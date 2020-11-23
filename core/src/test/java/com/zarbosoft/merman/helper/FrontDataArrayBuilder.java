@@ -1,17 +1,17 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.front.FrontDataArray;
+import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 
 public class FrontDataArrayBuilder {
-	private final FrontDataArray front;
+	private final FrontFixedArraySpec front;
 
 	public FrontDataArrayBuilder(final String middle) {
-		this.front = new FrontDataArray();
+		this.front = new FrontFixedArraySpec();
 		front.middle = middle;
 	}
 
-	public FrontDataArray build() {
+	public FrontFixedArraySpec build() {
 		return front;
 	}
 

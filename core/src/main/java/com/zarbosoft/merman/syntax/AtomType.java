@@ -2,175 +2,184 @@ package com.zarbosoft.merman.syntax;
 
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
-import com.zarbosoft.interface1.Configuration;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
-import com.zarbosoft.merman.syntax.back.*;
-import com.zarbosoft.merman.syntax.front.FrontPart;
-import com.zarbosoft.merman.syntax.middle.*;
-import com.zarbosoft.pidgoon.events.Operator;
-import com.zarbosoft.pidgoon.events.Store;
-import com.zarbosoft.pidgoon.internal.Helper;
+import com.zarbosoft.merman.syntax.back.BackArraySpec;
+import com.zarbosoft.merman.syntax.back.BackAtomSpec;
+import com.zarbosoft.merman.syntax.back.BackFixedArraySpec;
+import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
+import com.zarbosoft.merman.syntax.back.BackFixedTypeSpec;
+import com.zarbosoft.merman.syntax.back.BackKeySpec;
+import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
+import com.zarbosoft.merman.syntax.back.BackRecordSpec;
+import com.zarbosoft.merman.syntax.back.BackRootArraySpec;
+import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.merman.syntax.back.BackTypeSpec;
+import com.zarbosoft.merman.syntax.front.FrontSpec;
+import com.zarbosoft.merman.syntax.middle.MiddleArraySpecBase;
+import com.zarbosoft.merman.syntax.middle.MiddleAtomSpec;
+import com.zarbosoft.merman.syntax.middle.MiddlePrimitiveSpec;
+import com.zarbosoft.merman.syntax.middle.MiddleRecordSpec;
+import com.zarbosoft.merman.syntax.middle.MiddleSpec;
+import com.zarbosoft.pidgoon.events.stores.StackStore;
+import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.Pair;
 
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static com.zarbosoft.rendaw.common.Common.enumerate;
 
-@Configuration
 public abstract class AtomType {
 
-	@Configuration
-	public Set<String> tags = new HashSet<>();
+  public Set<String> tags = new HashSet<>();
 
-	public abstract List<FrontPart> front();
+  public abstract Map<String, AlignmentDefinition> alignments();
 
-	public abstract Map<String, MiddlePart> middle();
+  public abstract int precedence();
 
-	public abstract List<BackPart> back();
+  public abstract boolean associateForward();
 
-	public abstract Map<String, AlignmentDefinition> alignments();
+  public abstract int depthScore();
 
-	public abstract int precedence();
+  public void finish(
+      final Syntax syntax, final Set<String> allTypes, final Set<String> scalarTypes) {
+    middle()
+        .forEach(
+            (k, v) -> {
+              v.id = k;
+              v.finish(allTypes, scalarTypes);
+            });
+    {
+      final Set<String> middleUsedBack = new HashSet<>();
+      enumerate(back().stream())
+          .forEach(
+              pair -> {
+                final Integer i = pair.first;
+                final BackSpec p = pair.second;
+                p.finish(syntax, this, middleUsedBack);
+                p.parent = new NodeBackParent(i);
+              });
+      final Set<String> missing = Sets.difference(middle().keySet(), middleUsedBack);
+      if (!missing.isEmpty())
+        throw new InvalidSyntax(
+            String.format("Middle elements %s in %s are unused by back parts.", missing, id()));
+    }
+    {
+      final Set<String> middleUsedFront = new HashSet<>();
+      front().forEach(p -> p.finish(this, middleUsedFront));
+      final Set<String> missing = Sets.difference(middle().keySet(), middleUsedFront);
+      if (!missing.isEmpty())
+        throw new InvalidSyntax(
+            String.format("Middle elements %s in %s are unused by front parts.", missing, id()));
+    }
+  }
 
-	public abstract boolean associateForward();
+  public abstract List<FrontSpec> front();
 
-	public abstract String id();
+  public abstract Map<String, MiddleSpec> middle();
 
-	public abstract int depthScore();
+  public abstract List<BackSpec> back();
 
-	public static class NodeBackParent extends BackPart.Parent {
-		public int index;
+  public abstract String id();
 
-		public NodeBackParent(final int index) {
-			this.index = index;
-		}
-	}
+  public com.zarbosoft.pidgoon.Node buildBackRule(final Syntax syntax) {
+    final Sequence seq = new Sequence();
+    seq.add(StackStore.prepVarStack);
+    back().forEach(p -> seq.add(p.buildBackRule(syntax, this)));
+    return new Operator<StackStore>(seq) {
+      @Override
+      protected StackStore process(StackStore store) {
+        final Map<String, Value> data = new HashMap<>();
+        store = store.popVarMap(data);
+        final Atom atom = new Atom(AtomType.this, data);
+        return store.pushStack(atom);
+      }
+    };
+  }
 
-	public void finish(final Syntax syntax, final Set<String> allTypes, final Set<String> scalarTypes) {
-		middle().forEach((k, v) -> {
-			v.id = k;
-			v.finish(allTypes, scalarTypes);
-		});
-		{
-			final Set<String> middleUsedBack = new HashSet<>();
-			enumerate(back().stream()).forEach(pair -> {
-				final Integer i = pair.first;
-				final BackPart p = pair.second;
-				p.finish(syntax, this, middleUsedBack);
-				p.parent = new NodeBackParent(i);
-			});
-			final Set<String> missing = Sets.difference(middle().keySet(), middleUsedBack);
-			if (!missing.isEmpty())
-				throw new InvalidSyntax(String.format("Middle elements %s in %s are unused by back parts.",
-						missing,
-						id()
-				));
-		}
-		{
-			final Set<String> middleUsedFront = new HashSet<>();
-			front().forEach(p -> p.finish(this, middleUsedFront));
-			final Set<String> missing = Sets.difference(middle().keySet(), middleUsedFront);
-			if (!missing.isEmpty())
-				throw new InvalidSyntax(String.format("Middle elements %s in %s are unused by front parts.",
-						missing,
-						id()
-				));
-		}
-	}
+  public abstract String name();
 
-	public com.zarbosoft.pidgoon.Node buildBackRule(final Syntax syntax) {
-		final Sequence seq = new Sequence();
-		seq.add(new Operator((store) -> store.pushStack(0)));
-		back().forEach(p -> seq.add(p.buildBackRule(syntax, this)));
-		return new Operator(seq, store -> {
-			final Map<String, Value> data = new HashMap<>();
-			store = (Store) Helper.<Pair<String, Value>>stackPopSingleList(store,
-					pair -> data.put(pair.first, pair.second)
-			);
-			final Atom atom = new Atom(this, data);
-			return store.pushStack(atom);
-		});
-	}
+  public BackSpec getBackPart(final String id) {
+    final Deque<Iterator<BackSpec>> stack = new ArrayDeque<>();
+    stack.addLast(back().iterator());
+    while (!stack.isEmpty()) {
+      final Iterator<BackSpec> iterator = stack.pollLast();
+      if (!iterator.hasNext()) continue;
+      stack.addLast(iterator);
+      final BackSpec next = iterator.next();
+      if (next instanceof BackFixedArraySpec) {
+        stack.addLast(((BackFixedArraySpec) next).elements.iterator());
+      } else if (next instanceof BackFixedRecordSpec) {
+        stack.addLast(((BackFixedRecordSpec) next).pairs.values().iterator());
+      } else if (next instanceof BackArraySpec) {
+        if (((BackArraySpec) next).middle.equals(id)) return next;
+      } else if (next instanceof BackRootArraySpec) {
+        if (((BackRootArraySpec) next).middle.equals(id)) return next;
+      } else if (next instanceof BackKeySpec) {
+        if (((BackKeySpec) next).middle.equals(id)) return next;
+      } else if (next instanceof BackAtomSpec) {
+        if (((BackAtomSpec) next).middle.equals(id)) return next;
+      } else if (next instanceof BackFixedTypeSpec) {
+        stack.addLast(Iterators.singletonIterator(((BackFixedTypeSpec) next).value));
+      } else if (next instanceof BackTypeSpec) {
+        if (((BackTypeSpec) next).type.equals(id)) return next;
+      } else if (next instanceof BackPrimitiveSpec) {
+        if (((BackPrimitiveSpec) next).middle.equals(id)) return next;
+      } else if (next instanceof BackRecordSpec) {
+        if (((BackRecordSpec) next).middle.equals(id)) return next;
+      }
+    }
+    throw new DeadCode();
+  }
 
-	public abstract String name();
+  public MiddleRecordSpec getDataRecord(final String middle) {
+    return getData(MiddleRecordSpec.class, middle);
+  }
 
-	public BackPart getBackPart(final String id) {
-		final Deque<Iterator<BackPart>> stack = new ArrayDeque<>();
-		stack.addLast(back().iterator());
-		while (!stack.isEmpty()) {
-			final Iterator<BackPart> iterator = stack.pollLast();
-			if (!iterator.hasNext())
-				continue;
-			stack.addLast(iterator);
-			final BackPart next = iterator.next();
-			if (next instanceof BackArray) {
-				stack.addLast(((BackArray) next).elements.iterator());
-			} else if (next instanceof BackRecord) {
-				stack.addLast(((BackRecord) next).pairs.values().iterator());
-			} else if (next instanceof BackDataArray) {
-				if (((BackDataArray) next).middle.equals(id))
-					return next;
-			} else if (next instanceof BackDataRootArray) {
-				if (((BackDataRootArray) next).middle.equals(id))
-					return next;
-			} else if (next instanceof BackDataKey) {
-				if (((BackDataKey) next).middle.equals(id))
-					return next;
-			} else if (next instanceof BackDataAtom) {
-				if (((BackDataAtom) next).middle.equals(id))
-					return next;
-			} else if (next instanceof BackType) {
-				stack.addLast(Iterators.singletonIterator(((BackType) next).value));
-			} else if (next instanceof BackDataType) {
-				if (((BackDataType) next).type.equals(id))
-					return next;
-			} else if (next instanceof BackDataPrimitive) {
-				if (((BackDataPrimitive) next).middle.equals(id))
-					return next;
-			} else if (next instanceof BackDataRecord) {
-				if (((BackDataRecord) next).middle.equals(id))
-					return next;
-			}
-		}
-		throw new DeadCode();
-	}
+  private <D extends MiddleSpec> D getData(
+      final Class<? extends MiddleSpec> type, final String id) {
+    final MiddleSpec found = middle().get(id);
+    if (found == null)
+      throw new InvalidSyntax(String.format("No middle element [%s] in [%s]", id, this.id()));
+    if (!type.isAssignableFrom(found.getClass()))
+      throw new InvalidSyntax(
+          String.format(
+              "Conflicting types for middle element [%s] in [%s]: %s, %s",
+              id, this.id(), found.getClass(), type));
+    return (D) found;
+  }
 
-	public MiddleRecord getDataRecord(final String middle) {
-		return getData(MiddleRecord.class, middle);
-	}
+  public MiddlePrimitiveSpec getDataPrimitive(final String key) {
+    return getData(MiddlePrimitiveSpec.class, key);
+  }
 
-	private <D extends MiddlePart> D getData(final Class<? extends MiddlePart> type, final String id) {
-		final MiddlePart found = middle().get(id);
-		if (found == null)
-			throw new InvalidSyntax(String.format("No middle element [%s] in [%s]", id, this.id()));
-		if (!type.isAssignableFrom(found.getClass()))
-			throw new InvalidSyntax(String.format("Conflicting types for middle element [%s] in [%s]: %s, %s",
-					id,
-					this.id(),
-					found.getClass(),
-					type
-			));
-		return (D) found;
-	}
+  public MiddleAtomSpec getDataNode(final String key) {
+    return getData(MiddleAtomSpec.class, key);
+  }
 
-	public MiddlePrimitive getDataPrimitive(final String key) {
-		return getData(MiddlePrimitive.class, key);
-	}
+  public MiddleArraySpecBase getDataArray(final String key) {
+    return getData(MiddleArraySpecBase.class, key);
+  }
 
-	public MiddleAtom getDataNode(final String key) {
-		return getData(MiddleAtom.class, key);
-	}
+  @Override
+  public String toString() {
+    return String.format("<type %s>", id());
+  }
 
-	public MiddleArrayBase getDataArray(final String key) {
-		return getData(MiddleArrayBase.class, key);
-	}
+  public static class NodeBackParent extends BackSpec.Parent {
+    public int index;
 
-	@Override
-	public String toString() {
-		return String.format("<type %s>", id());
-	}
+    public NodeBackParent(final int index) {
+      this.index = index;
+    }
+  }
 }

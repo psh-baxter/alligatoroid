@@ -1,112 +1,94 @@
 package com.zarbosoft.merman.syntax;
 
-import com.zarbosoft.interface1.Configuration;
-import com.zarbosoft.interface1.Walk;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
-import com.zarbosoft.merman.syntax.back.BackDataRootArray;
-import com.zarbosoft.merman.syntax.back.BackPart;
-import com.zarbosoft.merman.syntax.front.FrontPart;
-import com.zarbosoft.merman.syntax.middle.MiddlePart;
+import com.zarbosoft.merman.syntax.back.BackRootArraySpec;
+import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.merman.syntax.front.FrontSpec;
+import com.zarbosoft.merman.syntax.middle.MiddleSpec;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-@Configuration
 public class FreeAtomType extends AtomType {
-	@Configuration
-	public String id;
+  public String id;
+  public String name;
+  public int depthScore = 0;
+  public List<FrontSpec> front = new ArrayList<>();
+  public List<BackSpec> back = new ArrayList<>();
+  public Map<String, MiddleSpec> middle = new HashMap<>();
+  public Map<String, AlignmentDefinition> alignments = new HashMap<>();
+  public int precedence = Integer.MAX_VALUE;
+  public boolean associateForward = false;
+  public int autoChooseAmbiguity = 1;
 
-	@Configuration
-	public String name;
+  @Override
+  public Map<String, AlignmentDefinition> alignments() {
+    return alignments;
+  }
 
-	@Configuration(name = "depth_score", optional = true)
-	public int depthScore = 0;
+  @Override
+  public int precedence() {
+    return precedence;
+  }
 
-	@Configuration
-	public List<FrontPart> front = new ArrayList<>();
+  @Override
+  public boolean associateForward() {
+    return associateForward;
+  }
 
-	@Configuration
-	public List<BackPart> back = new ArrayList<>();
+  @Override
+  public int depthScore() {
+    return depthScore;
+  }
 
-	@Configuration
-	public Map<String, MiddlePart> middle = new HashMap<>();
+  @Override
+  public void finish(
+      final Syntax syntax, final Set<String> allTypes, final Set<String> scalarTypes) {
+    super.finish(syntax, allTypes, scalarTypes);
+    back.forEach(
+        backPart -> {
+          if (backPart instanceof BackRootArraySpec) {
+            throw new InvalidSyntax(
+                String.format(
+                    "[%s] has back parts of type [%s] which may only be used in the root atom type.",
+                    name, BackRootArraySpec.class.getName()));
+          }
+        });
+  }
 
-	@Configuration
-	public Map<String, AlignmentDefinition> alignments = new HashMap<>();
+  @Override
+  public List<FrontSpec> front() {
+    return front;
+  }
 
-	@Configuration(optional = true)
-	public int precedence = Integer.MAX_VALUE;
+  @Override
+  public Map<String, MiddleSpec> middle() {
+    return middle;
+  }
 
-	@Configuration(name = "associate_forward", optional = true)
-	public boolean associateForward = false;
+  @Override
+  public List<BackSpec> back() {
+    return back;
+  }
 
-	@Configuration(name = "auto_choose_ambiguity", optional = true)
-	public int autoChooseAmbiguity = 1;
+  @Override
+  public String id() {
+    return id;
+  }
 
-	@Override
-	public String id() {
-		return id;
-	}
+  @Override
+  public String name() {
+    return name;
+  }
 
-	@Override
-	public int depthScore() {
-		return depthScore;
-	}
-
-	@Override
-	public List<FrontPart> front() {
-		return front;
-	}
-
-	@Override
-	public Map<String, MiddlePart> middle() {
-		return middle;
-	}
-
-	@Override
-	public List<BackPart> back() {
-		return back;
-	}
-
-	@Override
-	public Map<String, AlignmentDefinition> alignments() {
-		return alignments;
-	}
-
-	@Override
-	public int precedence() {
-		return precedence;
-	}
-
-	@Override
-	public boolean associateForward() {
-		return associateForward;
-	}
-
-	@Override
-	public String name() {
-		return name;
-	}
-
-	public Atom create(final Syntax syntax) {
-		final Map<String, Value> data = new HashMap<>();
-		middle.entrySet().stream().forEach(e -> data.put(e.getKey(), e.getValue().create(syntax)));
-		return new Atom(this, data);
-	}
-
-	@Override
-	public void finish(
-			final Syntax syntax, final Set<String> allTypes, final Set<String> scalarTypes
-	) {
-		super.finish(syntax, allTypes, scalarTypes);
-		back.forEach(backPart -> {
-			if (backPart instanceof BackDataRootArray) {
-				throw new InvalidSyntax(String.format(
-						"[%s] has back parts of type [%s] which may only be used in the root atom type.",
-						Walk.decideName(BackDataRootArray.class)
-				));
-			}
-		});
-	}
+  public Atom create(final Syntax syntax) {
+    final Map<String, Value> data = new HashMap<>();
+    middle.entrySet().stream().forEach(e -> data.put(e.getKey(), e.getValue().create(syntax)));
+    return new Atom(this, data);
+  }
 }

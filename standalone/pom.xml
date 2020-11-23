@@ -3,22 +3,19 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.zarbosoft.merman</groupId>
     <artifactId>standalone</artifactId>
-    <version>0.0.8</version>
-    <parent>
-        <groupId>com.zarbosoft</groupId>
-        <artifactId>merman</artifactId>
-        <version>0.0.8</version>
-        <relativePath>../pom.xml</relativePath>
-    </parent>
+    <version>0.0.0</version>
+    <properties>
+        <jfxver>14.0.2</jfxver>
+    </properties>
     <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.3</version>
+                <version>${compver}</version>
                 <configuration>
-                    <source>1.9</source>
-                    <target>1.9</target>
+                    <source>14</source>
+                    <target>14</target>
                 </configuration>
             </plugin>
             <plugin>
@@ -58,12 +55,17 @@
         <dependency>
             <groupId>com.zarbosoft.merman</groupId>
             <artifactId>core</artifactId>
-            <version>0.0.8</version>
+            <version>0.0.0</version>
         </dependency>
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.2.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-controls</artifactId>
+            <version>${jfxver}</version>
         </dependency>
     </dependencies>
 </project>

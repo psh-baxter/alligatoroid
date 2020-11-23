@@ -7,9 +7,9 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.alignments.AbsoluteAlignmentDefinition;
 import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentDefinition;
 import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentDefinition;
-import com.zarbosoft.merman.syntax.front.FrontDataArray;
+import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.middle.MiddleArray;
+import com.zarbosoft.merman.syntax.middle.MiddleArraySpec;
 import com.zarbosoft.merman.syntax.style.Style;
 
 import java.util.List;
@@ -23,7 +23,7 @@ public class SyntaxBuilder {
 		syntax.root = new RootAtomType();
 		syntax.root.back = ImmutableList.of(Helper.buildBackDataRootArray("value"));
 		syntax.root.front = ImmutableList.of(new FrontDataArrayBuilder("value").build());
-		final MiddleArray middle = new MiddleArray();
+		final MiddleArraySpec middle = new MiddleArraySpec();
 		middle.id = "value";
 		middle.type = root;
 		syntax.root.middle.put("value", middle);
@@ -69,12 +69,12 @@ public class SyntaxBuilder {
 	}
 
 	public SyntaxBuilder addRootFrontSeparator(final FrontSymbol part) {
-		((FrontDataArray) syntax.root.front.get(0)).separator.add(part);
+		((FrontFixedArraySpec) syntax.root.front.get(0)).separator.add(part);
 		return this;
 	}
 
 	public SyntaxBuilder addRootFrontPrefix(final FrontSymbol part) {
-		((FrontDataArray) syntax.root.front.get(0)).prefix.add(part);
+		((FrontFixedArraySpec) syntax.root.front.get(0)).prefix.add(part);
 		return this;
 	}
 }

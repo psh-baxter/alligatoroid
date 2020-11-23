@@ -33,8 +33,8 @@ import com.zarbosoft.merman.modules.Module;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.*;
 import com.zarbosoft.merman.syntax.front.FrontGapBase;
-import com.zarbosoft.merman.syntax.middle.MiddleArray;
-import com.zarbosoft.merman.syntax.middle.MiddleRecord;
+import com.zarbosoft.merman.syntax.middle.MiddleArraySpec;
+import com.zarbosoft.merman.syntax.middle.MiddleRecordSpec;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.Pair;
@@ -235,13 +235,13 @@ public class Context {
 		// Either (value) or (atom & part) are always set
 		Value value = null;
 		Atom atom = document.root;
-		BackPart part = document.root.type.back().get(0);
+		BackSpec part = document.root.type.back().get(0);
 		for (int cycle = 0; cycle < 10000; ++cycle) {
 			if (part != null) {
 				// Process from either the root or a sublevel of a atom
 				String middle = null;
 				while (true) {
-					if (part instanceof BackArray) {
+					if (part instanceof BackFixedArraySpec) {
 						pathIndex += 1;
 						if (pathIndex == segments.size())
 							return atom;
@@ -256,50 +256,50 @@ public class Context {
 									new Path(TreePVector.from(segments.subList(0, tempPathIndex)))
 							));
 						}
-						final BackArray arrayPart = ((BackArray) part);
+						final BackFixedArraySpec arrayPart = ((BackFixedArraySpec) part);
 						if (subIndex >= arrayPart.elements.size())
 							throw new InvalidPath(String.format("Invalid index %d at [%s].",
 									subIndex,
 									new Path(TreePVector.from(segments.subList(0, tempPathIndex)))
 							));
 						part = arrayPart.elements.get(subIndex);
-					} else if (part instanceof BackRecord) {
+					} else if (part instanceof BackFixedRecordSpec) {
 						pathIndex += 1;
 						if (pathIndex >= segments.size())
 							return atom;
 						final String segment = segments.get(pathIndex);
 						final int tempPathIndex = pathIndex;
-						final BackRecord recordPart = ((BackRecord) part);
+						final BackFixedRecordSpec recordPart = ((BackFixedRecordSpec) part);
 						if (!recordPart.pairs.containsKey(segment))
 							throw new InvalidPath(String.format("Invalid key [%s] at [%s].",
 									segment,
 									new Path(TreePVector.from(segments.subList(0, pathIndex)))
 							));
 						part = recordPart.pairs.get(segment);
-					} else if (part instanceof BackDataArray) {
-						middle = ((BackDataArray) part).middle;
+					} else if (part instanceof BackArraySpec) {
+						middle = ((BackArraySpec) part).middle;
 						break;
-					} else if (part instanceof BackDataRootArray) {
-						middle = ((BackDataRootArray) part).middle;
+					} else if (part instanceof BackRootArraySpec) {
+						middle = ((BackRootArraySpec) part).middle;
 						break;
-					} else if (part instanceof BackDataKey) {
-						middle = ((BackDataKey) part).middle;
+					} else if (part instanceof BackKeySpec) {
+						middle = ((BackKeySpec) part).middle;
 						break;
-					} else if (part instanceof BackDataAtom) {
-						middle = ((BackDataAtom) part).middle;
+					} else if (part instanceof BackAtomSpec) {
+						middle = ((BackAtomSpec) part).middle;
 						break;
-					} else if (part instanceof BackDataType) {
-						middle = ((BackDataType) part).type;
-						part = ((BackType) part).value;
+					} else if (part instanceof BackTypeSpec) {
+						middle = ((BackTypeSpec) part).type;
+						part = ((BackFixedTypeSpec) part).value;
 						break;
-					} else if (part instanceof BackDataPrimitive) {
-						middle = ((BackDataPrimitive) part).middle;
+					} else if (part instanceof BackPrimitiveSpec) {
+						middle = ((BackPrimitiveSpec) part).middle;
 						break;
-					} else if (part instanceof BackDataRecord) {
-						middle = ((BackDataRecord) part).middle;
+					} else if (part instanceof BackRecordSpec) {
+						middle = ((BackRecordSpec) part).middle;
 						break;
-					} else if (part instanceof BackType) {
-						part = ((BackType) part).value;
+					} else if (part instanceof BackFixedTypeSpec) {
+						part = ((BackFixedTypeSpec) part).value;
 					} else
 						return atom;
 				}
@@ -316,10 +316,10 @@ public class Context {
 						return value;
 					final int tempPathIndex = pathIndex;
 					final String segment = segments.get(pathIndex);
-					if (((ValueArray) value).middle() instanceof MiddleRecord) {
+					if (((ValueArray) value).middle() instanceof MiddleRecordSpec) {
 						atom = ((ValueArray) value).data.stream().filter(child -> (
 								(ValuePrimitive) child.data.get((
-										(BackDataKey) child.type.back().get(0)
+										(BackKeySpec) child.type.back().get(0)
 								).middle)
 						).get().equals(segment)).findFirst().orElseThrow(() -> new InvalidPath(String.format(
 								"Invalid key %s at [%s].",
@@ -329,7 +329,7 @@ public class Context {
 						if (!goLong && pathIndex + 1 == segments.size())
 							return atom;
 						part = atom.type.back().get(1);
-					} else if (((ValueArray) value).middle() instanceof MiddleArray) {
+					} else if (((ValueArray) value).middle() instanceof MiddleArraySpec) {
 						final int index;
 						try {
 							index = Integer.parseInt(segment);

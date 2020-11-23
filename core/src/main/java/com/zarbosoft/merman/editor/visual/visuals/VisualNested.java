@@ -10,7 +10,7 @@ import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.syntax.middle.MiddleAtom;
+import com.zarbosoft.merman.syntax.middle.MiddleAtomSpec;
 import org.pcollections.PSet;
 
 import java.util.Map;
@@ -53,7 +53,7 @@ public abstract class VisualNested extends VisualNestedBase {
 
 	@Override
 	protected String nodeType() {
-		return ((MiddleAtom) value.middle()).type;
+		return ((MiddleAtomSpec) value.middle()).type;
 	}
 
 	@Override

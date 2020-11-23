@@ -14,7 +14,7 @@ import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
-import com.zarbosoft.merman.syntax.front.FrontPart;
+import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.Pair;
@@ -66,9 +66,9 @@ public class VisualAtom extends Visual {
 			localAlignments.put(entry.getKey(), alignment);
 		}
 		rootInner(context, parent, alignments, visualDepth, depthScore);
-		for (final Pair<Integer, FrontPart> pair : iterable(enumerate(Common.stream(atom.type.front())))) {
+		for (final Pair<Integer, FrontSpec> pair : iterable(enumerate(Common.stream(atom.type.front())))) {
 			final int index = pair.first;
-			final FrontPart front = pair.second;
+			final FrontSpec front = pair.second;
 			final Visual visual = pair.second.createVisual(
 					context,
 					front.middle() == null ?

@@ -1,27 +1,24 @@
 package com.zarbosoft.merman.editor.backevents;
 
-import com.zarbosoft.interface1.Configuration;
 import com.zarbosoft.pidgoon.events.MatchingEvent;
 
-@Configuration(name = "key")
 public class ETypeEvent implements BackEvent {
-	public ETypeEvent(final String string) {
-		value = string;
-	}
+  public String value;
 
-	public ETypeEvent() {
-	}
+  public ETypeEvent(final String string) {
+    value = string;
+  }
 
-	@Configuration
-	public String value;
+  public ETypeEvent() {}
 
-	@Override
-	public boolean matches(final MatchingEvent event) {
-		return event instanceof ETypeEvent && (value == null || value.equals(((ETypeEvent) event).value));
-	}
+  @Override
+  public boolean matches(final MatchingEvent event) {
+    return event instanceof ETypeEvent
+        && (value == null || value.equals(((ETypeEvent) event).value));
+  }
 
-	@Override
-	public String toString() {
-		return String.format("TYPE %s", value == null ? "*" : value);
-	}
+  @Override
+  public String toString() {
+    return String.format("TYPE %s", value == null ? "*" : value);
+  }
 }

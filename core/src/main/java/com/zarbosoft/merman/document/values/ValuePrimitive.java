@@ -5,19 +5,19 @@ import com.zarbosoft.merman.editor.history.Change;
 import com.zarbosoft.merman.editor.history.changes.ChangePrimitiveAdd;
 import com.zarbosoft.merman.editor.history.changes.ChangePrimitiveRemove;
 import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
-import com.zarbosoft.merman.syntax.middle.MiddlePart;
-import com.zarbosoft.merman.syntax.middle.MiddlePrimitive;
+import com.zarbosoft.merman.syntax.middle.MiddleSpec;
+import com.zarbosoft.merman.syntax.middle.MiddlePrimitiveSpec;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class ValuePrimitive extends Value {
 	public VisualPrimitive visual;
-	public final MiddlePrimitive middle;
+	public final MiddlePrimitiveSpec middle;
 	public StringBuilder data = new StringBuilder();
 	public final Set<Listener> listeners = new HashSet<>();
 
-	public ValuePrimitive(final MiddlePrimitive middle, final String data) {
+	public ValuePrimitive(final MiddlePrimitiveSpec middle, final String data) {
 		this.middle = middle;
 		this.data = new StringBuilder(data);
 	}
@@ -51,7 +51,7 @@ public class ValuePrimitive extends Value {
 	}
 
 	@Override
-	public MiddlePart middle() {
+	public MiddleSpec middle() {
 		return middle;
 	}
 

@@ -1,751 +1,524 @@
 package com.zarbosoft.merman.modules.hotkeys;
 
-import com.zarbosoft.interface1.Configuration;
-
-@Configuration
 public enum Key {
-	@Configuration(name = "mouse1")
-	MOUSE_1,
-	@Configuration(name = "mouse2")
-	MOUSE_2,
-	@Configuration(name = "mouse3")
-	MOUSE_3,
-	@Configuration(name = "mouse_scroll_up")
-	MOUSE_SCROLL_UP,
-	@Configuration(name = "mouse_scroll_down")
-	MOUSE_SCROLL_DOWN,
-	@Configuration(name = "enter")
-	ENTER,
+  MOUSE_1,
 
-	@Configuration(name = "backspace")
-	BACK_SPACE,
+  MOUSE_2,
 
-	@Configuration(name = "tab")
-	TAB,
+  MOUSE_3,
 
-	@Configuration(name = "cancel")
-	CANCEL,
+  MOUSE_SCROLL_UP,
 
-	@Configuration(name = "clear")
-	CLEAR,
+  MOUSE_SCROLL_DOWN,
 
-	@Configuration(name = "shift")
-	SHIFT,
+  ENTER,
 
-	@Configuration(name = "control")
-	CONTROL,
+  BACK_SPACE,
 
-	@Configuration(name = "alt")
-	ALT,
+  TAB,
 
-	@Configuration(name = "pause")
-	PAUSE,
+  CANCEL,
 
-	@Configuration(name = "caps")
-	CAPS,
+  CLEAR,
 
-	@Configuration(name = "escape")
-	ESCAPE,
+  SHIFT,
 
-	@Configuration(name = "space")
-	SPACE,
+  CONTROL,
 
-	@Configuration(name = "page_up")
-	PAGE_UP,
+  ALT,
 
-	@Configuration(name = "page_down")
-	PAGE_DOWN,
+  PAUSE,
 
-	@Configuration(name = "end")
-	END,
+  CAPS,
 
-	@Configuration(name = "home")
-	HOME,
+  ESCAPE,
 
-	@Configuration(name = "left")
-	LEFT,
+  SPACE,
 
-	@Configuration(name = "up")
-	UP,
+  PAGE_UP,
 
-	@Configuration(name = "right")
-	RIGHT,
+  PAGE_DOWN,
 
-	@Configuration(name = "down")
-	DOWN,
+  END,
 
-	@Configuration(name = "comma")
-	COMMA,
+  HOME,
 
-	@Configuration(name = "minus")
-	MINUS,
+  LEFT,
 
-	@Configuration(name = "period")
-	PERIOD,
+  UP,
 
-	@Configuration(name = "slash")
-	SLASH,
+  RIGHT,
 
-	@Configuration(name = "0")
-	DIGIT0,
+  DOWN,
 
-	@Configuration(name = "1")
-	DIGIT1,
+  COMMA,
 
-	@Configuration(name = "2")
-	DIGIT2,
+  MINUS,
 
-	@Configuration(name = "3")
-	DIGIT3,
+  PERIOD,
 
-	@Configuration(name = "4")
-	DIGIT4,
+  SLASH,
 
-	@Configuration(name = "5")
-	DIGIT5,
+  DIGIT0,
 
-	@Configuration(name = "6")
-	DIGIT6,
+  DIGIT1,
 
-	@Configuration(name = "7")
-	DIGIT7,
+  DIGIT2,
 
-	@Configuration(name = "8")
-	DIGIT8,
+  DIGIT3,
 
-	@Configuration(name = "9")
-	DIGIT9,
+  DIGIT4,
 
-	@Configuration(name = "semicolon")
-	SEMICOLON,
+  DIGIT5,
 
-	@Configuration(name = "equals")
-	EQUALS,
+  DIGIT6,
 
-	@Configuration(name = "a")
-	A,
+  DIGIT7,
 
-	@Configuration(name = "b")
-	B,
+  DIGIT8,
 
-	@Configuration(name = "c")
-	C,
+  DIGIT9,
 
-	@Configuration(name = "d")
-	D,
+  SEMICOLON,
 
-	@Configuration(name = "e")
-	E,
+  EQUALS,
 
-	@Configuration(name = "f")
-	F,
+  A,
 
-	@Configuration(name = "g")
-	G,
+  B,
 
-	@Configuration(name = "h")
-	H,
+  C,
 
-	@Configuration(name = "i")
-	I,
+  D,
 
-	@Configuration(name = "j")
-	J,
+  E,
 
-	@Configuration(name = "k")
-	K,
+  F,
 
-	@Configuration(name = "l")
-	L,
+  G,
 
-	@Configuration(name = "m")
-	M,
+  H,
 
-	@Configuration(name = "n")
-	N,
+  I,
 
-	@Configuration(name = "o")
-	O,
+  J,
 
-	@Configuration(name = "p")
-	P,
+  K,
 
-	@Configuration(name = "q")
-	Q,
+  L,
 
-	@Configuration(name = "r")
-	R,
+  M,
 
-	@Configuration(name = "s")
-	S,
+  N,
 
-	@Configuration(name = "t")
-	T,
+  O,
 
-	@Configuration(name = "u")
-	U,
+  P,
 
-	@Configuration(name = "v")
-	V,
+  Q,
 
-	@Configuration(name = "w")
-	W,
+  R,
 
-	@Configuration(name = "x")
-	X,
+  S,
 
-	@Configuration(name = "y")
-	Y,
+  T,
 
-	@Configuration(name = "z")
-	Z,
+  U,
 
-	@Configuration(name = "open_bracket")
-	OPEN_BRACKET,
+  V,
 
-	@Configuration(name = "back_slash")
-	BACK_SLASH,
+  W,
 
-	@Configuration(name = "close_bracket")
-	CLOSE_BRACKET,
+  X,
 
-	@Configuration(name = "numpad0")
-	NUMPAD0,
+  Y,
 
-	@Configuration(name = "numpad1")
-	NUMPAD1,
+  Z,
 
-	@Configuration(name = "numpad2")
-	NUMPAD2,
+  OPEN_BRACKET,
 
-	@Configuration(name = "numpad3")
-	NUMPAD3,
+  BACK_SLASH,
 
-	@Configuration(name = "numpad4")
-	NUMPAD4,
+  CLOSE_BRACKET,
 
-	@Configuration(name = "numpad5")
-	NUMPAD5,
+  NUMPAD0,
 
-	@Configuration(name = "numpad6")
-	NUMPAD6,
+  NUMPAD1,
 
-	@Configuration(name = "numpad7")
-	NUMPAD7,
+  NUMPAD2,
 
-	@Configuration(name = "numpad8")
-	NUMPAD8,
+  NUMPAD3,
 
-	@Configuration(name = "numpad9")
-	NUMPAD9,
+  NUMPAD4,
 
-	@Configuration(name = "multiply")
-	MULTIPLY,
+  NUMPAD5,
 
-	@Configuration(name = "add")
-	ADD,
+  NUMPAD6,
 
-	@Configuration(name = "separator")
-	SEPARATOR,
+  NUMPAD7,
 
-	@Configuration(name = "subtract")
-	SUBTRACT,
+  NUMPAD8,
 
-	@Configuration(name = "decimal")
-	DECIMAL,
+  NUMPAD9,
 
-	@Configuration(name = "divide")
-	DIVIDE,
+  MULTIPLY,
 
-	@Configuration(name = "delete")
-	DELETE,
+  ADD,
 
-	@Configuration(name = "num_lock")
-	NUM_LOCK,
+  SEPARATOR,
 
-	@Configuration(name = "scroll_lock")
-	SCROLL_LOCK,
+  SUBTRACT,
 
-	@Configuration(name = "f1")
-	F1,
+  DECIMAL,
 
-	@Configuration(name = "f2")
-	F2,
+  DIVIDE,
 
-	@Configuration(name = "f3")
-	F3,
+  DELETE,
 
-	@Configuration(name = "f4")
-	F4,
+  NUM_LOCK,
 
-	@Configuration(name = "f5")
-	F5,
+  SCROLL_LOCK,
 
-	@Configuration(name = "f6")
-	F6,
+  F1,
 
-	@Configuration(name = "f7")
-	F7,
+  F2,
 
-	@Configuration(name = "f8")
-	F8,
+  F3,
 
-	@Configuration(name = "f9")
-	F9,
+  F4,
 
-	@Configuration(name = "f10")
-	F10,
+  F5,
 
-	@Configuration(name = "f11")
-	F11,
+  F6,
 
-	@Configuration(name = "f12")
-	F12,
+  F7,
 
-	@Configuration(name = "f13")
-	F13,
+  F8,
 
-	@Configuration(name = "f14")
-	F14,
+  F9,
 
-	@Configuration(name = "f15")
-	F15,
+  F10,
 
-	@Configuration(name = "f16")
-	F16,
+  F11,
 
-	@Configuration(name = "f17")
-	F17,
+  F12,
 
-	@Configuration(name = "f18")
-	F18,
+  F13,
 
-	@Configuration(name = "f19")
-	F19,
+  F14,
 
-	@Configuration(name = "f20")
-	F20,
+  F15,
 
-	@Configuration(name = "f21")
-	F21,
+  F16,
 
-	@Configuration(name = "f22")
-	F22,
+  F17,
 
-	@Configuration(name = "f23")
-	F23,
+  F18,
 
-	@Configuration(name = "f24")
-	F24,
+  F19,
 
-	@Configuration(name = "printscreen")
-	PRINTSCREEN,
+  F20,
 
-	@Configuration(name = "insert")
-	INSERT,
+  F21,
 
-	@Configuration(name = "help")
-	HELP,
+  F22,
 
-	@Configuration(name = "meta")
-	META,
+  F23,
 
-	@Configuration(name = "back_quote")
-	BACK_QUOTE,
+  F24,
 
-	@Configuration(name = "quote")
-	QUOTE,
+  PRINTSCREEN,
 
-	@Configuration(name = "kp_up")
-	KP_UP,
+  INSERT,
 
-	@Configuration(name = "kp_down")
-	KP_DOWN,
+  HELP,
 
-	@Configuration(name = "kp_left")
-	KP_LEFT,
+  META,
 
-	@Configuration(name = "kp_right")
-	KP_RIGHT,
+  BACK_QUOTE,
 
-	@Configuration(name = "dead_grave")
-	DEAD_GRAVE,
+  QUOTE,
 
-	@Configuration(name = "dead_acute")
-	DEAD_ACUTE,
+  KP_UP,
 
-	@Configuration(name = "dead_circumflex")
-	DEAD_CIRCUMFLEX,
+  KP_DOWN,
 
-	@Configuration(name = "dead_tilde")
-	DEAD_TILDE,
+  KP_LEFT,
 
-	@Configuration(name = "dead_macron")
-	DEAD_MACRON,
+  KP_RIGHT,
 
-	@Configuration(name = "dead_breve")
-	DEAD_BREVE,
+  DEAD_GRAVE,
 
-	@Configuration(name = "dead_abovedot")
-	DEAD_ABOVEDOT,
+  DEAD_ACUTE,
 
-	@Configuration(name = "dead_diaeresis")
-	DEAD_DIAERESIS,
+  DEAD_CIRCUMFLEX,
 
-	@Configuration(name = "dead_abovering")
-	DEAD_ABOVERING,
+  DEAD_TILDE,
 
-	@Configuration(name = "dead_doubleacute")
-	DEAD_DOUBLEACUTE,
+  DEAD_MACRON,
 
-	@Configuration(name = "dead_caron")
-	DEAD_CARON,
+  DEAD_BREVE,
 
-	@Configuration(name = "dead_cedilla")
-	DEAD_CEDILLA,
+  DEAD_ABOVEDOT,
 
-	@Configuration(name = "dead_ogonek")
-	DEAD_OGONEK,
+  DEAD_DIAERESIS,
 
-	@Configuration(name = "dead_iota")
-	DEAD_IOTA,
+  DEAD_ABOVERING,
 
-	@Configuration(name = "dead_voiced_sound")
-	DEAD_VOICED_SOUND,
+  DEAD_DOUBLEACUTE,
 
-	@Configuration(name = "dead_semivoiced_sound")
-	DEAD_SEMIVOICED_SOUND,
+  DEAD_CARON,
 
-	@Configuration(name = "ampersand")
-	AMPERSAND,
+  DEAD_CEDILLA,
 
-	@Configuration(name = "asterisk")
-	ASTERISK,
+  DEAD_OGONEK,
 
-	@Configuration(name = "quotedbl")
-	QUOTEDBL,
+  DEAD_IOTA,
 
-	@Configuration(name = "less")
-	LESS,
+  DEAD_VOICED_SOUND,
 
-	@Configuration(name = "greater")
-	GREATER,
+  DEAD_SEMIVOICED_SOUND,
 
-	@Configuration(name = "braceleft")
-	BRACELEFT,
+  AMPERSAND,
 
-	@Configuration(name = "braceright")
-	BRACERIGHT,
+  ASTERISK,
 
-	@Configuration(name = "at")
-	AT,
+  QUOTEDBL,
 
-	@Configuration(name = "colon")
-	COLON,
+  LESS,
 
-	@Configuration(name = "circumflex")
-	CIRCUMFLEX,
+  GREATER,
 
-	@Configuration(name = "dollar")
-	DOLLAR,
+  BRACELEFT,
 
-	@Configuration(name = "euro_sign")
-	EURO_SIGN,
+  BRACERIGHT,
 
-	@Configuration(name = "exclamation_mark")
-	EXCLAMATION_MARK,
+  AT,
 
-	@Configuration(name = "inverted_exclamation_mark")
-	INVERTED_EXCLAMATION_MARK,
+  COLON,
 
-	@Configuration(name = "left_parenthesis")
-	LEFT_PARENTHESIS,
+  CIRCUMFLEX,
 
-	@Configuration(name = "number_sign")
-	NUMBER_SIGN,
+  DOLLAR,
 
-	@Configuration(name = "plus")
-	PLUS,
+  EURO_SIGN,
 
-	@Configuration(name = "right_parenthesis")
-	RIGHT_PARENTHESIS,
+  EXCLAMATION_MARK,
 
-	@Configuration(name = "underscore")
-	UNDERSCORE,
+  INVERTED_EXCLAMATION_MARK,
 
-	@Configuration(name = "windows")
-	WINDOWS,
+  LEFT_PARENTHESIS,
 
-	@Configuration(name = "context_menu")
-	CONTEXT_MENU,
+  NUMBER_SIGN,
 
-	@Configuration(name = "final")
-	FINAL,
+  PLUS,
 
-	@Configuration(name = "convert")
-	CONVERT,
+  RIGHT_PARENTHESIS,
 
-	@Configuration(name = "nonconvert")
-	NONCONVERT,
+  UNDERSCORE,
 
-	@Configuration(name = "accept")
-	ACCEPT,
+  WINDOWS,
 
-	@Configuration(name = "modechange")
-	MODECHANGE,
+  CONTEXT_MENU,
 
-	@Configuration(name = "kana")
-	KANA,
+  FINAL,
 
-	@Configuration(name = "kanji")
-	KANJI,
+  CONVERT,
 
-	@Configuration(name = "alphanumeric")
-	ALPHANUMERIC,
+  NONCONVERT,
 
-	@Configuration(name = "katakana")
-	KATAKANA,
+  ACCEPT,
 
-	@Configuration(name = "hiragana")
-	HIRAGANA,
+  MODECHANGE,
 
-	@Configuration(name = "full_width")
-	FULL_WIDTH,
+  KANA,
 
-	@Configuration(name = "half_width")
-	HALF_WIDTH,
+  KANJI,
 
-	@Configuration(name = "roman_characters")
-	ROMAN_CHARACTERS,
+  ALPHANUMERIC,
 
-	@Configuration(name = "all_candidates")
-	ALL_CANDIDATES,
+  KATAKANA,
 
-	@Configuration(name = "previous_candidate")
-	PREVIOUS_CANDIDATE,
+  HIRAGANA,
 
-	@Configuration(name = "code_input")
-	CODE_INPUT,
+  FULL_WIDTH,
 
-	@Configuration(name = "japanese_katakana")
-	JAPANESE_KATAKANA,
+  HALF_WIDTH,
 
-	@Configuration(name = "japanese_hiragana")
-	JAPANESE_HIRAGANA,
+  ROMAN_CHARACTERS,
 
-	@Configuration(name = "japanese_roman")
-	JAPANESE_ROMAN,
+  ALL_CANDIDATES,
 
-	@Configuration(name = "kana_lock")
-	KANA_LOCK,
+  PREVIOUS_CANDIDATE,
 
-	@Configuration(name = "input_method_on_off")
-	INPUT_METHOD_ON_OFF,
+  CODE_INPUT,
 
-	@Configuration(name = "cut")
-	CUT,
+  JAPANESE_KATAKANA,
 
-	@Configuration(name = "copy")
-	COPY,
+  JAPANESE_HIRAGANA,
 
-	@Configuration(name = "paste")
-	PASTE,
+  JAPANESE_ROMAN,
 
-	@Configuration(name = "undo")
-	UNDO,
+  KANA_LOCK,
 
-	@Configuration(name = "again")
-	AGAIN,
+  INPUT_METHOD_ON_OFF,
 
-	@Configuration(name = "find")
-	FIND,
+  CUT,
 
-	@Configuration(name = "props")
-	PROPS,
+  COPY,
 
-	@Configuration(name = "stop")
-	STOP,
+  PASTE,
 
-	@Configuration(name = "compose")
-	COMPOSE,
+  UNDO,
 
-	@Configuration(name = "alt_graph")
-	ALT_GRAPH,
+  AGAIN,
 
-	@Configuration(name = "begin")
-	BEGIN,
+  FIND,
 
-	@Configuration(name = "undefined")
-	UNDEFINED,
+  PROPS,
 
-	@Configuration(name = "softkey_0")
-	SOFTKEY_0,
+  STOP,
 
-	@Configuration(name = "softkey_1")
-	SOFTKEY_1,
+  COMPOSE,
 
-	@Configuration(name = "softkey_2")
-	SOFTKEY_2,
+  ALT_GRAPH,
 
-	@Configuration(name = "softkey_3")
-	SOFTKEY_3,
+  BEGIN,
 
-	@Configuration(name = "softkey_4")
-	SOFTKEY_4,
+  UNDEFINED,
 
-	@Configuration(name = "softkey_5")
-	SOFTKEY_5,
+  SOFTKEY_0,
 
-	@Configuration(name = "softkey_6")
-	SOFTKEY_6,
+  SOFTKEY_1,
 
-	@Configuration(name = "softkey_7")
-	SOFTKEY_7,
+  SOFTKEY_2,
 
-	@Configuration(name = "softkey_8")
-	SOFTKEY_8,
+  SOFTKEY_3,
 
-	@Configuration(name = "softkey_9")
-	SOFTKEY_9,
+  SOFTKEY_4,
 
-	@Configuration(name = "game_a")
-	GAME_A,
+  SOFTKEY_5,
 
-	@Configuration(name = "game_b")
-	GAME_B,
+  SOFTKEY_6,
 
-	@Configuration(name = "game_c")
-	GAME_C,
+  SOFTKEY_7,
 
-	@Configuration(name = "game_d")
-	GAME_D,
+  SOFTKEY_8,
 
-	@Configuration(name = "star")
-	STAR,
+  SOFTKEY_9,
 
-	@Configuration(name = "pound")
-	POUND,
+  GAME_A,
 
-	@Configuration(name = "power")
-	POWER,
+  GAME_B,
 
-	@Configuration(name = "info")
-	INFO,
+  GAME_C,
 
-	@Configuration(name = "colored_key_0")
-	COLORED_KEY_0,
+  GAME_D,
 
-	@Configuration(name = "colored_key_1")
-	COLORED_KEY_1,
+  STAR,
 
-	@Configuration(name = "colored_key_2")
-	COLORED_KEY_2,
+  POUND,
 
-	@Configuration(name = "colored_key_3")
-	COLORED_KEY_3,
+  POWER,
 
-	@Configuration(name = "eject_toggle")
-	EJECT_TOGGLE,
+  INFO,
 
-	@Configuration(name = "play")
-	PLAY,
+  COLORED_KEY_0,
 
-	@Configuration(name = "record")
-	RECORD,
+  COLORED_KEY_1,
 
-	@Configuration(name = "fast_fwd")
-	FAST_FWD,
+  COLORED_KEY_2,
 
-	@Configuration(name = "rewind")
-	REWIND,
+  COLORED_KEY_3,
 
-	@Configuration(name = "track_prev")
-	TRACK_PREV,
+  EJECT_TOGGLE,
 
-	@Configuration(name = "track_next")
-	TRACK_NEXT,
+  PLAY,
 
-	@Configuration(name = "channel_up")
-	CHANNEL_UP,
+  RECORD,
 
-	@Configuration(name = "channel_down")
-	CHANNEL_DOWN,
+  FAST_FWD,
 
-	@Configuration(name = "volume_up")
-	VOLUME_UP,
+  REWIND,
 
-	@Configuration(name = "volume_down")
-	VOLUME_DOWN,
+  TRACK_PREV,
 
-	@Configuration(name = "mute")
-	MUTE,
+  TRACK_NEXT,
 
-	@Configuration(name = "command")
-	COMMAND,
+  CHANNEL_UP,
 
-	@Configuration(name = "shortcut")
-	SHORTCUT,;
+  CHANNEL_DOWN,
 
-	public static Key fromChar(final char at) {
-		switch (at) {
-			case 'a':
-				return A;
-			case 'b':
-				return B;
-			case 'c':
-				return C;
-			case 'd':
-				return D;
-			case 'e':
-				return E;
-			case 'f':
-				return F;
-			case 'g':
-				return G;
-			case 'h':
-				return H;
-			case 'i':
-				return I;
-			case 'j':
-				return J;
-			case 'k':
-				return K;
-			case 'l':
-				return L;
-			case 'm':
-				return M;
-			case 'n':
-				return N;
-			case 'o':
-				return O;
-			case 'p':
-				return P;
-			case 'q':
-				return Q;
-			case 'r':
-				return R;
-			case 's':
-				return S;
-			case 't':
-				return T;
-			case 'u':
-				return U;
-			case 'v':
-				return V;
-			case 'w':
-				return W;
-			case 'x':
-				return X;
-			case 'y':
-				return Y;
-			case 'z':
-				return Z;
-			case '-':
-				return MINUS;
-			case ':':
-				return COLON;
-		}
-		throw new IllegalArgumentException();
-	}
+  VOLUME_UP,
 
+  VOLUME_DOWN,
+
+  MUTE,
+
+  COMMAND,
+
+  SHORTCUT,
+  ;
+
+  public static Key fromChar(final char at) {
+    switch (at) {
+      case 'a':
+        return A;
+      case 'b':
+        return B;
+      case 'c':
+        return C;
+      case 'd':
+        return D;
+      case 'e':
+        return E;
+      case 'f':
+        return F;
+      case 'g':
+        return G;
+      case 'h':
+        return H;
+      case 'i':
+        return I;
+      case 'j':
+        return J;
+      case 'k':
+        return K;
+      case 'l':
+        return L;
+      case 'm':
+        return M;
+      case 'n':
+        return N;
+      case 'o':
+        return O;
+      case 'p':
+        return P;
+      case 'q':
+        return Q;
+      case 'r':
+        return R;
+      case 's':
+        return S;
+      case 't':
+        return T;
+      case 'u':
+        return U;
+      case 'v':
+        return V;
+      case 'w':
+        return W;
+      case 'x':
+        return X;
+      case 'y':
+        return Y;
+      case 'z':
+        return Z;
+      case '-':
+        return MINUS;
+      case ':':
+        return COLON;
+    }
+    throw new IllegalArgumentException();
+  }
 }

@@ -1,17 +1,17 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.back.BackArray;
-import com.zarbosoft.merman.syntax.back.BackPart;
+import com.zarbosoft.merman.syntax.back.BackFixedArraySpec;
+import com.zarbosoft.merman.syntax.back.BackSpec;
 
 public class BackArrayBuilder {
-	BackArray back = new BackArray();
+	BackFixedArraySpec back = new BackFixedArraySpec();
 
-	public BackArrayBuilder add(final BackPart part) {
+	public BackArrayBuilder add(final BackSpec part) {
 		back.elements.add(part);
 		return this;
 	}
 
-	public BackPart build() {
+	public BackSpec build() {
 		return back;
 	}
 }

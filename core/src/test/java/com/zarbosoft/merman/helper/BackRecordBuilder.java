@@ -1,17 +1,17 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.back.BackPart;
-import com.zarbosoft.merman.syntax.back.BackRecord;
+import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
 
 public class BackRecordBuilder {
-	BackRecord back = new BackRecord();
+	BackFixedRecordSpec back = new BackFixedRecordSpec();
 
-	public BackRecordBuilder add(final String key, final BackPart part) {
+	public BackRecordBuilder add(final String key, final BackSpec part) {
 		back.pairs.put(key, part);
 		return this;
 	}
 
-	public BackPart build() {
+	public BackSpec build() {
 		return back;
 	}
 }

@@ -24,10 +24,6 @@ public abstract class Selection {
 		context.selectionTagsChanged();
 	}
 
-	public abstract class VisualListener {
-
-	}
-
 	public Style.Baked getBorderStyle(final Context context, final PSet<Tag> tags) {
 		return context.getStyle(context.globalTags.plusAll(tags).plus(new PartTag("selection")));
 	}

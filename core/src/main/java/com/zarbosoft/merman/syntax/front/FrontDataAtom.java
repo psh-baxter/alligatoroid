@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.syntax.front;
 
-import com.zarbosoft.interface1.Configuration;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.Alignment;
@@ -11,29 +10,29 @@ import com.zarbosoft.merman.editor.visual.tags.PartTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.visual.visuals.VisualNested;
 import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.middle.MiddleAtom;
+import com.zarbosoft.merman.syntax.middle.MiddleAtomSpec;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
-import com.zarbosoft.merman.syntax.symbol.SymbolText;
+import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import org.pcollections.PSet;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Configuration(name = "atom")
-public class FrontDataAtom extends FrontPart {
+
+public class FrontDataAtom extends FrontSpec {
 
 	@Override
 	public String middle() {
 		return middle;
 	}
 
-	@Configuration
-	public String middle;
-	private MiddleAtom dataType;
 
-	@Configuration(optional = true)
-	public Symbol ellipsis = new SymbolText("...");
+	public String middle;
+	private MiddleAtomSpec dataType;
+
+
+	public Symbol ellipsis = new SymbolTextSpec("...");
 
 	@Override
 	public Visual createVisual(

@@ -9,8 +9,8 @@ import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualNestedFromArray;
 import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.middle.MiddleArrayBase;
-import com.zarbosoft.merman.syntax.middle.MiddlePart;
+import com.zarbosoft.merman.syntax.middle.MiddleArraySpecBase;
+import com.zarbosoft.merman.syntax.middle.MiddleSpec;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.Pair;
 
@@ -25,11 +25,11 @@ import static com.zarbosoft.rendaw.common.Common.iterable;
 
 public class ValueArray extends Value {
 	public Visual visual = null;
-	private final MiddleArrayBase middle;
+	private final MiddleArraySpecBase middle;
 	public final List<Atom> data = new ArrayList<>();
 	public final Set<Listener> listeners = new HashSet<>();
 
-	public MiddlePart middle() {
+	public MiddleSpec middle() {
 		return middle;
 	}
 
@@ -78,7 +78,7 @@ public class ValueArray extends Value {
 		listeners.remove(listener);
 	}
 
-	public ValueArray(final MiddleArrayBase middle, final List<Atom> data) {
+	public ValueArray(final MiddleArraySpecBase middle, final List<Atom> data) {
 		this.middle = middle;
 		this.data.addAll(data);
 		data.stream().forEach(v -> {
@@ -114,13 +114,13 @@ public class ValueArray extends Value {
 		}
 	}
 
-	public ValueArray(final MiddleArrayBase middle) {
+	public ValueArray(final MiddleArraySpecBase middle) {
 		this.middle = middle;
 	}
 
 	public Atom createAndAddDefault(final Context context, final int index) {
 		final List<FreeAtomType> childTypes =
-				context.syntax.getLeafTypes(((MiddleArrayBase) middle()).type).collect(Collectors.toList());
+				context.syntax.getLeafTypes(((MiddleArraySpecBase) middle()).type).collect(Collectors.toList());
 		final Atom element;
 		if (childTypes.size() == 1)
 			element = childTypes.get(0).create(context.syntax);

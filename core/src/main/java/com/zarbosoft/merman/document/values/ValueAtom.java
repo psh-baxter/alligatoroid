@@ -5,15 +5,15 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.editor.visual.visuals.VisualNested;
-import com.zarbosoft.merman.syntax.middle.MiddleAtom;
-import com.zarbosoft.merman.syntax.middle.MiddlePart;
+import com.zarbosoft.merman.syntax.middle.MiddleAtomSpec;
+import com.zarbosoft.merman.syntax.middle.MiddleSpec;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class ValueAtom extends Value {
 	public VisualNested visual;
-	private final MiddleAtom middle;
+	private final MiddleAtomSpec middle;
 	public Atom data = null; // INVARIANT: Never null when in tree
 	public final Set<Listener> listeners = new HashSet<>();
 
@@ -59,7 +59,7 @@ public class ValueAtom extends Value {
 		}
 	}
 
-	public ValueAtom(final MiddleAtom middle, final Atom data) {
+	public ValueAtom(final MiddleAtomSpec middle, final Atom data) {
 		this.middle = middle;
 		this.data = data;
 		if (data != null)
@@ -94,7 +94,7 @@ public class ValueAtom extends Value {
 	}
 
 	@Override
-	public MiddlePart middle() {
+	public MiddleSpec middle() {
 		return middle;
 	}
 }

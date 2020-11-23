@@ -1,30 +1,28 @@
 package com.zarbosoft.merman.modules.hotkeys;
 
-import com.zarbosoft.interface1.Configuration;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.modules.hotkeys.grammar.Node;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
-@Configuration
 public class HotkeyRule {
-	@Configuration()
-	public Set<Tag> with = new HashSet<>();
-	@Configuration(optional = true)
-	public Set<Tag> without = new HashSet<>();
 
-	@Configuration()
-	public Map<String, List<Node>> hotkeys = new HashMap<>();
+  public Set<Tag> with = new HashSet<>();
 
-	@Configuration(name = "free_typing", optional = true)
-	public boolean freeTyping = true;
+  public Set<Tag> without = new HashSet<>();
 
-	public HotkeyRule() {
+  public Map<String, List<Node>> hotkeys = new HashMap<>();
 
-	}
+  public boolean freeTyping = true;
 
-	public HotkeyRule(final Set<Tag> with, final Set<Tag> without) {
-		this.with.addAll(with);
-		this.without.addAll(without);
-	}
+  public HotkeyRule() {}
+
+  public HotkeyRule(final Set<Tag> with, final Set<Tag> without) {
+    this.with.addAll(with);
+    this.without.addAll(without);
+  }
 }

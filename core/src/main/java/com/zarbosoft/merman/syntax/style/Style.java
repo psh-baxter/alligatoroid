@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.syntax.style;
 
 import com.google.common.collect.ImmutableSet;
-import com.zarbosoft.interface1.Configuration;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
@@ -12,119 +11,95 @@ import java.util.Set;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-@Configuration
 public class Style {
 
-	@Configuration()
-	public Set<Tag> with = new HashSet<>();
-	@Configuration(optional = true)
-	public Set<Tag> without = new HashSet<>();
+  public Set<Tag> with = new HashSet<>();
 
-	@Configuration(name = "split", optional = true)
-	public Boolean split = null;
+  public Set<Tag> without = new HashSet<>();
 
-	@Configuration(name = "align", optional = true)
-	public String alignment = null;
+  public Boolean split = null;
 
-	@Configuration(name = "space_before", optional = true)
-	public Integer spaceBefore = null;
+  public String alignment = null;
 
-	@Configuration(name = "space_after", optional = true)
-	public Integer spaceAfter = null;
+  public Integer spaceBefore = null;
 
-	@Configuration(name = "space_transverse_before", optional = true)
-	public Integer spaceTransverseBefore = null;
+  public Integer spaceAfter = null;
 
-	@Configuration(name = "space_transverse_after", optional = true)
-	public Integer spaceTransverseAfter = null;
+  public Integer spaceTransverseBefore = null;
 
-	// Text/image/shape only
+  public Integer spaceTransverseAfter = null;
 
-	@Configuration(optional = true)
-	public ModelColor color = null;
+  // Text/image/shape only
 
-	// Text only
+  public ModelColor color = null;
 
-	@Configuration(optional = true)
-	public String font = null;
+  // Text only
 
-	@Configuration(name = "font_size", optional = true)
-	public Integer fontSize = null;
+  public String font = null;
 
-	// Image only
+  public Integer fontSize = null;
 
-	@Configuration(optional = true)
-	public String image = null;
+  // Image only
 
-	@Configuration(optional = true)
-	public Integer rotate = null;
+  public String image = null;
 
-	// Space only
+  public Integer rotate = null;
 
-	@Configuration(optional = true)
-	public Integer space = null;
+  // Space only
 
-	// Other
+  public Integer space = null;
 
-	@Configuration(optional = true)
-	public BoxStyle box = null;
+  // Other
 
-	@Configuration(optional = true)
-	public ObboxStyle obbox = null;
+  public BoxStyle box = null;
 
-	public static class Baked {
-		public Set<Tag> tags = new HashSet<>();
-		public boolean split = false;
-		public String alignment = null;
-		public int spaceBefore = 0;
-		public int spaceAfter = 0;
-		public int spaceTransverseBefore = 0;
-		public int spaceTransverseAfter = 0;
-		public ModelColor color = new ModelColor.RGB();
-		public String font = null;
-		public int fontSize = 14;
-		public String image = null;
-		public int rotate = 0;
-		public int space = 0;
-		public BoxStyle.Baked box = new BoxStyle.Baked();
-		public ObboxStyle.Baked obbox = new ObboxStyle.Baked();
+  public ObboxStyle obbox = null;
 
-		public Baked(final Set<Tag> tags) {
-			this.tags.addAll(tags);
-		}
+  public static class Baked {
+    public static Set<Class<?>> mergeableTypes =
+        ImmutableSet.of(
+            Integer.class,
+            Double.class,
+            Boolean.class,
+            String.class,
+            ModelColor.class,
+            BoxStyle.class,
+            ObboxStyle.class);
+    public Set<Tag> tags = new HashSet<>();
+    public boolean split = false;
+    public String alignment = null;
+    public int spaceBefore = 0;
+    public int spaceAfter = 0;
+    public int spaceTransverseBefore = 0;
+    public int spaceTransverseAfter = 0;
+    public ModelColor color = new ModelColor.RGB();
+    public String font = null;
+    public int fontSize = 14;
+    public String image = null;
+    public int rotate = 0;
+    public int space = 0;
+    public BoxStyle.Baked box = new BoxStyle.Baked();
+    public ObboxStyle.Baked obbox = new ObboxStyle.Baked();
 
-		public static Set<Class<?>> mergeableTypes = ImmutableSet.of(
-				Integer.class,
-				Double.class,
-				Boolean.class,
-				String.class,
-				ModelColor.class,
-				BoxStyle.class,
-				ObboxStyle.class
-		);
+    public Baked(final Set<Tag> tags) {
+      this.tags.addAll(tags);
+    }
 
-		public void merge(final Style style) {
-			for (final Field field : Style.class.getFields()) {
-				if (field.getAnnotation(Configuration.class) == null)
-					continue;
-				if (!mergeableTypes.contains(field.getType()))
-					continue;
-				final Object value = uncheck(() -> field.get(style));
-				if (value != null) {
-					if (field.getName().equals("box"))
-						box.merge((BoxStyle) value);
-					else if (field.getName().equals("obbox"))
-						obbox.merge((ObboxStyle) value);
-					else
-						uncheck(() -> getClass().getField(field.getName()).set(this, value));
-				}
-			}
-		}
+    public void merge(final Style style) {
+      for (final Field field : Style.class.getFields()) {
+        if (!mergeableTypes.contains(field.getType())) continue;
+        final Object value = uncheck(() -> field.get(style));
+        if (value != null) {
+          if (field.getName().equals("box")) box.merge((BoxStyle) value);
+          else if (field.getName().equals("obbox")) obbox.merge((ObboxStyle) value);
+          else uncheck(() -> getClass().getField(field.getName()).set(this, value));
+        }
+      }
+    }
 
-		public Font getFont(final Context context) {
-			if (font == null)
-				return context.display.font(null, fontSize);
-			return context.display.font(font, fontSize);
-		}
-	}
+    public Font getFont(final Context context) {
+      if (font == null) return context.display.font(null, fontSize);
+      return context.display.font(font, fontSize);
+    }
+  }
 }

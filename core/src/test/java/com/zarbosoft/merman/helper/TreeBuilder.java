@@ -6,8 +6,8 @@ import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.middle.MiddleAtom;
-import com.zarbosoft.merman.syntax.middle.MiddlePrimitive;
+import com.zarbosoft.merman.syntax.middle.MiddleAtomSpec;
+import com.zarbosoft.merman.syntax.middle.MiddlePrimitiveSpec;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,17 +23,17 @@ public class TreeBuilder {
 	}
 
 	public TreeBuilder add(final String key, final TreeBuilder builder) {
-		data.put(key, new ValueAtom((MiddleAtom) type.middle().get(key), builder.build()));
+		data.put(key, new ValueAtom((MiddleAtomSpec) type.middle().get(key), builder.build()));
 		return this;
 	}
 
 	public TreeBuilder add(final String key, final Atom atom) {
-		data.put(key, new ValueAtom((MiddleAtom) type.middle().get(key), atom));
+		data.put(key, new ValueAtom((MiddleAtomSpec) type.middle().get(key), atom));
 		return this;
 	}
 
 	public TreeBuilder add(final String key, final String text) {
-		data.put(key, new ValuePrimitive((MiddlePrimitive) type.middle().get(key), text));
+		data.put(key, new ValuePrimitive((MiddlePrimitiveSpec) type.middle().get(key), text));
 		return this;
 	}
 
