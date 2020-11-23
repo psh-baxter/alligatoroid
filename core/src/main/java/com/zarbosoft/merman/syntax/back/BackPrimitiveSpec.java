@@ -9,7 +9,6 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
-import com.zarbosoft.rendaw.common.Pair;
 
 import java.util.Set;
 
@@ -23,10 +22,9 @@ public class BackPrimitiveSpec extends BackSpec {
     return new Operator<StackStore>(new ClassEqTerminal(EPrimitiveEvent.class)) {
       @Override
       protected StackStore process(StackStore store) {
-        return store.stackSingleElement(
-            new Pair<>(
-                BackPrimitiveSpec.this.middle,
-                new ValuePrimitive(middle, ((EPrimitiveEvent) store.top()).value)));
+        return store.stackVarDoubleElement(
+            BackPrimitiveSpec.this.middle,
+            new ValuePrimitive(middle, ((EPrimitiveEvent) store.top()).value));
       }
     };
   }

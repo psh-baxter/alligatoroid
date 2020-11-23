@@ -38,7 +38,7 @@ public class BackRootArraySpec extends BackSpec {
         store = store.popVarSingleList(temp);
         Collections.reverse(temp);
         final ValueArray value = new ValueArray(atomType.getDataArray(middle), temp);
-        return store.stackSingleElement(new Pair<>(middle, value));
+        return store.stackVarDoubleElement(middle, value);
       }
     };
   }
