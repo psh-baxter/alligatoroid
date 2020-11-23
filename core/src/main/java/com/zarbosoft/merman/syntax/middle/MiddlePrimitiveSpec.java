@@ -29,7 +29,10 @@ public class MiddlePrimitiveSpec extends MiddleSpec {
   }
 
   @Override
-  public void finish(final Set<String> allTypes, final Set<String> scalarTypes) {}
+  public void finish(final Set<String> allTypes, final Set<String> scalarTypes) {
+    if (pattern != null)
+      matcher = pattern.new Matcher();
+  }
 
   @Override
   public com.zarbosoft.merman.document.values.Value create(final Syntax syntax) {

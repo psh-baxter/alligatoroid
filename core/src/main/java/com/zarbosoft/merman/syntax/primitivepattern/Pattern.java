@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.syntax.primitivepattern;
 
-import com.zarbosoft.luxem.read.Parse;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.bytes.ParseBuilder;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 
 public abstract class Pattern {
@@ -25,7 +25,7 @@ public abstract class Pattern {
 
     public boolean match(final String value) {
       try {
-        new Parse<Void>().grammar(grammar).parse(value);
+        new ParseBuilder<Void>().grammar(grammar).parse(value);
         return true;
       } catch (final InvalidStream e) {
         return false;

@@ -3,6 +3,8 @@ package com.zarbosoft.merman.editor.visual.visuals;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
+import com.zarbosoft.merman.document.Atom;
+import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
@@ -1012,6 +1014,25 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void receiveText(final Context context, final String text) {
+      String preview = value.get();
+      if (value.middle.matcher != null) {
+        preview =
+            preview.substring(0, range.beginOffset)
+                + text
+                + preview.substring(range.endOffset, preview.length());
+        if (!value.middle.matcher.match(preview)) {
+          if (range.endOffset == value.length()
+              && last(atomVisual().children) == VisualPrimitive.this) {
+            context.history.finishChange(context);
+            final Value.Parent parent = atomVisual().atom.parent;
+            final Atom gap = context.syntax.suffixGap.create(true, atomVisual().atom);
+            parent.replace(context, gap);
+            gap.data.get("gap").selectDown(context);
+            context.selection.receiveText(context, text);
+          }
+          return;
+        }
+      }
       if (range.beginOffset != range.endOffset)
         context.history.apply(
             context, value.changeRemove(range.beginOffset, range.endOffset - range.beginOffset));
@@ -1534,6 +1555,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     public String text;
     public BrickLine brick;
     public int index;
+
     private Line(final boolean hard) {
       this.hard = hard;
     }

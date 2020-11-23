@@ -32,7 +32,7 @@ public class TestLayoutSpace {
 				.type(one)
 				.type(array)
 				.group("any", new GroupBuilder().type(one).type(array).build())
-				.style(new StyleBuilder().tag(new PartTag("space")).split(true).build())
+				.style(new StyleBuilder().tag(new PartTag("symbol-space")).split(true).build())
 				.build();
 	}
 
