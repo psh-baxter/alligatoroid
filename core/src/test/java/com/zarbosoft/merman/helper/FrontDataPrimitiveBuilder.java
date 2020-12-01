@@ -11,7 +11,7 @@ public class FrontDataPrimitiveBuilder {
 
 	public FrontDataPrimitiveBuilder(final String middle) {
 		this.front = new FrontPrimitiveSpec();
-		front.middle = middle;
+		front.field = middle;
 		front.tags(tags);
 	}
 

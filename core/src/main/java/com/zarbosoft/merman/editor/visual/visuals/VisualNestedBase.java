@@ -48,7 +48,7 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 
 	protected abstract Value value();
 
-	protected abstract Path getSelectionPath();
+	protected abstract Path getBackPath();
 
 	protected abstract Symbol ellipsis();
 
@@ -207,7 +207,6 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 				return ellipsisTags;
 			}
 		});
-		final Style.Baked style = context.getStyle(ellipsisTags);
 		ellipsis.tagsChanged(context);
 		context.bricksCreated(this, ellipsis);
 		return ellipsis;
@@ -215,7 +214,6 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 
 	public void tagsChanged(final Context context) {
 		if (ellipsis != null) {
-			final Style.Baked style = context.getStyle(ellipsisTags);
 			ellipsis.tagsChanged(context);
 		}
 		if (selection != null)
@@ -329,8 +327,8 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 		}
 
 		@Override
-		public Path getPath() {
-			return getSelectionPath();
+		public Path getSyntaxPath() {
+			return VisualNestedBase.this.getBackPath();
 		}
 
 		@Override
@@ -628,9 +626,9 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 			final Atom gap = context.syntax.prefixGap.create();
 			nodeSet(context, gap);
 			context.history.apply(context,
-					new ChangeArray((ValueArray) gap.data.get("value"), 0, 0, ImmutableList.of(old))
+					new ChangeArray((ValueArray) gap.fields.get("value"), 0, 0, ImmutableList.of(old))
 			);
-			gap.data.get("gap").selectDown(context);
+			gap.fields.get("gap").selectDown(context);
 			return true;
 		}
 
@@ -643,7 +641,7 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 
 			final Atom gap = context.syntax.suffixGap.create(false, atomGet());
 			nodeSet(context, gap);
-			gap.data.get("gap").selectDown(context);
+			gap.fields.get("gap").selectDown(context);
 			return false;
 		}
 	}

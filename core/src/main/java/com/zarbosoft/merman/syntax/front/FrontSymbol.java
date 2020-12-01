@@ -55,7 +55,7 @@ public class FrontSymbol extends FrontSpec {
   }
 
   @Override
-  public String middle() {
+  public String field() {
     return null;
   }
 

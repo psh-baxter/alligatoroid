@@ -10,7 +10,7 @@ import com.zarbosoft.merman.editor.visual.tags.PartTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
 import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.middle.MiddleArraySpecBase;
+import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import org.pcollections.PSet;
@@ -35,7 +35,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
 
   public Symbol ellipsis = new SymbolTextSpec("...");
 
-  protected MiddleArraySpecBase dataType;
+  protected BaseBackArraySpec dataType;
 
   @Override
   public Visual createVisual(
@@ -49,7 +49,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
     return new VisualArray(
         context,
         parent,
-        dataType.get(atom.data),
+        dataType.get(atom.fields),
         tags.plus(new PartTag("array"))
             .plusAll(this.tags.stream().map(s -> new FreeTag(s)).collect(Collectors.toSet())),
         alignments,
@@ -67,11 +67,6 @@ public abstract class FrontArraySpecBase extends FrontSpec {
       }
 
       @Override
-      protected Symbol ellipsis() {
-        return ellipsis;
-      }
-
-      @Override
       protected List<FrontSymbol> getPrefix() {
         return prefix;
       }
@@ -85,17 +80,22 @@ public abstract class FrontArraySpecBase extends FrontSpec {
       protected List<FrontSymbol> getSuffix() {
         return suffix;
       }
+
+      @Override
+      protected Symbol ellipsis() {
+        return ellipsis;
+      }
     };
   }
 
   @Override
   public void finish(final AtomType atomType, final Set<String> middleUsed) {
-    middleUsed.add(middle());
-    ((MiddleArraySpecBase) atomType.middle().get(middle())).front = this;
-    dataType = atomType.getDataArray(middle());
+    middleUsed.add(field());
+    ((BaseBackArraySpec) atomType.fields.get(field())).front = this;
+    dataType = atomType.getDataArray(field());
   }
 
-  public abstract String middle();
+  public abstract String field();
 
   @Override
   public void dispatch(final DispatchHandler handler) {

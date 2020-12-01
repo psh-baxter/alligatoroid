@@ -10,6 +10,7 @@ import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.history.changes.ChangeArray;
 import com.zarbosoft.merman.editor.history.changes.ChangeNodeSet;
+import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
@@ -22,9 +23,6 @@ import com.zarbosoft.merman.syntax.front.FrontDataAtom;
 import com.zarbosoft.merman.syntax.front.FrontGapBase;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.middle.MiddleArraySpec;
-import com.zarbosoft.merman.syntax.middle.MiddlePrimitiveSpec;
-import com.zarbosoft.merman.syntax.middle.MiddleSpec;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.bytes.ParseBuilder;
 import com.zarbosoft.pidgoon.bytes.Position;
@@ -48,36 +46,26 @@ import java.util.stream.Stream;
 import static com.zarbosoft.rendaw.common.Common.iterable;
 
 public class PrefixGapAtomType extends AtomType {
-  private final MiddleArraySpec dataValue;
-  private final MiddlePrimitiveSpec dataGap;
   private final List<BackSpec> back;
-  private final Map<String, MiddleSpec> middle;
+  private final BackPrimitiveSpec dataGap;
+  private final BackArraySpec dataValue;
   public List<FrontSymbol> frontPrefix = new ArrayList<>();
   public List<FrontSymbol> frontInfix = new ArrayList<>();
   public List<FrontSymbol> frontSuffix = new ArrayList<>();
   private List<FrontSpec> front;
 
   public PrefixGapAtomType() {
-    {
-      final BackPrimitiveSpec gap = new BackPrimitiveSpec();
-      gap.middle = "gap";
-      final BackArraySpec value = new BackArraySpec();
-      value.middle = "value";
-      final BackFixedRecordSpec record = new BackFixedRecordSpec();
-      record.pairs.put("gap", gap);
-      record.pairs.put("value", value);
-      final BackFixedTypeSpec type = new BackFixedTypeSpec();
-      type.type = "__prefix_gap";
-      type.value = record;
-      back = ImmutableList.of(type);
-    }
-    {
-      dataValue = new MiddleArraySpec();
-      dataValue.id = "value";
-      dataGap = new MiddlePrimitiveSpec();
-      dataGap.id = "gap";
-      middle = ImmutableMap.of("gap", dataGap, "value", dataValue);
-    }
+    dataGap = new BackPrimitiveSpec();
+    dataGap.id = "gap";
+    dataValue = new BackArraySpec();
+    dataValue.id = "value";
+    final BackFixedRecordSpec record = new BackFixedRecordSpec();
+    record.pairs.put("gap", dataGap);
+    record.pairs.put("value", dataValue);
+    final BackFixedTypeSpec type = new BackFixedTypeSpec();
+    type.type = "__prefix_gap";
+    type.value = record;
+    back = ImmutableList.of(type);
   }
 
   @Override
@@ -112,7 +100,7 @@ public class PrefixGapAtomType extends AtomType {
                 final Atom self,
                 final String string,
                 final Common.UserData store) {
-              final Atom value = ((ValueArray) self.data.get("value")).data.get(0);
+              final Atom value = ((ValueArray) self.fields.get("value")).data.get(0);
               class PrefixChoice extends Choice {
                 private final FreeAtomType type;
                 private final GapKey key;
@@ -146,7 +134,7 @@ public class PrefixGapAtomType extends AtomType {
                               context.history.apply(
                                   context,
                                   new ChangeArray(
-                                      (ValueArray) atom.data.get(front.middle()),
+                                      (ValueArray) atom.fields.get(front.field()),
                                       0,
                                       0,
                                       ImmutableList.of(inner)));
@@ -157,13 +145,13 @@ public class PrefixGapAtomType extends AtomType {
                               context.history.apply(
                                   context,
                                   new ChangeNodeSet(
-                                      (ValueAtom) atom.data.get(front.middle), inner));
+                                      (ValueAtom) atom.fields.get(front.middle), inner));
                             }
                           });
 
                   // Select the next input after the key
                   if (parsed.nextInput != null)
-                    atom.data.get(parsed.nextInput.middle()).selectDown(context);
+                    atom.fields.get(parsed.nextInput.field()).selectDown(context);
                   else inner.visual.selectDown(context);
                 }
 
@@ -241,7 +229,7 @@ public class PrefixGapAtomType extends AtomType {
                 final String string,
                 final Common.UserData userData) {
               if (self.visual != null && string.isEmpty()) {
-                self.parent.replace(context, ((ValueArray) self.data.get("value")).data.get(0));
+                self.parent.replace(context, ((ValueArray) self.fields.get("value")).data.get(0));
               }
             }
           };
@@ -265,11 +253,6 @@ public class PrefixGapAtomType extends AtomType {
   }
 
   @Override
-  public Map<String, MiddleSpec> middle() {
-    return middle;
-  }
-
-  @Override
   public List<BackSpec> back() {
     return back;
   }
@@ -287,20 +270,22 @@ public class PrefixGapAtomType extends AtomType {
   public Atom create(final Atom value) {
     return new Atom(
         this,
-        ImmutableMap.of(
-            "value",
-            new ValueArray(dataValue, ImmutableList.of(value)),
-            "gap",
-            new ValuePrimitive(dataGap, "")));
+        new TSMap<>(
+            ImmutableMap.of(
+                "value",
+                new ValueArray(dataValue, ImmutableList.of(value)),
+                "gap",
+                new ValuePrimitive(dataGap, ""))));
   }
 
   public Atom create() {
     return new Atom(
         this,
-        ImmutableMap.of(
-            "value",
-            new ValueArray(dataValue, ImmutableList.of()),
-            "gap",
-            new ValuePrimitive(dataGap, "")));
+        new TSMap<>(
+            ImmutableMap.of(
+                "value",
+                new ValueArray(dataValue, ImmutableList.of()),
+                "gap",
+                new ValuePrimitive(dataGap, ""))));
   }
 }

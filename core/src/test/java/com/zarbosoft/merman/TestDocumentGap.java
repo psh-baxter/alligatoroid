@@ -11,14 +11,12 @@ import com.zarbosoft.merman.editor.history.changes.ChangePrimitiveSet;
 import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.BackRecordBuilder;
-import com.zarbosoft.merman.helper.ExpressionSyntax;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
-import com.zarbosoft.merman.helper.SyntaxRestrictedRoot;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
 import com.zarbosoft.merman.syntax.FreeAtomType;
@@ -58,20 +56,20 @@ public class TestDocumentGap {
             .front(new FrontMarkBuilder("one").build())
             .build();
     FreeAtomType two =
-      new TypeBuilder("two")
-        .back(Helper.buildBackPrimitive("two"))
-        .front(new FrontMarkBuilder("two").build())
-        .build();
+        new TypeBuilder("two")
+            .back(Helper.buildBackPrimitive("two"))
+            .front(new FrontMarkBuilder("two").build())
+            .build();
     FreeAtomType three =
-      new TypeBuilder("three")
-        .back(Helper.buildBackPrimitive("three"))
-        .front(new FrontMarkBuilder("three").build())
-        .build();
+        new TypeBuilder("three")
+            .back(Helper.buildBackPrimitive("three"))
+            .front(new FrontMarkBuilder("three").build())
+            .build();
     FreeAtomType four =
-      new TypeBuilder("four")
-        .back(Helper.buildBackPrimitive("four"))
-        .front(new FrontMarkBuilder("four").build())
-        .build();
+        new TypeBuilder("four")
+            .back(Helper.buildBackPrimitive("four"))
+            .front(new FrontMarkBuilder("four").build())
+            .build();
     Syntax syntax =
         new SyntaxBuilder("test_group_1")
             .type(infinity)
@@ -81,15 +79,10 @@ public class TestDocumentGap {
             .type(four)
             .group(
                 "test_group_1",
-                new GroupBuilder()
-                    .type(infinity)
-                    .type(one)
-                    .type(two)
-                    .group("test_group_2")
-                    .build())
+                new GroupBuilder().type(infinity).type(one).type(two).group("test_group_2").build())
             .group("test_group_2", new GroupBuilder().type(three).type(one).build())
-          .group("unused", new GroupBuilder().type(four).type(one).build())
-          .build();
+            .group("unused", new GroupBuilder().type(four).type(one).build())
+            .build();
 
     final Context context = blank(syntax);
     assertThat(
@@ -109,10 +102,10 @@ public class TestDocumentGap {
   // Decision making and replacement
   @Test
   public void decisionMaking_choiceCount() {
+    // Check that typing a letter that matches a type produces that type as a choice
     // TODO how does this work?
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -121,8 +114,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     Syntax syntax =
@@ -134,13 +129,15 @@ public class TestDocumentGap {
 
     final Atom gap = syntax.gap.create();
     new GeneralTestWizard(syntax, new TreeBuilder(restricted).add("value", gap).build())
-        .run(context -> gap.data.get("gap").selectDown(context))
+        .run(context -> gap.fields.get("gap").selectDown(context))
         .sendText("q")
         .checkChoices(1);
   }
 
   @Test
   public void decisionMaking_undecided() {
+    // With an ambiguous character (potentially matching multiple autocompletable types)
+    // a gap autocompletes neither
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -187,8 +184,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -196,7 +191,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -205,15 +199,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -228,12 +219,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -242,12 +231,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -256,12 +243,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -270,27 +255,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -300,8 +287,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -312,12 +298,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -327,8 +311,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -336,10 +319,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -347,12 +328,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -363,8 +342,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -378,14 +355,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -465,6 +443,8 @@ public class TestDocumentGap {
 
   @Test
   public void decisionMaking_undecidedFull() {
+    // If ambiguous input is entered into a gap, even if the input exactly matches
+    // a choice, that choice isn't autocompleted.
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -511,8 +491,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -520,7 +498,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -529,15 +506,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -552,12 +526,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -566,12 +538,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -580,12 +550,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -594,27 +562,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -624,8 +594,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -636,12 +605,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -651,8 +618,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -660,10 +626,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -671,12 +635,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -687,8 +649,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -702,14 +662,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -791,6 +752,8 @@ public class TestDocumentGap {
 
   @Test
   public void decisionMaking_immediate() {
+    // If a partial input is entered that matches only one
+    // autocomplete type, autocomplete.
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -837,8 +800,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -846,7 +807,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -855,15 +815,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -878,12 +835,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -892,12 +847,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -906,12 +859,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -920,27 +871,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -950,8 +903,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -962,12 +914,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -977,8 +927,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -986,10 +935,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -997,12 +944,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -1013,8 +958,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -1028,14 +971,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -1118,6 +1062,10 @@ public class TestDocumentGap {
 
   @Test
   public void decisionMaking_binaryImmediate() {
+    // Input that doesn't match fixed primitive string that matched previously causes it to be
+    // converted (TODO split?)
+    // Carryover text that matches unambiguously an autoconvert binary operator causes it to
+    // autoconvert
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -1164,8 +1112,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -1173,7 +1119,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -1182,15 +1127,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -1205,12 +1147,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -1219,12 +1159,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -1233,12 +1171,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -1247,27 +1183,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -1277,8 +1215,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -1289,12 +1226,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -1304,8 +1239,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -1313,10 +1247,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -1324,12 +1256,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -1340,8 +1270,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -1355,14 +1283,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -1447,6 +1376,10 @@ public class TestDocumentGap {
 
   @Test
   public void decisionMaking_binaryTextImmediate() {
+    // Input that doesn't match data primitive string by pattern that matched previously causes it
+    // to be converted (TODO separate?)
+    // Carryover text that matches unambiguously an autoconvert binary operator causes it to
+    // autoconvert
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -1493,8 +1426,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -1502,7 +1433,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -1511,15 +1441,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -1534,12 +1461,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -1548,12 +1473,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -1562,12 +1485,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -1576,27 +1497,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -1606,8 +1529,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -1618,12 +1540,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -1633,8 +1553,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -1642,10 +1561,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -1653,12 +1570,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -1669,8 +1584,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -1684,14 +1597,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -1776,6 +1690,8 @@ public class TestDocumentGap {
 
   @Test
   public void decisionMaking_textPrimitiveImmediate() {
+    // Typing a character that only matches dynamic primitive pattern autocompletes to that type
+    // ex: 9 can only appear in digit type, so pressing 9 autocompletes to digit type (1 choice)
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -1822,8 +1738,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -1831,7 +1745,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -1840,15 +1753,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -1863,12 +1773,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -1877,12 +1785,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -1891,12 +1797,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -1905,27 +1809,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -1935,8 +1841,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -1947,12 +1852,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -1962,8 +1865,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -1971,10 +1873,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -1982,12 +1882,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -1998,8 +1896,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -2013,14 +1909,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -2092,7 +1989,7 @@ public class TestDocumentGap {
 
     final Atom atom = syntax.gap.create();
     new GeneralTestWizard(syntax, atom)
-        .run(context -> atom.data.get("gap").selectDown(context))
+        .run(context -> atom.fields.get("gap").selectDown(context))
         .sendText("9")
         .checkArrayTree(new TreeBuilder(digits).add("value", "9").build())
         .run(
@@ -2106,6 +2003,10 @@ public class TestDocumentGap {
 
   @Test
   public void decisionMaking_textMark1Immediate() {
+    // input is ambiguous if type A or type B followed by type C
+    // when input becomes clear that it's type B followed by C, both B and C are resolved
+    // immediately
+    // (part of the input doesn't match b, so must start with resolving b)
     final FreeAtomType one;
     final FreeAtomType two;
     final FreeAtomType three;
@@ -2131,12 +2032,10 @@ public class TestDocumentGap {
             .build();
     textMark1 =
         new TypeBuilder("textmark1")
-            .middlePrimitiveLetters("text")
-            .middleAtom("atom", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("text", Helper.buildBackDataPrimitive("text"))
-                    .add("atom", Helper.buildBackDataAtom("atom"))
+                    .add("text", Helper.buildBackDataPrimitiveLetters("text"))
+                    .add("atom", Helper.buildBackDataAtom("atom", "any"))
                     .build())
             .frontDataPrimitive("text")
             .frontMark("$1")
@@ -2145,14 +2044,11 @@ public class TestDocumentGap {
             .build();
     textMark2 =
         new TypeBuilder("textmark2")
-            .middlePrimitiveLetters("text")
-            .middleAtom("atom", "any")
-            .middleAtom("atom2", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("text", Helper.buildBackDataPrimitive("text"))
-                    .add("atom", Helper.buildBackDataAtom("atom"))
-                    .add("atom2", Helper.buildBackDataAtom("atom2"))
+                    .add("text", Helper.buildBackDataPrimitiveLetters("text"))
+                    .add("atom", Helper.buildBackDataAtom("atom", "any"))
+                    .add("atom2", Helper.buildBackDataAtom("atom2", "any"))
                     .build())
             .frontDataPrimitive("text")
             .frontMark("$2")
@@ -2162,14 +2058,11 @@ public class TestDocumentGap {
             .build();
     textMark3 =
         new TypeBuilder("textmark3")
-            .middlePrimitiveLetters("text")
-            .middleAtom("atom", "any")
-            .middleAtom("atom2", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("text", Helper.buildBackDataPrimitive("text"))
-                    .add("atom", Helper.buildBackDataAtom("atom"))
-                    .add("atom2", Helper.buildBackDataAtom("atom2"))
+                    .add("text", Helper.buildBackDataPrimitiveLetters("text"))
+                    .add("atom", Helper.buildBackDataAtom("atom", "any"))
+                    .add("atom2", Helper.buildBackDataAtom("atom2", "any"))
                     .build())
             .frontDataNode("atom2")
             .frontDataPrimitive("text")
@@ -2179,8 +2072,10 @@ public class TestDocumentGap {
             .build();
     ambiguateTextMark3 =
         new TypeBuilder("atextmark3")
-            .middleAtom("atom", "any")
-            .back(new BackRecordBuilder().add("atom", Helper.buildBackDataAtom("atom")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("atom", Helper.buildBackDataAtom("atom", "any"))
+                    .build())
             .frontDataNode("atom")
             .frontMark("t")
             .autoComplete(1)
@@ -2209,7 +2104,7 @@ public class TestDocumentGap {
 
     final Atom atom = syntax.gap.create();
     new GeneralTestWizard(syntax, atom)
-        .run(context -> atom.data.get("gap").selectDown(context))
+        .run(context -> atom.fields.get("gap").selectDown(context))
         .sendText("t")
         .sendText("$")
         .sendText("1")
@@ -2230,6 +2125,7 @@ public class TestDocumentGap {
 
   @Test
   public void decisionMaking_binaryUndecided() {
+    // ambiguity in suffix gap, doesn't auto resolve
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -2276,8 +2172,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -2285,7 +2179,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -2294,15 +2187,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -2317,12 +2207,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -2331,12 +2219,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -2345,12 +2231,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -2359,27 +2243,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -2389,8 +2275,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -2401,12 +2286,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -2416,8 +2299,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -2425,10 +2307,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -2436,12 +2316,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -2452,8 +2330,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -2467,14 +2343,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -2558,6 +2435,8 @@ public class TestDocumentGap {
 
   @Test
   public void decisionMaking_immediateReplaceOnSelection() {
+    // a partially completed gap will be completed automatically when deselected
+    // TODO don't do this maybe
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -2604,8 +2483,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -2613,7 +2490,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -2622,15 +2498,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -2645,12 +2518,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -2659,12 +2530,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -2673,12 +2542,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -2687,27 +2554,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -2717,8 +2586,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -2729,12 +2597,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -2744,8 +2610,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -2753,10 +2618,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -2764,12 +2627,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -2780,8 +2641,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -2795,14 +2654,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -2877,7 +2737,7 @@ public class TestDocumentGap {
     value's selection.
      */
     final Atom gap = syntax.gap.create();
-    final ValuePrimitive primitive = (ValuePrimitive) gap.data.get("gap");
+    final ValuePrimitive primitive = (ValuePrimitive) gap.fields.get("gap");
     new GeneralTestWizard(syntax, gap)
         .run(context -> context.history.apply(context, new ChangePrimitiveSet(primitive, "\"")))
         .checkArrayTree(gap)
@@ -2895,6 +2755,7 @@ public class TestDocumentGap {
   // Unit gap
   @Test
   public void unitGap_unitContinueInside() {
+    // After completing gap, next primitive is selected automatically if primitive is first editable
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -2941,8 +2802,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -2950,7 +2809,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -2959,15 +2817,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -2982,12 +2837,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -2996,12 +2849,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -3010,12 +2861,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -3024,27 +2873,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -3054,8 +2905,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -3066,12 +2916,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -3081,8 +2929,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -3090,10 +2937,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -3101,12 +2946,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -3117,8 +2960,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -3132,14 +2973,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -3220,6 +3062,7 @@ public class TestDocumentGap {
 
   @Test
   public void unitGap_unitContinueInsideArray() {
+    // After completing gap, array is selected (creating element)
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -3266,8 +3109,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -3275,7 +3116,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -3284,15 +3124,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -3307,12 +3144,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -3321,12 +3156,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -3335,12 +3168,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -3349,27 +3180,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -3379,8 +3212,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -3391,12 +3223,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -3406,8 +3236,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -3415,10 +3244,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -3426,12 +3253,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -3442,8 +3267,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -3457,14 +3280,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -3547,6 +3371,8 @@ public class TestDocumentGap {
 
   @Test
   public void suffix_suffixContinueInside() {
+    // In suffix gap if completed atom has editable after the matched key text,
+    // after completeion selection automatically goes into that editable (gap in this case)
     FreeAtomType infinity =
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
@@ -3593,8 +3419,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -3602,7 +3426,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -3611,15 +3434,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -3634,12 +3454,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -3648,12 +3466,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -3662,12 +3478,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -3676,27 +3490,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -3706,8 +3522,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -3718,12 +3533,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -3733,8 +3546,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -3742,10 +3554,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -3753,12 +3563,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -3769,8 +3577,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -3784,14 +3590,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -3865,7 +3672,7 @@ public class TestDocumentGap {
         syntax,
         () -> syntax.suffixGap.create(true, new TreeBuilder(one).build()),
         context -> {
-          Helper.rootArray(context.document).data.get(0).data.get("gap").selectDown(context);
+          Helper.rootArray(context.document).data.get(0).fields.get("gap").selectDown(context);
           context.selection.receiveText(context, "?");
           context.selection.receiveText(context, "e");
         },
@@ -3877,9 +3684,6 @@ public class TestDocumentGap {
             .add("gap", "e")
             .build());
   }
-
-  // ========================================================================
-  // Suffix
 
   private void innerTestTransform(
       final Syntax syntax,
@@ -3897,6 +3701,7 @@ public class TestDocumentGap {
 
   @Test
   public void suffix_textMark3Immediate() {
+    // match text then mark as soon as it's unambiguous
     FreeAtomType one =
         new TypeBuilder("one")
             .back(Helper.buildBackPrimitive("one"))
@@ -3914,12 +3719,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType textMark1 =
         new TypeBuilder("textmark1")
-            .middlePrimitiveLetters("text")
-            .middleAtom("atom", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("text", Helper.buildBackDataPrimitive("text"))
-                    .add("atom", Helper.buildBackDataAtom("atom"))
+                    .add("text", Helper.buildBackDataPrimitiveLetters("text"))
+                    .add("atom", Helper.buildBackDataAtom("atom", "any"))
                     .build())
             .frontDataPrimitive("text")
             .frontMark("$1")
@@ -3928,14 +3731,11 @@ public class TestDocumentGap {
             .build();
     FreeAtomType textMark2 =
         new TypeBuilder("textmark2")
-            .middlePrimitiveLetters("text")
-            .middleAtom("atom", "any")
-            .middleAtom("atom2", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("text", Helper.buildBackDataPrimitive("text"))
-                    .add("atom", Helper.buildBackDataAtom("atom"))
-                    .add("atom2", Helper.buildBackDataAtom("atom2"))
+                    .add("text", Helper.buildBackDataPrimitiveLetters("text"))
+                    .add("atom", Helper.buildBackDataAtom("atom", "any"))
+                    .add("atom2", Helper.buildBackDataAtom("atom2", "any"))
                     .build())
             .frontDataPrimitive("text")
             .frontMark("$2")
@@ -3945,14 +3745,11 @@ public class TestDocumentGap {
             .build();
     FreeAtomType textMark3 =
         new TypeBuilder("textmark3")
-            .middlePrimitiveLetters("text")
-            .middleAtom("atom", "any")
-            .middleAtom("atom2", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("text", Helper.buildBackDataPrimitive("text"))
-                    .add("atom", Helper.buildBackDataAtom("atom"))
-                    .add("atom2", Helper.buildBackDataAtom("atom2"))
+                    .add("text", Helper.buildBackDataPrimitiveLetters("text"))
+                    .add("atom", Helper.buildBackDataAtom("atom", "any"))
+                    .add("atom2", Helper.buildBackDataAtom("atom2", "any"))
                     .build())
             .frontDataNode("atom2")
             .frontDataPrimitive("text")
@@ -3962,8 +3759,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ambiguateTextMark3 =
         new TypeBuilder("atextmark3")
-            .middleAtom("atom", "any")
-            .back(new BackRecordBuilder().add("atom", Helper.buildBackDataAtom("atom")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("atom", Helper.buildBackDataAtom("atom", "any"))
+                    .build())
             .frontDataNode("atom")
             .frontMark("t")
             .autoComplete(1)
@@ -3992,7 +3791,7 @@ public class TestDocumentGap {
 
     final Atom atom = syntax.suffixGap.create(true, new TreeBuilder(one).build());
     new GeneralTestWizard(syntax, atom)
-        .run(context -> atom.data.get("gap").selectDown(context))
+        .run(context -> atom.fields.get("gap").selectDown(context))
         .sendText("t")
         .sendText("$")
         .sendText("t")
@@ -4006,17 +3805,49 @@ public class TestDocumentGap {
 
   @Test
   public void suffix_suffixOnlyPlaceAllowedTypes() {
+    FreeAtomType one =
+        new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .autoComplete(-1)
+            .build();
+    FreeAtomType quoted =
+        new TypeBuilder("quoted")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .front(new FrontMarkBuilder("\"").build())
+            .frontDataPrimitive("value")
+            .front(new FrontMarkBuilder("\"").build())
+            .autoComplete(1)
+            .build();
+    FreeAtomType binaryBang =
+        new TypeBuilder("bang")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "one"))
+                    .add("second", Helper.buildBackDataAtom("second", "one"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("!")
+            .frontDataNode("second")
+            .autoComplete(1)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(quoted)
+            .type(one)
+            .type(binaryBang)
+            .group("restricted_group", new GroupBuilder().type(quoted).build())
+            .group("any", new GroupBuilder().type(quoted).type(binaryBang).build())
+            .build();
+
     final Atom gap =
-        SyntaxRestrictedRoot.syntax.suffixGap.create(
-            true, new TreeBuilder(SyntaxRestrictedRoot.quoted).add("value", "hi").build());
-    new GeneralTestWizard(SyntaxRestrictedRoot.syntax, gap)
-        .run(context -> gap.data.get("gap").selectDown(context))
+        syntax.suffixGap.create(true, new TreeBuilder(quoted).add("value", "hi").build());
+    new GeneralTestWizard(syntax, gap)
+        .run(context -> gap.fields.get("gap").selectDown(context))
         .sendText("!")
         .checkArrayTree(
-            new TreeBuilder(SyntaxRestrictedRoot.syntax.suffixGap)
-                .addArray(
-                    "value",
-                    new TreeBuilder(SyntaxRestrictedRoot.quoted).add("value", "hi").build())
+            new TreeBuilder(syntax.suffixGap)
+                .addArray("value", new TreeBuilder(quoted).add("value", "hi").build())
                 .add("gap", "!")
                 .build());
   }
@@ -4072,8 +3903,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -4081,7 +3910,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -4090,15 +3918,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -4113,12 +3938,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -4127,12 +3950,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -4141,12 +3962,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -4155,27 +3974,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -4185,8 +4006,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -4197,12 +4017,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -4212,8 +4030,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -4221,10 +4038,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -4232,12 +4047,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -4248,8 +4061,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -4263,14 +4074,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -4348,7 +4160,8 @@ public class TestDocumentGap {
                 .addArray("value", new TreeBuilder(one).build())
                 .build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "gap"))).selectDown(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
+              .selectDown(context);
           context.selection.receiveText(context, "x");
           context.selection.receiveText(context, "13");
         },
@@ -4403,8 +4216,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -4412,7 +4223,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -4421,15 +4231,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -4444,12 +4251,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -4458,12 +4263,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -4472,12 +4275,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -4486,27 +4287,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -4516,8 +4319,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -4528,12 +4330,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -4543,8 +4343,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -4552,10 +4351,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -4563,12 +4360,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -4579,8 +4374,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -4594,14 +4387,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -4679,7 +4473,8 @@ public class TestDocumentGap {
                 .addArray("value", new TreeBuilder(one).build())
                 .build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "gap"))).selectDown(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
+              .selectDown(context);
           context.selection.receiveText(context, "#");
           context.selection.receiveText(context, "e");
         },
@@ -4694,18 +4489,49 @@ public class TestDocumentGap {
 
   @Test
   public void prefix_prefixOnlyPlaceAllowedTypes() {
-    final Atom gap =
-        SyntaxRestrictedRoot.syntax.prefixGap.create(
-            new TreeBuilder(SyntaxRestrictedRoot.quoted).add("value", "hi").build());
-    new GeneralTestWizard(SyntaxRestrictedRoot.syntax, gap)
-        .run(context -> gap.data.get("gap").selectDown(context))
+    FreeAtomType one =
+        new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .autoComplete(-1)
+            .build();
+    FreeAtomType quoted =
+        new TypeBuilder("quoted")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .front(new FrontMarkBuilder("\"").build())
+            .frontDataPrimitive("value")
+            .front(new FrontMarkBuilder("\"").build())
+            .autoComplete(1)
+            .build();
+    FreeAtomType binaryBang =
+        new TypeBuilder("bang")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "one"))
+                    .add("second", Helper.buildBackDataAtom("second", "one"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("!")
+            .frontDataNode("second")
+            .autoComplete(1)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(quoted)
+            .type(one)
+            .type(binaryBang)
+            .group("restricted_group", new GroupBuilder().type(quoted).build())
+            .group("any", new GroupBuilder().type(quoted).type(binaryBang).build())
+            .build();
+
+    final Atom gap = syntax.prefixGap.create(new TreeBuilder(quoted).add("value", "hi").build());
+    new GeneralTestWizard(syntax, gap)
+        .run(context -> gap.fields.get("gap").selectDown(context))
         .sendText("!")
         .checkArrayTree(
-            new TreeBuilder(SyntaxRestrictedRoot.syntax.prefixGap)
+            new TreeBuilder(syntax.prefixGap)
                 .add("gap", "!")
-                .addArray(
-                    "value",
-                    new TreeBuilder(SyntaxRestrictedRoot.quoted).add("value", "hi").build())
+                .addArray("value", new TreeBuilder(quoted).add("value", "hi").build())
                 .build());
   }
 
@@ -4715,157 +4541,812 @@ public class TestDocumentGap {
 
   @Test
   public void suffixRaising_testRaisePrecedenceLower() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(99)
+            .build();
+    FreeAtomType factorial =
+        new TypeBuilder("factorial")
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
+            .frontDataNode("value")
+            .frontMark("!")
+            .autoComplete(99)
+            .build();
+    FreeAtomType plus =
+        new TypeBuilder("plus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("+")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType minus =
+        new TypeBuilder("minus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("-")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateBackward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType multiply =
+        new TypeBuilder("multiply")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("*")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType divide =
+        new TypeBuilder("divide")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("/")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType subscript =
+        new TypeBuilder("subscript")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("_")
+            .frontDataNode("second")
+            .precedence(0)
+            .autoComplete(99)
+            .build();
+    FreeAtomType inclusiveRange =
+        new TypeBuilder("inclusiveRange")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontMark("[")
+            .frontDataNode("first")
+            .frontMark(", ")
+            .frontDataNode("second")
+            .frontMark("]")
+            .precedence(50)
+            .autoComplete(99)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(factorial)
+            .type(plus)
+            .type(minus)
+            .type(multiply)
+            .type(divide)
+            .type(subscript)
+            .type(inclusiveRange)
+            .group("name", new GroupBuilder().type(infinity).type(subscript).build())
+            .group(
+                "any",
+                new GroupBuilder()
+                    .type(factorial)
+                    .type(plus)
+                    .type(minus)
+                    .type(multiply)
+                    .type(divide)
+                    .group("name")
+                    .type(inclusiveRange)
+                    .build())
+            .build();
+
     innerTestTransform(
-        ExpressionSyntax.syntax,
+        syntax,
         () ->
-            new TreeBuilder(ExpressionSyntax.plus)
-                .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                .add(
-                    "second",
-                    ExpressionSyntax.syntax.suffixGap.create(
-                        true, new TreeBuilder(ExpressionSyntax.infinity).build()))
+            new TreeBuilder(plus)
+                .add("first", new TreeBuilder(infinity))
+                .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "second", "gap"))).selectDown(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+              .selectDown(context);
           context.selection.receiveText(context, "*");
         },
-        new TreeBuilder(ExpressionSyntax.plus)
-            .add("first", new TreeBuilder(ExpressionSyntax.infinity))
+        new TreeBuilder(plus)
+            .add("first", new TreeBuilder(infinity))
             .add(
                 "second",
-                new TreeBuilder(ExpressionSyntax.multiply)
-                    .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                    .add("second", ExpressionSyntax.syntax.gap.create()))
+                new TreeBuilder(multiply)
+                    .add("first", new TreeBuilder(infinity))
+                    .add("second", syntax.gap.create()))
             .build());
   }
 
   @Test
   public void suffixRaising_testRaisePrecedenceEqualAfter() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(99)
+            .build();
+    FreeAtomType factorial =
+        new TypeBuilder("factorial")
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
+            .frontDataNode("value")
+            .frontMark("!")
+            .autoComplete(99)
+            .build();
+    FreeAtomType plus =
+        new TypeBuilder("plus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("+")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType minus =
+        new TypeBuilder("minus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("-")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateBackward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType multiply =
+        new TypeBuilder("multiply")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("*")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType divide =
+        new TypeBuilder("divide")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("/")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType subscript =
+        new TypeBuilder("subscript")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("_")
+            .frontDataNode("second")
+            .precedence(0)
+            .autoComplete(99)
+            .build();
+    FreeAtomType inclusiveRange =
+        new TypeBuilder("inclusiveRange")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontMark("[")
+            .frontDataNode("first")
+            .frontMark(", ")
+            .frontDataNode("second")
+            .frontMark("]")
+            .precedence(50)
+            .autoComplete(99)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(factorial)
+            .type(plus)
+            .type(minus)
+            .type(multiply)
+            .type(divide)
+            .type(subscript)
+            .type(inclusiveRange)
+            .group("name", new GroupBuilder().type(infinity).type(subscript).build())
+            .group(
+                "any",
+                new GroupBuilder()
+                    .type(factorial)
+                    .type(plus)
+                    .type(minus)
+                    .type(multiply)
+                    .type(divide)
+                    .group("name")
+                    .type(inclusiveRange)
+                    .build())
+            .build();
+
     innerTestTransform(
-        ExpressionSyntax.syntax,
+        syntax,
         () ->
-            new TreeBuilder(ExpressionSyntax.plus)
-                .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                .add(
-                    "second",
-                    ExpressionSyntax.syntax.suffixGap.create(
-                        true, new TreeBuilder(ExpressionSyntax.infinity).build()))
+            new TreeBuilder(plus)
+                .add("first", new TreeBuilder(infinity))
+                .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "second", "gap"))).selectDown(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+              .selectDown(context);
           context.selection.receiveText(context, "+");
         },
-        new TreeBuilder(ExpressionSyntax.plus)
-            .add("first", new TreeBuilder(ExpressionSyntax.infinity))
+        new TreeBuilder(plus)
+            .add("first", new TreeBuilder(infinity))
             .add(
                 "second",
-                new TreeBuilder(ExpressionSyntax.plus)
-                    .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                    .add("second", ExpressionSyntax.syntax.gap.create()))
+                new TreeBuilder(plus)
+                    .add("first", new TreeBuilder(infinity))
+                    .add("second", syntax.gap.create()))
             .build());
   }
 
   @Test
   public void suffixRaising_testRaisePrecedenceEqualBefore() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(99)
+            .build();
+    FreeAtomType factorial =
+        new TypeBuilder("factorial")
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
+            .frontDataNode("value")
+            .frontMark("!")
+            .autoComplete(99)
+            .build();
+    FreeAtomType plus =
+        new TypeBuilder("plus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("+")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType minus =
+        new TypeBuilder("minus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("-")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateBackward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType multiply =
+        new TypeBuilder("multiply")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("*")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType divide =
+        new TypeBuilder("divide")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("/")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType subscript =
+        new TypeBuilder("subscript")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("_")
+            .frontDataNode("second")
+            .precedence(0)
+            .autoComplete(99)
+            .build();
+    FreeAtomType inclusiveRange =
+        new TypeBuilder("inclusiveRange")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontMark("[")
+            .frontDataNode("first")
+            .frontMark(", ")
+            .frontDataNode("second")
+            .frontMark("]")
+            .precedence(50)
+            .autoComplete(99)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(factorial)
+            .type(plus)
+            .type(minus)
+            .type(multiply)
+            .type(divide)
+            .type(subscript)
+            .type(inclusiveRange)
+            .group("name", new GroupBuilder().type(infinity).type(subscript).build())
+            .group(
+                "any",
+                new GroupBuilder()
+                    .type(factorial)
+                    .type(plus)
+                    .type(minus)
+                    .type(multiply)
+                    .type(divide)
+                    .group("name")
+                    .type(inclusiveRange)
+                    .build())
+            .build();
+
     innerTestTransform(
-        ExpressionSyntax.syntax,
+        syntax,
         () ->
-            new TreeBuilder(ExpressionSyntax.minus)
-                .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                .add(
-                    "second",
-                    ExpressionSyntax.syntax.suffixGap.create(
-                        true, new TreeBuilder(ExpressionSyntax.infinity).build()))
+            new TreeBuilder(minus)
+                .add("first", new TreeBuilder(infinity))
+                .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "second", "gap"))).selectDown(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+              .selectDown(context);
           context.selection.receiveText(context, "-");
         },
-        new TreeBuilder(ExpressionSyntax.minus)
+        new TreeBuilder(minus)
             .add(
                 "first",
-                new TreeBuilder(ExpressionSyntax.minus)
-                    .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                    .add("second", new TreeBuilder(ExpressionSyntax.infinity)))
-            .add("second", ExpressionSyntax.syntax.gap.create())
+                new TreeBuilder(minus)
+                    .add("first", new TreeBuilder(infinity))
+                    .add("second", new TreeBuilder(infinity)))
+            .add("second", syntax.gap.create())
             .build());
   }
 
   @Test
   public void suffixRaising_testRaisePrecedenceGreater() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(99)
+            .build();
+    FreeAtomType factorial =
+        new TypeBuilder("factorial")
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
+            .frontDataNode("value")
+            .frontMark("!")
+            .autoComplete(99)
+            .build();
+    FreeAtomType plus =
+        new TypeBuilder("plus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("+")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType minus =
+        new TypeBuilder("minus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("-")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateBackward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType multiply =
+        new TypeBuilder("multiply")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("*")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType divide =
+        new TypeBuilder("divide")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("/")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType subscript =
+        new TypeBuilder("subscript")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("_")
+            .frontDataNode("second")
+            .precedence(0)
+            .autoComplete(99)
+            .build();
+    FreeAtomType inclusiveRange =
+        new TypeBuilder("inclusiveRange")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontMark("[")
+            .frontDataNode("first")
+            .frontMark(", ")
+            .frontDataNode("second")
+            .frontMark("]")
+            .precedence(50)
+            .autoComplete(99)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(factorial)
+            .type(plus)
+            .type(minus)
+            .type(multiply)
+            .type(divide)
+            .type(subscript)
+            .type(inclusiveRange)
+            .group("name", new GroupBuilder().type(infinity).type(subscript).build())
+            .group(
+                "any",
+                new GroupBuilder()
+                    .type(factorial)
+                    .type(plus)
+                    .type(minus)
+                    .type(multiply)
+                    .type(divide)
+                    .group("name")
+                    .type(inclusiveRange)
+                    .build())
+            .build();
+
     innerTestTransform(
-        ExpressionSyntax.syntax,
+        syntax,
         () ->
-            new TreeBuilder(ExpressionSyntax.multiply)
-                .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                .add(
-                    "second",
-                    ExpressionSyntax.syntax.suffixGap.create(
-                        true, new TreeBuilder(ExpressionSyntax.infinity).build()))
+            new TreeBuilder(multiply)
+                .add("first", new TreeBuilder(infinity))
+                .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "second", "gap"))).selectDown(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+              .selectDown(context);
           context.selection.receiveText(context, "+");
         },
-        new TreeBuilder(ExpressionSyntax.plus)
+        new TreeBuilder(plus)
             .add(
                 "first",
-                new TreeBuilder(ExpressionSyntax.multiply)
-                    .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                    .add("second", new TreeBuilder(ExpressionSyntax.infinity)))
-            .add("second", ExpressionSyntax.syntax.gap.create())
+                new TreeBuilder(multiply)
+                    .add("first", new TreeBuilder(infinity))
+                    .add("second", new TreeBuilder(infinity)))
+            .add("second", syntax.gap.create())
             .build());
   }
 
   @Test
   public void suffixRaising_testRaiseSkipDissimilar() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(99)
+            .build();
+    FreeAtomType plus =
+        new TypeBuilder("plus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("+")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType subscript =
+        new TypeBuilder("subscript")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "name"))
+                    .add("second", Helper.buildBackDataAtom("second", "name"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("_")
+            .frontDataNode("second")
+            .precedence(0)
+            .autoComplete(99)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(plus)
+            .type(subscript)
+            .group("name", new GroupBuilder().type(infinity).type(subscript).build())
+            .group(
+                "any",
+                new GroupBuilder()
+                    .type(plus)
+                    .group("name")
+                    .build())
+            .build();
+
     innerTestTransform(
-        ExpressionSyntax.syntax,
+        syntax,
         () ->
-            new TreeBuilder(ExpressionSyntax.subscript)
-                .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                .add(
-                    "second",
-                    ExpressionSyntax.syntax.suffixGap.create(
-                        true, new TreeBuilder(ExpressionSyntax.infinity).build()))
+            new TreeBuilder(subscript)
+                .add("first", new TreeBuilder(infinity))
+                .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "second", "gap"))).selectDown(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+              .selectDown(context);
           context.selection.receiveText(context, "+");
         },
-        new TreeBuilder(ExpressionSyntax.plus)
+        new TreeBuilder(plus)
             .add(
                 "first",
-                new TreeBuilder(ExpressionSyntax.subscript)
-                    .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                    .add("second", new TreeBuilder(ExpressionSyntax.infinity)))
-            .add("second", ExpressionSyntax.syntax.gap.create())
+                new TreeBuilder(subscript)
+                    .add("first", new TreeBuilder(infinity))
+                    .add("second", new TreeBuilder(infinity)))
+            .add("second", syntax.gap.create())
             .build());
   }
 
   @Test
   public void suffixRaising_testRaiseBounded() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(99)
+            .build();
+    FreeAtomType factorial =
+        new TypeBuilder("factorial")
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
+            .frontDataNode("value")
+            .frontMark("!")
+            .autoComplete(99)
+            .build();
+    FreeAtomType plus =
+        new TypeBuilder("plus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("+")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType minus =
+        new TypeBuilder("minus")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("-")
+            .frontDataNode("second")
+            .precedence(10)
+            .associateBackward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType multiply =
+        new TypeBuilder("multiply")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("*")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType divide =
+        new TypeBuilder("divide")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("/")
+            .frontDataNode("second")
+            .precedence(20)
+            .associateForward()
+            .autoComplete(99)
+            .build();
+    FreeAtomType subscript =
+        new TypeBuilder("subscript")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontDataNode("first")
+            .frontMark("_")
+            .frontDataNode("second")
+            .precedence(0)
+            .autoComplete(99)
+            .build();
+    FreeAtomType inclusiveRange =
+        new TypeBuilder("inclusiveRange")
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                    .build())
+            .frontMark("[")
+            .frontDataNode("first")
+            .frontMark(", ")
+            .frontDataNode("second")
+            .frontMark("]")
+            .precedence(50)
+            .autoComplete(99)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(factorial)
+            .type(plus)
+            .type(minus)
+            .type(multiply)
+            .type(divide)
+            .type(subscript)
+            .type(inclusiveRange)
+            .group("name", new GroupBuilder().type(infinity).type(subscript).build())
+            .group(
+                "any",
+                new GroupBuilder()
+                    .type(factorial)
+                    .type(plus)
+                    .type(minus)
+                    .type(multiply)
+                    .type(divide)
+                    .group("name")
+                    .type(inclusiveRange)
+                    .build())
+            .build();
+
     innerTestTransform(
-        ExpressionSyntax.syntax,
+        syntax,
         () ->
-            new TreeBuilder(ExpressionSyntax.inclusiveRange)
-                .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                .add(
-                    "second",
-                    ExpressionSyntax.syntax.suffixGap.create(
-                        true, new TreeBuilder(ExpressionSyntax.infinity).build()))
+            new TreeBuilder(inclusiveRange)
+                .add("first", new TreeBuilder(infinity))
+                .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "second", "gap"))).selectDown(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+              .selectDown(context);
           context.selection.receiveText(context, "+");
         },
-        new TreeBuilder(ExpressionSyntax.inclusiveRange)
-            .add("first", new TreeBuilder(ExpressionSyntax.infinity))
+        new TreeBuilder(inclusiveRange)
+            .add("first", new TreeBuilder(infinity))
             .add(
                 "second",
-                new TreeBuilder(ExpressionSyntax.plus)
-                    .add("first", new TreeBuilder(ExpressionSyntax.infinity))
-                    .add("second", ExpressionSyntax.syntax.gap.create()))
+                new TreeBuilder(plus)
+                    .add("first", new TreeBuilder(infinity))
+                    .add("second", syntax.gap.create()))
             .build());
   }
 
@@ -4921,8 +5402,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -4930,7 +5409,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -4939,15 +5417,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -4962,12 +5437,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -4976,12 +5449,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -4990,12 +5461,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -5004,27 +5473,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -5034,8 +5505,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -5046,12 +5516,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -5061,8 +5529,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -5070,10 +5537,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -5081,12 +5546,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -5097,8 +5560,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -5112,14 +5573,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -5193,8 +5655,10 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(array).addArray("value", syntax.gap.create()).build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "0"))).selectDown(context);
-          ((Atom) context.locateShort(new Path("0", "0"))).parent.selectUp(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "value", "0", "gap")))
+              .selectDown(context);
+          ((Atom) context.syntaxLocate(new Path("value", "0", "value", "0")))
+              .parent.selectUp(context);
         },
         new TreeBuilder(array).addArray("value").build());
   }
@@ -5247,8 +5711,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -5256,7 +5718,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -5265,15 +5726,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -5288,12 +5746,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -5302,12 +5758,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -5316,12 +5770,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -5330,27 +5782,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -5360,8 +5814,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -5372,12 +5825,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -5387,8 +5838,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -5396,10 +5846,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -5407,12 +5855,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -5423,8 +5869,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -5438,14 +5882,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -5519,9 +5964,11 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(array).addArray("value", syntax.gap.create()).build(),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "0"))).selectDown(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "value", "0", "gap")))
+              .selectDown(context);
           context.selection.receiveText(context, "urt");
-          ((ValueArray) context.locateLong(new Path("0"))).visual.selectDown(context);
+          ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
+              .visual.selectDown(context);
         },
         new TreeBuilder(array)
             .addArray("value", new TreeBuilder(syntax.gap).add("gap", "urt").build())
@@ -5576,8 +6023,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -5585,7 +6030,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -5594,15 +6038,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -5617,12 +6058,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -5631,12 +6070,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -5645,12 +6082,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -5659,27 +6094,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -5689,8 +6126,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -5701,12 +6137,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -5716,8 +6150,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -5725,10 +6158,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -5736,12 +6167,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -5752,8 +6181,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -5767,14 +6194,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -5845,19 +6273,19 @@ public class TestDocumentGap {
             .build();
 
     final Context context = buildDoc(syntax, syntax.gap.create(), syntax.gap.create());
-    ((Atom) context.locateShort(new Path("0"))).visual.selectDown(context);
-    ((Atom) context.locateShort(new Path("1"))).visual.selectDown(context);
+    ((Atom) context.syntaxLocate(new Path("value", "0"))).visual.selectDown(context);
+    ((Atom) context.syntaxLocate(new Path("value", "1"))).visual.selectDown(context);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
     assertTreeEqual(context, syntax.gap.create(), Helper.rootArray(context.document));
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "0")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "gap", "0")));
     context.history.undo(context);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(2));
     assertTreeEqual(syntax.gap.create(), Helper.rootArray(context.document).data.get(0));
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("1", "0")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "1", "gap", "0")));
     context.history.redo(context);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
     assertTreeEqual(syntax.gap.create(), Helper.rootArray(context.document).data.get(0));
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "0")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "gap", "0")));
   }
 
   @Test
@@ -5908,8 +6336,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -5917,7 +6343,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -5926,15 +6351,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -5949,12 +6371,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -5963,12 +6383,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -5977,12 +6395,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -5991,27 +6407,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -6021,8 +6439,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -6033,12 +6450,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -6048,8 +6463,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -6057,10 +6471,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -6068,12 +6480,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -6084,8 +6494,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -6099,14 +6507,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -6180,8 +6589,9 @@ public class TestDocumentGap {
         syntax,
         () -> syntax.suffixGap.create(true, new TreeBuilder(infinity).build()),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "gap"))).selectDown(context);
-          ((Atom) context.locateShort(new Path("0"))).parent.selectUp(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
+              .selectDown(context);
+          ((Atom) context.syntaxLocate(new Path("value", "0"))).parent.selectUp(context);
         },
         new TreeBuilder(infinity).build());
   }
@@ -6234,8 +6644,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -6243,7 +6651,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -6252,15 +6659,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -6275,12 +6679,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -6289,12 +6691,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -6303,12 +6703,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -6317,27 +6715,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -6347,8 +6747,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -6359,12 +6758,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -6374,8 +6771,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -6383,10 +6779,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -6394,12 +6788,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -6410,8 +6802,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -6425,14 +6815,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -6506,8 +6897,9 @@ public class TestDocumentGap {
         syntax,
         () -> syntax.prefixGap.create(new TreeBuilder(infinity).build()),
         context -> {
-          ((ValuePrimitive) context.locateLong(new Path("0", "gap"))).selectDown(context);
-          ((Atom) context.locateShort(new Path("0"))).parent.selectUp(context);
+          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
+              .selectDown(context);
+          ((Atom) context.syntaxLocate(new Path("value", "0"))).parent.selectUp(context);
         },
         new TreeBuilder(infinity).build());
   }
@@ -6563,8 +6955,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -6572,7 +6962,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -6581,15 +6970,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -6604,12 +6990,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -6618,12 +7002,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -6632,12 +7014,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -6646,27 +7026,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -6676,8 +7058,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -6688,12 +7069,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -6703,8 +7082,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -6712,10 +7090,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -6723,12 +7099,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -6739,8 +7113,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -6754,14 +7126,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -6835,7 +7208,8 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(array).addArray("value").build(),
         context -> {
-          ((ValueArray) context.locateLong(new Path("0"))).visual.selectDown(context);
+          ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
+              .visual.selectDown(context);
         },
         new TreeBuilder(array).addArray("value", syntax.gap.create()).build());
   }
@@ -6888,8 +7262,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -6897,7 +7269,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -6906,15 +7277,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -6929,12 +7297,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -6943,12 +7309,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -6957,12 +7321,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -6971,27 +7333,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -7001,8 +7365,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -7013,12 +7376,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -7028,8 +7389,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -7037,10 +7397,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -7048,12 +7406,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -7064,8 +7420,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -7079,14 +7433,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)
@@ -7160,7 +7515,8 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(restrictedArray).addArray("value").build(),
         context -> {
-          ((ValueArray) context.locateLong(new Path("0"))).visual.selectDown(context);
+          ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
+              .visual.selectDown(context);
         },
         new TreeBuilder(restrictedArray)
             .addArray("value", new TreeBuilder(quoted).add("value", "").build())
@@ -7215,8 +7571,6 @@ public class TestDocumentGap {
         new TypeBuilder("multiback")
             .back(Helper.buildBackDataPrimitive("a"))
             .back(Helper.buildBackDataPrimitive("b"))
-            .middlePrimitive("a")
-            .middlePrimitive("b")
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
@@ -7224,7 +7578,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
-            .middlePrimitive("value")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
@@ -7233,15 +7586,12 @@ public class TestDocumentGap {
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
-            .middlePrimitiveDigits("value")
-            .back(Helper.buildBackDataPrimitive("value"))
+            .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
             .autoComplete(1)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -7256,12 +7606,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+")
@@ -7270,12 +7618,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("+=")
@@ -7284,12 +7630,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first"))
-                    .add("second", Helper.buildBackDataAtom("second"))
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontDataNode("first")
             .frontMark("!")
@@ -7298,27 +7642,29 @@ public class TestDocumentGap {
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
-            .middleAtom("first", "any")
-            .back(new BackRecordBuilder().add("first", Helper.buildBackDataAtom("first")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                    .build())
             .frontDataNode("first")
             .frontMark("?")
             .autoComplete(1)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
-            .middleAtom("value", "any")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
             .frontMark("#")
             .frontDataNode("value")
             .autoComplete(1)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
-            .middlePrimitive("text")
-            .middleAtom("value", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value"))
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
                     .add("text", Helper.buildBackDataPrimitive("text"))
                     .build())
             .frontMark("x")
@@ -7328,8 +7674,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
-            .middleArray("value", "any")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "any"))
             .frontMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
@@ -7340,12 +7685,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
-            .middleArray("first", "any")
-            .middleArray("second", "any")
             .back(
                 new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first"))
-                    .add("second", Helper.buildBackDataArray("second"))
+                    .add("first", Helper.buildBackDataArray("first", "any"))
+                    .add("second", Helper.buildBackDataArray("second", "any"))
                     .build())
             .frontMark("[")
             .frontDataArray("first")
@@ -7355,8 +7698,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType record =
         new TypeBuilder("record")
-            .middleRecord("value", "record_element")
-            .back(Helper.buildBackDataRecord("value"))
+            .back(Helper.buildBackDataRecord("value", "record_element"))
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
@@ -7364,10 +7706,8 @@ public class TestDocumentGap {
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
-            .middlePrimitive("key")
-            .middleAtom("value", "any")
             .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value"))
+            .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
@@ -7375,12 +7715,10 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
-            .middleAtom("first", "any")
-            .middleAtom("second", "any")
             .back(
                 new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first"))
-                    .add(Helper.buildBackDataAtom("second"))
+                    .add(Helper.buildBackDataAtom("first", "any"))
+                    .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .frontMark("<")
             .frontDataNode("first")
@@ -7391,8 +7729,6 @@ public class TestDocumentGap {
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
-            .middlePrimitive("first")
-            .middlePrimitive("second")
             .back(
                 new BackRecordBuilder()
                     .add("first", Helper.buildBackDataPrimitive("first"))
@@ -7406,14 +7742,15 @@ public class TestDocumentGap {
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
-            .middleAtom("value", "restricted_group")
-            .back(new BackRecordBuilder().add("value", Helper.buildBackDataAtom("value")).build())
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                    .build())
             .frontDataNode("value")
             .build();
     FreeAtomType restrictedArray =
         new TypeBuilder("restricted_array")
-            .middleArray("value", "restricted_array_group")
-            .back(Helper.buildBackDataArray("value"))
+            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
             .autoComplete(1)

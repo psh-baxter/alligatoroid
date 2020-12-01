@@ -29,7 +29,7 @@ public abstract class FrontSpec {
 
   public void finish(final AtomType atomType, final Set<String> middleUsed) {}
 
-  public abstract String middle();
+  public abstract String field();
 
   public abstract void dispatch(DispatchHandler handler);
 

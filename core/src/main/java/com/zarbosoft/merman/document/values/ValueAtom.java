@@ -5,96 +5,110 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.editor.visual.visuals.VisualNested;
-import com.zarbosoft.merman.syntax.middle.MiddleAtomSpec;
-import com.zarbosoft.merman.syntax.middle.MiddleSpec;
+import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class ValueAtom extends Value {
-	public VisualNested visual;
-	private final MiddleAtomSpec middle;
-	public Atom data = null; // INVARIANT: Never null when in tree
-	public final Set<Listener> listeners = new HashSet<>();
+  public static final String SYNTAX_PATH_KEY = "atom";
+  public final Set<Listener> listeners = new HashSet<>();
+  private final BaseBackAtomSpec back;
+  public VisualNested visual;
+  public Atom data; // INVARIANT: Never null when in tree
 
-	public abstract static class Listener {
-		public abstract void set(Context context, Atom atom);
-	}
+  public ValueAtom(final BaseBackAtomSpec back, final Atom data) {
+    this.back = back;
+    this.data = data;
+    if (data != null) data.setParent(new NodeParent());
+  }
 
-	public class NodeParent extends Parent {
-		@Override
-		public void replace(final Context context, final Atom atom) {
-			context.history.apply(context, new ChangeNodeSet(ValueAtom.this, atom));
-		}
+  public void addListener(final Listener listener) {
+    listeners.add(listener);
+  }
 
-		@Override
-		public void delete(final Context context) {
-			context.history.apply(context, new ChangeNodeSet(ValueAtom.this, context.syntax.gap.create()));
-		}
+  public void removeListener(final Listener listener) {
+    listeners.remove(listener);
+  }
 
-		@Override
-		public String childType() {
-			return middle.type;
-		}
+  public Atom get() {
+    return data;
+  }
 
-		@Override
-		public Value value() {
-			return ValueAtom.this;
-		}
+  @Override
+  public BaseBackAtomSpec back() {
+    return back;
+  }
 
-		@Override
-		public String id() {
-			return middle.id;
-		}
+  @Override
+  public boolean selectDown(final Context context) {
+    select(context);
+    return true;
+  }
 
-		@Override
-		public Path path() {
-			return ValueAtom.this.getPath();
-		}
+  @Override
+  public Object syntaxLocateStep(String segment) {
+    if (!SYNTAX_PATH_KEY.equals(segment)) return null;
+    return data;
+  }
 
-		@Override
-		public boolean selectUp(final Context context) {
-			select(context);
-			return true;
-		}
-	}
+  public void select(final Context context) {
+    if (context.window) {
+      if (visual == null || data.visual == null) {
+        context.createWindowForSelection(this, context.syntax.ellipsizeThreshold);
+      }
+    }
+    visual.select(context);
+  }
 
-	public ValueAtom(final MiddleAtomSpec middle, final Atom data) {
-		this.middle = middle;
-		this.data = data;
-		if (data != null)
-			data.setParent(new NodeParent());
-	}
+  public abstract static class Listener {
+    public abstract void set(Context context, Atom atom);
+  }
 
-	@Override
-	public boolean selectDown(final Context context) {
-		select(context);
-		return true;
-	}
+  public class NodeParent extends Parent {
+    @Override
+    public void replace(final Context context, final Atom atom) {
+      context.history.apply(context, new ChangeNodeSet(ValueAtom.this, atom));
+    }
 
-	public void select(final Context context) {
-		if (context.window) {
-			if (visual == null || data.visual == null) {
-				context.createWindowForSelection(this, context.syntax.ellipsizeThreshold);
-			}
-		}
-		visual.select(context);
-	}
+    @Override
+    public void delete(final Context context) {
+      context.history.apply(
+          context, new ChangeNodeSet(ValueAtom.this, context.syntax.gap.create()));
+    }
 
-	public void addListener(final Listener listener) {
-		listeners.add(listener);
-	}
+    @Override
+    public String childType() {
+      return back.type;
+    }
 
-	public void removeListener(final Listener listener) {
-		listeners.remove(listener);
-	}
+    @Override
+    public Value value() {
+      return ValueAtom.this;
+    }
 
-	public Atom get() {
-		return data;
-	}
+    @Override
+    public String id() {
+      return back.id;
+    }
 
-	@Override
-	public MiddleSpec middle() {
-		return middle;
-	}
+    @Override
+    public Path path() {
+      return ValueAtom.this.getSyntaxPath();
+    }
+
+    @Override
+    public boolean selectUp(final Context context) {
+      select(context);
+      return true;
+    }
+
+    @Override
+    public Path getSyntaxPath() {
+      Path out;
+      if (parent == null) out = new Path();
+      else out = parent.getSyntaxPath();
+      return out.add(SYNTAX_PATH_KEY);
+    }
+  }
 }

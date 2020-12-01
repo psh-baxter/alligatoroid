@@ -28,14 +28,16 @@ public class TestActionsArray {
                 .build());
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "enter");
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "0", "value")));
+    assertThat(
+        context.selection.getSyntaxPath(),
+        equalTo(new Path("value", "0", "value", "0", "value")));
   }
 
   public Context build(final Atom... atoms) {
     final Context context =
         buildDoc(
             MiscSyntax.syntax, new TreeBuilder(MiscSyntax.array).addArray("value", atoms).build());
-    ((ValueArray) Helper.rootArray(context.document).data.get(0).data.get("value"))
+    ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.get("value"))
         .selectDown(context);
     return context;
   }
@@ -53,7 +55,7 @@ public class TestActionsArray {
                 .build());
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "exit");
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0")));
   }
 
   @Test
@@ -70,8 +72,8 @@ public class TestActionsArray {
         .run(
             context ->
                 assertThat(
-                    context.selection.getPath().toList(),
-                    equalTo(ImmutableList.of("0", "second", "0"))));
+                    context.selection.getSyntaxPath(),
+                    equalTo(new Path("value", "0", "second", "0"))));
   }
 
   @Test
@@ -88,8 +90,8 @@ public class TestActionsArray {
         .run(
             context ->
                 assertThat(
-                    context.selection.getPath().toList(),
-                    equalTo(ImmutableList.of("0", "first", "0"))));
+                    context.selection.getSyntaxPath(),
+                    equalTo(new Path("value", "0", "first", "0"))));
   }
 
   @Test
@@ -97,7 +99,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "next_element");
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "3")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "3")));
   }
 
   public Context buildFive() {
@@ -128,7 +130,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 4);
     Helper.act(context, "next_element");
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "4")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "4")));
   }
 
   @Test
@@ -136,7 +138,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "previous_element");
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "1")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "1")));
   }
 
   @Test
@@ -152,7 +154,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "previous_element");
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "0")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "0")));
   }
 
   @Test
@@ -199,7 +201,8 @@ public class TestActionsArray {
   public void testReleaseNext() {
     final Context context = buildFive();
     ((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual)
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual)
         .select(context, true, 2, 3);
     Helper.act(context, "release_next");
     final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
@@ -221,7 +224,8 @@ public class TestActionsArray {
   public void testReleasePrevious() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "release_previous");
     final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
@@ -243,7 +247,8 @@ public class TestActionsArray {
   public void testDelete() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "delete");
     assertTreeEqual(
@@ -256,14 +261,15 @@ public class TestActionsArray {
                 new TreeBuilder(MiscSyntax.five).build())
             .build(),
         Helper.rootArray(context.document));
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "1")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "1")));
   }
 
   @Test
   public void testInsertBefore() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "insert_before");
     assertTreeEqual(
@@ -279,7 +285,9 @@ public class TestActionsArray {
                 new TreeBuilder(MiscSyntax.five).build())
             .build(),
         Helper.rootArray(context.document));
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "1", "0")));
+    assertThat(
+        context.selection.getSyntaxPath(),
+        equalTo(new Path("value", "0", "value", "1", "gap", "0")));
   }
 
   @Test
@@ -288,7 +296,7 @@ public class TestActionsArray {
         new TreeBuilder(MiscSyntax.restrictedArray)
             .addArray("value", new TreeBuilder(MiscSyntax.quoted).add("value", "").build())
             .build();
-    final ValueArray value = (ValueArray) atom.data.get("value");
+    final ValueArray value = (ValueArray) atom.fields.get("value");
     new GeneralTestWizard(MiscSyntax.syntax, atom)
         .run(context -> value.select(context, true, 0, 0))
         .act("insert_before")
@@ -302,15 +310,16 @@ public class TestActionsArray {
         .run(
             context ->
                 assertThat(
-                    context.selection.getPath().toList(),
-                    equalTo(ImmutableList.of("0", "0", "0"))));
+                    context.selection.getSyntaxPath(),
+                    equalTo(new Path("value", "0", "value", "0", "value", "0"))));
   }
 
   @Test
   public void testInsertAfter() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "insert_after");
     assertTreeEqual(
@@ -326,7 +335,9 @@ public class TestActionsArray {
                 new TreeBuilder(MiscSyntax.five).build())
             .build(),
         Helper.rootArray(context.document));
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "3", "0")));
+    assertThat(
+        context.selection.getSyntaxPath(),
+        equalTo(new Path("value", "0", "value", "3", "gap", "0")));
   }
 
   @Test
@@ -335,7 +346,7 @@ public class TestActionsArray {
         new TreeBuilder(MiscSyntax.restrictedArray)
             .addArray("value", new TreeBuilder(MiscSyntax.quoted).add("value", "").build())
             .build();
-    final ValueArray value = (ValueArray) atom.data.get("value");
+    final ValueArray value = (ValueArray) atom.fields.get("value");
     new GeneralTestWizard(MiscSyntax.syntax, atom)
         .run(context -> value.select(context, true, 0, 0))
         .act("insert_after")
@@ -349,15 +360,16 @@ public class TestActionsArray {
         .run(
             context ->
                 assertThat(
-                    context.selection.getPath().toList(),
-                    equalTo(ImmutableList.of("0", "1", "0"))));
+                    context.selection.getSyntaxPath(),
+                    equalTo(new Path("value", "0", "value", "1", "value", "0"))));
   }
 
   @Test
   public void testMoveBefore() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "move_before");
     assertTreeEqual(
@@ -381,7 +393,8 @@ public class TestActionsArray {
   public void testMoveBeforeStart() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 0, 1);
     Helper.act(context, "move_before");
     assertTreeEqual(
@@ -405,7 +418,8 @@ public class TestActionsArray {
   public void testMoveAfter() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "move_after");
     assertTreeEqual(
@@ -429,7 +443,8 @@ public class TestActionsArray {
   public void testMoveAfterEnd() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 3, 4);
     Helper.act(context, "move_after");
     assertTreeEqual(
@@ -454,7 +469,8 @@ public class TestActionsArray {
     final Context context = buildFive();
     final VisualArray visual =
         ((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual);
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual);
     visual.select(context, true, 1, 2);
     Helper.act(context, "copy");
     visual.select(context, true, 4, 4);
@@ -475,14 +491,15 @@ public class TestActionsArray {
     final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
     assertThat(selection.beginIndex, equalTo(5));
     assertThat(selection.endIndex, equalTo(5));
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "5")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "5")));
   }
 
   @Test
   public void testCutPaste() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "cut");
     {
@@ -491,7 +508,8 @@ public class TestActionsArray {
       assertThat(selection.endIndex, equalTo(1));
     }
     (((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual))
         .select(context, true, 2, 2);
     Helper.act(context, "paste");
     assertTreeEqual(
@@ -510,7 +528,7 @@ public class TestActionsArray {
       assertThat(selection.beginIndex, equalTo(3));
       assertThat(selection.endIndex, equalTo(3));
     }
-    assertThat(context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "3")));
+    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "3")));
   }
 
   @Test
@@ -518,7 +536,8 @@ public class TestActionsArray {
     final Context context = buildFive();
     final VisualArray visual =
         ((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual);
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual);
     visual.select(context, true, 1, 1);
     Helper.act(context, "prefix");
     assertTreeEqual(
@@ -534,7 +553,8 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(context.document));
     assertThat(
-        context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "1", "gap", "0")));
+        context.selection.getSyntaxPath(),
+        equalTo(new Path("value", "0", "value", "1", "gap", "0")));
   }
 
   @Test
@@ -542,7 +562,8 @@ public class TestActionsArray {
     final Context context = buildFive();
     final VisualArray visual =
         ((VisualArray)
-            ((ValueArray) ((Atom) context.locateShort(new Path("0"))).data.get("value")).visual);
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+                .visual);
     visual.select(context, true, 1, 1);
     Helper.act(context, "suffix");
     assertTreeEqual(
@@ -558,6 +579,7 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(context.document));
     assertThat(
-        context.selection.getPath().toList(), equalTo(ImmutableList.of("0", "1", "gap", "0")));
+        context.selection.getSyntaxPath(),
+        equalTo(new Path("value", "0", "value", "1", "gap", "0")));
   }
 }

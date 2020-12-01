@@ -10,18 +10,10 @@ import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.middle.MiddleArraySpec;
-import com.zarbosoft.merman.syntax.middle.MiddleAtomSpec;
-import com.zarbosoft.merman.syntax.middle.MiddlePrimitiveSpec;
-import com.zarbosoft.merman.syntax.middle.MiddleRecordSpec;
-import com.zarbosoft.merman.syntax.primitivepattern.Digits;
-import com.zarbosoft.merman.syntax.primitivepattern.Letters;
-import com.zarbosoft.merman.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class TypeBuilder {
   private final FreeAtomType type;
@@ -31,7 +23,6 @@ public class TypeBuilder {
     type.id = id;
     type.name = id;
     type.back = new ArrayList<>();
-    type.middle = new HashMap<>();
     type.front = new ArrayList<>();
   }
 
@@ -70,7 +61,7 @@ public class TypeBuilder {
 
   public TypeBuilder frontDataPrimitive(final String middle) {
     final FrontPrimitiveSpec part = new FrontPrimitiveSpec();
-    part.middle = middle;
+    part.field = middle;
     type.front.add(part);
     return this;
   }
@@ -86,55 +77,6 @@ public class TypeBuilder {
     final FrontSymbol part = new FrontSymbol();
     part.type = new SymbolSpaceSpec();
     type.front.add(part);
-    return this;
-  }
-
-  public TypeBuilder middlePrimitive(final String id) {
-    final MiddlePrimitiveSpec middle = new MiddlePrimitiveSpec();
-    middle.id = id;
-    this.type.middle.put(id, middle);
-    return this;
-  }
-
-  public TypeBuilder middlePrimitiveLetters(final String id) {
-    final MiddlePrimitiveSpec middle = new MiddlePrimitiveSpec();
-    middle.id = id;
-    middle.pattern = new Repeat1();
-    ((Repeat1) middle.pattern).pattern = new Letters();
-    this.type.middle.put(id, middle);
-    return this;
-  }
-
-  public TypeBuilder middlePrimitiveDigits(final String id) {
-    final MiddlePrimitiveSpec middle = new MiddlePrimitiveSpec();
-    middle.id = id;
-    middle.pattern = new Repeat1();
-    ((Repeat1) middle.pattern).pattern = new Digits();
-    this.type.middle.put(id, middle);
-    return this;
-  }
-
-  public TypeBuilder middleAtom(final String id, final String type) {
-    final MiddleAtomSpec middle = new MiddleAtomSpec();
-    middle.type = type;
-    middle.id = id;
-    this.type.middle.put(id, middle);
-    return this;
-  }
-
-  public TypeBuilder middleArray(final String id, final String type) {
-    final MiddleArraySpec middle = new MiddleArraySpec();
-    middle.type = type;
-    middle.id = id;
-    this.type.middle.put(id, middle);
-    return this;
-  }
-
-  public TypeBuilder middleRecord(final String id, final String type) {
-    final MiddleRecordSpec middle = new MiddleRecordSpec();
-    middle.type = type;
-    middle.id = id;
-    this.type.middle.put(id, middle);
     return this;
   }
 

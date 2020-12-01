@@ -22,12 +22,13 @@ import com.zarbosoft.merman.editor.visual.tags.FreeTag;
 import com.zarbosoft.merman.editor.visual.tags.PartTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
+import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.middle.MiddleArraySpecBase;
-import com.zarbosoft.merman.syntax.middle.MiddleAtomSpec;
-import com.zarbosoft.merman.syntax.middle.MiddlePrimitiveSpec;
+import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
+import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.primitivepattern.Pattern;
 import com.zarbosoft.merman.syntax.style.BoxStyle;
 import com.zarbosoft.merman.syntax.style.Style;
@@ -36,9 +37,7 @@ import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.bytes.BytesHelper;
 import com.zarbosoft.pidgoon.bytes.ParseBuilder;
 import com.zarbosoft.pidgoon.bytes.Position;
-import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
-import com.zarbosoft.pidgoon.nodes.Wildcard;
 import com.zarbosoft.pidgoon.parse.Parse;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.DeadCode;
@@ -48,7 +47,6 @@ import org.pcollections.PSet;
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -60,7 +58,7 @@ import static com.zarbosoft.rendaw.common.Common.enumerate;
 import static com.zarbosoft.rendaw.common.Common.iterable;
 
 public abstract class FrontGapBase extends FrontSpec {
-  private MiddlePrimitiveSpec dataType;
+  private BaseBackPrimitiveSpec dataType;
 
   protected static List<GapKey> gapKeys(
       final Syntax syntax, final FreeAtomType type, final AtomType childType) {
@@ -83,7 +81,7 @@ public abstract class FrontGapBase extends FrontSpec {
                       front.prefix.forEach(front2 -> front2.dispatch(this));
                       flush(
                           !isTypeAllowed(
-                              ((MiddleArraySpecBase) type.middle.get(front.middle())).type));
+                              ((BaseBackArraySpec) type.fields.get(front.field())).type));
                       front.suffix.forEach(front2 -> front2.dispatch(this));
                     }
 
@@ -109,7 +107,7 @@ public abstract class FrontGapBase extends FrontSpec {
                     @Override
                     public void handle(final FrontDataAtom front) {
                       flush(
-                          !isTypeAllowed(((MiddleAtomSpec) type.middle.get(front.middle())).type));
+                          !isTypeAllowed(((BaseBackAtomSpec) type.fields.get(front.field())).type));
                     }
 
                     @Override
@@ -144,12 +142,12 @@ public abstract class FrontGapBase extends FrontSpec {
 
   @Override
   public void finish(final AtomType atomType, final Set<String> middleUsed) {
-    middleUsed.add(middle());
-    this.dataType = atomType.getDataPrimitive(middle());
+    middleUsed.add(field());
+    this.dataType = atomType.getDataPrimitive(field());
   }
 
   @Override
-  public String middle() {
+  public String field() {
     return "gap";
   }
 
@@ -199,8 +197,8 @@ public abstract class FrontGapBase extends FrontSpec {
             text = ((SymbolTextSpec) ((FrontSymbol) part).type).text;
           out.add(BytesHelper.stringSequence(text));
         } else if (part instanceof FrontPrimitiveSpec) {
-          final MiddlePrimitiveSpec middle =
-            (MiddlePrimitiveSpec) type.middle.get(((FrontPrimitiveSpec) part).middle);
+          final BaseBackPrimitiveSpec middle =
+              (BaseBackPrimitiveSpec) type.fields.get(((FrontPrimitiveSpec) part).field);
           out.add((middle.pattern == null ? Pattern.repeatedAny : middle.pattern).build());
         } else throw new DeadCode();
       }
@@ -212,8 +210,8 @@ public abstract class FrontGapBase extends FrontSpec {
       final Iterator<FrontSpec> frontIterator = keyParts.iterator();
 
       // Parse string into primitive parts
-      final Set<String> filled = new HashSet<>(type.middle.keySet());
-      final Map<String, Value> data = new HashMap<>();
+      final Set<String> filled = new HashSet<>(type.fields.keySet());
+      final TSMap<String, Value> data = new TSMap<>();
       int at = 0;
       for (final FrontSpec front : iterable(frontIterator)) {
         final Grammar grammar = new Grammar();
@@ -223,10 +221,10 @@ public abstract class FrontGapBase extends FrontSpec {
             text = ((SymbolTextSpec) ((FrontSymbol) front).type).text;
           grammar.add("root", BytesHelper.stringSequence(text));
         } else if (front instanceof FrontPrimitiveSpec) {
-          final MiddlePrimitiveSpec middle =
-            (MiddlePrimitiveSpec) type.middle.get(((FrontPrimitiveSpec) front).middle);
+          final BaseBackPrimitiveSpec middle =
+              (BaseBackPrimitiveSpec) type.fields.get(((FrontPrimitiveSpec) front).field);
           grammar.add(
-            "root", (middle.pattern == null ? Pattern.repeatedAny : middle.pattern).build());
+              "root", (middle.pattern == null ? Pattern.repeatedAny : middle.pattern).build());
         } else throw new DeadCode();
         final Pair<Parse, Position> longest =
             new ParseBuilder<>()
@@ -236,18 +234,18 @@ public abstract class FrontGapBase extends FrontSpec {
                         string.substring(at).getBytes(StandardCharsets.UTF_8)));
         if (front instanceof FrontPrimitiveSpec) {
           data.put(
-              front.middle(),
+              front.field(),
               new ValuePrimitive(
-                  type.getDataPrimitive(front.middle()),
+                  type.getDataPrimitive(front.field()),
                   string.substring(at, at + (int) longest.second.absolute)));
-          filled.remove(front.middle());
+          filled.remove(front.field());
           out.nextInput = front;
         } else out.nextInput = null;
         at = at + (int) longest.second.absolute;
         if (at >= string.length()) break;
       }
       if (at < string.length()) out.nextInput = null;
-      filled.forEach(middle -> data.put(middle, type.middle.get(middle).create(context.syntax)));
+      filled.forEach(middle -> data.put(middle, type.fields.get(middle).create(context.syntax)));
       out.remainder = string.substring(at);
       out.atom = new Atom(type, data);
 
@@ -270,7 +268,7 @@ public abstract class FrontGapBase extends FrontSpec {
   }
 
   public class GapVisualPrimitive extends VisualPrimitive {
-    private final Map<String, Value> data;
+    private final TSMap<String, Value> data;
 
     public GapVisualPrimitive(
         final Context context,
@@ -282,7 +280,7 @@ public abstract class FrontGapBase extends FrontSpec {
       super(
           context,
           parent,
-          FrontGapBase.this.dataType.get(atom.data),
+          FrontGapBase.this.dataType.get(atom.fields),
           tags.plus(new PartTag("gap"))
               .plusAll(
                   FrontGapBase.this.tags.stream()
@@ -290,7 +288,7 @@ public abstract class FrontGapBase extends FrontSpec {
                       .collect(Collectors.toSet())),
           visualDepth,
           depthScore);
-      this.data = atom.data;
+      this.data = atom.fields;
     }
 
     @Override

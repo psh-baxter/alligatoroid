@@ -2,10 +2,10 @@ package com.zarbosoft.merman.syntax;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.Value;
+import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
-import com.zarbosoft.merman.syntax.middle.MiddleSpec;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,7 +15,6 @@ import java.util.Map;
 public class RootAtomType extends AtomType {
   public List<FrontSpec> front = new ArrayList<>();
   public List<BackSpec> back = new ArrayList<>();
-  public Map<String, MiddleSpec> middle = new HashMap<>();
   public Map<String, AlignmentDefinition> alignments = new HashMap<>();
 
   @Override
@@ -44,11 +43,6 @@ public class RootAtomType extends AtomType {
   }
 
   @Override
-  public Map<String, MiddleSpec> middle() {
-    return middle;
-  }
-
-  @Override
   public List<BackSpec> back() {
     return back;
   }
@@ -64,8 +58,8 @@ public class RootAtomType extends AtomType {
   }
 
   public Atom create(final Syntax syntax) {
-    final Map<String, Value> data = new HashMap<>();
-    middle.entrySet().stream().forEach(e -> data.put(e.getKey(), e.getValue().create(syntax)));
+    final TSMap<String, Value> data = new TSMap<>();
+    fields.entrySet().stream().forEach(e -> data.put(e.getKey(), e.getValue().create(syntax)));
     return new Atom(this, data);
   }
 }

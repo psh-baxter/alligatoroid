@@ -3,78 +3,60 @@ package com.zarbosoft.merman.document.values;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.syntax.back.BackKeySpec;
-import com.zarbosoft.merman.syntax.middle.MiddleArraySpec;
-import com.zarbosoft.merman.syntax.middle.MiddleSpec;
-import com.zarbosoft.merman.syntax.middle.MiddleRecordSpec;
+import com.zarbosoft.merman.syntax.back.BackSpecData;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.Pair;
 
 public abstract class Value {
-	public Atom.Parent parent = null;
+  public Atom.Parent parent = null;
 
-	public void setParent(final Atom.Parent parent) {
-		this.parent = parent;
-	}
+  public void setParent(final Atom.Parent parent) {
+    this.parent = parent;
+  }
 
-	public abstract MiddleSpec middle();
+  public abstract BackSpecData back();
 
-	final public Path getPath() {
-		final Atom atom = parent.atom();
-		if (atom.parent == null)
-			return new Path();
-		final Pair<Integer, Path> subpath = atom.type.getBackPart(middle().id).getSubpath();
-		final Value parentValue = atom.parent.value();
-		final Path parentPath = parentValue.getPath();
-		if (atom.parent.value().middle() instanceof MiddleArraySpec) {
-			final com.zarbosoft.merman.document.values.ValueArray.ArrayParent arrayParent =
-					(com.zarbosoft.merman.document.values.ValueArray.ArrayParent) atom.parent;
-			return parentPath.add(String.valueOf(arrayParent.actualIndex + subpath.first)).add(subpath.second);
-		} else if (atom.parent.value().middle() instanceof MiddleRecordSpec) {
-			final String key = (
-					(com.zarbosoft.merman.document.values.ValuePrimitive) atom.data.get((
-							(BackKeySpec) atom.type.back().get(0)
-					).middle)
-			).get();
-			return parentPath.add(key).add(subpath.second);
-		} else {
-			return parentPath.add(subpath.second);
-		}
-	}
+  public final Path getSyntaxPath() {
+    if (parent == null) return new Path();
+    else return parent.getSyntaxPath();
+  }
 
-	public abstract boolean selectDown(Context context);
+  public abstract boolean selectDown(Context context);
 
-	public abstract class Parent {
+  public abstract Object syntaxLocateStep(String segment);
 
-		/**
-		 * Replace the child with a new atom.  (Creates history)
-		 *
-		 * @param context
-		 * @param atom
-		 */
-		public abstract void replace(Context context, Atom atom);
+  public abstract class Parent {
 
-		/**
-		 * Remove the element if an array.  (Creates history)
-		 *
-		 * @param context
-		 */
-		public void delete(final Context context) {
-			throw new DeadCode();
-		}
+    /**
+     * Replace the child with a new atom. (Creates history)
+     *
+     * @param context
+     * @param atom
+     */
+    public abstract void replace(Context context, Atom atom);
 
-		public abstract String childType();
+    /**
+     * Remove the element if an array. (Creates history)
+     *
+     * @param context
+     */
+    public void delete(final Context context) {
+      throw new DeadCode();
+    }
 
-		public Value value() {
-			return Value.this;
-		}
+    public abstract String childType();
 
-		public String id() {
-			return middle().id;
-		}
+    public Value value() {
+      return Value.this;
+    }
 
-		public abstract Path path();
+    public String id() {
+      return back().id;
+    }
 
-		public abstract boolean selectUp(final Context context);
-	}
+    public abstract Path path();
+
+    public abstract boolean selectUp(final Context context);
+
+    public abstract Path getSyntaxPath();
+  }
 }

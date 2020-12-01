@@ -16,7 +16,7 @@ public abstract class Selection {
 
 	public abstract SelectionState saveState();
 
-	public abstract Path getPath();
+	public abstract Path getSyntaxPath();
 
 	public void tagsChanged(
 			final Context context

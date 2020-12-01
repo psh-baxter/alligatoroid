@@ -9,9 +9,6 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.document.InvalidDocument;
 import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.banner.Banner;
 import com.zarbosoft.merman.editor.details.Details;
 import com.zarbosoft.merman.editor.display.Display;
@@ -31,17 +28,14 @@ import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Wall;
 import com.zarbosoft.merman.modules.Module;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.back.*;
 import com.zarbosoft.merman.syntax.front.FrontGapBase;
-import com.zarbosoft.merman.syntax.middle.MiddleArraySpec;
-import com.zarbosoft.merman.syntax.middle.MiddleRecordSpec;
 import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.WeakCache;
 import org.pcollections.HashTreePSet;
 import org.pcollections.PSet;
-import org.pcollections.TreePVector;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -212,159 +206,20 @@ public class Context {
 		ImmutableList.copyOf(selectionTagsChangeListeners).forEach(listener -> listener.tagsChanged(this));
 	}
 
-	public Object locateLong(final Path path) {
-		return locate(path, true);
-	}
-
-	public Object locateShort(final Path path) {
-		return locate(path, false);
-	}
-
-	/**
-	 * Locate a Node or Value from a path.  If the path ends between those two, the last valid value
-	 * is returned.  If the path references an invalid location InvalidPath is thrown.
-	 * <p>
-	 * If goLong is true, find the deepest element that resolves with this path.  If false, the shallowest.
-	 *
-	 * @param path
-	 * @return
-	 */
-	public Object locate(final Path path, final boolean goLong) {
-		int pathIndex = -1;
-		final List<String> segments = ImmutableList.copyOf(path.segments);
-		// Either (value) or (atom & part) are always set
-		Value value = null;
-		Atom atom = document.root;
-		BackSpec part = document.root.type.back().get(0);
-		for (int cycle = 0; cycle < 10000; ++cycle) {
-			if (part != null) {
-				// Process from either the root or a sublevel of a atom
-				String middle = null;
-				while (true) {
-					if (part instanceof BackFixedArraySpec) {
-						pathIndex += 1;
-						if (pathIndex == segments.size())
-							return atom;
-						final String segment = segments.get(pathIndex);
-						final int tempPathIndex = pathIndex;
-						final int subIndex;
-						try {
-							subIndex = Integer.parseInt(segment);
-						} catch (final NumberFormatException e) {
-							throw new InvalidPath(String.format("Segment [%s] at [%s] is not an integer.",
-									segment,
-									new Path(TreePVector.from(segments.subList(0, tempPathIndex)))
-							));
-						}
-						final BackFixedArraySpec arrayPart = ((BackFixedArraySpec) part);
-						if (subIndex >= arrayPart.elements.size())
-							throw new InvalidPath(String.format("Invalid index %d at [%s].",
-									subIndex,
-									new Path(TreePVector.from(segments.subList(0, tempPathIndex)))
-							));
-						part = arrayPart.elements.get(subIndex);
-					} else if (part instanceof BackFixedRecordSpec) {
-						pathIndex += 1;
-						if (pathIndex >= segments.size())
-							return atom;
-						final String segment = segments.get(pathIndex);
-						final int tempPathIndex = pathIndex;
-						final BackFixedRecordSpec recordPart = ((BackFixedRecordSpec) part);
-						if (!recordPart.pairs.containsKey(segment))
-							throw new InvalidPath(String.format("Invalid key [%s] at [%s].",
-									segment,
-									new Path(TreePVector.from(segments.subList(0, pathIndex)))
-							));
-						part = recordPart.pairs.get(segment);
-					} else if (part instanceof BackArraySpec) {
-						middle = ((BackArraySpec) part).middle;
-						break;
-					} else if (part instanceof BackRootArraySpec) {
-						middle = ((BackRootArraySpec) part).middle;
-						break;
-					} else if (part instanceof BackKeySpec) {
-						middle = ((BackKeySpec) part).middle;
-						break;
-					} else if (part instanceof BackAtomSpec) {
-						middle = ((BackAtomSpec) part).middle;
-						break;
-					} else if (part instanceof BackTypeSpec) {
-						middle = ((BackTypeSpec) part).type;
-						part = ((BackFixedTypeSpec) part).value;
-						break;
-					} else if (part instanceof BackPrimitiveSpec) {
-						middle = ((BackPrimitiveSpec) part).middle;
-						break;
-					} else if (part instanceof BackRecordSpec) {
-						middle = ((BackRecordSpec) part).middle;
-						break;
-					} else if (part instanceof BackFixedTypeSpec) {
-						part = ((BackFixedTypeSpec) part).value;
-					} else
-						return atom;
-				}
-				value = atom.data.get(middle);
-				if (!goLong && pathIndex + 1 == segments.size() && value != null)
-					return value;
-				part = null;
-				atom = null;
-			} else {
-				// Start from a value
-				if (value instanceof ValueArray) {
-					pathIndex += 1;
-					if (pathIndex == segments.size())
-						return value;
-					final int tempPathIndex = pathIndex;
-					final String segment = segments.get(pathIndex);
-					if (((ValueArray) value).middle() instanceof MiddleRecordSpec) {
-						atom = ((ValueArray) value).data.stream().filter(child -> (
-								(ValuePrimitive) child.data.get((
-										(BackKeySpec) child.type.back().get(0)
-								).middle)
-						).get().equals(segment)).findFirst().orElseThrow(() -> new InvalidPath(String.format(
-								"Invalid key %s at [%s].",
-								segment,
-								new Path(TreePVector.from(segments.subList(0, tempPathIndex)))
-						)));
-						if (!goLong && pathIndex + 1 == segments.size())
-							return atom;
-						part = atom.type.back().get(1);
-					} else if (((ValueArray) value).middle() instanceof MiddleArraySpec) {
-						final int index;
-						try {
-							index = Integer.parseInt(segment);
-						} catch (final NumberFormatException e) {
-							throw new InvalidPath(String.format("Segment [%s] at [%s] is not an integer.",
-									segment,
-									new Path(TreePVector.from(segments.subList(0, pathIndex)))
-							));
-						}
-						atom = ((ValueArray) value).data.stream().filter(child -> (
-								((ValueArray.ArrayParent) child.parent).actualIndex <= index
-						)).reduce((a, b) -> b).orElseThrow(() -> new InvalidPath(String.format(
-								"Invalid index %d at [%s].",
-								index,
-								new Path(TreePVector.from(segments.subList(0, tempPathIndex)))
-						)));
-						if (!goLong && pathIndex + 1 == segments.size())
-							return atom;
-						part = atom.type.back().get(index - ((ValueArray.ArrayParent) atom.parent).actualIndex);
-					}
-				} else if (value instanceof ValueAtom) {
-					atom = ((ValueAtom) value).get();
-					part = atom.type.back().get(0);
-				} else if (value instanceof ValuePrimitive) {
-					if (segments.size() > pathIndex + 1)
-						throw new InvalidPath(String.format("Path continues but data ends at primitive [%s].",
-								new Path(TreePVector.from(segments.subList(0, pathIndex)))
-						));
-					return value;
-				} else
-					throw new AssertionError();
-				value = null;
-			}
-		}
-		throw new AssertionError("Path locate did not complete in a reasonable number of iterations.");
+  public Object syntaxLocate(final Path path) {
+    Object at = document.root;
+	  for (int i = 0; i < path.segments.size(); ++i) {
+      String segment = path.segments.get(i);
+      if (at instanceof Atom) {
+        at = ((Atom)at).syntaxLocateStep(segment);
+        if (at == null) throw new InvalidPath(path.segments.subList(0, i), path.segments);
+      } else if (at instanceof Value) {
+        at = ((Value)at).syntaxLocateStep(segment);
+        if (at == null) throw new InvalidPath(path.segments.subList(0, i), path.segments);
+      } else
+        throw new Assertion();
+    }
+	  return at;
 	}
 
 	public abstract static class SelectionListener {

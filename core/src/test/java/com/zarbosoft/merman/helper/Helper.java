@@ -16,6 +16,7 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.merman.editor.history.History;
+import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.syntax.back.BackAtomSpec;
@@ -26,7 +27,10 @@ import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.syntax.back.BackRootArraySpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
-import com.zarbosoft.merman.syntax.middle.MiddleArraySpecBase;
+import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.syntax.primitivepattern.Digits;
+import com.zarbosoft.merman.syntax.primitivepattern.Letters;
+import com.zarbosoft.merman.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.rendaw.common.DeadCode;
 import org.junit.ComparisonFailure;
 
@@ -61,12 +65,12 @@ public class Helper {
           writer.type(value.type.id().getBytes(StandardCharsets.UTF_8));
           writer.recordBegin();
           value
-              .data
+              .fields
               .keySet()
               .forEach(
                   k ->
                       dump(
-                          value.data.get(k),
+                          value.fields.get(k),
                           uncheck(() -> writer.key(k.getBytes(StandardCharsets.UTF_8)))));
           writer.recordEnd();
         });
@@ -101,39 +105,61 @@ public class Helper {
     return back;
   }
 
-  public static BackSpec buildBackDataAtom(final String middle) {
+  public static BackSpec buildBackDataAtom(final String id, String type) {
     final BackAtomSpec back = new BackAtomSpec();
-    back.middle = middle;
+    back.id = id;
+    back.type = type;
     return back;
   }
 
-  public static BackSpec buildBackDataPrimitive(final String middle) {
+  public static BackSpec buildBackDataPrimitive(final String id) {
     final BackPrimitiveSpec back = new BackPrimitiveSpec();
-    back.middle = middle;
+    back.id = id;
     return back;
   }
 
-  public static BackSpec buildBackDataRecord(final String middle) {
+  public static BackSpec buildBackDataPrimitiveLetters(final String id) {
+    final BackPrimitiveSpec back = new BackPrimitiveSpec();
+    back.id = id;
+    back.pattern = new Repeat1();
+    ((Repeat1) back.pattern).pattern = new Letters();
+    back.matcher = back.pattern.new Matcher();
+    return back;
+  }
+
+  public static BackSpec buildBackDataPrimitiveDigits(final String id) {
+    final BackPrimitiveSpec back = new BackPrimitiveSpec();
+    back.id = id;
+    back.pattern = new Repeat1();
+    ((Repeat1) back.pattern).pattern = new Digits();
+    back.matcher = back.pattern.new Matcher();
+    return back;
+  }
+
+  public static BackSpec buildBackDataRecord(final String id, String type) {
     final BackRecordSpec back = new BackRecordSpec();
-    back.middle = middle;
+    back.id = id;
+    back.type = type;
     return back;
   }
 
-  public static BackSpec buildBackDataKey(final String middle) {
+  public static BackKeySpec buildBackDataKey(final String id) {
     final BackKeySpec back = new BackKeySpec();
-    back.middle = middle;
+    back.id = id;
     return back;
   }
 
-  public static BackSpec buildBackDataArray(final String middle) {
+  public static BackArraySpec buildBackDataArray(final String id, String type) {
     final BackArraySpec back = new BackArraySpec();
-    back.middle = middle;
+    back.id = id;
+    back.type = type;
     return back;
   }
 
-  public static BackSpec buildBackDataRootArray(final String middle) {
+  public static BackRootArraySpec buildBackDataRootArray(final String id, String type) {
     final BackRootArraySpec back = new BackRootArraySpec();
-    back.middle = middle;
+    back.id = id;
+    back.type = type;
     return back;
   }
 
@@ -142,22 +168,22 @@ public class Helper {
       throw new AssertionError(
           String.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
-              expected.type, got.type, got.getPath()));
-    final Set<String> expectedKeys = expected.data.keySet();
-    final Set<String> gotKeys = got.data.keySet();
+              expected.type, got.type, got.getSyntaxPath()));
+    final Set<String> expectedKeys = expected.fields.keySet();
+    final Set<String> gotKeys = got.fields.keySet();
     {
       final Set<String> missing = Sets.difference(expectedKeys, gotKeys);
       if (!missing.isEmpty())
         throw new AssertionError(
-            String.format("Missing fields: %s\nAt: %s", missing, got.getPath()));
+            String.format("Missing fields: %s\nAt: %s", missing, got.getSyntaxPath()));
     }
     {
       final Set<String> extra = Sets.difference(gotKeys, expectedKeys);
       if (!extra.isEmpty())
-        throw new AssertionError(String.format("Unknown fields: %s\nAt: %s", extra, got.getPath()));
+        throw new AssertionError(String.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
     }
     for (final String key : Sets.intersection(expectedKeys, gotKeys)) {
-      assertTreeEqual(expected.data.get(key), got.data.get(key));
+      assertTreeEqual(expected.fields.get(key), got.fields.get(key));
     }
   }
 
@@ -169,7 +195,7 @@ public class Helper {
         throw new AssertionError(
             String.format(
                 "Array length mismatch.\nExpected: %s\nGot: %s\nAt: %s",
-                expectedValue.data.size(), gotValue.data.size(), got.getPath()));
+                expectedValue.data.size(), gotValue.data.size(), got.getSyntaxPath()));
       zip(expectedValue.data.stream(), gotValue.data.stream())
           .forEach(pair -> assertTreeEqual(pair.first, pair.second));
     } else if (expected.getClass() == ValueAtom.class) {
@@ -181,26 +207,26 @@ public class Helper {
       final ValuePrimitive gotValue = (ValuePrimitive) got;
       if (!expectedValue.get().equals(gotValue.get()))
         throw new ComparisonFailure(
-            String.format("Array length mismatch.\nAt: %s", got.getPath()),
+            String.format("Array length mismatch.\nAt: %s", got.getSyntaxPath()),
             expectedValue.get(),
             gotValue.get());
     } else
       throw new AssertionError(
           String.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
-              expected.getClass(), got.getClass(), got.getPath()));
+              expected.getClass(), got.getClass(), got.getSyntaxPath()));
   }
 
   public static void assertTreeEqual(final Context context, final Atom expected, final Value got) {
     assertTreeEqual(
         new ValueArray(
-            (MiddleArraySpecBase) context.syntax.root.middle.get("value"),
+            (BaseBackArraySpec) context.syntax.root.fields.get("value"),
             ImmutableList.of(expected)),
         got);
   }
 
   public static ValueArray rootArray(final Document doc) {
-    return (ValueArray) doc.root.data.get("value");
+    return (ValueArray) doc.root.fields.get("value");
   }
 
   public static Context buildDoc(final Syntax syntax, final Atom... root) {
@@ -217,11 +243,12 @@ public class Helper {
             syntax,
             new Atom(
                 syntax.root,
-                ImmutableMap.of(
-                    "value",
-                    new ValueArray(
-                        (MiddleArraySpecBase) syntax.root.middle.get("value"),
-                        Arrays.asList(root)))));
+                new TSMap<>(
+                    ImmutableMap.of(
+                        "value",
+                        new ValueArray(
+                            (BaseBackArraySpec) syntax.root.fields.get("value"),
+                            Arrays.asList(root))))));
     final Context context =
         new Context(
             syntax,

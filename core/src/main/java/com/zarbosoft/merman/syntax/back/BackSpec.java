@@ -1,20 +1,23 @@
 package com.zarbosoft.merman.syntax.back;
 
+import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Path;
+import com.zarbosoft.merman.editor.serialization.Write;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.Pair;
 
-import java.util.Set;
+import java.util.Deque;
+import java.util.Map;
 
 public abstract class BackSpec {
   public Parent parent = null;
 
   public abstract Node buildBackRule(Syntax syntax, AtomType atomType);
 
-  public void finish(final Syntax syntax, final AtomType atomType, final Set<String> middleUsed) {}
+  public void finish(final Syntax syntax, final AtomType atomType, final Map<String, BackSpecData> fields) {}
 
   public final Pair<Integer, Path> getSubpath() {
     if (parent instanceof AtomType.NodeBackParent)
@@ -25,6 +28,10 @@ public abstract class BackSpec {
       return new Pair<>(base.first, section == null ? base.second : base.second.add(section));
     } else throw new DeadCode();
   }
+
+  public abstract void write(
+    Deque<Write.WriteState> stack, Atom base, Write.EventConsumer writer
+  );
 
   public abstract static class Parent {}
 

@@ -5,7 +5,7 @@ public class FrontFixedArraySpec extends FrontArraySpecBase {
   public String middle;
 
   @Override
-  public String middle() {
+  public String field() {
     return middle;
   }
 }

@@ -5,11 +5,11 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectOpenEvent;
+import com.zarbosoft.merman.editor.serialization.Write;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.InvalidSyntax;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.middle.MiddleRecordSpec;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
@@ -20,16 +20,14 @@ import com.zarbosoft.rendaw.common.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.iterable;
 import static com.zarbosoft.rendaw.common.Common.last;
 
-public class BackRecordSpec extends BackSpec {
-
-  public String middle;
-
+public class BackRecordSpec extends BaseBackArraySpec {
   @Override
   public Node buildBackRule(final Syntax syntax, final AtomType atomType) {
     final Sequence sequence;
@@ -38,9 +36,7 @@ public class BackRecordSpec extends BackSpec {
     sequence.add(StackStore.prepVarStack);
     sequence.add(
         new Repeat(
-            new Sequence()
-                .add(syntax.backRuleRef(atomType.getDataArray(middle).type))
-                .add(StackStore.pushVarStackSingle)));
+            new Sequence().add(syntax.backRuleRef(type)).add(StackStore.pushVarStackSingle)));
     sequence.add(new MatchingEventTerminal(new EObjectCloseEvent()));
     return new Operator<StackStore>(sequence) {
       @Override
@@ -48,17 +44,17 @@ public class BackRecordSpec extends BackSpec {
         final List<Atom> temp = new ArrayList<>();
         store = store.popVarSingleList(temp);
         Collections.reverse(temp);
-        final ValueArray value = new ValueArray(atomType.getDataArray(middle), temp);
-        return store.stackSingleElement(new Pair<>(middle, value));
+        final ValueArray value = new ValueArray(BackRecordSpec.this, temp);
+        return store.stackSingleElement(new Pair<>(id, value));
       }
     };
   }
 
   @Override
-  public void finish(final Syntax syntax, final AtomType atomType, final Set<String> middleUsed) {
-    middleUsed.add(middle);
-    final MiddleRecordSpec dataType = atomType.getDataRecord(middle);
-    for (final FreeAtomType element : iterable(syntax.getLeafTypes(dataType.type))) {
+  public void finish(
+      final Syntax syntax, final AtomType atomType, final Map<String, BackSpecData> fields) {
+    fields.put(id, this);
+    for (final FreeAtomType element : iterable(syntax.getLeafTypes(type))) {
       if (element.back.size() < 1) finishThrow(element);
       if (!(element.back.get(0) instanceof BackKeySpec)) finishThrow(element);
       if (element.back.size() >= 2 && element.back.size() <= 3) {
@@ -69,6 +65,13 @@ public class BackRecordSpec extends BackSpec {
           finishThrow(element);
       } else finishThrow(element);
     }
+  }
+
+  @Override
+  public void write(Deque<Write.WriteState> stack, Atom base, Write.EventConsumer writer) {
+    writer.recordBegin();
+    stack.addLast(new Write.WriteStateRecordEnd());
+    stack.addLast(new Write.WriteStateDataArray(((ValueArray) base.fields.get(id))));
   }
 
   private static void finishThrow(final AtomType type) {

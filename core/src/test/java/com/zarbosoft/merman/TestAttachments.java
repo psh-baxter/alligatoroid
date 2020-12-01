@@ -33,7 +33,6 @@ public class TestAttachments {
 
 	static {
 		text = new TypeBuilder("text")
-				.middlePrimitive("value")
 				.back(Helper.buildBackDataPrimitive("value"))
 				.frontDataPrimitive("value")
 				.build();
@@ -140,7 +139,7 @@ public class TestAttachments {
 	@Test
 	public void testPrimitiveRemoveAttachments() {
 		final Atom textAtom = new TreeBuilder(text).add("value", "hi\ndog").build();
-		final ValuePrimitive value = (ValuePrimitive) textAtom.data.get("value");
+		final ValuePrimitive value = (ValuePrimitive) textAtom.fields.get("value");
 		final Common.Mutable<Brick> lastBrick = new Common.Mutable<>(null);
 		final Attachment listener = new Attachment() {
 			@Override
@@ -159,7 +158,7 @@ public class TestAttachments {
 	@Test
 	public void testPrimitiveExpandAttachments() {
 		final Atom textAtom = new TreeBuilder(text).add("value", "higgs dogoid").build();
-		final ValuePrimitive value = (ValuePrimitive) textAtom.data.get("value");
+		final ValuePrimitive value = (ValuePrimitive) textAtom.fields.get("value");
 		final Common.Mutable<Brick> lastBrick = new Common.Mutable<>(null);
 		final Attachment listener = new Attachment() {
 			@Override

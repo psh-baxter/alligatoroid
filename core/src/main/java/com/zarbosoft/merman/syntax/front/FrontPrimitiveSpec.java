@@ -11,7 +11,7 @@ import com.zarbosoft.merman.editor.visual.tags.PartTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
 import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.middle.MiddlePrimitiveSpec;
+import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import org.pcollections.HashTreePSet;
 import org.pcollections.PSet;
 
@@ -22,9 +22,9 @@ import java.util.stream.Collectors;
 
 public class FrontPrimitiveSpec extends FrontSpec {
 
-  public String middle;
+  public String field;
   private Set<String> tags = new HashSet<>();
-  private MiddlePrimitiveSpec dataType;
+  private BaseBackPrimitiveSpec dataType;
 
   @Override
   public Visual createVisual(
@@ -38,7 +38,7 @@ public class FrontPrimitiveSpec extends FrontSpec {
     return new VisualPrimitive(
         context,
         parent,
-        dataType.get(atom.data),
+        dataType.get(atom.fields),
         HashTreePSet.from(tags)
             .plus(new PartTag("primitive"))
             .plusAll(this.tags.stream().map(s -> new FreeTag(s)).collect(Collectors.toSet())),
@@ -48,13 +48,13 @@ public class FrontPrimitiveSpec extends FrontSpec {
 
   @Override
   public void finish(final AtomType atomType, final Set<String> middleUsed) {
-    middleUsed.add(middle);
-    this.dataType = atomType.getDataPrimitive(middle);
+    middleUsed.add(field);
+    this.dataType = atomType.getDataPrimitive(field);
   }
 
   @Override
-  public String middle() {
-    return middle;
+  public String field() {
+    return field;
   }
 
   @Override

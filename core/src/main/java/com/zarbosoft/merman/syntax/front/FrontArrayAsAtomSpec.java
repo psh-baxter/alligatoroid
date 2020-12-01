@@ -10,7 +10,7 @@ import com.zarbosoft.merman.editor.visual.tags.PartTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.visual.visuals.VisualNestedFromArray;
 import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.middle.MiddleArraySpec;
+import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import org.pcollections.HashTreePSet;
 import org.pcollections.PSet;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class FrontArrayAsAtomSpec extends FrontSpec {
 
   public String middle;
-  private MiddleArraySpec dataType;
+  private BaseBackArraySpec dataType;
 
   @Override
   public Visual createVisual(
@@ -36,7 +36,7 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
     return new VisualNestedFromArray(
         context,
         parent,
-        dataType.get(atom.data),
+        dataType.get(atom.fields),
         HashTreePSet.from(tags)
             .plus(new PartTag("nested"))
             .plusAll(this.tags.stream().map(s -> new FreeTag(s)).collect(Collectors.toSet())),
@@ -54,11 +54,11 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
   @Override
   public void finish(final AtomType atomType, final Set<String> middleUsed) {
     middleUsed.add(middle);
-    dataType = (MiddleArraySpec) atomType.getDataArray(middle);
+    dataType = (BaseBackArraySpec) atomType.getDataArray(middle);
   }
 
   @Override
-  public String middle() {
+  public String field() {
     return middle;
   }
 

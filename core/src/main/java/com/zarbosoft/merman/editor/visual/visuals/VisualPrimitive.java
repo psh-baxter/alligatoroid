@@ -15,7 +15,6 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.Selection;
 import com.zarbosoft.merman.editor.SelectionState;
 import com.zarbosoft.merman.editor.display.Font;
-import com.zarbosoft.merman.editor.display.derived.Obbox;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
@@ -58,7 +57,6 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
   // INVARIANT: Always at least one line
   // TODO index line offsets for faster insert/remove
   private final ValuePrimitive.Listener dataListener;
-  private final Obbox border = null;
   private final ValuePrimitive value;
   private final BrickStyle brickStyle;
   public VisualParent parent;
@@ -132,7 +130,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
             if (remainder != null) line.setText(context, line.text + remainder);
 
             // Renumber/adjust offset of following lines
-            renumber(context, index, movingOffset);
+            renumber(index, movingOffset);
 
             if (selection != null) {
               final int newBegin;
@@ -258,7 +256,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     canExpand = false;
   }
 
-  private void renumber(final Context context, int index, int offset) {
+  private void renumber(int index, int offset) {
     for (; index < lines.size(); ++index) {
       final Line line = lines.get(index);
       if (line.hard) offset += 1;
@@ -280,7 +278,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     return tags.plus(new StateTag("hard"));
   }
 
-  protected Stream<Action> getActions(final Context context) {
+  protected Stream<Action> getActions() {
     return Stream.of();
   }
 
@@ -300,7 +298,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     return new PrimitiveSelection(context, leadFirst, beginOffset, endOffset);
   }
 
-  protected void commit(final Context context) {}
+  protected void commit() {}
 
   public void idleResplit(final Context context) {
     if (idleResplit == null && canExpand) {
@@ -542,8 +540,6 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     Integer firstLineCreated = null;
     Integer lastLineCreated = null;
     if (build.hasText()) {
-      final Brick priorBrick = lines.get(j - 1).brick;
-
       firstLineCreated = j;
       while (build.hasText()) {
         final Line line = new Line(false);
@@ -573,7 +569,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     // Cleanup
-    renumber(context, j, build.offset);
+    renumber(j, build.offset);
 
     if (firstLineCreated != null) {
       idleLayBricks(context, firstLineCreated, lastLineCreated - firstLineCreated);
@@ -855,7 +851,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
       if (endLine != null && endLine.brick != null) listener.lastChanged(context, endLine.brick);
     }
 
-    public void removeListener(final Context context, final BoundsListener listener) {
+    public void removeListener(final BoundsListener listener) {
       listeners.remove(listener);
     }
 
@@ -936,7 +932,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
                       new ActionReleasePreviousWord(),
                       new ActionReleasePreviousLineStart(),
                       new ActionReleasePreviousLine(beginOffset)),
-                  VisualPrimitive.this.getActions(context))
+                  VisualPrimitive.this.getActions())
               .collect(Collectors.toList()));
     }
 
@@ -1008,7 +1004,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
       context.removeActions(this);
       range.destroy(context);
       selection = null;
-      commit(context);
+      commit();
       value.removeListener(clusterListener);
     }
 
@@ -1027,7 +1023,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
             final Value.Parent parent = atomVisual().atom.parent;
             final Atom gap = context.syntax.suffixGap.create(true, atomVisual().atom);
             parent.replace(context, gap);
-            gap.data.get("gap").selectDown(context);
+            gap.fields.get("gap").selectDown(context);
             context.selection.receiveText(context, text);
           }
           return;
@@ -1051,8 +1047,8 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
-    public Path getPath() {
-      return value.getPath().add(String.valueOf(range.beginOffset));
+    public Path getSyntaxPath() {
+      return value.getSyntaxPath().add(String.valueOf(range.beginOffset));
     }
 
     @Override

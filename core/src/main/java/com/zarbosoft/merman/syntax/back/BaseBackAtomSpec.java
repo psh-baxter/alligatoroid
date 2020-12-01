@@ -1,17 +1,17 @@
-package com.zarbosoft.merman.syntax.middle;
+package com.zarbosoft.merman.syntax.back;
 
+import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.InvalidSyntax;
 import com.zarbosoft.merman.syntax.Syntax;
 
-import java.util.Map;
 import java.util.Set;
 
-public class MiddleAtomSpec extends MiddleSpec {
-
+public abstract class BaseBackAtomSpec extends BackSpecData{
   public String type;
 
-  public ValueAtom get(final Map<String, com.zarbosoft.merman.document.values.Value> data) {
+  public ValueAtom get(final TSMap<String, Value> data) {
     return (ValueAtom) data.get(id);
   }
 

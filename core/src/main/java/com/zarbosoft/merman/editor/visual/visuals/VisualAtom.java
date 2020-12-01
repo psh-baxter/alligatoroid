@@ -71,7 +71,7 @@ public class VisualAtom extends Visual {
 			final FrontSpec front = pair.second;
 			final Visual visual = pair.second.createVisual(
 					context,
-					front.middle() == null ?
+					front.field() == null ?
 							new ChildParent(index) :
 							new SelectableChildParent(index, selectable.size()),
 					atom,
@@ -81,7 +81,7 @@ public class VisualAtom extends Visual {
 					this.depthScore
 			);
 			children.add(visual);
-			if (front.middle() != null)
+			if (front.field() != null)
 				selectable.add(visual);
 		}
 		atom.visual = this;

@@ -9,10 +9,12 @@ import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
 import com.zarbosoft.merman.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.syntax.front.FrontDataAtom;
 import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
@@ -20,8 +22,6 @@ import com.zarbosoft.merman.syntax.front.FrontGapBase;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.middle.MiddlePrimitiveSpec;
-import com.zarbosoft.merman.syntax.middle.MiddleSpec;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.bytes.ParseBuilder;
 import com.zarbosoft.pidgoon.bytes.Position;
@@ -46,38 +46,30 @@ import java.util.stream.Stream;
 import static com.zarbosoft.rendaw.common.Common.iterable;
 
 public class GapAtomType extends AtomType {
-  private final MiddlePrimitiveSpec dataGap;
+  private final BaseBackPrimitiveSpec gapSpec;
   private final List<BackSpec> back;
-  private final Map<String, MiddleSpec> middle;
   public List<FrontSymbol> frontPrefix = new ArrayList<>();
   public List<FrontSymbol> frontSuffix = new ArrayList<>();
   private List<FrontSpec> front;
 
   public GapAtomType() {
-    {
-      final BackPrimitiveSpec backPrimitiveSpec = new BackPrimitiveSpec();
-      backPrimitiveSpec.middle = "gap";
-      final BackFixedTypeSpec backType = new BackFixedTypeSpec();
-      backType.type = "__gap";
-      backType.value = backPrimitiveSpec;
-      back = ImmutableList.of(backType);
-    }
-    {
-      dataGap = new MiddlePrimitiveSpec();
-      dataGap.id = "gap";
-      middle = ImmutableMap.of("gap", dataGap);
-    }
+    gapSpec = new BackPrimitiveSpec();
+    gapSpec.id = "gap";
+    final BackFixedTypeSpec backType = new BackFixedTypeSpec();
+    backType.type = "__gap";
+    backType.value = gapSpec;
+    back = ImmutableList.of(backType);
   }
 
   public Value findSelectNext(final Context context, final Atom atom, boolean skipFirstNode) {
     if (atom.type == context.syntax.gap
         || atom.type == context.syntax.prefixGap
-        || atom.type == context.syntax.suffixGap) return atom.data.get("gap");
+        || atom.type == context.syntax.suffixGap) return atom.fields.get("gap");
     for (final FrontSpec front : atom.type.front()) {
       if (front instanceof FrontPrimitiveSpec) {
-        return atom.data.get(((FrontPrimitiveSpec) front).middle);
+        return atom.fields.get(((FrontPrimitiveSpec) front).field);
       } else if (front instanceof FrontGapBase) {
-        return atom.data.get(middle());
+        return atom.fields.get(front.field());
       } else if (front instanceof FrontDataAtom) {
         if (skipFirstNode) {
           skipFirstNode = false;
@@ -85,12 +77,12 @@ public class GapAtomType extends AtomType {
           final Value found =
               findSelectNext(
                   context,
-                  ((ValueAtom) atom.data.get(((FrontDataAtom) front).middle)).get(),
+                  ((ValueAtom) atom.fields.get(((FrontDataAtom) front).middle)).get(),
                   skipFirstNode);
           if (found != null) return found;
         }
       } else if (front instanceof FrontFixedArraySpec) {
-        final ValueArray array = (ValueArray) atom.data.get(((FrontFixedArraySpec) front).middle);
+        final ValueArray array = (ValueArray) atom.fields.get(((FrontFixedArraySpec) front).middle);
         if (array.data.isEmpty()) {
           if (skipFirstNode) {
             skipFirstNode = false;
@@ -174,17 +166,17 @@ public class GapAtomType extends AtomType {
                     if (key.indexAfter == -1) {
                       // No such place exists - wrap the placement atom in a suffix gap
                       root = context.syntax.suffixGap.create(true, atom);
-                      selectNext = (ValuePrimitive) root.data.get("gap");
+                      selectNext = (ValuePrimitive) root.fields.get("gap");
                     } else {
                       nextWhatever = type.front.get(key.indexAfter);
                     }
                   } else nextWhatever = parsed.nextInput;
                   if (selectNext == null) {
                     if (nextWhatever instanceof FrontDataAtom) {
-                      selectNext = atom.data.get(nextWhatever.middle());
+                      selectNext = atom.fields.get(nextWhatever.field());
                     } else if (nextWhatever instanceof FrontPrimitiveSpec
                         || nextWhatever instanceof FrontArraySpecBase) {
-                      selectNext = atom.data.get(nextWhatever.middle());
+                      selectNext = atom.fields.get(nextWhatever.field());
                     } else throw new DeadCode();
                   }
 
@@ -296,11 +288,6 @@ public class GapAtomType extends AtomType {
   }
 
   @Override
-  public Map<String, MiddleSpec> middle() {
-    return middle;
-  }
-
-  @Override
   public List<BackSpec> back() {
     return back;
   }
@@ -316,6 +303,6 @@ public class GapAtomType extends AtomType {
   }
 
   public Atom create() {
-    return new Atom(this, ImmutableMap.of("gap", new ValuePrimitive(dataGap, "")));
+    return new Atom(this, new TSMap<>(ImmutableMap.of("gap", new ValuePrimitive(gapSpec, ""))));
   }
 }

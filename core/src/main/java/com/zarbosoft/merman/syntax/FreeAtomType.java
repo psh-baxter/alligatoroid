@@ -1,12 +1,9 @@
 package com.zarbosoft.merman.syntax;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
 import com.zarbosoft.merman.syntax.back.BackRootArraySpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
-import com.zarbosoft.merman.syntax.middle.MiddleSpec;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,7 +17,6 @@ public class FreeAtomType extends AtomType {
   public int depthScore = 0;
   public List<FrontSpec> front = new ArrayList<>();
   public List<BackSpec> back = new ArrayList<>();
-  public Map<String, MiddleSpec> middle = new HashMap<>();
   public Map<String, AlignmentDefinition> alignments = new HashMap<>();
   public int precedence = Integer.MAX_VALUE;
   public boolean associateForward = false;
@@ -67,11 +63,6 @@ public class FreeAtomType extends AtomType {
   }
 
   @Override
-  public Map<String, MiddleSpec> middle() {
-    return middle;
-  }
-
-  @Override
   public List<BackSpec> back() {
     return back;
   }
@@ -84,11 +75,5 @@ public class FreeAtomType extends AtomType {
   @Override
   public String name() {
     return name;
-  }
-
-  public Atom create(final Syntax syntax) {
-    final Map<String, Value> data = new HashMap<>();
-    middle.entrySet().stream().forEach(e -> data.put(e.getKey(), e.getValue().create(syntax)));
-    return new Atom(this, data);
   }
 }
