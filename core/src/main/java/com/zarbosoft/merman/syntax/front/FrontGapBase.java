@@ -6,6 +6,7 @@ import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.details.DetailsPage;
 import com.zarbosoft.merman.editor.display.Blank;
 import com.zarbosoft.merman.editor.display.DisplayNode;
@@ -79,9 +80,9 @@ public abstract class FrontGapBase extends FrontSpec {
                     @Override
                     public void handle(final FrontArraySpecBase front) {
                       front.prefix.forEach(front2 -> front2.dispatch(this));
-                      flush(
-                          !isTypeAllowed(
-                              ((BaseBackArraySpec) type.fields.get(front.field())).type));
+                      BaseBackArraySpec backArray =
+                          ((BaseBackArraySpec) type.fields.get(front.field()));
+                      flush(!isTypeAllowed(backArray.elementAtomType()));
                       front.suffix.forEach(front2 -> front2.dispatch(this));
                     }
 
@@ -101,7 +102,7 @@ public abstract class FrontGapBase extends FrontSpec {
                           || childType == syntax.gap
                           || childType == syntax.prefixGap
                           || childType == syntax.suffixGap
-                          || syntax.getLeafTypes(type).anyMatch(t -> t.equals(childType));
+                          || syntax.getLeafTypes(type).stream().anyMatch(t -> t.equals(childType));
                     }
 
                     @Override
@@ -141,9 +142,10 @@ public abstract class FrontGapBase extends FrontSpec {
   }
 
   @Override
-  public void finish(final AtomType atomType, final Set<String> middleUsed) {
+  public void finish(
+      List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
     middleUsed.add(field());
-    this.dataType = atomType.getDataPrimitive(field());
+    this.dataType = atomType.getDataPrimitive(errors, typePath, field());
   }
 
   @Override
@@ -233,10 +235,10 @@ public abstract class FrontGapBase extends FrontSpec {
                     new ByteArrayInputStream(
                         string.substring(at).getBytes(StandardCharsets.UTF_8)));
         if (front instanceof FrontPrimitiveSpec) {
-          data.put(
+          data.putNew(
               front.field(),
               new ValuePrimitive(
-                  type.getDataPrimitive(front.field()),
+                  ((FrontPrimitiveSpec) front).dataType,
                   string.substring(at, at + (int) longest.second.absolute)));
           filled.remove(front.field());
           out.nextInput = front;
@@ -245,7 +247,7 @@ public abstract class FrontGapBase extends FrontSpec {
         if (at >= string.length()) break;
       }
       if (at < string.length()) out.nextInput = null;
-      filled.forEach(middle -> data.put(middle, type.fields.get(middle).create(context.syntax)));
+      filled.forEach(middle -> data.putNew(middle, type.fields.get(middle).create(context.syntax)));
       out.remainder = string.substring(at);
       out.atom = new Atom(type, data);
 

@@ -282,7 +282,7 @@ public class TestLayoutGeneral {
   public void testDynamicWrapLayout() {
     final Atom text = new TreeBuilder(this.text).add("value", "123").build();
     new GeneralTestWizard(syntax, text)
-        .run(context -> text.fields.get("value").selectDown(context))
+        .run(context -> text.fields.getOpt("value").selectDown(context))
         .resize(40)
         .run(context -> context.selection.receiveText(context, "4"))
         .checkCourseCount(1)
@@ -302,9 +302,9 @@ public class TestLayoutGeneral {
   @Test
   public void testDynamicUnwrapLayout() {
     final Atom text = new TreeBuilder(this.text).add("value", "123456").build();
-    final ValuePrimitive primitive = (ValuePrimitive) text.fields.get("value");
+    final ValuePrimitive primitive = (ValuePrimitive) text.fields.getOpt("value");
     new GeneralTestWizard(syntax, text)
-        .run(context -> text.fields.get("value").selectDown(context))
+        .run(context -> text.fields.getOpt("value").selectDown(context))
         .resize(40)
         .run(context -> context.history.apply(context, new ChangePrimitiveRemove(primitive, 5, 1)))
         .checkCourseCount(2)
@@ -327,7 +327,7 @@ public class TestLayoutGeneral {
     new GeneralTestWizard(syntax, gap)
         .run(
             context -> {
-              gap.fields.get("gap").selectDown(context);
+              gap.fields.getOpt("gap").selectDown(context);
               context.selection.receiveText(context, "[");
             })
         .checkTextBrick(0, 0, "[")

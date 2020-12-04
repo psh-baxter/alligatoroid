@@ -42,7 +42,7 @@ public class TestPrimitivePatterns {
   public void testQuotedAllowed() {
     final Atom atom = new TreeBuilder(quoted).add("value", "").build();
     new GeneralTestWizard(syntax, atom)
-        .run(context -> atom.fields.get("value").selectDown(context))
+        .run(context -> atom.fields.getOpt("value").selectDown(context))
         .sendText("a")
         .checkArrayTree(new TreeBuilder(quoted).add("value", "a").build());
   }
@@ -51,7 +51,7 @@ public class TestPrimitivePatterns {
   public void testQuotedDisallowed() {
     final Atom atom = new TreeBuilder(quoted).add("value", "").build();
     new GeneralTestWizard(syntax, atom)
-        .run(context -> atom.fields.get("value").selectDown(context))
+        .run(context -> atom.fields.getOpt("value").selectDown(context))
         .sendText("1")
         .checkArrayTree(new TreeBuilder(quoted).add("value", "").build());
   }
@@ -60,7 +60,7 @@ public class TestPrimitivePatterns {
   public void testDisallowedSuffix() {
     final Atom atom = new TreeBuilder(unquoted).add("value", "").build();
     new GeneralTestWizard(syntax, atom)
-        .run(context -> atom.fields.get("value").selectDown(context))
+        .run(context -> atom.fields.getOpt("value").selectDown(context))
         .sendText("1")
         .checkArrayTree(
             new TreeBuilder(syntax.suffixGap)

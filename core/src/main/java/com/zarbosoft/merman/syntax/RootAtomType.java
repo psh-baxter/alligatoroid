@@ -5,6 +5,7 @@ import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
 import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.merman.syntax.back.BackSpecData;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 
 import java.util.ArrayList;
@@ -48,18 +49,20 @@ public class RootAtomType extends AtomType {
   }
 
   @Override
-  public String id() {
-    return "root";
-  }
-
-  @Override
   public String name() {
     return "root array";
   }
 
+  @Override
+  public String id() {
+    return "root";
+  }
+
   public Atom create(final Syntax syntax) {
     final TSMap<String, Value> data = new TSMap<>();
-    fields.entrySet().stream().forEach(e -> data.put(e.getKey(), e.getValue().create(syntax)));
+    for (Map.Entry<String, BackSpecData> e : fields.entries()) {
+      data.putNew(e.getKey(), e.getValue().create(syntax));
+    }
     return new Atom(this, data);
   }
 }

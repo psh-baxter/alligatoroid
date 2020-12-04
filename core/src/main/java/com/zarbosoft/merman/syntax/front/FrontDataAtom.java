@@ -2,6 +2,7 @@ package com.zarbosoft.merman.syntax.front;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
@@ -15,6 +16,7 @@ import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import org.pcollections.PSet;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -51,9 +53,11 @@ public class FrontDataAtom extends FrontSpec {
   }
 
   @Override
-  public void finish(final AtomType atomType, final Set<String> middleUsed) {
+  public void finish(
+    List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed
+  ) {
     middleUsed.add(middle);
-    dataType = atomType.getDataNode(middle);
+    dataType = atomType.getDataAtom(errors, typePath, middle);
   }
 
   @Override

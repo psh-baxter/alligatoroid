@@ -322,7 +322,7 @@ public class TestLayoutAlignment {
   @Test
   public void testDynamicSecondShiftOut() {
     final Atom line2 = new TreeBuilder(pair).add("first", "c").add("second", "d").build();
-    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.get("first");
+    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.getOpt("first");
     new GeneralTestWizard(
             syntax, new TreeBuilder(pair).add("first", "a").add("second", "b").build(), line2)
         .run(context -> context.history.apply(context, new ChangePrimitiveAdd(line2_1, 1, "cc")))
@@ -332,7 +332,7 @@ public class TestLayoutAlignment {
   @Test
   public void testDynamicFirstShiftOut() {
     final Atom line = new TreeBuilder(pair).add("first", "a").add("second", "b").build();
-    final ValuePrimitive text = (ValuePrimitive) line.fields.get("first");
+    final ValuePrimitive text = (ValuePrimitive) line.fields.getOpt("first");
     new GeneralTestWizard(
             syntax, line, new TreeBuilder(pair).add("first", "c").add("second", "d").build())
         .run(context -> context.history.apply(context, new ChangePrimitiveAdd(text, 1, "aa")))
@@ -342,7 +342,7 @@ public class TestLayoutAlignment {
   @Test
   public void testDynamicShiftIn() {
     final Atom line2 = new TreeBuilder(pair).add("first", "ccccc").add("second", "d").build();
-    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.get("first");
+    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.getOpt("first");
     new GeneralTestWizard(
             syntax, new TreeBuilder(pair).add("first", "a").add("second", "b").build(), line2)
         .run(context -> context.history.apply(context, new ChangePrimitiveRemove(line2_1, 1, 4)))
@@ -397,7 +397,7 @@ public class TestLayoutAlignment {
   @Test
   public void testConcensusSameLineDynamicAdd() {
     final Atom line2 = new TreeBuilder(pair).add("first", "").add("second", "d").build();
-    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.get("first");
+    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.getOpt("first");
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(line)
@@ -417,7 +417,7 @@ public class TestLayoutAlignment {
         new TreeBuilder(line)
             .addArray("value", new TreeBuilder(pair).add("first", "ccc").add("second", "d").build())
             .build();
-    final ValueArray array = (ValueArray) line2.fields.get("value");
+    final ValueArray array = (ValueArray) line2.fields.getOpt("value");
     new GeneralTestWizard(syntax, line2)
         .run(
             context ->
@@ -436,7 +436,7 @@ public class TestLayoutAlignment {
   @Test
   public void testConcensusSameLineDynamicRemove() {
     final Atom line2 = new TreeBuilder(pair).add("first", "cc").add("second", "d").build();
-    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.get("first");
+    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.getOpt("first");
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(line)
@@ -593,7 +593,7 @@ public class TestLayoutAlignment {
             context ->
                 context.history.apply(
                     context,
-                    new ChangePrimitiveAdd((ValuePrimitive) pair1.fields.get("first"), 8, "9X")))
+                    new ChangePrimitiveAdd((ValuePrimitive) pair1.fields.getOpt("first"), 8, "9X")))
         .checkCourseCount(2)
         .checkBrick(0, 2, 100)
         .checkBrick(1, 2, 100);
@@ -611,7 +611,7 @@ public class TestLayoutAlignment {
                 context.history.apply(
                     context,
                     new ChangeArray(
-                        (ValueArray) lineAtom.fields.get("value"),
+                        (ValueArray) lineAtom.fields.getOpt("value"),
                         1,
                         0,
                         ImmutableList.of(
@@ -622,10 +622,10 @@ public class TestLayoutAlignment {
                 context.history.apply(
                     context,
                     new ChangePrimitiveAdd(
-                        (ValuePrimitive) pairAtom1.fields.get("first"), 7, "9X")))
+                        (ValuePrimitive) pairAtom1.fields.getOpt("first"), 7, "9X")))
         .run(
             context ->
-                ((ValuePrimitive) pairAtom1.fields.get("first"))
+                ((ValuePrimitive) pairAtom1.fields.getOpt("first"))
                     .visual.changeTags(context, new TagsChange().add(new FreeTag("split"))))
         .checkCourseCount(2);
   }
@@ -645,7 +645,7 @@ public class TestLayoutAlignment {
         .checkCourseCount(1)
         .run(
             context ->
-                ((ValuePrimitive) pairAtom1.fields.get("second"))
+                ((ValuePrimitive) pairAtom1.fields.getOpt("second"))
                     .visual.changeTags(context, new TagsChange().add(new FreeTag("split"))))
         .checkCourseCount(2);
   }

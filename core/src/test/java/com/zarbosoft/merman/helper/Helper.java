@@ -25,7 +25,7 @@ import com.zarbosoft.merman.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.back.BackRecordSpec;
-import com.zarbosoft.merman.syntax.back.BackRootArraySpec;
+import com.zarbosoft.merman.syntax.back.BackSubArraySpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.primitivepattern.Digits;
@@ -70,7 +70,7 @@ public class Helper {
               .forEach(
                   k ->
                       dump(
-                          value.fields.get(k),
+                          value.fields.getOpt(k),
                           uncheck(() -> writer.key(k.getBytes(StandardCharsets.UTF_8)))));
           writer.recordEnd();
         });
@@ -123,7 +123,7 @@ public class Helper {
     back.id = id;
     back.pattern = new Repeat1();
     ((Repeat1) back.pattern).pattern = new Letters();
-    back.matcher = back.pattern.new Matcher();
+    //back.matcher = back.pattern.new Matcher();
     return back;
   }
 
@@ -132,14 +132,14 @@ public class Helper {
     back.id = id;
     back.pattern = new Repeat1();
     ((Repeat1) back.pattern).pattern = new Digits();
-    back.matcher = back.pattern.new Matcher();
+    //back.matcher = back.pattern.new Matcher();
     return back;
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
     final BackRecordSpec back = new BackRecordSpec();
     back.id = id;
-    back.type = type;
+    back.element = type;
     return back;
   }
 
@@ -152,14 +152,18 @@ public class Helper {
   public static BackArraySpec buildBackDataArray(final String id, String type) {
     final BackArraySpec back = new BackArraySpec();
     back.id = id;
-    back.type = type;
+    final BackAtomSpec inner = new BackAtomSpec();
+    inner.type = type;
+    back.element = inner;
     return back;
   }
 
-  public static BackRootArraySpec buildBackDataRootArray(final String id, String type) {
-    final BackRootArraySpec back = new BackRootArraySpec();
+  public static BackSubArraySpec buildBackDataRootArray(final String id, String type) {
+    final BackSubArraySpec back = new BackSubArraySpec();
     back.id = id;
-    back.type = type;
+    final BackAtomSpec inner = new BackAtomSpec();
+    inner.type = type;
+    back.element = inner;
     return back;
   }
 
@@ -183,7 +187,7 @@ public class Helper {
         throw new AssertionError(String.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
     }
     for (final String key : Sets.intersection(expectedKeys, gotKeys)) {
-      assertTreeEqual(expected.fields.get(key), got.fields.get(key));
+      assertTreeEqual(expected.fields.getOpt(key), got.fields.getOpt(key));
     }
   }
 
@@ -226,7 +230,7 @@ public class Helper {
   }
 
   public static ValueArray rootArray(final Document doc) {
-    return (ValueArray) doc.root.fields.get("value");
+    return (ValueArray) doc.root.fields.getOpt("value");
   }
 
   public static Context buildDoc(final Syntax syntax, final Atom... root) {

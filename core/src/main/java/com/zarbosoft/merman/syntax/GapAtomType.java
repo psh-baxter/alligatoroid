@@ -39,11 +39,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.zarbosoft.rendaw.common.Common.iterable;
 
 public class GapAtomType extends AtomType {
   private final BaseBackPrimitiveSpec gapSpec;
@@ -64,12 +61,12 @@ public class GapAtomType extends AtomType {
   public Value findSelectNext(final Context context, final Atom atom, boolean skipFirstNode) {
     if (atom.type == context.syntax.gap
         || atom.type == context.syntax.prefixGap
-        || atom.type == context.syntax.suffixGap) return atom.fields.get("gap");
+        || atom.type == context.syntax.suffixGap) return atom.fields.getOpt("gap");
     for (final FrontSpec front : atom.type.front()) {
       if (front instanceof FrontPrimitiveSpec) {
-        return atom.fields.get(((FrontPrimitiveSpec) front).field);
+        return atom.fields.getOpt(((FrontPrimitiveSpec) front).field);
       } else if (front instanceof FrontGapBase) {
-        return atom.fields.get(front.field());
+        return atom.fields.getOpt(front.field());
       } else if (front instanceof FrontDataAtom) {
         if (skipFirstNode) {
           skipFirstNode = false;
@@ -77,12 +74,12 @@ public class GapAtomType extends AtomType {
           final Value found =
               findSelectNext(
                   context,
-                  ((ValueAtom) atom.fields.get(((FrontDataAtom) front).middle)).get(),
+                  ((ValueAtom) atom.fields.getOpt(((FrontDataAtom) front).middle)).get(),
                   skipFirstNode);
           if (found != null) return found;
         }
       } else if (front instanceof FrontFixedArraySpec) {
-        final ValueArray array = (ValueArray) atom.fields.get(((FrontFixedArraySpec) front).middle);
+        final ValueArray array = (ValueArray) atom.fields.getOpt(((FrontFixedArraySpec) front).middle);
         if (array.data.isEmpty()) {
           if (skipFirstNode) {
             skipFirstNode = false;
@@ -127,8 +124,7 @@ public class GapAtomType extends AtomType {
   }
 
   @Override
-  public void finish(
-      final Syntax syntax, final Set<String> allTypes, final Set<String> scalarTypes) {
+  public void finish(List<Object> errors, final Syntax syntax) {
     {
       final FrontGapBase gap =
           new FrontGapBase() {
@@ -166,17 +162,17 @@ public class GapAtomType extends AtomType {
                     if (key.indexAfter == -1) {
                       // No such place exists - wrap the placement atom in a suffix gap
                       root = context.syntax.suffixGap.create(true, atom);
-                      selectNext = (ValuePrimitive) root.fields.get("gap");
+                      selectNext = (ValuePrimitive) root.fields.getOpt("gap");
                     } else {
                       nextWhatever = type.front.get(key.indexAfter);
                     }
                   } else nextWhatever = parsed.nextInput;
                   if (selectNext == null) {
                     if (nextWhatever instanceof FrontDataAtom) {
-                      selectNext = atom.fields.get(nextWhatever.field());
+                      selectNext = atom.fields.getOpt(nextWhatever.field());
                     } else if (nextWhatever instanceof FrontPrimitiveSpec
                         || nextWhatever instanceof FrontArraySpecBase) {
-                      selectNext = atom.fields.get(nextWhatever.field());
+                      selectNext = atom.fields.getOpt(nextWhatever.field());
                     } else throw new DeadCode();
                   }
 
@@ -212,7 +208,7 @@ public class GapAtomType extends AtomType {
                       () -> {
                         final Union union = new Union();
                         for (final FreeAtomType type :
-                            (iterable(context.syntax.getLeafTypes(self.parent.childType())))) {
+                            context.syntax.getLeafTypes(self.parent.childType())) {
                           for (final GapKey key : gapKeys(syntax, type, null)) {
                             final GapChoice choice = new GapChoice(type, key);
                             union.add(
@@ -279,7 +275,7 @@ public class GapAtomType extends AtomType {
       front =
           ImmutableList.copyOf(Iterables.concat(frontPrefix, ImmutableList.of(gap), frontSuffix));
     }
-    super.finish(syntax, allTypes, scalarTypes);
+    super.finish(errors, syntax);
   }
 
   @Override
@@ -293,13 +289,13 @@ public class GapAtomType extends AtomType {
   }
 
   @Override
-  public String id() {
-    return "__gap";
+  public String name() {
+    return "Gap";
   }
 
   @Override
-  public String name() {
-    return "Gap";
+  public String id() {
+    return "__gap";
   }
 
   public Atom create() {

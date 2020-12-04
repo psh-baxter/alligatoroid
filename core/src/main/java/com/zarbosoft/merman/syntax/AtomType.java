@@ -4,6 +4,7 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.Value;
+import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
@@ -14,34 +15,38 @@ import com.zarbosoft.merman.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.back.BackRecordSpec;
-import com.zarbosoft.merman.syntax.back.BackRootArraySpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
+import com.zarbosoft.merman.syntax.back.BackSubArraySpec;
 import com.zarbosoft.merman.syntax.back.BackTypeSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.merman.syntax.error.AtomTypeErrors;
+import com.zarbosoft.merman.syntax.error.AtomTypeNoBack;
+import com.zarbosoft.merman.syntax.error.BackFieldWrongType;
+import com.zarbosoft.merman.syntax.error.MissingBack;
+import com.zarbosoft.merman.syntax.error.UnusedBackData;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
+import com.zarbosoft.pidgoon.nodes.Color;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.DeadCode;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static com.zarbosoft.rendaw.common.Common.enumerate;
-
 public abstract class AtomType {
 
   public Set<String> tags = new HashSet<>();
-  public Map<String, BackSpecData> fields;
+  public TSMap<String, BackSpecData> fields;
 
   public abstract Map<String, AlignmentDefinition> alignments();
 
@@ -51,24 +56,30 @@ public abstract class AtomType {
 
   public abstract int depthScore();
 
-  public void finish(
-      final Syntax syntax, final Set<String> allTypes, final Set<String> scalarTypes) {
-    fields = new HashMap<>();
-    enumerate(back().stream())
-        .forEach(
-            pair -> {
-              final Integer i = pair.first;
-              final BackSpec p = pair.second;
-              p.finish(syntax, this, fields);
-              p.parent = new NodeBackParent(i);
-            });
+  public void finish(List<Object> errors, final Syntax syntax) {
+    fields = new TSMap<>();
+    List<Object> subErrors = new ArrayList<>();
+    if (back().isEmpty()) {
+      subErrors.add(new AtomTypeNoBack());
+    }
+    for (int i = 0; i < back().size(); ++i) {
+      BackSpec e = back().get(i);
+      e.finish(subErrors, syntax, new Path("back").add(Integer.toString(i)), fields, false, false);
+      e.parent = new NodeBackParent(i);
+    }
     {
       final Set<String> fieldsUsedFront = new HashSet<>();
-      front().forEach(p -> p.finish(this, fieldsUsedFront));
+      for (int i = 0; i < front().size(); ++i) {
+        FrontSpec e = front().get(i);
+        e.finish(subErrors, new Path("front").add(Integer.toString(i)), this, fieldsUsedFront);
+      }
       final Set<String> missing = Sets.difference(fields.keySet(), fieldsUsedFront);
-      if (!missing.isEmpty())
-        throw new InvalidSyntax(
-            String.format("Middle elements %s in %s are unused by front parts.", missing, id()));
+      if (!missing.isEmpty()) {
+        subErrors.add(new UnusedBackData(missing));
+      }
+    }
+    if (!subErrors.isEmpty()) {
+      errors.add(new AtomTypeErrors(this, subErrors));
     }
   }
 
@@ -76,21 +87,21 @@ public abstract class AtomType {
 
   public abstract List<BackSpec> back();
 
-  public abstract String id();
-
   public com.zarbosoft.pidgoon.Node buildBackRule(final Syntax syntax) {
     final Sequence seq = new Sequence();
     seq.add(StackStore.prepVarStack);
-    back().forEach(p -> seq.add(p.buildBackRule(syntax, this)));
-    return new Operator<StackStore>(seq) {
-      @Override
-      protected StackStore process(StackStore store) {
-        final TSMap<String, Value> data = new TSMap<>();
-        store = store.popVarMap(data.inner);
-        final Atom atom = new Atom(AtomType.this, data);
-        return store.pushStack(atom);
-      }
-    };
+    back().forEach(p -> seq.add(p.buildBackRule(syntax)));
+    return new Color(
+        this,
+        new Operator<StackStore>(seq) {
+          @Override
+          protected StackStore process(StackStore store) {
+            final TSMap<String, Value> data = new TSMap<>();
+            store = store.popVarMap(data.inner);
+            final Atom atom = new Atom(AtomType.this, data);
+            return store.pushStack(atom);
+          }
+        });
   }
 
   public abstract String name();
@@ -109,8 +120,8 @@ public abstract class AtomType {
         stack.addLast(((BackFixedRecordSpec) next).pairs.values().iterator());
       } else if (next instanceof BackArraySpec) {
         if (((BackArraySpec) next).id.equals(id)) return next;
-      } else if (next instanceof BackRootArraySpec) {
-        if (((BackRootArraySpec) next).id.equals(id)) return next;
+      } else if (next instanceof BackSubArraySpec) {
+        if (((BackSubArraySpec) next).id.equals(id)) return next;
       } else if (next instanceof BackKeySpec) {
         if (((BackKeySpec) next).id.equals(id)) return next;
       } else if (next instanceof BackAtomSpec) {
@@ -128,29 +139,31 @@ public abstract class AtomType {
     throw new DeadCode();
   }
 
-  public BaseBackPrimitiveSpec getDataPrimitive(final String key) {
-    return getBack(BaseBackPrimitiveSpec.class, key);
+  public BaseBackPrimitiveSpec getDataPrimitive(
+      List<Object> errors, Path typePath, final String key) {
+    return getBack(errors, typePath, BaseBackPrimitiveSpec.class, key);
   }
 
-  private <D extends BackSpecData> D getBack(
-      final Class<? extends BackSpecData> type, final String id) {
+  public <D extends BackSpecData> D getBack(
+      List<Object> errors, Path typePath, final Class<D> type, final String id) {
     final BackSpecData found = fields.get(id);
-    if (found == null)
-      throw new InvalidSyntax(String.format("No middle element [%s] in [%s]", id, this.id()));
-    if (!type.isAssignableFrom(found.getClass()))
-      throw new InvalidSyntax(
-          String.format(
-              "Conflicting types for middle element [%s] in [%s]: %s, %s",
-              id, this.id(), found.getClass(), type));
+    if (found == null) {
+      errors.add(new MissingBack(typePath, id));
+      return null;
+    }
+    if (!type.isAssignableFrom(found.getClass())) {
+      errors.add(new BackFieldWrongType(typePath, id, found, type));
+      return null;
+    }
     return (D) found;
   }
 
-  public BaseBackAtomSpec getDataNode(final String key) {
-    return getBack(BaseBackAtomSpec.class, key);
+  public BaseBackAtomSpec getDataAtom(List<Object> errors, Path typePath, final String key) {
+    return getBack(errors, typePath, BaseBackAtomSpec.class, key);
   }
 
-  public BaseBackArraySpec getDataArray(final String key) {
-    return getBack(BaseBackArraySpec.class, key);
+  public BaseBackArraySpec getDataArray(List<Object> errors, Path typePath, final String key) {
+    return getBack(errors, typePath, BaseBackArraySpec.class, key);
   }
 
   @Override
@@ -158,9 +171,13 @@ public abstract class AtomType {
     return String.format("<type %s>", id());
   }
 
+  public abstract String id();
+
   public Atom create(final Syntax syntax) {
     final TSMap<String, Value> data = new TSMap<>();
-    fields.entrySet().stream().forEach(e -> data.put(e.getKey(), e.getValue().create(syntax)));
+    for (Map.Entry<String, BackSpecData> e : fields.entries()) {
+      data.putNew(e.getKey(), e.getValue().create(syntax));
+    }
     return new Atom(this, data);
   }
 

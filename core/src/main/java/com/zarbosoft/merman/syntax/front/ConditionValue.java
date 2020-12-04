@@ -16,7 +16,7 @@ public class ConditionValue extends ConditionType {
 
   @Override
   public ConditionAttachment create(final Context context, final Atom atom) {
-    final Value value = atom.fields.get(middle);
+    final Value value = atom.fields.getOpt(middle);
     if (value instanceof ValuePrimitive) {
       class PrimitiveCondition extends ConditionAttachment implements ValuePrimitive.Listener {
 

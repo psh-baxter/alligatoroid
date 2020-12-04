@@ -46,7 +46,7 @@ public class TestLayoutArray {
   @Test
   public void testDynamicAddFirst() {
     final Atom arrayAtom = new TreeBuilder(MiscSyntax.array).addArray("value").build();
-    final ValueArray array = (ValueArray) arrayAtom.fields.get("value");
+    final ValueArray array = (ValueArray) arrayAtom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, arrayAtom)
         .run(
             context ->
@@ -65,7 +65,7 @@ public class TestLayoutArray {
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.one).build())
             .build();
-    final ValueArray array = (ValueArray) arrayAtom.fields.get("value");
+    final ValueArray array = (ValueArray) arrayAtom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, arrayAtom)
         .run(
             context ->
@@ -86,7 +86,7 @@ public class TestLayoutArray {
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.one).build())
             .build();
-    final ValueArray array = (ValueArray) arrayAtom.fields.get("value");
+    final ValueArray array = (ValueArray) arrayAtom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, arrayAtom)
         .run(
             context ->
@@ -107,7 +107,7 @@ public class TestLayoutArray {
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.array).addArray("value").build())
             .build();
-    final ValueArray array = (ValueArray) arrayAtom.fields.get("value");
+    final ValueArray array = (ValueArray) arrayAtom.fields.getOpt("value");
     final int index = 0;
     int index2 = 0;
     new GeneralTestWizard(MiscSyntax.syntax, arrayAtom)
@@ -135,7 +135,7 @@ public class TestLayoutArray {
                 new TreeBuilder(MiscSyntax.one).build(),
                 new TreeBuilder(MiscSyntax.one).build())
             .build();
-    final ValueArray array = (ValueArray) arrayAtom.fields.get("value");
+    final ValueArray array = (ValueArray) arrayAtom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, arrayAtom)
         .run(
             context ->
@@ -154,7 +154,7 @@ public class TestLayoutArray {
                 new TreeBuilder(MiscSyntax.one).build(),
                 new TreeBuilder(MiscSyntax.one).build())
             .build();
-    final ValueArray array = (ValueArray) arrayAtom.fields.get("value");
+    final ValueArray array = (ValueArray) arrayAtom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, arrayAtom)
         .run(
             context ->
@@ -170,7 +170,7 @@ public class TestLayoutArray {
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.one).build())
             .build();
-    final ValueArray array = (ValueArray) arrayAtom.fields.get("value");
+    final ValueArray array = (ValueArray) arrayAtom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, arrayAtom)
         .run(
             context ->

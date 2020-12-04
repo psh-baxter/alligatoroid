@@ -92,7 +92,7 @@ public class TestPrimitiveBreaking {
     final Atom primitive = new TreeBuilder(PrimitiveSyntax.primitive).add("value", "123").build();
     new GeneralTestWizard(PrimitiveSyntax.syntax, primitive)
         .resize(40)
-        .run(context -> primitive.fields.get("value").selectDown(context))
+        .run(context -> primitive.fields.getOpt("value").selectDown(context))
         .run(context -> context.selection.receiveText(context, "4"))
         .checkTextBrick(0, 1, "1234")
         .run(context -> context.selection.receiveText(context, "5"))
@@ -184,7 +184,7 @@ public class TestPrimitiveBreaking {
   public void testUnbreakCursor() {
     final Atom primitiveAtom =
         new TreeBuilder(PrimitiveSyntax.quoted).add("value", "12345").build();
-    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.get("value");
+    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.getOpt("value");
     new GeneralTestWizard(PrimitiveSyntax.syntax, primitiveAtom)
         .run(context -> ((ValuePrimitive) primitive).visual.select(context, true, 5, 5))
         .resize(50)
@@ -207,7 +207,7 @@ public class TestPrimitiveBreaking {
   public void testUnbreakCursorSplit() {
     final Atom primitiveAtom =
         new TreeBuilder(PrimitiveSyntax.quoted).add("value", "123456").build();
-    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.get("value");
+    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.getOpt("value");
     new GeneralTestWizard(
             PrimitiveSyntax.syntax,
             new TreeBuilder(PrimitiveSyntax.primitive).add("value", "aaaaa").build(),
@@ -233,7 +233,7 @@ public class TestPrimitiveBreaking {
   public void testUnbreakClear() {
     final Atom primitiveAtom =
         new TreeBuilder(PrimitiveSyntax.primitive).add("value", "word egg").build();
-    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.get("value");
+    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.getOpt("value");
     new GeneralTestWizard(PrimitiveSyntax.syntax, primitiveAtom)
         .resize(40)
         .checkCourseCount(2)
@@ -250,7 +250,7 @@ public class TestPrimitiveBreaking {
   public void testUnbreakClearEnd() {
     final Atom primitiveAtom =
         new TreeBuilder(PrimitiveSyntax.primitive).add("value", "gate\nword egg").build();
-    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.get("value");
+    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.getOpt("value");
     new GeneralTestWizard(PrimitiveSyntax.syntax, primitiveAtom)
         .resize(40)
         .checkCourseCount(3)
@@ -267,7 +267,7 @@ public class TestPrimitiveBreaking {
   public void testUnbreakClearStart() {
     final Atom primitiveAtom =
         new TreeBuilder(PrimitiveSyntax.primitive).add("value", "word egg\nroad").build();
-    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.get("value");
+    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.getOpt("value");
     new GeneralTestWizard(PrimitiveSyntax.syntax, primitiveAtom)
         .resize(40)
         .checkCourseCount(3)
@@ -284,7 +284,7 @@ public class TestPrimitiveBreaking {
   public void testAddThenSplit() {
     final Atom primitiveAtom =
         new TreeBuilder(PrimitiveSyntax.primitive).add("value", "ab").build();
-    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.get("value");
+    final ValuePrimitive primitive = (ValuePrimitive) primitiveAtom.fields.getOpt("value");
     new GeneralTestWizard(PrimitiveSyntax.syntax, primitiveAtom)
         .resize(40)
         .checkCourseCount(1)

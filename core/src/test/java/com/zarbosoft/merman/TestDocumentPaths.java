@@ -56,7 +56,7 @@ public class TestDocumentPaths {
             .group("any", ImmutableList.of("base"))
             .build();
     final Context context =
-        buildDoc(syntax, new TreeBuilder(syntax.types.get(0)).add("a", "").build());
+        buildDoc(syntax, new TreeBuilder(syntax.types.get("base")).add("a", "").build());
     final Value value1 = Helper.rootArray(context.document).data.get(0).fields.get("a");
     assertThat(value1.getSyntaxPath().toList(), equalTo(ImmutableList.of("value","0", "a")));
     assertThat(context.syntaxLocate(value1.getSyntaxPath()), equalTo(value1));
@@ -74,7 +74,7 @@ public class TestDocumentPaths {
             .group("any", ImmutableList.of("base"))
             .build();
     final Context context =
-        buildDoc(syntax, new TreeBuilder(syntax.types.get(0)).add("a", "").build());
+        buildDoc(syntax, new TreeBuilder(syntax.types.get("base")).add("a", "").build());
     final Value value1 = Helper.rootArray(context.document).data.get(0).fields.get("a");
     assertThat(value1.getSyntaxPath().toList(), equalTo(ImmutableList.of("value","0", "a")));
     assertThat(context.syntaxLocate(value1.getSyntaxPath()), equalTo(value1));
@@ -99,8 +99,8 @@ public class TestDocumentPaths {
     final Context context =
         buildDoc(
             syntax,
-            new TreeBuilder(syntax.types.get(0))
-                .add("a", new TreeBuilder(syntax.types.get(1)).add("b", ""))
+            new TreeBuilder(syntax.types.get("base"))
+                .add("a", new TreeBuilder(syntax.types.get("child")).add("b", ""))
                 .build());
     final Value value1 =
         ((ValueAtom) Helper.rootArray(context.document).data.get(0).fields.get("a"))
@@ -128,10 +128,10 @@ public class TestDocumentPaths {
     final Context context =
         buildDoc(
             syntax,
-            new TreeBuilder(syntax.types.get(0))
+            new TreeBuilder(syntax.types.get("base"))
                 .addArray(
                     "a",
-                    ImmutableList.of(new TreeBuilder(syntax.types.get(1)).add("b", "").build()))
+                    ImmutableList.of(new TreeBuilder(syntax.types.get("child")).add("b", "").build()))
                 .build());
     final Value value1 =
         ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.get("a"))
@@ -164,9 +164,9 @@ public class TestDocumentPaths {
     final Context context =
         buildDoc(
             syntax,
-            new TreeBuilder(syntax.types.get(0))
+            new TreeBuilder(syntax.types.get("base"))
                 .addRecord(
-                    "a", new TreeBuilder(syntax.types.get(1)).add("k", "K").add("v", "V").build())
+                    "a", new TreeBuilder(syntax.types.get("element")).add("k", "K").add("v", "V").build())
                 .build());
     final Value value1 =
         ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.get("a"))

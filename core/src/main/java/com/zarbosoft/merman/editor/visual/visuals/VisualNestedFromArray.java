@@ -55,11 +55,6 @@ public abstract class VisualNestedFromArray extends VisualNestedBase {
   }
 
   @Override
-  protected String nodeType() {
-    return value.back().type;
-  }
-
-  @Override
   protected Value value() {
     return value;
   }

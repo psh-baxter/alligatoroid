@@ -1023,7 +1023,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
             final Value.Parent parent = atomVisual().atom.parent;
             final Atom gap = context.syntax.suffixGap.create(true, atomVisual().atom);
             parent.replace(context, gap);
-            gap.fields.get("gap").selectDown(context);
+            gap.fields.getOpt("gap").selectDown(context);
             context.selection.receiveText(context, text);
           }
           return;

@@ -24,9 +24,9 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.front.FrontGapBase;
 import org.junit.Test;
 
+import java.util.HashSet;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import static com.zarbosoft.merman.helper.Helper.assertTreeEqual;
 import static com.zarbosoft.merman.helper.Helper.buildDoc;
@@ -86,7 +86,7 @@ public class TestDocumentGap {
 
     final Context context = blank(syntax);
     assertThat(
-        context.syntax.getLeafTypes("test_group_1").collect(Collectors.toSet()),
+        new HashSet<>(context.syntax.getLeafTypes("test_group_1")),
         equalTo(ImmutableSet.of(infinity, one, two, three)));
   }
 
@@ -129,7 +129,7 @@ public class TestDocumentGap {
 
     final Atom gap = syntax.gap.create();
     new GeneralTestWizard(syntax, new TreeBuilder(restricted).add("value", gap).build())
-        .run(context -> gap.fields.get("gap").selectDown(context))
+        .run(context -> gap.fields.getOpt("gap").selectDown(context))
         .sendText("q")
         .checkChoices(1);
   }
@@ -1989,7 +1989,7 @@ public class TestDocumentGap {
 
     final Atom atom = syntax.gap.create();
     new GeneralTestWizard(syntax, atom)
-        .run(context -> atom.fields.get("gap").selectDown(context))
+        .run(context -> atom.fields.getOpt("gap").selectDown(context))
         .sendText("9")
         .checkArrayTree(new TreeBuilder(digits).add("value", "9").build())
         .run(
@@ -2104,7 +2104,7 @@ public class TestDocumentGap {
 
     final Atom atom = syntax.gap.create();
     new GeneralTestWizard(syntax, atom)
-        .run(context -> atom.fields.get("gap").selectDown(context))
+        .run(context -> atom.fields.getOpt("gap").selectDown(context))
         .sendText("t")
         .sendText("$")
         .sendText("1")
@@ -2737,7 +2737,7 @@ public class TestDocumentGap {
     value's selection.
      */
     final Atom gap = syntax.gap.create();
-    final ValuePrimitive primitive = (ValuePrimitive) gap.fields.get("gap");
+    final ValuePrimitive primitive = (ValuePrimitive) gap.fields.getOpt("gap");
     new GeneralTestWizard(syntax, gap)
         .run(context -> context.history.apply(context, new ChangePrimitiveSet(primitive, "\"")))
         .checkArrayTree(gap)
@@ -3672,7 +3672,7 @@ public class TestDocumentGap {
         syntax,
         () -> syntax.suffixGap.create(true, new TreeBuilder(one).build()),
         context -> {
-          Helper.rootArray(context.document).data.get(0).fields.get("gap").selectDown(context);
+          Helper.rootArray(context.document).data.get(0).fields.getOpt("gap").selectDown(context);
           context.selection.receiveText(context, "?");
           context.selection.receiveText(context, "e");
         },
@@ -3791,7 +3791,7 @@ public class TestDocumentGap {
 
     final Atom atom = syntax.suffixGap.create(true, new TreeBuilder(one).build());
     new GeneralTestWizard(syntax, atom)
-        .run(context -> atom.fields.get("gap").selectDown(context))
+        .run(context -> atom.fields.getOpt("gap").selectDown(context))
         .sendText("t")
         .sendText("$")
         .sendText("t")
@@ -3843,7 +3843,7 @@ public class TestDocumentGap {
     final Atom gap =
         syntax.suffixGap.create(true, new TreeBuilder(quoted).add("value", "hi").build());
     new GeneralTestWizard(syntax, gap)
-        .run(context -> gap.fields.get("gap").selectDown(context))
+        .run(context -> gap.fields.getOpt("gap").selectDown(context))
         .sendText("!")
         .checkArrayTree(
             new TreeBuilder(syntax.suffixGap)
@@ -4526,7 +4526,7 @@ public class TestDocumentGap {
 
     final Atom gap = syntax.prefixGap.create(new TreeBuilder(quoted).add("value", "hi").build());
     new GeneralTestWizard(syntax, gap)
-        .run(context -> gap.fields.get("gap").selectDown(context))
+        .run(context -> gap.fields.getOpt("gap").selectDown(context))
         .sendText("!")
         .checkArrayTree(
             new TreeBuilder(syntax.prefixGap)

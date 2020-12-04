@@ -23,7 +23,7 @@ public class TreeBuilder {
   }
 
   public TreeBuilder add(final String key, final TreeBuilder builder) {
-    data.put(key, new ValueAtom((BaseBackAtomSpec) type.fields.get(key), builder.build()));
+    data.putNew(key, new ValueAtom((BaseBackAtomSpec) type.fields.get(key), builder.build()));
     return this;
   }
 
@@ -32,27 +32,27 @@ public class TreeBuilder {
   }
 
   public TreeBuilder add(final String key, final Atom atom) {
-    data.put(key, new ValueAtom((BaseBackAtomSpec) type.fields.get(key), atom));
+    data.putNew(key, new ValueAtom((BaseBackAtomSpec) type.fields.get(key), atom));
     return this;
   }
 
   public TreeBuilder add(final String key, final String text) {
-    data.put(key, new ValuePrimitive((BaseBackPrimitiveSpec) type.fields.get(key), text));
+    data.putNew(key, new ValuePrimitive((BaseBackPrimitiveSpec) type.fields.get(key), text));
     return this;
   }
 
   public TreeBuilder addArray(final String key, final List<Atom> values) {
-    data.put(key, new ValueArray((BaseBackArraySpec) type.fields.get(key), values));
+    data.putNew(key, new ValueArray((BaseBackArraySpec) type.fields.get(key), values));
     return this;
   }
 
   public TreeBuilder addArray(final String key, final Atom... values) {
-    data.put(key, new ValueArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
+    data.putNew(key, new ValueArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
     return this;
   }
 
   public TreeBuilder addRecord(final String key, final Atom... values) {
-    data.put(key, new ValueArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
+    data.putNew(key, new ValueArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
     return this;
   }
 

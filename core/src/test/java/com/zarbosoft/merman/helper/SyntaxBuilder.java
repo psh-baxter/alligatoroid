@@ -12,7 +12,9 @@ import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.style.Style;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class SyntaxBuilder {
 
@@ -27,17 +29,22 @@ public class SyntaxBuilder {
   }
 
   public SyntaxBuilder type(final FreeAtomType type) {
-    syntax.types.add(type);
+    syntax.types.putNew(type.id, type);
     return this;
   }
 
   public Syntax build() {
-    syntax.finish();
+    List<Object> errors = new ArrayList<>();
+    syntax.finish(errors);
+    if (!errors.isEmpty())
+      throw new RuntimeException(
+          String.format(
+              "\n%s\n", errors.stream().map(e -> e.toString()).collect(Collectors.joining("\n"))));
     return syntax;
   }
 
   public SyntaxBuilder group(final String name, final List<String> subtypes) {
-    syntax.groups.put(name, subtypes);
+    syntax.groups.putNew(name, subtypes);
     return this;
   }
 

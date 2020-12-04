@@ -2,6 +2,7 @@ package com.zarbosoft.merman.syntax.front;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
@@ -11,6 +12,7 @@ import com.zarbosoft.rendaw.common.DeadCode;
 import org.pcollections.PSet;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,7 +29,8 @@ public abstract class FrontSpec {
       int visualDepth,
       int depthScore);
 
-  public void finish(final AtomType atomType, final Set<String> middleUsed) {}
+  public void finish(
+      List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {}
 
   public abstract String field();
 

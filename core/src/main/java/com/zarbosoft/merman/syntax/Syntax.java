@@ -3,7 +3,14 @@ package com.zarbosoft.merman.syntax;
 import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.editor.serialization.Load;
+import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.modules.Module;
+import com.zarbosoft.merman.syntax.error.DuplicateAtomTypeIds;
+import com.zarbosoft.merman.syntax.error.DuplicateAtomTypeIdsInGroup;
+import com.zarbosoft.merman.syntax.error.GroupChildDoesntExist;
+import com.zarbosoft.merman.syntax.error.NotTransverse;
+import com.zarbosoft.merman.syntax.error.TypeCircularReference;
+import com.zarbosoft.merman.syntax.error.UnsupportedDirections;
 import com.zarbosoft.merman.syntax.style.BoxStyle;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.syntax.style.Style;
@@ -14,8 +21,8 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Pair;
-import org.pcollections.HashTreePSet;
-import org.pcollections.PSet;
+import org.pcollections.PVector;
+import org.pcollections.TreePVector;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
@@ -26,16 +33,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 
-import static com.zarbosoft.rendaw.common.Common.stream;
+import static com.zarbosoft.rendaw.common.Common.sublist;
 
 public class Syntax {
 
@@ -47,8 +53,8 @@ public class Syntax {
   public Padding bannerPad = new Padding();
   public Padding detailPad = new Padding();
   public int detailSpan = 300;
-  public List<FreeAtomType> types = new ArrayList<>();
-  public Map<String, List<String>> groups = new HashMap<>();
+  public TSMap<String, FreeAtomType> types = new TSMap<>();
+  public TSMap<String, List<String>> groups = new TSMap<>();
   public RootAtomType root;
   public GapAtomType gap = new GapAtomType();
   public PrefixGapAtomType prefixGap = new PrefixGapAtomType();
@@ -70,19 +76,19 @@ public class Syntax {
   public Direction transverseDirection = Direction.DOWN;
   Grammar grammar;
 
-  public void finish() {
+  public void finish(List<Object> errors) {
     // jfx, qt, and swing don't support vertical languages
     if (!ImmutableSet.of(Direction.LEFT, Direction.RIGHT).contains(converseDirection)
-        || (transverseDirection != Direction.DOWN))
-      throw new InvalidSyntax(
-          "Currently only converse directions left/right and transverse down are supported.");
+        || (transverseDirection != Direction.DOWN)) {
+      errors.add(new UnsupportedDirections());
+    }
     switch (converseDirection) {
       case LEFT:
       case RIGHT:
         switch (transverseDirection) {
           case LEFT:
           case RIGHT:
-            throw new InvalidSyntax("Secondary direction must cross converse direction axis.");
+            errors.add(new NotTransverse(converseDirection, transverseDirection));
         }
         break;
       case UP:
@@ -90,80 +96,68 @@ public class Syntax {
         switch (transverseDirection) {
           case UP:
           case DOWN:
-            throw new InvalidSyntax("Secondary direction must cross converse direction axis.");
+            errors.add(new NotTransverse(converseDirection, transverseDirection));
         }
         break;
     }
 
     {
-      final Deque<Pair<PSet<String>, Iterator<String>>> stack = new ArrayDeque<>();
-      stack.addLast(new Pair<>(HashTreePSet.empty(), groups.keySet().iterator()));
+      final Deque<Pair<PVector<String>, Iterator<String>>> stack = new ArrayDeque<>();
+      Iterator<String> seed = groups.keySet().iterator();
+      if (seed.hasNext()) stack.addLast(new Pair<>(TreePVector.empty(), seed));
       while (!stack.isEmpty()) {
-        final Pair<PSet<String>, Iterator<String>> top = stack.pollLast();
-        if (!top.second.hasNext()) continue;
+        final Pair<PVector<String>, Iterator<String>> top = stack.peekLast();
         final String childKey = top.second.next();
-        final List<String> child = groups.get(childKey);
+        if (!top.second.hasNext()) {
+          stack.removeLast();
+        }
+        final List<String> child = groups.getOpt(childKey);
         if (child == null) continue;
-        if (top.first.contains(childKey))
-          throw new InvalidSyntax(String.format("Circular reference in group [%s].", childKey));
-        stack.addLast(top);
+        int pathContainsChild = top.first.lastIndexOf(childKey);
+        PVector<String> newPath = top.first.plus(childKey);
+        if (pathContainsChild != -1) {
+          errors.add(new TypeCircularReference(sublist(newPath, pathContainsChild)));
+          continue;
+        }
         stack.addLast(new Pair<>(top.first.plus(childKey), child.iterator()));
       }
     }
 
-    final Set<String> scalarTypes = new HashSet<>(); // Types that only have one back element
-    final Set<String> allTypes = new HashSet<>();
-    for (final FreeAtomType t : types) {
-      if (t.back.isEmpty())
-        throw new InvalidSyntax(String.format("Type [%s] has no back parts.", t.id()));
-      if (allTypes.contains(t.id()))
-        throw new InvalidSyntax(String.format("Multiple types with id [%s].", t.id()));
-      allTypes.add(t.id());
-      if (t.back.size() == 1) scalarTypes.add(t.id());
-    }
-    final Map<String, Set<String>> groupsThatContainType = new HashMap<>();
-    final Set<String> potentiallyScalarGroups = new HashSet<>();
-    for (final Map.Entry<String, List<String>> pair : groups.entrySet()) {
-      final String group = pair.getKey();
-      if (new HashSet<>(pair.getValue()).size() != pair.getValue().size())
-        throw new InvalidSyntax(String.format("Duplicate type ids in group [%s].", group));
-      for (final String child : pair.getValue()) {
-        if (!allTypes.contains(child) && !groups.containsKey(child))
-          throw new InvalidSyntax(
-              String.format("Group [%s] refers to non-existant member [%s].", group, child));
-        groupsThatContainType.putIfAbsent(child, new HashSet<>());
-        groupsThatContainType.get(child).add(pair.getKey());
+    Set<String> allTypes = new HashSet<>();
+    for (final String t : types.keySet()) {
+      if (allTypes.contains(t)) {
+        errors.add(new DuplicateAtomTypeIds(t));
       }
-      if (allTypes.contains(group))
-        throw new InvalidSyntax(String.format("Group id [%s] already used.", group));
-      allTypes.add(group);
-      potentiallyScalarGroups.add(group);
+      allTypes.add(t);
     }
-    for (final FreeAtomType t : types) {
-      if (t.back.size() == 1) continue;
-      final Deque<Iterator<String>> stack = new ArrayDeque<>();
-      stack.add(groupsThatContainType.getOrDefault(t.id(), ImmutableSet.of()).iterator());
-      while (!stack.isEmpty()) {
-        final Iterator<String> top = stack.pollLast();
-        if (top.hasNext()) {
-          stack.addLast(top);
-          final String notScalarGroup = top.next();
-          if (potentiallyScalarGroups.contains(notScalarGroup)) {
-            stack.add(
-                groupsThatContainType.getOrDefault(notScalarGroup, ImmutableSet.of()).iterator());
-            potentiallyScalarGroups.remove(notScalarGroup);
-          }
+
+    for (final Map.Entry<String, List<String>> pair : groups.entries()) {
+      final String group = pair.getKey();
+      if (new HashSet<>(pair.getValue()).size() != pair.getValue().size()) {
+        errors.add(new DuplicateAtomTypeIdsInGroup(group));
+      }
+      if (allTypes.contains(group)) {
+        errors.add(new DuplicateAtomTypeIds(group));
+      }
+      allTypes.add(group);
+    }
+
+    for (final Map.Entry<String, List<String>> pair : groups.entries()) {
+      final String group = pair.getKey();
+      for (final String child : pair.getValue()) {
+        if (!allTypes.contains(child) && !groups.contains(child)) {
+          errors.add(new GroupChildDoesntExist(group, child));
         }
       }
     }
-    scalarTypes.addAll(potentiallyScalarGroups);
-    for (final FreeAtomType t : types) {
-      t.finish(this, allTypes, scalarTypes);
+
+    for (final FreeAtomType t : types.values()) {
+      t.finish(errors, this);
     }
-    root.finish(this, allTypes, scalarTypes);
-    gap.finish(this, allTypes, scalarTypes);
-    prefixGap.finish(this, allTypes, scalarTypes);
-    suffixGap.finish(this, allTypes, scalarTypes);
+    root.finish(errors, this);
+    gap.finish(errors, this);
+    prefixGap.finish(errors, this);
+    suffixGap.finish(errors, this);
   }
 
   public Node backRuleRef(final String type) {
@@ -178,16 +172,17 @@ public class Syntax {
   public Grammar getGrammar() {
     if (grammar == null) {
       grammar = new Grammar();
-      types.forEach(t -> grammar.add(t.id(), t.buildBackRule(this)));
+      for (FreeAtomType t : types.values()) {
+        grammar.add(t.id(), t.buildBackRule(this));
+      }
       grammar.add(gap.id(), gap.buildBackRule(this));
       grammar.add(prefixGap.id(), prefixGap.buildBackRule(this));
       grammar.add(suffixGap.id(), suffixGap.buildBackRule(this));
-      groups.forEach(
-          (k, v) -> {
-            final Union group = new Union();
-            v.forEach(n -> group.add(new Reference(n)));
-            grammar.add(k, group);
-          });
+      for (Map.Entry<String, List<String>> entry : groups.entries()) {
+        final Union group = new Union();
+        entry.getValue().forEach(n -> group.add(new Reference(n)));
+        grammar.add(entry.getKey(), group);
+      }
       grammar.add("root", root.buildBackRule(this));
     }
     return grammar;
@@ -211,40 +206,35 @@ public class Syntax {
     return load(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
   }
 
-  public Stream<FreeAtomType> getLeafTypes(final String type) {
-    if (type == null) return types.stream(); // Gap types
-    final List<String> group = groups.get(type);
-    if (group == null) return Stream.of(getType(type));
+  public List<FreeAtomType> getLeafTypes(final String type) {
+    if (type == null) return new ArrayList<>(types.values()); // Gap types
+    final List<String> group = groups.getOpt(type);
+    if (group == null) {
+      FreeAtomType found = types.get(type);
+      if (found == null) return Arrays.asList();
+      else return Arrays.asList(found);
+    }
     final Deque<Iterator<String>> stack = new ArrayDeque<>();
-    stack.addLast(group.iterator());
-    // TODO deduplicate to prevent loops?
-    return stream(
-            new Iterator<FreeAtomType>() {
-              @Override
-              public boolean hasNext() {
-                return !stack.isEmpty();
-              }
-
-              @Override
-              public FreeAtomType next() {
-                final Iterator<String> top = stack.pollLast();
-                if (!top.hasNext()) return null;
-                final String childKey = top.next();
-                if (top.hasNext()) stack.addLast(top);
-                final List<String> child = groups.get(childKey);
-                if (child == null) {
-                  return getType(childKey);
-                } else {
-                  stack.addLast(child.iterator());
-                }
-                return null;
-              }
-            })
-        .filter(x -> x != null);
-  }
-
-  public FreeAtomType getType(final String type) {
-    return types.stream().filter(t -> t.id().equals(type)).findFirst().get();
+    Iterator<String> seed = group.iterator();
+    List<FreeAtomType> out = new ArrayList<>();
+    if (!seed.hasNext()) return out;
+    stack.addLast(seed);
+    Set<String> seen = new HashSet<>();
+    while (!stack.isEmpty()) {
+      final Iterator<String> top = stack.peekLast();
+      final String childKey = top.next();
+      if (!top.hasNext()) stack.removeLast();
+      if (!seen.add(childKey)) continue;
+      final List<String> childGroup = groups.getOpt(childKey);
+      if (childGroup == null) {
+        FreeAtomType gotType = types.get(childKey);
+        if (gotType == null) continue;
+        out.add(gotType);
+      } else {
+        stack.addLast(childGroup.iterator());
+      }
+    }
+    return out;
   }
 
   public static enum BackType {

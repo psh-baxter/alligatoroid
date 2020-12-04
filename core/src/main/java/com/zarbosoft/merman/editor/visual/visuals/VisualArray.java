@@ -241,7 +241,6 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
                     alignments,
                     group.visualDepth + 2,
                     depthScore());
-        final int addIndex2 = addIndex;
         group.add(
             context,
             new Visual(group.visualDepth + 1) {
@@ -854,7 +853,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     private class ActionPaste extends ActionBase {
       @Override
       public boolean run(final Context context) {
-        final List<Atom> atoms = context.uncopy(self.value.back().type);
+        final List<Atom> atoms = context.uncopy(self.value.back().elementAtomType());
         if (atoms.isEmpty()) return false;
         context.history.apply(
             context, new ChangeArray(self.value, beginIndex, endIndex - beginIndex + 1, atoms));
@@ -976,8 +975,8 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
             context, new ChangeArray(self.value, index, 1, ImmutableList.of(gap)));
         context.history.apply(
             context,
-            new ChangeArray((ValueArray) gap.fields.get("value"), 0, 0, ImmutableList.of(old)));
-        gap.fields.get("gap").selectDown(context);
+            new ChangeArray((ValueArray) gap.fields.getOpt("value"), 0, 0, ImmutableList.of(old)));
+        gap.fields.getOpt("gap").selectDown(context);
         return true;
       }
     }
@@ -997,7 +996,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
         final Atom gap = context.syntax.suffixGap.create(false, self.value.data.get(index));
         context.history.apply(
             context, new ChangeArray(self.value, index, 1, ImmutableList.of(gap)));
-        gap.fields.get("gap").selectDown(context);
+        gap.fields.getOpt("gap").selectDown(context);
         return true;
       }
     }

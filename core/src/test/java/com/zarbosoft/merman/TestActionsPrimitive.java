@@ -36,7 +36,7 @@ public class TestActionsPrimitive {
     final Context context =
         buildDoc(
             MiscSyntax.syntax, new TreeBuilder(MiscSyntax.quoted).add("value", string).build());
-    Helper.rootArray(context.document).data.get(0).fields.get("value").selectDown(context);
+    Helper.rootArray(context.document).data.get(0).fields.getOpt("value").selectDown(context);
     return context;
   }
 
@@ -44,7 +44,7 @@ public class TestActionsPrimitive {
   public void testNext() {
     final Atom target =
         new TreeBuilder(MiscSyntax.doubleQuoted).add("first", "").add("second", "").build();
-    final ValuePrimitive value = (ValuePrimitive) target.fields.get("first");
+    final ValuePrimitive value = (ValuePrimitive) target.fields.getOpt("first");
     new GeneralTestWizard(MiscSyntax.syntax, target)
         .run(context -> value.selectDown(context))
         .act("next")
@@ -59,7 +59,7 @@ public class TestActionsPrimitive {
   public void testPrevious() {
     final Atom target =
         new TreeBuilder(MiscSyntax.doubleQuoted).add("first", "").add("second", "").build();
-    final ValuePrimitive value = (ValuePrimitive) target.fields.get("second");
+    final ValuePrimitive value = (ValuePrimitive) target.fields.getOpt("second");
     new GeneralTestWizard(MiscSyntax.syntax, target)
         .run(context -> value.selectDown(context))
         .act("previous")
@@ -327,7 +327,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
         .run(
             context ->
-                ((ValuePrimitive) primitiveAtom.fields.get("value"))
+                ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 2, 2))
         .act("gather_next")
         .act("gather_next")
@@ -340,7 +340,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
         .run(
             context ->
-                ((ValuePrimitive) primitiveAtom.fields.get("value"))
+                ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 2, 2))
         .act("gather_next")
         .act("gather_next")
@@ -409,7 +409,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
         .run(
             context ->
-                ((ValuePrimitive) primitiveAtom.fields.get("value"))
+                ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 5, 5))
         .act("gather_previous_line")
         .run(context -> assertSelection(context, 1, 5));
@@ -421,7 +421,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
         .run(
             context ->
-                ((ValuePrimitive) primitiveAtom.fields.get("value"))
+                ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 4, 4))
         .act("gather_previous_line")
         .run(context -> assertSelection(context, 0, 4));
@@ -802,7 +802,7 @@ public class TestActionsPrimitive {
                     .data
                     .get(0)
                     .fields
-                    .get("value")
+                    .getOpt("value")
                     .selectDown(context))
         .run(context -> visual(context).select(context, true, 1, 13))
         .act("delete_next")

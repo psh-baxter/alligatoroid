@@ -1,6 +1,5 @@
 package com.zarbosoft.merman;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.Context;
@@ -37,7 +36,7 @@ public class TestActionsArray {
     final Context context =
         buildDoc(
             MiscSyntax.syntax, new TreeBuilder(MiscSyntax.array).addArray("value", atoms).build());
-    ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.get("value"))
+    ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.getOpt("value"))
         .selectDown(context);
     return context;
   }
@@ -201,7 +200,7 @@ public class TestActionsArray {
   public void testReleaseNext() {
     final Context context = buildFive();
     ((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual)
         .select(context, true, 2, 3);
     Helper.act(context, "release_next");
@@ -224,7 +223,7 @@ public class TestActionsArray {
   public void testReleasePrevious() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "release_previous");
@@ -247,7 +246,7 @@ public class TestActionsArray {
   public void testDelete() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "delete");
@@ -268,7 +267,7 @@ public class TestActionsArray {
   public void testInsertBefore() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "insert_before");
@@ -296,7 +295,7 @@ public class TestActionsArray {
         new TreeBuilder(MiscSyntax.restrictedArray)
             .addArray("value", new TreeBuilder(MiscSyntax.quoted).add("value", "").build())
             .build();
-    final ValueArray value = (ValueArray) atom.fields.get("value");
+    final ValueArray value = (ValueArray) atom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, atom)
         .run(context -> value.select(context, true, 0, 0))
         .act("insert_before")
@@ -318,7 +317,7 @@ public class TestActionsArray {
   public void testInsertAfter() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "insert_after");
@@ -346,7 +345,7 @@ public class TestActionsArray {
         new TreeBuilder(MiscSyntax.restrictedArray)
             .addArray("value", new TreeBuilder(MiscSyntax.quoted).add("value", "").build())
             .build();
-    final ValueArray value = (ValueArray) atom.fields.get("value");
+    final ValueArray value = (ValueArray) atom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, atom)
         .run(context -> value.select(context, true, 0, 0))
         .act("insert_after")
@@ -368,7 +367,7 @@ public class TestActionsArray {
   public void testMoveBefore() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "move_before");
@@ -393,7 +392,7 @@ public class TestActionsArray {
   public void testMoveBeforeStart() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 0, 1);
     Helper.act(context, "move_before");
@@ -418,7 +417,7 @@ public class TestActionsArray {
   public void testMoveAfter() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "move_after");
@@ -443,7 +442,7 @@ public class TestActionsArray {
   public void testMoveAfterEnd() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 3, 4);
     Helper.act(context, "move_after");
@@ -469,7 +468,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     final VisualArray visual =
         ((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual);
     visual.select(context, true, 1, 2);
     Helper.act(context, "copy");
@@ -498,7 +497,7 @@ public class TestActionsArray {
   public void testCutPaste() {
     final Context context = buildFive();
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "cut");
@@ -508,7 +507,7 @@ public class TestActionsArray {
       assertThat(selection.endIndex, equalTo(1));
     }
     (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 2, 2);
     Helper.act(context, "paste");
@@ -536,7 +535,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     final VisualArray visual =
         ((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual);
     visual.select(context, true, 1, 1);
     Helper.act(context, "prefix");
@@ -562,7 +561,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     final VisualArray visual =
         ((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.get("value"))
+            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual);
     visual.select(context, true, 1, 1);
     Helper.act(context, "suffix");

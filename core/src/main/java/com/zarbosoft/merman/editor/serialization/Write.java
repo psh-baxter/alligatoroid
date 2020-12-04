@@ -6,7 +6,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.rendaw.common.DeadCode;
@@ -190,7 +190,7 @@ public class Write {
 
   public static void write(final Atom atom, final EventConsumer writer) {
     final Deque<WriteState> stack = new ArrayDeque<>();
-    stack.addLast(new WriteStateBack(atom, atom.type.back().iterator()));
+    atom.write(stack);
     uncheck(
         () -> {
           while (!stack.isEmpty()) stack.getLast().run(stack, writer);
@@ -266,11 +266,11 @@ public class Write {
   }
 
   public static class WriteStateBack extends WriteState {
-    private final Atom base;
+    private final TSMap<String, Object> data;
     private final Iterator<BackSpec> iterator;
 
-    public WriteStateBack(final Atom base, final Iterator<BackSpec> iterator) {
-      this.base = base;
+    public WriteStateBack(TSMap<String, Object> data, final Iterator<BackSpec> iterator) {
+      this.data = data;
       this.iterator = iterator;
     }
 
@@ -281,16 +281,16 @@ public class Write {
         return;
       }
       BackSpec part = iterator.next();
-      part.write(stack, base, writer);
+      part.write(stack, data, writer);
     }
   }
 
   public static class WriteStateRecord extends WriteState {
-    private final Atom base;
+    private final TSMap<String, Object> data;
     private final Iterator<Map.Entry<String, BackSpec>> iterator;
 
-    public WriteStateRecord(final Atom base, final Map<String, BackSpec> record) {
-      this.base = base;
+    public WriteStateRecord(final TSMap<String, Object> data, final Map<String, BackSpec> record) {
+      this.data = data;
       this.iterator = record.entrySet().iterator();
     }
 
@@ -303,15 +303,36 @@ public class Write {
       final Map.Entry<String, BackSpec> next = iterator.next();
       writer.key(next.getKey());
       BackSpec part = next.getValue();
-      part.write(stack, base, writer);
+      part.write(stack, data, writer);
     }
   }
 
   public static class WriteStateDataArray extends WriteState {
     private final Iterator<Atom> iterator;
 
-    public WriteStateDataArray(final ValueArray array) {
-      this.iterator = array.data.iterator();
+    public WriteStateDataArray(final List<Atom> array) {
+      this.iterator = array.iterator();
+    }
+
+    @Override
+    public void run(final Deque<WriteState> stack, final EventConsumer writer) {
+      if (!iterator.hasNext()) {
+        stack.removeLast();
+        return;
+      }
+      iterator.next().write(stack);
+    }
+  }
+
+  public static class WriteStateDeepDataArray extends WriteState {
+    private final Iterator<Atom> iterator;
+    private final String elementKey;
+    private final BackSpec element;
+
+    public WriteStateDeepDataArray(BackSpec element, String elementKey, final List<Atom> array) {
+      this.element = element;
+      this.elementKey = elementKey;
+      this.iterator = array.iterator();
     }
 
     @Override
@@ -321,7 +342,8 @@ public class Write {
         return;
       }
       final Atom next = iterator.next();
-      stack.addLast(new WriteStateBack(next, next.type.back().iterator()));
+      element.write(
+          stack, new TSMap.Builder<String, Object>().putNull(elementKey, next).build(), writer);
     }
   }
 

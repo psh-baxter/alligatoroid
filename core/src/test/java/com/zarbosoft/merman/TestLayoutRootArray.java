@@ -72,7 +72,7 @@ public class TestLayoutRootArray {
   public void testDynamicCompact() {
     final Atom text = new TreeBuilder(this.text).add("value", "").build();
     new GeneralTestWizard(syntax, new TreeBuilder(one).build(), text)
-        .run(context -> text.fields.get("value").selectDown(context))
+        .run(context -> text.fields.getOpt("value").selectDown(context))
         .resize(40)
         .checkSpaceBrick(0, 0)
         .checkTextBrick(0, 1, "one")

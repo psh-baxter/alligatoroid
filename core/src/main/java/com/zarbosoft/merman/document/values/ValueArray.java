@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.zarbosoft.rendaw.common.Common.enumerate;
 import static com.zarbosoft.rendaw.common.Common.iterable;
@@ -89,8 +88,7 @@ public class ValueArray extends Value {
   }
 
   public Atom createAndAddDefault(final Context context, final int index) {
-    final List<FreeAtomType> childTypes =
-        context.syntax.getLeafTypes(back.type).collect(Collectors.toList());
+    final List<FreeAtomType> childTypes = context.syntax.getLeafTypes(back.elementAtomType());
     final Atom element;
     if (childTypes.size() == 1) element = childTypes.get(0).create(context.syntax);
     else element = context.syntax.gap.create();
@@ -150,7 +148,7 @@ public class ValueArray extends Value {
 
     @Override
     public String childType() {
-      return back.type;
+      return back.elementAtomType();
     }
 
     @Override

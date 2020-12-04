@@ -298,7 +298,7 @@ public class TestSelectionChanges {
                 .build());
 
     final ValueArray value =
-        (ValueArray) Helper.rootArray(context.document).data.get(0).fields.get("value");
+        (ValueArray) Helper.rootArray(context.document).data.get(0).fields.getOpt("value");
     final VisualArray visual = (VisualArray) value.visual;
     visual.select(context, true, beginSelectBegin, beginSelectEnd);
     final VisualArray.ArraySelection selection = visual.selection;

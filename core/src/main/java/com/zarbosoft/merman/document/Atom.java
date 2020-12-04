@@ -1,8 +1,12 @@
 package com.zarbosoft.merman.document;
 
 import com.zarbosoft.merman.document.values.Value;
+import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
+import com.zarbosoft.merman.editor.serialization.Write;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
@@ -11,8 +15,11 @@ import com.zarbosoft.merman.editor.visual.tags.TypeTag;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
+import com.zarbosoft.rendaw.common.Assertion;
 import org.pcollections.PSet;
 
+import java.util.Deque;
+import java.util.HashMap;
 import java.util.Map;
 
 public class Atom {
@@ -76,7 +83,21 @@ public class Atom {
   }
 
   public Object syntaxLocateStep(String segment) {
-    return fields.get(segment);
+    return fields.getOpt(segment);
+  }
+
+  public void write(Deque<Write.WriteState> stack) {
+    TSMap<String, Object> childData = new TSMap<>();
+    for (Map.Entry<String, Value> entry : fields.entries()) {
+      if (entry.getValue() instanceof ValueAtom) {
+        childData.put(entry.getKey(), ((ValueAtom) entry.getValue()).data);
+      } else if (entry.getValue() instanceof ValueArray) {
+        childData.put(entry.getKey(), ((ValueArray) entry.getValue()).data);
+      } else if (entry.getValue() instanceof ValuePrimitive) {
+        childData.put(entry.getKey(), ((ValuePrimitive) entry.getValue()).data);
+      } else throw new Assertion();
+    }
+    stack.addLast(new Write.WriteStateBack(childData, type.back().iterator()));
   }
 
   public abstract static class Parent {

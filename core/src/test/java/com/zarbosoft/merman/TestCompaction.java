@@ -300,7 +300,7 @@ public class TestCompaction {
         new TreeBuilder(low)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
             .build();
-    final ValueArray array = (ValueArray) lowAtom.fields.get("value");
+    final ValueArray array = (ValueArray) lowAtom.fields.getOpt("value");
     new GeneralTestWizard(syntax, lowAtom)
         .resize(70)
         .checkCourseCount(1)
@@ -326,7 +326,7 @@ public class TestCompaction {
   @Test
   public void testSplitDynamicBrickChange() {
     final Atom textAtom = new TreeBuilder(text).add("value", "oran").build();
-    final ValuePrimitive text = (ValuePrimitive) textAtom.fields.get("value");
+    final ValuePrimitive text = (ValuePrimitive) textAtom.fields.getOpt("value");
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(low).addArray("value", new TreeBuilder(one).build(), textAtom).build())
@@ -356,7 +356,7 @@ public class TestCompaction {
                 context.history.apply(
                     context,
                     new ChangePrimitiveAdd(
-                        (ValuePrimitive) primitive.fields.get("value"), 0, "wigwam ")))
+                        (ValuePrimitive) primitive.fields.getOpt("value"), 0, "wigwam ")))
         .checkTextBrick(0, 0, "wigwam I am a ")
         .checkTextBrick(1, 0, "banana")
         .checkTextBrick(1, 1, "123");
@@ -415,7 +415,7 @@ public class TestCompaction {
         new TreeBuilder(low)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
             .build();
-    final ValueArray array = (ValueArray) lowAtom.fields.get("value");
+    final ValueArray array = (ValueArray) lowAtom.fields.getOpt("value");
     new GeneralTestWizard(syntax, new TreeBuilder(unary).add("value", lowAtom).build())
         .resize(70)
         .checkCourseCount(1)
@@ -444,7 +444,7 @@ public class TestCompaction {
         new TreeBuilder(high)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
             .build();
-    final ValueArray array = (ValueArray) highAtom.fields.get("value");
+    final ValueArray array = (ValueArray) highAtom.fields.getOpt("value");
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(mid)
@@ -493,7 +493,7 @@ public class TestCompaction {
                 new TreeBuilder(one).build(),
                 new TreeBuilder(infinity).build())
             .build();
-    final ValueArray array = (ValueArray) lowAtom.fields.get("value");
+    final ValueArray array = (ValueArray) lowAtom.fields.getOpt("value");
     new GeneralTestWizard(syntax, lowAtom)
         .resize(100)
         .checkTextBrick(0, 1, "one")

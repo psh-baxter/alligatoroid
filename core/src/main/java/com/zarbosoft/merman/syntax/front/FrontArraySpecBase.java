@@ -2,6 +2,7 @@ package com.zarbosoft.merman.syntax.front;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
@@ -89,10 +90,12 @@ public abstract class FrontArraySpecBase extends FrontSpec {
   }
 
   @Override
-  public void finish(final AtomType atomType, final Set<String> middleUsed) {
+  public void finish(
+    List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed
+  ) {
     middleUsed.add(field());
     ((BaseBackArraySpec) atomType.fields.get(field())).front = this;
-    dataType = atomType.getDataArray(field());
+    dataType = atomType.getDataArray(errors,typePath, field());
   }
 
   public abstract String field();

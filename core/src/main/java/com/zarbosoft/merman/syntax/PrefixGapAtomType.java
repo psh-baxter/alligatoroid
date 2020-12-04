@@ -13,6 +13,7 @@ import com.zarbosoft.merman.editor.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
+import com.zarbosoft.merman.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
@@ -39,7 +40,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -59,6 +59,7 @@ public class PrefixGapAtomType extends AtomType {
     dataGap.id = "gap";
     dataValue = new BackArraySpec();
     dataValue.id = "value";
+    dataValue.element = new BackAtomSpec();
     final BackFixedRecordSpec record = new BackFixedRecordSpec();
     record.pairs.put("gap", dataGap);
     record.pairs.put("value", dataValue);
@@ -90,7 +91,8 @@ public class PrefixGapAtomType extends AtomType {
 
   @Override
   public void finish(
-      final Syntax syntax, final Set<String> allTypes, final Set<String> scalarTypes) {
+    List<Object> errors, final Syntax syntax
+  ) {
     {
       final FrontGapBase gap =
           new FrontGapBase() {
@@ -100,7 +102,7 @@ public class PrefixGapAtomType extends AtomType {
                 final Atom self,
                 final String string,
                 final Common.UserData store) {
-              final Atom value = ((ValueArray) self.fields.get("value")).data.get(0);
+              final Atom value = ((ValueArray) self.fields.getOpt("value")).data.get(0);
               class PrefixChoice extends Choice {
                 private final FreeAtomType type;
                 private final GapKey key;
@@ -134,7 +136,7 @@ public class PrefixGapAtomType extends AtomType {
                               context.history.apply(
                                   context,
                                   new ChangeArray(
-                                      (ValueArray) atom.fields.get(front.field()),
+                                      (ValueArray) atom.fields.getOpt(front.field()),
                                       0,
                                       0,
                                       ImmutableList.of(inner)));
@@ -145,13 +147,13 @@ public class PrefixGapAtomType extends AtomType {
                               context.history.apply(
                                   context,
                                   new ChangeNodeSet(
-                                      (ValueAtom) atom.fields.get(front.middle), inner));
+                                      (ValueAtom) atom.fields.getOpt(front.middle), inner));
                             }
                           });
 
                   // Select the next input after the key
                   if (parsed.nextInput != null)
-                    atom.fields.get(parsed.nextInput.field()).selectDown(context);
+                    atom.fields.getOpt(parsed.nextInput.field()).selectDown(context);
                   else inner.visual.selectDown(context);
                 }
 
@@ -177,7 +179,7 @@ public class PrefixGapAtomType extends AtomType {
                       () -> {
                         final Union union = new Union();
                         for (final FreeAtomType type :
-                            (iterable(context.syntax.getLeafTypes(self.parent.childType())))) {
+                            context.syntax.getLeafTypes(self.parent.childType())) {
                           for (final GapKey key : gapKeys(syntax, type, value.type)) {
                             if (key.indexAfter == -1) continue;
                             final PrefixChoice choice = new PrefixChoice(type, key);
@@ -229,12 +231,12 @@ public class PrefixGapAtomType extends AtomType {
                 final String string,
                 final Common.UserData userData) {
               if (self.visual != null && string.isEmpty()) {
-                self.parent.replace(context, ((ValueArray) self.fields.get("value")).data.get(0));
+                self.parent.replace(context, ((ValueArray) self.fields.getOpt("value")).data.get(0));
               }
             }
           };
       final FrontArrayAsAtomSpec value = new FrontArrayAsAtomSpec();
-      value.middle = "value";
+      value.back = "value";
       front =
           ImmutableList.copyOf(
               Iterables.concat(
@@ -244,7 +246,7 @@ public class PrefixGapAtomType extends AtomType {
                   ImmutableList.of(value),
                   frontSuffix));
     }
-    super.finish(syntax, allTypes, scalarTypes);
+    super.finish(errors, syntax);
   }
 
   @Override

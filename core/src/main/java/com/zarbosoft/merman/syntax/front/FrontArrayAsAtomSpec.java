@@ -2,6 +2,7 @@ package com.zarbosoft.merman.syntax.front;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
@@ -15,13 +16,14 @@ import com.zarbosoft.merman.syntax.symbol.Symbol;
 import org.pcollections.HashTreePSet;
 import org.pcollections.PSet;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class FrontArrayAsAtomSpec extends FrontSpec {
 
-  public String middle;
+  public String back;
   private BaseBackArraySpec dataType;
 
   @Override
@@ -45,6 +47,11 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
         depthScore) {
 
       @Override
+      protected String nodeType() {
+        return dataType.elementAtomType();
+      }
+
+      @Override
       protected Symbol ellipsis() {
         return null;
       }
@@ -52,14 +59,15 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
   }
 
   @Override
-  public void finish(final AtomType atomType, final Set<String> middleUsed) {
-    middleUsed.add(middle);
-    dataType = (BaseBackArraySpec) atomType.getDataArray(middle);
+  public void finish(
+      List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
+    middleUsed.add(back);
+    dataType = (BaseBackArraySpec) atomType.getDataArray(errors, typePath, back);
   }
 
   @Override
   public String field() {
-    return middle;
+    return back;
   }
 
   @Override

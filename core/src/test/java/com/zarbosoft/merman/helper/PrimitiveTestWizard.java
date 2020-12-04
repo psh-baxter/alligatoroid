@@ -15,7 +15,7 @@ public class PrimitiveTestWizard {
 				new TreeBuilder(PrimitiveSyntax.primitive).add("value", string).build()
 		);
 		this.primitive =
-				((ValuePrimitive) Helper.rootArray(inner.context.document).data.get(0).fields.get("value")).visual;
+				((ValuePrimitive) Helper.rootArray(inner.context.document).data.get(0).fields.getOpt("value")).visual;
 	}
 
 	public PrimitiveTestWizard check(final String... lines) {

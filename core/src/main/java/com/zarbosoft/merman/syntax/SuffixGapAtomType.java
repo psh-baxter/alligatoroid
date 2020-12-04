@@ -14,11 +14,11 @@ import com.zarbosoft.merman.editor.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
+import com.zarbosoft.merman.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
-import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontArrayAsAtomSpec;
 import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
@@ -45,12 +45,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class SuffixGapAtomType extends AtomType {
-  private final BaseBackArraySpec dataValue;
+  private final BackArraySpec dataValue;
   private final BaseBackPrimitiveSpec dataGap;
   private final List<BackSpec> back;
   public List<FrontSymbol> frontPrefix = new ArrayList<>();
@@ -61,6 +60,7 @@ public class SuffixGapAtomType extends AtomType {
   public SuffixGapAtomType() {
     dataValue = new BackArraySpec();
     dataValue.id = "value";
+    dataValue.element = new BackAtomSpec();
     dataGap = new BackPrimitiveSpec();
     dataGap.id = "gap";
     final BackFixedRecordSpec record = new BackFixedRecordSpec();
@@ -94,10 +94,11 @@ public class SuffixGapAtomType extends AtomType {
 
   @Override
   public void finish(
-      final Syntax syntax, final Set<String> allTypes, final Set<String> scalarTypes) {
+    List<Object> errors, final Syntax syntax
+  ) {
     {
       final FrontArrayAsAtomSpec value = new FrontArrayAsAtomSpec();
-      value.middle = "value";
+      value.back = "value";
       final FrontGapBase gap =
           new FrontGapBase() {
             @Override
@@ -133,8 +134,8 @@ public class SuffixGapAtomType extends AtomType {
                   final Atom atom = parsed.atom;
                   final String remainder = parsed.remainder;
                   root = atom;
-                  child = ((ValueArray) suffixSelf.fields.get("value")).data.get(0);
-                  childPlacement = atom.fields.get(atom.type.front().get(key.indexBefore).field());
+                  child = ((ValueArray) suffixSelf.fields.getOpt("value")).data.get(0);
+                  childPlacement = atom.fields.getOpt(atom.type.front().get(key.indexBefore).field());
 
                   // Find the new atom placement point
                   rootPlacement = suffixSelf.parent;
@@ -158,17 +159,17 @@ public class SuffixGapAtomType extends AtomType {
                     if (key.indexAfter == -1) {
                       // No such place exists - wrap the placement atom in a suffix gap
                       root = context.syntax.suffixGap.create(true, atom);
-                      selectNext = (ValuePrimitive) root.fields.get("gap");
+                      selectNext = (ValuePrimitive) root.fields.getOpt("gap");
                     } else {
                       nextWhatever = type.front.get(key.indexAfter);
                     }
                   } else nextWhatever = parsed.nextInput;
                   if (selectNext == null) {
                     if (nextWhatever instanceof FrontDataAtom) {
-                      selectNext = atom.fields.get(nextWhatever.field());
+                      selectNext = atom.fields.getOpt(nextWhatever.field());
                     } else if (nextWhatever instanceof FrontPrimitiveSpec
                         || nextWhatever instanceof FrontArraySpecBase) {
-                      selectNext = atom.fields.get(nextWhatever.field());
+                      selectNext = atom.fields.getOpt(nextWhatever.field());
                     } else throw new DeadCode();
                   }
 
@@ -210,12 +211,12 @@ public class SuffixGapAtomType extends AtomType {
 
               // Get or build gap grammar
               final AtomType childType =
-                  ((ValueArray) suffixSelf.fields.get("value")).data.get(0).type;
+                  ((ValueArray) suffixSelf.fields.getOpt("value")).data.get(0).type;
               final Grammar grammar =
                   store.get(
                       () -> {
                         final Union union = new Union();
-                        for (final FreeAtomType type : context.syntax.types) {
+                        for (final FreeAtomType type : context.syntax.types.values()) {
                           final Pair<Value.Parent, Atom> replacementPoint =
                               findReplacementPoint(context, self.parent, type);
                           if (replacementPoint.first == null) continue;
@@ -281,7 +282,7 @@ public class SuffixGapAtomType extends AtomType {
                 if (context
                     .syntax
                     .getLeafTypes(test.childType())
-                    .map(t -> t.id())
+                    .stream().map(t -> t.id())
                     .collect(Collectors.toSet())
                     .contains(type.id())) {
                   parent = test;
@@ -306,7 +307,7 @@ public class SuffixGapAtomType extends AtomType {
                 final String string,
                 final Common.UserData userData) {
               if (self.visual != null && string.isEmpty()) {
-                self.parent.replace(context, ((ValueArray) self.fields.get("value")).data.get(0));
+                self.parent.replace(context, ((ValueArray) self.fields.getOpt("value")).data.get(0));
               }
             }
           };
@@ -319,7 +320,7 @@ public class SuffixGapAtomType extends AtomType {
                   ImmutableList.of(gap),
                   frontSuffix));
     }
-    super.finish(syntax, allTypes, scalarTypes);
+    super.finish(errors, syntax);
   }
 
   /**

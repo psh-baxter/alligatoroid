@@ -186,7 +186,7 @@ public class GeneralTestWizard {
 	}
 
 	public GeneralTestWizard checkArrayTree(final Atom... atoms) {
-		final ValueArray documentAtoms = (ValueArray) inner.context.document.root.fields.get("value");
+		final ValueArray documentAtoms = (ValueArray) inner.context.document.root.fields.getOpt("value");
 		assertThat(documentAtoms.data.size(), equalTo(atoms.length));
 		zip(Stream.of(atoms), documentAtoms.data.stream()).forEach(pair -> {
 			Helper.assertTreeEqual(pair.first, pair.second);
