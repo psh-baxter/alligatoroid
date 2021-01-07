@@ -23,7 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
 /** Test changes to the selection when a change affects the selected nodes (or nearby nodes). */
-public class TestSelectionChanges {
+public class TestCursorChanges {
 
   @Test
   public void removeRootOnly() {
@@ -51,26 +51,26 @@ public class TestSelectionChanges {
     // Initial selection and double checking
     final Atom found = (Atom) context.syntaxLocate(selectBegin);
     found.parent.selectUp(context);
-    selectBegin = context.selection.getSyntaxPath();
+    selectBegin = context.cursor.getSyntaxPath();
     //assertThat(context.selection.getSyntaxPath(), equalTo(selectBegin));
 
     // Transform
     transform.accept(context, found);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
     assertTreeEqual(Helper.rootArray(context.document).data.get(0), end);
-    assertThat(context.selection.getSyntaxPath(), equalTo(selectEnd));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(selectEnd));
 
     // Undo
     context.history.undo(context);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
     assertTreeEqual(Helper.rootArray(context.document).data.get(0), begin);
-    assertThat(context.selection.getSyntaxPath(), equalTo(selectBegin));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(selectBegin));
 
     // Redo
     context.history.redo(context);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
     assertTreeEqual(Helper.rootArray(context.document).data.get(0), end);
-    assertThat(context.selection.getSyntaxPath(), equalTo(selectEnd));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(selectEnd));
   }
 
   @Test
@@ -197,7 +197,7 @@ public class TestSelectionChanges {
               .parent
               .atom()
               .parent
-              .delete(context);
+              .deleteChild(context);
         },
         new TreeBuilder(MiscSyntax.array)
             .addArray(
@@ -301,7 +301,7 @@ public class TestSelectionChanges {
         (ValueArray) Helper.rootArray(context.document).data.get(0).fields.getOpt("value");
     final VisualArray visual = (VisualArray) value.visual;
     visual.select(context, true, beginSelectBegin, beginSelectEnd);
-    final VisualArray.ArraySelection selection = visual.selection;
+    final VisualArray.ArrayCursor selection = visual.selection;
 
     // Transform
     transform.accept(context, value);
@@ -526,7 +526,7 @@ public class TestSelectionChanges {
               .parent
               .atom()
               .parent
-              .delete(context);
+              .deleteChild(context);
         },
         new TreeBuilder(MiscSyntax.snooze).add("value", MiscSyntax.syntax.gap.create()).build(),
         new Path("value", "0", "value"));

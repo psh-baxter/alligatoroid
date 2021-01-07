@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editor.hid;
 
 import com.google.common.collect.ImmutableSet;
-import com.zarbosoft.merman.modules.hotkeys.Key;
+import com.zarbosoft.merman.extensions.hotkeys.Key;
 import com.zarbosoft.pidgoon.events.Event;
 
 import java.util.Set;

@@ -30,9 +30,10 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Wall;
-import com.zarbosoft.merman.modules.Module;
+import com.zarbosoft.merman.extensions.Extension;
+import com.zarbosoft.merman.extensions.ExtensionContext;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.front.FrontGapBase;
+import com.zarbosoft.merman.editor.gap.TwoColumnChoice;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ChainComparator;
@@ -66,9 +67,10 @@ public class Context {
   public final Wall foreground;
   public final Display display;
   public final Syntax syntax;
+  public final ExtensionContext extensionContext;
   public final Document document;
-  private final Set<SelectionListener> selectionListeners = new HashSet<>();
-  private final Set<HoverListener> hoverListeners = new HashSet<>();
+  public final Set<SelectionListener> selectionListeners = new HashSet<>();
+  public final Set<HoverListener> hoverListeners = new HashSet<>();
   private final Set<TagsListener> selectionTagsChangeListeners = new HashSet<>();
   private final Set<TagsListener> globalTagsChangeListeners = new HashSet<>();
   private final Set<ActionChangeListener> actionChangeListeners = new HashSet<>();
@@ -77,7 +79,7 @@ public class Context {
   private final Consumer<Integer> flushIteration;
   public boolean window;
   public Atom windowAtom;
-  public List<Module.State> modules;
+  public List<Extension.State> modules;
   public PSet<Tag> globalTags = HashTreePSet.empty();
   public List<KeyListener> keyListeners = new ArrayList<>();
   public List<GapChoiceListener> gapChoiceListeners = new ArrayList<>();
@@ -96,7 +98,7 @@ public class Context {
   public Brick hoverBrick;
   public Hoverable hover;
   public HoverIteration hoverIdle;
-  public Selection selection;
+  public Cursor cursor;
   WeakCache<Set<Tag>, Style.Baked> styleCache = new WeakCache<>(v -> v.tags);
   List<ContextIntListener> converseEdgeListeners = new ArrayList<>();
   List<ContextIntListener> transverseEdgeListeners = new ArrayList<>();
@@ -182,7 +184,7 @@ public class Context {
             return;
           }
           if (text.isEmpty()) return;
-          selection.receiveText(this, text);
+          cursor.receiveText(this, text);
           flushIteration(100);
         });
     display.addMouseExitListener(
@@ -268,7 +270,7 @@ public class Context {
               ImmutableSet.of()));
     }
     modules =
-        document.syntax.modules.stream().map(p -> p.initialize(this)).collect(Collectors.toList());
+        document.syntax.extensions.stream().map(p -> p.create(this)).collect(Collectors.toList());
     display.addHIDEventListener(
         event -> {
           clearHover();
@@ -628,27 +630,27 @@ public class Context {
   }
 
   public void clearSelection() {
-    selection.clear(this);
-    selection = null;
+    cursor.clear(this);
+    cursor = null;
   }
 
-  public void setSelection(final Selection selection) {
+  public void setSelection(final Cursor cursor) {
     final int localToken = ++selectToken;
-    final Selection oldSelection = this.selection;
-    this.selection = selection;
+    final Cursor oldCursor = this.cursor;
+    this.cursor = cursor;
 
-    if (oldSelection != null) {
-      oldSelection.clear(this);
+    if (oldCursor != null) {
+      oldCursor.clear(this);
     }
 
     if (localToken != selectToken) return;
 
-    ImmutableSet.copyOf(selectionListeners).forEach(l -> l.selectionChanged(this, selection));
+    ImmutableSet.copyOf(selectionListeners).forEach(l -> l.selectionChanged(this, cursor));
     selectionTagsChanged();
   }
 
   public void selectionTagsChanged() {
-    if (selection == null) return;
+    if (cursor == null) return;
     banner.tagsChanged(this);
     details.tagsChanged(this);
     ImmutableList.copyOf(selectionTagsChangeListeners)
@@ -684,7 +686,7 @@ public class Context {
             ImmutableSet.of(new StateTag("windowed"), new StateTag("root_window"))));
   }
   public static interface GapChoiceListener {
-    void changed(Context context, List<? extends FrontGapBase.Choice> choices);
+    void changed(Context context, List<? extends TwoColumnChoice> choices);
   }
 
   public static interface ContextIntListener {
@@ -702,9 +704,9 @@ public class Context {
     boolean handleKey(Context context, HIDEvent event);
   }
 
-  public abstract static class SelectionListener {
+  public interface SelectionListener {
 
-    public abstract void selectionChanged(Context context, Selection selection);
+    public abstract void selectionChanged(Context context, Cursor cursor);
   }
 
   public abstract static class HoverListener {
@@ -921,14 +923,10 @@ public class Context {
       if (!window) return false;
       if (windowAtom == null) return false;
       final Atom atom = windowAtom;
-      final Visual oldWindowVisual = windowAtom.visual;
-      final Visual windowVisual;
       if (atom == document.root) {
         windowAtom = null;
-        windowVisual = document.root.createVisual(context, null, ImmutableMap.of(), 0, 0);
       } else {
         windowAtom = atom.parent.value().parent.atom();
-        windowVisual = windowAtom.createVisual(context, null, ImmutableMap.of(), 0, 0);
       }
       idleLayBricksOutward();
       return true;
@@ -942,8 +940,8 @@ public class Context {
       if (!window) return false;
       final List<VisualAtom> chain = new ArrayList<>();
       final VisualAtom stop = windowAtom.visual;
-      if (selection.getVisual().parent() == null) return false;
-      VisualAtom at = selection.getVisual().parent().atomVisual();
+      if (cursor.getVisual().parent() == null) return false;
+      VisualAtom at = cursor.getVisual().parent().atomVisual();
       while (at != null) {
         if (at == stop) break;
         if (at.parent() == null) break;

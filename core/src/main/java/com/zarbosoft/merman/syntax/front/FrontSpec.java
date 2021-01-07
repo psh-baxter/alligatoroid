@@ -42,7 +42,7 @@ public abstract class FrontSpec {
 
     public abstract void handle(FrontArraySpecBase front);
 
-    public abstract void handle(FrontDataAtom front);
+    public abstract void handle(FrontAtomSpec front);
 
     public abstract void handle(FrontPrimitiveSpec front);
 

@@ -12,7 +12,7 @@ import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.Selection;
+import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.SelectionState;
 import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.visual.Alignment;
@@ -63,7 +63,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
   public PSet<Tag> tags;
   public int brickCount = 0;
   public PrimitiveHoverable hoverable;
-  public PrimitiveSelection selection;
+  public PrimitiveCursor selection;
   public List<Line> lines = new ArrayList<>();
   private boolean canExpand = false;
   private int hardLineCount = 0;
@@ -293,9 +293,9 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
   }
 
-  public PrimitiveSelection createSelection(
+  public PrimitiveCursor createSelection(
       final Context context, final boolean leadFirst, final int beginOffset, final int endOffset) {
-    return new PrimitiveSelection(context, leadFirst, beginOffset, endOffset);
+    return new PrimitiveCursor(context, leadFirst, beginOffset, endOffset);
   }
 
   protected void commit() {}
@@ -862,7 +862,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
   }
 
-  public class PrimitiveSelection extends Selection {
+  public class PrimitiveCursor extends Cursor {
     public final RangeAttachment range;
     final BreakIterator clusterIterator = BreakIterator.getCharacterInstance();
     private final ValuePrimitive.Listener clusterListener =
@@ -883,7 +883,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
           }
         };
 
-    public PrimitiveSelection(
+    public PrimitiveCursor(
         final Context context,
         final boolean leadFirst,
         final int beginOffset,
@@ -1024,7 +1024,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
             final Atom gap = context.syntax.suffixGap.create(true, atomVisual().atom);
             parent.replace(context, gap);
             gap.fields.getOpt("gap").selectDown(context);
-            context.selection.receiveText(context, text);
+            context.cursor.receiveText(context, text);
           }
           return;
         }

@@ -11,6 +11,7 @@
         <module>webview</module>
         <module>luxem</module>
         <module>pidgoon</module>
+        <module>common</module>
     </modules>
     <properties>
         <jver>11</jver>

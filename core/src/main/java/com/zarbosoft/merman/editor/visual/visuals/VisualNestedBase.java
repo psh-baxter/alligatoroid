@@ -31,7 +31,7 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 	protected VisualAtom body;
 	VisualParent parent;
 	private NestedHoverable hoverable;
-	private NestedSelection selection;
+	private NestedCursor selection;
 	private Brick ellipsis = null;
 
 	public VisualNestedBase(final PSet<Tag> tags, final int visualDepth) {
@@ -278,7 +278,7 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 		else if (hoverable != null) {
 			context.clearHover();
 		}
-		selection = new NestedSelection(context);
+		selection = new NestedCursor(context);
 		context.setSelection(selection);
 	}
 
@@ -297,10 +297,10 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 		);
 	}
 
-	public class NestedSelection extends Selection {
+	public class NestedCursor extends Cursor {
 		private BorderAttachment border;
 
-		public NestedSelection(final Context context) {
+		public NestedCursor(final Context context) {
 			border = new BorderAttachment(context, getBorderStyle(context, tags).obbox);
 			final Brick first = nudge(context);
 			border.setFirst(context, first);
@@ -373,8 +373,8 @@ public abstract class VisualNestedBase extends Visual implements VisualLeaf {
 			return;
 		boolean fixDeepSelection = false;
 		boolean fixDeepHover = false;
-		if (context.selection != null) {
-			VisualParent parent = context.selection.getVisual().parent();
+		if (context.cursor != null) {
+			VisualParent parent = context.cursor.getVisual().parent();
 			while (parent != null) {
 				final Visual visual = parent.visual();
 				if (visual == this) {

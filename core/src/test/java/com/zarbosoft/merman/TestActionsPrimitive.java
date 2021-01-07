@@ -23,7 +23,7 @@ public class TestActionsPrimitive {
   @Test
   public void testExit() {
     final Context context = buildFive();
-    assertThat(context.selection.getVisual(), instanceOf(VisualPrimitive.class));
+    assertThat(context.cursor.getVisual(), instanceOf(VisualPrimitive.class));
     Helper.act(context, "exit");
     assertNotNull(((VisualArray) Helper.rootArray(context.document).visual).selection);
   }
@@ -51,7 +51,7 @@ public class TestActionsPrimitive {
         .run(
             context ->
                 assertThat(
-                    context.selection.getSyntaxPath(),
+                    context.cursor.getSyntaxPath(),
                     equalTo(new Path("value", "0", "second", "0"))));
   }
 
@@ -66,7 +66,7 @@ public class TestActionsPrimitive {
         .run(
             context ->
                 assertThat(
-                    context.selection.getSyntaxPath(),
+                    context.cursor.getSyntaxPath(),
                     equalTo(new Path("value", "0", "first", "0"))));
   }
 
@@ -79,12 +79,12 @@ public class TestActionsPrimitive {
   }
 
   public static VisualPrimitive visual(final Context context) {
-    return (VisualPrimitive) context.selection.getVisual();
+    return (VisualPrimitive) context.cursor.getVisual();
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final VisualPrimitive.PrimitiveSelection selection =
-        (VisualPrimitive.PrimitiveSelection) context.selection;
+    final VisualPrimitive.PrimitiveCursor selection =
+        (VisualPrimitive.PrimitiveCursor) context.cursor;
     assertThat(selection.range.beginOffset, equalTo(begin));
     assertThat(selection.range.endOffset, equalTo(end));
   }

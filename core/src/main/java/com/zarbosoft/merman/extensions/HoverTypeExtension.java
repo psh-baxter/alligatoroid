@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.modules;
+package com.zarbosoft.merman.extensions;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
@@ -9,14 +9,14 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.visual.visuals.VisualNestedBase;
 import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
 
-public class HoverType extends Module {
+public class HoverTypeExtension extends Extension {
 
   public boolean node = true;
 
   public boolean part = true;
 
   @Override
-  public State initialize(final Context context) {
+  public State create(final ExtensionContext context) {
     return new ModuleState(context);
   }
 
@@ -66,6 +66,6 @@ public class HoverType extends Module {
     }
 
     @Override
-    public void destroy(final Context context) {}
+    public void destroy(final ExtensionContext context) {}
   }
 }

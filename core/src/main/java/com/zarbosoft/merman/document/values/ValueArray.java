@@ -141,7 +141,7 @@ public class ValueArray extends Value {
     }
 
     @Override
-    public void delete(final Context context) {
+    public void deleteChild(final Context context) {
       context.history.apply(
           context, new ChangeArray(ValueArray.this, index, 1, ImmutableList.of()));
     }

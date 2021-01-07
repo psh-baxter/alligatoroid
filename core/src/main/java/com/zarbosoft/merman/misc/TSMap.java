@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Supplier;
 
 public class TSMap<K, V> {
   private static final Object missing = new Object();
@@ -71,6 +72,10 @@ public class TSMap<K, V> {
 
   public Collection<V> values() {
     return inner.values();
+  }
+
+  public V getCreate(K k, Supplier<V> s) {
+    return inner.computeIfAbsent(k,ignored -> s.get());
   }
 
   public static class Builder<K, V> {

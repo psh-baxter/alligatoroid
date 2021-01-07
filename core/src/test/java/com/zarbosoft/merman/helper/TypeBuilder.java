@@ -5,7 +5,7 @@ import com.zarbosoft.merman.syntax.alignments.AbsoluteAlignmentDefinition;
 import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentDefinition;
 import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentDefinition;
 import com.zarbosoft.merman.syntax.back.BackSpec;
-import com.zarbosoft.merman.syntax.front.FrontDataAtom;
+import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
@@ -46,7 +46,7 @@ public class TypeBuilder {
   }
 
   public TypeBuilder frontDataNode(final String middle) {
-    final FrontDataAtom part = new FrontDataAtom();
+    final FrontAtomSpec part = new FrontAtomSpec();
     part.middle = middle;
     type.front.add(part);
     return this;

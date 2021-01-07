@@ -17,7 +17,7 @@ import com.zarbosoft.merman.editor.wall.Course;
 import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
 import com.zarbosoft.merman.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.front.FrontGapBase;
+import com.zarbosoft.merman.editor.gap.TwoColumnChoice;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -35,7 +35,7 @@ import static org.hamcrest.number.OrderingComparison.greaterThan;
 import static org.junit.Assert.assertThat;
 
 public class GeneralTestWizard {
-	private List<? extends FrontGapBase.Choice> choices;
+	private List<? extends TwoColumnChoice> choices;
 	TestWizard inner;
 
 	public GeneralTestWizard(final Syntax syntax, final Atom... atoms) {
@@ -149,7 +149,7 @@ public class GeneralTestWizard {
 
 	public GeneralTestWizard run(final Consumer<Context> r) {
 		r.accept(inner.context);
-		assertThat(inner.context.selection, is(notNullValue()));
+		assertThat(inner.context.cursor, is(notNullValue()));
 		inner.runner.flush();
 		return this;
 	}
@@ -158,7 +158,7 @@ public class GeneralTestWizard {
 		for (final Action action : iterable(inner.context.actions())) {
 			if (action.id().equals(name)) {
 				action.run(inner.context);
-				assertThat(inner.context.selection, is(notNullValue()));
+				assertThat(inner.context.cursor, is(notNullValue()));
 				inner.runner.flush();
 				return this;
 			}
@@ -195,7 +195,7 @@ public class GeneralTestWizard {
 	}
 
 	public GeneralTestWizard sendText(final String text) {
-		inner.context.selection.receiveText(inner.context, text);
+		inner.context.cursor.receiveText(inner.context, text);
 		inner.runner.flush();
 		return this;
 	}

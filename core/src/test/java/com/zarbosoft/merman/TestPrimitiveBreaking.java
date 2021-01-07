@@ -93,12 +93,12 @@ public class TestPrimitiveBreaking {
     new GeneralTestWizard(PrimitiveSyntax.syntax, primitive)
         .resize(40)
         .run(context -> primitive.fields.getOpt("value").selectDown(context))
-        .run(context -> context.selection.receiveText(context, "4"))
+        .run(context -> context.cursor.receiveText(context, "4"))
         .checkTextBrick(0, 1, "1234")
-        .run(context -> context.selection.receiveText(context, "5"))
+        .run(context -> context.cursor.receiveText(context, "5"))
         .checkTextBrick(0, 1, "1234")
         .checkTextBrick(1, 0, "5")
-        .run(context -> context.selection.receiveText(context, "6"))
+        .run(context -> context.cursor.receiveText(context, "6"))
         .checkTextBrick(0, 1, "1234")
         .checkTextBrick(1, 0, "56");
   }

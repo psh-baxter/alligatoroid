@@ -28,7 +28,7 @@ public class TestActionsArray {
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "enter");
     assertThat(
-        context.selection.getSyntaxPath(),
+        context.cursor.getSyntaxPath(),
         equalTo(new Path("value", "0", "value", "0", "value")));
   }
 
@@ -42,7 +42,7 @@ public class TestActionsArray {
   }
 
   public static VisualArray visual(final Context context) {
-    return (VisualArray) context.selection.getVisual().parent().visual();
+    return (VisualArray) context.cursor.getVisual().parent().visual();
   }
 
   @Test
@@ -54,7 +54,7 @@ public class TestActionsArray {
                 .build());
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "exit");
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0")));
   }
 
   @Test
@@ -71,7 +71,7 @@ public class TestActionsArray {
         .run(
             context ->
                 assertThat(
-                    context.selection.getSyntaxPath(),
+                    context.cursor.getSyntaxPath(),
                     equalTo(new Path("value", "0", "second", "0"))));
   }
 
@@ -89,7 +89,7 @@ public class TestActionsArray {
         .run(
             context ->
                 assertThat(
-                    context.selection.getSyntaxPath(),
+                    context.cursor.getSyntaxPath(),
                     equalTo(new Path("value", "0", "first", "0"))));
   }
 
@@ -98,7 +98,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "next_element");
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "3")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "3")));
   }
 
   public Context buildFive() {
@@ -119,7 +119,7 @@ public class TestActionsArray {
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(begin));
     assertThat(selection.endIndex, equalTo(end));
   }
@@ -129,7 +129,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 4);
     Helper.act(context, "next_element");
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "4")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "4")));
   }
 
   @Test
@@ -137,7 +137,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "previous_element");
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "1")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "1")));
   }
 
   @Test
@@ -153,7 +153,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "previous_element");
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "0")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "0")));
   }
 
   @Test
@@ -161,7 +161,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "gather_next");
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(3));
   }
@@ -171,7 +171,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 4);
     Helper.act(context, "gather_next");
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(4));
     assertThat(selection.endIndex, equalTo(4));
   }
@@ -181,7 +181,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "gather_previous");
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(1));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -191,7 +191,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "gather_previous");
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(0));
   }
@@ -204,7 +204,7 @@ public class TestActionsArray {
                 .visual)
         .select(context, true, 2, 3);
     Helper.act(context, "release_next");
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -214,7 +214,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "release_next");
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -227,7 +227,7 @@ public class TestActionsArray {
                 .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "release_previous");
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -237,7 +237,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "release_previous");
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -260,7 +260,7 @@ public class TestActionsArray {
                 new TreeBuilder(MiscSyntax.five).build())
             .build(),
         Helper.rootArray(context.document));
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "1")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "1")));
   }
 
   @Test
@@ -285,7 +285,7 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(context.document));
     assertThat(
-        context.selection.getSyntaxPath(),
+        context.cursor.getSyntaxPath(),
         equalTo(new Path("value", "0", "value", "1", "gap", "0")));
   }
 
@@ -309,7 +309,7 @@ public class TestActionsArray {
         .run(
             context ->
                 assertThat(
-                    context.selection.getSyntaxPath(),
+                    context.cursor.getSyntaxPath(),
                     equalTo(new Path("value", "0", "value", "0", "value", "0"))));
   }
 
@@ -335,7 +335,7 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(context.document));
     assertThat(
-        context.selection.getSyntaxPath(),
+        context.cursor.getSyntaxPath(),
         equalTo(new Path("value", "0", "value", "3", "gap", "0")));
   }
 
@@ -359,7 +359,7 @@ public class TestActionsArray {
         .run(
             context ->
                 assertThat(
-                    context.selection.getSyntaxPath(),
+                    context.cursor.getSyntaxPath(),
                     equalTo(new Path("value", "0", "value", "1", "value", "0"))));
   }
 
@@ -383,7 +383,7 @@ public class TestActionsArray {
                 new TreeBuilder(MiscSyntax.five).build())
             .build(),
         Helper.rootArray(context.document));
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(1));
   }
@@ -408,7 +408,7 @@ public class TestActionsArray {
                 new TreeBuilder(MiscSyntax.five).build())
             .build(),
         Helper.rootArray(context.document));
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(1));
   }
@@ -433,7 +433,7 @@ public class TestActionsArray {
                 new TreeBuilder(MiscSyntax.five).build())
             .build(),
         Helper.rootArray(context.document));
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(3));
   }
@@ -458,7 +458,7 @@ public class TestActionsArray {
                 new TreeBuilder(MiscSyntax.five).build())
             .build(),
         Helper.rootArray(context.document));
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(3));
     assertThat(selection.endIndex, equalTo(4));
   }
@@ -487,10 +487,10 @@ public class TestActionsArray {
                 new TreeBuilder(MiscSyntax.three).build())
             .build(),
         Helper.rootArray(context.document));
-    final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(5));
     assertThat(selection.endIndex, equalTo(5));
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "5")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "5")));
   }
 
   @Test
@@ -502,7 +502,7 @@ public class TestActionsArray {
         .select(context, true, 1, 2);
     Helper.act(context, "cut");
     {
-      final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+      final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
       assertThat(selection.beginIndex, equalTo(1));
       assertThat(selection.endIndex, equalTo(1));
     }
@@ -523,11 +523,11 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(context.document));
     {
-      final VisualArray.ArraySelection selection = (VisualArray.ArraySelection) context.selection;
+      final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
       assertThat(selection.beginIndex, equalTo(3));
       assertThat(selection.endIndex, equalTo(3));
     }
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "value", "3")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "3")));
   }
 
   @Test
@@ -552,7 +552,7 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(context.document));
     assertThat(
-        context.selection.getSyntaxPath(),
+        context.cursor.getSyntaxPath(),
         equalTo(new Path("value", "0", "value", "1", "gap", "0")));
   }
 
@@ -578,7 +578,7 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(context.document));
     assertThat(
-        context.selection.getSyntaxPath(),
+        context.cursor.getSyntaxPath(),
         equalTo(new Path("value", "0", "value", "1", "gap", "0")));
   }
 }

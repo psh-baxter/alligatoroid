@@ -3,8 +3,8 @@ package com.zarbosoft.merman.syntax;
 import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.editor.serialization.Load;
+import com.zarbosoft.merman.extensions.Extension;
 import com.zarbosoft.merman.misc.TSMap;
-import com.zarbosoft.merman.modules.Module;
 import com.zarbosoft.merman.syntax.error.DuplicateAtomTypeIds;
 import com.zarbosoft.merman.syntax.error.DuplicateAtomTypeIdsInGroup;
 import com.zarbosoft.merman.syntax.error.GroupChildDoesntExist;
@@ -57,11 +57,10 @@ public class Syntax {
   public TSMap<String, List<String>> groups = new TSMap<>();
   public RootAtomType root;
   public GapAtomType gap = new GapAtomType();
-  public PrefixGapAtomType prefixGap = new PrefixGapAtomType();
   public SuffixGapAtomType suffixGap = new SuffixGapAtomType();
   public Symbol gapPlaceholder = new SymbolTextSpec("•");
   public BoxStyle gapChoiceStyle = new BoxStyle();
-  public List<Module> modules = new ArrayList<>();
+  public List<Extension> extensions = new ArrayList<>();
   public boolean animateCoursePlacement = false;
   public boolean animateDetails = false;
   public boolean startWindowed = false;
@@ -156,7 +155,6 @@ public class Syntax {
     }
     root.finish(errors, this);
     gap.finish(errors, this);
-    prefixGap.finish(errors, this);
     suffixGap.finish(errors, this);
   }
 
@@ -176,7 +174,6 @@ public class Syntax {
         grammar.add(t.id(), t.buildBackRule(this));
       }
       grammar.add(gap.id(), gap.buildBackRule(this));
-      grammar.add(prefixGap.id(), prefixGap.buildBackRule(this));
       grammar.add(suffixGap.id(), suffixGap.buildBackRule(this));
       for (Map.Entry<String, List<String>> entry : groups.entries()) {
         final Union group = new Union();
@@ -206,20 +203,25 @@ public class Syntax {
     return load(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
   }
 
-  public List<FreeAtomType> getLeafTypes(final String type) {
-    if (type == null) return new ArrayList<>(types.values()); // Gap types
+  /**
+   *
+   * @param type
+   * @param seen Already seen types/groups; modified during search
+   * @return
+   */
+  public Set<FreeAtomType> getLeafTypes(final String type, Set<String> seen) {
+    if (type == null) return new HashSet<>(types.values()); // Gap types
     final List<String> group = groups.getOpt(type);
     if (group == null) {
       FreeAtomType found = types.get(type);
-      if (found == null) return Arrays.asList();
-      else return Arrays.asList(found);
+      if (found == null) return new HashSet<>();
+      else return new HashSet<>(Arrays.asList(found));
     }
     final Deque<Iterator<String>> stack = new ArrayDeque<>();
     Iterator<String> seed = group.iterator();
-    List<FreeAtomType> out = new ArrayList<>();
+    Set<FreeAtomType> out = new HashSet<>();
     if (!seed.hasNext()) return out;
     stack.addLast(seed);
-    Set<String> seen = new HashSet<>();
     while (!stack.isEmpty()) {
       final Iterator<String> top = stack.peekLast();
       final String childKey = top.next();

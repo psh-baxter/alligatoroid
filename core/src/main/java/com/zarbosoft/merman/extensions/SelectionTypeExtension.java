@@ -1,9 +1,9 @@
-package com.zarbosoft.merman.modules;
+package com.zarbosoft.merman.extensions;
 
 import com.google.common.collect.ImmutableMap;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.Selection;
+import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.banner.BannerMessage;
 import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
@@ -11,12 +11,12 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualNestedBase;
 import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
 import com.zarbosoft.merman.syntax.format.Format;
 
-public class SelectionType extends Module {
+public class SelectionTypeExtension extends Extension {
 
   public Format format;
 
   @Override
-  public State initialize(final Context context) {
+  public State create(final ExtensionContext context) {
     return new ModuleState(context);
   }
 
@@ -25,14 +25,14 @@ public class SelectionType extends Module {
     private final Context.SelectionListener listener =
         new Context.SelectionListener() {
           @Override
-          public void selectionChanged(final Context context, final Selection selection) {
+          public void selectionChanged(final Context context, final Cursor cursor) {
             BannerMessage oldMessage = message;
             message = new BannerMessage();
             message.priority = 100;
             final String outerId;
             final String outerName;
             {
-              final VisualAtom nodeType = selection.getVisual().parent().atomVisual();
+              final VisualAtom nodeType = cursor.getVisual().parent().atomVisual();
               outerId = nodeType.type().id();
               outerName = nodeType.type().name();
             }
@@ -40,21 +40,21 @@ public class SelectionType extends Module {
             final String innerId;
             final String innerName;
             {
-              if (selection instanceof VisualArray.ArraySelection) {
+              if (cursor instanceof VisualArray.ArrayCursor) {
                 part = "array";
-                final VisualArray.ArraySelection selection1 =
-                    (VisualArray.ArraySelection) selection;
+                final VisualArray.ArrayCursor selection1 =
+                    (VisualArray.ArrayCursor) cursor;
                 final Atom child =
                     selection1.self.value.data.get(
                         selection1.leadFirst ? selection1.beginIndex : selection1.endIndex);
                 innerId = child.type.id();
                 innerName = child.type.name();
-              } else if (selection instanceof VisualNestedBase.NestedSelection) {
+              } else if (cursor instanceof VisualNestedBase.NestedCursor) {
                 part = "nested";
-                final Atom child = ((VisualNestedBase) selection.getVisual()).atomGet();
+                final Atom child = ((VisualNestedBase) cursor.getVisual()).atomGet();
                 innerId = child.type.id();
                 innerName = child.type.name();
-              } else if (selection instanceof VisualPrimitive.PrimitiveSelection) {
+              } else if (cursor instanceof VisualPrimitive.PrimitiveCursor) {
                 part = "primitive";
                 innerId = outerId;
                 innerName = outerName;
@@ -83,7 +83,7 @@ public class SelectionType extends Module {
     }
 
     @Override
-    public void destroy(final Context context) {
+    public void destroy(final ExtensionContext context) {
       context.removeSelectionListener(listener);
     }
   }

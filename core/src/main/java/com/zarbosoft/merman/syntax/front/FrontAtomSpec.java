@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class FrontDataAtom extends FrontSpec {
+public class FrontAtomSpec extends FrontSpec {
   public String middle;
   public Symbol ellipsis = new SymbolTextSpec("...");
-  private BaseBackAtomSpec dataType;
+  public BaseBackAtomSpec dataType;
 
   @Override
   public Visual createVisual(

@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.modules;
+package com.zarbosoft.merman.extensions;
 
 import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.editor.Action;
@@ -13,12 +13,12 @@ import java.util.stream.Collectors;
 
 import static com.zarbosoft.rendaw.common.Common.enumerate;
 
-public class Modes extends Module {
+public class Modes extends Extension {
 
   public List<String> states;
 
   @Override
-  public State initialize(final Context context) {
+  public State create(final ExtensionContext context) {
     return new ModuleState(context);
   }
 
@@ -48,7 +48,7 @@ public class Modes extends Module {
     }
 
     @Override
-    public void destroy(final Context context) {
+    public void destroy(final ExtensionContext context) {
       context.changeGlobalTags(new TagsChange(ImmutableSet.of(), ImmutableSet.of(getTag(state))));
       context.removeActions(this);
     }

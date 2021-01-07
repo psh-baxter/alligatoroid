@@ -3,7 +3,9 @@ package com.zarbosoft.merman.document.values;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
+import com.zarbosoft.merman.editor.gap.GapCompletionEngine;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 
 public abstract class Value {
@@ -24,6 +26,8 @@ public abstract class Value {
 
   public abstract Object syntaxLocateStep(String segment);
 
+  public abstract GapCompletionEngine.State createGapEngine();
+
   public abstract class Parent {
 
     /**
@@ -39,8 +43,8 @@ public abstract class Value {
      *
      * @param context
      */
-    public void delete(final Context context) {
-      throw new DeadCode();
+    public void deleteChild(final Context context) {
+      throw new Assertion();
     }
 
     public abstract String childType();

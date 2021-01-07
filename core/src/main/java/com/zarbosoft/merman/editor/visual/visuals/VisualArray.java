@@ -7,7 +7,7 @@ import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.Selection;
+import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.SelectionState;
 import com.zarbosoft.merman.editor.history.changes.ChangeArray;
 import com.zarbosoft.merman.editor.visual.Alignment;
@@ -40,7 +40,7 @@ import static com.zarbosoft.rendaw.common.Common.last;
 public abstract class VisualArray extends VisualGroup implements VisualLeaf {
   public final ValueArray value;
   private final ValueArray.Listener dataListener;
-  public ArraySelection selection;
+  public ArrayCursor selection;
   private PSet<Tag> tags;
   private PSet<Tag> ellipsisTags;
   private PSet<Tag> emptyTags;
@@ -89,8 +89,8 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
             if (selection != null) {
               oldSelectionBeginIndex = selection.beginIndex;
               oldSelectionEndIndex = selection.endIndex;
-            } else if (context.selection != null) {
-              VisualParent parent = context.selection.getVisual().parent();
+            } else if (context.cursor != null) {
+              VisualParent parent = context.cursor.getVisual().parent();
               while (parent != null) {
                 final Visual visual = parent.visual();
                 if (visual == VisualArray.this) {
@@ -404,7 +404,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
       final Context context, final boolean leadFirst, final int start, final int end) {
     if (hoverable != null) hoverable.notifySelected(context, start, end);
     if (selection == null) {
-      selection = new ArraySelection(context, this, leadFirst, start, end);
+      selection = new ArrayCursor(context, this, leadFirst, start, end);
       context.setSelection(selection);
     } else {
       selection.setRange(context, start, end);
@@ -603,14 +603,14 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     }
   }
 
-  public static class ArraySelection extends Selection {
+  public static class ArrayCursor extends Cursor {
     public final VisualArray self;
     public int beginIndex;
     public int endIndex;
     public boolean leadFirst;
     BorderAttachment border;
 
-    public ArraySelection(
+    public ArrayCursor(
         final Context context,
         final VisualArray self,
         final boolean leadFirst,
@@ -774,7 +774,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
       @Override
       public boolean run(final Context context) {
 
-        ArraySelection.this.leadFirst = true;
+        ArrayCursor.this.leadFirst = true;
         final int newIndex = Math.min(self.value.data.size() - 1, endIndex + 1);
         if (newIndex == beginIndex && newIndex == endIndex) return false;
         setPosition(context, newIndex);
@@ -787,7 +787,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
       @Override
       public boolean run(final Context context) {
 
-        ArraySelection.this.leadFirst = true;
+        ArrayCursor.this.leadFirst = true;
         final int newIndex = Math.max(0, beginIndex - 1);
         if (newIndex == beginIndex && newIndex == endIndex) return false;
         setPosition(context, newIndex);
@@ -921,7 +921,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
             context, new ChangeArray(self.value, index, atoms.size(), ImmutableList.of()));
         setBegin(context, --index);
         context.history.apply(context, new ChangeArray(self.value, index, 0, atoms));
-        ArraySelection.this.leadFirst = true;
+        ArrayCursor.this.leadFirst = true;
         setRange(context, index, index + atoms.size() - 1);
         return true;
       }
@@ -938,7 +938,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
             context, new ChangeArray(self.value, index, atoms.size(), ImmutableList.of()));
         setPosition(context, ++index);
         context.history.apply(context, new ChangeArray(self.value, index, 0, atoms));
-        ArraySelection.this.leadFirst = false;
+        ArrayCursor.this.leadFirst = false;
         setRange(context, index, index + atoms.size() - 1);
         return true;
       }

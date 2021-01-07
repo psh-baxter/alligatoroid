@@ -22,12 +22,14 @@ import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontArrayAsAtomSpec;
 import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
-import com.zarbosoft.merman.syntax.front.FrontDataAtom;
+import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontGapBase;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.editor.gap.GapKey;
+import com.zarbosoft.merman.editor.gap.TwoColumnChoice;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.bytes.ParseBuilder;
 import com.zarbosoft.pidgoon.bytes.Position;
@@ -102,13 +104,11 @@ public class SuffixGapAtomType extends AtomType {
       final FrontGapBase gap =
           new FrontGapBase() {
             @Override
-            protected List<? extends Choice> process(
-                final Context context,
-                final Atom self,
-                final String string,
-                final Common.UserData store) {
+            public List<? extends TwoColumnChoice> process(
+              final Context context, final Atom self, final String string, final Common.UserData store
+            ) {
               final SuffixGapAtom suffixSelf = (SuffixGapAtom) self;
-              class SuffixChoice extends Choice {
+              class SuffixChoice extends TwoColumnChoice {
                 private final FreeAtomType type;
                 private final GapKey key;
 
@@ -155,7 +155,7 @@ public class SuffixGapAtomType extends AtomType {
                   // Find the selection/remainder entry point
                   Value selectNext = null;
                   FrontSpec nextWhatever = null;
-                  if (parsed.nextInput == null) {
+                  if (parsed.nextPrimitive == null) {
                     if (key.indexAfter == -1) {
                       // No such place exists - wrap the placement atom in a suffix gap
                       root = context.syntax.suffixGap.create(true, atom);
@@ -163,9 +163,9 @@ public class SuffixGapAtomType extends AtomType {
                     } else {
                       nextWhatever = type.front.get(key.indexAfter);
                     }
-                  } else nextWhatever = parsed.nextInput;
+                  } else nextWhatever = parsed.nextPrimitive;
                   if (selectNext == null) {
-                    if (nextWhatever instanceof FrontDataAtom) {
+                    if (nextWhatever instanceof FrontAtomSpec) {
                       selectNext = atom.fields.getOpt(nextWhatever.field());
                     } else if (nextWhatever instanceof FrontPrimitiveSpec
                         || nextWhatever instanceof FrontArraySpecBase) {
@@ -190,7 +190,7 @@ public class SuffixGapAtomType extends AtomType {
                   if (selectNext instanceof ValueAtom
                       && ((ValueAtom) selectNext).data.visual.selectDown(context)) {
                   } else selectNext.selectDown(context);
-                  if (!remainder.isEmpty()) context.selection.receiveText(context, remainder);
+                  if (!remainder.isEmpty()) context.cursor.receiveText(context, remainder);
                 }
 
                 @Override
@@ -222,7 +222,7 @@ public class SuffixGapAtomType extends AtomType {
                           if (replacementPoint.first == null) continue;
                           for (final GapKey key : gapKeys(syntax, type, childType)) {
                             if (key.indexBefore == -1) continue;
-                            final Choice choice = new SuffixChoice(type, key);
+                            final TwoColumnChoice choice = new SuffixChoice(type, key);
                             union.add(
                                 new Color(
                                     choice,
@@ -261,7 +261,7 @@ public class SuffixGapAtomType extends AtomType {
                 }
                 return choices;
               } else if (longest.second.absolute >= 1) {
-                for (final Choice choice : choices) {
+                for (final TwoColumnChoice choice : choices) {
                   choice.choose(context, string);
                   return ImmutableList.of();
                 }
@@ -301,11 +301,9 @@ public class SuffixGapAtomType extends AtomType {
             }
 
             @Override
-            protected void deselect(
-                final Context context,
-                final Atom self,
-                final String string,
-                final Common.UserData userData) {
+            public void deselect(
+              final Context context, final Atom self, final String string, final Common.UserData userData
+            ) {
               if (self.visual != null && string.isEmpty()) {
                 self.parent.replace(context, ((ValueArray) self.fields.getOpt("value")).data.get(0));
               }
@@ -359,7 +357,7 @@ public class SuffixGapAtomType extends AtomType {
             pair -> {
               FrontSpec front = pair.second;
               String id = null;
-              if (front instanceof FrontDataAtom) id = ((FrontDataAtom) front).middle;
+              if (front instanceof FrontAtomSpec) id = ((FrontAtomSpec) front).middle;
               else if (front instanceof FrontFixedArraySpec)
                 id = ((FrontFixedArraySpec) front).middle;
               return parent.id().equals(id);

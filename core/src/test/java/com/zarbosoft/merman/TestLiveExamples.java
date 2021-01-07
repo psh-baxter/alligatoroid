@@ -23,9 +23,9 @@ public class TestLiveExamples {
   public void testDeselectGapInArray() {
     new GeneralTestWizard(MiscSyntax.syntax, MiscSyntax.syntax.gap.create())
         .act("enter")
-        .run(context -> context.selection.receiveText(context, "["))
+        .run(context -> context.cursor.receiveText(context, "["))
         .checkBrickCount(3)
-        .run(context -> context.selection.receiveText(context, "e"))
+        .run(context -> context.cursor.receiveText(context, "e"))
         .checkArrayTree(
             new TreeBuilder(MiscSyntax.array)
                 .addArray("value", new TreeBuilder(MiscSyntax.syntax.gap).add("gap", "e").build())
@@ -38,7 +38,7 @@ public class TestLiveExamples {
   public void testDeleteArray() {
     new GeneralTestWizard(MiscSyntax.syntax, MiscSyntax.syntax.gap.create())
         .act("enter")
-        .run(context -> context.selection.receiveText(context, "["))
+        .run(context -> context.cursor.receiveText(context, "["))
         .act("exit")
         .act("exit")
         .checkArrayTree(new TreeBuilder(MiscSyntax.array).addArray("value").build())

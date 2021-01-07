@@ -1,16 +1,14 @@
-package com.zarbosoft.merman.modules;
+package com.zarbosoft.merman.extensions;
 
-import com.zarbosoft.merman.editor.Context;
+public abstract class Extension {
 
-public abstract class Module {
-
-  public abstract State initialize(Context context);
+  public abstract State create(ExtensionContext context);
 
   /**
    * Since multiple documents may use the same syntax, modules may be initialized and independently
    * destroyed multiple times from the same definition. All state should go in the State object.
    */
   public abstract static class State {
-    public abstract void destroy(Context context);
+    public abstract void destroy(ExtensionContext context);
   }
 }

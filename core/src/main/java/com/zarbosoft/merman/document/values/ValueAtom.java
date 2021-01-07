@@ -72,7 +72,7 @@ public class ValueAtom extends Value {
     }
 
     @Override
-    public void delete(final Context context) {
+    public void deleteChild(final Context context) {
       context.history.apply(
           context, new ChangeNodeSet(ValueAtom.this, context.syntax.gap.create()));
     }

@@ -21,7 +21,7 @@ import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.front.FrontGapBase;
+import com.zarbosoft.merman.editor.gap.GapVisualPrimitive;
 import org.junit.Test;
 
 import java.util.HashSet;
@@ -434,7 +434,7 @@ public class TestDocumentGap {
             .build();
 
     final Context context = blank(syntax);
-    context.selection.receiveText(context, "o");
+    context.cursor.receiveText(context, "o");
     assertTreeEqual(
         context,
         new TreeBuilder(syntax.gap).add("gap", "o").build(),
@@ -741,9 +741,9 @@ public class TestDocumentGap {
             .build();
 
     final Context context = blank(syntax);
-    context.selection.receiveText(context, "o");
-    context.selection.receiveText(context, "n");
-    context.selection.receiveText(context, "e");
+    context.cursor.receiveText(context, "o");
+    context.cursor.receiveText(context, "n");
+    context.cursor.receiveText(context, "e");
     assertTreeEqual(
         context,
         new TreeBuilder(syntax.gap).add("gap", "one").build(),
@@ -1050,7 +1050,7 @@ public class TestDocumentGap {
             .build();
 
     final Context context = blank(syntax);
-    context.selection.receiveText(context, "i");
+    context.cursor.receiveText(context, "i");
     assertTreeEqual(
         context,
         new TreeBuilder(syntax.suffixGap)
@@ -1362,9 +1362,9 @@ public class TestDocumentGap {
             .build();
 
     final Context context = blank(syntax);
-    context.selection.receiveText(context, "one");
-    context.selection.receiveText(context, "!");
-    context.selection.receiveText(context, "t");
+    context.cursor.receiveText(context, "one");
+    context.cursor.receiveText(context, "!");
+    context.cursor.receiveText(context, "t");
     assertTreeEqual(
         context,
         new TreeBuilder(binaryBang)
@@ -1676,9 +1676,9 @@ public class TestDocumentGap {
             .build();
 
     final Context context = blank(syntax);
-    context.selection.receiveText(context, "7");
-    context.selection.receiveText(context, "!");
-    context.selection.receiveText(context, "t");
+    context.cursor.receiveText(context, "7");
+    context.cursor.receiveText(context, "!");
+    context.cursor.receiveText(context, "t");
     assertTreeEqual(
         context,
         new TreeBuilder(binaryBang)
@@ -1995,7 +1995,7 @@ public class TestDocumentGap {
         .run(
             context -> {
               final VisualPrimitive.RangeAttachment range =
-                  ((VisualPrimitive.PrimitiveSelection) context.selection).range;
+                  ((VisualPrimitive.PrimitiveCursor) context.cursor).range;
               assertThat(range.beginOffset, equalTo(1));
               assertThat(range.endOffset, equalTo(1));
             });
@@ -2117,7 +2117,7 @@ public class TestDocumentGap {
         .run(
             context -> {
               final VisualPrimitive.RangeAttachment range =
-                  ((VisualPrimitive.PrimitiveSelection) context.selection).range;
+                  ((VisualPrimitive.PrimitiveCursor) context.cursor).range;
               assertThat(range.beginOffset, equalTo(1));
               assertThat(range.endOffset, equalTo(1));
             });
@@ -2422,8 +2422,8 @@ public class TestDocumentGap {
             .build();
 
     final Context context = blank(syntax);
-    context.selection.receiveText(context, "one");
-    context.selection.receiveText(context, "+");
+    context.cursor.receiveText(context, "one");
+    context.cursor.receiveText(context, "+");
     assertTreeEqual(
         context,
         new TreeBuilder(syntax.suffixGap)
@@ -2746,8 +2746,8 @@ public class TestDocumentGap {
         .run(
             context ->
                 assertThat(
-                    context.selection,
-                    not(instanceOf(FrontGapBase.GapVisualPrimitive.GapSelection.class))));
+                    context.cursor,
+                    not(instanceOf(GapVisualPrimitive.GapCursor.class))));
   }
 
   // ========================================================================
@@ -3052,8 +3052,8 @@ public class TestDocumentGap {
             .build();
 
     final Context context = blank(syntax);
-    context.selection.receiveText(context, "\"");
-    context.selection.receiveText(context, "e");
+    context.cursor.receiveText(context, "\"");
+    context.cursor.receiveText(context, "e");
     assertTreeEqual(
         context,
         new TreeBuilder(quoted).add("value", "e").build(),
@@ -3359,8 +3359,8 @@ public class TestDocumentGap {
             .build();
 
     final Context context = blank(syntax);
-    context.selection.receiveText(context, "[");
-    context.selection.receiveText(context, "e");
+    context.cursor.receiveText(context, "[");
+    context.cursor.receiveText(context, "e");
     assertTreeEqual(
         context,
         new TreeBuilder(array)
@@ -3673,8 +3673,8 @@ public class TestDocumentGap {
         () -> syntax.suffixGap.create(true, new TreeBuilder(one).build()),
         context -> {
           Helper.rootArray(context.document).data.get(0).fields.getOpt("gap").selectDown(context);
-          context.selection.receiveText(context, "?");
-          context.selection.receiveText(context, "e");
+          context.cursor.receiveText(context, "?");
+          context.cursor.receiveText(context, "e");
         },
         new TreeBuilder(syntax.suffixGap)
             .addArray(
@@ -4162,8 +4162,8 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
               .selectDown(context);
-          context.selection.receiveText(context, "x");
-          context.selection.receiveText(context, "13");
+          context.cursor.receiveText(context, "x");
+          context.cursor.receiveText(context, "13");
         },
         new TreeBuilder(multiplier).add("value", new TreeBuilder(one)).add("text", "13").build());
   }
@@ -4475,8 +4475,8 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
               .selectDown(context);
-          context.selection.receiveText(context, "#");
-          context.selection.receiveText(context, "e");
+          context.cursor.receiveText(context, "#");
+          context.cursor.receiveText(context, "e");
         },
         new TreeBuilder(snooze)
             .add(
@@ -4675,7 +4675,7 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectDown(context);
-          context.selection.receiveText(context, "*");
+          context.cursor.receiveText(context, "*");
         },
         new TreeBuilder(plus)
             .add("first", new TreeBuilder(infinity))
@@ -4823,7 +4823,7 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectDown(context);
-          context.selection.receiveText(context, "+");
+          context.cursor.receiveText(context, "+");
         },
         new TreeBuilder(plus)
             .add("first", new TreeBuilder(infinity))
@@ -4971,7 +4971,7 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectDown(context);
-          context.selection.receiveText(context, "-");
+          context.cursor.receiveText(context, "-");
         },
         new TreeBuilder(minus)
             .add(
@@ -5119,7 +5119,7 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectDown(context);
-          context.selection.receiveText(context, "+");
+          context.cursor.receiveText(context, "+");
         },
         new TreeBuilder(plus)
             .add(
@@ -5190,7 +5190,7 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectDown(context);
-          context.selection.receiveText(context, "+");
+          context.cursor.receiveText(context, "+");
         },
         new TreeBuilder(plus)
             .add(
@@ -5338,7 +5338,7 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectDown(context);
-          context.selection.receiveText(context, "+");
+          context.cursor.receiveText(context, "+");
         },
         new TreeBuilder(inclusiveRange)
             .add("first", new TreeBuilder(infinity))
@@ -5966,7 +5966,7 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "value", "0", "gap")))
               .selectDown(context);
-          context.selection.receiveText(context, "urt");
+          context.cursor.receiveText(context, "urt");
           ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
               .visual.selectDown(context);
         },
@@ -6277,15 +6277,15 @@ public class TestDocumentGap {
     ((Atom) context.syntaxLocate(new Path("value", "1"))).visual.selectDown(context);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
     assertTreeEqual(context, syntax.gap.create(), Helper.rootArray(context.document));
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "gap", "0")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "gap", "0")));
     context.history.undo(context);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(2));
     assertTreeEqual(syntax.gap.create(), Helper.rootArray(context.document).data.get(0));
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "1", "gap", "0")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "1", "gap", "0")));
     context.history.redo(context);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
     assertTreeEqual(syntax.gap.create(), Helper.rootArray(context.document).data.get(0));
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value", "0", "gap", "0")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "gap", "0")));
   }
 
   @Test

@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.modules.hotkeys;
+package com.zarbosoft.merman.extensions.hotkeys;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Sets;
@@ -12,8 +12,9 @@ import com.zarbosoft.merman.editor.display.derived.TLayout;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.editor.visual.tags.PartTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.modules.Module;
-import com.zarbosoft.merman.modules.hotkeys.grammar.Node;
+import com.zarbosoft.merman.extensions.Extension;
+import com.zarbosoft.merman.extensions.ExtensionContext;
+import com.zarbosoft.merman.extensions.hotkeys.grammar.Node;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
@@ -35,7 +36,7 @@ import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.iterable;
 
-public class Hotkeys extends Module {
+public class HotkeysExtension extends Extension {
 
   private static final Comparator<Pair<Integer, Action>> matchComparator =
       new ChainComparator<Pair<Integer, Action>>().greaterFirst(p -> p.first).build();
@@ -43,7 +44,7 @@ public class Hotkeys extends Module {
   public boolean showDetails = true;
 
   @Override
-  public State initialize(final Context context) {
+  public State create(final ExtensionContext context) {
     return new ModuleState(context);
   }
 
@@ -80,8 +81,8 @@ public class Hotkeys extends Module {
     }
 
     private void update(final Context context) {
-      if (context.selection == null) return;
-      final PSet<Tag> tags = context.globalTags.plusAll(context.selection.getTags(context));
+      if (context.cursor == null) return;
+      final PSet<Tag> tags = context.globalTags.plusAll(context.cursor.getTags(context));
       clean(context);
       hotkeys = new HashMap<>();
       freeTyping = true;
@@ -152,7 +153,7 @@ public class Hotkeys extends Module {
     }
 
     @Override
-    public void destroy(final Context context) {
+    public void destroy(final ExtensionContext context) {
       clean(context);
     }
 

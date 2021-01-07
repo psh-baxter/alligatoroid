@@ -41,7 +41,7 @@ public class History {
 		@Override
 		public Change apply(final Context context) {
 			final Level out = new Level(id);
-			out.select = context.selection.saveState();
+			out.select = context.cursor.saveState();
 			for (final Change change : Lists.reverse(subchanges)) {
 				out.subchanges.add(change.apply(context));
 			}
@@ -137,8 +137,8 @@ public class History {
 				past.addLast(reverseLevel);
 			} else
 				reverseLevel = past.getLast();
-			if (reverseLevel.select == null && context.selection != null)
-				reverseLevel.select = context.selection.saveState();
+			if (reverseLevel.select == null && context.cursor != null)
+				reverseLevel.select = context.cursor.saveState();
 			final Change reverse = change.apply(context);
 			reverseLevel.merge(reverse);
 			for (final Listener listener : ImmutableList.copyOf(listeners))

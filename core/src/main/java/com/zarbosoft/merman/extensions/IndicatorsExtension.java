@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.modules;
+package com.zarbosoft.merman.extensions;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
@@ -17,7 +17,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class Indicators extends Module {
+public class IndicatorsExtension extends Extension {
 
   public List<Indicator> indicators = new ArrayList<>();
   public boolean converseStart = true;
@@ -26,7 +26,7 @@ public class Indicators extends Module {
   public int transversePadding = 0;
 
   @Override
-  public State initialize(final Context context) {
+  public State create(final ExtensionContext context) {
     return new ModuleState(context);
   }
 
@@ -56,8 +56,8 @@ public class Indicators extends Module {
           new Context.TagsListener() {
             @Override
             public void tagsChanged(final Context context) {
-              if (context.selection == null) update(context, context.globalTags);
-              else update(context, context.globalTags.plusAll(context.selection.getTags(context)));
+              if (context.cursor == null) update(context, context.globalTags);
+              else update(context, context.globalTags.plusAll(context.cursor.getTags(context)));
             }
           };
       context.addGlobalTagsChangeListener(listener);
@@ -122,7 +122,7 @@ public class Indicators extends Module {
     }
 
     @Override
-    public void destroy(final Context context) {
+    public void destroy(final ExtensionContext context) {
       context.midground.remove(group);
       context.removeConverseEdgeListener(resizeListener);
       context.removeTransverseEdgeListener(resizeListener);

@@ -1,7 +1,7 @@
-package com.zarbosoft.merman.modules.hotkeys;
+package com.zarbosoft.merman.extensions.hotkeys;
 
 import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.modules.hotkeys.grammar.Node;
+import com.zarbosoft.merman.extensions.hotkeys.grammar.Node;
 
 import java.util.HashMap;
 import java.util.HashSet;

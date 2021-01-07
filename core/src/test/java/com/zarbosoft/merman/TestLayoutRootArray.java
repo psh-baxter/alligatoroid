@@ -80,9 +80,9 @@ public class TestLayoutRootArray {
         .checkTextBrick(0, 3, "")
         .run(
             context -> {
-              context.selection.receiveText(context, "x");
-              context.selection.receiveText(context, "x");
-              context.selection.receiveText(context, "x");
+              context.cursor.receiveText(context, "x");
+              context.cursor.receiveText(context, "x");
+              context.cursor.receiveText(context, "x");
             })
         .checkSpaceBrick(0, 0)
         .checkTextBrick(0, 1, "one")

@@ -4,20 +4,20 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.helper.*;
-import com.zarbosoft.merman.modules.hotkeys.HotkeyRule;
-import com.zarbosoft.merman.modules.hotkeys.Hotkeys;
-import com.zarbosoft.merman.modules.hotkeys.Key;
-import com.zarbosoft.merman.modules.hotkeys.grammar.Terminal;
+import com.zarbosoft.merman.extensions.hotkeys.HotkeyRule;
+import com.zarbosoft.merman.extensions.hotkeys.HotkeysExtension;
+import com.zarbosoft.merman.extensions.hotkeys.Key;
+import com.zarbosoft.merman.extensions.hotkeys.grammar.Terminal;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import org.junit.Test;
 
-public class TestModuleHotkeys {
+public class TestExtensionHotkeys {
 	final public static FreeAtomType one;
 	final static Syntax syntax;
 
 	static {
-		final Hotkeys hotkeys = new Hotkeys();
+		final HotkeysExtension hotkeys = new HotkeysExtension();
 		{
 			final HotkeyRule rule = new HotkeyRule();
 			final Terminal terminal = new Terminal();
@@ -33,7 +33,7 @@ public class TestModuleHotkeys {
 				.group("any", new GroupBuilder().type(one).build())
 				.style(new StyleBuilder().split(true).build())
 				.build();
-		syntax.modules.add(hotkeys);
+		syntax.extensions.add(hotkeys);
 	}
 
 	@Test

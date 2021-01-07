@@ -6,7 +6,7 @@ import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.syntax.style.Style;
 import org.pcollections.PSet;
 
-public abstract class Selection {
+public abstract class Cursor {
 	protected abstract void clear(Context context);
 
 	public void receiveText(final Context context, final String text) {

@@ -36,7 +36,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
 
   public Symbol ellipsis = new SymbolTextSpec("...");
 
-  protected BaseBackArraySpec dataType;
+  public BaseBackArraySpec dataType;
 
   @Override
   public Visual createVisual(

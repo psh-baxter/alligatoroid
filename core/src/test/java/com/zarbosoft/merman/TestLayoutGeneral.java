@@ -284,16 +284,16 @@ public class TestLayoutGeneral {
     new GeneralTestWizard(syntax, text)
         .run(context -> text.fields.getOpt("value").selectDown(context))
         .resize(40)
-        .run(context -> context.selection.receiveText(context, "4"))
+        .run(context -> context.cursor.receiveText(context, "4"))
         .checkCourseCount(1)
         .checkCourse(0, 0, 10)
         .checkBrickNotCompact(0, 0)
-        .run(context -> context.selection.receiveText(context, "5"))
+        .run(context -> context.cursor.receiveText(context, "5"))
         .checkCourseCount(2)
         .checkCourse(0, -10, 0)
         .checkCourse(1, 10, 20)
         .checkBrickCompact(0, 0)
-        .run(context -> context.selection.receiveText(context, "6"))
+        .run(context -> context.cursor.receiveText(context, "6"))
         .checkCourseCount(2)
         .checkCourse(0, -10, 0)
         .checkCourse(1, 10, 20);
@@ -328,7 +328,7 @@ public class TestLayoutGeneral {
         .run(
             context -> {
               gap.fields.getOpt("gap").selectDown(context);
-              context.selection.receiveText(context, "[");
+              context.cursor.receiveText(context, "[");
             })
         .checkTextBrick(0, 0, "[")
         .checkTextBrick(1, 0, "")

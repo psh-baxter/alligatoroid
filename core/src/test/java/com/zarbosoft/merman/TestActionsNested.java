@@ -1,6 +1,5 @@
 package com.zarbosoft.merman;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.editor.Context;
@@ -40,7 +39,7 @@ public class TestActionsNested {
     ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom"))).parent.selectUp(context);
     Helper.act(context, "enter");
     assertThat(
-        context.selection.getSyntaxPath(), equalTo(new Path("value","0", "value","atom", "value")));
+        context.cursor.getSyntaxPath(), equalTo(new Path("value","0", "value","atom", "value")));
   }
 
   @Test
@@ -57,7 +56,7 @@ public class TestActionsNested {
                 .build());
     ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom"))).parent.selectUp(context);
     Helper.act(context, "exit");
-    assertThat(context.selection.getSyntaxPath(), equalTo(new Path("value","0")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value","0")));
   }
 
   @Test
@@ -74,7 +73,7 @@ public class TestActionsNested {
         .run(
             context ->
                 assertThat(
-                    context.selection.getSyntaxPath(),
+                    context.cursor.getSyntaxPath(),
                     equalTo(new Path("value","0", "second"))));
   }
 
@@ -92,7 +91,7 @@ public class TestActionsNested {
         .run(
             context ->
                 assertThat(
-                    context.selection.getSyntaxPath(),
+                    context.cursor.getSyntaxPath(),
                     equalTo(new Path("value","0", "first"))));
   }
 
@@ -556,7 +555,7 @@ public class TestActionsNested {
             .build(),
         Helper.rootArray(context.document));
     assertThat(
-        context.selection.getSyntaxPath(),
+        context.cursor.getSyntaxPath(),
         equalTo(new Path("value","0", "value", "atom","gap", "0")));
   }
 
@@ -698,7 +697,7 @@ public class TestActionsNested {
             .build(),
         Helper.rootArray(context.document));
     assertThat(
-        context.selection.getSyntaxPath(),
+        context.cursor.getSyntaxPath(),
         equalTo(new Path("value","0", "value", "atom","gap", "0")));
   }
 }
