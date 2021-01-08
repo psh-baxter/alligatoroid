@@ -2,20 +2,19 @@ package com.zarbosoft.merman.extensions.gapchoices;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.Value;
+import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.gap.GapCompletionEngine;
 import com.zarbosoft.merman.editor.gap.GapKey;
+import com.zarbosoft.merman.editor.history.changes.ChangeArray;
+import com.zarbosoft.merman.editor.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.extensions.Extension;
 import com.zarbosoft.merman.extensions.ExtensionContext;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
-import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
-import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.syntax.front.FrontSpec;
-import com.zarbosoft.merman.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.syntax.front.*;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.Store;
@@ -32,16 +31,7 @@ import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Deque;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -118,44 +108,35 @@ public class SyntacticGapChoicesExtension extends Extension {
     public State createGapCompletionState(ExtensionContext context, String baseType) {
       GapCompletionState state = new GapCompletionState();
       Union grammar = new Union();
-      Deque<Iterator<String>> stack = new ArrayDeque<>();
+      Deque<Iterator<FreeAtomType>> stack = new ArrayDeque<>();
       Set<String> seen = new HashSet<>();
-      stack.add(Arrays.asList(baseType).iterator());
+      stack.add(context.syntax().splayedTypes.get(baseType).iterator());
       while (!stack.isEmpty()) {
-        Iterator<String> top = stack.peekLast();
-        String next = top.next();
+        Iterator<FreeAtomType> top = stack.peekLast();
+        FreeAtomType type = top.next();
         if (!top.hasNext()) {
           stack.removeLast();
         }
-        if (seen.contains(next)) continue;
-        seen.add(next);
-        List<String> foundGroup = context.syntax().groups.getOpt(next);
-        if (foundGroup != null) {
-          /// Recurse type groups
-          stack.add(foundGroup.iterator());
-        } else {
-          FreeAtomType type = context.syntax().types.get(next);
-          FrontSpec front = type.front.get(0);
-          if (front instanceof FrontSymbol) {
-            /// Hit a symbol, create choice
-            createGapChoice(state, grammar, GapKey.gapKeys(type).get(0), type);
-          } else if (front instanceof FrontArraySpecBase) {
-            if (((FrontArraySpecBase) front).prefix.isEmpty()) {
-              /// Recurse arrays with no prefix
-              stack.add(
-                  Arrays.asList(((FrontArraySpecBase) front).dataType.elementAtomType())
-                      .iterator());
-            } else {
-              /// Hit array with prefix, create choice
-              createGapChoice(state, grammar, GapKey.gapKeys(type).get(0), type);
-            }
-          } else if (front instanceof FrontAtomSpec) {
-            /// Recurse atoms
-            stack.add(Arrays.asList(((FrontAtomSpec) front).dataType.type).iterator());
-          } else if (front instanceof FrontPrimitiveSpec) {
-            /// Hit a primitive, create choice
+        FrontSpec front = type.front.get(0);
+        if (front instanceof FrontSymbol) {
+          createGapChoice(state, grammar, GapKey.gapKeys(type).get(0), type);
+        } else if (front instanceof FrontArraySpecBase) {
+          if (((FrontArraySpecBase) front).prefix.isEmpty()) {
+            stack.add(
+                context
+                    .syntax().splayedTypes.get(((FrontArraySpecBase) front).dataType.elementAtomType())
+                    .iterator());
+          } else {
             createGapChoice(state, grammar, GapKey.gapKeys(type).get(0), type);
           }
+        } else if (front instanceof FrontAtomSpec) {
+          stack.add(
+              context
+                  .syntax()
+                  .splayedTypes.get(((FrontAtomSpec) front).dataType.type)
+                  .iterator());
+        } else if (front instanceof FrontPrimitiveSpec) {
+          createGapChoice(state, grammar, GapKey.gapKeys(type).get(0), type);
         }
       }
       state.grammar = new Grammar().add(Grammar.DEFAULT_ROOT_KEY, grammar);
@@ -218,7 +199,7 @@ public class SyntacticGapChoicesExtension extends Extension {
         ExtensionContext context, List<Atom> succeeding, String baseType) {
       GapCompletionState state = new GapCompletionState();
       Union grammar = new Union();
-      for (FreeAtomType type : context.syntax().getLeafTypes(baseType, new HashSet<>())) {
+      for (FreeAtomType type : context.syntax().splayedTypes.get(baseType)) {
         List<GapKey> keys = GapKey.gapKeys(type);
 
         GapKey firstGapKey = keys.get(0);
@@ -236,64 +217,61 @@ public class SyntacticGapChoicesExtension extends Extension {
         TSMap<Integer, Supplier<Placement>> placementsTemplate = new TSMap<>();
         Sequence isCandidateSeq = new Sequence().add(StackStore.prepVarStack);
         for (int frontIndex0 = lastGapKey.indexAfter;
-             frontIndex0 < type.front.size();
-             ++frontIndex0) {
+            frontIndex0 < type.front.size();
+            ++frontIndex0) {
           int frontIndex = frontIndex0;
           FrontSpec front = type.front.get(frontIndex);
           if (front instanceof FrontArraySpecBase) {
             placementsTemplate.put(frontIndex, createPlaceArray);
             isCandidateSeq.add(
-                    new Repeat(
-                            new Operator<StackStore>(
-                                    new TypeMatch(((FrontArraySpecBase) front).dataType.elementAtomType())) {
-                              @Override
-                              protected StackStore process(StackStore store) {
-                                return store.stackVarDoubleElement(
-                                        frontIndex, ((AtomEvent) store.top()).atom);
-                              }
-                            }));
-          } else if (front instanceof FrontAtomSpec) {
-            placementsTemplate.put(frontIndex, createPlaceAtom);
-            isCandidateSeq.add(
-                    new Operator<StackStore>(new TypeMatch(((FrontAtomSpec) front).dataType.type)) {
+                new Repeat(
+                    new Operator<StackStore>(
+                        new TypeMatch(((FrontArraySpecBase) front).dataType.elementAtomType())) {
                       @Override
                       protected StackStore process(StackStore store) {
                         return store.stackVarDoubleElement(
-                                frontIndex, ((AtomEvent) store.top()).atom);
+                            frontIndex, ((AtomEvent) store.top()).atom);
                       }
-                    });
+                    }));
+          } else if (front instanceof FrontAtomSpec) {
+            placementsTemplate.put(frontIndex, createPlaceAtom);
+            isCandidateSeq.add(
+                new Operator<StackStore>(new TypeMatch(((FrontAtomSpec) front).dataType.type)) {
+                  @Override
+                  protected StackStore process(StackStore store) {
+                    return store.stackVarDoubleElement(frontIndex, ((AtomEvent) store.top()).atom);
+                  }
+                });
           } else throw new Assertion();
         }
         isCandidateSeq.add(
-                new Operator<StackStore>() {
-                  @Override
-                  protected StackStore process(StackStore store) {
-                    TSMap<Integer, Placement> placements = new TSMap<>();
-                    for (Map.Entry<Integer, Supplier<Placement>> e : placementsTemplate.entries()) {
-                      placements.put(e.getKey(), e.getValue().get());
-                    }
-                    return store
-                            .<Integer, Atom>popVarDouble(
-                                    (i, atom) -> {
-                                      placements.get(i).add(atom);
-                                    })
-                            .pushStack(placements);
-                  }
-                });
+            new Operator<StackStore>() {
+              @Override
+              protected StackStore process(StackStore store) {
+                TSMap<Integer, Placement> placements = new TSMap<>();
+                for (Map.Entry<Integer, Supplier<Placement>> e : placementsTemplate.entries()) {
+                  placements.put(e.getKey(), e.getValue().get());
+                }
+                return store
+                    .<Integer, Atom>popVarDouble(
+                        (i, atom) -> {
+                          placements.get(i).add(atom);
+                        })
+                    .pushStack(placements);
+              }
+            });
 
         /// Check if all front slots after gap match succeeding atoms, if so this is a candidate
         TSMap<Integer, Placement> placements = null;
         try {
           placements =
-                  new ParseBuilder<TSMap<Integer, Placement>>()
-                          .grammar(new Grammar().add("root", isCandidateSeq))
-                          .store(new StackStore())
-                          .uncertainty(100)
-                          .root("root")
-                          .parse(
-                                  succeeding.stream()
-                                          .map(a -> new AtomEvent(a))
-                                          .collect(Collectors.toList()));
+              new ParseBuilder<TSMap<Integer, Placement>>()
+                  .grammar(new Grammar().add("root", isCandidateSeq))
+                  .store(new StackStore())
+                  .uncertainty(100)
+                  .root("root")
+                  .parse(
+                      succeeding.stream().map(a -> new AtomEvent(a)).collect(Collectors.toList()));
         } catch (InvalidStream | GrammarTooUncertain ignored) {
         }
         if (placements != null) {
@@ -310,7 +288,54 @@ public class SyntacticGapChoicesExtension extends Extension {
         GapKey key,
         FreeAtomType type,
         TSMap<Integer, Placement> placements) {
-      grammar.add(key.matchGrammar(new SyntacticGapChoice(type, key) {}));
+      grammar.add(
+          key.matchGrammar(
+              new SyntacticGapChoice(type, key) {
+                @Override
+                public void choose(Context context) {
+                  final GapKey.ParseResult parsed = key.parse(context, type, state.currentText);
+                  final Atom atom = parsed.atom;
+
+                  // Place the atom
+                  int lastPlacement = -1;
+                  for (Map.Entry<Integer, Placement> entry : placements.entries()) {
+                    if (entry.getKey() > lastPlacement) lastPlacement = entry.getKey();
+                  }
+                  FrontSpec nextDataFront = findNextDataAtom(type, lastPlacement + 1);
+                  if (nextDataFront == null) {
+                    Atom newGap  = context.syntax.prefixGap.create(atom);
+                    gap.parent.replace(context, newGap);
+                    doPlacements(context, atom);
+                    newGap.visual.selectDown(context);
+                  } else {
+                    gap.parent.replace(context, atom);
+                    doPlacements(context, atom);
+                    atom.fields.getOpt(nextDataFront.field()).selectDown(context);
+                  }
+                }
+
+                private void doPlacements(Context context, Atom atom) {
+                  for (Map.Entry<Integer, Placement> entry : placements.entries()) {
+                    FrontSpec front = type.front().get(entry.getKey());
+                    Placement placement = entry.getValue();
+                    if (placement instanceof PlaceAtom) {
+                      context.history.apply(
+                              context,
+                          new ChangeNodeSet(
+                              (ValueAtom) atom.fields.getOpt(front.field()),
+                              ((PlaceAtom) placement).data));
+                    } else if (placement instanceof PlaceArray) {
+                      context.history.apply(
+                              context,
+                          new ChangeArray(
+                              (ValueArray) atom.fields.getOpt(front.field()),
+                              0,
+                              0,
+                              ((PlaceArray) placement).data));
+                    } else throw new Assertion();
+                  }
+                }
+              }));
     }
 
     @Override

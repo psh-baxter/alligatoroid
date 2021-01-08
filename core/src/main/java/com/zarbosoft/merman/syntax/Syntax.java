@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.zarbosoft.rendaw.common.Common.last;
 import static com.zarbosoft.rendaw.common.Common.sublist;
 
 public class Syntax {
@@ -55,6 +56,7 @@ public class Syntax {
   public int detailSpan = 300;
   public TSMap<String, FreeAtomType> types = new TSMap<>();
   public TSMap<String, List<String>> groups = new TSMap<>();
+  public TSMap<String, Set<FreeAtomType>> splayedTypes = new TSMap<>();
   public RootAtomType root;
   public GapAtomType gap = new GapAtomType();
   public SuffixGapAtomType suffixGap = new SuffixGapAtomType();
@@ -100,53 +102,57 @@ public class Syntax {
         break;
     }
 
+    for (Map.Entry<String, FreeAtomType> entry : types.entries()) {
+      splayedTypes.put(entry.getKey(), new HashSet<>(Arrays.asList(entry.getValue())));
+    }
+
     {
-      final Deque<Pair<PVector<String>, Iterator<String>>> stack = new ArrayDeque<>();
-      Iterator<String> seed = groups.keySet().iterator();
-      if (seed.hasNext()) stack.addLast(new Pair<>(TreePVector.empty(), seed));
-      while (!stack.isEmpty()) {
-        final Pair<PVector<String>, Iterator<String>> top = stack.peekLast();
-        final String childKey = top.second.next();
-        if (!top.second.hasNext()) {
-          stack.removeLast();
+      for (Map.Entry<String, List<String>> group : groups.entries()) {
+        if (splayedTypes.contains(group.getKey())) {
+          errors.add(new DuplicateAtomTypeIds(group.getKey()));
         }
-        final List<String> child = groups.getOpt(childKey);
-        if (child == null) continue;
-        int pathContainsChild = top.first.lastIndexOf(childKey);
-        PVector<String> newPath = top.first.plus(childKey);
-        if (pathContainsChild != -1) {
-          errors.add(new TypeCircularReference(sublist(newPath, pathContainsChild)));
-          continue;
+        if (new HashSet<>(group.getValue()).size() != group.getValue().size()) {
+          errors.add(new DuplicateAtomTypeIdsInGroup(group.getKey()));
         }
-        stack.addLast(new Pair<>(top.first.plus(childKey), child.iterator()));
-      }
-    }
+        final Deque<Pair<PVector<String>, Iterator<String>>> stack = new ArrayDeque<>();
+        Iterator<String> seed = group.getValue().iterator();
+        Set<FreeAtomType> out = new HashSet<>();
+        if (seed.hasNext()) {
+          stack.addLast(new Pair<>(TreePVector.singleton(group.getKey()), seed));
+          while (!stack.isEmpty()) {
+            Pair<PVector<String>, Iterator<String>> top = stack.peekLast();
+            final String childKey = top.second.next();
+            if (!top.second.hasNext()) stack.removeLast();
 
-    Set<String> allTypes = new HashSet<>();
-    for (final String t : types.keySet()) {
-      if (allTypes.contains(t)) {
-        errors.add(new DuplicateAtomTypeIds(t));
-      }
-      allTypes.add(t);
-    }
+            int pathContainsChild = top.first.lastIndexOf(childKey);
+            PVector<String> newPath = top.first.plus(childKey);
+            if (pathContainsChild != -1) {
+              errors.add(new TypeCircularReference(sublist(newPath, pathContainsChild)));
+              continue;
+            }
 
-    for (final Map.Entry<String, List<String>> pair : groups.entries()) {
-      final String group = pair.getKey();
-      if (new HashSet<>(pair.getValue()).size() != pair.getValue().size()) {
-        errors.add(new DuplicateAtomTypeIdsInGroup(group));
-      }
-      if (allTypes.contains(group)) {
-        errors.add(new DuplicateAtomTypeIds(group));
-      }
-      allTypes.add(group);
-    }
+            final Set<FreeAtomType> splayed = splayedTypes.getOpt(childKey);
+            if (splayed != null) {
+              out.addAll(splayed);
+              continue;
+            }
 
-    for (final Map.Entry<String, List<String>> pair : groups.entries()) {
-      final String group = pair.getKey();
-      for (final String child : pair.getValue()) {
-        if (!allTypes.contains(child) && !groups.contains(child)) {
-          errors.add(new GroupChildDoesntExist(group, child));
+            final List<String> childGroup = groups.getOpt(childKey);
+            if (childGroup != null) {
+              stack.addLast(new Pair<>(newPath, childGroup.iterator()));
+              continue;
+            }
+
+              FreeAtomType gotType = types.get(childKey);
+            if (gotType != null) {
+              out.add(gotType);
+              continue;
+              }
+
+            errors.add(new GroupChildDoesntExist(last(top.first), childKey));
+          }
         }
+        splayedTypes.put(group.getKey(), out);
       }
     }
 
@@ -201,42 +207,6 @@ public class Syntax {
 
   public Document load(final String string) {
     return load(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
-  }
-
-  /**
-   *
-   * @param type
-   * @param seen Already seen types/groups; modified during search
-   * @return
-   */
-  public Set<FreeAtomType> getLeafTypes(final String type, Set<String> seen) {
-    if (type == null) return new HashSet<>(types.values()); // Gap types
-    final List<String> group = groups.getOpt(type);
-    if (group == null) {
-      FreeAtomType found = types.get(type);
-      if (found == null) return new HashSet<>();
-      else return new HashSet<>(Arrays.asList(found));
-    }
-    final Deque<Iterator<String>> stack = new ArrayDeque<>();
-    Iterator<String> seed = group.iterator();
-    Set<FreeAtomType> out = new HashSet<>();
-    if (!seed.hasNext()) return out;
-    stack.addLast(seed);
-    while (!stack.isEmpty()) {
-      final Iterator<String> top = stack.peekLast();
-      final String childKey = top.next();
-      if (!top.hasNext()) stack.removeLast();
-      if (!seen.add(childKey)) continue;
-      final List<String> childGroup = groups.getOpt(childKey);
-      if (childGroup == null) {
-        FreeAtomType gotType = types.get(childKey);
-        if (gotType == null) continue;
-        out.add(gotType);
-      } else {
-        stack.addLast(childGroup.iterator());
-      }
-    }
-    return out;
   }
 
   public static enum BackType {
