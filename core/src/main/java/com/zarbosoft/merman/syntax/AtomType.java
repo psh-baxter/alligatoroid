@@ -27,11 +27,14 @@ import com.zarbosoft.merman.syntax.error.AtomTypeNoBack;
 import com.zarbosoft.merman.syntax.error.BackFieldWrongType;
 import com.zarbosoft.merman.syntax.error.MissingBack;
 import com.zarbosoft.merman.syntax.error.UnusedBackData;
+import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
+import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Color;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.DeadCode;
 
 import java.util.ArrayDeque;
@@ -47,6 +50,52 @@ public abstract class AtomType {
 
   public Set<String> tags = new HashSet<>();
   public TSMap<String, BackSpecData> fields;
+
+  /**
+   * @param type
+   * @param test
+   * @param allowed type is allowed to be placed here. Only for sliding suffix gaps.
+   * @return
+   */
+  public static boolean isPrecedent(
+      final FreeAtomType type, final Value.Parent test, final boolean allowed) {
+    final Atom testAtom = test.value().parent.atom();
+
+    // Can't move up if current level is bounded by any other front parts
+    final int index = getIndexOfData(test, testAtom);
+    final List<FrontSpec> front = testAtom.type.front();
+    if (index != front.size() - 1) return false;
+    final FrontSpec frontNext = front.get(index);
+    if (frontNext instanceof FrontFixedArraySpec
+        && !((FrontFixedArraySpec) frontNext).suffix.isEmpty()) return false;
+
+    if (allowed) {
+      // Can't move up if next level has lower precedence
+      if (testAtom.type.precedence() < type.precedence) return false;
+
+      // Can't move up if next level has same precedence and parent is forward-associative
+      if (testAtom.type.precedence() == type.precedence && testAtom.type.associateForward())
+        return false;
+    }
+
+    return true;
+  }
+
+  private static int getIndexOfData(final Value.Parent parent, final Atom atom) {
+    return Common.enumerate(atom.type.front().stream())
+        .filter(
+            pair -> {
+              FrontSpec front = pair.second;
+              String id = null;
+              if (front instanceof FrontAtomSpec) id = ((FrontAtomSpec) front).middle;
+              else if (front instanceof FrontFixedArraySpec)
+                id = ((FrontFixedArraySpec) front).middle;
+              return parent.id().equals(id);
+            })
+        .map(pair -> pair.first)
+        .findFirst()
+        .get();
+  }
 
   public abstract Map<String, AlignmentDefinition> alignments();
 

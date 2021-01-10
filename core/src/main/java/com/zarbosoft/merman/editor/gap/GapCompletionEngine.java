@@ -9,9 +9,6 @@ import java.util.List;
 public interface GapCompletionEngine {
   public State createGapCompletionState(ExtensionContext context, String baseType);
 
-  public State createPrefixGapCompletionState(
-      ExtensionContext context, List<Atom> succeeding, String baseType);
-
   public State createSuffixGapCompletionState(
       ExtensionContext context, List<Atom> preceding, String baseType);
 

@@ -3,8 +3,8 @@ package com.zarbosoft.merman.syntax.front;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.condition.ConditionAttachment;
+import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.SuffixGapAtomType;
 
 public class ConditionNode extends ConditionType {
   public Is is;
@@ -17,7 +17,7 @@ public class ConditionNode extends ConditionType {
     } else if (!(atom.type instanceof FreeAtomType)) {
       show = true;
     } else {
-      show = SuffixGapAtomType.isPrecedent((FreeAtomType) atom.type, atom.parent, true);
+      show = AtomType.isPrecedent((FreeAtomType) atom.type, atom.parent, true);
     }
     final ConditionAttachment condition =
         new ConditionAttachment(invert) {
