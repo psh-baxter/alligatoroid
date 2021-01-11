@@ -44,8 +44,8 @@ public class FrontPrimitiveSpec extends FrontSpec {
         HashTreePSet.from(tags)
             .plus(new PartTag("primitive"))
             .plusAll(this.tags.stream().map(s -> new FreeTag(s)).collect(Collectors.toSet())),
-        visualDepth,
-        depthScore);
+        visualDepth
+    );
   }
 
   @Override

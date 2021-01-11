@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.history.changes.ChangeArray;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualNestedFromArray;
@@ -33,7 +32,7 @@ public class ValueArray extends Value {
     data.stream()
         .forEach(
             v -> {
-              v.setParent(new ArrayParent());
+              v.setParent(new ArrayParent(this));
             });
     renumber(0);
   }
@@ -65,15 +64,15 @@ public class ValueArray extends Value {
 
   @Override
   public boolean selectDown(final Context context) {
-    select(context, true, 0, 0);
-    return true;
+    return select(context, true, 0, 0);
   }
 
-  public void select(
+  public boolean select(
       final Context context, final boolean leadFirst, final int start, final int end) {
     if (data.isEmpty()) {
-      final Atom initial = createAndAddDefault(context, 0);
-      if (initial.visual.selectDown(context)) return;
+      if (context.createArrayDefault == null) return false;
+      final Atom initial = context.createArrayDefault.create(context, this);
+      initial.visual.selectDown(context);
     }
     if (context.window) {
       final Atom firstChild = data.get(start);
@@ -81,19 +80,12 @@ public class ValueArray extends Value {
         context.createWindowForSelection(this, context.syntax.ellipsizeThreshold);
       }
     }
-    if (visual instanceof VisualArray) ((VisualArray) visual).select(context, true, start, end);
+    if (visual instanceof VisualArray)
+      ((VisualArray) visual).select(context, leadFirst, start, end);
     else if (visual instanceof VisualNestedFromArray)
       ((VisualNestedFromArray) visual).select(context);
     else throw new DeadCode();
-  }
-
-  public Atom createAndAddDefault(final Context context, final int index) {
-    final List<FreeAtomType> childTypes = context.syntax.getLeafTypes(back.elementAtomType());
-    final Atom element;
-    if (childTypes.size() == 1) element = childTypes.get(0).create(context.syntax);
-    else element = context.syntax.gap.create();
-    context.history.apply(context, new ChangeArray(this, index, 0, ImmutableList.of(element)));
-    return element;
+    return true;
   }
 
   @Override
@@ -120,7 +112,7 @@ public class ValueArray extends Value {
     if (!data.isEmpty()) throw new AssertionError();
     if (parent.atom().parent != null) throw new AssertionError();
     data.add(value);
-    value.setParent(new ArrayParent());
+    value.setParent(new ArrayParent(this));
     renumber(0);
   }
 
@@ -129,45 +121,41 @@ public class ValueArray extends Value {
     void changed(Context context, int index, int remove, List<Atom> add);
   }
 
-  public class ArrayParent extends Parent {
+  public static class ArrayParent extends Parent<ValueArray> {
     public int index = 0;
     public int actualIndex = 0;
 
-    @Override
-    public void replace(final Context context, final Atom atom) {
-      final int index = this.index;
-      context.history.apply(
-          context, new ChangeArray(ValueArray.this, index, 1, ImmutableList.of(atom)));
-    }
-
-    @Override
-    public void deleteChild(final Context context) {
-      context.history.apply(
-          context, new ChangeArray(ValueArray.this, index, 1, ImmutableList.of()));
+    public ArrayParent(ValueArray value) {
+      super(value);
     }
 
     @Override
     public String childType() {
-      return back.elementAtomType();
+      return value.back.elementAtomType();
     }
 
     @Override
     public Path path() {
-      return back.getPath(ValueArray.this, actualIndex);
+      return value.back.getPath(value, actualIndex);
     }
 
     @Override
     public boolean selectUp(final Context context) {
-      select(context, true, index, index);
+      value.select(context, true, index, index);
       return true;
     }
 
     @Override
     public Path getSyntaxPath() {
       Path out;
-      if (parent == null) out = new Path();
-      else out = parent.getSyntaxPath();
+      if (value.parent == null) out = new Path();
+      else out = value.parent.getSyntaxPath();
       return out.add(Integer.toString(index));
+    }
+
+    @Override
+    public void dispatch(ParentDispatcher dispatcher) {
+      dispatcher.handle(this);
     }
   }
 }

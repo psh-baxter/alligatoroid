@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.nio.file.Path;
 
 public class Document {
-
 	final public Syntax syntax;
 	final public Atom root;
 

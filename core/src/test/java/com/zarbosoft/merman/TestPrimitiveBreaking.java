@@ -2,8 +2,8 @@ package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
-import com.zarbosoft.merman.editor.history.changes.ChangePrimitiveAdd;
-import com.zarbosoft.merman.editor.history.changes.ChangePrimitiveRemove;
+import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveAdd;
+import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.PrimitiveSyntax;
 import com.zarbosoft.merman.helper.PrimitiveTestWizard;

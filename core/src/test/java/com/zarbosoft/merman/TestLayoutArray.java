@@ -3,7 +3,7 @@ package com.zarbosoft.merman;
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.editor.history.changes.ChangeArray;
+import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.MiscSyntax;
 import com.zarbosoft.merman.helper.TreeBuilder;

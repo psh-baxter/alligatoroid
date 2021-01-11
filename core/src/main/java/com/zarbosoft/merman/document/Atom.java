@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class Atom {
   public final TSMap<String, Value> fields;
-  public Value.Parent parent;
+  public Value.Parent<?> parent;
   public AtomType type;
   public VisualAtom visual;
   public PSet<Tag> tags;
@@ -78,7 +78,7 @@ public class Atom {
     return visual;
   }
 
-  public void setParent(final Value.Parent parent) {
+  public void setParent(final Value.Parent<?> parent) {
     this.parent = parent;
   }
 

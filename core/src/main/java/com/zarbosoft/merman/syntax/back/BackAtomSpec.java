@@ -8,6 +8,7 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
+import com.zarbosoft.pidgoon.nodes.Reference;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -20,7 +21,7 @@ public class BackAtomSpec extends BaseBackAtomSpec {
   }
 
   public Node buildBackRule(final Syntax syntax) {
-    return new Operator<StackStore>(syntax.backRuleRef(type)) {
+    return new Operator<StackStore>(new Reference(type)) {
       @Override
       protected StackStore process(StackStore store) {
         final Atom value = store.stackTop();

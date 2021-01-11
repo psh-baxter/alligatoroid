@@ -2,7 +2,7 @@ package com.zarbosoft.merman;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.history.changes.ChangeArray;
+import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.helper.*;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;

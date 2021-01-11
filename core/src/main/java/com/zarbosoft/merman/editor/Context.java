@@ -9,20 +9,18 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.document.InvalidDocument;
 import com.zarbosoft.merman.document.values.Value;
+import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.banner.Banner;
 import com.zarbosoft.merman.editor.details.Details;
 import com.zarbosoft.merman.editor.display.Display;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.editor.history.Change;
-import com.zarbosoft.merman.editor.history.History;
 import com.zarbosoft.merman.editor.serialization.Load;
 import com.zarbosoft.merman.editor.serialization.Write;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.GlobalTag;
 import com.zarbosoft.merman.editor.visual.tags.StateTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
@@ -30,10 +28,7 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Wall;
-import com.zarbosoft.merman.extensions.Extension;
-import com.zarbosoft.merman.extensions.ExtensionContext;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.editor.gap.TwoColumnChoice;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ChainComparator;
@@ -60,14 +55,19 @@ import java.util.stream.Stream;
 import static com.zarbosoft.rendaw.common.Common.last;
 
 public class Context {
-  public final History history;
   /** Contains the cursor and other marks. Scrolls. */
   public final Group overlay;
   /** Contains the source code. Scrolls. */
   public final Wall foreground;
+
+  @FunctionalInterface
+  public interface CreateArrayDefault {
+    Atom create(Context context, ValueArray value);
+  }
+  public CreateArrayDefault createArrayDefault;
+
   public final Display display;
   public final Syntax syntax;
-  public final ExtensionContext extensionContext;
   public final Document document;
   public final Set<SelectionListener> selectionListeners = new HashSet<>();
   public final Set<HoverListener> hoverListeners = new HashSet<>();
@@ -79,15 +79,15 @@ public class Context {
   private final Consumer<Integer> flushIteration;
   public boolean window;
   public Atom windowAtom;
-  public List<Extension.State> modules;
   public PSet<Tag> globalTags = HashTreePSet.empty();
-  public List<KeyListener> keyListeners = new ArrayList<>();
-  public List<GapChoiceListener> gapChoiceListeners = new ArrayList<>();
+  public KeyListener keyListener;
+  public TextListener textListener;
   public ClipboardEngine clipboardEngine;
   /** Contains banner/details and icons. Doesn't scroll. */
   public Group midground;
   /** Contains source borders. Scrolls. */
   public Group background;
+
   public Banner banner;
   public Details details;
   public int scroll = 0;
@@ -107,7 +107,7 @@ public class Context {
   int scrollStartBeddingBefore;
   int scrollStartBeddingAfter;
   int selectToken = 0;
-  boolean keyIgnore = false;
+  boolean keyHandlingInProgress = false;
   boolean debugInHover = false;
   private IterationNotifyBricksCreated idleNotifyBricksCreated;
 
@@ -117,7 +117,6 @@ public class Context {
       final Display display,
       final Consumer<IterationTask> addIteration,
       final Consumer<Integer> flushIteration,
-      final History history,
       final ClipboardEngine clipboardEngine) {
     actions.put(
         this,
@@ -148,13 +147,6 @@ public class Context {
     this.flushIteration = flushIteration;
     banner = new Banner(this);
     details = new Details(this);
-    this.history = history;
-    history.addModifiedStateListener(
-        modified -> {
-          final Tag tag = new GlobalTag("modified");
-          if (modified) changeGlobalTags(new TagsChange().add(tag));
-          else changeGlobalTags(new TagsChange().remove(tag));
-        });
     this.clipboardEngine = clipboardEngine;
     display.addConverseEdgeListener(
         (oldValue, newValue) -> {
@@ -172,19 +164,20 @@ public class Context {
         }));
     display.addHIDEventListener(
         hidEvent -> {
-          keyIgnore = false;
-          if (!keyListeners.stream().allMatch(l -> l.handleKey(this, hidEvent))) return;
-          keyIgnore = true;
-          flushIteration(100);
+          keyHandlingInProgress = false;
+          if (keyListener != null && keyListener.handleKey(this, hidEvent)){
+            keyHandlingInProgress = true;
+            flushIteration(100);
+          }
         });
     display.addTypingListener(
         text -> {
-          if (keyIgnore) {
-            keyIgnore = false;
+          if (keyHandlingInProgress) {
+            keyHandlingInProgress = false;
             return;
           }
           if (text.isEmpty()) return;
-          cursor.receiveText(this, text);
+          textListener.handleText(this, text);
           flushIteration(100);
         });
     display.addMouseExitListener(
@@ -202,15 +195,6 @@ public class Context {
             addIteration.accept(hoverIdle);
           }
           hoverIdle.point = vector.add(new Vector(-syntax.pad.converseStart, scroll + peek));
-        });
-    history.addListener(
-        new History.Listener() {
-          @Override
-          public void applied(final Context context, final Change change) {
-            if (hoverIdle != null) {
-              hoverIdle.destroy();
-            }
-          }
         });
     foreground.addCornerstoneListener(
         this,
@@ -269,8 +253,6 @@ public class Context {
               ImmutableSet.of(new StateTag("windowed"), new StateTag("root_window")),
               ImmutableSet.of()));
     }
-    modules =
-        document.syntax.extensions.stream().map(p -> p.create(this)).collect(Collectors.toList());
     display.addHIDEventListener(
         event -> {
           clearHover();
@@ -304,13 +286,7 @@ public class Context {
       newScroll = minimum;
     } else if (maxDiff > 0) {
       // Maximum is below scroll window
-      if (scroll + maxDiff < minimum) {
-        // Adjusted scroll doesn't go past the minimum
-        newScroll = scroll + maxDiff;
-      } else {
-        // Adjusted scroll goes past the minimum, so just go to minimum
-        newScroll = minimum;
-      }
+      newScroll = Math.min(scroll + maxDiff, minimum);
     }
     if (newScroll != null) {
       scroll = newScroll;
@@ -337,14 +313,6 @@ public class Context {
   public static PSet<Tag> asFreeTags(final Set<String> tags) {
     return HashTreePSet.from(
         tags.stream().map(tag -> new FreeTag(tag)).collect(Collectors.toList()));
-  }
-
-  public void addGapChoiceListener(final GapChoiceListener listener) {
-    gapChoiceListeners.add(listener);
-  }
-
-  public void removeGapChoiceListener(final GapChoiceListener listener) {
-    gapChoiceListeners.remove(listener);
   }
 
   public void addActions(final Object key, final List<Action> actions) {
@@ -457,22 +425,13 @@ public class Context {
     this.globalTagsChangeListeners.remove(listener);
   }
 
-  public void addKeyListener(final KeyListener listener) {
-    this.keyListeners.add(listener);
-  }
-
-  public void removeKeyListener(final KeyListener listener) {
-    this.keyListeners.remove(listener);
-  }
-
   public void idleLayBricks(
       final VisualParent parent,
       final int index,
       final int addCount,
       final int size,
       final Function<Integer, Brick> accessFirst,
-      final Function<Integer, Brick> accessLast,
-      final Function<Integer, Brick> create) {
+      final Function<Integer, Brick> accessLast) {
     if (size == 0) throw new AssertionError();
     if (index > 0) {
       final Brick previousBrick = accessLast.apply(index - 1);
@@ -557,7 +516,7 @@ public class Context {
 
     // Try just going up
     if (windowAtom != null) {
-      Value at = windowAtom.parent.value();
+        Value at = windowAtom.parent.value;
       while (true) {
         if (at == value) {
           windowAtom = at.parent.atom();
@@ -565,7 +524,7 @@ public class Context {
         }
         final Atom atom = at.parent.atom();
         if (atom.parent == null) break;
-        at = atom.parent.value();
+          at = atom.parent.value;
       }
     }
 
@@ -577,7 +536,7 @@ public class Context {
         depth += windowAtom.type.depthScore();
         if (depth >= depthThreshold) break;
         if (windowAtom.parent == null) break;
-        windowAtom = windowAtom.parent.value().parent.atom();
+          windowAtom = windowAtom.parent.value.parent.atom();
       }
 
       if (depth < depthThreshold) {
@@ -685,9 +644,6 @@ public class Context {
             ImmutableSet.of(),
             ImmutableSet.of(new StateTag("windowed"), new StateTag("root_window"))));
   }
-  public static interface GapChoiceListener {
-    void changed(Context context, List<? extends TwoColumnChoice> choices);
-  }
 
   public static interface ContextIntListener {
     void changed(Context context, int oldValue, int newValue);
@@ -704,6 +660,11 @@ public class Context {
     boolean handleKey(Context context, HIDEvent event);
   }
 
+  @FunctionalInterface
+  public interface TextListener {
+    void handleText(Context context, String text);
+  }
+
   public interface SelectionListener {
 
     public abstract void selectionChanged(Context context, Cursor cursor);
@@ -717,12 +678,6 @@ public class Context {
   public abstract static class TagsListener {
 
     public abstract void tagsChanged(Context context);
-  }
-
-  private abstract static class ActionBase extends Action {
-    public static String group() {
-      return "editor";
-    }
   }
 
   public class IterationLayBricks extends IterationTask {
@@ -901,7 +856,7 @@ public class Context {
   }
 
   @Action.StaticID(id = "window_clear")
-  private class ActionWindowClear extends ActionBase {
+  private class ActionWindowClear extends Action {
     @Override
     public boolean run(final Context context) {
       if (!window) return false;
@@ -911,7 +866,7 @@ public class Context {
   }
 
   @Action.StaticID(id = "window_up")
-  private class ActionWindowUp extends ActionBase {
+  private class ActionWindowUp extends Action {
     private final Document document;
 
     public ActionWindowUp(final Document document) {
@@ -926,7 +881,7 @@ public class Context {
       if (atom == document.root) {
         windowAtom = null;
       } else {
-        windowAtom = atom.parent.value().parent.atom();
+          windowAtom = atom.parent.value.parent.atom();
       }
       idleLayBricksOutward();
       return true;
@@ -934,7 +889,7 @@ public class Context {
   }
 
   @Action.StaticID(id = "window_down")
-  private class ActionWindowDown extends ActionBase {
+  private class ActionWindowDown extends Action {
     @Override
     public boolean run(final Context context) {
       if (!window) return false;
@@ -960,7 +915,7 @@ public class Context {
   }
 
   @Action.StaticID(id = "scroll_previous")
-  private class ActionScrollNext extends ActionBase {
+  private class ActionScrollNext extends Action {
 
     @Override
     public boolean run(final Context context) {
@@ -971,7 +926,7 @@ public class Context {
   }
 
   @Action.StaticID(id = "scroll_previous_alot")
-  private class ActionScrollNextAlot extends ActionBase {
+  private class ActionScrollNextAlot extends Action {
 
     @Override
     public boolean run(final Context context) {
@@ -982,7 +937,7 @@ public class Context {
   }
 
   @Action.StaticID(id = "scroll_next")
-  private class ActionScrollPrevious extends ActionBase {
+  private class ActionScrollPrevious extends Action {
 
     @Override
     public boolean run(final Context context) {
@@ -993,7 +948,7 @@ public class Context {
   }
 
   @Action.StaticID(id = "scroll_next_alot")
-  private class ActionScrollPreviousAlot extends ActionBase {
+  private class ActionScrollPreviousAlot extends Action {
 
     @Override
     public boolean run(final Context context) {
@@ -1004,7 +959,7 @@ public class Context {
   }
 
   @Action.StaticID(id = "scroll_reset")
-  private class ActionScrollReset extends ActionBase {
+  private class ActionScrollReset extends Action {
 
     @Override
     public boolean run(final Context context) {

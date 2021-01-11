@@ -7,8 +7,8 @@ import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.history.changes.ChangeArray;
-import com.zarbosoft.merman.editor.history.changes.ChangeNodeSet;
+import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
+import com.zarbosoft.merman.editorcore.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.MiscSyntax;
@@ -82,9 +82,9 @@ public class TestCursorChanges {
             .build(),
         new Path("value", "0", "value", "0"),
         (context, selected) -> {
-          context.history.apply(
+            context.history.apply(
               context,
-              new ChangeArray((ValueArray) selected.parent.value(), 0, 1, ImmutableList.of()));
+              new ChangeArray((ValueArray) selected.parent.value, 0, 1, ImmutableList.of()));
         },
         new TreeBuilder(MiscSyntax.array).addArray("value").build(),
         new Path("value", "0"));
@@ -101,10 +101,9 @@ public class TestCursorChanges {
                 new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
         new Path("value", "0", "value", "0"),
-        (context, selected) ->
-            context.history.apply(
+            (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.parent.value(), 1, 1, ImmutableList.of())),
+                new ChangeArray((ValueArray) selected.parent.value, 1, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
@@ -122,10 +121,9 @@ public class TestCursorChanges {
                 new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
         new Path("value", "0", "value", "1"),
-        (context, selected) ->
-            context.history.apply(
+            (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.parent.value(), 0, 1, ImmutableList.of())),
+                new ChangeArray((ValueArray) selected.parent.value, 0, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
@@ -144,10 +142,9 @@ public class TestCursorChanges {
                 new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
         new Path("value", "0", "value", "1"),
-        (context, selected) ->
-            context.history.apply(
+            (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.parent.value(), 1, 1, ImmutableList.of())),
+                new ChangeArray((ValueArray) selected.parent.value, 1, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray(
                 "value",
@@ -168,10 +165,9 @@ public class TestCursorChanges {
                 new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
         new Path("value", "0", "value", "1"),
-        (context, selected) ->
-            context.history.apply(
+            (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.parent.value(), 1, 1, ImmutableList.of())),
+                new ChangeArray((ValueArray) selected.parent.value, 1, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
@@ -219,11 +215,10 @@ public class TestCursorChanges {
                 new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
         new Path("value", "0", "value", "0"),
-        (context, selected) ->
-            context.history.apply(
+            (context, selected) -> context.history.apply(
                 context,
                 new ChangeArray(
-                    (ValueArray) selected.parent.value(),
+                    (ValueArray) selected.parent.value,
                     0,
                     0,
                     ImmutableList.of(new TreeBuilder(MiscSyntax.infinity).build()))),
@@ -248,11 +243,10 @@ public class TestCursorChanges {
                 new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
         new Path("value", "0", "value", "1"),
-        (context, selected) ->
-            context.history.apply(
+            (context, selected) -> context.history.apply(
                 context,
                 new ChangeArray(
-                    (ValueArray) selected.parent.value(),
+                    (ValueArray) selected.parent.value,
                     1,
                     0,
                     ImmutableList.of(new TreeBuilder(MiscSyntax.infinity).build()))),
@@ -500,10 +494,10 @@ public class TestCursorChanges {
             .build(),
         new Path("value", "0", "value", "atom"),
         (context, selected) -> {
-          context.history.apply(
+            context.history.apply(
               context,
               new ChangeNodeSet(
-                  (ValueAtom) selected.parent.value(), MiscSyntax.syntax.gap.create()));
+                  (ValueAtom) selected.parent.value, MiscSyntax.syntax.gap.create()));
         },
         new TreeBuilder(MiscSyntax.snooze).add("value", MiscSyntax.syntax.gap.create()).build(),
         new Path("value", "0", "value"));

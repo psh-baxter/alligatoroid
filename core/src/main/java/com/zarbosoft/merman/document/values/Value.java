@@ -3,10 +3,8 @@ package com.zarbosoft.merman.document.values;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.gap.GapCompletionEngine;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.DeadCode;
 
 public abstract class Value {
   public Atom.Parent parent = null;
@@ -26,35 +24,17 @@ public abstract class Value {
 
   public abstract Object syntaxLocateStep(String segment);
 
-  public abstract GapCompletionEngine.State createGapEngine();
+  public abstract static class Parent<T extends Value> {
+    public final T value;
 
-  public abstract class Parent {
-
-    /**
-     * Replace the child with a new atom. (Creates history)
-     *
-     * @param context
-     * @param atom
-     */
-    public abstract void replace(Context context, Atom atom);
-
-    /**
-     * Remove the element if an array. (Creates history)
-     *
-     * @param context
-     */
-    public void deleteChild(final Context context) {
-      throw new Assertion();
+    protected Parent(T value) {
+      this.value = value;
     }
 
     public abstract String childType();
 
-    public Value value() {
-      return Value.this;
-    }
-
     public String id() {
-      return back().id;
+      return value.back().id;
     }
 
     public abstract Path path();
@@ -62,5 +42,13 @@ public abstract class Value {
     public abstract boolean selectUp(final Context context);
 
     public abstract Path getSyntaxPath();
+
+    public abstract void dispatch(ParentDispatcher dispatcher);
+  }
+
+  public interface ParentDispatcher {
+    void handle(ValueArray.ArrayParent parent);
+
+    void handle(ValueAtom.NodeParent parent);
   }
 }

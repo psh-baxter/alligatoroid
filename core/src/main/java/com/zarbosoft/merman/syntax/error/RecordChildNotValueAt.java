@@ -3,7 +3,6 @@ package com.zarbosoft.merman.syntax.error;
 import com.google.common.collect.ImmutableMap;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 
 public class RecordChildNotValueAt extends BaseKVError{

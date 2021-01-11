@@ -10,13 +10,9 @@ import java.util.Map;
 import java.util.Set;
 
 public class HotkeyRule {
-
   public Set<Tag> with = new HashSet<>();
-
   public Set<Tag> without = new HashSet<>();
-
   public Map<String, List<Node>> hotkeys = new HashMap<>();
-
   public boolean freeTyping = true;
 
   public HotkeyRule() {}

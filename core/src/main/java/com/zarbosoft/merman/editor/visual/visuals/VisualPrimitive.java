@@ -3,8 +3,6 @@ package com.zarbosoft.merman.editor.visual.visuals;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Iterables;
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
@@ -57,7 +55,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
   // INVARIANT: Always at least one line
   // TODO index line offsets for faster insert/remove
   private final ValuePrimitive.Listener dataListener;
-  private final ValuePrimitive value;
+  public final ValuePrimitive value;
   private final BrickStyle brickStyle;
   public VisualParent parent;
   public PSet<Tag> tags;
@@ -74,8 +72,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
       final VisualParent parent,
       final ValuePrimitive value,
       final PSet<Tag> tags,
-      final int visualDepth,
-      final int depthScore) {
+      final int visualDepth) {
     super(visualDepth);
     this.tags = tags.plus(new PartTag("primitive"));
     this.parent = parent;
@@ -215,14 +212,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
 
   private void idleLayBricks(final Context context, final int start, final int end) {
     final Function<Integer, Brick> accessor = i -> lines.get(i).brick;
-    context.idleLayBricks(
-        parent,
-        start,
-        end - start,
-        lines.size(),
-        accessor,
-        accessor,
-        i -> lines.get(start).createBrick(context));
+    context.idleLayBricks(parent, start, end - start, lines.size(), accessor, accessor);
   }
 
   private void set(final Context context, final String text) {
@@ -295,7 +285,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
 
   public PrimitiveCursor createSelection(
       final Context context, final boolean leadFirst, final int beginOffset, final int endOffset) {
-    return new PrimitiveCursor(context, leadFirst, beginOffset, endOffset);
+    return new PrimitiveCursor(this, context, leadFirst, beginOffset, endOffset);
   }
 
   protected void commit() {}
@@ -591,12 +581,6 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     return result;
   }
 
-  private abstract static class ActionBase extends Action {
-    public static String group() {
-      return "primitive";
-    }
-  }
-
   public abstract static class BoundsListener {
     public abstract void firstChanged(Context context, Brick brick);
 
@@ -705,8 +689,8 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     public int endOffset;
     boolean leadFirst;
     TextBorderAttachment border;
-    Line beginLine;
-    Line endLine;
+    public Line beginLine;
+    public Line endLine;
     Set<BoundsListener> listeners = new HashSet<>();
     private ObboxStyle.Baked style;
 
@@ -752,29 +736,25 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
           cursor = null;
         }
         final BrickText newFirstBrick;
-        final Integer newFirstIndex;
         final BrickText newLastBrick;
-        final Integer newLastIndex;
         final int beginIndex = findContaining(beginOffset);
         if (beginLine != null && beginLine.index == beginIndex) {
           newFirstBrick = beginLine.brick;
-          newFirstIndex = beginOffset - beginLine.offset;
         } else {
           beginLine = lines.get(beginIndex);
           if (beginLine.brick != null) newFirstBrick = beginLine.brick;
           else newFirstBrick = null;
-          newFirstIndex = beginOffset - beginLine.offset;
         }
+        int newFirstIndex = beginOffset - beginLine.offset;
         final int endIndex = findContaining(endOffset);
         if (endLine != null && endLine.index == endIndex) {
           newLastBrick = endLine.brick;
-          newLastIndex = endOffset - endLine.offset;
         } else {
           endLine = lines.get(endIndex);
           if (endLine.brick != null) newLastBrick = endLine.brick;
           else newLastBrick = null;
-          newLastIndex = endOffset - endLine.offset;
         }
+        int newLastIndex = endOffset - endLine.offset;
         if (border == null) {
           border = new TextBorderAttachment(context);
           border.setStyle(context, style);
@@ -862,7 +842,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
   }
 
-  public class PrimitiveCursor extends Cursor {
+  public static class PrimitiveCursor extends Cursor {
     public final RangeAttachment range;
     final BreakIterator clusterIterator = BreakIterator.getCharacterInstance();
     private final ValuePrimitive.Listener clusterListener =
@@ -874,26 +854,28 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
 
           @Override
           public void added(final Context context, final int index, final String text) {
-            clusterIterator.setText(value.get());
+            clusterIterator.setText(visualPrimitive.value.get());
           }
 
           @Override
           public void removed(final Context context, final int index, final int count) {
-            clusterIterator.setText(value.get());
+            clusterIterator.setText(visualPrimitive.value.get());
           }
         };
+    public VisualPrimitive visualPrimitive;
 
     public PrimitiveCursor(
+        final VisualPrimitive visualPrimitive,
         final Context context,
         final boolean leadFirst,
         final int beginOffset,
         final int endOffset) {
-      range = new RangeAttachment(true);
-      range.setStyle(context, getBorderStyle(context, tags).obbox);
+      range = visualPrimitive.new RangeAttachment(true);
+      range.setStyle(context, getBorderStyle(context, visualPrimitive.tags).obbox);
       range.leadFirst = leadFirst;
       range.setOffsets(context, beginOffset, endOffset);
-      clusterIterator.setText(value.get());
-      value.addListener(this.clusterListener);
+      clusterIterator.setText(visualPrimitive.value.get());
+      visualPrimitive.value.addListener(this.clusterListener);
       context.addActions(
           this,
           Stream.concat(
@@ -909,13 +891,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
                       new ActionLineEnd(),
                       new ActionNextLine(),
                       new ActionPreviousLine(),
-                      new ActionDeletePrevious(),
-                      new ActionDeleteNext(),
-                      new ActionSplit(),
-                      new ActionJoin(),
                       new ActionCopy(),
-                      new ActionCut(),
-                      new ActionPaste(),
                       new ActionGatherNext(),
                       new ActionGatherNextWord(),
                       new ActionGatherNextLineEnd(),
@@ -932,8 +908,9 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
                       new ActionReleasePreviousWord(),
                       new ActionReleasePreviousLineStart(),
                       new ActionReleasePreviousLine(beginOffset)),
-                  VisualPrimitive.this.getActions())
+                  visualPrimitive.getActions())
               .collect(Collectors.toList()));
+      this.visualPrimitive = visualPrimitive;
     }
 
     private int preceding(final int offset) {
@@ -946,46 +923,46 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
       return Math.max(0, to);
     }
 
-    private int preceding() {
+    public int preceding() {
       return preceding(clusterIterator, range.beginOffset);
     }
 
-    private int following(final int offset) {
+    public int following(final int offset) {
       return following(clusterIterator, offset);
     }
 
     private int following(final BreakIterator iter, final int offset) {
       int to = iter.following(offset);
-      if (to == BreakIterator.DONE) to = value.length();
-      return Math.min(value.length(), to);
+      if (to == BreakIterator.DONE) to = visualPrimitive.value.length();
+      return Math.min(visualPrimitive.value.length(), to);
     }
 
-    private int following() {
+    public int following() {
       return following(clusterIterator, range.endOffset);
     }
 
     private int nextWord(final int source) {
       final BreakIterator iter = BreakIterator.getWordInstance();
-      iter.setText(value.get());
+      iter.setText(visualPrimitive.value.get());
       return following(iter, source);
     }
 
     private int previousWord(final int source) {
       final BreakIterator iter = BreakIterator.getWordInstance();
-      iter.setText(value.get());
+      iter.setText(visualPrimitive.value.get());
       return preceding(iter, source);
     }
 
     private int nextLine(final Line sourceLine, final int source) {
-      if (sourceLine.index + 1 < lines.size()) {
-        final Line nextLine = lines.get(sourceLine.index + 1);
+      if (sourceLine.index + 1 < visualPrimitive.lines.size()) {
+        final Line nextLine = visualPrimitive.lines.get(sourceLine.index + 1);
         return nextLine.offset + Math.min(nextLine.text.length(), source - sourceLine.offset);
       } else return sourceLine.offset + sourceLine.text.length();
     }
 
     private int previousLine(final Line sourceLine, final int source) {
       if (sourceLine.index > 0) {
-        final Line previousLine = lines.get(sourceLine.index - 1);
+        final Line previousLine = visualPrimitive.lines.get(sourceLine.index - 1);
         return previousLine.offset
             + Math.min(previousLine.text.length(), source - sourceLine.offset);
       } else return sourceLine.offset;
@@ -1003,94 +980,72 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     public void clear(final Context context) {
       context.removeActions(this);
       range.destroy(context);
-      selection = null;
-      commit();
-      value.removeListener(clusterListener);
-    }
-
-    @Override
-    public void receiveText(final Context context, final String text) {
-      String preview = value.get();
-      if (value.middle.matcher != null) {
-        preview =
-            preview.substring(0, range.beginOffset)
-                + text
-                + preview.substring(range.endOffset, preview.length());
-        if (!value.middle.matcher.match(preview)) {
-          if (range.endOffset == value.length()
-              && last(atomVisual().children) == VisualPrimitive.this) {
-            context.history.finishChange(context);
-            final Value.Parent parent = atomVisual().atom.parent;
-            final Atom gap = context.syntax.suffixGap.create(true, atomVisual().atom);
-            parent.replace(context, gap);
-            gap.fields.getOpt("gap").selectDown(context);
-            context.cursor.receiveText(context, text);
-          }
-          return;
-        }
-      }
-      if (range.beginOffset != range.endOffset)
-        context.history.apply(
-            context, value.changeRemove(range.beginOffset, range.endOffset - range.beginOffset));
-      context.history.apply(context, value.changeAdd(range.beginOffset, text));
+      visualPrimitive.selection = null;
+      visualPrimitive.commit();
+      visualPrimitive.value.removeListener(clusterListener);
     }
 
     @Override
     public Visual getVisual() {
-      return VisualPrimitive.this;
+      return visualPrimitive;
     }
 
     @Override
     public SelectionState saveState() {
       return new PrimitiveSelectionState(
-          value, range.leadFirst, range.beginOffset, range.endOffset);
+          visualPrimitive.value, range.leadFirst, range.beginOffset, range.endOffset);
     }
 
     @Override
     public Path getSyntaxPath() {
-      return value.getSyntaxPath().add(String.valueOf(range.beginOffset));
+      return visualPrimitive.value.getSyntaxPath().add(String.valueOf(range.beginOffset));
     }
 
     @Override
     public void tagsChanged(final Context context) {
-      range.setStyle(context, getBorderStyle(context, tags).obbox);
+      range.setStyle(context, getBorderStyle(context, visualPrimitive.tags).obbox);
       super.tagsChanged(context);
     }
 
     @Override
     public PSet<Tag> getTags(final Context context) {
-      return tags;
+      return visualPrimitive.tags;
+    }
+
+    @Override
+    public void dispatch(Dispatcher dispatcher) {
+dispatcher.handle(this);
     }
 
     @Action.StaticID(id = "exit")
-    private class ActionExit extends ActionBase {
+    private class ActionExit extends Action {
       @Override
       public boolean run(final Context context) {
 
-        if (value.parent == null) return false;
-        value.parent.selectUp(context);
+        if (visualPrimitive.value.parent == null) return false;
+        visualPrimitive.value.parent.selectUp(context);
         return true;
       }
     }
 
     @Action.StaticID(id = "next")
-    private class ActionNext extends ActionBase {
+    private class ActionNext extends Action {
       @Override
       public boolean run(final Context context) {
-        return parent.selectNext(context);
+        return visualPrimitive.parent.selectNext(context);
       }
     }
 
     @Action.StaticID(id = "previous")
-    private class ActionPrevious extends ActionBase {
+    private class ActionPrevious extends Action {
       @Override
       public boolean run(final Context context) {
-        return parent.selectPrevious(context);
+        return visualPrimitive.parent.selectPrevious(context);
       }
     }
 
     @Action.StaticID(id = "next_element")
-    private class ActionNextElement extends ActionBase {
+    private class ActionNextElement extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1102,7 +1057,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "previous_element")
-    private class ActionPreviousElement extends ActionBase {
+    private class ActionPreviousElement extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1114,7 +1069,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "next_word")
-    private class ActionNextWord extends ActionBase {
+    private class ActionNextWord extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1126,7 +1081,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "previous_word")
-    private class ActionPreviousWord extends ActionBase {
+    private class ActionPreviousWord extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1138,7 +1093,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "line_begin")
-    private class ActionLineBegin extends ActionBase {
+    private class ActionLineBegin extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1150,7 +1105,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "line_end")
-    private class ActionLineEnd extends ActionBase {
+    private class ActionLineEnd extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1162,7 +1117,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "next_line")
-    private class ActionNextLine extends ActionBase {
+    private class ActionNextLine extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1174,7 +1129,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "previous_line")
-    private class ActionPreviousLine extends ActionBase {
+    private class ActionPreviousLine extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1185,130 +1140,18 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "delete_previous")
-    private class ActionDeletePrevious extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-        if (range.beginOffset == range.endOffset) {
-          if (range.beginOffset == 0) return false;
-          final int preceding = preceding();
-          context.history.apply(
-              context, value.changeRemove(preceding, range.beginOffset - preceding));
-        } else
-          context.history.apply(
-              context, value.changeRemove(range.beginOffset, range.endOffset - range.beginOffset));
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "delete_next")
-    private class ActionDeleteNext extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-        if (range.beginOffset == range.endOffset) {
-          if (range.endOffset == value.length()) return false;
-          final int following = following();
-          context.history.apply(
-              context, value.changeRemove(range.beginOffset, following - range.beginOffset));
-        } else
-          context.history.apply(
-              context, value.changeRemove(range.beginOffset, range.endOffset - range.beginOffset));
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "split")
-    private class ActionSplit extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-
-        if (range.beginOffset != range.endOffset)
-          context.history.apply(
-              context, value.changeRemove(range.beginOffset, range.endOffset - range.beginOffset));
-        context.history.apply(context, value.changeAdd(range.beginOffset, "\n"));
-
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "join")
-    private class ActionJoin extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-        if (range.beginOffset == range.endOffset) {
-          if (range.beginLine.index + 1 >= lines.size()) return false;
-          final int select = range.endLine.offset + range.endLine.text.length();
-
-          context.history.apply(
-              context, value.changeRemove(lines.get(range.beginLine.index + 1).offset - 1, 1));
-
-          select(context, true, select, select);
-        } else {
-          if (range.beginLine == range.endLine) return false;
-
-          final StringBuilder replace = new StringBuilder();
-          replace.append(
-              range.beginLine.text.substring(range.beginOffset - range.beginLine.offset));
-          final int selectBegin = range.beginOffset;
-          int selectEnd = range.endOffset - 1;
-          for (int index = range.beginLine.index + 1; index <= range.endLine.index - 1; ++index) {
-            replace.append(lines.get(index).text);
-            selectEnd -= 1;
-          }
-          replace.append(range.endLine.text.substring(0, range.endOffset - range.endLine.offset));
-          context.history.apply(
-              context, value.changeRemove(range.beginOffset, range.endOffset - range.beginOffset));
-          context.history.apply(context, value.changeAdd(range.beginOffset, replace.toString()));
-
-          select(context, true, selectBegin, selectEnd);
-        }
-        return true;
-      }
-    }
-
     @Action.StaticID(id = "copy")
-    private class ActionCopy extends ActionBase {
+    private class ActionCopy extends Action {
       @Override
       public boolean run(final Context context) {
 
-        context.copy(value.get().substring(range.beginOffset, range.endOffset));
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "cut")
-    private class ActionCut extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-
-        context.copy(value.get().substring(range.beginOffset, range.endOffset));
-
-        context.history.apply(
-            context, value.changeRemove(range.beginOffset, range.endOffset - range.beginOffset));
-
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "paste")
-    private class ActionPaste extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-
-        final String text = context.uncopyString();
-        if (text == null) return false;
-
-        if (range.beginOffset != range.endOffset)
-          context.history.apply(
-              context, value.changeRemove(range.beginOffset, range.endOffset - range.beginOffset));
-        context.history.apply(context, value.changeAdd(range.beginOffset, text));
-
+        context.copy(visualPrimitive.value.get().substring(range.beginOffset, range.endOffset));
         return true;
       }
     }
 
     @Action.StaticID(id = "gather_next")
-    private class ActionGatherNext extends ActionBase {
+    private class ActionGatherNext extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1320,7 +1163,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "gather_next_word")
-    private class ActionGatherNextWord extends ActionBase {
+    private class ActionGatherNextWord extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1332,7 +1175,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "gather_next_line_end")
-    private class ActionGatherNextLineEnd extends ActionBase {
+    private class ActionGatherNextLineEnd extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1344,7 +1187,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "gather_next_line")
-    private class ActionGatherNextLine extends ActionBase {
+    private class ActionGatherNextLine extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1356,7 +1199,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_next")
-    private class ActionReleaseNext extends ActionBase {
+    private class ActionReleaseNext extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1368,7 +1211,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_next_word")
-    private class ActionReleaseNextWord extends ActionBase {
+    private class ActionReleaseNextWord extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1380,7 +1223,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_next_line_end")
-    private class ActionReleaseNextLineEnd extends ActionBase {
+    private class ActionReleaseNextLineEnd extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1392,7 +1235,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_next_line")
-    private class ActionReleaseNextLine extends ActionBase {
+    private class ActionReleaseNextLine extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1405,7 +1248,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "gather_previous")
-    private class ActionGatherPrevious extends ActionBase {
+    private class ActionGatherPrevious extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1417,7 +1260,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "gather_previous_word")
-    private class ActionGatherPreviousWord extends ActionBase {
+    private class ActionGatherPreviousWord extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1429,7 +1272,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "gather_previous_line_start")
-    private class ActionGatherPreviousLineStart extends ActionBase {
+    private class ActionGatherPreviousLineStart extends Action {
       @Override
       public boolean run(final Context context) {
         final int newIndex = startOfLine(range.beginLine);
@@ -1440,7 +1283,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "gather_previous_line")
-    private class ActionGatherPreviousLine extends ActionBase {
+    private class ActionGatherPreviousLine extends Action {
       @Override
       public boolean run(final Context context) {
         final int newIndex = previousLine(range.beginLine, range.beginOffset);
@@ -1451,7 +1294,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_previous")
-    private class ActionReleasePrevious extends ActionBase {
+    private class ActionReleasePrevious extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1463,7 +1306,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_previous_word")
-    private class ActionReleasePreviousWord extends ActionBase {
+    private class ActionReleasePreviousWord extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1475,7 +1318,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_previous_line_start")
-    private class ActionReleasePreviousLineStart extends ActionBase {
+    private class ActionReleasePreviousLineStart extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -1487,7 +1330,7 @@ public class VisualPrimitive extends Visual implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_previous_line")
-    private class ActionReleasePreviousLine extends ActionBase {
+    private class ActionReleasePreviousLine extends Action {
       private final int beginOffset;
 
       public ActionReleasePreviousLine(final int beginOffset) {

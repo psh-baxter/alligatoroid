@@ -16,9 +16,9 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
+import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
-import com.zarbosoft.rendaw.common.Pair;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,7 +48,7 @@ public class BackRecordSpec extends BaseBackArraySpec {
     sequence.add(StackStore.prepVarStack);
     sequence.add(
         new Repeat(
-            new Sequence().add(syntax.backRuleRef(element)).add(StackStore.pushVarStackSingle)));
+            new Sequence().add(new Reference(element)).add(StackStore.pushVarStackSingle)));
     sequence.add(new MatchingEventTerminal(new EObjectCloseEvent()));
     return new Operator<StackStore>(sequence) {
       @Override
@@ -89,7 +89,7 @@ public class BackRecordSpec extends BaseBackArraySpec {
       boolean singularRestriction,
       boolean typeRestriction) {
     super.finish(errors, syntax, typePath, fields, singularRestriction, typeRestriction);
-    for (final FreeAtomType element : syntax.getLeafTypes(element)) {
+    for (final FreeAtomType element : syntax.splayedTypes.get(element)) {
       CheckBackState state = CheckBackState.KEY;
       for (int i = 0; i < element.back.size(); ++i) {
         BackSpec back = element.back.get(i);

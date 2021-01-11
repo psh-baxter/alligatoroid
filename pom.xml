@@ -7,6 +7,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>core</module>
+        <module>editorcore</module>
         <module>standalone</module>
         <module>webview</module>
         <module>luxem</module>

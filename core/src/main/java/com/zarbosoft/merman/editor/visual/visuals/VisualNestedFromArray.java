@@ -6,7 +6,6 @@ import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.history.changes.ChangeArray;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
@@ -17,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class VisualNestedFromArray extends VisualNestedBase {
-  final ValueArray value;
+  public final ValueArray value;
   private final ValueArray.Listener dataListener;
 
   public VisualNestedFromArray(
@@ -44,8 +43,8 @@ public abstract class VisualNestedFromArray extends VisualNestedBase {
   }
 
   @Override
-  protected void nodeSet(final Context context, final Atom atom) {
-    context.history.apply(context, new ChangeArray(value, 0, 1, ImmutableList.of(atom)));
+  public void dispatch(VisualNestedDispatcher dispatcher) {
+    dispatcher.handle(this);
   }
 
   @Override

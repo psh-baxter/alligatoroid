@@ -47,7 +47,7 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
         depthScore) {
 
       @Override
-      protected String nodeType() {
+      public String nodeType() {
         return dataType.elementAtomType();
       }
 

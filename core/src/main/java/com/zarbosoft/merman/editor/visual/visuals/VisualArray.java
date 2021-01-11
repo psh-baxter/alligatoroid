@@ -9,7 +9,6 @@ import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.SelectionState;
-import com.zarbosoft.merman.editor.history.changes.ChangeArray;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
@@ -71,7 +70,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
               if (value.data.isEmpty()) {
                 // Was blank, now ellipsized
                 if (empty != null) empty.destroy(context);
-                context.idleLayBricks(parent, 0, 1, 1, null, null, i -> createEmpty(context));
+                context.idleLayBricks(parent, 0, 1, 1, null, null);
                 return;
               } else if (add.isEmpty() && remove == value.data.size()) {
                 // Was ellipsized, now blank
@@ -125,11 +124,10 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
                   visualIndex(index + add.size()) - layIndex,
                   children.size(),
                   i -> children.get(i).getFirstBrick(context),
-                  i -> children.get(i).getLastBrick(context),
-                  i -> children.get(i).createFirstBrick(context));
+                  i -> children.get(i).getLastBrick(context));
             } else if (value.data.isEmpty()) {
               if (ellipsis != null) ellipsis.destroy(context);
-              context.idleLayBricks(parent, 0, 1, 1, null, null, i -> createEmpty(context));
+              context.idleLayBricks(parent, 0, 1, 1, null, null);
             }
 
             // Fix hover/selection
@@ -176,10 +174,8 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     final Map<String, Alignment> alignments = parent.atomVisual().alignments();
     int visualIndex = index;
     int visualRemove = remove;
-    int visualAdd = add.size();
     if (!getSeparator().isEmpty()) {
       visualIndex = index == 0 ? 0 : visualIndex * 2 - 1;
-      visualAdd = children.isEmpty() ? visualAdd * 2 - 1 : visualAdd * 2;
       visualRemove = Math.min(visualRemove * 2, children.size());
     }
     final boolean retagFirst = tagFirst() && visualIndex == 0;
@@ -500,22 +496,19 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     this.parent = parent;
     if (value.data.isEmpty()) {
       super.root(context, parent, alignments, visualDepth, depthScore);
-      if (empty == null)
-        context.idleLayBricks(parent, 0, 1, 1, null, null, i -> createEmpty(context));
+      if (empty == null) context.idleLayBricks(parent, 0, 1, 1, null, null);
     } else if (ellipsize(context)) {
       if (!children.isEmpty()) {
         remove(context, 0, children.size());
       }
       super.root(context, parent, alignments, visualDepth, depthScore);
-      if (ellipsis == null)
-        context.idleLayBricks(parent, 0, 1, 1, null, null, i -> createEllipsis(context));
+      if (ellipsis == null) context.idleLayBricks(parent, 0, 1, 1, null, null);
     } else {
       if (ellipsis != null) ellipsis.destroy(context);
       super.root(context, parent, alignments, visualDepth, depthScore);
       if (children.isEmpty()) {
         coreChange(context, 0, 0, value.data);
-        context.idleLayBricks(
-            parent, 0, 1, 1, null, null, i -> children.get(0).createFirstBrick(context));
+        context.idleLayBricks(parent, 0, 1, 1, null, null);
       }
     }
   }
@@ -597,12 +590,6 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     } else return super.hover(context, point);
   }
 
-  private abstract static class ActionBase extends Action {
-    public static String group() {
-      return "array";
-    }
-  }
-
   public static class ArrayCursor extends Cursor {
     public final VisualArray self;
     public int beginIndex;
@@ -629,24 +616,15 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
               new ActionPrevious(),
               new ActionNextElement(),
               new ActionPreviousElement(),
-              new ActionDelete(),
-              new ActionInsertBefore(),
-              new ActionInsertAfter(),
               new ActionCopy(),
-              new ActionCut(),
-              new ActionPaste(),
               new ActionGatherNext(),
               new ActionReleaseNext(),
               new ActionGatherPrevious(),
               new ActionReleasePrevious(),
-              new ActionMoveBefore(),
-              new ActionMoveAfter(),
-              new ActionWindow(),
-              new ActionPrefix(leadFirst),
-              new ActionSuffix(leadFirst)));
+              new ActionWindow()));
     }
 
-    private void setRange(final Context context, final int begin, final int end) {
+    public void setRange(final Context context, final int begin, final int end) {
       setBeginInternal(context, begin);
       setEndInternal(context, end);
       border.setFirst(context, self.children.get(self.visualIndex(begin)).getFirstBrick(context));
@@ -683,7 +661,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
       if (!leadFirst) setCornerstone(context, endIndex);
     }
 
-    private void setBegin(final Context context, final int index) {
+    public void setBegin(final Context context, final int index) {
       leadFirst = true;
       setBeginInternal(context, index);
       border.setFirst(context, self.children.get(self.visualIndex(index)).getFirstBrick(context));
@@ -695,7 +673,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
       border.setLast(context, self.children.get(self.visualIndex(index)).getLastBrick(context));
     }
 
-    private void setPosition(final Context context, final int index) {
+    public void setPosition(final Context context, final int index) {
       setEndInternal(context, index);
       setBeginInternal(context, index);
       border.setFirst(context, self.children.get(self.visualIndex(index)).getFirstBrick(context));
@@ -735,8 +713,13 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
       return self.tags;
     }
 
-    @Action.StaticID(id = "enter")
-    private class ActionEnter extends ActionBase {
+      @Override
+      public void dispatch(Dispatcher dispatcher) {
+dispatcher.handle(this);
+      }
+
+      @Action.StaticID(id = "enter")
+    private class ActionEnter extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -745,16 +728,15 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     }
 
     @Action.StaticID(id = "exit")
-    private class ActionExit extends ActionBase {
+    private class ActionExit extends Action {
       @Override
       public boolean run(final Context context) {
-
         return self.value.parent.selectUp(context);
       }
     }
 
     @Action.StaticID(id = "next")
-    private class ActionNext extends ActionBase {
+    private class ActionNext extends Action {
       @Override
       public boolean run(final Context context) {
         return self.parent.selectNext(context);
@@ -762,7 +744,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     }
 
     @Action.StaticID(id = "previous")
-    private class ActionPrevious extends ActionBase {
+    private class ActionPrevious extends Action {
       @Override
       public boolean run(final Context context) {
         return self.parent.selectPrevious(context);
@@ -770,7 +752,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     }
 
     @Action.StaticID(id = "next_element")
-    private class ActionNextElement extends ActionBase {
+    private class ActionNextElement extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -783,7 +765,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     }
 
     @Action.StaticID(id = "previous_element")
-    private class ActionPreviousElement extends ActionBase {
+    private class ActionPreviousElement extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -795,75 +777,17 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "delete")
-    private class ActionDelete extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-        context.history.apply(
-            context,
-            new ChangeArray(self.value, beginIndex, endIndex - beginIndex + 1, ImmutableList.of()));
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "insert_before")
-    private class ActionInsertBefore extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-        final Atom created = self.value.createAndAddDefault(context, beginIndex);
-        if (!created.visual.selectDown(context)) setPosition(context, beginIndex);
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "insert_after")
-    private class ActionInsertAfter extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-        final Atom created = self.value.createAndAddDefault(context, endIndex + 1);
-        if (!created.visual.selectDown(context)) setPosition(context, endIndex + 1);
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "copy")
-    private class ActionCopy extends ActionBase {
+      @Action.StaticID(id = "copy")
+    private class ActionCopy extends Action {
       @Override
       public boolean run(final Context context) {
         context.copy(self.value.data.subList(beginIndex, endIndex + 1));
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "cut")
-    private class ActionCut extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-
-        context.copy(self.value.data.subList(beginIndex, endIndex + 1));
-        context.history.apply(
-            context,
-            new ChangeArray(self.value, beginIndex, endIndex - beginIndex + 1, ImmutableList.of()));
-
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "paste")
-    private class ActionPaste extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-        final List<Atom> atoms = context.uncopy(self.value.back().elementAtomType());
-        if (atoms.isEmpty()) return false;
-        context.history.apply(
-            context, new ChangeArray(self.value, beginIndex, endIndex - beginIndex + 1, atoms));
-
         return true;
       }
     }
 
     @Action.StaticID(id = "gather_next")
-    private class ActionGatherNext extends ActionBase {
+    private class ActionGatherNext extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -875,7 +799,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_next")
-    private class ActionReleaseNext extends ActionBase {
+    private class ActionReleaseNext extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -887,7 +811,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     }
 
     @Action.StaticID(id = "gather_previous")
-    private class ActionGatherPrevious extends ActionBase {
+    private class ActionGatherPrevious extends Action {
       @Override
       public boolean run(final Context context) {
 
@@ -899,7 +823,8 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     }
 
     @Action.StaticID(id = "release_previous")
-    private class ActionReleasePrevious extends ActionBase {
+    private class ActionReleasePrevious extends Action {
+
       @Override
       public boolean run(final Context context) {
 
@@ -910,42 +835,9 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "move_before")
-    private class ActionMoveBefore extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-        if (beginIndex == 0) return false;
-        int index = beginIndex;
-        final List<Atom> atoms = ImmutableList.copyOf(self.value.data.subList(index, endIndex + 1));
-        context.history.apply(
-            context, new ChangeArray(self.value, index, atoms.size(), ImmutableList.of()));
-        setBegin(context, --index);
-        context.history.apply(context, new ChangeArray(self.value, index, 0, atoms));
-        ArrayCursor.this.leadFirst = true;
-        setRange(context, index, index + atoms.size() - 1);
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "move_after")
-    private class ActionMoveAfter extends ActionBase {
-      @Override
-      public boolean run(final Context context) {
-        if (endIndex == self.value.data.size() - 1) return false;
-        int index = beginIndex;
-        final List<Atom> atoms = ImmutableList.copyOf(self.value.data.subList(index, endIndex + 1));
-        context.history.apply(
-            context, new ChangeArray(self.value, index, atoms.size(), ImmutableList.of()));
-        setPosition(context, ++index);
-        context.history.apply(context, new ChangeArray(self.value, index, 0, atoms));
-        ArrayCursor.this.leadFirst = false;
-        setRange(context, index, index + atoms.size() - 1);
-        return true;
-      }
-    }
-
     @Action.StaticID(id = "window")
-    private class ActionWindow extends ActionBase {
+    private class ActionWindow extends Action {
+
       @Override
       public boolean run(final Context context) {
         final Atom root = self.value.data.get(beginIndex);
@@ -954,50 +846,6 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
           return true;
         }
         return false;
-      }
-    }
-
-    @Action.StaticID(id = "prefix")
-    private class ActionPrefix extends ActionBase {
-      private final boolean leadFirst;
-
-      public ActionPrefix(final boolean leadFirst) {
-        this.leadFirst = leadFirst;
-      }
-
-      @Override
-      public boolean run(final Context context) {
-
-        final int index = leadFirst ? beginIndex : endIndex;
-        final Atom old = self.value.data.get(index);
-        final Atom gap = context.syntax.prefixGap.create();
-        context.history.apply(
-            context, new ChangeArray(self.value, index, 1, ImmutableList.of(gap)));
-        context.history.apply(
-            context,
-            new ChangeArray((ValueArray) gap.fields.getOpt("value"), 0, 0, ImmutableList.of(old)));
-        gap.fields.getOpt("gap").selectDown(context);
-        return true;
-      }
-    }
-
-    @Action.StaticID(id = "suffix")
-    private class ActionSuffix extends ActionBase {
-      private final boolean leadFirst;
-
-      public ActionSuffix(final boolean leadFirst) {
-        this.leadFirst = leadFirst;
-      }
-
-      @Override
-      public boolean run(final Context context) {
-
-        final int index = leadFirst ? beginIndex : endIndex;
-        final Atom gap = context.syntax.suffixGap.create(false, self.value.data.get(index));
-        context.history.apply(
-            context, new ChangeArray(self.value, index, 1, ImmutableList.of(gap)));
-        gap.fields.getOpt("gap").selectDown(context);
-        return true;
       }
     }
   }
@@ -1022,7 +870,7 @@ public abstract class VisualArray extends VisualGroup implements VisualLeaf {
     }
   }
 
-  private abstract class ArrayHoverable extends Hoverable {
+    private abstract class ArrayHoverable extends Hoverable {
     final BorderAttachment border;
 
     ArrayHoverable(final Context context) {

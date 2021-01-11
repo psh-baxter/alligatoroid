@@ -5,7 +5,7 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Editor;
-import com.zarbosoft.merman.editor.history.changes.ChangePrimitiveRemove;
+import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.helper.*;

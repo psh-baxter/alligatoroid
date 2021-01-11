@@ -2,7 +2,7 @@ package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
-import com.zarbosoft.merman.editor.history.changes.ChangePrimitiveRemove;
+import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 import com.zarbosoft.merman.editor.visual.tags.FreeTag;
 import com.zarbosoft.merman.editor.visual.tags.TypeTag;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;

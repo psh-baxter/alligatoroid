@@ -9,63 +9,48 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.visual.visuals.VisualNestedBase;
 import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
 
-public class HoverTypeExtension extends Extension {
+public class HoverTypeExtension {
+  private BannerMessage message;
 
-  public boolean node = true;
+  public HoverTypeExtension(Context context, boolean node, boolean part) {
+    context.addHoverListener(
+        new Context.HoverListener() {
 
-  public boolean part = true;
-
-  @Override
-  public State create(final ExtensionContext context) {
-    return new ModuleState(context);
-  }
-
-  private class ModuleState extends State {
-    private BannerMessage message;
-
-    ModuleState(final Context context) {
-      context.addHoverListener(
-          new Context.HoverListener() {
-
-            @Override
-            public void hoverChanged(final Context context, final Hoverable hoverable) {
-              BannerMessage oldMessage = message;
-              message = null;
-              if (hoverable != null) {
-                message = new BannerMessage();
-                message.priority = 100;
-                final StringBuilder text = new StringBuilder();
-                if (node) {
-                  final VisualAtom nodeType = hoverable.atom();
-                  if (nodeType == null) text.append("Root Element");
-                  else text.append((hoverable.atom()).type().name());
-                }
-                if (part) {
-                  final Visual part = hoverable.visual();
-                  final String temp;
-                  if (part instanceof VisualArray) {
-                    temp = "array";
-                  } else if (part instanceof VisualPrimitive) {
-                    temp = "primitive";
-                  } else if (part instanceof VisualNestedBase) {
-                    temp = "nested";
-                  } else temp = part.getClass().getSimpleName();
-                  if (text.length() > 0) text.append(" (" + temp + ")");
-                  else text.append(temp);
-                }
-                message.text = text.toString();
-                context.banner.addMessage(context, message);
+          @Override
+          public void hoverChanged(final Context context, final Hoverable hoverable) {
+            BannerMessage oldMessage = message;
+            message = null;
+            if (hoverable != null) {
+              message = new BannerMessage();
+              message.priority = 100;
+              final StringBuilder text = new StringBuilder();
+              if (node) {
+                final VisualAtom nodeType = hoverable.atom();
+                if (nodeType == null) text.append("Root Element");
+                else text.append((hoverable.atom()).type().name());
               }
-              if (oldMessage != null) {
-                context.banner.removeMessage(
-                    context, oldMessage); // TODO oldMessage callback on finish?
-                //oldMessage = null;
+              if (part) {
+                final Visual part = hoverable.visual();
+                final String temp;
+                if (part instanceof VisualArray) {
+                  temp = "array";
+                } else if (part instanceof VisualPrimitive) {
+                  temp = "primitive";
+                } else if (part instanceof VisualNestedBase) {
+                  temp = "nested";
+                } else temp = part.getClass().getSimpleName();
+                if (text.length() > 0) text.append(" (" + temp + ")");
+                else text.append(temp);
               }
+              message.text = text.toString();
+              context.banner.addMessage(context, message);
             }
-          });
-    }
-
-    @Override
-    public void destroy(final ExtensionContext context) {}
+            if (oldMessage != null) {
+              context.banner.removeMessage(
+                  context, oldMessage); // TODO oldMessage callback on finish?
+              // oldMessage = null;
+            }
+          }
+        });
   }
 }

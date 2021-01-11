@@ -12,8 +12,6 @@ import com.zarbosoft.merman.editor.display.derived.TLayout;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.editor.visual.tags.PartTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.extensions.Extension;
-import com.zarbosoft.merman.extensions.ExtensionContext;
 import com.zarbosoft.merman.extensions.hotkeys.grammar.Node;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.pidgoon.Grammar;
@@ -36,27 +34,23 @@ import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.iterable;
 
-public class HotkeysExtension extends Extension {
-
+public class HotkeysExtension  {
   private static final Comparator<Pair<Integer, Action>> matchComparator =
       new ChainComparator<Pair<Integer, Action>>().greaterFirst(p -> p.first).build();
-  public List<HotkeyRule> rules = new ArrayList<>();
-  public boolean showDetails = true;
+  private final List<HotkeyRule> rules;
+  private final boolean showDetails;
 
-  @Override
-  public State create(final ExtensionContext context) {
-    return new ModuleState(context);
-  }
-
-  private class ModuleState extends State {
-    Map<String, List<Node>> hotkeys = new HashMap<>();
+  Map<String, List<Node>> hotkeys = new HashMap<>();
     boolean freeTyping = true;
     private Grammar hotkeyGrammar;
     private ParseEventSink<Pair<Integer, Action>> hotkeyParse;
     private String hotkeySequence = "";
     private HotkeyDetails hotkeyDetails = null;
-    public ModuleState(final Context context) {
-      context.addKeyListener(this::handleEvent);
+
+  public HotkeysExtension(final Context context, boolean showDetails, List<HotkeyRule> rules) {
+    this.rules = rules;
+    this.showDetails = showDetails;
+    context.keyListener=this::handleEvent;
       final Context.TagsListener tagsListener =
           new Context.TagsListener() {
             @Override
@@ -125,9 +119,7 @@ public class HotkeysExtension extends Extension {
           final Action action =
               hotkeyParse.allResults().stream().sorted(matchComparator).findFirst().get().second;
           clean(context);
-          context.history.finishChange(context);
           action.run(context);
-          context.history.finishChange(context);
         } else {
           if (showDetails) {
             if (hotkeyDetails != null) context.details.removePage(context, hotkeyDetails);
@@ -150,11 +142,6 @@ public class HotkeysExtension extends Extension {
         context.details.removePage(context, hotkeyDetails);
         hotkeyDetails = null;
       }
-    }
-
-    @Override
-    public void destroy(final ExtensionContext context) {
-      clean(context);
     }
 
     private class HotkeyDetails extends DetailsPage {
@@ -200,5 +187,4 @@ public class HotkeysExtension extends Extension {
       @Override
       public void tagsChanged(final Context context) {}
     }
-  }
 }

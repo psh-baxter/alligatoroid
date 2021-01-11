@@ -7,7 +7,7 @@ import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.history.changes.ChangePrimitiveSet;
+import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveSet;
 import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.BackRecordBuilder;

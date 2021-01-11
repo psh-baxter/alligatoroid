@@ -75,7 +75,7 @@ public class BrickText extends Brick implements AlignmentListener {
 	}
 
 	public void setText(final Context context, final String text) {
-		this.text.setText(context, text.replaceAll("\\p{Cntrl}", context.syntax.placeholder));
+		this.text.setText(context, text.replaceAll("\\p{Cntrl}", context.syntax.unprintable));
 		changed(context);
 	}
 

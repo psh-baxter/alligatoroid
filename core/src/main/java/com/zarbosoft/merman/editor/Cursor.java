@@ -3,14 +3,14 @@ package com.zarbosoft.merman.editor;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.tags.PartTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
+import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
+import com.zarbosoft.merman.editor.visual.visuals.VisualNestedBase;
+import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
 import com.zarbosoft.merman.syntax.style.Style;
 import org.pcollections.PSet;
 
 public abstract class Cursor {
 	protected abstract void clear(Context context);
-
-	public void receiveText(final Context context, final String text) {
-	}
 
 	public abstract Visual getVisual();
 
@@ -29,4 +29,14 @@ public abstract class Cursor {
 	}
 
 	public abstract PSet<Tag> getTags(Context context);
+
+	public interface Dispatcher {
+
+		void handle(VisualArray.ArrayCursor cursor);
+
+		void handle(VisualNestedBase.NestedCursor cursor);
+
+		void handle(VisualPrimitive.PrimitiveCursor cursor);
+	}
+	public abstract void dispatch(Dispatcher dispatcher);
 }

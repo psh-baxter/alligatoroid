@@ -3,7 +3,6 @@ package com.zarbosoft.merman.document.values;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.editor.visual.visuals.VisualNested;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 
@@ -20,7 +19,7 @@ public class ValueAtom extends Value {
   public ValueAtom(final BaseBackAtomSpec back, final Atom data) {
     this.back = back;
     this.data = data;
-    if (data != null) data.setParent(new NodeParent());
+    if (data != null) data.setParent(new NodeParent(this));
   }
 
   public void addListener(final Listener listener) {
@@ -65,50 +64,43 @@ public class ValueAtom extends Value {
     public abstract void set(Context context, Atom atom);
   }
 
-  public class NodeParent extends Parent {
-    @Override
-    public void replace(final Context context, final Atom atom) {
-      context.history.apply(context, new ChangeNodeSet(ValueAtom.this, atom));
-    }
-
-    @Override
-    public void deleteChild(final Context context) {
-      context.history.apply(
-          context, new ChangeNodeSet(ValueAtom.this, context.syntax.gap.create()));
+  public static class NodeParent extends Parent<ValueAtom> {
+    public NodeParent(ValueAtom value) {
+      super(value);
     }
 
     @Override
     public String childType() {
-      return back.type;
-    }
-
-    @Override
-    public Value value() {
-      return ValueAtom.this;
+      return value.back.type;
     }
 
     @Override
     public String id() {
-      return back.id;
+      return value.back.id;
     }
 
     @Override
     public Path path() {
-      return ValueAtom.this.getSyntaxPath();
+      return value.getSyntaxPath();
     }
 
     @Override
     public boolean selectUp(final Context context) {
-      select(context);
+      value.select(context);
       return true;
     }
 
     @Override
     public Path getSyntaxPath() {
       Path out;
-      if (parent == null) out = new Path();
-      else out = parent.getSyntaxPath();
+      if (value.parent == null) out = new Path();
+      else out = value.parent.getSyntaxPath();
       return out.add(SYNTAX_PATH_KEY);
+    }
+
+    @Override
+    public void dispatch(ParentDispatcher dispatcher) {
+      dispatcher.handle(this);
     }
   }
 }
