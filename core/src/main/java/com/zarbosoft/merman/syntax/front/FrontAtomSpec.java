@@ -6,44 +6,58 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.PartTag;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.editor.visual.visuals.VisualNested;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtom;
+import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
-import org.pcollections.PSet;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class FrontAtomSpec extends FrontSpec {
-  public String middle;
-  public Symbol ellipsis = new SymbolTextSpec("...");
-  public BaseBackAtomSpec dataType;
+  private final String field;
+  private final Symbol ellipsis;
+  private BaseBackAtomSpec dataType;
+
+  public BaseBackAtomSpec getDataType() {
+    return dataType;
+  }
+
+  public static class Config {
+    public final String middle;
+    public Symbol ellipsis = new SymbolTextSpec("...");
+    public ROSet<String> tags = ROSet.empty;
+
+    public Config(String middle) {
+      this.middle = middle;
+    }
+
+    public Config(String middle, Symbol ellipsis, ROSet<String> tags) {
+      this.middle = middle;
+      this.ellipsis = ellipsis;
+      this.tags = tags;
+    }
+  }
+
+  public FrontAtomSpec(Config config) {
+    super(config.tags);
+    field = config.middle;
+    ellipsis = config.ellipsis;
+  }
 
   @Override
   public Visual createVisual(
       final Context context,
       final VisualParent parent,
       final Atom atom,
-      final PSet<Tag> tags,
-      final Map<String, Alignment> alignments,
+      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
-    return new VisualNested(
-        context,
-        parent,
-        dataType.get(atom.fields),
-        tags.plus(new PartTag("nested"))
-            .plusAll(this.tags.stream().map(s -> new FreeTag(s)).collect(Collectors.toSet())),
-        alignments,
-        visualDepth,
-        depthScore) {
+    return new VisualFrontAtom(
+        context, parent, dataType.get(atom.fields), alignments, visualDepth, depthScore) {
 
       @Override
       protected Symbol ellipsis() {
@@ -54,15 +68,14 @@ public class FrontAtomSpec extends FrontSpec {
 
   @Override
   public void finish(
-    List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed
-  ) {
-    middleUsed.add(middle);
-    dataType = atomType.getDataAtom(errors, typePath, middle);
+      MultiError errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
+    middleUsed.add(field);
+    dataType = atomType.getDataAtom(errors, typePath, field);
   }
 
   @Override
   public String field() {
-    return middle;
+    return field;
   }
 
   @Override

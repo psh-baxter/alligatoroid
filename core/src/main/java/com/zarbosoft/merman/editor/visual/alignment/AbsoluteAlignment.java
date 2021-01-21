@@ -3,8 +3,7 @@ package com.zarbosoft.merman.editor.visual.alignment;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.AlignmentListener;
-
-import java.util.Map;
+import com.zarbosoft.merman.misc.ROMap;
 
 public class AbsoluteAlignment extends Alignment implements AlignmentListener {
 	public AbsoluteAlignment(final int offset) {
@@ -17,7 +16,7 @@ public class AbsoluteAlignment extends Alignment implements AlignmentListener {
 	}
 
 	@Override
-	public void root(final Context context, final Map<String, Alignment> parents) {
+	public void root(final Context context, final ROMap<String, Alignment> parents) {
 		align(context);
 	}
 

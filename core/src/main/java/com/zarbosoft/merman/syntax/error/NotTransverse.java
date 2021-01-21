@@ -1,16 +1,13 @@
 package com.zarbosoft.merman.syntax.error;
 
 import com.google.common.collect.ImmutableMap;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.syntax.Direction;
 
 public class NotTransverse extends BaseKVError{
 
-  public NotTransverse(Syntax.Direction converseDirection, Syntax.Direction transverseDirection) {
-    super(
-      ImmutableMap.<String, Object>builder()
-        .put("converse", converseDirection)
-        .put("transverse", transverseDirection)
-        .build());
+  public NotTransverse(Direction converseDirection, Direction transverseDirection) {
+        put("converse", converseDirection);
+        put("transverse", transverseDirection);
   }
 
   @Override

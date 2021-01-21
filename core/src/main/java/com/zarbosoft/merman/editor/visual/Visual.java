@@ -3,10 +3,10 @@ package com.zarbosoft.merman.editor.visual;
 import com.google.common.collect.Iterators;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
-import com.zarbosoft.merman.editor.visual.tags.StateTag;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.wall.Brick;
+import com.zarbosoft.merman.misc.ROMap;
 import com.zarbosoft.rendaw.common.Pair;
 
 import java.util.Iterator;
@@ -22,7 +22,7 @@ public abstract class Visual {
 
 	public abstract VisualParent parent();
 
-	public abstract void changeTags(final Context context, final TagsChange change);
+	public abstract void tagsChanged(Context context);
 
 	public abstract Brick createOrGetFirstBrick(Context context);
 
@@ -61,7 +61,7 @@ public abstract class Visual {
 	public void root(
 			final Context context,
 			final VisualParent parent,
-			final Map<String, Alignment> alignments,
+			final ROMap<String, Alignment> alignments,
 			final int depth,
 			final int depthScore
 	) {
@@ -72,14 +72,6 @@ public abstract class Visual {
 
 	public Hoverable hover(final Context context, final Vector point) {
 		return parent().hover(context, point);
-	}
-
-	public void changeTagsCompact(final Context context) {
-		changeTags(context, new TagsChange().add(new StateTag("compact")));
-	}
-
-	public void changeTagsExpand(final Context context) {
-		changeTags(context, new TagsChange().remove(new StateTag("compact")));
 	}
 
 	public abstract Stream<Brick> streamBricks();

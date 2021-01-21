@@ -1,84 +1,108 @@
 package com.zarbosoft.merman.helper;
 
-import com.google.common.collect.ImmutableList;
+import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.misc.ROList;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
+import com.zarbosoft.merman.misc.TSList;
+import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
+import com.zarbosoft.merman.syntax.Padding;
 import com.zarbosoft.merman.syntax.RootAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.alignments.AbsoluteAlignmentDefinition;
-import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentDefinition;
-import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentDefinition;
-import com.zarbosoft.merman.syntax.back.BackSpec;
-import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
+import com.zarbosoft.merman.syntax.alignments.AbsoluteAlignmentSpec;
+import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
+import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentSpec;
+import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
+import com.zarbosoft.merman.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.style.Style;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
 
 public class SyntaxBuilder {
-
-  private final Syntax syntax;
+  private final TSList<AtomType> types = new TSList<>();
+  private final TSMap<String, ROList<String>> groups = new TSMap<String, ROList<String>>();
+  private final TSList<Style.Spec> styles = new TSList<>();
+  private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
+  private final String rootChildType;
+  private final FrontDataArrayBuilder front = new FrontDataArrayBuilder("value");
+  private Padding padding = Padding.empty;
 
   public SyntaxBuilder(final String root) {
-    this.syntax = new Syntax();
-    syntax.root = new RootAtomType();
-    BackSpec back = Helper.buildBackDataRootArray("value", root);
-    syntax.root.back = ImmutableList.of(back);
-    syntax.root.front = ImmutableList.of(new FrontDataArrayBuilder("value").build());
+    rootChildType = root;
   }
 
   public SyntaxBuilder type(final FreeAtomType type) {
-    syntax.types.putNew(type.id, type);
+    types.add(type);
     return this;
   }
 
   public Syntax build() {
-    List<Object> errors = new ArrayList<>();
+    MultiError splayErrors = new MultiError();
+    TSMap<String, Set<AtomType>> splayed = Syntax.splayGroups(splayErrors, types, groups);
+    splayErrors.raise();
+
+    RootAtomType root =
+        new RootAtomType(
+            new RootAtomType.Config(
+                ROSet.empty,
+                TSList.of(Helper.buildBackDataRootArray("value", rootChildType)),
+                TSList.of(front.build()),
+                alignments));
+
+    Syntax.Config config = new Syntax.Config(types, splayed, root);
+    config.pad = this.padding;
+    config.styles = styles;
+    Syntax syntax = new Syntax(config);
+    MultiError errors = new MultiError();
     syntax.finish(errors);
-    if (!errors.isEmpty())
-      throw new RuntimeException(
-          String.format(
-              "\n%s\n", errors.stream().map(e -> e.toString()).collect(Collectors.joining("\n"))));
+    errors.raise();
+
     return syntax;
   }
 
-  public SyntaxBuilder group(final String name, final List<String> subtypes) {
-    syntax.groups.putNew(name, subtypes);
+  public SyntaxBuilder group(final String name, final ROList<String> subtypes) {
+    groups.putNew(name, subtypes);
     return this;
   }
 
-  public SyntaxBuilder style(final Style style) {
-    syntax.styles.add(style);
+  public SyntaxBuilder style(final Style.Spec style) {
+    styles.add(style);
     return this;
   }
 
   public SyntaxBuilder absoluteAlignment(final String name, final int offset) {
-    final AbsoluteAlignmentDefinition definition = new AbsoluteAlignmentDefinition();
-    definition.offset = offset;
-    this.syntax.root.alignments.put(name, definition);
+    alignments.put(name, new AbsoluteAlignmentSpec(offset));
     return this;
   }
 
   public SyntaxBuilder relativeAlignment(final String name, final int offset) {
-    final RelativeAlignmentDefinition definition = new RelativeAlignmentDefinition();
-    definition.offset = offset;
-    this.syntax.root.alignments.put(name, definition);
+    final RelativeAlignmentSpec definition =
+        new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(null, offset));
+    alignments.put(name, definition);
     return this;
   }
 
   public SyntaxBuilder concensusAlignment(final String name) {
-    this.syntax.root.alignments.put(name, new ConcensusAlignmentDefinition());
+    alignments.put(name, new ConcensusAlignmentSpec());
     return this;
   }
 
   public SyntaxBuilder addRootFrontSeparator(final FrontSymbol part) {
-    ((FrontFixedArraySpec) syntax.root.front.get(0)).separator.add(part);
+    front.addSeparator(part);
     return this;
   }
 
   public SyntaxBuilder addRootFrontPrefix(final FrontSymbol part) {
-    ((FrontFixedArraySpec) syntax.root.front.get(0)).prefix.add(part);
+    front.addPrefix(part);
+    return this;
+  }
+
+  public SyntaxBuilder pad(Padding padding) {
+    this.padding = padding;
     return this;
   }
 }

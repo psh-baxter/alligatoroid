@@ -4,7 +4,11 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 
 public class Repeat1 extends Pattern {
-  public Pattern pattern;
+  public final Pattern pattern;
+
+  public Repeat1(Pattern pattern) {
+    this.pattern = pattern;
+  }
 
   @Override
   public Node build() {

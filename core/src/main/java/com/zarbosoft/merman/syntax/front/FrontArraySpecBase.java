@@ -6,56 +6,80 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.PartTag;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.misc.ROList;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
-import org.pcollections.PSet;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public abstract class FrontArraySpecBase extends FrontSpec {
+  public final ROList<FrontSymbol> prefix;
+  public final ROList<FrontSymbol> suffix;
+  public final ROList<FrontSymbol> separator;
+  public final boolean tagFirst;
+  public final boolean tagLast;
+  public final Symbol ellipsis;
+  private BaseBackArraySpec dataType;
 
-  public List<FrontSymbol> prefix = new ArrayList<>();
+  public BaseBackArraySpec dataType() {
+    return dataType;
+  }
 
-  public List<FrontSymbol> suffix = new ArrayList<>();
+  public static class Config {
+    public ROSet<String> tags = ROSet.empty;
+    public ROList<FrontSymbol> prefix = ROList.empty;
+    public ROList<FrontSymbol> suffix = ROList.empty;
+    public ROList<FrontSymbol> separator = ROList.empty;
+    public boolean tagFirst = false;
+    public boolean tagLast = false;
+    public Symbol ellipsis = new SymbolTextSpec("...");
 
-  public List<FrontSymbol> separator = new ArrayList<>();
+    public Config() {}
 
-  public boolean tagFirst = false;
+    public Config(
+        ROSet<String> tags,
+        ROList<FrontSymbol> prefix,
+        ROList<FrontSymbol> suffix,
+        ROList<FrontSymbol> separator,
+        boolean tagFirst,
+        boolean tagLast,
+        Symbol ellipsis) {
+      this.tags = tags;
+      this.prefix = prefix;
+      this.suffix = suffix;
+      this.separator = separator;
+      this.tagFirst = tagFirst;
+      this.tagLast = tagLast;
+      this.ellipsis = ellipsis;
+    }
+  }
 
-  public boolean tagLast = false;
-
-  public Symbol ellipsis = new SymbolTextSpec("...");
-
-  public BaseBackArraySpec dataType;
+  public FrontArraySpecBase(Config config) {
+    super(config.tags);
+    this.prefix = config.prefix;
+    this.suffix = config.suffix;
+    this.separator = config.separator;
+    this.tagFirst = config.tagFirst;
+    this.tagLast = config.tagLast;
+    this.ellipsis = config.ellipsis;
+  }
 
   @Override
   public Visual createVisual(
       final Context context,
       final VisualParent parent,
       final Atom atom,
-      final PSet<Tag> tags,
-      final Map<String, Alignment> alignments,
+      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
-    return new VisualArray(
-        context,
-        parent,
-        dataType.get(atom.fields),
-        tags.plus(new PartTag("array"))
-            .plusAll(this.tags.stream().map(s -> new FreeTag(s)).collect(Collectors.toSet())),
-        alignments,
-        visualDepth,
-        depthScore) {
+    return new VisualFrontArray(
+        context, parent, dataType.get(atom.fields), alignments, visualDepth, depthScore) {
 
       @Override
       protected boolean tagLast() {
@@ -68,17 +92,17 @@ public abstract class FrontArraySpecBase extends FrontSpec {
       }
 
       @Override
-      protected List<FrontSymbol> getPrefix() {
+      protected ROList<FrontSymbol> getElementPrefix() {
         return prefix;
       }
 
       @Override
-      protected List<FrontSymbol> getSeparator() {
+      protected ROList<FrontSymbol> getSeparator() {
         return separator;
       }
 
       @Override
-      protected List<FrontSymbol> getSuffix() {
+      protected ROList<FrontSymbol> getElementSuffix() {
         return suffix;
       }
 
@@ -91,11 +115,9 @@ public abstract class FrontArraySpecBase extends FrontSpec {
 
   @Override
   public void finish(
-    List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed
-  ) {
+      MultiError errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
     middleUsed.add(field());
-    ((BaseBackArraySpec) atomType.fields.get(field())).front = this;
-    dataType = atomType.getDataArray(errors,typePath, field());
+    dataType = atomType.getDataArray(errors, typePath, field());
   }
 
   public abstract String field();

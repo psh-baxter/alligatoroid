@@ -1,14 +1,24 @@
 package com.zarbosoft.merman.syntax.format;
 
-import java.util.List;
+import com.zarbosoft.merman.misc.ROList;
+import com.zarbosoft.merman.misc.ROMap;
+
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class Format {
 
-  public List<Element> elements;
+  public final ROList<Element> elements;
 
-  public String format(final Map<String, Object> data) {
-    return elements.stream().map(element -> element.format(data)).collect(Collectors.joining());
+  public Format(ROList<Element> elements) {
+    this.elements = elements;
+  }
+
+  public String format(final ROMap<String, Object> data) {
+    StringBuilder builder = new StringBuilder();
+    for (Element element : elements) {
+      builder.append(element.format(data));
+    }
+    return builder.toString();
   }
 }

@@ -4,10 +4,10 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.banner.BannerMessage;
 import com.zarbosoft.merman.editor.visual.Visual;
-import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
-import com.zarbosoft.merman.editor.visual.visuals.VisualNestedBase;
-import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 
 public class HoverTypeExtension {
   private BannerMessage message;
@@ -32,11 +32,11 @@ public class HoverTypeExtension {
               if (part) {
                 final Visual part = hoverable.visual();
                 final String temp;
-                if (part instanceof VisualArray) {
+                if (part instanceof VisualFrontArray) {
                   temp = "array";
-                } else if (part instanceof VisualPrimitive) {
+                } else if (part instanceof VisualFrontPrimitive) {
                   temp = "primitive";
-                } else if (part instanceof VisualNestedBase) {
+                } else if (part instanceof VisualFrontAtomBase) {
                   temp = "nested";
                 } else temp = part.getClass().getSimpleName();
                 if (text.length() > 0) text.append(" (" + temp + ")");

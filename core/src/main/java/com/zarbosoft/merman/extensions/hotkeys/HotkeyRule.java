@@ -1,24 +1,31 @@
 package com.zarbosoft.merman.extensions.hotkeys;
 
-import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.extensions.hotkeys.grammar.Node;
+import com.zarbosoft.merman.misc.ROList;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
 
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 public class HotkeyRule {
-  public Set<Tag> with = new HashSet<>();
-  public Set<Tag> without = new HashSet<>();
-  public Map<String, List<Node>> hotkeys = new HashMap<>();
-  public boolean freeTyping = true;
+  public static final boolean DEFAULT_FREE_TYPING = true;
+  public final ROSet<String> with;
+  public final ROSet<String> without;
+  public final ROMap<String, ROList<Node>> hotkeys;
+  /**
+   * Keys that don't match any actions are passed to the underlying atom/field if this is true in
+   * any active rule.
+   */
+  public final boolean freeTyping;
 
-  public HotkeyRule() {}
-
-  public HotkeyRule(final Set<Tag> with, final Set<Tag> without) {
-    this.with.addAll(with);
-    this.without.addAll(without);
+  public HotkeyRule(
+      final ROSet<String> with,
+      final ROSet<String> without,
+      ROMap<String, ROList<Node>> hotkeys,
+      boolean freeTyping) {
+    this.with = with;
+    this.without = without;
+    this.hotkeys = hotkeys;
+    this.freeTyping = freeTyping;
   }
 }

@@ -1,28 +1,58 @@
 package com.zarbosoft.merman.syntax;
 
-import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
-import com.zarbosoft.merman.syntax.back.BackSubArraySpec;
-import com.zarbosoft.merman.syntax.back.BackSpec;
-import com.zarbosoft.merman.syntax.front.FrontSpec;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 
 public class FreeAtomType extends AtomType {
-  public String id;
-  public String name;
-  public int depthScore = 0;
-  public List<FrontSpec> front = new ArrayList<>();
-  public List<BackSpec> back = new ArrayList<>();
-  public Map<String, AlignmentDefinition> alignments = new HashMap<>();
-  public int precedence = Integer.MAX_VALUE;
-  public boolean associateForward = false;
-  public int autoChooseAmbiguity = 1;
+  public final String name;
+  public final int depthScore;
+  public final ROMap<String, AlignmentSpec> alignments;
+  public final int precedence;
+  public final boolean associateForward;
+  public final int autoChooseAmbiguity;
+
+  public static class Config {
+    public AtomType.Config base;
+    public String name;
+    public int depthScore = 0;
+    public ROMap<String, AlignmentSpec> alignments = ROMap.empty;
+    public int precedence = Integer.MAX_VALUE;
+    public boolean associateForward = false;
+    public int autoChooseAmbiguity = 1;
+
+    public Config() {}
+
+    public Config(
+        AtomType.Config base,
+        String name,
+        int depthScore,
+        ROMap<String, AlignmentSpec> alignments,
+        int precedence,
+        boolean associateForward,
+        int autoChooseAmbiguity) {
+      this.base = base;
+      this.name = name;
+      this.depthScore = depthScore;
+      this.alignments = alignments;
+      this.precedence = precedence;
+      this.associateForward = associateForward;
+      this.autoChooseAmbiguity = autoChooseAmbiguity;
+    }
+  }
+
+  public FreeAtomType(Config config) {
+    super(config.base);
+    this.name = config.name;
+    this.depthScore = config.depthScore;
+    this.alignments = config.alignments;
+    this.precedence = config.precedence;
+    this.associateForward = config.associateForward;
+    this.autoChooseAmbiguity = config.autoChooseAmbiguity;
+  }
 
   @Override
-  public Map<String, AlignmentDefinition> alignments() {
+  public ROMap<String, AlignmentSpec> alignments() {
     return alignments;
   }
 
@@ -39,21 +69,6 @@ public class FreeAtomType extends AtomType {
   @Override
   public int depthScore() {
     return depthScore;
-  }
-
-  @Override
-  public List<FrontSpec> front() {
-    return front;
-  }
-
-  @Override
-  public List<BackSpec> back() {
-    return back;
-  }
-
-  @Override
-  public String id() {
-    return id;
   }
 
   @Override

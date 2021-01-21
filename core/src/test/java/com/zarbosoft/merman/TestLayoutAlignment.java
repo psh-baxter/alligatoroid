@@ -2,23 +2,14 @@ package com.zarbosoft.merman;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
-import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveAdd;
-import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
-import com.zarbosoft.merman.editor.visual.Visual;
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.StateTag;
+import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
-import com.zarbosoft.merman.editor.visual.tags.TypeTag;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontDataPrimitiveBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.helper.FrontSpaceBuilder;
-import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.StyleBuilder;
@@ -30,8 +21,6 @@ import com.zarbosoft.merman.syntax.Syntax;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-
-import java.util.function.Function;
 
 @RunWith(Parameterized.class)
 public class TestLayoutAlignment {
@@ -50,6 +39,8 @@ public class TestLayoutAlignment {
   public final FreeAtomType threeLine;
   public final FreeAtomType threeLine2;
   public final Syntax syntax;
+  private final int layBrickBatchSize;
+
   public TestLayoutAlignment(final int layBrickBatchSize) {
     primitive =
         new TypeBuilder("primitive")
@@ -210,33 +201,34 @@ public class TestLayoutAlignment {
             .concensusAlignment("concensus1")
             .concensusAlignment("concensus2")
             .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
-            .style(new StyleBuilder().tag(new FreeTag("split")).split(true).build())
+            .style(new StyleBuilder().tag("split").split(true).build())
+            .style(
+                new StyleBuilder().tag("compact_split").tag(Tags.TAG_COMPACT).split(true).build())
+            .style(new StyleBuilder().tag("absolute").alignment("absolute").build())
+            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
             .style(
                 new StyleBuilder()
-                    .tag(new FreeTag("compact_split"))
-                    .tag(new StateTag("compact"))
-                    .split(true)
-                    .build())
-            .style(new StyleBuilder().tag(new TypeTag("absolute")).alignment("absolute").build())
-            .style(
-                new StyleBuilder().tag(new FreeTag("concensus1")).alignment("concensus1").build())
-            .style(
-                new StyleBuilder()
-                    .tag(new FreeTag("concensus1unsplit"))
-                    .notag(new StateTag("compact"))
+                    .tag("concensus1unsplit")
+                    .notag(Tags.TAG_COMPACT)
                     .alignment("concensus1")
                     .build())
-            .style(
-                new StyleBuilder().tag(new FreeTag("concensus2")).alignment("concensus2").build())
+            .style(new StyleBuilder().tag("concensus2").alignment("concensus2").build())
             .style(
                 new StyleBuilder()
-                    .tag(new FreeTag("concensus2unsplit"))
-                    .notag(new StateTag("compact"))
+                    .tag("concensus2unsplit")
+                    .notag(Tags.TAG_COMPACT)
                     .alignment("concensus2")
                     .build())
-            .style(new StyleBuilder().tag(new TypeTag("relative")).alignment("relative").build())
+            .style(new StyleBuilder().tag("relative").alignment("relative").build())
             .build();
-    syntax.layBrickBatchSize = layBrickBatchSize;
+    this.layBrickBatchSize = layBrickBatchSize;
+  }
+
+  public class GeneralTestWizard extends com.zarbosoft.merman.helper.GeneralTestWizard {
+    public GeneralTestWizard(Syntax syntax, Atom... atoms) {
+      super(syntax, atoms);
+      this.inner.context.layBrickBatchSize = layBrickBatchSize;
+    }
   }
 
   @Parameterized.Parameters
@@ -320,67 +312,6 @@ public class TestLayoutAlignment {
   }
 
   @Test
-  public void testDynamicSecondShiftOut() {
-    final Atom line2 = new TreeBuilder(pair).add("first", "c").add("second", "d").build();
-    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.getOpt("first");
-    new GeneralTestWizard(
-            syntax, new TreeBuilder(pair).add("first", "a").add("second", "b").build(), line2)
-        .run(context -> context.history.apply(context, new ChangePrimitiveAdd(line2_1, 1, "cc")))
-        .checkBrick(0, 2, 30);
-  }
-
-  @Test
-  public void testDynamicFirstShiftOut() {
-    final Atom line = new TreeBuilder(pair).add("first", "a").add("second", "b").build();
-    final ValuePrimitive text = (ValuePrimitive) line.fields.getOpt("first");
-    new GeneralTestWizard(
-            syntax, line, new TreeBuilder(pair).add("first", "c").add("second", "d").build())
-        .run(context -> context.history.apply(context, new ChangePrimitiveAdd(text, 1, "aa")))
-        .checkBrick(0, 2, 30);
-  }
-
-  @Test
-  public void testDynamicShiftIn() {
-    final Atom line2 = new TreeBuilder(pair).add("first", "ccccc").add("second", "d").build();
-    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.getOpt("first");
-    new GeneralTestWizard(
-            syntax, new TreeBuilder(pair).add("first", "a").add("second", "b").build(), line2)
-        .run(context -> context.history.apply(context, new ChangePrimitiveRemove(line2_1, 1, 4)))
-        .checkBrick(0, 2, 10);
-  }
-
-  @Test
-  public void testDynamicAddLine() {
-    new GeneralTestWizard(
-            syntax, new TreeBuilder(pair).add("first", "a").add("second", "b").build())
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(
-                        Helper.rootArray(context.document),
-                        1,
-                        0,
-                        ImmutableList.of(
-                            new TreeBuilder(pair).add("first", "ccc").add("second", "d").build()))))
-        .checkBrick(0, 2, 30);
-  }
-
-  @Test
-  public void testDynamicRemoveLine() {
-    new GeneralTestWizard(
-            syntax,
-            new TreeBuilder(pair).add("first", "a").add("second", "b").build(),
-            new TreeBuilder(pair).add("first", "ccc").add("second", "d").build())
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(Helper.rootArray(context.document), 1, 1, ImmutableList.of())))
-        .checkBrick(0, 2, 10);
-  }
-
-  @Test
   public void testConcensusSameLine() {
     new GeneralTestWizard(
             syntax,
@@ -390,62 +321,6 @@ public class TestLayoutAlignment {
                     new TreeBuilder(pair).add("first", "a").add("second", "b").build(),
                     new TreeBuilder(pair).add("first", "").add("second", "d").build())
                 .build())
-        .checkBrick(0, 2, 10)
-        .checkBrick(0, 4, 20);
-  }
-
-  @Test
-  public void testConcensusSameLineDynamicAdd() {
-    final Atom line2 = new TreeBuilder(pair).add("first", "").add("second", "d").build();
-    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.getOpt("first");
-    new GeneralTestWizard(
-            syntax,
-            new TreeBuilder(line)
-                .addArray(
-                    "value",
-                    new TreeBuilder(pair).add("first", "a").add("second", "b").build(),
-                    line2)
-                .build())
-        .run(context -> context.history.apply(context, new ChangePrimitiveAdd(line2_1, 0, "cc")))
-        .checkBrick(0, 2, 10)
-        .checkBrick(0, 4, 40);
-  }
-
-  @Test
-  public void testConcensusSameLineDynamicAddPairBefore() {
-    final Atom line2 =
-        new TreeBuilder(line)
-            .addArray("value", new TreeBuilder(pair).add("first", "ccc").add("second", "d").build())
-            .build();
-    final ValueArray array = (ValueArray) line2.fields.getOpt("value");
-    new GeneralTestWizard(syntax, line2)
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(
-                        array,
-                        0,
-                        0,
-                        ImmutableList.of(
-                            new TreeBuilder(pair).add("first", "a").add("second", "b").build()))))
-        .checkBrick(0, 2, 10)
-        .checkBrick(0, 4, 50);
-  }
-
-  @Test
-  public void testConcensusSameLineDynamicRemove() {
-    final Atom line2 = new TreeBuilder(pair).add("first", "cc").add("second", "d").build();
-    final ValuePrimitive line2_1 = (ValuePrimitive) line2.fields.getOpt("first");
-    new GeneralTestWizard(
-            syntax,
-            new TreeBuilder(line)
-                .addArray(
-                    "value",
-                    new TreeBuilder(pair).add("first", "a").add("second", "b").build(),
-                    line2)
-                .build())
-        .run(context -> context.history.apply(context, new ChangePrimitiveRemove(line2_1, 0, 2)))
         .checkBrick(0, 2, 10)
         .checkBrick(0, 4, 20);
   }
@@ -569,68 +444,6 @@ public class TestLayoutAlignment {
   }
 
   @Test
-  public void testDynamicConcensusSplitAdjust() {
-    final Function<Context, Visual> line2Visual =
-        context -> Helper.rootArray(context.document).data.get(1).visual.parent().visual();
-    final Atom pair1 = new TreeBuilder(pair).add("first", "12345678").add("second", "x").build();
-    new GeneralTestWizard(
-            syntax, pair1, new TreeBuilder(pair).add("first", "1").add("second", "y").build())
-        .checkCourseCount(2)
-        .checkBrick(0, 2, 80)
-        .checkBrick(1, 2, 80)
-        .run(
-            context ->
-                line2Visual
-                    .apply(context)
-                    .changeTags(context, new TagsChange().remove(new FreeTag("split"))))
-        .checkCourseCount(1)
-        .run(
-            context ->
-                line2Visual
-                    .apply(context)
-                    .changeTags(context, new TagsChange().add(new FreeTag("split"))))
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangePrimitiveAdd((ValuePrimitive) pair1.fields.getOpt("first"), 8, "9X")))
-        .checkCourseCount(2)
-        .checkBrick(0, 2, 100)
-        .checkBrick(1, 2, 100);
-  }
-
-  @Test
-  public void testDisabledConcensusSplit() {
-    final Atom pairAtom1 =
-        new TreeBuilder(pair).add("first", "gmippii").add("second", "mmm").build();
-    final Atom lineAtom = new TreeBuilder(line).addArray("value", pairAtom1).build();
-    new GeneralTestWizard(syntax, lineAtom)
-        .checkCourseCount(1)
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(
-                        (ValueArray) lineAtom.fields.getOpt("value"),
-                        1,
-                        0,
-                        ImmutableList.of(
-                            new TreeBuilder(pair).add("first", "mo").add("second", "oo").build(),
-                            new TreeBuilder(pair).add("first", "g").add("second", "q").build()))))
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangePrimitiveAdd(
-                        (ValuePrimitive) pairAtom1.fields.getOpt("first"), 7, "9X")))
-        .run(
-            context ->
-                ((ValuePrimitive) pairAtom1.fields.getOpt("first"))
-                    .visual.changeTags(context, new TagsChange().add(new FreeTag("split"))))
-        .checkCourseCount(2);
-  }
-
-  @Test
   public void testDisabledConcensusSplit2() {
     final Atom pairAtom1 =
         new TreeBuilder(pair).add("first", "gmippii").add("second", "mmm").build();
@@ -643,10 +456,7 @@ public class TestLayoutAlignment {
                     new TreeBuilder(pair).add("first", "mo").add("second", "oo").build())
                 .build())
         .checkCourseCount(1)
-        .run(
-            context ->
-                ((ValuePrimitive) pairAtom1.fields.getOpt("second"))
-                    .visual.changeTags(context, new TagsChange().add(new FreeTag("split"))))
+        .run(context -> pairAtom1.changeTags(context, TagsChange.add("split")))
         .checkCourseCount(2);
   }
 }

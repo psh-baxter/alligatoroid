@@ -1,19 +1,11 @@
 package com.zarbosoft.merman;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
-import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveAdd;
-import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.StateTag;
+import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontDataPrimitiveBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.helper.FrontSpaceBuilder;
-import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.StyleBuilder;
@@ -37,6 +29,13 @@ public class TestCompaction {
   public static final FreeAtomType mid;
   public static final FreeAtomType high;
   public static final Syntax syntax;
+
+  public static class GeneralTestWizard extends com.zarbosoft.merman.helper.GeneralTestWizard {
+    public GeneralTestWizard(Syntax syntax, Atom... atoms) {
+      super(syntax, atoms);
+      this.inner.context.ellipsizeThreshold = 2;
+    }
+  }
 
   static {
     infinity =
@@ -145,14 +144,8 @@ public class TestCompaction {
                     .type(comboText)
                     .type(initialSplitText)
                     .build())
-            .style(
-                new StyleBuilder()
-                    .tag(new FreeTag("split"))
-                    .tag(new StateTag("compact"))
-                    .split(true)
-                    .build())
+            .style(new StyleBuilder().tag("split").tag(Tags.TAG_COMPACT).split(true).build())
             .build();
-    syntax.ellipsizeThreshold = 2;
   }
 
   @Test
@@ -295,74 +288,6 @@ public class TestCompaction {
   }
 
   @Test
-  public void testSplitDynamic() {
-    final Atom lowAtom =
-        new TreeBuilder(low)
-            .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
-            .build();
-    final ValueArray array = (ValueArray) lowAtom.fields.getOpt("value");
-    new GeneralTestWizard(syntax, lowAtom)
-        .resize(70)
-        .checkCourseCount(1)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(0, 3, "one")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(array, 2, 0, ImmutableList.of(new TreeBuilder(one).build()))))
-        .checkCourseCount(3)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(1, 1, "one")
-        .checkTextBrick(2, 1, "one")
-        .run(
-            context ->
-                context.history.apply(context, new ChangeArray(array, 2, 1, ImmutableList.of())))
-        .checkCourseCount(1)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(0, 3, "one");
-  }
-
-  @Test
-  public void testSplitDynamicBrickChange() {
-    final Atom textAtom = new TreeBuilder(text).add("value", "oran").build();
-    final ValuePrimitive text = (ValuePrimitive) textAtom.fields.getOpt("value");
-    new GeneralTestWizard(
-            syntax,
-            new TreeBuilder(low).addArray("value", new TreeBuilder(one).build(), textAtom).build())
-        .resize(80)
-        .checkCourseCount(1)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(0, 3, "oran")
-        .run(context -> context.history.apply(context, new ChangePrimitiveAdd(text, 4, "ge")))
-        .checkCourseCount(2)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(1, 1, "orange")
-        .run(context -> context.history.apply(context, new ChangePrimitiveRemove(text, 4, 2)))
-        .checkCourseCount(1)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(0, 3, "oran");
-  }
-
-  @Test
-  public void testSplitDynamicComboBrick() {
-    final Atom primitive = new TreeBuilder(comboText).add("value", "I am a banana").build();
-    new GeneralTestWizard(syntax, primitive)
-        .resize(140)
-        .checkTextBrick(0, 0, "I am a banana")
-        .checkTextBrick(0, 1, "123")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangePrimitiveAdd(
-                        (ValuePrimitive) primitive.fields.getOpt("value"), 0, "wigwam ")))
-        .checkTextBrick(0, 0, "wigwam I am a ")
-        .checkTextBrick(1, 0, "banana")
-        .checkTextBrick(1, 1, "123");
-  }
-
-  @Test
   public void testExpandPrimitiveOrder() {
     new GeneralTestWizard(
             syntax,
@@ -410,107 +335,6 @@ public class TestCompaction {
   }
 
   @Test
-  public void testSplitNested() {
-    final Atom lowAtom =
-        new TreeBuilder(low)
-            .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
-            .build();
-    final ValueArray array = (ValueArray) lowAtom.fields.getOpt("value");
-    new GeneralTestWizard(syntax, new TreeBuilder(unary).add("value", lowAtom).build())
-        .resize(70)
-        .checkCourseCount(1)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(0, 3, "one")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(array, 2, 0, ImmutableList.of(new TreeBuilder(one).build()))))
-        .checkCourseCount(3)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(1, 1, "one")
-        .checkTextBrick(2, 1, "one")
-        .run(
-            context ->
-                context.history.apply(context, new ChangeArray(array, 2, 1, ImmutableList.of())))
-        .checkCourseCount(1)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(0, 3, "one");
-  }
-
-  @Test
-  public void testSplitOrderRuleDynamic() {
-    final Atom highAtom =
-        new TreeBuilder(high)
-            .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
-            .build();
-    final ValueArray array = (ValueArray) highAtom.fields.getOpt("value");
-    new GeneralTestWizard(
-            syntax,
-            new TreeBuilder(mid)
-                .addArray(
-                    "value",
-                    new TreeBuilder(low)
-                        .addArray(
-                            "value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
-                        .build(),
-                    highAtom)
-                .build())
-        .resize(80)
-        .checkCourseCount(4)
-        .checkTextBrick(1, 1, "one")
-        .checkTextBrick(2, 1, "one")
-        .checkTextBrick(3, 2, "one")
-        .checkTextBrick(3, 4, "one")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(array, 2, 0, ImmutableList.of(new TreeBuilder(one).build()))))
-        .checkCourseCount(7)
-        .checkTextBrick(1, 1, "one")
-        .checkTextBrick(2, 1, "one")
-        .checkTextBrick(4, 1, "one")
-        .checkTextBrick(5, 1, "one")
-        .checkTextBrick(6, 1, "one")
-        .run(
-            context ->
-                context.history.apply(context, new ChangeArray(array, 2, 1, ImmutableList.of())))
-        .checkCourseCount(4)
-        .checkTextBrick(1, 1, "one")
-        .checkTextBrick(2, 1, "one")
-        .checkTextBrick(3, 2, "one")
-        .checkTextBrick(3, 4, "one");
-  }
-
-  @Test
-  public void testStartCompactDynamic() {
-    final Atom lowAtom =
-        new TreeBuilder(low)
-            .addArray(
-                "value",
-                new TreeBuilder(one).build(),
-                new TreeBuilder(one).build(),
-                new TreeBuilder(infinity).build())
-            .build();
-    final ValueArray array = (ValueArray) lowAtom.fields.getOpt("value");
-    new GeneralTestWizard(syntax, lowAtom)
-        .resize(100)
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(1, 1, "one")
-        .checkTextBrick(2, 1, "infinity")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(array, 1, 0, ImmutableList.of(new TreeBuilder(one).build()))))
-        .checkTextBrick(0, 1, "one")
-        .checkTextBrick(1, 1, "one")
-        .checkTextBrick(2, 1, "one")
-        .checkTextBrick(3, 1, "infinity");
-  }
-
-  @Test
   public void testCompactWindowDownSimple() {
     final Atom midAtom =
         new TreeBuilder(mid)
@@ -528,7 +352,7 @@ public class TestCompaction {
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "...")
         .checkTextBrick(3, 1, "one")
-        .run(context -> midAtom.parent.selectUp(context))
+        .run(context -> midAtom.parent.selectChild(context))
         .act("window")
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 2, "one")
@@ -548,13 +372,15 @@ public class TestCompaction {
                     .build(),
                 new TreeBuilder(one).build())
             .build();
-    new GeneralTestWizard(syntax, new TreeBuilder(high).addArray("value", midAtom).build())
+    Atom highAtom = new TreeBuilder(high).addArray("value", midAtom).build();
+    new GeneralTestWizard(syntax, highAtom)
+        .run(context -> highAtom.parent.selectChild(context))
         .act("window")
         .resize(70)
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "...")
         .checkTextBrick(3, 1, "one")
-        .run(context -> midAtom.parent.selectUp(context))
+        .run(context -> midAtom.parent.selectChild(context))
         .act("window")
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 1, "one")

@@ -6,16 +6,12 @@ import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.merman.editor.visual.tags.PartTag;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.editor.visual.tags.TypeTag;
+import com.zarbosoft.merman.editor.visual.tags.Tags;
+import com.zarbosoft.merman.misc.ROSet;
+import com.zarbosoft.merman.misc.ROSetRef;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
-import org.pcollections.PSet;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class IndicatorsExtension {
   private final Group group;
@@ -33,10 +29,16 @@ public class IndicatorsExtension {
   private final int transversePadding;
 
   public static class Indicator {
-    public String id;
-    public Set<Tag> tags = new HashSet<>();
-    public Symbol symbol;
-    DisplayNode node;
+    public final String id;
+    public final ROSet<String> tags;
+    public final Symbol symbol;
+    private DisplayNode node;
+
+    public Indicator(String id, ROSet<String> tags, Symbol symbol) {
+      this.id = id;
+      this.tags = tags;
+      this.symbol = symbol;
+    }
   }
 
   public IndicatorsExtension(
@@ -55,8 +57,10 @@ public class IndicatorsExtension {
         new Context.TagsListener() {
           @Override
           public void tagsChanged(final Context context) {
-            if (context.cursor == null) update(context, context.globalTags);
-            else update(context, context.globalTags.plusAll(context.cursor.getTags(context)));
+            if (context.cursor == null) update(context, context.getGlobalTags());
+            else
+              update(
+                  context, context.getGlobalTags().mut().addAll(context.cursor.getTags(context)));
           }
         };
     context.addGlobalTagsChangeListener(listener);
@@ -64,11 +68,11 @@ public class IndicatorsExtension {
     context.addTransverseEdgeListener(resizeListener);
     group = context.display.group();
     context.midground.add(group);
-    update(context, context.globalTags);
+    update(context, context.getGlobalTags());
     updatePosition(context);
   }
 
-  public void update(final Context context, final PSet<Tag> tags) {
+  public void update(final Context context, final ROSetRef<String> tags) {
     int transverse = 0;
     int offset = 0;
     for (final Indicator indicator : indicators) {
@@ -81,7 +85,7 @@ public class IndicatorsExtension {
         indicator.symbol.style(
             context,
             node,
-            context.getStyle(tags.plus(new TypeTag(indicator.id)).plus(new PartTag("indicator"))));
+            context.getStyle(tags.mut().add(indicator.id).add(Tags.TAG_PART_INDICATOR).ro()));
         final int ascent;
         final int descent;
         if (node instanceof Text) {

@@ -3,13 +3,12 @@ package com.zarbosoft.merman.editor.visual.visuals;
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.visual.visuals.VisualNestedBase;
 
 @Action.StaticID(id = "copy")
 class AtomActionCopy extends Action {
-    private final VisualNestedBase base;
+    private final VisualFrontAtomBase base;
 
-    public AtomActionCopy(VisualNestedBase base) {
+    public AtomActionCopy(VisualFrontAtomBase base) {
         this.base = base;
     }
 

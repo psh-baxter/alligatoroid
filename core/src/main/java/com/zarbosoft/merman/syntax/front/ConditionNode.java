@@ -7,7 +7,22 @@ import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 
 public class ConditionNode extends ConditionType {
-  public Is is;
+  public final Is is;
+
+  public static class Config {
+    public final Is is;
+    public final boolean invert;
+
+    public Config(Is is, boolean invert) {
+      this.is = is;
+      this.invert = invert;
+    }
+  }
+
+  public ConditionNode(Config config) {
+    super(config.invert);
+    this.is = config.is;
+  }
 
   @Override
   public ConditionAttachment create(final Context context, final Atom atom) {

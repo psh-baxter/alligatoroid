@@ -1,105 +1,202 @@
 package com.zarbosoft.merman.syntax.style;
 
-import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Font;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
-
-import java.lang.reflect.Field;
-import java.util.HashSet;
-import java.util.Set;
+import com.zarbosoft.merman.misc.ROList;
+import com.zarbosoft.merman.misc.ROSet;
+import com.zarbosoft.merman.misc.TSList;
+import com.zarbosoft.merman.misc.TSSet;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Style {
+  public final ROSet<String> tags;
 
-  public Set<Tag> with = new HashSet<>();
+  public final Boolean split;
 
-  public Set<Tag> without = new HashSet<>();
+  public final String alignment;
 
-  public Boolean split = null;
+  public final Integer spaceBefore;
 
-  public String alignment = null;
+  public final Integer spaceAfter;
 
-  public Integer spaceBefore = null;
+  public final Integer spaceTransverseBefore;
 
-  public Integer spaceAfter = null;
-
-  public Integer spaceTransverseBefore = null;
-
-  public Integer spaceTransverseAfter = null;
+  public final Integer spaceTransverseAfter;
 
   // Text/image/shape only
 
-  public ModelColor color = null;
+  public final ModelColor color;
 
   // Text only
 
-  public String font = null;
+  public final String font;
 
-  public Integer fontSize = null;
+  public final Integer fontSize;
 
   // Image only
 
-  public String image = null;
+  public final String image;
 
-  public Integer rotate = null;
+  public final Integer rotate;
 
   // Space only
 
-  public Integer space = null;
+  public final Integer space;
 
   // Other
 
-  public BoxStyle box = null;
+  public final BoxStyle box;
 
-  public ObboxStyle obbox = null;
+  public final ObboxStyle obbox;
 
-  public static class Baked {
-    public static Set<Class<?>> mergeableTypes =
-        ImmutableSet.of(
-            Integer.class,
-            Double.class,
-            Boolean.class,
-            String.class,
-            ModelColor.class,
-            BoxStyle.class,
-            ObboxStyle.class);
-    public Set<Tag> tags = new HashSet<>();
-    public boolean split = false;
-    public String alignment = null;
-    public int spaceBefore = 0;
-    public int spaceAfter = 0;
-    public int spaceTransverseBefore = 0;
-    public int spaceTransverseAfter = 0;
-    public ModelColor color = new ModelColor.RGB();
-    public String font = null;
-    public int fontSize = 14;
-    public String image = null;
-    public int rotate = 0;
-    public int space = 0;
-    public BoxStyle.Baked box = new BoxStyle.Baked();
-    public ObboxStyle.Baked obbox = new ObboxStyle.Baked();
+  public Style(
+      ROSet<String> tags,
+      Boolean split,
+      String alignment,
+      Integer spaceBefore,
+      Integer spaceAfter,
+      Integer spaceTransverseBefore,
+      Integer spaceTransverseAfter,
+      ModelColor color,
+      String font,
+      Integer fontSize,
+      String image,
+      Integer rotate,
+      Integer space,
+      BoxStyle box,
+      ObboxStyle obbox) {
+    this.tags = tags;
+    this.split = split;
+    this.alignment = alignment;
+    this.spaceBefore = spaceBefore;
+    this.spaceAfter = spaceAfter;
+    this.spaceTransverseBefore = spaceTransverseBefore;
+    this.spaceTransverseAfter = spaceTransverseAfter;
+    this.color = color;
+    this.font = font;
+    this.fontSize = fontSize;
+    this.image = image;
+    this.rotate = rotate;
+    this.space = space;
+    this.box = box;
+    this.obbox = obbox;
+  }
 
-    public Baked(final Set<Tag> tags) {
-      this.tags.addAll(tags);
+  public static final class Spec {
+    public ROSet<String> with;
+    public ROSet<String> without;
+    public Boolean split;
+    public String alignment;
+    public Integer spaceBefore;
+    public Integer spaceAfter;
+    public Integer spaceTransverseBefore;
+    public Integer spaceTransverseAfter;
+    // Text/image/shape only
+    public ModelColor color;
+    // Text only
+    public String font;
+    public Integer fontSize;
+    // Image only
+    public String image;
+    public Integer rotate;
+    // Space only
+    public Integer space;
+    // Other
+    public BoxStyle.Spec box;
+    public ObboxStyle.Spec obbox;
+
+    public Spec() {}
+
+    public Spec(
+        ROSet<String> with,
+        ROSet<String> without,
+        Boolean split,
+        String alignment,
+        Integer spaceBefore,
+        Integer spaceAfter,
+        Integer spaceTransverseBefore,
+        Integer spaceTransverseAfter,
+        ModelColor color,
+        String font,
+        Integer fontSize,
+        String image,
+        Integer rotate,
+        Integer space,
+        BoxStyle.Spec box,
+        ObboxStyle.Spec obbox) {
+      this.with = with;
+      this.without = without;
+      this.split = split;
+      this.alignment = alignment;
+      this.spaceBefore = spaceBefore;
+      this.spaceAfter = spaceAfter;
+      this.spaceTransverseBefore = spaceTransverseBefore;
+      this.spaceTransverseAfter = spaceTransverseAfter;
+      this.color = color;
+      this.font = font;
+      this.fontSize = fontSize;
+      this.image = image;
+      this.rotate = rotate;
+      this.space = space;
+      this.box = box;
+      this.obbox = obbox;
     }
+  }
 
-    public void merge(final Style style) {
-      for (final Field field : Style.class.getFields()) {
-        if (!mergeableTypes.contains(field.getType())) continue;
-        final Object value = uncheck(() -> field.get(style));
-        if (value != null) {
-          if (field.getName().equals("box")) box.merge((BoxStyle) value);
-          else if (field.getName().equals("obbox")) obbox.merge((ObboxStyle) value);
-          else uncheck(() -> getClass().getField(field.getName()).set(this, value));
-        }
-      }
+  public static Style create(ROList<Spec> toMerge) {
+    TSSet<String> usedTags = new TSSet<>();
+    boolean split = false;
+    String alignment = null;
+    int spaceBefore = 0;
+    int spaceAfter = 0;
+    int spaceTransverseBefore = 0;
+    int spaceTransverseAfter = 0;
+    ModelColor color = new ModelColor.RGB(0, 0, 0);
+    String font = null;
+    int fontSize = 14;
+    String image = null;
+    int rotate = 0;
+    int space = 0;
+    TSList<BoxStyle.Spec> boxToMerge = new TSList<BoxStyle.Spec>();
+    TSList<ObboxStyle.Spec> obboxToMerge = new TSList<ObboxStyle.Spec>();
+    for (Spec spec : toMerge) {
+      usedTags.addAll(spec.with);
+      if (spec.split != null) split = spec.split;
+      if (spec.alignment != null) alignment = spec.alignment;
+      if (spec.spaceBefore != null) spaceBefore = spec.spaceBefore;
+      if (spec.spaceAfter != null) spaceAfter = spec.spaceAfter;
+      if (spec.spaceTransverseBefore != null) spaceTransverseBefore = spec.spaceTransverseBefore;
+      if (spec.spaceTransverseAfter != null) spaceTransverseAfter = spec.spaceTransverseAfter;
+      if (spec.color != null) color = spec.color;
+      if (spec.font != null) font = spec.font;
+      if (spec.fontSize != null) fontSize = spec.fontSize;
+      if (spec.image != null) image = spec.image;
+      if (spec.rotate != null) rotate = spec.rotate;
+      if (spec.space != null) space = spec.space;
+      if (spec.box != null) boxToMerge.add(spec.box);
+      if (spec.obbox != null) obboxToMerge.add(spec.obbox);
     }
+    return new Style(
+        usedTags.ro(),
+        split,
+        alignment,
+        spaceBefore,
+        spaceAfter,
+        spaceTransverseBefore,
+        spaceTransverseAfter,
+        color,
+        font,
+        fontSize,
+        image,
+        rotate,
+        space,
+        BoxStyle.create(boxToMerge),
+        ObboxStyle.create(obboxToMerge));
+  }
 
-    public Font getFont(final Context context) {
-      if (font == null) return context.display.font(null, fontSize);
-      return context.display.font(font, fontSize);
-    }
+  public Font getFont(final Context context) {
+    if (font == null) return context.display.font(null, fontSize);
+    return context.display.font(font, fontSize);
   }
 }

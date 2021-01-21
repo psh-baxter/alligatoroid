@@ -4,11 +4,8 @@ import com.google.common.collect.ImmutableMap;
 
 public class GroupChildDoesntExist extends BaseKVError{
   public GroupChildDoesntExist(String group, String child) {
-    super(
-      ImmutableMap.<String, Object>builder()
-        .put("group", group)
-        .put("child", child)
-        .build());
+        put("group", group);
+        put("child", child);
   }
 
   @Override

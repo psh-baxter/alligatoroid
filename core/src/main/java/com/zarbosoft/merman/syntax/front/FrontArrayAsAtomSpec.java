@@ -6,45 +6,45 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.PartTag;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.editor.visual.visuals.VisualNestedFromArray;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomFromArray;
+import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
-import org.pcollections.HashTreePSet;
-import org.pcollections.PSet;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class FrontArrayAsAtomSpec extends FrontSpec {
-
-  public String back;
+  public final String field;
   private BaseBackArraySpec dataType;
+
+  public static class Config {
+    public final String field;
+    public final ROSet<String> tags;
+
+    public Config(String field, ROSet<String> tags) {
+      this.field = field;
+      this.tags = tags;
+    }
+  }
+
+  public FrontArrayAsAtomSpec(Config config) {
+    super(config.tags);
+    this.field = config.field;
+  }
 
   @Override
   public Visual createVisual(
       final Context context,
       final VisualParent parent,
       final Atom atom,
-      final PSet<Tag> tags,
-      final Map<String, Alignment> alignments,
+      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
-    return new VisualNestedFromArray(
-        context,
-        parent,
-        dataType.get(atom.fields),
-        HashTreePSet.from(tags)
-            .plus(new PartTag("nested"))
-            .plusAll(this.tags.stream().map(s -> new FreeTag(s)).collect(Collectors.toSet())),
-        alignments,
-        visualDepth,
-        depthScore) {
+    return new VisualFrontAtomFromArray(
+        context, parent, dataType.get(atom.fields), alignments, visualDepth, depthScore) {
 
       @Override
       public String nodeType() {
@@ -60,14 +60,14 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
 
   @Override
   public void finish(
-      List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
-    middleUsed.add(back);
-    dataType = (BaseBackArraySpec) atomType.getDataArray(errors, typePath, back);
+      MultiError errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
+    middleUsed.add(field);
+    dataType = (BaseBackArraySpec) atomType.getDataArray(errors, typePath, field);
   }
 
   @Override
   public String field() {
-    return back;
+    return field;
   }
 
   @Override

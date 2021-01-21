@@ -1,25 +1,41 @@
 package com.zarbosoft.merman.syntax;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.misc.TSMap;
-import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
+import com.zarbosoft.merman.misc.ROList;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
+import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
-import com.zarbosoft.merman.syntax.back.BackSpecData;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class RootAtomType extends AtomType {
-  public List<FrontSpec> front = new ArrayList<>();
-  public List<BackSpec> back = new ArrayList<>();
-  public Map<String, AlignmentDefinition> alignments = new HashMap<>();
+  public static final String ROOT_TYPE_ID = "root";
+  private final ROMap<String, AlignmentSpec> alignments;
+
+  public static class Config {
+    public final ROSet<String> tags;
+    public final ROList<BackSpec> back;
+    public final ROList<FrontSpec> front;
+    public final ROMap<String, AlignmentSpec> alignments;
+
+    public Config(
+        ROSet<String> tags,
+        ROList<BackSpec> back,
+        ROList<FrontSpec> front,
+        ROMap<String, AlignmentSpec> alignments) {
+      this.tags = tags;
+      this.back = back;
+      this.front = front;
+      this.alignments = alignments;
+    }
+  }
+
+  public RootAtomType(Config config) {
+    super(new AtomType.Config(ROOT_TYPE_ID, config.tags, config.back, config.front));
+    alignments = config.alignments;
+  }
 
   @Override
-  public Map<String, AlignmentDefinition> alignments() {
+  public ROMap<String, AlignmentSpec> alignments() {
     return alignments;
   }
 
@@ -39,30 +55,7 @@ public class RootAtomType extends AtomType {
   }
 
   @Override
-  public List<FrontSpec> front() {
-    return front;
-  }
-
-  @Override
-  public List<BackSpec> back() {
-    return back;
-  }
-
-  @Override
   public String name() {
     return "root array";
-  }
-
-  @Override
-  public String id() {
-    return "root";
-  }
-
-  public Atom create(final Syntax syntax) {
-    final TSMap<String, Value> data = new TSMap<>();
-    for (Map.Entry<String, BackSpecData> e : fields.entries()) {
-      data.putNew(e.getKey(), e.getValue().create(syntax));
-    }
-    return new Atom(this, data);
   }
 }

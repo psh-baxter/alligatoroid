@@ -4,7 +4,6 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
-import com.zarbosoft.rendaw.common.Assertion;
 
 public abstract class Value {
   public Atom.Parent parent = null;
@@ -20,26 +19,26 @@ public abstract class Value {
     else return parent.getSyntaxPath();
   }
 
-  public abstract boolean selectDown(Context context);
+  public abstract boolean selectInto(Context context);
 
   public abstract Object syntaxLocateStep(String segment);
 
   public abstract static class Parent<T extends Value> {
-    public final T value;
+    public final T child;
 
-    protected Parent(T value) {
-      this.value = value;
+    protected Parent(T child) {
+      this.child = child;
     }
 
     public abstract String childType();
 
     public String id() {
-      return value.back().id;
+      return child.back().id;
     }
 
     public abstract Path path();
 
-    public abstract boolean selectUp(final Context context);
+    public abstract boolean selectChild(final Context context);
 
     public abstract Path getSyntaxPath();
 

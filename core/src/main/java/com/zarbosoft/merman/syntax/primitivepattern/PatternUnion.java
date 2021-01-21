@@ -5,7 +5,11 @@ import com.zarbosoft.pidgoon.Node;
 import java.util.List;
 
 public class PatternUnion extends Pattern {
-  public List<Pattern> children;
+  public final List<Pattern> children;
+
+  public PatternUnion(List<Pattern> children) {
+    this.children = children;
+  }
 
   @Override
   public Node build() {

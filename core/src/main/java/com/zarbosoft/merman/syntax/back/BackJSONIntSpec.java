@@ -5,6 +5,7 @@ import com.zarbosoft.merman.editor.backevents.JIntEvent;
 import com.zarbosoft.merman.editor.serialization.Write;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.syntax.primitivepattern.Digits;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
@@ -14,6 +15,10 @@ import java.util.Deque;
 import java.util.Iterator;
 
 public class BackJSONIntSpec extends BaseBackPrimitiveSpec {
+  protected BackJSONIntSpec(String id) {
+    super(new Config(id, new Digits()));
+  }
+
   @Override
   protected Iterator<BackSpec> walkStep() {
     return null;

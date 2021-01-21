@@ -14,6 +14,9 @@ import java.util.Deque;
 import java.util.Iterator;
 
 public class BackAtomSpec extends BaseBackAtomSpec {
+  public BackAtomSpec(Config config) {
+    super(config);
+  }
 
   @Override
   protected Iterator<BackSpec> walkStep() {

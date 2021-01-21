@@ -3,8 +3,7 @@ package com.zarbosoft.merman.editor.visual.alignment;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.AlignmentListener;
-
-import java.util.Map;
+import com.zarbosoft.merman.misc.ROMap;
 
 public class RelativeAlignment extends Alignment implements AlignmentListener {
 	private final String base;
@@ -23,11 +22,11 @@ public class RelativeAlignment extends Alignment implements AlignmentListener {
 	}
 
 	@Override
-	public void root(final Context context, final Map<String, Alignment> parents) {
+	public void root(final Context context, final ROMap<String, Alignment> parents) {
 		if (alignment != null) {
 			alignment.removeListener(context, this);
 		}
-		alignment = parents.get(base);
+		alignment = parents.getOpt(base);
 		if (alignment == this)
 			throw new AssertionError("Alignment parented to self");
 		if (alignment != null)

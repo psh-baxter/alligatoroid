@@ -6,12 +6,7 @@ import com.zarbosoft.pidgoon.bytes.ParseBuilder;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 
 public abstract class Pattern {
-  public static Pattern repeatedAny;
-
-  static {
-    repeatedAny = new Repeat0();
-    ((Repeat0) repeatedAny).pattern = new Any();
-  }
+  public static Pattern repeatedAny = new Repeat0(new Any());
 
   public abstract Node build();
 

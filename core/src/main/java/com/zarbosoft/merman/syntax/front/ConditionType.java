@@ -5,8 +5,11 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.condition.ConditionAttachment;
 
 public abstract class ConditionType {
+  public final boolean invert;
 
-  public boolean invert = false;
+  protected ConditionType(boolean invert) {
+    this.invert = invert;
+  }
 
   public abstract ConditionAttachment create(Context context, Atom atom);
 

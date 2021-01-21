@@ -11,12 +11,30 @@ import com.zarbosoft.rendaw.common.DeadCode;
 import java.util.List;
 
 public class ConditionValue extends ConditionType {
-  public String middle;
-  public Is is;
+  public final String field;
+  public final Is is;
 
-  @Override
+  public static class Config {
+    public final String field;
+    public final Is is;
+    public final boolean invert;
+
+    public Config(String field, Is is, boolean invert) {
+      this.field = field;
+      this.is = is;
+      this.invert = invert;
+    }
+  }
+
+    public ConditionValue(Config config) {
+        super(config.invert);
+        this.field = config.field;
+        this.is = config.is;
+    }
+
+    @Override
   public ConditionAttachment create(final Context context, final Atom atom) {
-    final Value value = atom.fields.getOpt(middle);
+    final Value value = atom.fields.getOpt(field);
     if (value instanceof ValuePrimitive) {
       class PrimitiveCondition extends ConditionAttachment implements ValuePrimitive.Listener {
 

@@ -4,6 +4,7 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EArrayOpenEvent;
 import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
@@ -37,16 +38,15 @@ public class BackFixedArraySpec extends BackSpec {
 
   @Override
   public void finish(
-      List<Object> errors,
-      final Syntax syntax,
-      final Path typePath,
-      final TSMap<String, BackSpecData> fields,
-      boolean singularRestriction,
-      boolean typeRestriction) {
-    super.finish(errors, syntax, typePath, fields, singularRestriction, typeRestriction);
+          MultiError errors,
+          final Syntax syntax,
+          final Path typePath,
+          boolean singularRestriction,
+          boolean typeRestriction) {
+    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
     for (int i = 0; i < elements.size(); ++i) {
       BackSpec element = elements.get(i);
-      element.finish(errors, syntax, typePath.add(Integer.toString(i)), fields, false, false);
+      element.finish(errors, syntax, typePath.add(Integer.toString(i)), false, false);
       int finalI = i;
       element.parent =
           new PartParent() {

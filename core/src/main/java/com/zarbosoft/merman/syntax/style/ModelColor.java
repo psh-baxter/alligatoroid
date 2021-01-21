@@ -3,31 +3,36 @@ package com.zarbosoft.merman.syntax.style;
 public abstract class ModelColor {
 
   public static class RGB extends ModelColor {
-    public static final ModelColor white;
+    public static final ModelColor white = new RGB(1, 1, 1);
 
-    static {
-      final RGB tempWhite = new RGB();
-      tempWhite.r = 1;
-      tempWhite.g = 1;
-      tempWhite.b = 1;
-      white = tempWhite;
+    public final double r;
+
+    public final double g;
+
+    public final double b;
+
+    public RGB(double r, double g, double b) {
+      this.r = r;
+      this.g = g;
+      this.b = b;
     }
-
-    public double r;
-
-    public double g;
-
-    public double b;
   }
 
   public static class RGBA extends ModelColor {
 
-    public double r;
+    public final double r;
 
-    public double g;
+    public final double g;
 
-    public double b;
+    public final double b;
 
-    public double a;
+    public final double a;
+
+    public RGBA(double r, double g, double b, double a) {
+      this.r = r;
+      this.g = g;
+      this.b = b;
+      this.a = a;
+    }
   }
 }

@@ -13,9 +13,9 @@ public class TestWizard {
 	public final Context context;
 	private final MockeryDisplay display;
 
-	public TestWizard(final Syntax syntax, final Atom... initial) {
+	public TestWizard(final Syntax syntax, boolean startWindowed, final Atom... initial) {
 		this.runner = new IterationRunner();
-		this.context = buildDoc(runner::addIteration, runner::flushIteration, syntax, initial);
+		this.context = buildDoc(runner::addIteration, runner::flushIteration, syntax, startWindowed,  initial);
 		this.display = (MockeryDisplay) context.display;
 		runner.flush();
 	}

@@ -7,12 +7,15 @@ import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
+import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.rendaw.common.Assertion;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Set;
 
 public class TreeBuilder {
   private final AtomType type;
@@ -20,6 +23,12 @@ public class TreeBuilder {
 
   public TreeBuilder(final AtomType type) {
     this.type = type;
+  }
+
+  public TreeBuilder(Syntax syntax, String type) {
+    Set<AtomType> t = syntax.splayedTypes.get(type);
+    if (t.size() != 1) throw new Assertion();
+    this.type = t.iterator().next();
   }
 
   public TreeBuilder add(final String key, final TreeBuilder builder) {
@@ -47,12 +56,14 @@ public class TreeBuilder {
   }
 
   public TreeBuilder addArray(final String key, final Atom... values) {
-    data.putNew(key, new ValueArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
+    data.putNew(
+        key, new ValueArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
     return this;
   }
 
   public TreeBuilder addRecord(final String key, final Atom... values) {
-    data.putNew(key, new ValueArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
+    data.putNew(
+        key, new ValueArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
     return this;
   }
 

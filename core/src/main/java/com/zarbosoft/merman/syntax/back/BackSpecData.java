@@ -8,19 +8,9 @@ import com.zarbosoft.merman.syntax.Syntax;
 import java.util.List;
 
 public abstract class BackSpecData extends BackSpec {
-  public String id;
+  public final String id;
 
-  public abstract Value create(Syntax syntax);
-
-  @Override
-  public void finish(
-      List<Object> errors,
-      Syntax syntax,
-      Path typePath,
-      TSMap<String, BackSpecData> fields,
-      boolean singularRestriction,
-      boolean typeRestriction) {
-    super.finish(errors, syntax, typePath, fields, singularRestriction, typeRestriction);
-    if (fields != null) fields.put(id, this);
+  protected BackSpecData(String id) {
+    this.id = id;
   }
 }

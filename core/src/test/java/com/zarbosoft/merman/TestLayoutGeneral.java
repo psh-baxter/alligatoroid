@@ -1,10 +1,5 @@
 package com.zarbosoft.merman;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
-import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.TypeTag;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.helper.FrontSpaceBuilder;
@@ -16,6 +11,7 @@ import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
 import com.zarbosoft.merman.syntax.FreeAtomType;
+import com.zarbosoft.merman.syntax.Padding;
 import com.zarbosoft.merman.syntax.Syntax;
 import org.junit.Test;
 
@@ -68,11 +64,12 @@ public class TestLayoutGeneral {
             .type(array)
             .group("any", new GroupBuilder().type(one).type(two).type(text).type(array).build())
             .style(new StyleBuilder().split(true).build())
-            .style(new StyleBuilder().tag(new FreeTag("separator")).split(false).build())
-            .style(new StyleBuilder().tag(new TypeTag("big")).spaceTransverseAfter(60).build())
+            .style(new StyleBuilder().tag("separator").split(false).build())
+            .style(new StyleBuilder().tag("big").spaceTransverseAfter(60).build())
             .build();
     syntaxPadded =
         new SyntaxBuilder("any")
+            .pad(new Padding(5, 5, 9, 9))
             .type(one)
             .type(two)
             .type(big)
@@ -82,12 +79,8 @@ public class TestLayoutGeneral {
                 "any",
                 new GroupBuilder().type(one).type(two).type(big).type(text).type(array).build())
             .style(new StyleBuilder().split(true).build())
-            .style(new StyleBuilder().tag(new FreeTag("separator")).split(false).build())
+            .style(new StyleBuilder().tag("separator").split(false).build())
             .build();
-    syntaxPadded.pad.converseStart = 5;
-    syntaxPadded.pad.converseEnd = 5;
-    syntaxPadded.pad.transverseStart = 9;
-    syntaxPadded.pad.transverseEnd = 9;
   }
 
   @Test
@@ -136,7 +129,7 @@ public class TestLayoutGeneral {
         .resizeTransitive(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectUp(context);
+              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
             })
         .checkCourse(4, 47, 57)
         .checkScroll(24)
@@ -159,12 +152,12 @@ public class TestLayoutGeneral {
         .resizeTransitive(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectUp(context);
+              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
             })
         .checkScroll(24)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(0).parent.selectUp(context);
+              Helper.rootArray(context.document).data.get(0).parent.selectChild(context);
             })
         .checkCourse(0, -3, 7)
         .checkScroll(-13);
@@ -183,7 +176,7 @@ public class TestLayoutGeneral {
         .resizeTransitive(50)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectUp(context);
+              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
             })
         .checkCourse(4, 47, 57)
         .checkScroll(23)
@@ -206,12 +199,12 @@ public class TestLayoutGeneral {
         .resizeTransitive(50)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectUp(context);
+              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
             })
         .checkScroll(23)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(0).parent.selectUp(context);
+              Helper.rootArray(context.document).data.get(0).parent.selectChild(context);
             })
         .checkCourse(0, -3, 7)
         .checkScroll(-22);
@@ -230,7 +223,7 @@ public class TestLayoutGeneral {
         .resizeTransitive(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectUp(context);
+              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
             })
         .checkCourse(4, 47, 107)
         .checkScroll(37)
@@ -253,12 +246,12 @@ public class TestLayoutGeneral {
         .resizeTransitive(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectUp(context);
+              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
             })
         .checkScroll(37)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(0).parent.selectUp(context);
+              Helper.rootArray(context.document).data.get(0).parent.selectChild(context);
             })
         .checkCourse(0, -3, 7)
         .checkScroll(-13);
@@ -276,62 +269,5 @@ public class TestLayoutGeneral {
         .checkTextBrick(1, 1, ", ")
         .checkTextBrick(2, 0, "two")
         .checkTextBrick(3, 0, "]");
-  }
-
-  @Test
-  public void testDynamicWrapLayout() {
-    final Atom text = new TreeBuilder(this.text).add("value", "123").build();
-    new GeneralTestWizard(syntax, text)
-        .run(context -> text.fields.getOpt("value").selectDown(context))
-        .resize(40)
-        .run(context -> context.cursor.receiveText(context, "4"))
-        .checkCourseCount(1)
-        .checkCourse(0, 0, 10)
-        .checkBrickNotCompact(0, 0)
-        .run(context -> context.cursor.receiveText(context, "5"))
-        .checkCourseCount(2)
-        .checkCourse(0, -10, 0)
-        .checkCourse(1, 10, 20)
-        .checkBrickCompact(0, 0)
-        .run(context -> context.cursor.receiveText(context, "6"))
-        .checkCourseCount(2)
-        .checkCourse(0, -10, 0)
-        .checkCourse(1, 10, 20);
-  }
-
-  @Test
-  public void testDynamicUnwrapLayout() {
-    final Atom text = new TreeBuilder(this.text).add("value", "123456").build();
-    final ValuePrimitive primitive = (ValuePrimitive) text.fields.getOpt("value");
-    new GeneralTestWizard(syntax, text)
-        .run(context -> text.fields.getOpt("value").selectDown(context))
-        .resize(40)
-        .run(context -> context.history.apply(context, new ChangePrimitiveRemove(primitive, 5, 1)))
-        .checkCourseCount(2)
-        .checkCourse(0, -10, 0)
-        .checkCourse(1, 10, 20)
-        .run(context -> context.history.apply(context, new ChangePrimitiveRemove(primitive, 4, 1)))
-        .checkCourseCount(1)
-        .checkCourse(0, -10, 0)
-        .run(context -> context.history.apply(context, new ChangePrimitiveRemove(primitive, 3, 1)))
-        .checkCourseCount(1)
-        .checkCourse(0, -10, 0)
-        .run(context -> context.history.apply(context, new ChangePrimitiveRemove(primitive, 2, 1)))
-        .checkCourseCount(1)
-        .checkCourse(0, -10, 0);
-  }
-
-  @Test
-  public void testDynamicArrayLayout() {
-    final Atom gap = syntax.gap.create();
-    new GeneralTestWizard(syntax, gap)
-        .run(
-            context -> {
-              gap.fields.getOpt("gap").selectDown(context);
-              context.cursor.receiveText(context, "[");
-            })
-        .checkTextBrick(0, 0, "[")
-        .checkTextBrick(1, 0, "")
-        .checkTextBrick(2, 0, "]");
   }
 }

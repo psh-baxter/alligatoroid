@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.StateTag;
+import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 
@@ -64,12 +63,11 @@ public class PrimitiveSyntax {
                     .build())
             .style(
                 new StyleBuilder()
-                    .tag(new StateTag("compact"))
-                    .tag(new FreeTag("split"))
+                    .tag(Tags.TAG_COMPACT)
+                    .tag("split")
                     .split(true)
                     .build())
             .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
             .build();
-    syntax.retryExpandFactor = 1.05;
   }
 }

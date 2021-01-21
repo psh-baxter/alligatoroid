@@ -1,13 +1,11 @@
 package com.zarbosoft.merman.document.values;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Visual;
-import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
-import com.zarbosoft.merman.editor.visual.visuals.VisualNestedFromArray;
-import com.zarbosoft.merman.syntax.FreeAtomType;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomFromArray;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.Pair;
@@ -63,27 +61,25 @@ public class ValueArray extends Value {
   }
 
   @Override
-  public boolean selectDown(final Context context) {
+  public boolean selectInto(final Context context) {
     return select(context, true, 0, 0);
   }
 
   public boolean select(
       final Context context, final boolean leadFirst, final int start, final int end) {
     if (data.isEmpty()) {
-      if (context.createArrayDefault == null) return false;
-      final Atom initial = context.createArrayDefault.create(context, this);
-      initial.visual.selectDown(context);
+      return false;
     }
     if (context.window) {
       final Atom firstChild = data.get(start);
       if (visual == null || firstChild.visual == null) {
-        context.createWindowForSelection(this, context.syntax.ellipsizeThreshold);
+        context.createWindowForSelection(this, context.ellipsizeThreshold);
       }
     }
-    if (visual instanceof VisualArray)
-      ((VisualArray) visual).select(context, leadFirst, start, end);
-    else if (visual instanceof VisualNestedFromArray)
-      ((VisualNestedFromArray) visual).select(context);
+    if (visual instanceof VisualFrontArray)
+      ((VisualFrontArray) visual).select(context, leadFirst, start, end);
+    else if (visual instanceof VisualFrontAtomFromArray)
+      ((VisualFrontAtomFromArray) visual).select(context);
     else throw new DeadCode();
     return true;
   }
@@ -131,25 +127,25 @@ public class ValueArray extends Value {
 
     @Override
     public String childType() {
-      return value.back.elementAtomType();
+      return child.back.elementAtomType();
     }
 
     @Override
     public Path path() {
-      return value.back.getPath(value, actualIndex);
+      return child.back.getPath(child, actualIndex);
     }
 
     @Override
-    public boolean selectUp(final Context context) {
-      value.select(context, true, index, index);
+    public boolean selectChild(final Context context) {
+      child.select(context, true, index, index);
       return true;
     }
 
     @Override
     public Path getSyntaxPath() {
       Path out;
-      if (value.parent == null) out = new Path();
-      else out = value.parent.getSyntaxPath();
+      if (child.parent == null) out = new Path();
+      else out = child.parent.getSyntaxPath();
       return out.add(Integer.toString(index));
     }
 

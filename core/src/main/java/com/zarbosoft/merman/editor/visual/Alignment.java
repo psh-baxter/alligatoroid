@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editor.visual;
 
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.misc.ROMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +27,7 @@ public abstract class Alignment {
 		listeners.remove(listener);
 	}
 
-	public abstract void root(Context context, Map<String, Alignment> parents);
+	public abstract void root(Context context, ROMap<String, Alignment> parents);
 
 	public abstract void destroy(Context context);
 }

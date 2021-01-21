@@ -75,42 +75,6 @@ public class TestWindowing {
   }
 
   public GeneralTestWizard start(final boolean startWindowed) {
-    final Syntax syntax = syntax(startWindowed);
-    return new GeneralTestWizard(
-        syntax,
-        new TreeBuilder(oneAtom)
-            .add(
-                "value",
-                new TreeBuilder(oneAtom).add("value", new TreeBuilder(a0_0).build()).build())
-            .build(),
-        new TreeBuilder(array)
-            .addArray(
-                "value",
-                new TreeBuilder(a1_0).build(),
-                new TreeBuilder(array)
-                    .addArray(
-                        "value",
-                        new TreeBuilder(a2_0).build(),
-                        new TreeBuilder(array)
-                            .addArray(
-                                "value",
-                                new TreeBuilder(a3_0).build(),
-                                new TreeBuilder(array)
-                                    .addArray("value", new TreeBuilder(a4).build())
-                                    .build(),
-                                new TreeBuilder(oneAtom)
-                                    .add("value", new TreeBuilder(a5).build())
-                                    .build(),
-                                new TreeBuilder(a3_1).build())
-                            .build(),
-                        new TreeBuilder(a2_1).build())
-                    .build(),
-                new TreeBuilder(a1_1).build())
-            .build(),
-        new TreeBuilder(a0_1).build());
-  }
-
-  public Syntax syntax(final boolean startWindowed) {
     final Syntax out =
         new SyntaxBuilder("any")
             .type(a0_0)
@@ -143,9 +107,43 @@ public class TestWindowing {
                     .build())
             .style(new StyleBuilder().split(true).build())
             .build();
-    out.startWindowed = startWindowed;
-    out.ellipsizeThreshold = 3;
-    return out;
+    final Syntax syntax = out;
+    GeneralTestWizard generalTestWizard =
+        new GeneralTestWizard(
+            syntax,
+            startWindowed,
+            new TreeBuilder(oneAtom)
+                .add(
+                    "value",
+                    new TreeBuilder(oneAtom).add("value", new TreeBuilder(a0_0).build()).build())
+                .build(),
+            new TreeBuilder(array)
+                .addArray(
+                    "value",
+                    new TreeBuilder(a1_0).build(),
+                    new TreeBuilder(array)
+                        .addArray(
+                            "value",
+                            new TreeBuilder(a2_0).build(),
+                            new TreeBuilder(array)
+                                .addArray(
+                                    "value",
+                                    new TreeBuilder(a3_0).build(),
+                                    new TreeBuilder(array)
+                                        .addArray("value", new TreeBuilder(a4).build())
+                                        .build(),
+                                    new TreeBuilder(oneAtom)
+                                        .add("value", new TreeBuilder(a5).build())
+                                        .build(),
+                                    new TreeBuilder(a3_1).build())
+                                .build(),
+                            new TreeBuilder(a2_1).build())
+                        .build(),
+                    new TreeBuilder(a1_1).build())
+                .build(),
+            new TreeBuilder(a0_1).build());
+    generalTestWizard.inner.context.ellipsizeThreshold = 3;
+    return generalTestWizard;
   }
 
   @Test
@@ -165,7 +163,9 @@ public class TestWindowing {
   public void testWindowArray() {
     int i = 0;
     start(false)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1"))).parent.selectChild(context))
         .act("window")
         .checkTextBrick(i++, 0, "1_0")
         .checkTextBrick(i++, 0, "2_0")
@@ -181,7 +181,9 @@ public class TestWindowing {
   public void testWindowArrayUnselectable() {
     int i = 0;
     start(false)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","2"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "2"))).parent.selectChild(context))
         .checkTextBrick(0, 0, "0_0")
         .act("window")
         .checkTextBrick(i++, 0, "0_0")
@@ -200,9 +202,14 @@ public class TestWindowing {
   public void testRewindowArray() {
     int i = 0;
     start(false)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1"))).parent.selectChild(context))
         .act("window")
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1", "value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .act("window")
         .checkTextBrick(i++, 0, "2_0")
         .checkTextBrick(i++, 0, "3_0")
@@ -218,7 +225,8 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((ValueAtom) context.syntaxLocate(new Path("value","0", "value"))).selectDown(context))
+                ((ValueAtom) context.syntaxLocate(new Path("value", "0", "value")))
+                    .selectInto(context))
         .act("window")
         .checkTextBrick(i++, 0, "0_0");
   }
@@ -229,8 +237,8 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((ValueAtom) context.syntaxLocate(new Path("value","0", "value", "atom", "value")))
-                    .selectDown(context))
+                ((ValueAtom) context.syntaxLocate(new Path("value", "0", "value", "atom", "value")))
+                    .selectInto(context))
         .act("window")
         .checkTextBrick(i++, 0, "0_0")
         .checkTextBrick(i++, 0, "1_0")
@@ -250,8 +258,10 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value","1", "value","1", "value","1", "value","1")))
-                    .parent.selectUp(context))
+                ((Atom)
+                        context.syntaxLocate(
+                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .act("window")
         .checkTextBrick(i++, 0, "4");
   }
@@ -260,11 +270,14 @@ public class TestWindowing {
   public void testWindowDown() {
     int i = 0;
     start(false)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1"))).parent.selectChild(context))
         .act("window")
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value","1", "value","1", "value","1"))).parent.selectUp(context))
+                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .act("window_down")
         .checkTextBrick(i++, 0, "2_0")
         .checkTextBrick(i++, 0, "3_0")
@@ -280,8 +293,10 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value","1", "value","1","value", "1","value", "1")))
-                    .parent.selectUp(context))
+                ((Atom)
+                        context.syntaxLocate(
+                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .act("window")
         .act("window_down")
         .checkTextBrick(i++, 0, "4");
@@ -293,8 +308,10 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value","1", "value","1","value", "1","value", "1")))
-                    .parent.selectUp(context))
+                ((Atom)
+                        context.syntaxLocate(
+                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .act("window")
         .checkCourseCount(1)
         .checkTextBrick(0, 0, "4")
@@ -309,7 +326,9 @@ public class TestWindowing {
   public void testWindowUpRoot() {
     int i = 0;
     start(true)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1"))).parent.selectChild(context))
         .act("window")
         .checkTextBrick(0, 0, "1_0")
         .act("window_up")
@@ -326,7 +345,9 @@ public class TestWindowing {
   public void testWindowClear() {
     int i = 0;
     start(false)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1"))).parent.selectChild(context))
         .act("window")
         .act("window_clear")
         .checkTextBrick(i++, 0, "0_0")
@@ -345,10 +366,15 @@ public class TestWindowing {
   public void testWindowSelectArrayNoChange() {
     int i = 0;
     start(false)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1"))).parent.selectChild(context))
         .act("window")
         .checkTextBrick(0, 0, "1_0")
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1", "value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .checkTextBrick(i++, 0, "1_0")
         .checkTextBrick(i++, 0, "2_0")
         .checkTextBrick(i++, 0, "3_0")
@@ -363,11 +389,14 @@ public class TestWindowing {
   public void testWindowSelectArrayEllipsis() {
     int i = 0;
     start(false)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1"))).parent.selectChild(context))
         .act("window")
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value","1", "value","1","value", "1"))).parent.selectUp(context))
+                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .act("enter")
         .checkTextBrick(i++, 0, "1_0")
         .checkTextBrick(i++, 0, "2_0")
@@ -383,14 +412,18 @@ public class TestWindowing {
   public void testWindowSelectArrayOutside() {
     int i = 0;
     start(true)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","0"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "0"))).parent.selectChild(context))
         .act("window")
         .checkTextBrick(0, 0, "0_0")
         .checkCourseCount(1)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value","1", "value","1", "value","1", "value","1")))
-                    .parent.selectUp(context))
+                ((Atom)
+                        context.syntaxLocate(
+                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .checkTextBrick(i++, 0, "1_0")
         .checkTextBrick(i++, 0, "2_0")
         .checkTextBrick(i++, 0, "3_0")
@@ -405,11 +438,16 @@ public class TestWindowing {
   public void testWindowSelectArrayOutsideRoot() {
     int i = 0;
     start(true)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","0"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "0"))).parent.selectChild(context))
         .act("window")
         .checkTextBrick(0, 0, "0_0")
         .checkCourseCount(1)
-        .run(context -> ((Atom) context.syntaxLocate(new Path("value","1", "value","1"))).parent.selectUp(context))
+        .run(
+            context ->
+                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .checkTextBrick(i++, 0, "0_0")
         .checkTextBrick(i++, 0, "1_0")
         .checkTextBrick(i++, 0, "2_0")
@@ -425,8 +463,10 @@ public class TestWindowing {
     start(true)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value","1", "value","1","value", "1","value", "1")))
-                    .parent.selectUp(context))
+                ((Atom)
+                        context.syntaxLocate(
+                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                    .parent.selectChild(context))
         .act("window")
         .checkTextBrick(0, 0, "4")
         .checkCourseCount(1)

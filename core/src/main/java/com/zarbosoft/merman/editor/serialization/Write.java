@@ -6,7 +6,9 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
+import com.zarbosoft.merman.misc.ROMap;
 import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.syntax.BackType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.rendaw.common.DeadCode;
@@ -39,14 +41,12 @@ public class Write {
           final EventConsumer writer;
           switch (syntax.backType) {
             case LUXEM:
-              writer =
-                  luxemEventConsumer(
-                      syntax.prettySave ? new Writer(stream, (byte) ' ', 4) : new Writer(stream));
+              writer = luxemEventConsumer(new Writer(stream, (byte) ' ', 4));
               break;
             case JSON:
               {
                 jsonGenerator = new JsonFactory().createGenerator(stream);
-                if (syntax.prettySave) jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
+                jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
                 writer = jsonEventConsumer(jsonGenerator);
                 break;
               }
@@ -54,8 +54,8 @@ public class Write {
               throw new DeadCode();
           }
           write(atom, writer);
-          if (syntax.backType == Syntax.BackType.JSON) jsonGenerator.flush();
-          if (syntax.prettySave) stream.write('\n');
+          if (syntax.backType == BackType.JSON) jsonGenerator.flush();
+          stream.write('\n');
           stream.flush();
         });
   }
@@ -204,14 +204,12 @@ public class Write {
           final EventConsumer writer;
           switch (syntax.backType) {
             case LUXEM:
-              writer =
-                  luxemEventConsumer(
-                      syntax.prettySave ? new Writer(stream, (byte) ' ', 4) : new Writer(stream));
+              writer = luxemEventConsumer(new Writer(stream, (byte) ' ', 4));
               break;
             case JSON:
               {
                 jsonGenerator = new JsonFactory().createGenerator(stream);
-                if (syntax.prettySave) jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
+                jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
                 jsonGenerator.writeStartArray();
                 writer = jsonEventConsumer(jsonGenerator);
                 break;
@@ -222,7 +220,7 @@ public class Write {
           for (final Atom atom : atoms) write(atom, writer);
           switch (syntax.backType) {
             case LUXEM:
-              if (syntax.prettySave) stream.write('\n');
+              stream.write('\n');
               break;
             case JSON:
               jsonGenerator.writeEndArray();
@@ -289,9 +287,10 @@ public class Write {
     private final TSMap<String, Object> data;
     private final Iterator<Map.Entry<String, BackSpec>> iterator;
 
-    public WriteStateRecord(final TSMap<String, Object> data, final Map<String, BackSpec> record) {
+    public WriteStateRecord(
+        final TSMap<String, Object> data, final ROMap<String, BackSpec> record) {
       this.data = data;
-      this.iterator = record.entrySet().iterator();
+      this.iterator = record.iterator();
     }
 
     @Override
@@ -342,8 +341,7 @@ public class Write {
         return;
       }
       final Atom next = iterator.next();
-      element.write(
-          stack, new TSMap.Builder<String, Object>().putNull(elementKey, next).build(), writer);
+      element.write(stack, new TSMap<String, Object>().putChain(elementKey, next), writer);
     }
   }
 

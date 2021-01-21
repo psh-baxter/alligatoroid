@@ -6,52 +6,66 @@ import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.visual.visuals.VisualSymbol;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
-import org.pcollections.HashTreePSet;
-import org.pcollections.PSet;
-
-import java.util.Map;
 
 public class FrontSymbol extends FrontSpec {
 
-  public Symbol type;
+  public final Symbol type;
 
-  public ConditionType condition = null;
+  public final ConditionType condition;
 
-  public String gapKey = "";
+  /**
+   * When filling a gap:
+   * Text to match non-text symbols, or override the text of text symbols
+   */
+  public final String gapKey;
+
+  public static class Config {
+    public final Symbol type;
+    public final ConditionType condition;
+    public final String gapKey;
+    public final ROSet<String> tags;
+
+    public Config(Symbol type, ConditionType condition, String gapKey, ROSet<String> tags) {
+      this.type = type;
+      this.condition = condition;
+      this.gapKey = gapKey;
+      this.tags = tags;
+    }
+  }
+
+  public FrontSymbol(Config config) {
+    super(config.tags);
+    type = config.type;
+    condition = config.condition;
+    gapKey = config.gapKey;
+  }
 
   public Visual createVisual(
-      final Context context,
-      final VisualParent parent,
-      final PSet<Tag> tags,
-      final Map<String, Alignment> alignments,
-      final int visualDepth,
-      final int depthScore) {
-    return createVisual(context, parent, null, tags, alignments, visualDepth, depthScore);
+          final Context context,
+          final VisualParent parent,
+          final ROMap<String, Alignment> alignments,
+          final int visualDepth,
+          final int depthScore) {
+    return createVisual(context, parent, null, alignments, visualDepth, depthScore);
   }
 
   @Override
   public Visual createVisual(
-      final Context context,
-      final VisualParent parent,
-      final Atom atom,
-      final PSet<Tag> tags,
-      final Map<String, Alignment> alignments,
-      final int visualDepth,
-      final int depthScore) {
+          final Context context,
+          final VisualParent parent,
+          final Atom atom,
+          final ROMap<String, Alignment> alignments,
+          final int visualDepth,
+          final int depthScore) {
     return new VisualSymbol(
-        context,
         parent,
         this,
-        getTags(context, tags),
         atom == null ? null : condition == null ? null : condition.create(context, atom),
         visualDepth);
-  }
-
-  public PSet<Tag> getTags(final Context context, final PSet<Tag> tags) {
-    return tags.plusAll(Context.asFreeTags(this.tags)).plus(type.partTag());
   }
 
   @Override
@@ -70,7 +84,7 @@ public class FrontSymbol extends FrontSpec {
     type.style(
         context,
         out,
-        context.getStyle(context.globalTags.plusAll(getTags(context, HashTreePSet.empty()))));
+        context.getStyle(context.getGlobalTags().mut().addAll(tags).add(type.partTag()).ro()));
     return out;
   }
 }

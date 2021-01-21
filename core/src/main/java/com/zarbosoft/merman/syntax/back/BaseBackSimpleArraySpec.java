@@ -1,17 +1,48 @@
 package com.zarbosoft.merman.syntax.back;
 
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.ArrayMissingAtom;
 import com.zarbosoft.merman.syntax.error.ArrayMultipleAtoms;
 import com.zarbosoft.rendaw.common.Common;
 
-import java.util.List;
-
 public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
-  public BackSpec element;
-  public BaseBackAtomSpec elementAtom;
+  public final BackSpec element;
+  public final BaseBackAtomSpec elementAtom;
+
+  public static class Config {
+    public final String id;
+    public final BackSpec element;
+
+    public Config(String id, BackSpec element) {
+      this.id = id;
+      this.element = element;
+    }
+  }
+
+  protected BaseBackSimpleArraySpec(Config config) {
+    super(config.id);
+    this.element = config.element;
+    MultiError errors = new MultiError();
+    Common.Mutable<BackAtomSpec> atom = new Common.Mutable<>();
+    BackSpec.walk(
+        element,
+        child -> {
+          if (!(child instanceof BackAtomSpec)) return true;
+          if (atom.value != null) {
+            errors.add(new ArrayMultipleAtoms(this, atom.value, child));
+          } else {
+            atom.value = (BackAtomSpec) child;
+          }
+          return false;
+        });
+    if (atom.value == null) {
+      errors.add(new ArrayMissingAtom(this));
+    }
+    elementAtom = atom.value;
+    errors.raise();
+  }
 
   @Override
   public String elementAtomType() {
@@ -20,29 +51,13 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
 
   @Override
   public void finish(
-    List<Object> errors,
-    final Syntax syntax,
-    final Path typePath,
-    final TSMap<String, BackSpecData> fields,
-    boolean singularRestriction, boolean typeRestriction
-  ) {
-    super.finish(errors, syntax, typePath, fields, singularRestriction, typeRestriction);
-    Common.Mutable<BackAtomSpec> atom = new Common.Mutable<>();
-    BackSpec.walk(
-        element,
-        child -> {
-          if (!(child instanceof BackAtomSpec)) return;
-          if (atom.value != null) {
-            errors.add(new ArrayMultipleAtoms(this, atom.value, child));
-          } else {
-            atom.value = (BackAtomSpec) child;
-          }
-        });
-    if (atom.value == null) {
-      errors.add(new ArrayMissingAtom(this));
-    }
-    elementAtom = atom.value;
-    element.finish(errors, syntax, typePath.add("element"), null, false, false);
+      MultiError errors,
+      final Syntax syntax,
+      final Path typePath,
+      boolean singularRestriction,
+      boolean typeRestriction) {
+    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
+    element.finish(errors, syntax, typePath.add("element"), false, false);
   }
 
   @Override

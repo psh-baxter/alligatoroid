@@ -3,18 +3,14 @@ package com.zarbosoft.merman.syntax.symbol;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Text;
-import com.zarbosoft.merman.editor.visual.tags.PartTag;
+import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.syntax.style.Style;
 
 public class SymbolTextSpec extends Symbol {
-
-  public static PartTag partTag = new PartTag("symbol-text");
-  public String text;
-
-  public SymbolTextSpec() {}
+  public final String text;
 
   public SymbolTextSpec(final String text) {
     this.text = text;
@@ -28,7 +24,7 @@ public class SymbolTextSpec extends Symbol {
   }
 
   @Override
-  public void style(final Context context, final DisplayNode node, final Style.Baked style) {
+  public void style(final Context context, final DisplayNode node, final Style style) {
     final Text text = (Text) node;
     text.setFont(context, style.getFont(context));
     text.setColor(context, style.color);
@@ -42,7 +38,7 @@ public class SymbolTextSpec extends Symbol {
   }
 
   @Override
-  public PartTag partTag() {
-    return partTag;
+  public String partTag() {
+    return Tags.TAG_SYMBOL_TEXT;
   }
 }

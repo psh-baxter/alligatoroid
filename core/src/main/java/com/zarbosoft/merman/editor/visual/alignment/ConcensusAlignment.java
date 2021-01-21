@@ -5,9 +5,9 @@ import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.AlignmentListener;
+import com.zarbosoft.merman.misc.ROMap;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 public class ConcensusAlignment extends Alignment {
@@ -70,7 +70,7 @@ public class ConcensusAlignment extends Alignment {
 	}
 
 	@Override
-	public void root(final Context context, final Map<String, Alignment> parents) {
+	public void root(final Context context, final ROMap<String, Alignment> parents) {
 	}
 
 	public void disable(final Context context) {

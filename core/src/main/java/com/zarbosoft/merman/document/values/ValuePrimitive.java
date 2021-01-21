@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.document.values;
 
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 
@@ -9,7 +9,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class ValuePrimitive extends Value {
-  public VisualPrimitive visual;
+  public VisualFrontPrimitive visual;
   public final BaseBackPrimitiveSpec middle;
   public StringBuilder data;
   public final Set<Listener> listeners = new HashSet<>();
@@ -20,10 +20,10 @@ public class ValuePrimitive extends Value {
   }
 
   @Override
-  public boolean selectDown(final Context context) {
+  public boolean selectInto(final Context context) {
     if (context.window) {
       if (visual == null) {
-        context.createWindowForSelection(this, context.syntax.ellipsizeThreshold);
+        context.createWindowForSelection(this, context.ellipsizeThreshold);
       }
     }
     final int length = data.length();

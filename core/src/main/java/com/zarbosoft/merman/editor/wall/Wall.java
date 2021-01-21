@@ -5,7 +5,7 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.Group;
-import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.Pair;
 
@@ -34,9 +34,9 @@ public class Wall {
 	int beddingAfter = 0;
 	Set<BeddingListener> beddingListeners = new HashSet<>();
 	Set<CornerstoneListener> cornerstoneListeners = new HashSet<>();
-	public PriorityQueue<VisualPrimitive> splitPrimitives = new PriorityQueue<>(
+	public PriorityQueue<VisualFrontPrimitive> splitPrimitives = new PriorityQueue<>(
 			11,
-			new ChainComparator<VisualPrimitive>().lesserFirst(visual -> visual.lines.get(0).brick.parent.index).build()
+			new ChainComparator<VisualFrontPrimitive>().lesserFirst(visual -> visual.lines.get(0).brick.parent.index).build()
 	);
 
 	public static abstract class CornerstoneListener {
@@ -51,7 +51,7 @@ public class Wall {
 	public Wall(final Context context) {
 		visual = context.display.group();
 		context.addConverseEdgeListener((context1, oldValue, newValue) -> {
-			for (final VisualPrimitive primitive : splitPrimitives) {
+			for (final VisualFrontPrimitive primitive : splitPrimitives) {
 				primitive.idleResplit(context1);
 			}
 			if (newValue < oldValue) {
@@ -343,7 +343,7 @@ public class Wall {
 			}
 			if (forward < children.size()) {
 				// Always > 0 because of cornerstone
-				int transverse = children.get(forward - 1).transverseEdge(context);
+				int transverse = children.get(forward - 1).transverseEdge();
 				if (forward - 1 == cornerstoneCourse.index)
 					transverse += beddingAfter;
 				children.get(forward).setTransverse(context, transverse);

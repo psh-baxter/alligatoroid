@@ -1,11 +1,9 @@
 package com.zarbosoft.merman.extensions;
 
-import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.visual.tags.GlobalTag;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
+import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.rendaw.common.Pair;
 
 import java.util.List;
@@ -27,11 +25,11 @@ public class ModesExtension {
                   return new ActionMode(pair);
                 })
             .collect(Collectors.toList()));
-    context.changeGlobalTags(new TagsChange(ImmutableSet.of(getTag(state)), ImmutableSet.of()));
+    context.changeGlobalTags(TagsChange.add(getTag(state)));
   }
 
-  private Tag getTag(final int state) {
-    return new GlobalTag(String.format("mode_%s", states.get(state)));
+  private String getTag(final int state) {
+    return String.format("mode_%s", states.get(state));
   }
 
   private class ActionMode extends Action {
@@ -44,7 +42,8 @@ public class ModesExtension {
     @Override
     public boolean run(final Context context) {
       context.changeGlobalTags(
-          new TagsChange(ImmutableSet.of(getTag(pair.first)), ImmutableSet.of(getTag(state))));
+          new TagsChange(
+              new TSSet<String>().add(getTag(pair.first)), new TSSet<String>().add(getTag(state))));
       state = pair.first;
       return true;
     }

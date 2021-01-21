@@ -7,51 +7,48 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.PartTag;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
-import org.pcollections.HashTreePSet;
-import org.pcollections.PSet;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class FrontPrimitiveSpec extends FrontSpec {
-
-  public String field;
-  private Set<String> tags = new HashSet<>();
+  public final String field;
   public BaseBackPrimitiveSpec dataType;
+
+  public static class Config {
+    final String field;
+    final ROSet<String> tags;
+
+    public Config(String field, ROSet<String> tags) {
+      this.field = field;
+      this.tags = tags;
+    }
+  }
+
+  public FrontPrimitiveSpec(Config config) {
+    super(config.tags);
+    field = config.field;
+  }
 
   @Override
   public Visual createVisual(
       final Context context,
       final VisualParent parent,
       final Atom atom,
-      final PSet<Tag> tags,
-      final Map<String, Alignment> alignments,
+      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
-    return new VisualPrimitive(
-        context,
-        parent,
-        dataType.get(atom.fields),
-        HashTreePSet.from(tags)
-            .plus(new PartTag("primitive"))
-            .plusAll(this.tags.stream().map(s -> new FreeTag(s)).collect(Collectors.toSet())),
-        visualDepth
-    );
+    return new VisualFrontPrimitive(context, parent,this, dataType.get(atom.fields), visualDepth);
   }
 
   @Override
   public void finish(
-    List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed
-  ) {
+      MultiError errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
     middleUsed.add(field);
     this.dataType = atomType.getDataPrimitive(errors, typePath, field);
   }
@@ -68,10 +65,5 @@ public class FrontPrimitiveSpec extends FrontSpec {
 
   public Set<String> tags() {
     return ImmutableSet.copyOf(tags);
-  }
-
-  public void tags(final Set<String> tags) {
-    if (!this.tags.isEmpty()) throw new AssertionError();
-    this.tags = tags;
   }
 }

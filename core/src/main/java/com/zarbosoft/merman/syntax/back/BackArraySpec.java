@@ -22,6 +22,11 @@ import java.util.Iterator;
 import java.util.List;
 
 public class BackArraySpec extends BaseBackSimpleArraySpec {
+
+  public BackArraySpec(Config config) {
+    super(config);
+  }
+
   @Override
   protected Iterator<BackSpec> walkStep() {
     return element.walkStep();

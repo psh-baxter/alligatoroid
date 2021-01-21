@@ -1,22 +1,21 @@
 package com.zarbosoft.merman.helper;
 
+import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
+import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 
 public class FrontSpaceBuilder {
-	private final FrontSymbol front;
+  private final TSSet<String> tags = new TSSet<>();
 
-	public FrontSpaceBuilder() {
-		this.front = new FrontSymbol();
-		front.type = new SymbolSpaceSpec();
-	}
+  public FrontSpaceBuilder() {}
 
-	public FrontSymbol build() {
-		return front;
-	}
+  public FrontSymbol build() {
+    return new FrontSymbol(new FrontSymbol.Config(new SymbolSpaceSpec(), null, null, tags.ro()));
+  }
 
-	public FrontSpaceBuilder tag(final String tag) {
-		front.tags.add(tag);
-		return this;
-	}
+  public FrontSpaceBuilder tag(final String tag) {
+    tags.add(tag);
+    return this;
+  }
 }

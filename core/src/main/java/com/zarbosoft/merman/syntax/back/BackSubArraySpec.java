@@ -5,6 +5,7 @@ import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.PluralInvalidAtLocation;
@@ -21,15 +22,19 @@ import java.util.Iterator;
 import java.util.List;
 
 public class BackSubArraySpec extends BaseBackSimpleArraySpec {
+
+  public BackSubArraySpec(Config config) {
+    super(config);
+  }
+
   @Override
   public void finish(
-      List<Object> errors,
-      Syntax syntax,
-      Path typePath,
-      TSMap<String, BackSpecData> fields,
-      boolean singularRestriction,
-      boolean typeRestriction) {
-    super.finish(errors, syntax, typePath, fields, singularRestriction, typeRestriction);
+            MultiError errors,
+            Syntax syntax,
+            Path typePath,
+            boolean singularRestriction,
+            boolean typeRestriction) {
+    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
     if (singularRestriction) {
       errors.add(new PluralInvalidAtLocation(typePath));
     }

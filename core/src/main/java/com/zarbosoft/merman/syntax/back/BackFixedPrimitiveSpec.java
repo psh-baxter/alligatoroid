@@ -12,7 +12,11 @@ import java.util.Iterator;
 
 public class BackFixedPrimitiveSpec extends BackSpec {
 
-  public String value;
+  public final String value;
+
+  public BackFixedPrimitiveSpec(String value) {
+    this.value = value;
+  }
 
   @Override
   public Node buildBackRule(final Syntax syntax) {

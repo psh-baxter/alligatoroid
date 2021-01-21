@@ -1,12 +1,16 @@
 package com.zarbosoft.merman.syntax.format;
 
-import java.util.Map;
+import com.zarbosoft.merman.misc.ROMap;
 
 public class Literal implements Element {
-  public String value;
+  public final String value;
+
+  public Literal(String value) {
+    this.value = value;
+  }
 
   @Override
-  public String format(final Map<String, Object> data) {
+  public String format(final ROMap<String, Object> data) {
     return value;
   }
 }

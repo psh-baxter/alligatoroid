@@ -4,7 +4,11 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.bytes.ParseBuilder;
 
 public class PatternString extends Pattern {
-  public String string;
+  public final String string;
+
+  public PatternString(String string) {
+    this.string = string;
+  }
 
   @Override
   public Node build() {

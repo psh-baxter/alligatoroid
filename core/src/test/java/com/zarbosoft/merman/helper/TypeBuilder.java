@@ -1,122 +1,119 @@
 package com.zarbosoft.merman.helper;
 
+import com.zarbosoft.merman.misc.ROSet;
+import com.zarbosoft.merman.misc.TSList;
+import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.alignments.AbsoluteAlignmentDefinition;
-import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentDefinition;
-import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentDefinition;
+import com.zarbosoft.merman.syntax.alignments.AbsoluteAlignmentSpec;
+import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
+import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentSpec;
+import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.merman.syntax.front.FrontArraySpec;
+import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
-import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
-
-import java.util.ArrayList;
+import org.checkerframework.checker.units.qual.C;
 
 public class TypeBuilder {
-  private final FreeAtomType type;
+  private final String id;
+  private final TSList<FrontSpec> front = new TSList<>();
+  private final TSList<BackSpec> back = new TSList<>();
+  private final FreeAtomType.Config config = new FreeAtomType.Config();
+  private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
 
   public TypeBuilder(final String id) {
-    this.type = new FreeAtomType();
-    type.id = id;
-    type.name = id;
-    type.back = new ArrayList<>();
-    type.front = new ArrayList<>();
+    this.id = id;
+    config.name = id;
   }
 
   public TypeBuilder back(final BackSpec back) {
-    type.back.add(back);
+    this.back.add(back);
     return this;
   }
 
   public FreeAtomType build() {
-    return type;
+    config.base = new AtomType.Config(id, ROSet.empty, back, front);
+    config.alignments = alignments;
+    return new FreeAtomType(config);
   }
 
   public TypeBuilder front(final FrontSpec front) {
-    type.front.add(front);
+    this.front.add(front);
     return this;
   }
 
   public TypeBuilder autoComplete(final int x) {
-    type.autoChooseAmbiguity = x;
+    config.autoChooseAmbiguity = x;
     return this;
   }
 
   public TypeBuilder frontDataNode(final String middle) {
-    final FrontAtomSpec part = new FrontAtomSpec();
-    part.middle = middle;
-    type.front.add(part);
+    this.front.add(new FrontAtomSpec(new FrontAtomSpec.Config(middle)));
     return this;
   }
 
   public TypeBuilder frontDataArray(final String middle) {
-    final FrontFixedArraySpec part = new FrontFixedArraySpec();
-    part.middle = middle;
-    type.front.add(part);
+    this.front.add(
+        new FrontArraySpec(new FrontArraySpec.Config(middle, new FrontArraySpecBase.Config())));
     return this;
   }
 
   public TypeBuilder frontDataPrimitive(final String middle) {
-    final FrontPrimitiveSpec part = new FrontPrimitiveSpec();
-    part.field = middle;
-    type.front.add(part);
+    this.front.add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(middle, ROSet.empty)));
     return this;
   }
 
   public TypeBuilder frontMark(final String value) {
-    final FrontSymbol part = new FrontSymbol();
-    part.type = new SymbolTextSpec(value);
-    type.front.add(part);
+    this.front.add(
+        new FrontSymbol(
+            new FrontSymbol.Config(new SymbolTextSpec(value), null, null, ROSet.empty)));
     return this;
   }
 
   public TypeBuilder frontSpace() {
-    final FrontSymbol part = new FrontSymbol();
-    part.type = new SymbolSpaceSpec();
-    type.front.add(part);
+    this.front.add(
+        new FrontSymbol(new FrontSymbol.Config(new SymbolSpaceSpec(), null, null, ROSet.empty)));
     return this;
   }
 
   public TypeBuilder precedence(final int precedence) {
-    this.type.precedence = precedence;
+    config.precedence = precedence;
     return this;
   }
 
   public TypeBuilder associateForward() {
-    this.type.associateForward = true;
+    config.associateForward = true;
     return this;
   }
 
   public TypeBuilder associateBackward() {
-    this.type.associateForward = false;
+    config.associateForward = false;
     return this;
   }
 
   public TypeBuilder depthScore(final int i) {
-    this.type.depthScore = i;
+    config.depthScore = i;
     return this;
   }
 
   public TypeBuilder absoluteAlignment(final String name, final int offset) {
-    final AbsoluteAlignmentDefinition definition = new AbsoluteAlignmentDefinition();
-    definition.offset = offset;
-    this.type.alignments.put(name, definition);
+    alignments.put(name, new AbsoluteAlignmentSpec(offset));
     return this;
   }
 
   public TypeBuilder relativeAlignment(final String name, final String base, final int offset) {
-    final RelativeAlignmentDefinition definition = new RelativeAlignmentDefinition();
-    definition.offset = offset;
-    definition.base = base;
-    this.type.alignments.put(name, definition);
+    alignments.put(name, new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(base, offset)));
     return this;
   }
 
   public TypeBuilder concensusAlignment(final String name) {
-    this.type.alignments.put(name, new ConcensusAlignmentDefinition());
+    alignments.put(name, new ConcensusAlignmentSpec());
     return this;
   }
 }

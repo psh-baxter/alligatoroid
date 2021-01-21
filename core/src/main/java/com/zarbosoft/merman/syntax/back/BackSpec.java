@@ -3,6 +3,7 @@ package com.zarbosoft.merman.syntax.back;
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
@@ -11,12 +12,12 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class BackSpec {
   public Parent parent = null;
 
-  public static void walk(BackSpec root, Consumer<BackSpec> consumer) {
+  public static void walk(BackSpec root, Function<BackSpec, Boolean> consumer) {
     Deque<Iterator<BackSpec>> stack = new ArrayDeque<>();
     stack.addLast(ImmutableList.of(root).iterator());
     while (!stack.isEmpty()) {
@@ -25,10 +26,12 @@ public abstract class BackSpec {
       if (!top.hasNext()) {
         stack.removeLast();
       }
-      consumer.accept(next);
-      Iterator<BackSpec> children = next.walkStep();
-      if (children != null && children.hasNext()) {
-        stack.addLast(children);
+      boolean cont = consumer.apply(next);
+      if (cont) {
+        Iterator<BackSpec> children = next.walkStep();
+        if (children != null && children.hasNext()) {
+          stack.addLast(children);
+        }
       }
     }
   }
@@ -38,14 +41,13 @@ public abstract class BackSpec {
   public abstract Node buildBackRule(Syntax syntax);
 
   public void finish(
-      List<Object> errors,
-      final Syntax syntax,
-      final Path typePath,
-      /** Null if this is nested under an array and thus will only be consumed by that array */
-      final TSMap<String, BackSpecData> fields,
-      /** If immediate child is an atom, all candidates must be singular values */
-      boolean singularRestriction,
-      boolean typeRestriction) {}
+          MultiError errors,
+          final Syntax syntax,
+          final Path typePath,
+          /** Null if this is nested under an array and thus will only be consumed by that array */
+          /** If immediate child is an atom, all candidates must be singular values */
+          boolean singularRestriction,
+          boolean typeRestriction) {}
 
   /**
    * @param stack
@@ -53,11 +55,11 @@ public abstract class BackSpec {
    * @param writer
    */
   public abstract void write(
-    Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer);
+      Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer);
 
   /**
-   * Can this represent a single value (non key/type) field in back type
-   * Subarrays can represent a single value but this cannot be checked up front and may change during operation, so false
+   * Can this represent a single value (non key/type) field in back type Subarrays can represent a
+   * single value but this cannot be checked up front and may change during operation, so false
    *
    * @return
    */

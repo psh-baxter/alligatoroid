@@ -1,15 +1,12 @@
 package com.zarbosoft.merman.editor;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.zarbosoft.luxem.read.InvalidStream;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.document.InvalidDocument;
 import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.banner.Banner;
 import com.zarbosoft.merman.editor.details.Details;
 import com.zarbosoft.merman.editor.display.Display;
@@ -20,22 +17,23 @@ import com.zarbosoft.merman.editor.serialization.Write;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.StateTag;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
+import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Wall;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
+import com.zarbosoft.merman.misc.ROSetRef;
+import com.zarbosoft.merman.misc.TSList;
+import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.Pair;
-import com.zarbosoft.rendaw.common.WeakCache;
-import org.pcollections.HashTreePSet;
-import org.pcollections.PSet;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -49,22 +47,28 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.zarbosoft.rendaw.common.Common.last;
 
 public class Context {
+  public static Supplier<Set> createSet = () -> new HashSet<>();
+  // Settings
+  public boolean animateCoursePlacement = false;
+  public boolean animateDetails = false;
+  public int ellipsizeThreshold = Integer.MAX_VALUE;
+  public int layBrickBatchSize = 10;
+  public double retryExpandFactor = 1.25;
+  public double scrollFactor = 0.1;
+  public double scrollAlotFactor = 0.8;
+
+  // State
   /** Contains the cursor and other marks. Scrolls. */
   public final Group overlay;
   /** Contains the source code. Scrolls. */
   public final Wall foreground;
-
-  @FunctionalInterface
-  public interface CreateArrayDefault {
-    Atom create(Context context, ValueArray value);
-  }
-  public CreateArrayDefault createArrayDefault;
 
   public final Display display;
   public final Syntax syntax;
@@ -79,7 +83,7 @@ public class Context {
   private final Consumer<Integer> flushIteration;
   public boolean window;
   public Atom windowAtom;
-  public PSet<Tag> globalTags = HashTreePSet.empty();
+  private final TSSet<String> globalTags = new TSSet<String>();
   public KeyListener keyListener;
   public TextListener textListener;
   public ClipboardEngine clipboardEngine;
@@ -99,7 +103,7 @@ public class Context {
   public Hoverable hover;
   public HoverIteration hoverIdle;
   public Cursor cursor;
-  WeakCache<Set<Tag>, Style.Baked> styleCache = new WeakCache<>(v -> v.tags);
+  TSMap<ROSet<String>, Style> styleCache = new TSMap<>();
   List<ContextIntListener> converseEdgeListeners = new ArrayList<>();
   List<ContextIntListener> transverseEdgeListeners = new ArrayList<>();
   int scrollStart;
@@ -117,7 +121,8 @@ public class Context {
       final Display display,
       final Consumer<IterationTask> addIteration,
       final Consumer<Integer> flushIteration,
-      final ClipboardEngine clipboardEngine) {
+      final ClipboardEngine clipboardEngine,
+      final boolean startWindowed) {
     actions.put(
         this,
         ImmutableList.of(
@@ -165,7 +170,7 @@ public class Context {
     display.addHIDEventListener(
         hidEvent -> {
           keyHandlingInProgress = false;
-          if (keyListener != null && keyListener.handleKey(this, hidEvent)){
+          if (keyListener != null && keyListener.handleKey(this, hidEvent)) {
             keyHandlingInProgress = true;
             flushIteration(100);
           }
@@ -226,7 +231,7 @@ public class Context {
           @Override
           public void cornerstoneChanged(final Context context, final Brick brick) {
             if (cornerstone != null) {
-              cornerstone.removeAttachment(context, selectionBrickAttachment);
+              cornerstone.removeAttachment(selectionBrickAttachment);
             }
             this.cornerstone = brick;
             cornerstone.addAttachment(context, selectionBrickAttachment);
@@ -243,15 +248,15 @@ public class Context {
             scrollVisible();
           }
         });
-    if (!syntax.startWindowed) windowClearNoLayBricks();
+    if (!startWindowed) windowClearNoLayBricks();
     else {
       window = true;
       windowAtom = null;
-      document.root.createVisual(this, null, ImmutableMap.of(), 0, 0);
+      document.root.ensureVisual(this, null, ROMap.empty, 0, 0);
       changeGlobalTags(
           new TagsChange(
-              ImmutableSet.of(new StateTag("windowed"), new StateTag("root_window")),
-              ImmutableSet.of()));
+              new TSSet<String>().add(Tags.TAG_GLOBAL_WINDOWED).add(Tags.TAG_GLOBAL_ROOT_WINDOW),
+              new TSSet<>()));
     }
     display.addHIDEventListener(
         event -> {
@@ -297,22 +302,17 @@ public class Context {
   public void applyScroll() {
     final int newScroll = scroll + peek;
     foreground.visual.setPosition(
-        this, new Vector(syntax.pad.converseStart, -newScroll), syntax.animateCoursePlacement);
+        this, new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
     background.setPosition(
-        this, new Vector(syntax.pad.converseStart, -newScroll), syntax.animateCoursePlacement);
+        this, new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
     overlay.setPosition(
-        this, new Vector(syntax.pad.converseStart, -newScroll), syntax.animateCoursePlacement);
+        this, new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
     banner.setScroll(this, newScroll);
     details.setScroll(this, newScroll);
   }
 
   public void flushIteration(final int limit) {
     this.flushIteration.accept(limit);
-  }
-
-  public static PSet<Tag> asFreeTags(final Set<String> tags) {
-    return HashTreePSet.from(
-        tags.stream().map(tag -> new FreeTag(tag)).collect(Collectors.toList()));
   }
 
   public void addActions(final Object key, final List<Action> actions) {
@@ -384,10 +384,10 @@ public class Context {
       String segment = path.segments.get(i);
       if (at instanceof Atom) {
         at = ((Atom) at).syntaxLocateStep(segment);
-        if (at == null) throw new InvalidPath(path.segments.subList(0, i), path.segments);
+        if (at == null) throw new InvalidPath(path.segments.sublist(0, i), path.segments);
       } else if (at instanceof Value) {
         at = ((Value) at).syntaxLocateStep(segment);
-        if (at == null) throw new InvalidPath(path.segments.subList(0, i), path.segments);
+        if (at == null) throw new InvalidPath(path.segments.sublist(0, i), path.segments);
       } else throw new Assertion();
     }
     return at;
@@ -516,15 +516,15 @@ public class Context {
 
     // Try just going up
     if (windowAtom != null) {
-        Value at = windowAtom.parent.value;
+      Value at = windowAtom.parent.child;
       while (true) {
         if (at == value) {
           windowAtom = at.parent.atom();
-          windowVisual = windowAtom.createVisual(this, null, ImmutableMap.of(), 0, 0);
+          windowVisual = windowAtom.ensureVisual(this, null, ROMap.empty, 0, 0);
         }
         final Atom atom = at.parent.atom();
         if (atom.parent == null) break;
-          at = atom.parent.value;
+        at = atom.parent.child;
       }
     }
 
@@ -536,14 +536,14 @@ public class Context {
         depth += windowAtom.type.depthScore();
         if (depth >= depthThreshold) break;
         if (windowAtom.parent == null) break;
-          windowAtom = windowAtom.parent.value.parent.atom();
+        windowAtom = windowAtom.parent.child.parent.atom();
       }
 
       if (depth < depthThreshold) {
         windowAtom = null;
-        windowVisual = document.root.createVisual(this, null, ImmutableMap.of(), 0, 0);
+        windowVisual = document.root.ensureVisual(this, null, ROMap.empty, 0, 0);
       } else {
-        windowVisual = windowAtom.createVisual(this, null, ImmutableMap.of(), 0, 0);
+        windowVisual = windowAtom.ensureVisual(this, null, ROMap.empty, 0, 0);
       }
     }
 
@@ -562,22 +562,23 @@ public class Context {
   }
 
   public void setAtomWindow(final Atom atom) {
-    TagsChange tagsChange = new TagsChange();
+    TSSet<String> addTags = new TSSet<>();
+    TSSet<String> removeTags = new TSSet<>();
     if (!window) {
       window = true;
-      tagsChange = tagsChange.add(new StateTag("windowed"));
+      addTags.add(Tags.TAG_GLOBAL_WINDOWED);
     }
-    if (windowAtom == null) tagsChange = tagsChange.remove(new StateTag("root_window"));
+    if (windowAtom == null) removeTags.add(Tags.TAG_GLOBAL_ROOT_WINDOW);
     final Visual oldWindow = windowAtom == null ? document.root.visual : windowAtom.visual;
     windowAtom = atom;
-    final Visual windowVisual = atom.createVisual(this, null, ImmutableMap.of(), 0, 0);
+    final Visual windowVisual = atom.ensureVisual(this, null, ROMap.empty, 0, 0);
     if (!overlapsWindow(oldWindow)) oldWindow.uproot(this, windowVisual);
-    if (!tagsChange.add.isEmpty() || !tagsChange.remove.isEmpty()) changeGlobalTags(tagsChange);
+    changeGlobalTags(new TagsChange(addTags, removeTags));
     idleLayBricksOutward();
   }
 
   public void changeGlobalTags(final TagsChange change) {
-    globalTags = change.apply(globalTags);
+    if (!change.apply(globalTags)) return;
     banner.tagsChanged(this);
     details.tagsChanged(this);
     ImmutableList.copyOf(globalTagsChangeListeners).forEach(listener -> listener.tagsChanged(this));
@@ -616,17 +617,16 @@ public class Context {
         .forEach(listener -> listener.tagsChanged(this));
   }
 
-  public Style.Baked getStyle(final Set<Tag> tags) {
-    return styleCache.getOrCreate(
-        tags,
-        tags1 -> {
-          final Style.Baked out = new Style.Baked(tags);
-          for (final Style style : syntax.styles) {
-            if (!tags.containsAll(style.with) || !Sets.intersection(tags, style.without).isEmpty())
-              continue;
-            out.merge(style);
+  public Style getStyle(final ROSet<String> tags) {
+    return styleCache.getCreate(
+        tags.own(),
+        () -> {
+          TSList<Style.Spec> toMerge = new TSList<Style.Spec>();
+          for (final Style.Spec spec : syntax.styles) {
+            if (!tags.containsAll(spec.with) || tags.intersect(spec.without).some()) continue;
+            toMerge.add(spec);
           }
-          return out;
+          return Style.create(toMerge);
         });
   }
 
@@ -638,11 +638,15 @@ public class Context {
   public void windowClearNoLayBricks() {
     window = false;
     windowAtom = null;
-    document.root.createVisual(this, null, ImmutableMap.of(), 0, 0);
+    document.root.ensureVisual(this, null, ROMap.empty, 0, 0);
     changeGlobalTags(
         new TagsChange(
-            ImmutableSet.of(),
-            ImmutableSet.of(new StateTag("windowed"), new StateTag("root_window"))));
+            new TSSet<>(),
+            new TSSet<String>().add(Tags.TAG_GLOBAL_WINDOWED).add(Tags.TAG_GLOBAL_ROOT_WINDOW)));
+  }
+
+  public ROSetRef<String> getGlobalTags() {
+    return globalTags;
   }
 
   public static interface ContextIntListener {
@@ -691,7 +695,7 @@ public class Context {
 
     @Override
     public boolean runImplementation(final IterationContext iterationContext) {
-      for (int i = 0; i < syntax.layBrickBatchSize; ++i) {
+      for (int i = 0; i < layBrickBatchSize; ++i) {
         if (ends.isEmpty() && starts.isEmpty()) {
           return false;
         }
@@ -823,7 +827,7 @@ public class Context {
       }
       if (point.transverse < at.parent.transverseStart && at.parent.index > 0) {
         at = context.foreground.children.get(at.parent.index - 1).children.get(0);
-      } else if (point.transverse > at.parent.transverseEdge(context)
+      } else if (point.transverse > at.parent.transverseEdge()
           && at.parent.index < foreground.children.size() - 1) {
         at = context.foreground.children.get(at.parent.index + 1).children.get(0);
       } else {
@@ -881,7 +885,7 @@ public class Context {
       if (atom == document.root) {
         windowAtom = null;
       } else {
-          windowAtom = atom.parent.value.parent.atom();
+        windowAtom = atom.parent.child.parent.atom();
       }
       idleLayBricksOutward();
       return true;
@@ -907,7 +911,7 @@ public class Context {
       final Visual oldWindowVisual = windowAtom.visual;
       final VisualAtom windowVisual = last(chain);
       windowAtom = windowVisual.atom;
-      last(chain).root(context, null, ImmutableMap.of(), 0, 0);
+      last(chain).root(context, null, ROMap.empty, 0, 0);
       oldWindowVisual.uproot(context, windowVisual);
       idleLayBricksOutward();
       return true;
@@ -919,7 +923,7 @@ public class Context {
 
     @Override
     public boolean run(final Context context) {
-      scroll -= syntax.scrollFactor * transverseEdge;
+      scroll -= scrollFactor * transverseEdge;
       applyScroll();
       return false;
     }
@@ -927,10 +931,9 @@ public class Context {
 
   @Action.StaticID(id = "scroll_previous_alot")
   private class ActionScrollNextAlot extends Action {
-
     @Override
     public boolean run(final Context context) {
-      scroll -= syntax.scrollAlotFactor * transverseEdge;
+      scroll -= scrollAlotFactor * transverseEdge;
       applyScroll();
       return false;
     }
@@ -938,10 +941,9 @@ public class Context {
 
   @Action.StaticID(id = "scroll_next")
   private class ActionScrollPrevious extends Action {
-
     @Override
     public boolean run(final Context context) {
-      scroll += syntax.scrollFactor * transverseEdge;
+      scroll += scrollFactor * transverseEdge;
       applyScroll();
       return false;
     }
@@ -949,10 +951,9 @@ public class Context {
 
   @Action.StaticID(id = "scroll_next_alot")
   private class ActionScrollPreviousAlot extends Action {
-
     @Override
     public boolean run(final Context context) {
-      scroll += syntax.scrollAlotFactor * transverseEdge;
+      scroll += scrollAlotFactor * transverseEdge;
       applyScroll();
       return false;
     }

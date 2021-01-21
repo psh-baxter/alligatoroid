@@ -15,7 +15,6 @@ import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
-import com.zarbosoft.merman.editor.history.History;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
@@ -28,6 +27,9 @@ import com.zarbosoft.merman.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.syntax.back.BackSubArraySpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
+import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.merman.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.syntax.primitivepattern.Repeat1;
@@ -93,78 +95,47 @@ public class Helper {
   }
 
   public static BackSpec buildBackType(final String type, final BackSpec child) {
-    final BackFixedTypeSpec back = new BackFixedTypeSpec();
-    back.type = type;
-    back.value = child;
-    return back;
+    return new BackFixedTypeSpec(new BackFixedTypeSpec.Config(type, child));
   }
 
   public static BackSpec buildBackPrimitive(final String value) {
-    final BackFixedPrimitiveSpec back = new BackFixedPrimitiveSpec();
-    back.value = value;
-    return back;
+    return new BackFixedPrimitiveSpec(value);
   }
 
   public static BackSpec buildBackDataAtom(final String id, String type) {
-    final BackAtomSpec back = new BackAtomSpec();
-    back.id = id;
-    back.type = type;
-    return back;
+    return new BackAtomSpec(new BaseBackAtomSpec.Config(type, id));
   }
 
   public static BackSpec buildBackDataPrimitive(final String id) {
-    final BackPrimitiveSpec back = new BackPrimitiveSpec();
-    back.id = id;
-    return back;
+    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, null));
   }
 
   public static BackSpec buildBackDataPrimitiveLetters(final String id) {
-    final BackPrimitiveSpec back = new BackPrimitiveSpec();
-    back.id = id;
-    back.pattern = new Repeat1();
-    ((Repeat1) back.pattern).pattern = new Letters();
-    //back.matcher = back.pattern.new Matcher();
-    return back;
+    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Letters())));
   }
 
   public static BackSpec buildBackDataPrimitiveDigits(final String id) {
-    final BackPrimitiveSpec back = new BackPrimitiveSpec();
-    back.id = id;
-    back.pattern = new Repeat1();
-    ((Repeat1) back.pattern).pattern = new Digits();
-    //back.matcher = back.pattern.new Matcher();
-    return back;
+    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Digits())));
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
-    final BackRecordSpec back = new BackRecordSpec();
-    back.id = id;
-    back.element = type;
-    return back;
+    return new BackRecordSpec(new BackRecordSpec.Config(id, type));
   }
 
   public static BackKeySpec buildBackDataKey(final String id) {
-    final BackKeySpec back = new BackKeySpec();
-    back.id = id;
-    return back;
+    return new BackKeySpec(new BaseBackPrimitiveSpec.Config(id, null));
   }
 
   public static BackArraySpec buildBackDataArray(final String id, String type) {
-    final BackArraySpec back = new BackArraySpec();
-    back.id = id;
-    final BackAtomSpec inner = new BackAtomSpec();
-    inner.type = type;
-    back.element = inner;
-    return back;
+    return new BackArraySpec(
+        new BaseBackSimpleArraySpec.Config(
+            id, new BackAtomSpec(new BaseBackAtomSpec.Config(type, null))));
   }
 
   public static BackSubArraySpec buildBackDataRootArray(final String id, String type) {
-    final BackSubArraySpec back = new BackSubArraySpec();
-    back.id = id;
-    final BackAtomSpec inner = new BackAtomSpec();
-    inner.type = type;
-    back.element = inner;
-    return back;
+    return new BackSubArraySpec(
+        new BaseBackSimpleArraySpec.Config(
+            id, new BackAtomSpec(new BaseBackAtomSpec.Config(type, null))));
   }
 
   public static void assertTreeEqual(final Atom expected, final Atom got) {
@@ -184,7 +155,8 @@ public class Helper {
     {
       final Set<String> extra = Sets.difference(gotKeys, expectedKeys);
       if (!extra.isEmpty())
-        throw new AssertionError(String.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
+        throw new AssertionError(
+            String.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
     }
     for (final String key : Sets.intersection(expectedKeys, gotKeys)) {
       assertTreeEqual(expected.fields.getOpt(key), got.fields.getOpt(key));
@@ -234,14 +206,14 @@ public class Helper {
   }
 
   public static Context buildDoc(final Syntax syntax, final Atom... root) {
-    return buildDoc(idleTask -> {}, limit -> {}, syntax, root);
+    return buildDoc(idleTask -> {}, limit -> {}, syntax, false, root);
   }
 
   public static Context buildDoc(
-      final Consumer<IterationTask> addIteration,
-      final Consumer<Integer> flushIteration,
-      final Syntax syntax,
-      final Atom... root) {
+          final Consumer<IterationTask> addIteration,
+          final Consumer<Integer> flushIteration,
+          final Syntax syntax,
+          boolean startWindowed, final Atom... root) {
     final Document doc =
         new Document(
             syntax,
@@ -260,7 +232,6 @@ public class Helper {
             new MockeryDisplay(),
             addIteration,
             flushIteration,
-            new History(),
             new ClipboardEngine() {
               byte[] data = null;
               String string = null;
@@ -284,7 +255,8 @@ public class Helper {
               public String getString() {
                 return string;
               }
-            });
+            },
+            startWindowed);
     return context;
   }
 }

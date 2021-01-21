@@ -4,8 +4,8 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
-import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.MiscSyntax;
@@ -23,9 +23,9 @@ public class TestActionsPrimitive {
   @Test
   public void testExit() {
     final Context context = buildFive();
-    assertThat(context.cursor.getVisual(), instanceOf(VisualPrimitive.class));
+    assertThat(context.cursor.getVisual(), instanceOf(VisualFrontPrimitive.class));
     Helper.act(context, "exit");
-    assertNotNull(((VisualArray) Helper.rootArray(context.document).visual).selection);
+    assertNotNull(((VisualFrontArray) Helper.rootArray(context.document).visual).selection);
   }
 
   public static Context buildFive() {
@@ -36,7 +36,7 @@ public class TestActionsPrimitive {
     final Context context =
         buildDoc(
             MiscSyntax.syntax, new TreeBuilder(MiscSyntax.quoted).add("value", string).build());
-    Helper.rootArray(context.document).data.get(0).fields.getOpt("value").selectDown(context);
+    Helper.rootArray(context.document).data.get(0).fields.getOpt("value").selectInto(context);
     return context;
   }
 
@@ -45,8 +45,8 @@ public class TestActionsPrimitive {
     final Atom target =
         new TreeBuilder(MiscSyntax.doubleQuoted).add("first", "").add("second", "").build();
     final ValuePrimitive value = (ValuePrimitive) target.fields.getOpt("first");
-    new GeneralTestWizard(MiscSyntax.syntax, target)
-        .run(context -> value.selectDown(context))
+    new GeneralTestWizard(MiscSyntax.syntax,  target)
+        .run(context -> value.selectInto(context))
         .act("next")
         .run(
             context ->
@@ -60,8 +60,8 @@ public class TestActionsPrimitive {
     final Atom target =
         new TreeBuilder(MiscSyntax.doubleQuoted).add("first", "").add("second", "").build();
     final ValuePrimitive value = (ValuePrimitive) target.fields.getOpt("second");
-    new GeneralTestWizard(MiscSyntax.syntax, target)
-        .run(context -> value.selectDown(context))
+    new GeneralTestWizard(MiscSyntax.syntax,  target)
+        .run(context -> value.selectInto(context))
         .act("previous")
         .run(
             context ->
@@ -78,13 +78,13 @@ public class TestActionsPrimitive {
     assertSelection(context, 3, 3);
   }
 
-  public static VisualPrimitive visual(final Context context) {
-    return (VisualPrimitive) context.cursor.getVisual();
+  public static VisualFrontPrimitive visual(final Context context) {
+    return (VisualFrontPrimitive) context.cursor.getVisual();
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final VisualPrimitive.PrimitiveCursor selection =
-        (VisualPrimitive.PrimitiveCursor) context.cursor;
+    final VisualFrontPrimitive.PrimitiveCursor selection =
+        (VisualFrontPrimitive.PrimitiveCursor) context.cursor;
     assertThat(selection.range.beginOffset, equalTo(begin));
     assertThat(selection.range.endOffset, equalTo(end));
   }
@@ -324,7 +324,7 @@ public class TestActionsPrimitive {
   @Test
   public void testGatherNextNewline() {
     final Atom primitiveAtom = new TreeBuilder(MiscSyntax.quoted).add("value", "abc\n123").build();
-    new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
+    new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
                 ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
@@ -337,7 +337,7 @@ public class TestActionsPrimitive {
   @Test
   public void testGatherNextNewlineShorter() {
     final Atom primitiveAtom = new TreeBuilder(MiscSyntax.quoted).add("value", "abc\n1").build();
-    new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
+    new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
                 ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
@@ -406,7 +406,7 @@ public class TestActionsPrimitive {
   @Test
   public void testGatherPreviousNewlineShorter() {
     final Atom primitiveAtom = new TreeBuilder(MiscSyntax.quoted).add("value", "a\n1234").build();
-    new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
+    new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
                 ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
@@ -418,7 +418,7 @@ public class TestActionsPrimitive {
   @Test
   public void testGatherPreviousNewlineStart() {
     final Atom primitiveAtom = new TreeBuilder(MiscSyntax.quoted).add("value", "abc\ndef").build();
-    new GeneralTestWizard(MiscSyntax.syntax, primitiveAtom)
+    new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
                 ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
@@ -529,329 +529,5 @@ public class TestActionsPrimitive {
     visual(context).select(context, true, 7, 15);
     Helper.act(context, "release_previous_line");
     assertSelection(context, 15, 15);
-  }
-
-  @Test
-  public void testSplitSingleStart() {
-    final Context context = build("ab");
-    visual(context).select(context, true, 0, 0);
-    Helper.act(context, "split");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "\nab").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testSplitSingleMid() {
-    final Context context = build("ab");
-    visual(context).select(context, true, 1, 1);
-    Helper.act(context, "split");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "a\nb").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 2, 2);
-  }
-
-  @Test
-  public void testSplitSingleEnd() {
-    final Context context = build("ab");
-    visual(context).select(context, true, 2, 2);
-    Helper.act(context, "split");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "ab\n").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 3, 3);
-  }
-
-  @Test
-  public void testSplitMultipleStart() {
-    final Context context = build("1\nab\n2");
-    visual(context).select(context, true, 2, 2);
-    Helper.act(context, "split");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "1\n\nab\n2").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 3, 3);
-  }
-
-  @Test
-  public void testSplitMultipleMid() {
-    final Context context = build("1\nab\n2");
-    visual(context).select(context, true, 3, 3);
-    Helper.act(context, "split");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "1\na\nb\n2").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 4, 4);
-  }
-
-  @Test
-  public void testSplitMultipleEnd() {
-    final Context context = build("1\nab\n2");
-    visual(context).select(context, true, 4, 4);
-    Helper.act(context, "split");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "1\nab\n\n2").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 5, 5);
-  }
-
-  @Test
-  public void testSplitEmpty() {
-    final Context context = build("");
-    visual(context).select(context, true, 0, 0);
-    Helper.act(context, "split");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "\n").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testSplitRange() {
-    final Context context = build("abcd");
-    visual(context).select(context, true, 1, 3);
-    Helper.act(context, "split");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "a\nd").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 2, 2);
-  }
-
-  @Test
-  public void testJoinEmpty() {
-    final Context context = build("");
-    visual(context).select(context, true, 0, 0);
-    Helper.act(context, "join");
-    assertSelection(context, 0, 0);
-  }
-
-  @Test
-  public void testJoinMinimal() {
-    final Context context = build("\n");
-    visual(context).select(context, true, 0, 0);
-    Helper.act(context, "join");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 0, 0);
-  }
-
-  @Test
-  public void testJoin() {
-    final Context context = build("a\nb");
-    visual(context).select(context, true, 0, 0);
-    Helper.act(context, "join");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "ab").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testJoinRange() {
-    final Context context = build("ab\nc\nde");
-    visual(context).select(context, true, 1, 6);
-    Helper.act(context, "join");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "abcde").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 4);
-  }
-
-  @Test
-  public void testDeletePrevious() {
-    final Context context = buildFive();
-    visual(context).select(context, true, 2, 2);
-    Helper.act(context, "delete_previous");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "1345").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testDeleteBOL() {
-    final Context context = build("a\nb");
-    visual(context).select(context, true, 2, 2);
-    Helper.act(context, "delete_previous");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "ab").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testDeleteBOF() {
-    final Context context = build("a");
-    visual(context).select(context, true, 0, 0);
-    Helper.act(context, "delete_previous");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "a").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 0, 0);
-  }
-
-  @Test
-  public void testDeletePreviousRange() {
-    final Context context = buildFive();
-    visual(context).select(context, true, 1, 2);
-    Helper.act(context, "delete_previous");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "1345").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testDeletePreviousRangeLines() {
-    final Context context = build("ab\ncd");
-    visual(context).select(context, true, 1, 4);
-    Helper.act(context, "delete_previous");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "ad").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testDeleteNext() {
-    final Context context = buildFive();
-    visual(context).select(context, true, 2, 2);
-    Helper.act(context, "delete_next");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "1245").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 2, 2);
-  }
-
-  @Test
-  public void testDeleteEOL() {
-    final Context context = build("a\nb");
-    visual(context).select(context, true, 1, 1);
-    Helper.act(context, "delete_next");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "ab").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testDeleteEOF() {
-    final Context context = build("a");
-    visual(context).select(context, true, 1, 1);
-    Helper.act(context, "delete_next");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "a").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testDeleteNextRange() {
-    final Context context = buildFive();
-    visual(context).select(context, true, 1, 2);
-    Helper.act(context, "delete_next");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "1345").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testDeleteNextRangeLines() {
-    final Context context = build("ab\ncd");
-    visual(context).select(context, true, 1, 4);
-    Helper.act(context, "delete_next");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "ad").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 1, 1);
-  }
-
-  @Test
-  public void testDeleteNextLongRangeLines() {
-    new GeneralTestWizard(
-            MiscSyntax.syntax,
-            new TreeBuilder(MiscSyntax.quoted).add("value", "ab\ncognate\nefg").build())
-        .run(
-            context ->
-                Helper.rootArray(context.document)
-                    .data
-                    .get(0)
-                    .fields
-                    .getOpt("value")
-                    .selectDown(context))
-        .run(context -> visual(context).select(context, true, 1, 13))
-        .act("delete_next")
-        .checkTextBrick(0, 1, "ag")
-        .checkCourseCount(1)
-        .checkArrayTree(new TreeBuilder(MiscSyntax.quoted).add("value", "ag").build())
-        .run(context -> assertSelection(context, 1, 1));
-  }
-
-  @Test
-  public void testCopyPasteSingle() {
-    final Context context = buildFive();
-    visual(context).select(context, true, 1, 3);
-    Helper.act(context, "copy");
-    visual(context).select(context, true, 4, 4);
-    Helper.act(context, "paste");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "1234235").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 6, 6);
-  }
-
-  @Test
-  public void testCopyPasteRange() {
-    final Context context = buildFive();
-    visual(context).select(context, true, 1, 3);
-    Helper.act(context, "copy");
-    visual(context).select(context, true, 4, 5);
-    Helper.act(context, "paste");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "123423").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 6, 6);
-  }
-
-  @Test
-  public void testCutPaste() {
-    final Context context = buildFive();
-    visual(context).select(context, true, 1, 3);
-    Helper.act(context, "cut");
-    assertSelection(context, 1, 1);
-    visual(context).select(context, true, 2, 3);
-    Helper.act(context, "paste");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.quoted).add("value", "1423").build(),
-        Helper.rootArray(context.document));
-    assertSelection(context, 4, 4);
   }
 }

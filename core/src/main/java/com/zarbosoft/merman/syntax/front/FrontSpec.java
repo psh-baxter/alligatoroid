@@ -6,31 +6,33 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
+import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.misc.ROList;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
+import com.zarbosoft.merman.misc.ROSetRef;
 import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.rendaw.common.DeadCode;
-import org.pcollections.PSet;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public abstract class FrontSpec {
 
-  public Set<String> tags = new HashSet<>();
+  public final ROSet<String> tags;
+
+  protected FrontSpec(ROSet<String> tags) {
+    this.tags = tags;
+  }
 
   public abstract Visual createVisual(
-      Context context,
-      VisualParent parent,
-      Atom atom,
-      PSet<Tag> tags,
-      Map<String, Alignment> alignments,
-      int visualDepth,
-      int depthScore);
+          Context context,
+          VisualParent parent,
+          Atom atom,
+          ROMap<String, Alignment> alignments,
+          int visualDepth,
+          int depthScore);
 
   public void finish(
-      List<Object> errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {}
+      MultiError errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {}
 
   public abstract String field();
 
@@ -45,40 +47,5 @@ public abstract class FrontSpec {
     public abstract void handle(FrontAtomSpec front);
 
     public abstract void handle(FrontPrimitiveSpec front);
-
-    public abstract void handle(FrontGapBase front);
-  }
-
-  public abstract static class NodeDispatchHandler extends DispatchHandler {
-
-    @Override
-    public final void handle(final FrontSymbol front) {}
-
-    @Override
-    public final void handle(final FrontPrimitiveSpec front) {}
-
-    @Override
-    public final void handle(final FrontGapBase front) {}
-  }
-
-  public abstract static class NodeOnlyDispatchHandler extends DispatchHandler {
-
-    public final void handle(final FrontSymbol front) {
-      throw new DeadCode();
-    }
-
-    public final void handle(final FrontPrimitiveSpec front) {
-      throw new DeadCode();
-    }
-
-    @Override
-    public final void handle(final FrontGapBase front) {
-      throw new DeadCode();
-    }
-  }
-
-  public abstract static class DataDispatchHandler extends DispatchHandler {
-    @Override
-    public void handle(final FrontSymbol front) {}
   }
 }

@@ -5,6 +5,7 @@ import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.backevents.ETypeEvent;
 import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.TypeInvalidAtLocation;
@@ -16,12 +17,30 @@ import com.zarbosoft.pidgoon.nodes.Sequence;
 
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.List;
 
 public class BackTypeSpec extends BaseBackPrimitiveSpec {
-  public String type;
+  public final String type;
 
-  public BackSpec value;
+  public final BackSpec value;
+
+  public static class Config {
+    public final BaseBackPrimitiveSpec.Config base;
+    public final String type;
+
+    public final BackSpec value;
+
+    public Config(BaseBackPrimitiveSpec.Config base, String type, BackSpec value) {
+      this.base = base;
+      this.type = type;
+      this.value = value;
+    }
+  }
+
+  protected BackTypeSpec(Config config) {
+    super(config.base);
+    this.type = config.type;
+    this.value = config.value;
+  }
 
   @Override
   protected Iterator<BackSpec> walkStep() {
@@ -60,17 +79,16 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   }
 
   public void finish(
-      List<Object> errors,
+      MultiError errors,
       final Syntax syntax,
       Path typePath,
-      final TSMap<String, BackSpecData> fields,
       boolean singularRestriction,
       boolean typeRestriction) {
-    super.finish(errors, syntax, typePath, fields, singularRestriction, typeRestriction);
+    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
     if (typeRestriction) {
       errors.add(new TypeInvalidAtLocation(typePath));
     }
-    value.finish(errors, syntax, typePath.add("value"), fields, true, true);
+    value.finish(errors, syntax, typePath.add("value"), true, true);
     value.parent =
         new PartParent() {
           @Override

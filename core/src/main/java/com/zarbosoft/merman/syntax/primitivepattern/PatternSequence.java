@@ -1,11 +1,14 @@
 package com.zarbosoft.merman.syntax.primitivepattern;
 
+import com.zarbosoft.merman.misc.ROList;
 import com.zarbosoft.pidgoon.Node;
 
-import java.util.List;
-
 public class PatternSequence extends Pattern {
-  public List<Pattern> children;
+  public final ROList<Pattern> children;
+
+  public PatternSequence(ROList<Pattern> children) {
+    this.children = children;
+  }
 
   @Override
   public Node build() {

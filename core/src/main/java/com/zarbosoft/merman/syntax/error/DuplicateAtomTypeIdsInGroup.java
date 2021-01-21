@@ -1,13 +1,10 @@
 package com.zarbosoft.merman.syntax.error;
 
-import com.google.common.collect.ImmutableMap;
+import com.zarbosoft.merman.misc.TSMap;
 
-public class DuplicateAtomTypeIdsInGroup extends BaseKVError{
+public class DuplicateAtomTypeIdsInGroup extends BaseKVError {
   public DuplicateAtomTypeIdsInGroup(String group) {
-    super(
-      ImmutableMap.<String, Object>builder()
-        .put("group", group)
-        .build());
+    put("group", group);
   }
 
   @Override

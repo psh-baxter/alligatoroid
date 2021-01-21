@@ -2,21 +2,27 @@ package com.zarbosoft.merman.extensions.hotkeys.grammar;
 
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.extensions.hotkeys.Key;
+import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 
 import java.util.HashSet;
-import java.util.Set;
 
 public class Terminal implements Node {
 
-  public Key key;
+  public final Key key;
 
-  public boolean press = true;
+  public final boolean press;
 
-  public Set<Key> modifiers = new HashSet<>();
+  public final ROSet<Key> modifiers;
+
+  public Terminal(Key key, boolean press, ROSet<Key> modifiers) {
+    this.key = key;
+    this.press = press;
+    this.modifiers = modifiers;
+  }
 
   public com.zarbosoft.pidgoon.Node build() {
     return new Operator<StackStore>(

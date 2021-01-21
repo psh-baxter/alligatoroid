@@ -2,21 +2,22 @@ package com.zarbosoft.merman.editorcore.history;
 
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 
 public abstract class EditAction extends Action {
-    public final History history;
+  protected final EditingExtension edit;
 
-    public EditAction(History history) {
-        this.history = history;
-    }
+  public EditAction(EditingExtension edit) {
+    this.edit = edit;
+  }
 
-    @Override
-    public final boolean run(Context context) {
-        history.finishChange(context);
-        boolean out = run1(context);
-        history.finishChange(context);
-        return out;
-    }
+  @Override
+  public final boolean run(Context context) {
+    edit.history.finishChange(context);
+    boolean out = run1(context);
+    edit.history.finishChange(context);
+    return out;
+  }
 
-    protected abstract boolean run1(Context context);
+  protected abstract boolean run1(Context context);
 }

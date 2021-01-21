@@ -2,32 +2,32 @@ package com.zarbosoft.merman.editorcore.editing.actions;
 
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
-import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveAdd;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 
 @Action.StaticID(id = "join")
 public class PrimitiveActionJoinLines extends EditAction {
-  private final VisualPrimitive.PrimitiveCursor cursor;
+  private final VisualFrontPrimitive.PrimitiveCursor cursor;
 
-  public PrimitiveActionJoinLines(History history, VisualPrimitive.PrimitiveCursor cursor) {
-    super(history);
+  public PrimitiveActionJoinLines(EditingExtension edit, VisualFrontPrimitive.PrimitiveCursor cursor) {
+    super(edit);
     this.cursor = cursor;
   }
 
   @Override
   public boolean run1(final Context context) {
-    VisualPrimitive.RangeAttachment range = cursor.range;
+    VisualFrontPrimitive.RangeAttachment range = cursor.range;
     int beginOffset = range.beginOffset;
     int endOffset = range.endOffset;
-    VisualPrimitive.Line beginLine = range.beginLine;
-    VisualPrimitive.Line endLine = range.endLine;
+    VisualFrontPrimitive.Line beginLine = range.beginLine;
+    VisualFrontPrimitive.Line endLine = range.endLine;
     if (beginOffset == endOffset) {
       if (beginLine.index + 1 >= cursor.visualPrimitive.lines.size()) return false;
       final int select = endLine.offset + endLine.text.length();
-      history.apply(
+      edit.history.apply(
           context,
           new ChangePrimitiveRemove(
               cursor.visualPrimitive.value,
@@ -45,11 +45,11 @@ public class PrimitiveActionJoinLines extends EditAction {
         selectEnd -= 1;
       }
       replace.append(endLine.text.substring(0, endOffset - endLine.offset));
-      history.apply(
+      edit.history.apply(
           context,
           new ChangePrimitiveRemove(
               cursor.visualPrimitive.value, beginOffset, endOffset - beginOffset));
-      history.apply(
+      edit.history.apply(
           context,
           new ChangePrimitiveAdd(cursor.visualPrimitive.value, beginOffset, replace.toString()));
       cursor.visualPrimitive.select(context, true, selectBegin, selectEnd);

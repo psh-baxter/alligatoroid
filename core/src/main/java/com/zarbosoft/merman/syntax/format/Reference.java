@@ -1,13 +1,17 @@
 package com.zarbosoft.merman.syntax.format;
 
-import java.util.Map;
+import com.zarbosoft.merman.misc.ROMap;
 
 public class Reference implements Element {
 
-  public String name;
+  public final String name;
+
+  public Reference(String name) {
+    this.name = name;
+  }
 
   @Override
-  public String format(final Map<String, Object> data) {
-    return data.getOrDefault(name, "BADKEY").toString();
+  public String format(final ROMap<String, Object> data) {
+    return data.getOr(name, () -> String.format("<BADKEY:%s>", name)).toString();
   }
 }

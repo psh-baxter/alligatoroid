@@ -6,7 +6,6 @@ import java.util.Map;
 
 public class AtomTypeNoBack extends BaseKVError{
   public AtomTypeNoBack() {
-    super(ImmutableMap.of());
   }
 
   @Override

@@ -1,14 +1,14 @@
 package com.zarbosoft.merman.extensions;
 
-import com.google.common.collect.ImmutableMap;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.banner.BannerMessage;
-import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
-import com.zarbosoft.merman.editor.visual.visuals.VisualNestedBase;
-import com.zarbosoft.merman.editor.visual.visuals.VisualPrimitive;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.format.Format;
 
 public class SelectionTypeExtension {
@@ -32,20 +32,20 @@ public class SelectionTypeExtension {
           final String innerId;
           final String innerName;
           {
-            if (cursor instanceof VisualArray.ArrayCursor) {
+            if (cursor instanceof VisualFrontArray.ArrayCursor) {
               part = "array";
-              final VisualArray.ArrayCursor selection1 = (VisualArray.ArrayCursor) cursor;
+              final VisualFrontArray.ArrayCursor selection1 = (VisualFrontArray.ArrayCursor) cursor;
               final Atom child =
                   selection1.self.value.data.get(
                       selection1.leadFirst ? selection1.beginIndex : selection1.endIndex);
               innerId = child.type.id();
               innerName = child.type.name();
-            } else if (cursor instanceof VisualNestedBase.NestedCursor) {
+            } else if (cursor instanceof VisualFrontAtomBase.NestedCursor) {
               part = "nested";
-              final Atom child = ((VisualNestedBase) cursor.getVisual()).atomGet();
+              final Atom child = ((VisualFrontAtomBase) cursor.getVisual()).atomGet();
               innerId = child.type.id();
               innerName = child.type.name();
-            } else if (cursor instanceof VisualPrimitive.PrimitiveCursor) {
+            } else if (cursor instanceof VisualFrontPrimitive.PrimitiveCursor) {
               part = "primitive";
               innerId = outerId;
               innerName = outerName;
@@ -53,18 +53,16 @@ public class SelectionTypeExtension {
           }
           message.text =
               format.format(
-                  new ImmutableMap.Builder()
-                      .put("outer_id", outerId)
-                      .put("outer_name", outerName)
-                      .put("part", part)
-                      .put("inner_id", innerId)
-                      .put("inner_name", innerName)
-                      .build());
+                  new TSMap<String, Object>()
+                      .putChain("outer_id", outerId)
+                      .putChain("outer_name", outerName)
+                      .putChain("part", part)
+                      .putChain("inner_id", innerId)
+                      .putChain("inner_name", innerName));
           context.banner.addMessage(context, message);
           if (oldMessage != null) {
             context.banner.removeMessage(
                 context, oldMessage); // TODO oldMessage callback on finish?
-            oldMessage = null;
           }
         }
       };

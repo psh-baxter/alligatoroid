@@ -10,29 +10,29 @@ import com.zarbosoft.merman.editor.serialization.Write;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.editor.visual.tags.TypeTag;
+import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSetRef;
 import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.rendaw.common.Assertion;
-import org.pcollections.PSet;
 
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Atom {
   public final TSMap<String, Value> fields;
   public Value.Parent<?> parent;
-  public AtomType type;
+  public final AtomType type;
   public VisualAtom visual;
-  public PSet<Tag> tags;
+  private final TSSet<String> tags;
 
   public Atom(final AtomType type, final TSMap<String, Value> fields) {
     this.type = type;
     this.fields = fields;
-    tags = Context.asFreeTags(type.tags).plus(new TypeTag(type.id()));
+    tags = new TSSet<>();
     for (Map.Entry<String, Value> entry : fields.entries()) {
       Value v = entry.getValue();
       v.setParent(
@@ -45,7 +45,7 @@ public class Atom {
             @Override
             public boolean selectUp(final Context context) {
               if (parent == null) return false;
-              return Atom.this.parent.selectUp(context);
+              return Atom.this.parent.selectChild(context);
             }
 
             @Override
@@ -64,10 +64,10 @@ public class Atom {
     else return parent.path();
   }
 
-  public Visual createVisual(
+  public Visual ensureVisual(
       final Context context,
       final VisualParent parent,
-      final Map<String, Alignment> alignments,
+      final ROMap<String, Alignment> alignments,
       final int depth,
       final int depthScore) {
     if (visual != null) {
@@ -98,6 +98,14 @@ public class Atom {
       } else throw new Assertion();
     }
     stack.addLast(new Write.WriteStateBack(childData, type.back().iterator()));
+  }
+
+  public ROSetRef<String> getTags() {
+    return tags;
+  }
+
+  public void changeTags(Context context, final TagsChange change) {
+    if (change.apply(tags) && visual != null) visual.tagsChanged(context);
   }
 
   public abstract static class Parent {

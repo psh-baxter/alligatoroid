@@ -32,8 +32,8 @@ public class History {
     addModifiedStateListener(
         modified -> {
           final Tag tag = new GlobalTag("modified");
-          if (modified) changeGlobalTags(new TagsChange().add(tag));
-          else changeGlobalTags(new TagsChange().remove(tag));
+          if (modified) changeGlobalTags(new TagsChange(add, remove).add(tag));
+          else changeGlobalTags(new TagsChange(add, remove).remove(tag));
         });
     addListener(
             new History.Listener() {

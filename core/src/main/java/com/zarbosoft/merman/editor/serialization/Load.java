@@ -52,11 +52,16 @@ public class Load {
                 .eventFactory(luxemEventFactory())
                 .grammar(syntax.getGrammar())
                 .eventUncertainty(1000)
+                .root(syntax.root.id())
                 .parse(data));
       case JSON:
         return new Document(
             syntax,
-            new JSONParse<Atom>().grammar(syntax.getGrammar()).eventUncertainty(1000).parse(data));
+            new JSONParse<Atom>()
+                .grammar(syntax.getGrammar())
+                .eventUncertainty(1000)
+                .root(syntax.root.id())
+                .parse(data));
       default:
         throw new DeadCode();
     }
@@ -114,21 +119,22 @@ public class Load {
           grammar.add(
               data,
               new Sequence()
-                .add(StackStore.prepVarStack).add(
-          new Operator<StackStore>(
-                  new Repeat(
-                          new Sequence()
-                              .add(new Reference(type))
-                              .add(StackStore.pushVarStackSingle))
-                      .max(7)) {
-                @Override
-                protected StackStore process(StackStore store) {
-                  final List<Atom> temp = new ArrayList<>();
-                  store = store.popVarSingleList(temp);
-                  Collections.reverse(temp);
-                  return store.pushStack(temp);
-                }
-              }));
+                  .add(StackStore.prepVarStack)
+                  .add(
+                      new Operator<StackStore>(
+                          new Repeat(
+                                  new Sequence()
+                                      .add(new Reference(type))
+                                      .add(StackStore.pushVarStackSingle))
+                              .min(1)) {
+                        @Override
+                        protected StackStore process(StackStore store) {
+                          final List<Atom> temp = new ArrayList<>();
+                          store = store.popVarSingleList(temp);
+                          Collections.reverse(temp);
+                          return store.pushStack(temp);
+                        }
+                      }));
           return new Parse<List<Atom>>()
               .grammar(grammar)
               .eventFactory(luxemEventFactory())
@@ -139,27 +145,28 @@ public class Load {
       case JSON:
         {
           final Grammar grammar = new Grammar(syntax.getGrammar());
-          grammar.add(data,
-                  new Sequence()
-                    .add(StackStore.prepVarStack)
-                      .add(new MatchingEventTerminal(new EArrayOpenEvent()))
-                    .add(StackStore.prepVarStack)
-                      .add(
-                          new Operator<StackStore>(
-                              new Repeat(
-                                new Sequence().add(
-                                          new Reference(type)).add(StackStore.pushVarStackSingle)
-                                          )
-                                  .max(7)) {
-                            @Override
-                            protected StackStore process(StackStore store) {
-                              final List<Atom> temp = new ArrayList<>();
-                              store = store.popVarSingleList(temp);
-                              Collections.reverse(temp);
-                              return store.pushStack(temp);
-                            }
-                          })
-                      .add(new MatchingEventTerminal(new EArrayCloseEvent())));
+          grammar.add(
+              data,
+              new Sequence()
+                  .add(StackStore.prepVarStack)
+                  .add(new MatchingEventTerminal(new EArrayOpenEvent()))
+                  .add(StackStore.prepVarStack)
+                  .add(
+                      new Operator<StackStore>(
+                          new Repeat(
+                                  new Sequence()
+                                      .add(new Reference(type))
+                                      .add(StackStore.pushVarStackSingle))
+                              .max(7)) {
+                        @Override
+                        protected StackStore process(StackStore store) {
+                          final List<Atom> temp = new ArrayList<>();
+                          store = store.popVarSingleList(temp);
+                          Collections.reverse(temp);
+                          return store.pushStack(temp);
+                        }
+                      })
+                  .add(new MatchingEventTerminal(new EArrayCloseEvent())));
           return new JSONParse<List<Atom>>()
               .grammar(grammar)
               .root(data)

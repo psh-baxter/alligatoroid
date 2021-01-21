@@ -3,7 +3,7 @@ package com.zarbosoft.merman.syntax.symbol;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Image;
-import com.zarbosoft.merman.editor.visual.tags.PartTag;
+import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.editor.wall.bricks.BrickImage;
@@ -18,7 +18,7 @@ public class SymbolImageSpec extends Symbol {
   }
 
   @Override
-  public void style(final Context context, final DisplayNode node, final Style.Baked style) {
+  public void style(final Context context, final DisplayNode node, final Style style) {
     final Image image = (Image) node;
     image.setImage(context, Paths.get(style.image));
     image.rotate(context, style.rotate);
@@ -29,9 +29,8 @@ public class SymbolImageSpec extends Symbol {
     return new BrickImage(context, inter);
   }
 
-  public static PartTag partTag = new PartTag("symbol-image");
   @Override
-  public PartTag partTag() {
-    return partTag;
+  public String partTag() {
+    return Tags.TAG_SYMBOL_IMAGE;
   }
 }

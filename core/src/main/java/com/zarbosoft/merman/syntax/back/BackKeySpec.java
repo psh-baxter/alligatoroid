@@ -14,6 +14,11 @@ import java.util.Deque;
 import java.util.Iterator;
 
 public class BackKeySpec extends BaseBackPrimitiveSpec {
+
+  public BackKeySpec(Config config) {
+    super(config);
+  }
+
   @Override
   protected Iterator<BackSpec> walkStep() {
     return null;

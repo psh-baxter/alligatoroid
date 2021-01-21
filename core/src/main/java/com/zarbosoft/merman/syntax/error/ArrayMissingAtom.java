@@ -5,7 +5,7 @@ import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 
 public class ArrayMissingAtom extends BaseKVError{
   public ArrayMissingAtom(BaseBackArraySpec spec) {
-    super(ImmutableMap.<String, Object>builder().put("spec", spec).build());
+    put("spec", spec);
   }
 
   @Override

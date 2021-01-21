@@ -5,8 +5,12 @@ import com.google.common.collect.Sets;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.editor.Path;
+import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.misc.ROList;
+import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.merman.misc.TSMap;
-import com.zarbosoft.merman.syntax.alignments.AlignmentDefinition;
+import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.syntax.back.BackFixedArraySpec;
@@ -22,34 +26,81 @@ import com.zarbosoft.merman.syntax.back.BackTypeSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.merman.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.syntax.error.AtomTypeErrors;
 import com.zarbosoft.merman.syntax.error.AtomTypeNoBack;
 import com.zarbosoft.merman.syntax.error.BackFieldWrongType;
+import com.zarbosoft.merman.syntax.error.DuplicateBackId;
 import com.zarbosoft.merman.syntax.error.MissingBack;
 import com.zarbosoft.merman.syntax.error.UnusedBackData;
+import com.zarbosoft.merman.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
-import com.zarbosoft.merman.syntax.front.FrontFixedArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Color;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
-import com.zarbosoft.rendaw.common.Common;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public abstract class AtomType {
+  public final ROMap<String, BackSpecData> fields;
+  public final ROSet<String> tags;
+  private final String id;
+  private final ROList<BackSpec> back;
+  private final ROList<FrontSpec> front;
 
-  public Set<String> tags = new HashSet<>();
-  public TSMap<String, BackSpecData> fields;
+  public static final class Config {
+    public final String id;
+    public ROSet<String> tags;
+    public final ROList<BackSpec> back;
+    public final ROList<FrontSpec> front;
+
+    public Config(String id, ROList<BackSpec> back, ROList<FrontSpec> front) {
+      this.id = id;
+      this.back = back;
+      this.front = front;
+    }
+
+    public Config(String id, ROSet<String> tags, ROList<BackSpec> back, ROList<FrontSpec> front) {
+      this.id = id;
+      this.tags = tags;
+      this.back = back;
+      this.front = front;
+    }
+  }
+
+  public AtomType(Config config) {
+    id = config.id;
+    this.tags = config.tags;
+    back = config.back;
+    front = config.front;
+    TSMap<String, BackSpecData> fields = new TSMap<>();
+    MultiError errors = new MultiError();
+    if (back.isEmpty()) {
+      errors.add(new AtomTypeNoBack());
+    } else
+      for (BackSpec backSpec : back) {
+        BackSpec.walk(
+            backSpec,
+            s -> {
+              if (!(s instanceof BackSpecData)) return true;
+              BackSpecData s1 = (BackSpecData) s;
+              BackSpecData old = fields.put(s1.id, s1);
+              if (old != null) errors.add(new DuplicateBackId(s1.id));
+              if (s instanceof BaseBackSimpleArraySpec) return false;
+              return true;
+            });
+      }
+    this.fields = fields;
+    errors.raise();
+  }
 
   /**
    * @param type
@@ -59,15 +110,15 @@ public abstract class AtomType {
    */
   public static boolean isPrecedent(
       final FreeAtomType type, final Value.Parent test, final boolean allowed) {
-      final Atom testAtom = test.value.parent.atom();
+    final Atom testAtom = test.child.parent.atom();
 
     // Can't move up if current level is bounded by any other front parts
     final int index = getIndexOfData(test, testAtom);
-    final List<FrontSpec> front = testAtom.type.front();
+    final ROList<FrontSpec> front = testAtom.type.front();
     if (index != front.size() - 1) return false;
     final FrontSpec frontNext = front.get(index);
-    if (frontNext instanceof FrontFixedArraySpec
-        && !((FrontFixedArraySpec) frontNext).suffix.isEmpty()) return false;
+    if (frontNext instanceof FrontArraySpec && !((FrontArraySpec) frontNext).suffix.isEmpty())
+      return false;
 
     if (allowed) {
       // Can't move up if next level has lower precedence
@@ -82,22 +133,17 @@ public abstract class AtomType {
   }
 
   private static int getIndexOfData(final Value.Parent parent, final Atom atom) {
-    return Common.enumerate(atom.type.front().stream())
-        .filter(
-            pair -> {
-              FrontSpec front = pair.second;
-              String id = null;
-              if (front instanceof FrontAtomSpec) id = ((FrontAtomSpec) front).middle;
-              else if (front instanceof FrontFixedArraySpec)
-                id = ((FrontFixedArraySpec) front).middle;
-              return parent.id().equals(id);
-            })
-        .map(pair -> pair.first)
-        .findFirst()
-        .get();
+    for (int i = 0; i < atom.type.front.size(); ++i) {
+      FrontSpec front = atom.type.front.get(i);
+      String id = null;
+      if (front instanceof FrontAtomSpec) id = ((FrontAtomSpec) front).field();
+      else if (front instanceof FrontArraySpec) id = ((FrontArraySpec) front).field();
+      if (parent.id().equals(id)) return i;
+    }
+    throw new Assertion();
   }
 
-  public abstract Map<String, AlignmentDefinition> alignments();
+  public abstract ROMap<String, AlignmentSpec> alignments();
 
   public abstract int precedence();
 
@@ -105,15 +151,14 @@ public abstract class AtomType {
 
   public abstract int depthScore();
 
-  public void finish(List<Object> errors, final Syntax syntax) {
-    fields = new TSMap<>();
-    List<Object> subErrors = new ArrayList<>();
+  public void finish(MultiError errors, final Syntax syntax) {
+    MultiError subErrors = new MultiError();
     if (back().isEmpty()) {
       subErrors.add(new AtomTypeNoBack());
     }
     for (int i = 0; i < back().size(); ++i) {
       BackSpec e = back().get(i);
-      e.finish(subErrors, syntax, new Path("back").add(Integer.toString(i)), fields, false, false);
+      e.finish(subErrors, syntax, new Path("back").add(Integer.toString(i)), false, false);
       e.parent = new NodeBackParent(i);
     }
     {
@@ -122,7 +167,7 @@ public abstract class AtomType {
         FrontSpec e = front().get(i);
         e.finish(subErrors, new Path("front").add(Integer.toString(i)), this, fieldsUsedFront);
       }
-      final Set<String> missing = Sets.difference(fields.keySet(), fieldsUsedFront);
+      final Set<String> missing = Sets.difference(fields.keys(), fieldsUsedFront);
       if (!missing.isEmpty()) {
         subErrors.add(new UnusedBackData(missing));
       }
@@ -132,9 +177,13 @@ public abstract class AtomType {
     }
   }
 
-  public abstract List<FrontSpec> front();
+  public final ROList<FrontSpec> front() {
+    return front;
+  }
 
-  public abstract List<BackSpec> back();
+  public final ROList<BackSpec> back() {
+    return back;
+  }
 
   public com.zarbosoft.pidgoon.Node buildBackRule(final Syntax syntax) {
     final Sequence seq = new Sequence();
@@ -166,7 +215,7 @@ public abstract class AtomType {
       if (next instanceof BackFixedArraySpec) {
         stack.addLast(((BackFixedArraySpec) next).elements.iterator());
       } else if (next instanceof BackFixedRecordSpec) {
-        stack.addLast(((BackFixedRecordSpec) next).pairs.values().iterator());
+        stack.addLast(((BackFixedRecordSpec) next).pairs.iterValues());
       } else if (next instanceof BackArraySpec) {
         if (((BackArraySpec) next).id.equals(id)) return next;
       } else if (next instanceof BackSubArraySpec) {
@@ -189,13 +238,13 @@ public abstract class AtomType {
   }
 
   public BaseBackPrimitiveSpec getDataPrimitive(
-      List<Object> errors, Path typePath, final String key) {
+      MultiError errors, Path typePath, final String key) {
     return getBack(errors, typePath, BaseBackPrimitiveSpec.class, key);
   }
 
   public <D extends BackSpecData> D getBack(
-      List<Object> errors, Path typePath, final Class<D> type, final String id) {
-    final BackSpecData found = fields.get(id);
+      MultiError errors, Path typePath, final Class<D> type, final String id) {
+    final BackSpecData found = fields.getOpt(id);
     if (found == null) {
       errors.add(new MissingBack(typePath, id));
       return null;
@@ -207,11 +256,11 @@ public abstract class AtomType {
     return (D) found;
   }
 
-  public BaseBackAtomSpec getDataAtom(List<Object> errors, Path typePath, final String key) {
+  public BaseBackAtomSpec getDataAtom(MultiError errors, Path typePath, final String key) {
     return getBack(errors, typePath, BaseBackAtomSpec.class, key);
   }
 
-  public BaseBackArraySpec getDataArray(List<Object> errors, Path typePath, final String key) {
+  public BaseBackArraySpec getDataArray(MultiError errors, Path typePath, final String key) {
     return getBack(errors, typePath, BaseBackArraySpec.class, key);
   }
 
@@ -220,14 +269,8 @@ public abstract class AtomType {
     return String.format("<type %s>", id());
   }
 
-  public abstract String id();
-
-  public Atom create(final Syntax syntax) {
-    final TSMap<String, Value> data = new TSMap<>();
-    for (Map.Entry<String, BackSpecData> e : fields.entries()) {
-      data.putNew(e.getKey(), e.getValue().create(syntax));
-    }
-    return new Atom(this, data);
+  public final String id() {
+    return id;
   }
 
   public static class NodeBackParent extends BackSpec.Parent {

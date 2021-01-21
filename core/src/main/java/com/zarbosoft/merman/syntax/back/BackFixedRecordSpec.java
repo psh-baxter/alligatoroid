@@ -5,6 +5,8 @@ import com.zarbosoft.merman.editor.backevents.EKeyEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.misc.ROMap;
 import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
@@ -13,14 +15,16 @@ import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Set;
 
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 public class BackFixedRecordSpec extends BackSpec {
 
-  public Map<String, BackSpec> pairs = new HashMap<>();
+  public final ROMap<String, BackSpec> pairs;
+
+  public BackFixedRecordSpec(ROMap<String, BackSpec> pairs) {
+    this.pairs = pairs;
+  }
 
   @Override
   public Node buildBackRule(final Syntax syntax) {
@@ -28,13 +32,12 @@ public class BackFixedRecordSpec extends BackSpec {
     sequence = new Sequence();
     sequence.add(new MatchingEventTerminal(new EObjectOpenEvent()));
     final Set set = new Set();
-    pairs.forEach(
-        (key, value) -> {
-          set.add(
+    for (Map.Entry<String, BackSpec> pair : pairs) {
+      set.add(
               new Sequence()
-                  .add(new MatchingEventTerminal(new EKeyEvent(key)))
-                  .add(value.buildBackRule(syntax)));
-        });
+                      .add(new MatchingEventTerminal(new EKeyEvent(pair.getKey())))
+                      .add(pair.getValue().buildBackRule(syntax)));
+    }
     sequence.add(set);
     sequence.add(new MatchingEventTerminal(new EObjectCloseEvent()));
     return sequence;
@@ -42,16 +45,15 @@ public class BackFixedRecordSpec extends BackSpec {
 
   @Override
   public void finish(
-    List<Object> errors,
-    final Syntax syntax,
-    final Path typePath,
-    final TSMap<String, BackSpecData> fields,
-    boolean singularRestriction, boolean typeRestriction
+          MultiError errors,
+          final Syntax syntax,
+          final Path typePath,
+          boolean singularRestriction, boolean typeRestriction
   ) {
-    super.finish(errors, syntax, typePath, fields, singularRestriction, typeRestriction);
-    for (Map.Entry<String, BackSpec> e : pairs.entrySet()) {
+    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
+    for (Map.Entry<String, BackSpec> e : pairs) {
       String k = e.getKey();
-      e.getValue().finish(errors, syntax, typePath.add(k), fields, true, false);
+      e.getValue().finish(errors, syntax, typePath.add(k), true, false);
       e.getValue().parent =
           new PartParent() {
             @Override
@@ -87,6 +89,6 @@ public class BackFixedRecordSpec extends BackSpec {
 
   @Override
   protected Iterator<BackSpec> walkStep() {
-    return pairs.values().iterator();
+    return pairs.iterValues();
   }
 }

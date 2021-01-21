@@ -3,7 +3,7 @@ package com.zarbosoft.merman.document.values;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.visual.visuals.VisualNested;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtom;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 
 import java.util.HashSet;
@@ -13,7 +13,7 @@ public class ValueAtom extends Value {
   public static final String SYNTAX_PATH_KEY = "atom";
   public final Set<Listener> listeners = new HashSet<>();
   private final BaseBackAtomSpec back;
-  public VisualNested visual;
+  public VisualFrontAtom visual;
   public Atom data; // INVARIANT: Never null when in tree
 
   public ValueAtom(final BaseBackAtomSpec back, final Atom data) {
@@ -40,7 +40,7 @@ public class ValueAtom extends Value {
   }
 
   @Override
-  public boolean selectDown(final Context context) {
+  public boolean selectInto(final Context context) {
     select(context);
     return true;
   }
@@ -54,7 +54,7 @@ public class ValueAtom extends Value {
   public void select(final Context context) {
     if (context.window) {
       if (visual == null || data.visual == null) {
-        context.createWindowForSelection(this, context.syntax.ellipsizeThreshold);
+        context.createWindowForSelection(this, context.ellipsizeThreshold);
       }
     }
     visual.select(context);
@@ -65,36 +65,36 @@ public class ValueAtom extends Value {
   }
 
   public static class NodeParent extends Parent<ValueAtom> {
-    public NodeParent(ValueAtom value) {
-      super(value);
+    public NodeParent(ValueAtom child) {
+      super(child);
     }
 
     @Override
     public String childType() {
-      return value.back.type;
+      return child.back.type;
     }
 
     @Override
     public String id() {
-      return value.back.id;
+      return child.back.id;
     }
 
     @Override
     public Path path() {
-      return value.getSyntaxPath();
+      return child.getSyntaxPath();
     }
 
     @Override
-    public boolean selectUp(final Context context) {
-      value.select(context);
+    public boolean selectChild(final Context context) {
+      child.select(context);
       return true;
     }
 
     @Override
     public Path getSyntaxPath() {
       Path out;
-      if (value.parent == null) out = new Path();
-      else out = value.parent.getSyntaxPath();
+      if (child.parent == null) out = new Path();
+      else out = child.parent.getSyntaxPath();
       return out.add(SYNTAX_PATH_KEY);
     }
 

@@ -4,11 +4,20 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.visual.visuals.VisualArray;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.helper.BackArrayBuilder;
+import com.zarbosoft.merman.helper.BackRecordBuilder;
+import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
+import com.zarbosoft.merman.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
+import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.MiscSyntax;
+import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
+import com.zarbosoft.merman.helper.TypeBuilder;
+import com.zarbosoft.merman.syntax.FreeAtomType;
+import com.zarbosoft.merman.syntax.Syntax;
 import org.junit.Test;
 
 import static com.zarbosoft.merman.helper.Helper.assertTreeEqual;
@@ -20,10 +29,305 @@ public class TestActionsArray {
 
   @Test
   public void testEnter() {
+    FreeAtomType infinity =
+            new TypeBuilder("infinity")
+                    .back(Helper.buildBackPrimitive("infinity"))
+                    .front(new FrontMarkBuilder("infinity").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType one =
+            new TypeBuilder("one")
+                    .back(Helper.buildBackPrimitive("one"))
+                    .front(new FrontMarkBuilder("one").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType two =
+            new TypeBuilder("two")
+                    .back(Helper.buildBackPrimitive("two"))
+                    .front(new FrontMarkBuilder("two").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType three =
+            new TypeBuilder("three")
+                    .back(Helper.buildBackPrimitive("three"))
+                    .front(new FrontMarkBuilder("three").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType four =
+            new TypeBuilder("four")
+                    .back(Helper.buildBackPrimitive("four"))
+                    .front(new FrontMarkBuilder("four").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType five =
+            new TypeBuilder("five")
+                    .back(Helper.buildBackPrimitive("five"))
+                    .front(new FrontMarkBuilder("five").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType seven =
+            new TypeBuilder("seven")
+                    .back(Helper.buildBackPrimitive("7"))
+                    .front(new FrontMarkBuilder("7").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType multiback =
+            new TypeBuilder("multiback")
+                    .back(Helper.buildBackDataPrimitive("a"))
+                    .back(Helper.buildBackDataPrimitive("b"))
+                    .frontDataPrimitive("a")
+                    .frontMark("^")
+                    .frontDataPrimitive("b")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType quoted =
+            new TypeBuilder("quoted")
+                    .back(Helper.buildBackDataPrimitive("value"))
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("value")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType digits =
+            new TypeBuilder("digits")
+                    .back(Helper.buildBackDataPrimitiveDigits("value"))
+                    .frontDataPrimitive("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleQuoted =
+            new TypeBuilder("doubleuoted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("first")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("second")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plus =
+            new TypeBuilder("plus")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plusEqual =
+            new TypeBuilder("plusequal")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+=")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType binaryBang =
+            new TypeBuilder("bang")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("!")
+                    .frontDataNode("second")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType waddle =
+            new TypeBuilder("waddle")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("?")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType snooze =
+            new TypeBuilder("snooze")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .build())
+                    .frontMark("#")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType multiplier =
+            new TypeBuilder("multiplier")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .add("text", Helper.buildBackDataPrimitive("text"))
+                                    .build())
+                    .frontMark("x")
+                    .frontDataPrimitive("text")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType array =
+            new TypeBuilder("array")
+                    .back(Helper.buildBackDataArray("value", "any"))
+                    .frontMark("[")
+                    .front(
+                            new FrontDataArrayBuilder("value")
+                                    .addSeparator(new FrontMarkBuilder(", ").build())
+                                    .build())
+                    .frontMark("]")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleArray =
+            new TypeBuilder("doublearray")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataArray("first", "any"))
+                                    .add("second", Helper.buildBackDataArray("second", "any"))
+                                    .build())
+                    .frontMark("[")
+                    .frontDataArray("first")
+                    .frontMark("?")
+                    .frontDataArray("second")
+                    .frontMark("]")
+                    .build();
+    FreeAtomType record =
+            new TypeBuilder("record")
+                    .back(Helper.buildBackDataRecord("value", "record_element"))
+                    .frontMark("{")
+                    .frontDataArray("value")
+                    .frontMark("}")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType recordElement =
+            new TypeBuilder("record_element")
+                    .back(Helper.buildBackDataKey("key"))
+                    .back(Helper.buildBackDataAtom("value", "any"))
+                    .frontDataPrimitive("key")
+                    .frontMark(": ")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType pair =
+            new TypeBuilder("pair")
+                    .back(
+                            new BackArrayBuilder()
+                                    .add(Helper.buildBackDataAtom("first", "any"))
+                                    .add(Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataNode("first")
+                    .frontMark(", ")
+                    .frontDataNode("second")
+                    .frontMark(">")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType ratio =
+            new TypeBuilder("ratio")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataPrimitive("first")
+                    .frontMark(":")
+                    .frontDataPrimitive("second")
+                    .frontMark(">")
+                    .build();
+    FreeAtomType restricted =
+            new TypeBuilder("restricted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                                    .build())
+                    .frontDataNode("value")
+                    .build();
+    FreeAtomType restrictedArray =
+            new TypeBuilder("restricted_array")
+                    .back(Helper.buildBackDataArray("value", "restricted_array_group"))
+                    .frontMark("_")
+                    .front(new FrontDataArrayBuilder("value").build())
+                    .autoComplete(1)
+                    .build();
+    Syntax syntax =
+            new SyntaxBuilder("any")
+                    .type(infinity)
+                    .type(one)
+                    .type(two)
+                    .type(three)
+                    .type(four)
+                    .type(five)
+                    .type(seven)
+                    .type(multiback)
+                    .type(quoted)
+                    .type(digits)
+                    .type(doubleQuoted)
+                    .type(plus)
+                    .type(plusEqual)
+                    .type(binaryBang)
+                    .type(waddle)
+                    .type(snooze)
+                    .type(multiplier)
+                    .type(array)
+                    .type(doubleArray)
+                    .type(record)
+                    .type(recordElement)
+                    .type(pair)
+                    .type(ratio)
+                    .type(restricted)
+                    .type(restrictedArray)
+                    .group(
+                            "test_group_1",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(multiback)
+                                    .group("test_group_2")
+                                    .build())
+                    .group("test_group_2", new GroupBuilder().type(quoted).build())
+                    .group("restricted_group", new GroupBuilder().type(quoted).build())
+                    .group("restricted_array_group", new GroupBuilder().type(quoted).build())
+                    .group(
+                            "any",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(two)
+                                    .type(three)
+                                    .type(four)
+                                    .type(five)
+                                    .type(quoted)
+                                    .type(digits)
+                                    .type(seven)
+                                    .type(plus)
+                                    .type(plusEqual)
+                                    .type(binaryBang)
+                                    .type(waddle)
+                                    .type(snooze)
+                                    .type(multiplier)
+                                    .type(array)
+                                    .type(restrictedArray)
+                                    .type(record)
+                                    .type(pair)
+                                    .type(ratio)
+                                    .build())
+                    .group("arrayChildren", new GroupBuilder().type(one).type(multiback).build())
+                    .build();
+
     final Context context =
-        build(
-            new TreeBuilder(MiscSyntax.snooze)
-                .add("value", new TreeBuilder(MiscSyntax.infinity).build())
+        build(syntax,
+            new TreeBuilder(snooze)
+                .add("value", new TreeBuilder(infinity).build())
                 .build());
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "enter");
@@ -32,25 +336,321 @@ public class TestActionsArray {
         equalTo(new Path("value", "0", "value", "0", "value")));
   }
 
-  public Context build(final Atom... atoms) {
+  public Context build(Syntax syntax, final Atom... atoms) {
     final Context context =
         buildDoc(
-            MiscSyntax.syntax, new TreeBuilder(MiscSyntax.array).addArray("value", atoms).build());
+            syntax, new TreeBuilder(MiscSyntax.array).addArray("value", atoms).build());
     ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.getOpt("value"))
-        .selectDown(context);
+        .selectInto(context);
     return context;
   }
 
-  public static VisualArray visual(final Context context) {
-    return (VisualArray) context.cursor.getVisual().parent().visual();
+  public static VisualFrontArray visual(final Context context) {
+    return (VisualFrontArray) context.cursor.getVisual().parent().visual();
   }
 
   @Test
   public void testExit() {
+
+    FreeAtomType infinity =
+            new TypeBuilder("infinity")
+                    .back(Helper.buildBackPrimitive("infinity"))
+                    .front(new FrontMarkBuilder("infinity").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType one =
+            new TypeBuilder("one")
+                    .back(Helper.buildBackPrimitive("one"))
+                    .front(new FrontMarkBuilder("one").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType two =
+            new TypeBuilder("two")
+                    .back(Helper.buildBackPrimitive("two"))
+                    .front(new FrontMarkBuilder("two").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType three =
+            new TypeBuilder("three")
+                    .back(Helper.buildBackPrimitive("three"))
+                    .front(new FrontMarkBuilder("three").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType four =
+            new TypeBuilder("four")
+                    .back(Helper.buildBackPrimitive("four"))
+                    .front(new FrontMarkBuilder("four").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType five =
+            new TypeBuilder("five")
+                    .back(Helper.buildBackPrimitive("five"))
+                    .front(new FrontMarkBuilder("five").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType seven =
+            new TypeBuilder("seven")
+                    .back(Helper.buildBackPrimitive("7"))
+                    .front(new FrontMarkBuilder("7").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType multiback =
+            new TypeBuilder("multiback")
+                    .back(Helper.buildBackDataPrimitive("a"))
+                    .back(Helper.buildBackDataPrimitive("b"))
+                    .frontDataPrimitive("a")
+                    .frontMark("^")
+                    .frontDataPrimitive("b")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType quoted =
+            new TypeBuilder("quoted")
+                    .back(Helper.buildBackDataPrimitive("value"))
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("value")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType digits =
+            new TypeBuilder("digits")
+                    .back(Helper.buildBackDataPrimitiveDigits("value"))
+                    .frontDataPrimitive("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleQuoted =
+            new TypeBuilder("doubleuoted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("first")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("second")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plus =
+            new TypeBuilder("plus")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plusEqual =
+            new TypeBuilder("plusequal")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+=")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType binaryBang =
+            new TypeBuilder("bang")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("!")
+                    .frontDataNode("second")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType waddle =
+            new TypeBuilder("waddle")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("?")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType snooze =
+            new TypeBuilder("snooze")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .build())
+                    .frontMark("#")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType multiplier =
+            new TypeBuilder("multiplier")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .add("text", Helper.buildBackDataPrimitive("text"))
+                                    .build())
+                    .frontMark("x")
+                    .frontDataPrimitive("text")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType array =
+            new TypeBuilder("array")
+                    .back(Helper.buildBackDataArray("value", "any"))
+                    .frontMark("[")
+                    .front(
+                            new FrontDataArrayBuilder("value")
+                                    .addSeparator(new FrontMarkBuilder(", ").build())
+                                    .build())
+                    .frontMark("]")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleArray =
+            new TypeBuilder("doublearray")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataArray("first", "any"))
+                                    .add("second", Helper.buildBackDataArray("second", "any"))
+                                    .build())
+                    .frontMark("[")
+                    .frontDataArray("first")
+                    .frontMark("?")
+                    .frontDataArray("second")
+                    .frontMark("]")
+                    .build();
+    FreeAtomType record =
+            new TypeBuilder("record")
+                    .back(Helper.buildBackDataRecord("value", "record_element"))
+                    .frontMark("{")
+                    .frontDataArray("value")
+                    .frontMark("}")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType recordElement =
+            new TypeBuilder("record_element")
+                    .back(Helper.buildBackDataKey("key"))
+                    .back(Helper.buildBackDataAtom("value", "any"))
+                    .frontDataPrimitive("key")
+                    .frontMark(": ")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType pair =
+            new TypeBuilder("pair")
+                    .back(
+                            new BackArrayBuilder()
+                                    .add(Helper.buildBackDataAtom("first", "any"))
+                                    .add(Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataNode("first")
+                    .frontMark(", ")
+                    .frontDataNode("second")
+                    .frontMark(">")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType ratio =
+            new TypeBuilder("ratio")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataPrimitive("first")
+                    .frontMark(":")
+                    .frontDataPrimitive("second")
+                    .frontMark(">")
+                    .build();
+    FreeAtomType restricted =
+            new TypeBuilder("restricted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                                    .build())
+                    .frontDataNode("value")
+                    .build();
+    FreeAtomType restrictedArray =
+            new TypeBuilder("restricted_array")
+                    .back(Helper.buildBackDataArray("value", "restricted_array_group"))
+                    .frontMark("_")
+                    .front(new FrontDataArrayBuilder("value").build())
+                    .autoComplete(1)
+                    .build();
+    Syntax syntax =
+            new SyntaxBuilder("any")
+                    .type(infinity)
+                    .type(one)
+                    .type(two)
+                    .type(three)
+                    .type(four)
+                    .type(five)
+                    .type(seven)
+                    .type(multiback)
+                    .type(quoted)
+                    .type(digits)
+                    .type(doubleQuoted)
+                    .type(plus)
+                    .type(plusEqual)
+                    .type(binaryBang)
+                    .type(waddle)
+                    .type(snooze)
+                    .type(multiplier)
+                    .type(array)
+                    .type(doubleArray)
+                    .type(record)
+                    .type(recordElement)
+                    .type(pair)
+                    .type(ratio)
+                    .type(restricted)
+                    .type(restrictedArray)
+                    .group(
+                            "test_group_1",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(multiback)
+                                    .group("test_group_2")
+                                    .build())
+                    .group("test_group_2", new GroupBuilder().type(quoted).build())
+                    .group("restricted_group", new GroupBuilder().type(quoted).build())
+                    .group("restricted_array_group", new GroupBuilder().type(quoted).build())
+                    .group(
+                            "any",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(two)
+                                    .type(three)
+                                    .type(four)
+                                    .type(five)
+                                    .type(quoted)
+                                    .type(digits)
+                                    .type(seven)
+                                    .type(plus)
+                                    .type(plusEqual)
+                                    .type(binaryBang)
+                                    .type(waddle)
+                                    .type(snooze)
+                                    .type(multiplier)
+                                    .type(array)
+                                    .type(restrictedArray)
+                                    .type(record)
+                                    .type(pair)
+                                    .type(ratio)
+                                    .build())
+                    .group("arrayChildren", new GroupBuilder().type(one).type(multiback).build())
+                    .build();
+
     final Context context =
         build(
-            new TreeBuilder(MiscSyntax.snooze)
-                .add("value", new TreeBuilder(MiscSyntax.infinity).build())
+                syntax, new TreeBuilder(snooze)
+                .add("value", new TreeBuilder(infinity).build())
                 .build());
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "exit");
@@ -59,14 +659,308 @@ public class TestActionsArray {
 
   @Test
   public void testNext() {
-    final Atom target = new TreeBuilder(MiscSyntax.one).build();
+    FreeAtomType infinity =
+            new TypeBuilder("infinity")
+                    .back(Helper.buildBackPrimitive("infinity"))
+                    .front(new FrontMarkBuilder("infinity").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType one =
+            new TypeBuilder("one")
+                    .back(Helper.buildBackPrimitive("one"))
+                    .front(new FrontMarkBuilder("one").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType two =
+            new TypeBuilder("two")
+                    .back(Helper.buildBackPrimitive("two"))
+                    .front(new FrontMarkBuilder("two").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType three =
+            new TypeBuilder("three")
+                    .back(Helper.buildBackPrimitive("three"))
+                    .front(new FrontMarkBuilder("three").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType four =
+            new TypeBuilder("four")
+                    .back(Helper.buildBackPrimitive("four"))
+                    .front(new FrontMarkBuilder("four").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType five =
+            new TypeBuilder("five")
+                    .back(Helper.buildBackPrimitive("five"))
+                    .front(new FrontMarkBuilder("five").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType seven =
+            new TypeBuilder("seven")
+                    .back(Helper.buildBackPrimitive("7"))
+                    .front(new FrontMarkBuilder("7").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType multiback =
+            new TypeBuilder("multiback")
+                    .back(Helper.buildBackDataPrimitive("a"))
+                    .back(Helper.buildBackDataPrimitive("b"))
+                    .frontDataPrimitive("a")
+                    .frontMark("^")
+                    .frontDataPrimitive("b")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType quoted =
+            new TypeBuilder("quoted")
+                    .back(Helper.buildBackDataPrimitive("value"))
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("value")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType digits =
+            new TypeBuilder("digits")
+                    .back(Helper.buildBackDataPrimitiveDigits("value"))
+                    .frontDataPrimitive("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleQuoted =
+            new TypeBuilder("doubleuoted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("first")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("second")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plus =
+            new TypeBuilder("plus")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plusEqual =
+            new TypeBuilder("plusequal")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+=")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType binaryBang =
+            new TypeBuilder("bang")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("!")
+                    .frontDataNode("second")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType waddle =
+            new TypeBuilder("waddle")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("?")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType snooze =
+            new TypeBuilder("snooze")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .build())
+                    .frontMark("#")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType multiplier =
+            new TypeBuilder("multiplier")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .add("text", Helper.buildBackDataPrimitive("text"))
+                                    .build())
+                    .frontMark("x")
+                    .frontDataPrimitive("text")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType array =
+            new TypeBuilder("array")
+                    .back(Helper.buildBackDataArray("value", "any"))
+                    .frontMark("[")
+                    .front(
+                            new FrontDataArrayBuilder("value")
+                                    .addSeparator(new FrontMarkBuilder(", ").build())
+                                    .build())
+                    .frontMark("]")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleArray =
+            new TypeBuilder("doublearray")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataArray("first", "any"))
+                                    .add("second", Helper.buildBackDataArray("second", "any"))
+                                    .build())
+                    .frontMark("[")
+                    .frontDataArray("first")
+                    .frontMark("?")
+                    .frontDataArray("second")
+                    .frontMark("]")
+                    .build();
+    FreeAtomType record =
+            new TypeBuilder("record")
+                    .back(Helper.buildBackDataRecord("value", "record_element"))
+                    .frontMark("{")
+                    .frontDataArray("value")
+                    .frontMark("}")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType recordElement =
+            new TypeBuilder("record_element")
+                    .back(Helper.buildBackDataKey("key"))
+                    .back(Helper.buildBackDataAtom("value", "any"))
+                    .frontDataPrimitive("key")
+                    .frontMark(": ")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType pair =
+            new TypeBuilder("pair")
+                    .back(
+                            new BackArrayBuilder()
+                                    .add(Helper.buildBackDataAtom("first", "any"))
+                                    .add(Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataNode("first")
+                    .frontMark(", ")
+                    .frontDataNode("second")
+                    .frontMark(">")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType ratio =
+            new TypeBuilder("ratio")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataPrimitive("first")
+                    .frontMark(":")
+                    .frontDataPrimitive("second")
+                    .frontMark(">")
+                    .build();
+    FreeAtomType restricted =
+            new TypeBuilder("restricted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                                    .build())
+                    .frontDataNode("value")
+                    .build();
+    FreeAtomType restrictedArray =
+            new TypeBuilder("restricted_array")
+                    .back(Helper.buildBackDataArray("value", "restricted_array_group"))
+                    .frontMark("_")
+                    .front(new FrontDataArrayBuilder("value").build())
+                    .autoComplete(1)
+                    .build();
+    Syntax syntax =
+            new SyntaxBuilder("any")
+                    .type(infinity)
+                    .type(one)
+                    .type(two)
+                    .type(three)
+                    .type(four)
+                    .type(five)
+                    .type(seven)
+                    .type(multiback)
+                    .type(quoted)
+                    .type(digits)
+                    .type(doubleQuoted)
+                    .type(plus)
+                    .type(plusEqual)
+                    .type(binaryBang)
+                    .type(waddle)
+                    .type(snooze)
+                    .type(multiplier)
+                    .type(array)
+                    .type(doubleArray)
+                    .type(record)
+                    .type(recordElement)
+                    .type(pair)
+                    .type(ratio)
+                    .type(restricted)
+                    .type(restrictedArray)
+                    .group(
+                            "test_group_1",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(multiback)
+                                    .group("test_group_2")
+                                    .build())
+                    .group("test_group_2", new GroupBuilder().type(quoted).build())
+                    .group("restricted_group", new GroupBuilder().type(quoted).build())
+                    .group("restricted_array_group", new GroupBuilder().type(quoted).build())
+                    .group(
+                            "any",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(two)
+                                    .type(three)
+                                    .type(four)
+                                    .type(five)
+                                    .type(quoted)
+                                    .type(digits)
+                                    .type(seven)
+                                    .type(plus)
+                                    .type(plusEqual)
+                                    .type(binaryBang)
+                                    .type(waddle)
+                                    .type(snooze)
+                                    .type(multiplier)
+                                    .type(array)
+                                    .type(restrictedArray)
+                                    .type(record)
+                                    .type(pair)
+                                    .type(ratio)
+                                    .build())
+                    .group("arrayChildren", new GroupBuilder().type(one).type(multiback).build())
+                    .build();
+    final Atom target = new TreeBuilder(one).build();
     new GeneralTestWizard(
-            MiscSyntax.syntax,
-            new TreeBuilder(MiscSyntax.doubleArray)
+            syntax,
+             new TreeBuilder(doubleArray)
                 .addArray("first", target)
-                .addArray("second", new TreeBuilder(MiscSyntax.one).build())
+                .addArray("second", new TreeBuilder(one).build())
                 .build())
-        .run(context -> target.parent.selectUp(context))
+        .run(context -> target.parent.selectChild(context))
         .act("next")
         .run(
             context ->
@@ -77,14 +971,308 @@ public class TestActionsArray {
 
   @Test
   public void testPrevious() {
-    final Atom target = new TreeBuilder(MiscSyntax.one).build();
+    FreeAtomType infinity =
+            new TypeBuilder("infinity")
+                    .back(Helper.buildBackPrimitive("infinity"))
+                    .front(new FrontMarkBuilder("infinity").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType one =
+            new TypeBuilder("one")
+                    .back(Helper.buildBackPrimitive("one"))
+                    .front(new FrontMarkBuilder("one").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType two =
+            new TypeBuilder("two")
+                    .back(Helper.buildBackPrimitive("two"))
+                    .front(new FrontMarkBuilder("two").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType three =
+            new TypeBuilder("three")
+                    .back(Helper.buildBackPrimitive("three"))
+                    .front(new FrontMarkBuilder("three").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType four =
+            new TypeBuilder("four")
+                    .back(Helper.buildBackPrimitive("four"))
+                    .front(new FrontMarkBuilder("four").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType five =
+            new TypeBuilder("five")
+                    .back(Helper.buildBackPrimitive("five"))
+                    .front(new FrontMarkBuilder("five").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType seven =
+            new TypeBuilder("seven")
+                    .back(Helper.buildBackPrimitive("7"))
+                    .front(new FrontMarkBuilder("7").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType multiback =
+            new TypeBuilder("multiback")
+                    .back(Helper.buildBackDataPrimitive("a"))
+                    .back(Helper.buildBackDataPrimitive("b"))
+                    .frontDataPrimitive("a")
+                    .frontMark("^")
+                    .frontDataPrimitive("b")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType quoted =
+            new TypeBuilder("quoted")
+                    .back(Helper.buildBackDataPrimitive("value"))
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("value")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType digits =
+            new TypeBuilder("digits")
+                    .back(Helper.buildBackDataPrimitiveDigits("value"))
+                    .frontDataPrimitive("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleQuoted =
+            new TypeBuilder("doubleuoted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("first")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("second")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plus =
+            new TypeBuilder("plus")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plusEqual =
+            new TypeBuilder("plusequal")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+=")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType binaryBang =
+            new TypeBuilder("bang")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("!")
+                    .frontDataNode("second")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType waddle =
+            new TypeBuilder("waddle")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("?")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType snooze =
+            new TypeBuilder("snooze")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .build())
+                    .frontMark("#")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType multiplier =
+            new TypeBuilder("multiplier")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .add("text", Helper.buildBackDataPrimitive("text"))
+                                    .build())
+                    .frontMark("x")
+                    .frontDataPrimitive("text")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType array =
+            new TypeBuilder("array")
+                    .back(Helper.buildBackDataArray("value", "any"))
+                    .frontMark("[")
+                    .front(
+                            new FrontDataArrayBuilder("value")
+                                    .addSeparator(new FrontMarkBuilder(", ").build())
+                                    .build())
+                    .frontMark("]")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleArray =
+            new TypeBuilder("doublearray")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataArray("first", "any"))
+                                    .add("second", Helper.buildBackDataArray("second", "any"))
+                                    .build())
+                    .frontMark("[")
+                    .frontDataArray("first")
+                    .frontMark("?")
+                    .frontDataArray("second")
+                    .frontMark("]")
+                    .build();
+    FreeAtomType record =
+            new TypeBuilder("record")
+                    .back(Helper.buildBackDataRecord("value", "record_element"))
+                    .frontMark("{")
+                    .frontDataArray("value")
+                    .frontMark("}")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType recordElement =
+            new TypeBuilder("record_element")
+                    .back(Helper.buildBackDataKey("key"))
+                    .back(Helper.buildBackDataAtom("value", "any"))
+                    .frontDataPrimitive("key")
+                    .frontMark(": ")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType pair =
+            new TypeBuilder("pair")
+                    .back(
+                            new BackArrayBuilder()
+                                    .add(Helper.buildBackDataAtom("first", "any"))
+                                    .add(Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataNode("first")
+                    .frontMark(", ")
+                    .frontDataNode("second")
+                    .frontMark(">")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType ratio =
+            new TypeBuilder("ratio")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataPrimitive("first")
+                    .frontMark(":")
+                    .frontDataPrimitive("second")
+                    .frontMark(">")
+                    .build();
+    FreeAtomType restricted =
+            new TypeBuilder("restricted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                                    .build())
+                    .frontDataNode("value")
+                    .build();
+    FreeAtomType restrictedArray =
+            new TypeBuilder("restricted_array")
+                    .back(Helper.buildBackDataArray("value", "restricted_array_group"))
+                    .frontMark("_")
+                    .front(new FrontDataArrayBuilder("value").build())
+                    .autoComplete(1)
+                    .build();
+    Syntax syntax =
+            new SyntaxBuilder("any")
+                    .type(infinity)
+                    .type(one)
+                    .type(two)
+                    .type(three)
+                    .type(four)
+                    .type(five)
+                    .type(seven)
+                    .type(multiback)
+                    .type(quoted)
+                    .type(digits)
+                    .type(doubleQuoted)
+                    .type(plus)
+                    .type(plusEqual)
+                    .type(binaryBang)
+                    .type(waddle)
+                    .type(snooze)
+                    .type(multiplier)
+                    .type(array)
+                    .type(doubleArray)
+                    .type(record)
+                    .type(recordElement)
+                    .type(pair)
+                    .type(ratio)
+                    .type(restricted)
+                    .type(restrictedArray)
+                    .group(
+                            "test_group_1",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(multiback)
+                                    .group("test_group_2")
+                                    .build())
+                    .group("test_group_2", new GroupBuilder().type(quoted).build())
+                    .group("restricted_group", new GroupBuilder().type(quoted).build())
+                    .group("restricted_array_group", new GroupBuilder().type(quoted).build())
+                    .group(
+                            "any",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(two)
+                                    .type(three)
+                                    .type(four)
+                                    .type(five)
+                                    .type(quoted)
+                                    .type(digits)
+                                    .type(seven)
+                                    .type(plus)
+                                    .type(plusEqual)
+                                    .type(binaryBang)
+                                    .type(waddle)
+                                    .type(snooze)
+                                    .type(multiplier)
+                                    .type(array)
+                                    .type(restrictedArray)
+                                    .type(record)
+                                    .type(pair)
+                                    .type(ratio)
+                                    .build())
+                    .group("arrayChildren", new GroupBuilder().type(one).type(multiback).build())
+                    .build();
+    final Atom target = new TreeBuilder(one).build();
     new GeneralTestWizard(
-            MiscSyntax.syntax,
-            new TreeBuilder(MiscSyntax.doubleArray)
-                .addArray("first", new TreeBuilder(MiscSyntax.one).build())
+            syntax,
+             new TreeBuilder(doubleArray)
+                .addArray("first", new TreeBuilder(one).build())
                 .addArray("second", target)
                 .build())
-        .run(context -> target.parent.selectUp(context))
+        .run(context -> target.parent.selectChild(context))
         .act("previous")
         .run(
             context ->
@@ -102,12 +1290,306 @@ public class TestActionsArray {
   }
 
   public Context buildFive() {
+    FreeAtomType infinity =
+            new TypeBuilder("infinity")
+                    .back(Helper.buildBackPrimitive("infinity"))
+                    .front(new FrontMarkBuilder("infinity").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType one =
+            new TypeBuilder("one")
+                    .back(Helper.buildBackPrimitive("one"))
+                    .front(new FrontMarkBuilder("one").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType two =
+            new TypeBuilder("two")
+                    .back(Helper.buildBackPrimitive("two"))
+                    .front(new FrontMarkBuilder("two").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType three =
+            new TypeBuilder("three")
+                    .back(Helper.buildBackPrimitive("three"))
+                    .front(new FrontMarkBuilder("three").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType four =
+            new TypeBuilder("four")
+                    .back(Helper.buildBackPrimitive("four"))
+                    .front(new FrontMarkBuilder("four").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType five =
+            new TypeBuilder("five")
+                    .back(Helper.buildBackPrimitive("five"))
+                    .front(new FrontMarkBuilder("five").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType seven =
+            new TypeBuilder("seven")
+                    .back(Helper.buildBackPrimitive("7"))
+                    .front(new FrontMarkBuilder("7").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType multiback =
+            new TypeBuilder("multiback")
+                    .back(Helper.buildBackDataPrimitive("a"))
+                    .back(Helper.buildBackDataPrimitive("b"))
+                    .frontDataPrimitive("a")
+                    .frontMark("^")
+                    .frontDataPrimitive("b")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType quoted =
+            new TypeBuilder("quoted")
+                    .back(Helper.buildBackDataPrimitive("value"))
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("value")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType digits =
+            new TypeBuilder("digits")
+                    .back(Helper.buildBackDataPrimitiveDigits("value"))
+                    .frontDataPrimitive("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleQuoted =
+            new TypeBuilder("doubleuoted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("first")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .frontDataPrimitive("second")
+                    .front(new FrontMarkBuilder("\"").build())
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plus =
+            new TypeBuilder("plus")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType plusEqual =
+            new TypeBuilder("plusequal")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("+=")
+                    .frontDataNode("second")
+                    .autoComplete(-1)
+                    .build();
+    FreeAtomType binaryBang =
+            new TypeBuilder("bang")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .add("second", Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("!")
+                    .frontDataNode("second")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType waddle =
+            new TypeBuilder("waddle")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataAtom("first", "any"))
+                                    .build())
+                    .frontDataNode("first")
+                    .frontMark("?")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType snooze =
+            new TypeBuilder("snooze")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .build())
+                    .frontMark("#")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType multiplier =
+            new TypeBuilder("multiplier")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                                    .add("text", Helper.buildBackDataPrimitive("text"))
+                                    .build())
+                    .frontMark("x")
+                    .frontDataPrimitive("text")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType array =
+            new TypeBuilder("array")
+                    .back(Helper.buildBackDataArray("value", "any"))
+                    .frontMark("[")
+                    .front(
+                            new FrontDataArrayBuilder("value")
+                                    .addSeparator(new FrontMarkBuilder(", ").build())
+                                    .build())
+                    .frontMark("]")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType doubleArray =
+            new TypeBuilder("doublearray")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataArray("first", "any"))
+                                    .add("second", Helper.buildBackDataArray("second", "any"))
+                                    .build())
+                    .frontMark("[")
+                    .frontDataArray("first")
+                    .frontMark("?")
+                    .frontDataArray("second")
+                    .frontMark("]")
+                    .build();
+    FreeAtomType record =
+            new TypeBuilder("record")
+                    .back(Helper.buildBackDataRecord("value", "record_element"))
+                    .frontMark("{")
+                    .frontDataArray("value")
+                    .frontMark("}")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType recordElement =
+            new TypeBuilder("record_element")
+                    .back(Helper.buildBackDataKey("key"))
+                    .back(Helper.buildBackDataAtom("value", "any"))
+                    .frontDataPrimitive("key")
+                    .frontMark(": ")
+                    .frontDataNode("value")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType pair =
+            new TypeBuilder("pair")
+                    .back(
+                            new BackArrayBuilder()
+                                    .add(Helper.buildBackDataAtom("first", "any"))
+                                    .add(Helper.buildBackDataAtom("second", "any"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataNode("first")
+                    .frontMark(", ")
+                    .frontDataNode("second")
+                    .frontMark(">")
+                    .autoComplete(1)
+                    .build();
+    FreeAtomType ratio =
+            new TypeBuilder("ratio")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("first", Helper.buildBackDataPrimitive("first"))
+                                    .add("second", Helper.buildBackDataPrimitive("second"))
+                                    .build())
+                    .frontMark("<")
+                    .frontDataPrimitive("first")
+                    .frontMark(":")
+                    .frontDataPrimitive("second")
+                    .frontMark(">")
+                    .build();
+    FreeAtomType restricted =
+            new TypeBuilder("restricted")
+                    .back(
+                            new BackRecordBuilder()
+                                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
+                                    .build())
+                    .frontDataNode("value")
+                    .build();
+    FreeAtomType restrictedArray =
+            new TypeBuilder("restricted_array")
+                    .back(Helper.buildBackDataArray("value", "restricted_array_group"))
+                    .frontMark("_")
+                    .front(new FrontDataArrayBuilder("value").build())
+                    .autoComplete(1)
+                    .build();
+    Syntax syntax =
+            new SyntaxBuilder("any")
+                    .type(infinity)
+                    .type(one)
+                    .type(two)
+                    .type(three)
+                    .type(four)
+                    .type(five)
+                    .type(seven)
+                    .type(multiback)
+                    .type(quoted)
+                    .type(digits)
+                    .type(doubleQuoted)
+                    .type(plus)
+                    .type(plusEqual)
+                    .type(binaryBang)
+                    .type(waddle)
+                    .type(snooze)
+                    .type(multiplier)
+                    .type(array)
+                    .type(doubleArray)
+                    .type(record)
+                    .type(recordElement)
+                    .type(pair)
+                    .type(ratio)
+                    .type(restricted)
+                    .type(restrictedArray)
+                    .group(
+                            "test_group_1",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(multiback)
+                                    .group("test_group_2")
+                                    .build())
+                    .group("test_group_2", new GroupBuilder().type(quoted).build())
+                    .group("restricted_group", new GroupBuilder().type(quoted).build())
+                    .group("restricted_array_group", new GroupBuilder().type(quoted).build())
+                    .group(
+                            "any",
+                            new GroupBuilder()
+                                    .type(infinity)
+                                    .type(one)
+                                    .type(two)
+                                    .type(three)
+                                    .type(four)
+                                    .type(five)
+                                    .type(quoted)
+                                    .type(digits)
+                                    .type(seven)
+                                    .type(plus)
+                                    .type(plusEqual)
+                                    .type(binaryBang)
+                                    .type(waddle)
+                                    .type(snooze)
+                                    .type(multiplier)
+                                    .type(array)
+                                    .type(restrictedArray)
+                                    .type(record)
+                                    .type(pair)
+                                    .type(ratio)
+                                    .build())
+                    .group("arrayChildren", new GroupBuilder().type(one).type(multiback).build())
+                    .build();
     return build(
-        new TreeBuilder(MiscSyntax.one).build(),
-        new TreeBuilder(MiscSyntax.two).build(),
-        new TreeBuilder(MiscSyntax.three).build(),
-        new TreeBuilder(MiscSyntax.four).build(),
-        new TreeBuilder(MiscSyntax.five).build());
+            syntax, new TreeBuilder(one).build(),
+        new TreeBuilder(two).build(),
+        new TreeBuilder(three).build(),
+        new TreeBuilder(four).build(),
+        new TreeBuilder(five).build());
   }
 
   @Test
@@ -119,7 +1601,7 @@ public class TestActionsArray {
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(begin));
     assertThat(selection.endIndex, equalTo(end));
   }
@@ -161,7 +1643,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "gather_next");
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(3));
   }
@@ -171,7 +1653,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 4);
     Helper.act(context, "gather_next");
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(4));
     assertThat(selection.endIndex, equalTo(4));
   }
@@ -181,7 +1663,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "gather_previous");
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(1));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -191,7 +1673,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
     Helper.act(context, "gather_previous");
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(0));
   }
@@ -199,12 +1681,12 @@ public class TestActionsArray {
   @Test
   public void testReleaseNext() {
     final Context context = buildFive();
-    ((VisualArray)
+    ((VisualFrontArray)
             ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual)
         .select(context, true, 2, 3);
     Helper.act(context, "release_next");
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -214,7 +1696,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "release_next");
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -222,12 +1704,12 @@ public class TestActionsArray {
   @Test
   public void testReleasePrevious() {
     final Context context = buildFive();
-    (((VisualArray)
+    (((VisualFrontArray)
             ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.act(context, "release_previous");
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -237,348 +1719,8 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.act(context, "release_previous");
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
-  }
-
-  @Test
-  public void testDelete() {
-    final Context context = buildFive();
-    (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual))
-        .select(context, true, 1, 2);
-    Helper.act(context, "delete");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.five).build())
-            .build(),
-        Helper.rootArray(context.document));
-    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "1")));
-  }
-
-  @Test
-  public void testInsertBefore() {
-    final Context context = buildFive();
-    (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual))
-        .select(context, true, 1, 2);
-    Helper.act(context, "insert_before");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                MiscSyntax.syntax.gap.create(),
-                new TreeBuilder(MiscSyntax.two).build(),
-                new TreeBuilder(MiscSyntax.three).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.five).build())
-            .build(),
-        Helper.rootArray(context.document));
-    assertThat(
-        context.cursor.getSyntaxPath(),
-        equalTo(new Path("value", "0", "value", "1", "gap", "0")));
-  }
-
-  @Test
-  public void testInsertBeforeDefault() {
-    final Atom atom =
-        new TreeBuilder(MiscSyntax.restrictedArray)
-            .addArray("value", new TreeBuilder(MiscSyntax.quoted).add("value", "").build())
-            .build();
-    final ValueArray value = (ValueArray) atom.fields.getOpt("value");
-    new GeneralTestWizard(MiscSyntax.syntax, atom)
-        .run(context -> value.select(context, true, 0, 0))
-        .act("insert_before")
-        .checkArrayTree(
-            new TreeBuilder(MiscSyntax.restrictedArray)
-                .addArray(
-                    "value",
-                    new TreeBuilder(MiscSyntax.quoted).add("value", "").build(),
-                    new TreeBuilder(MiscSyntax.quoted).add("value", "").build())
-                .build())
-        .run(
-            context ->
-                assertThat(
-                    context.cursor.getSyntaxPath(),
-                    equalTo(new Path("value", "0", "value", "0", "value", "0"))));
-  }
-
-  @Test
-  public void testInsertAfter() {
-    final Context context = buildFive();
-    (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual))
-        .select(context, true, 1, 2);
-    Helper.act(context, "insert_after");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                new TreeBuilder(MiscSyntax.two).build(),
-                new TreeBuilder(MiscSyntax.three).build(),
-                MiscSyntax.syntax.gap.create(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.five).build())
-            .build(),
-        Helper.rootArray(context.document));
-    assertThat(
-        context.cursor.getSyntaxPath(),
-        equalTo(new Path("value", "0", "value", "3", "gap", "0")));
-  }
-
-  @Test
-  public void testInsertAfterDefault() {
-    final Atom atom =
-        new TreeBuilder(MiscSyntax.restrictedArray)
-            .addArray("value", new TreeBuilder(MiscSyntax.quoted).add("value", "").build())
-            .build();
-    final ValueArray value = (ValueArray) atom.fields.getOpt("value");
-    new GeneralTestWizard(MiscSyntax.syntax, atom)
-        .run(context -> value.select(context, true, 0, 0))
-        .act("insert_after")
-        .checkArrayTree(
-            new TreeBuilder(MiscSyntax.restrictedArray)
-                .addArray(
-                    "value",
-                    new TreeBuilder(MiscSyntax.quoted).add("value", "").build(),
-                    new TreeBuilder(MiscSyntax.quoted).add("value", "").build())
-                .build())
-        .run(
-            context ->
-                assertThat(
-                    context.cursor.getSyntaxPath(),
-                    equalTo(new Path("value", "0", "value", "1", "value", "0"))));
-  }
-
-  @Test
-  public void testMoveBefore() {
-    final Context context = buildFive();
-    (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual))
-        .select(context, true, 1, 2);
-    Helper.act(context, "move_before");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.two).build(),
-                new TreeBuilder(MiscSyntax.three).build(),
-                new TreeBuilder(MiscSyntax.one).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.five).build())
-            .build(),
-        Helper.rootArray(context.document));
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
-    assertThat(selection.beginIndex, equalTo(0));
-    assertThat(selection.endIndex, equalTo(1));
-  }
-
-  @Test
-  public void testMoveBeforeStart() {
-    final Context context = buildFive();
-    (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual))
-        .select(context, true, 0, 1);
-    Helper.act(context, "move_before");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                new TreeBuilder(MiscSyntax.two).build(),
-                new TreeBuilder(MiscSyntax.three).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.five).build())
-            .build(),
-        Helper.rootArray(context.document));
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
-    assertThat(selection.beginIndex, equalTo(0));
-    assertThat(selection.endIndex, equalTo(1));
-  }
-
-  @Test
-  public void testMoveAfter() {
-    final Context context = buildFive();
-    (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual))
-        .select(context, true, 1, 2);
-    Helper.act(context, "move_after");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.two).build(),
-                new TreeBuilder(MiscSyntax.three).build(),
-                new TreeBuilder(MiscSyntax.five).build())
-            .build(),
-        Helper.rootArray(context.document));
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
-    assertThat(selection.beginIndex, equalTo(2));
-    assertThat(selection.endIndex, equalTo(3));
-  }
-
-  @Test
-  public void testMoveAfterEnd() {
-    final Context context = buildFive();
-    (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual))
-        .select(context, true, 3, 4);
-    Helper.act(context, "move_after");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                new TreeBuilder(MiscSyntax.two).build(),
-                new TreeBuilder(MiscSyntax.three).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.five).build())
-            .build(),
-        Helper.rootArray(context.document));
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
-    assertThat(selection.beginIndex, equalTo(3));
-    assertThat(selection.endIndex, equalTo(4));
-  }
-
-  @Test
-  public void testCopyPaste() {
-    final Context context = buildFive();
-    final VisualArray visual =
-        ((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual);
-    visual.select(context, true, 1, 2);
-    Helper.act(context, "copy");
-    visual.select(context, true, 4, 4);
-    Helper.act(context, "paste");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                new TreeBuilder(MiscSyntax.two).build(),
-                new TreeBuilder(MiscSyntax.three).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.two).build(),
-                new TreeBuilder(MiscSyntax.three).build())
-            .build(),
-        Helper.rootArray(context.document));
-    final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
-    assertThat(selection.beginIndex, equalTo(5));
-    assertThat(selection.endIndex, equalTo(5));
-    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "5")));
-  }
-
-  @Test
-  public void testCutPaste() {
-    final Context context = buildFive();
-    (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual))
-        .select(context, true, 1, 2);
-    Helper.act(context, "cut");
-    {
-      final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
-      assertThat(selection.beginIndex, equalTo(1));
-      assertThat(selection.endIndex, equalTo(1));
-    }
-    (((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual))
-        .select(context, true, 2, 2);
-    Helper.act(context, "paste");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.two).build(),
-                new TreeBuilder(MiscSyntax.three).build())
-            .build(),
-        Helper.rootArray(context.document));
-    {
-      final VisualArray.ArrayCursor selection = (VisualArray.ArrayCursor) context.cursor;
-      assertThat(selection.beginIndex, equalTo(3));
-      assertThat(selection.endIndex, equalTo(3));
-    }
-    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "3")));
-  }
-
-  @Test
-  public void testPrefix() {
-    final Context context = buildFive();
-    final VisualArray visual =
-        ((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual);
-    visual.select(context, true, 1, 1);
-    Helper.act(context, "prefix");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                MiscSyntax.syntax.prefixGap.create(new TreeBuilder(MiscSyntax.two).build()),
-                new TreeBuilder(MiscSyntax.three).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.five).build())
-            .build(),
-        Helper.rootArray(context.document));
-    assertThat(
-        context.cursor.getSyntaxPath(),
-        equalTo(new Path("value", "0", "value", "1", "gap", "0")));
-  }
-
-  @Test
-  public void testSuffix() {
-    final Context context = buildFive();
-    final VisualArray visual =
-        ((VisualArray)
-            ((ValueArray) ((Atom) context.syntaxLocate(new Path("value", "0"))).fields.getOpt("value"))
-                .visual);
-    visual.select(context, true, 1, 1);
-    Helper.act(context, "suffix");
-    assertTreeEqual(
-        context,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.one).build(),
-                MiscSyntax.syntax.suffixGap.create(false, new TreeBuilder(MiscSyntax.two).build()),
-                new TreeBuilder(MiscSyntax.three).build(),
-                new TreeBuilder(MiscSyntax.four).build(),
-                new TreeBuilder(MiscSyntax.five).build())
-            .build(),
-        Helper.rootArray(context.document));
-    assertThat(
-        context.cursor.getSyntaxPath(),
-        equalTo(new Path("value", "0", "value", "1", "gap", "0")));
   }
 }

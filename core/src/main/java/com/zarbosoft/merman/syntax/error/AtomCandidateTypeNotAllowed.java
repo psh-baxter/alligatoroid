@@ -2,14 +2,12 @@ package com.zarbosoft.merman.syntax.error;
 
 import com.google.common.collect.ImmutableMap;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.syntax.FreeAtomType;
+import com.zarbosoft.merman.syntax.AtomType;
 
 public class AtomCandidateTypeNotAllowed extends BaseKVError{
-  public AtomCandidateTypeNotAllowed(Path typePath, FreeAtomType candidate) {
-    super(ImmutableMap.<String, Object>builder()
-      .put("typePath", typePath)
-      .put("candidate", candidate)
-      .build());
+  public AtomCandidateTypeNotAllowed(Path typePath, AtomType candidate) {
+      put("typePath", typePath);
+      put("candidate", candidate);
   }
 
   @Override

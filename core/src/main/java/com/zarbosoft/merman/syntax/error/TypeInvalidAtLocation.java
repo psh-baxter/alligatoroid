@@ -5,10 +5,7 @@ import com.zarbosoft.merman.editor.Path;
 
 public class TypeInvalidAtLocation extends BaseKVError{
   public TypeInvalidAtLocation(Path typePath) {
-    super(
-      ImmutableMap.<String, Object>builder()
-        .put("backPath", typePath)
-        .build());
+        put("backPath", typePath);
   }
 
   @Override

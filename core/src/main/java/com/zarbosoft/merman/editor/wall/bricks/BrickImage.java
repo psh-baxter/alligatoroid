@@ -12,7 +12,7 @@ import java.nio.file.Paths;
 
 public class BrickImage extends Brick implements AlignmentListener {
 	private final Image image;
-	private Style.Baked style;
+	private Style style;
 
 	public BrickImage(final Context context, final BrickInterface inter) {
 		super(inter);
@@ -22,7 +22,7 @@ public class BrickImage extends Brick implements AlignmentListener {
 
 	@Override
 	public void tagsChanged(final Context context) {
-		this.style = context.getStyle(context.globalTags.plusAll(inter.getTags(context)));
+		this.style = context.getStyle(inter.getTags(context).ro());
 		if (alignment != null)
 			alignment.removeListener(context, this);
 		alignment = inter.getAlignment(style);
@@ -33,7 +33,7 @@ public class BrickImage extends Brick implements AlignmentListener {
 		changed(context);
 	}
 
-	public Properties properties(final Context context, final Style.Baked style) {
+	public Properties properties(final Context context, final Style style) {
 		return new Properties(
 				style.split,
 				(int) image.transverseSpan(context),

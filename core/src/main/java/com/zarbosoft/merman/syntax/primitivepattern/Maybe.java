@@ -4,7 +4,11 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 
 public class Maybe extends Pattern {
-  public Pattern pattern;
+  public final Pattern pattern;
+
+  public Maybe(Pattern pattern) {
+    this.pattern = pattern;
+  }
 
   @Override
   public Node build() {
