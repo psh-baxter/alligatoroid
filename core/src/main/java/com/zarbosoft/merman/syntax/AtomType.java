@@ -110,7 +110,7 @@ public abstract class AtomType {
    */
   public static boolean isPrecedent(
       final FreeAtomType type, final Value.Parent test, final boolean allowed) {
-    final Atom testAtom = test.child.parent.atom();
+    final Atom testAtom = test.value.atomParentRef.atom();
 
     // Can't move up if current level is bounded by any other front parts
     final int index = getIndexOfData(test, testAtom);

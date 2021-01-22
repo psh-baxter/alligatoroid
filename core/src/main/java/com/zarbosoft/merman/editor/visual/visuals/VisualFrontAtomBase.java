@@ -510,8 +510,8 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     @Override
     public boolean run(final Context context) {
 
-      if (base.value().parent == null) return false;
-      return base.value().parent.selectUp(context);
+      if (base.value().atomParentRef == null) return false;
+      return base.value().atomParentRef.selectAtomParent(context);
     }
   }
 

@@ -960,7 +960,7 @@ public class TestActionsArray {
                 .addArray("first", target)
                 .addArray("second", new TreeBuilder(one).build())
                 .build())
-        .run(context -> target.parent.selectChild(context))
+        .run(context -> target.valueParentRef.selectValue(context))
         .act("next")
         .run(
             context ->
@@ -1272,7 +1272,7 @@ public class TestActionsArray {
                 .addArray("first", new TreeBuilder(one).build())
                 .addArray("second", target)
                 .build())
-        .run(context -> target.parent.selectChild(context))
+        .run(context -> target.valueParentRef.selectValue(context))
         .act("previous")
         .run(
             context ->

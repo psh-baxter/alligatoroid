@@ -24,7 +24,7 @@ import java.util.Map;
 
 public class Atom {
   public final TSMap<String, Value> fields;
-  public Value.Parent<?> parent;
+  public Value.Parent<?> valueParentRef;
   public final AtomType type;
   public VisualAtom visual;
   private final TSSet<String> tags;
@@ -35,7 +35,7 @@ public class Atom {
     tags = new TSSet<>();
     for (Map.Entry<String, Value> entry : fields.entries()) {
       Value v = entry.getValue();
-      v.setParent(
+      v.setAtomParentRef(
           new Parent() {
             @Override
             public Atom atom() {
@@ -43,16 +43,16 @@ public class Atom {
             }
 
             @Override
-            public boolean selectUp(final Context context) {
-              if (parent == null) return false;
-              return Atom.this.parent.selectChild(context);
+            public boolean selectAtomParent(final Context context) {
+              if (valueParentRef == null) return false;
+              return Atom.this.valueParentRef.selectValue(context);
             }
 
             @Override
             public Path getSyntaxPath() {
               Path out;
-              if (Atom.this.parent == null) out = new Path();
-              else out = Atom.this.parent.getSyntaxPath();
+              if (Atom.this.valueParentRef == null) out = new Path();
+              else out = Atom.this.valueParentRef.getSyntaxPath();
               return out.add(entry.getKey());
             }
           });
@@ -60,8 +60,8 @@ public class Atom {
   }
 
   public Path getSyntaxPath() {
-    if (parent == null) return new Path();
-    else return parent.path();
+    if (valueParentRef == null) return new Path();
+    else return valueParentRef.path();
   }
 
   public Visual ensureVisual(
@@ -78,8 +78,8 @@ public class Atom {
     return visual;
   }
 
-  public void setParent(final Value.Parent<?> parent) {
-    this.parent = parent;
+  public void setValueParentRef(final Value.Parent<?> valueParentRef) {
+    this.valueParentRef = valueParentRef;
   }
 
   public Object syntaxLocateStep(String segment) {
@@ -111,7 +111,7 @@ public class Atom {
   public abstract static class Parent {
     public abstract Atom atom();
 
-    public abstract boolean selectUp(final Context context);
+    public abstract boolean selectAtomParent(final Context context);
 
     /**
      * Get path relative to syntax structure

@@ -132,7 +132,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               context.clearHover();
             }
             if (oldSelectionBeginIndex != null) {
-              if (value.data.isEmpty()) value.parent.selectUp(context);
+              if (value.data.isEmpty()) value.atomParentRef.selectAtomParent(context);
               else {
                 if (oldSelectionBeginIndex >= index + remove)
                   selection.setBegin(context, oldSelectionBeginIndex - remove + add.size());
@@ -148,7 +148,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
                       Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
               }
             } else if (fixDeepSelectionIndex != null) {
-              if (value.data.isEmpty()) value.parent.selectUp(context);
+              if (value.data.isEmpty()) value.atomParentRef.selectAtomParent(context);
               else if (fixDeepSelectionIndex >= index && fixDeepSelectionIndex < index + remove) {
                 final int newIndex =
                     Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1));
@@ -702,7 +702,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     private class ActionExit extends Action {
       @Override
       public boolean run(final Context context) {
-        return self.value.parent.selectUp(context);
+        return self.value.atomParentRef.selectAtomParent(context);
       }
     }
 

@@ -248,7 +248,7 @@ public class EditingExtension {
 
   public void arrayParentDelete(ValueArray.ArrayParent parent) {
       history.apply(
-              context, new ChangeArray(parent.child, parent.index, 1, ImmutableList.of()));
+              context, new ChangeArray(parent.value, parent.index, 1, ImmutableList.of()));
   }
 
     public void parentDelete(Value.Parent<?> parent) {
@@ -261,7 +261,7 @@ public class EditingExtension {
 
           @Override
           public void handle(ValueAtom.NodeParent parent) {
-            history.apply(context, new ChangeNodeSet(parent.child, gap.create()));
+            history.apply(context, new ChangeNodeSet(parent.value, gap.create()));
           }
         });
   }
@@ -272,12 +272,12 @@ public class EditingExtension {
           @Override
           public void handle(ValueArray.ArrayParent parent) {
             history.apply(
-                    context, new ChangeArray(parent.child, parent.index, 1, ImmutableList.of(atom)));
+                    context, new ChangeArray(parent.value, parent.index, 1, ImmutableList.of(atom)));
           }
 
           @Override
           public void handle(ValueAtom.NodeParent parent) {
-            history.apply(context, new ChangeNodeSet(parent.child, atom));
+            history.apply(context, new ChangeNodeSet(parent.value, atom));
           }
         });
   }

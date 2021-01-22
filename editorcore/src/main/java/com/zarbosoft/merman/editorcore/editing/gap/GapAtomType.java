@@ -46,10 +46,10 @@ public class GapAtomType extends BaseGapAtomType {
               @Override
               public void deselect(final Context context, final Atom self, final String string) {
                 if (!string.isEmpty()) return;
-                if (self.parent == null) return;
-                final Value parentValue = self.parent.child;
+                if (self.valueParentRef == null) return;
+                final Value parentValue = self.valueParentRef.value;
                 if (parentValue instanceof ValueArray) {
-                  edit.arrayParentDelete((ValueArray.ArrayParent) self.parent);
+                  edit.arrayParentDelete((ValueArray.ArrayParent) self.valueParentRef);
                 }
               }
             };

@@ -122,7 +122,7 @@ public class GeneralTestWizard {
     return this;
   }
 
-  private void dumpCourses() {
+  public GeneralTestWizard dumpCourses() {
     List<Course> courses = inner.context.foreground.children;
     for (int i = 0; i < courses.size(); ++i) {
       Course course = courses.get(i);
@@ -141,6 +141,7 @@ public class GeneralTestWizard {
       }
       System.out.printf("\n");
     }
+    return this;
   }
 
   private Course getCourse(final int courseIndex) {

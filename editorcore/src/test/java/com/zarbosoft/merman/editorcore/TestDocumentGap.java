@@ -5653,7 +5653,7 @@ public class TestDocumentGap {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "value", "0", "gap")))
               .selectInto(context);
           ((Atom) context.syntaxLocate(new Path("value", "0", "value", "0")))
-              .parent.selectChild(context);
+              .valueParentRef.selectValue(context);
         },
         new TreeBuilder(array).addArray("value").build());
   }
@@ -6586,7 +6586,7 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
               .selectInto(context);
-          ((Atom) context.syntaxLocate(new Path("value", "0"))).parent.selectChild(context);
+          ((Atom) context.syntaxLocate(new Path("value", "0"))).valueParentRef.selectValue(context);
         },
         new TreeBuilder(infinity).build());
   }
@@ -6894,7 +6894,7 @@ public class TestDocumentGap {
         context -> {
           ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
               .selectInto(context);
-          ((Atom) context.syntaxLocate(new Path("value", "0"))).parent.selectChild(context);
+          ((Atom) context.syntaxLocate(new Path("value", "0"))).valueParentRef.selectValue(context);
         },
         new TreeBuilder(infinity).build());
   }

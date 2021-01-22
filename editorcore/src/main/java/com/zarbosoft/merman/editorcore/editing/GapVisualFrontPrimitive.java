@@ -82,7 +82,7 @@ public class GapVisualFrontPrimitive extends VisualFrontPrimitive {
     @Override
     public void clear(final Context context) {
       super.clear(context);
-      spec.deselect(context, self.parent.atom(), self.get());
+      spec.deselect(context, self.atomParentRef.atom(), self.get());
       if (choicePage != null) {
         context.details.removePage(context, choicePage);
         choicePage.destroy(context);

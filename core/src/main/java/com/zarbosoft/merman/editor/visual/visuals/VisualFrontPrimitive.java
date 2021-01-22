@@ -1016,8 +1016,8 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       @Override
       public boolean run(final Context context) {
 
-        if (visualPrimitive.value.parent == null) return false;
-        visualPrimitive.value.parent.selectUp(context);
+        if (visualPrimitive.value.atomParentRef == null) return false;
+        visualPrimitive.value.atomParentRef.selectAtomParent(context);
         return true;
       }
     }

@@ -129,7 +129,7 @@ public class TestLayoutGeneral {
         .resizeTransitive(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
+              Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
             })
         .checkCourse(4, 47, 57)
         .checkScroll(24)
@@ -152,12 +152,12 @@ public class TestLayoutGeneral {
         .resizeTransitive(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
+              Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
             })
         .checkScroll(24)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(0).parent.selectChild(context);
+              Helper.rootArray(context.document).data.get(0).valueParentRef.selectValue(context);
             })
         .checkCourse(0, -3, 7)
         .checkScroll(-13);
@@ -176,7 +176,7 @@ public class TestLayoutGeneral {
         .resizeTransitive(50)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
+              Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
             })
         .checkCourse(4, 47, 57)
         .checkScroll(23)
@@ -199,12 +199,12 @@ public class TestLayoutGeneral {
         .resizeTransitive(50)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
+              Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
             })
         .checkScroll(23)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(0).parent.selectChild(context);
+              Helper.rootArray(context.document).data.get(0).valueParentRef.selectValue(context);
             })
         .checkCourse(0, -3, 7)
         .checkScroll(-22);
@@ -223,7 +223,7 @@ public class TestLayoutGeneral {
         .resizeTransitive(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
+              Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
             })
         .checkCourse(4, 47, 107)
         .checkScroll(37)
@@ -246,12 +246,12 @@ public class TestLayoutGeneral {
         .resizeTransitive(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).parent.selectChild(context);
+              Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
             })
         .checkScroll(37)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(0).parent.selectChild(context);
+              Helper.rootArray(context.document).data.get(0).valueParentRef.selectValue(context);
             })
         .checkCourse(0, -3, 7)
         .checkScroll(-13);

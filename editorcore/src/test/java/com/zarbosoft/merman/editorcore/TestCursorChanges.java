@@ -48,7 +48,7 @@ public class TestCursorChanges {
 
     // Initial selection and double checking
     final Atom found = (Atom) context.syntaxLocate(selectBegin);
-    found.parent.selectChild(context);
+    found.valueParentRef.selectValue(context);
     selectBegin = context.cursor.getSyntaxPath();
     //assertThat(context.selection.getSyntaxPath(), equalTo(selectBegin));
 
@@ -82,7 +82,7 @@ public class TestCursorChanges {
         (context, selected) -> {
             context.history.apply(
               context,
-              new ChangeArray((ValueArray) selected.parent.child, 0, 1, ImmutableList.of()));
+              new ChangeArray((ValueArray) selected.valueParentRef.value, 0, 1, ImmutableList.of()));
         },
         new TreeBuilder(MiscSyntax.array).addArray("value").build(),
         new Path("value", "0"));
@@ -101,7 +101,7 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "0"),
             (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.parent.child, 1, 1, ImmutableList.of())),
+                new ChangeArray((ValueArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
@@ -121,7 +121,7 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "1"),
             (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.parent.child, 0, 1, ImmutableList.of())),
+                new ChangeArray((ValueArray) selected.valueParentRef.value, 0, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
@@ -142,7 +142,7 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "1"),
             (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.parent.child, 1, 1, ImmutableList.of())),
+                new ChangeArray((ValueArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray(
                 "value",
@@ -165,7 +165,7 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "1"),
             (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.parent.child, 1, 1, ImmutableList.of())),
+                new ChangeArray((ValueArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
@@ -188,9 +188,9 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "1", "value", "0"),
         (context, selected) -> {
           ((Value) context.syntaxLocate(new Path("value", "0", "value", "1", "value")))
-              .parent
+              .atomParentRef
               .atom()
-              .parent
+              .valueParentRef
               .deleteChild(context);
         },
         new TreeBuilder(MiscSyntax.array)
@@ -216,7 +216,7 @@ public class TestCursorChanges {
             (context, selected) -> context.history.apply(
                 context,
                 new ChangeArray(
-                    (ValueArray) selected.parent.child,
+                    (ValueArray) selected.valueParentRef.value,
                     0,
                     0,
                     ImmutableList.of(new TreeBuilder(MiscSyntax.infinity).build()))),
@@ -244,7 +244,7 @@ public class TestCursorChanges {
             (context, selected) -> context.history.apply(
                 context,
                 new ChangeArray(
-                    (ValueArray) selected.parent.child,
+                    (ValueArray) selected.valueParentRef.value,
                     1,
                     0,
                     ImmutableList.of(new TreeBuilder(MiscSyntax.infinity).build()))),
@@ -495,7 +495,7 @@ public class TestCursorChanges {
             context.history.apply(
               context,
               new ChangeNodeSet(
-                  (ValueAtom) selected.parent.child, MiscSyntax.syntax.gap.create()));
+                  (ValueAtom) selected.valueParentRef.value, MiscSyntax.syntax.gap.create()));
         },
         new TreeBuilder(MiscSyntax.snooze).add("value", MiscSyntax.syntax.gap.create()).build(),
         new Path("value", "0", "value"));
@@ -515,9 +515,9 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "atom","value","0"),
         (context, selected) -> {
           ((ValueArray) context.syntaxLocate(new Path("value", "0", "value","atom", "value")))
-              .parent
+              .atomParentRef
               .atom()
-              .parent
+              .valueParentRef
               .deleteChild(context);
         },
         new TreeBuilder(MiscSyntax.snooze).add("value", MiscSyntax.syntax.gap.create()).build(),

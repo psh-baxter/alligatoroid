@@ -6,17 +6,17 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
 
 public abstract class Value {
-  public Atom.Parent parent = null;
+  public Atom.Parent atomParentRef = null;
 
-  public void setParent(final Atom.Parent parent) {
-    this.parent = parent;
+  public void setAtomParentRef(final Atom.Parent atomParentRef) {
+    this.atomParentRef = atomParentRef;
   }
 
   public abstract BackSpecData back();
 
   public final Path getSyntaxPath() {
-    if (parent == null) return new Path();
-    else return parent.getSyntaxPath();
+    if (atomParentRef == null) return new Path();
+    else return atomParentRef.getSyntaxPath();
   }
 
   public abstract boolean selectInto(Context context);
@@ -24,21 +24,21 @@ public abstract class Value {
   public abstract Object syntaxLocateStep(String segment);
 
   public abstract static class Parent<T extends Value> {
-    public final T child;
+    public final T value;
 
-    protected Parent(T child) {
-      this.child = child;
+    protected Parent(T value) {
+      this.value = value;
     }
 
-    public abstract String childType();
+    public abstract String valueType();
 
     public String id() {
-      return child.back().id;
+      return value.back().id;
     }
 
     public abstract Path path();
 
-    public abstract boolean selectChild(final Context context);
+    public abstract boolean selectValue(final Context context);
 
     public abstract Path getSyntaxPath();
 

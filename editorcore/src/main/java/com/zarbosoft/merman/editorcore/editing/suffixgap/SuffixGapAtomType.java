@@ -92,10 +92,10 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                 @Override
                 public void deselect(final Context context, final Atom self, final String string) {
                   if (!string.isEmpty()) return;
-                  if (self.parent == null) return;
-                  final Value parentValue = self.parent.child;
+                  if (self.valueParentRef == null) return;
+                  final Value parentValue = self.valueParentRef.value;
                   if (parentValue instanceof ValueArray) {
-                    edit.arrayParentDelete((ValueArray.ArrayParent) self.parent);
+                    edit.arrayParentDelete((ValueArray.ArrayParent) self.valueParentRef);
                   }
                 }
               };
@@ -150,7 +150,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                   childPlacement = atom.fields.getOpt(atom.type.front().get(key.indexBefore).field());
 
                   // Find the new atom placement point
-                  rootPlacement = suffixSelf.parent;
+                  rootPlacement = suffixSelf.valueParentRef;
                   if (suffixSelf.raise) {
                     final Pair<Value.Parent, Atom> found =
                         findReplacementPoint(
@@ -159,7 +159,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                       // Raising new atom up; the value will be placed at the original parent
                       child2 = child;
                       child = found.second;
-                      child2Placement = suffixSelf.parent;
+                      child2Placement = suffixSelf.valueParentRef;
                       rootPlacement = found.first;
                     }
                   }
@@ -230,7 +230,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                         final Union union = new Union();
                         for (final FreeAtomType type : context.syntax.types.values()) {
                           final Pair<Value.Parent, Atom> replacementPoint =
-                              findReplacementPoint(context, self.parent, type);
+                              findReplacementPoint(context, self.valueParentRef, type);
                           if (replacementPoint.first == null) continue;
                           for (final GapKey key : gapKeys(syntax, type, childType)) {
                             if (key.indexBefore == -1) continue;
@@ -293,7 +293,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
                 if (context
                     .syntax
-                    .getLeafTypes(test.childType())
+                    .getLeafTypes(test.valueType())
                     .stream().map(t -> t.id())
                     .collect(Collectors.toSet())
                     .contains(type.id())) {
@@ -302,12 +302,12 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                   allowed = true;
                 }
 
-                  testAtom = test.child.parent.atom();
-                if (testAtom.parent == null) break;
+                  testAtom = test.value.atomParentRef.atom();
+                if (testAtom.valueParentRef == null) break;
 
                 if (!AtomType.isPrecedent(type, test, allowed)) break;
 
-                test = testAtom.parent;
+                test = testAtom.valueParentRef;
               }
               return new Pair<>(parent, child);
             }
@@ -317,7 +317,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
               final Context context, final Atom self, final String string, final Common.UserData userData
             ) {
               if (self.visual != null && string.isEmpty()) {
-                self.parent.replace(context, ((ValueArray) self.fields.getOpt("value")).data.get(0));
+                self.valueParentRef.replace(context, ((ValueArray) self.fields.getOpt("value")).data.get(0));
               }
             }
           };

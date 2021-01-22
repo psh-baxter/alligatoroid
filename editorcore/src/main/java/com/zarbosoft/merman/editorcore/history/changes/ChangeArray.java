@@ -49,13 +49,13 @@ public class ChangeArray extends Change {
     final List<Atom> clearSublist = value.data.subList(index, index + remove);
     final ChangeArray reverse =
         new ChangeArray(value, index, add.size(), ImmutableList.copyOf(clearSublist));
-    clearSublist.stream().forEach(v -> v.setParent(null));
+    clearSublist.stream().forEach(v -> v.setValueParentRef(null));
     clearSublist.clear();
     value.data.addAll(index, add);
     add.stream()
         .forEach(
             v -> {
-              v.setParent(new ValueArray.ArrayParent(value));
+              v.setValueParentRef(new ValueArray.ArrayParent(value));
             });
     value.renumber(index);
     for (final ValueArray.Listener listener : value.listeners) {

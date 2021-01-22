@@ -28,7 +28,7 @@ public class TestActionsNested {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom"))).parent.selectChild(context);
+    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom"))).valueParentRef.selectValue(context);
     Helper.act(context, "enter");
     assertThat(
         context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "atom", "value")));
@@ -46,7 +46,7 @@ public class TestActionsNested {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom"))).parent.selectChild(context);
+    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom"))).valueParentRef.selectValue(context);
     Helper.act(context, "exit");
     assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0")));
   }
@@ -60,7 +60,7 @@ public class TestActionsNested {
                 .add("first", target)
                 .add("second", new TreeBuilder(MiscSyntax.one).build())
                 .build())
-        .run(context -> target.parent.selectChild(context))
+        .run(context -> target.valueParentRef.selectValue(context))
         .act("next")
         .run(
             context ->
@@ -77,7 +77,7 @@ public class TestActionsNested {
                 .add("first", new TreeBuilder(MiscSyntax.one).build())
                 .add("second", target)
                 .build())
-        .run(context -> target.parent.selectChild(context))
+        .run(context -> target.valueParentRef.selectValue(context))
         .act("previous")
         .run(
             context ->

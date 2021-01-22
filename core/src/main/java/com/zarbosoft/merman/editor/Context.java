@@ -127,7 +127,7 @@ public class Context {
         this,
         ImmutableList.of(
             new ActionWindowClear(),
-            new ActionWindowUp(document),
+            new ActionWindowToParent(document),
             new ActionWindowDown(),
             new ActionScrollNext(),
             new ActionScrollNextAlot(),
@@ -516,27 +516,27 @@ public class Context {
 
     // Try just going up
     if (windowAtom != null) {
-      Value at = windowAtom.parent.child;
+      Value at = windowAtom.valueParentRef.value;
       while (true) {
         if (at == value) {
-          windowAtom = at.parent.atom();
+          windowAtom = at.atomParentRef.atom();
           windowVisual = windowAtom.ensureVisual(this, null, ROMap.empty, 0, 0);
         }
-        final Atom atom = at.parent.atom();
-        if (atom.parent == null) break;
-        at = atom.parent.child;
+        final Atom atom = at.atomParentRef.atom();
+        if (atom.valueParentRef == null) break;
+        at = atom.valueParentRef.value;
       }
     }
 
     // Otherwise go up from the selection to find the highest parent where this is still visible
     if (windowVisual == null) {
-      windowAtom = value.parent.atom();
+      windowAtom = value.atomParentRef.atom();
       int depth = 0;
       while (true) {
         depth += windowAtom.type.depthScore();
         if (depth >= depthThreshold) break;
-        if (windowAtom.parent == null) break;
-        windowAtom = windowAtom.parent.child.parent.atom();
+        if (windowAtom.valueParentRef == null) break;
+        windowAtom = windowAtom.valueParentRef.value.atomParentRef.atom();
       }
 
       if (depth < depthThreshold) {
@@ -870,10 +870,10 @@ public class Context {
   }
 
   @Action.StaticID(id = "window_up")
-  private class ActionWindowUp extends Action {
+  private class ActionWindowToParent extends Action {
     private final Document document;
 
-    public ActionWindowUp(final Document document) {
+    public ActionWindowToParent(final Document document) {
       this.document = document;
     }
 
@@ -885,7 +885,7 @@ public class Context {
       if (atom == document.root) {
         windowAtom = null;
       } else {
-        windowAtom = atom.parent.child.parent.atom();
+        windowAtom = atom.valueParentRef.value.atomParentRef.atom();
       }
       idleLayBricksOutward();
       return true;
@@ -897,22 +897,21 @@ public class Context {
     @Override
     public boolean run(final Context context) {
       if (!window) return false;
-      final List<VisualAtom> chain = new ArrayList<>();
+      VisualAtom windowNext = null;
       final VisualAtom stop = windowAtom.visual;
       if (cursor.getVisual().parent() == null) return false;
       VisualAtom at = cursor.getVisual().parent().atomVisual();
       while (at != null) {
         if (at == stop) break;
         if (at.parent() == null) break;
-        chain.add(at);
+        windowNext = at;
         at = at.parent().atomVisual();
       }
-      if (chain.isEmpty()) return false;
+      if (windowNext == null) return false;
       final Visual oldWindowVisual = windowAtom.visual;
-      final VisualAtom windowVisual = last(chain);
-      windowAtom = windowVisual.atom;
-      last(chain).root(context, null, ROMap.empty, 0, 0);
-      oldWindowVisual.uproot(context, windowVisual);
+      windowAtom = windowNext.atom;
+      windowNext.root(context, null, ROMap.empty, 0, 0);
+      oldWindowVisual.uproot(context, windowNext);
       idleLayBricksOutward();
       return true;
     }

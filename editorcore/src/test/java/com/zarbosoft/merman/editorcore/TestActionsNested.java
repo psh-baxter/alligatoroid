@@ -44,7 +44,7 @@ public class TestActionsNested {
         .run(
             context -> {
               ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom")))
-                  .parent.selectChild(context);
+                  .valueParentRef.selectValue(context);
             })
         .act("delete")
         .checkArrayTree(

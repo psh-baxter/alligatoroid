@@ -30,7 +30,7 @@ public class ValueArray extends Value {
     data.stream()
         .forEach(
             v -> {
-              v.setParent(new ArrayParent(this));
+              v.setValueParentRef(new ArrayParent(this));
             });
     renumber(0);
   }
@@ -41,11 +41,11 @@ public class ValueArray extends Value {
       sum = 0;
     } else {
       final Atom prior = data.get(from - 1);
-      final ArrayParent parent = (ArrayParent) prior.parent;
+      final ArrayParent parent = (ArrayParent) prior.valueParentRef;
       sum = parent.actualIndex + prior.type.back().size();
     }
     for (final Pair<Integer, Atom> p : iterable(enumerate(data.stream().skip(from), from))) {
-      final ArrayParent parent = ((ArrayParent) p.second.parent);
+      final ArrayParent parent = ((ArrayParent) p.second.valueParentRef);
       parent.index = p.first;
       parent.actualIndex = sum;
       sum += p.second.type.back().size();
@@ -106,9 +106,9 @@ public class ValueArray extends Value {
 
   public void sideload(final Atom value) {
     if (!data.isEmpty()) throw new AssertionError();
-    if (parent.atom().parent != null) throw new AssertionError();
+    if (atomParentRef.atom().valueParentRef != null) throw new AssertionError();
     data.add(value);
-    value.setParent(new ArrayParent(this));
+    value.setValueParentRef(new ArrayParent(this));
     renumber(0);
   }
 
@@ -126,26 +126,26 @@ public class ValueArray extends Value {
     }
 
     @Override
-    public String childType() {
-      return child.back.elementAtomType();
+    public String valueType() {
+      return value.back.elementAtomType();
     }
 
     @Override
     public Path path() {
-      return child.back.getPath(child, actualIndex);
+      return value.back.getPath(value, actualIndex);
     }
 
     @Override
-    public boolean selectChild(final Context context) {
-      child.select(context, true, index, index);
+    public boolean selectValue(final Context context) {
+      value.select(context, true, index, index);
       return true;
     }
 
     @Override
     public Path getSyntaxPath() {
       Path out;
-      if (child.parent == null) out = new Path();
-      else out = child.parent.getSyntaxPath();
+      if (value.atomParentRef == null) out = new Path();
+      else out = value.atomParentRef.getSyntaxPath();
       return out.add(Integer.toString(index));
     }
 

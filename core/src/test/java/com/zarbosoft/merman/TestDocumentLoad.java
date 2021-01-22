@@ -121,7 +121,7 @@ public class TestDocumentLoad {
     final Document doc = syntax.load("x");
     assertTreeEqual(Helper.rootArray(doc).data.get(0), new TreeBuilder(primitive).build());
     final List<Atom> top = Helper.rootArray(doc).data;
-    assertThat(top.get(0).parent.path(), equalTo(new Path("value", "0")));
+    assertThat(top.get(0).valueParentRef.path(), equalTo(new Path("value", "0")));
   }
 
   /**
@@ -144,8 +144,8 @@ public class TestDocumentLoad {
     assertTreeEqual(Helper.rootArray(doc).data.get(0), new TreeBuilder(primitive).build());
     assertTreeEqual(Helper.rootArray(doc).data.get(1), new TreeBuilder(primitive).build());
     final List<Atom> top = Helper.rootArray(doc).data;
-    assertThat(top.get(0).parent.path(), equalTo(new Path("value", "0")));
-    assertThat(top.get(1).parent.path(), equalTo(new Path("value", "1")));
+    assertThat(top.get(0).valueParentRef.path(), equalTo(new Path("value", "0")));
+    assertThat(top.get(1).valueParentRef.path(), equalTo(new Path("value", "1")));
   }
 
   @Test

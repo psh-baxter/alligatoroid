@@ -19,7 +19,7 @@ public class ValueAtom extends Value {
   public ValueAtom(final BaseBackAtomSpec back, final Atom data) {
     this.back = back;
     this.data = data;
-    if (data != null) data.setParent(new NodeParent(this));
+    if (data != null) data.setValueParentRef(new NodeParent(this));
   }
 
   public void addListener(final Listener listener) {
@@ -70,31 +70,31 @@ public class ValueAtom extends Value {
     }
 
     @Override
-    public String childType() {
-      return child.back.type;
+    public String valueType() {
+      return value.back.type;
     }
 
     @Override
     public String id() {
-      return child.back.id;
+      return value.back.id;
     }
 
     @Override
     public Path path() {
-      return child.getSyntaxPath();
+      return value.getSyntaxPath();
     }
 
     @Override
-    public boolean selectChild(final Context context) {
-      child.select(context);
+    public boolean selectValue(final Context context) {
+      value.select(context);
       return true;
     }
 
     @Override
     public Path getSyntaxPath() {
       Path out;
-      if (child.parent == null) out = new Path();
-      else out = child.parent.getSyntaxPath();
+      if (value.atomParentRef == null) out = new Path();
+      else out = value.atomParentRef.getSyntaxPath();
       return out.add(SYNTAX_PATH_KEY);
     }
 
