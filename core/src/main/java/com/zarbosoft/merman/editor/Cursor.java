@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.editor;
 
+import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
@@ -12,7 +13,7 @@ public abstract class Cursor {
 
   public abstract Visual getVisual();
 
-  public abstract SelectionState saveState();
+    public abstract SelectionState saveState();
 
   public abstract Path getSyntaxPath();
 

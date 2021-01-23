@@ -17,7 +17,7 @@ public class SelectionTypeExtension {
   private final Context.SelectionListener listener =
       new Context.SelectionListener() {
         @Override
-        public void selectionChanged(final Context context, final Cursor cursor) {
+        public void cursorChanged(final Context context, final Cursor cursor) {
           BannerMessage oldMessage = message;
           message = new BannerMessage();
           message.priority = 100;

@@ -95,14 +95,14 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
       if (body != null) {
         body.uproot(context, null);
         body = null;
-        context.idleLayBricks(parent, 0, 1, 1, null, null);
+        context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
       }
     } else {
       if (ellipsis != null) ellipsis.destroy(context);
       if (atomGet() != null) {
         if (body == null) {
           coreSet(context, atomGet());
-          context.idleLayBricks(parent, 0, 1, 1, null, null);
+          context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
         } else body.root(context, new NestedParent(), alignments, visualDepth + 1, depthScore);
       }
     }
@@ -136,7 +136,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
     @Override
     public void click(final Context context) {
-      selectDown(context);
+      selectAnyChild(context);
     }
 
     @Override
@@ -268,7 +268,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
       context.clearHover();
     }
     selection = new NestedCursor(this, context);
-    context.setSelection(selection);
+    context.setCursor(selection);
   }
 
   private TSSet<String> baseTags(Context context) {
@@ -392,7 +392,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     coreSet(context, data);
-    context.idleLayBricks(parent, 0, 1, 1, null, null);
+    context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
 
     if (fixDeepSelection) select(context);
     if (fixDeepHover) context.clearHover();
@@ -481,7 +481,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   @Override
-  public boolean selectDown(final Context context) {
+  public boolean selectAnyChild(final Context context) {
     return value().selectInto(context);
   }
 
@@ -495,7 +495,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
     @Override
     public boolean run(final Context context) {
-      return base.body.selectDown(context);
+      return base.body.selectAnyChild(context);
     }
   }
 
@@ -554,8 +554,9 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     @Override
     public boolean run(final Context context) {
       final Atom root = base.atomGet();
-      if (!root.visual.selectDown(context)) return false;
-      context.setAtomWindow(root);
+      if (!root.visual.selectAnyChild(context)) return false;
+      context.windowExact(root);
+      context.triggerIdleLayBricksOutward();
       return true;
     }
   }

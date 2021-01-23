@@ -200,7 +200,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
                   // Select and dump remainder
                   if (selectNext instanceof ValueAtom
-                      && ((ValueAtom) selectNext).data.visual.selectDown(context)) {
+                      && ((ValueAtom) selectNext).data.visual.selectAnyChild(context)) {
                   } else selectNext.selectInto(context);
                   if (!remainder.isEmpty()) context.cursor.receiveText(context, remainder);
                 }

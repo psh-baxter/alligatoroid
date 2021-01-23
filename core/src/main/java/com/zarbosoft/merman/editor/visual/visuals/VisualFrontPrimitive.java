@@ -212,7 +212,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   private void idleLayBricks(final Context context, final int start, final int end) {
     final Function<Integer, Brick> accessor = i -> lines.get(i).brick;
-    context.idleLayBricks(parent, start, end - start, lines.size(), accessor, accessor);
+    context.triggerIdleLayBricks(parent, start, end - start, lines.size(), accessor, accessor);
   }
 
   private void set(final Context context, final String text) {
@@ -279,7 +279,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       selection.range.setOffsets(context, beginOffset, endOffset);
     } else {
       selection = createSelection(context, leadFirst, beginOffset, endOffset);
-      context.setSelection(selection);
+      context.setCursor(selection);
     }
   }
 
@@ -409,7 +409,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   }
 
   @Override
-  public boolean selectDown(final Context context) {
+  public boolean selectAnyChild(final Context context) {
     value.selectInto(context);
     return true;
   }

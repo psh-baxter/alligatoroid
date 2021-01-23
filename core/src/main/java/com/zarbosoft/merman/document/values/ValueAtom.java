@@ -52,12 +52,8 @@ public class ValueAtom extends Value {
   }
 
   public void select(final Context context) {
-    if (context.window) {
-      if (visual == null || data.visual == null) {
-        context.createWindowForSelection(this, context.ellipsizeThreshold);
-      }
-    }
-    visual.select(context);
+    if (context.window)  context.windowAdjustMinimalTo(this);
+      visual.select(context);
   }
 
   public abstract static class Listener {

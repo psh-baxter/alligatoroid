@@ -114,9 +114,9 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public boolean selectDown(final Context context) {
+  public boolean selectAnyChild(final Context context) {
     if (selectable.isEmpty()) return false;
-    selectable.get(0).selectDown(context);
+    selectable.get(0).selectAnyChild(context);
     return true;
   }
 
@@ -256,7 +256,7 @@ public class VisualAtom extends Visual {
     public Brick createNextBrick(final Context context) {
       if (index + 1 < children.size()) return children.get(index + 1).createFirstBrick(context);
       if (parent == null) return null;
-      if (context.windowAtom == VisualAtom.this.atom) return null;
+      if (context.windowAtom() == VisualAtom.this.atom) return null;
       return parent.createNextBrick(context);
     }
 
@@ -264,7 +264,7 @@ public class VisualAtom extends Visual {
     public Brick createPreviousBrick(final Context context) {
       if (index - 1 >= 0) return children.get(index - 1).createLastBrick(context);
       if (parent == null) return null;
-      if (context.windowAtom == VisualAtom.this.atom) return null;
+      if (context.windowAtom() == VisualAtom.this.atom) return null;
       return parent.createPreviousBrick(context);
     }
 
@@ -274,7 +274,7 @@ public class VisualAtom extends Visual {
         final Brick test = children.get(at).getLastBrick(context);
         if (test != null) return test;
       }
-      if (context.windowAtom == VisualAtom.this.atom) return null;
+      if (context.windowAtom() == VisualAtom.this.atom) return null;
       if (parent == null) return null;
       return parent.findPreviousBrick(context);
     }
@@ -285,7 +285,7 @@ public class VisualAtom extends Visual {
         final Brick test = children.get(at).getLastBrick(context);
         if (test != null) return test;
       }
-      if (context.windowAtom == VisualAtom.this.atom) return null;
+      if (context.windowAtom() == VisualAtom.this.atom) return null;
       if (parent == null) return null;
       return parent.findNextBrick(context);
     }
@@ -293,7 +293,7 @@ public class VisualAtom extends Visual {
     @Override
     public Brick getPreviousBrick(final Context context) {
       if (index == 0) {
-        if (context.windowAtom == VisualAtom.this.atom) return null;
+        if (context.windowAtom() == VisualAtom.this.atom) return null;
         if (parent == null) return null;
         return parent.getPreviousBrick(context);
       } else return children.get(index - 1).getLastBrick(context);
@@ -302,7 +302,7 @@ public class VisualAtom extends Visual {
     @Override
     public Brick getNextBrick(final Context context) {
       if (index + 1 >= children.size()) {
-        if (context.windowAtom == VisualAtom.this.atom) return null;
+        if (context.windowAtom() == VisualAtom.this.atom) return null;
         if (parent == null) return null;
         return parent.getNextBrick(context);
       } else return children.get(index + 1).getFirstBrick(context);
@@ -370,14 +370,14 @@ public class VisualAtom extends Visual {
     @Override
     public boolean selectNext(final Context context) {
       int at = selectableIndex;
-      while (++at < selectable.size()) if (selectable.get(at).selectDown(context)) return true;
+      while (++at < selectable.size()) if (selectable.get(at).selectAnyChild(context)) return true;
       return false;
     }
 
     @Override
     public boolean selectPrevious(final Context context) {
       int at = selectableIndex;
-      while (--at >= 0) if (selectable.get(at).selectDown(context)) return true;
+      while (--at >= 0) if (selectable.get(at).selectAnyChild(context)) return true;
       return false;
     }
   }

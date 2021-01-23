@@ -16,6 +16,10 @@ public class TSSet<T> implements ROSetRef<T> {
     data = new HashSet<>();
   }
 
+  public static <T> TSSet<T> of(T ...values) {
+    return new TSSet<>(new HashSet<>(Arrays.asList(values)));
+  }
+
   TSSet(Set<T> data) {
     this.data = new HashSet<>(data);
   }

@@ -88,7 +88,7 @@ public class TestDocumentGap {
   private Context blank(Syntax syntax) {
     final Atom gap = syntax.gap.create();
     final Context context = Helper.buildDoc(syntax, gap);
-    gap.visual.selectDown(context);
+    gap.visual.selectAnyChild(context);
     return context;
   }
 
@@ -5963,7 +5963,7 @@ public class TestDocumentGap {
               .selectInto(context);
           context.cursor.receiveText(context, "urt");
           ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
-              .visual.selectDown(context);
+              .visual.selectAnyChild(context);
         },
         new TreeBuilder(array)
             .addArray("value", new TreeBuilder(syntax.gap).add("gap", "urt").build())
@@ -6268,8 +6268,8 @@ public class TestDocumentGap {
             .build();
 
     final Context context = buildDoc(syntax, syntax.gap.create(), syntax.gap.create());
-    ((Atom) context.syntaxLocate(new Path("value", "0"))).visual.selectDown(context);
-    ((Atom) context.syntaxLocate(new Path("value", "1"))).visual.selectDown(context);
+    ((Atom) context.syntaxLocate(new Path("value", "0"))).visual.selectAnyChild(context);
+    ((Atom) context.syntaxLocate(new Path("value", "1"))).visual.selectAnyChild(context);
     assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
     Helper.assertTreeEqual(context, syntax.gap.create(), Helper.rootArray(context.document));
     assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "gap", "0")));
@@ -7204,7 +7204,7 @@ public class TestDocumentGap {
         () -> new TreeBuilder(array).addArray("value").build(),
         context -> {
           ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
-              .visual.selectDown(context);
+              .visual.selectAnyChild(context);
         },
         new TreeBuilder(array).addArray("value", syntax.gap.create()).build());
   }
@@ -7511,7 +7511,7 @@ public class TestDocumentGap {
         () -> new TreeBuilder(restrictedArray).addArray("value").build(),
         context -> {
           ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
-              .visual.selectDown(context);
+              .visual.selectAnyChild(context);
         },
         new TreeBuilder(restrictedArray)
             .addArray("value", new TreeBuilder(quoted).add("value", "").build())

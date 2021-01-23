@@ -62,20 +62,15 @@ public class ValueArray extends Value {
 
   @Override
   public boolean selectInto(final Context context) {
-    return select(context, true, 0, 0);
+    return selectInto(context, true, 0, 0);
   }
 
-  public boolean select(
+  public boolean selectInto(
       final Context context, final boolean leadFirst, final int start, final int end) {
     if (data.isEmpty()) {
       return false;
     }
-    if (context.window) {
-      final Atom firstChild = data.get(start);
-      if (visual == null || firstChild.visual == null) {
-        context.createWindowForSelection(this, context.ellipsizeThreshold);
-      }
-    }
+    if (context.window) context.windowAdjustMinimalTo(this);
     if (visual instanceof VisualFrontArray)
       ((VisualFrontArray) visual).select(context, leadFirst, start, end);
     else if (visual instanceof VisualFrontAtomFromArray)
@@ -137,7 +132,7 @@ public class ValueArray extends Value {
 
     @Override
     public boolean selectValue(final Context context) {
-      value.select(context, true, index, index);
+      value.selectInto(context, true, index, index);
       return true;
     }
 

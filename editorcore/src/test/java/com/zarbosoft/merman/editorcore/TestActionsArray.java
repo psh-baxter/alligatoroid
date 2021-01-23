@@ -110,7 +110,7 @@ public class TestActionsArray {
             .build();
     final ValueArray value = (ValueArray) atom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, atom)
-        .run(context -> value.select(context, true, 0, 0))
+        .run(context -> value.selectInto(context, true, 0, 0))
         .act("insert_before")
         .checkArrayTree(
             new TreeBuilder(MiscSyntax.restrictedArray)
@@ -160,7 +160,7 @@ public class TestActionsArray {
             .build();
     final ValueArray value = (ValueArray) atom.fields.getOpt("value");
     new GeneralTestWizard(MiscSyntax.syntax, atom)
-        .run(context -> value.select(context, true, 0, 0))
+        .run(context -> value.selectInto(context, true, 0, 0))
         .act("insert_after")
         .checkArrayTree(
             new TreeBuilder(MiscSyntax.restrictedArray)

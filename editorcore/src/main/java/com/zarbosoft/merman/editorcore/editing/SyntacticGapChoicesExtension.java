@@ -193,7 +193,7 @@ public class SyntacticGapChoicesExtension {
 
                   /// Select and dump remainder
                   if (selectNext instanceof ValueAtom
-                      && ((ValueAtom) selectNext).data.visual.selectDown(context)) {
+                      && ((ValueAtom) selectNext).data.visual.selectAnyChild(context)) {
                   } else selectNext.selectInto(context);
                   if (!parsed.remainder.isEmpty())
                     context.cursor.receiveText(context, parsed.remainder);
@@ -372,7 +372,7 @@ public class SyntacticGapChoicesExtension {
 
                   /// Select and dump remainder of the text
                   if (selectNext instanceof ValueAtom
-                      && ((ValueAtom) selectNext).data.visual.selectDown(context)) {
+                      && ((ValueAtom) selectNext).data.visual.selectAnyChild(context)) {
                   } else selectNext.selectInto(context);
                   if (!remainder.isEmpty()) context.cursor.receiveText(context, remainder);
                 }

@@ -102,7 +102,7 @@ public class EditingExtension {
       context.addSelectionListener(
               new Context.SelectionListener() {
                   @Override
-                  public void selectionChanged(Context context, Cursor cursor0) {
+                  public void cursorChanged(Context context, Cursor cursor0) {
                       context.textListener = null;
                       context.removeActions(this);
                       cursor0.dispatch(

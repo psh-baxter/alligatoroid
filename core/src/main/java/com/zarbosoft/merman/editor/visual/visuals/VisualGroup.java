@@ -55,9 +55,9 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public boolean selectDown(final Context context) {
+  public boolean selectAnyChild(final Context context) {
     for (final Visual child : children) {
-      if (child.selectDown(context)) return true;
+      if (child.selectAnyChild(context)) return true;
     }
     return false;
   }
@@ -111,7 +111,7 @@ public class VisualGroup extends Visual {
         index + 1 >= this.children.size()
             ? parent.getNextBrick(context)
             : children.get(index + 1).getFirstBrick(context);
-    if (previousBrick != null && nextBrick != null) context.idleLayBricksAfterEnd(previousBrick);
+    if (previousBrick != null && nextBrick != null) context.triggerIdleLayBricksAfterEnd(previousBrick);
   }
 
   protected VisualParent createParent(final int index) {
@@ -261,7 +261,7 @@ public class VisualGroup extends Visual {
     public boolean selectNext(final Context context) {
       int test = index;
       while (++test < target.children.size()) {
-        if (target.children.get(test).selectDown(context)) return true;
+        if (target.children.get(test).selectAnyChild(context)) return true;
       }
       return target.parent.selectNext(context);
     }
@@ -270,7 +270,7 @@ public class VisualGroup extends Visual {
     public boolean selectPrevious(final Context context) {
       int test = index;
       while (--test >= 0) {
-        if (target.children.get(test).selectDown(context)) return true;
+        if (target.children.get(test).selectAnyChild(context)) return true;
       }
       return target.parent.selectPrevious(context);
     }

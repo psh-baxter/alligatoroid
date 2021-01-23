@@ -43,7 +43,7 @@ public class VisualSymbol extends Visual
   @Override
   public void conditionChanged(final Context context, final boolean show) {
     if (show) {
-      context.idleLayBricks(parent, 0, 1, 1, null, null);
+      context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
     } else if (brick != null) {
       brick.destroy(context);
     }
@@ -55,7 +55,7 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public boolean selectDown(final Context context) {
+  public boolean selectAnyChild(final Context context) {
     return false;
   }
 

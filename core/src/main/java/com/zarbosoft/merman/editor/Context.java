@@ -56,13 +56,13 @@ import static com.zarbosoft.rendaw.common.Common.last;
 public class Context {
   public static Supplier<Set> createSet = () -> new HashSet<>();
   // Settings
-  public boolean animateCoursePlacement = false;
-  public boolean animateDetails = false;
-  public int ellipsizeThreshold = Integer.MAX_VALUE;
-  public int layBrickBatchSize = 10;
-  public double retryExpandFactor = 1.25;
-  public double scrollFactor = 0.1;
-  public double scrollAlotFactor = 0.8;
+  public boolean animateCoursePlacement;
+  public boolean animateDetails;
+  public int ellipsizeThreshold;
+  public int layBrickBatchSize;
+  public double retryExpandFactor;
+  public double scrollFactor;
+  public double scrollAlotFactor;
 
   // State
   /** Contains the cursor and other marks. Scrolls. */
@@ -73,7 +73,7 @@ public class Context {
   public final Display display;
   public final Syntax syntax;
   public final Document document;
-  public final Set<SelectionListener> selectionListeners = new HashSet<>();
+  public final Set<SelectionListener> cursorListeners = new HashSet<>();
   public final Set<HoverListener> hoverListeners = new HashSet<>();
   private final Set<TagsListener> selectionTagsChangeListeners = new HashSet<>();
   private final Set<TagsListener> globalTagsChangeListeners = new HashSet<>();
@@ -82,7 +82,7 @@ public class Context {
   private final Consumer<IterationTask> addIteration;
   private final Consumer<Integer> flushIteration;
   public boolean window;
-  public Atom windowAtom;
+  private Atom windowAtom;
   private final TSSet<String> globalTags = new TSSet<String>();
   public KeyListener keyListener;
   public TextListener textListener;
@@ -115,20 +115,31 @@ public class Context {
   boolean debugInHover = false;
   private IterationNotifyBricksCreated idleNotifyBricksCreated;
 
+  public static class InitialConfig {
+    public boolean animateCoursePlacement = false;
+    public boolean animateDetails = false;
+    public int ellipsizeThreshold = Integer.MAX_VALUE;
+    public int layBrickBatchSize = 10;
+    public double retryExpandFactor = 1.25;
+    public double scrollFactor = 0.1;
+    public double scrollAlotFactor = 0.8;
+  }
+
   public Context(
-      final Syntax syntax,
-      final Document document,
-      final Display display,
-      final Consumer<IterationTask> addIteration,
-      final Consumer<Integer> flushIteration,
-      final ClipboardEngine clipboardEngine,
-      final boolean startWindowed) {
+      InitialConfig config,
+      Syntax syntax,
+      Document document,
+      Display display,
+      Consumer<IterationTask> addIteration,
+      Consumer<Integer> flushIteration,
+      ClipboardEngine clipboardEngine,
+      boolean startWindowed) {
     actions.put(
         this,
         ImmutableList.of(
             new ActionWindowClear(),
-            new ActionWindowToParent(document),
-            new ActionWindowDown(),
+            new ActionWindowTowardsRoot(),
+            new ActionWindowTowardsCursor(),
             new ActionScrollNext(),
             new ActionScrollNextAlot(),
             new ActionScrollPrevious(),
@@ -137,6 +148,13 @@ public class Context {
     this.syntax = syntax;
     this.document = document;
     this.display = display;
+    this.animateCoursePlacement = config.animateCoursePlacement;
+    this.animateDetails = config.animateDetails;
+    this.ellipsizeThreshold = config.ellipsizeThreshold;
+    this.layBrickBatchSize = config.layBrickBatchSize;
+    this.retryExpandFactor = config.retryExpandFactor;
+    this.scrollFactor = config.scrollFactor;
+    this.scrollAlotFactor = config.scrollAlotFactor;
     display.setBackgroundColor(syntax.background);
     edge = display.edge(this);
     transverseEdge = display.transverseEdge(this);
@@ -248,22 +266,14 @@ public class Context {
             scrollVisible();
           }
         });
-    if (!startWindowed) windowClearNoLayBricks();
-    else {
-      window = true;
-      windowAtom = null;
-      document.root.ensureVisual(this, null, ROMap.empty, 0, 0);
-      changeGlobalTags(
-          new TagsChange(
-              new TSSet<String>().add(Tags.TAG_GLOBAL_WINDOWED).add(Tags.TAG_GLOBAL_ROOT_WINDOW),
-              new TSSet<>()));
-    }
+    if (!startWindowed) windowClear();
+    else windowToSupertree(document.root);
     display.addHIDEventListener(
         event -> {
           clearHover();
         });
-    document.root.visual.selectDown(this);
-    idleLayBricksOutward();
+    document.root.visual.selectAnyChild(this);
+    triggerIdleLayBricksOutward();
   }
 
   public void clearHover() {
@@ -394,11 +404,11 @@ public class Context {
   }
 
   public void addSelectionListener(final SelectionListener listener) {
-    this.selectionListeners.add(listener);
+    this.cursorListeners.add(listener);
   }
 
   public void removeSelectionListener(final SelectionListener listener) {
-    this.selectionListeners.remove(listener);
+    this.cursorListeners.remove(listener);
   }
 
   public void addHoverListener(final HoverListener listener) {
@@ -425,7 +435,7 @@ public class Context {
     this.globalTagsChangeListeners.remove(listener);
   }
 
-  public void idleLayBricks(
+  public void triggerIdleLayBricks(
       final VisualParent parent,
       final int index,
       final int addCount,
@@ -436,48 +446,48 @@ public class Context {
     if (index > 0) {
       final Brick previousBrick = accessLast.apply(index - 1);
       if (previousBrick != null) {
-        idleLayBricksAfterEnd(previousBrick);
+        triggerIdleLayBricksAfterEnd(previousBrick);
         return;
       }
       if (index + addCount < size) {
         // Hits neither edge
         final Brick nextBrick = accessFirst.apply(index + addCount);
         if (nextBrick == null) return;
-        idleLayBricksBeforeStart(nextBrick);
+        triggerIdleLayBricksBeforeStart(nextBrick);
       } else {
         // Hits end edge
         if (parent == null) return;
         final Brick nextBrick = parent.getNextBrick(this);
         if (nextBrick == null) return;
-        idleLayBricksBeforeStart(nextBrick);
+        triggerIdleLayBricksBeforeStart(nextBrick);
       }
     } else {
       if (index + addCount < size) {
         // Hits index edge
         final Brick nextBrick = accessFirst.apply(index + addCount);
         if (nextBrick != null) {
-          idleLayBricksBeforeStart(nextBrick);
+          triggerIdleLayBricksBeforeStart(nextBrick);
           return;
         }
         final Brick previousBrick = parent.getPreviousBrick(this);
         if (previousBrick == null) return;
-        idleLayBricksAfterEnd(previousBrick);
+        triggerIdleLayBricksAfterEnd(previousBrick);
       } else {
         // Hits both edges
         if (parent == null) return;
         final Brick previousBrick = parent.getPreviousBrick(this);
         if (previousBrick != null) {
-          idleLayBricksAfterEnd(previousBrick);
+          triggerIdleLayBricksAfterEnd(previousBrick);
           return;
         }
         final Brick nextBrick = parent.getNextBrick(this);
         if (nextBrick == null) return;
-        idleLayBricksBeforeStart(nextBrick);
+        triggerIdleLayBricksBeforeStart(nextBrick);
       }
     }
   }
 
-  public void idleLayBricksAfterEnd(final Brick end) {
+  public void triggerIdleLayBricksAfterEnd(final Brick end) {
     if (idleLayBricks == null) {
       idleLayBricks = new IterationLayBricks();
       addIteration(idleLayBricks);
@@ -489,7 +499,7 @@ public class Context {
     this.addIteration.accept(task);
   }
 
-  public void idleLayBricksBeforeStart(final Brick start) {
+  public void triggerIdleLayBricksBeforeStart(final Brick start) {
     if (idleLayBricks == null) {
       idleLayBricks = new IterationLayBricks();
       addIteration(idleLayBricks);
@@ -510,83 +520,104 @@ public class Context {
     idleNotifyBricksCreated.newBricks.add(new Pair<>(visual, bricks));
   }
 
-  public void createWindowForSelection(final Value value, final int depthThreshold) {
-    final Visual oldWindow = windowAtom == null ? document.root.visual : windowAtom.visual;
-    Visual windowVisual = null;
-
-    // Try just going up
-    if (windowAtom != null) {
-      Value at = windowAtom.valueParentRef.value;
-      while (true) {
-        if (at == value) {
-          windowAtom = at.atomParentRef.atom();
-          windowVisual = windowAtom.ensureVisual(this, null, ROMap.empty, 0, 0);
-        }
-        final Atom atom = at.atomParentRef.atom();
-        if (atom.valueParentRef == null) break;
-        at = atom.valueParentRef.value;
-      }
+  public void windowAdjustMinimalTo(final Value value) {
+    // Check if the selection is a supertree of the current window
+    if (isSubtree(windowAtom, value.atomParentRef.atom())) {
+      windowToSupertree(value.atomParentRef.atom());
+      return;
     }
 
-    // Otherwise go up from the selection to find the highest parent where this is still visible
-    if (windowVisual == null) {
-      windowAtom = value.atomParentRef.atom();
-      int depth = 0;
-      while (true) {
-        depth += windowAtom.type.depthScore();
-        if (depth >= depthThreshold) break;
-        if (windowAtom.valueParentRef == null) break;
-        windowAtom = windowAtom.valueParentRef.value.atomParentRef.atom();
-      }
-
-      if (depth < depthThreshold) {
-        windowAtom = null;
-        windowVisual = document.root.ensureVisual(this, null, ROMap.empty, 0, 0);
-      } else {
-        windowVisual = windowAtom.ensureVisual(this, null, ROMap.empty, 0, 0);
-      }
+    // Otherwise from the selection go towards the root to find the last parent where the selection
+    // is still visible
+    Atom nextWindow = value.atomParentRef.atom();
+    int depth = 0;
+    while (true) {
+      if (nextWindow == windowAtom) return;
+      if (nextWindow.valueParentRef == null) break;
+      depth += nextWindow.type.depthScore();
+      if (depth >= ellipsizeThreshold) break;
+      nextWindow = nextWindow.valueParentRef.value.atomParentRef.atom();
     }
 
-    if (!overlapsWindow(oldWindow)) oldWindow.uproot(this, windowVisual);
+    if (isSubtree(windowAtom, nextWindow)) windowToSupertree(nextWindow);
+    else windowToNonSupertree(nextWindow);
   }
 
-  private boolean overlapsWindow(final Visual visual) {
-    final Visual stop = windowAtom == null ? document.root.visual : windowAtom.visual;
-    Visual at = visual;
+  public void windowClear() {
+    window = false;
+    windowAtom = document.root;
+    document.root.ensureVisual(this, null, ROMap.empty, 0, 0);
+    changeGlobalTags(
+        new TagsChange(
+            TSSet.of(), TSSet.of(Tags.TAG_GLOBAL_WINDOWED, Tags.TAG_GLOBAL_ROOT_WINDOW)));
+  }
+
+  /**
+   * Window tree is subtree or non-overlapping (or equal to) current window tree
+   *
+   * @param tree
+   */
+  private void windowToNonSupertree(Atom tree) {
+    window = true;
+    boolean wasRoot = windowAtom == document.root;
+    final Visual oldWindow = windowAtom.visual;
+    windowAtom = tree;
+    Visual windowVisual = windowAtom.ensureVisual(this, null, ROMap.empty, 0, 0);
+    oldWindow.uproot(this, windowVisual);
+    if (wasRoot) {
+      changeGlobalTags(
+          new TagsChange(TSSet.of(Tags.TAG_GLOBAL_WINDOWED, Tags.TAG_GLOBAL_WINDOWED), TSSet.of()));
+    } else {
+      changeGlobalTags(
+          new TagsChange(TSSet.of(Tags.TAG_GLOBAL_WINDOWED), TSSet.of(Tags.TAG_GLOBAL_WINDOWED)));
+    }
+  }
+
+  /**
+   * New window is the supertree (including equal to) of the current window tree
+   *
+   * @param supertree
+   */
+  private void windowToSupertree(Atom supertree) {
+    window = true;
+    windowAtom = supertree;
+    windowAtom.ensureVisual(this, null, ROMap.empty, 0, 0);
+    if (supertree == document.root)
+      changeGlobalTags(
+          new TagsChange(
+              TSSet.of(Tags.TAG_GLOBAL_WINDOWED, Tags.TAG_GLOBAL_ROOT_WINDOW), TSSet.of()));
+    else changeGlobalTags(new TagsChange(TSSet.of(Tags.TAG_GLOBAL_WINDOWED), TSSet.of()));
+  }
+
+  public boolean isSubtree(Atom subtree, Atom supertree) {
+    Atom at = subtree;
     while (true) {
-      if (at == stop) return true;
-      if (at.parent() == null) break;
-      at = at.parent().visual();
+      if (at == supertree) return true;
+      if (at.valueParentRef == null) break;
+      at = at.valueParentRef.value.atomParentRef.atom();
     }
     return false;
   }
 
-  public void setAtomWindow(final Atom atom) {
-    TSSet<String> addTags = new TSSet<>();
-    TSSet<String> removeTags = new TSSet<>();
-    if (!window) {
-      window = true;
-      addTags.add(Tags.TAG_GLOBAL_WINDOWED);
+  public void windowExact(final Atom atom) {
+    if (isSubtree(windowAtom, atom)) {
+      windowToSupertree(atom);
+    } else {
+      windowToNonSupertree(atom);
     }
-    if (windowAtom == null) removeTags.add(Tags.TAG_GLOBAL_ROOT_WINDOW);
-    final Visual oldWindow = windowAtom == null ? document.root.visual : windowAtom.visual;
-    windowAtom = atom;
-    final Visual windowVisual = atom.ensureVisual(this, null, ROMap.empty, 0, 0);
-    if (!overlapsWindow(oldWindow)) oldWindow.uproot(this, windowVisual);
-    changeGlobalTags(new TagsChange(addTags, removeTags));
-    idleLayBricksOutward();
   }
 
   public void changeGlobalTags(final TagsChange change) {
     if (!change.apply(globalTags)) return;
     banner.tagsChanged(this);
     details.tagsChanged(this);
+    windowAtom.visual.tagsChanged(this);
     ImmutableList.copyOf(globalTagsChangeListeners).forEach(listener -> listener.tagsChanged(this));
   }
 
-  private void idleLayBricksOutward() {
-    idleLayBricksBeforeStart(foreground.children.get(0).children.get(0));
-    idleLayBricksAfterEnd(last(last(foreground.children).children));
+  public void triggerIdleLayBricksOutward() {
+    triggerIdleLayBricksBeforeStart(foreground.children.get(0).children.get(0));
+    triggerIdleLayBricksAfterEnd(last(last(foreground.children).children));
   }
 
   public void clearSelection() {
@@ -594,19 +625,17 @@ public class Context {
     cursor = null;
   }
 
-  public void setSelection(final Cursor cursor) {
+  public void setCursor(final Cursor cursor) {
     final int localToken = ++selectToken;
     final Cursor oldCursor = this.cursor;
     this.cursor = cursor;
-
     if (oldCursor != null) {
       oldCursor.clear(this);
     }
-
     if (localToken != selectToken) return;
-
-    ImmutableSet.copyOf(selectionListeners).forEach(l -> l.selectionChanged(this, cursor));
+    ImmutableSet.copyOf(cursorListeners).forEach(l -> l.cursorChanged(this, cursor));
     selectionTagsChanged();
+    triggerIdleLayBricksOutward();
   }
 
   public void selectionTagsChanged() {
@@ -630,23 +659,12 @@ public class Context {
         });
   }
 
-  public void windowClear() {
-    windowClearNoLayBricks();
-    idleLayBricksOutward();
-  }
-
-  public void windowClearNoLayBricks() {
-    window = false;
-    windowAtom = null;
-    document.root.ensureVisual(this, null, ROMap.empty, 0, 0);
-    changeGlobalTags(
-        new TagsChange(
-            new TSSet<>(),
-            new TSSet<String>().add(Tags.TAG_GLOBAL_WINDOWED).add(Tags.TAG_GLOBAL_ROOT_WINDOW)));
-  }
-
   public ROSetRef<String> getGlobalTags() {
     return globalTags;
+  }
+
+  public Atom windowAtom() {
+    return windowAtom;
   }
 
   public static interface ContextIntListener {
@@ -670,17 +688,14 @@ public class Context {
   }
 
   public interface SelectionListener {
-
-    public abstract void selectionChanged(Context context, Cursor cursor);
+    public abstract void cursorChanged(Context context, Cursor cursor);
   }
 
   public abstract static class HoverListener {
-
     public abstract void hoverChanged(Context context, Hoverable selection);
   }
 
   public abstract static class TagsListener {
-
     public abstract void tagsChanged(Context context);
   }
 
@@ -865,35 +880,27 @@ public class Context {
     public boolean run(final Context context) {
       if (!window) return false;
       windowClear();
+      triggerIdleLayBricksOutward();
       return true;
     }
   }
 
   @Action.StaticID(id = "window_up")
-  private class ActionWindowToParent extends Action {
-    private final Document document;
-
-    public ActionWindowToParent(final Document document) {
-      this.document = document;
-    }
+  private class ActionWindowTowardsRoot extends Action {
+    public ActionWindowTowardsRoot() {}
 
     @Override
     public boolean run(final Context context) {
       if (!window) return false;
-      if (windowAtom == null) return false;
-      final Atom atom = windowAtom;
-      if (atom == document.root) {
-        windowAtom = null;
-      } else {
-        windowAtom = atom.valueParentRef.value.atomParentRef.atom();
-      }
-      idleLayBricksOutward();
+      if (windowAtom == document.root) return false;
+      windowToSupertree(windowAtom.valueParentRef.value.atomParentRef.atom());
+      triggerIdleLayBricksOutward();
       return true;
     }
   }
 
   @Action.StaticID(id = "window_down")
-  private class ActionWindowDown extends Action {
+  private class ActionWindowTowardsCursor extends Action {
     @Override
     public boolean run(final Context context) {
       if (!window) return false;
@@ -908,11 +915,8 @@ public class Context {
         at = at.parent().atomVisual();
       }
       if (windowNext == null) return false;
-      final Visual oldWindowVisual = windowAtom.visual;
-      windowAtom = windowNext.atom;
-      windowNext.root(context, null, ROMap.empty, 0, 0);
-      oldWindowVisual.uproot(context, windowNext);
-      idleLayBricksOutward();
+      context.windowToNonSupertree(windowNext.atom);
+      triggerIdleLayBricksOutward();
       return true;
     }
   }

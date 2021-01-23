@@ -68,7 +68,7 @@ public abstract class Visual {
 		this.visualDepth = depth;
 	}
 
-	public abstract boolean selectDown(final Context context);
+	public abstract boolean selectAnyChild(final Context context);
 
 	public Hoverable hover(final Context context, final Vector point) {
 		return parent().hover(context, point);

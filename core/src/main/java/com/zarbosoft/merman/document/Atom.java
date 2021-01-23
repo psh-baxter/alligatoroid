@@ -24,6 +24,9 @@ import java.util.Map;
 
 public class Atom {
   public final TSMap<String, Value> fields;
+  /**
+   * Null if root
+   */
   public Value.Parent<?> valueParentRef;
   public final AtomType type;
   public VisualAtom visual;

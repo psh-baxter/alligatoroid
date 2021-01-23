@@ -129,6 +129,7 @@ public class GeneralTestWizard {
       System.out.printf(" %02d  ", i);
       for (int j = 0; j < course.children.size(); ++j) {
         Brick brick = course.children.get(j);
+        if (inner.context.foreground.cornerstone == brick) System.out.format("*");
         if (brick instanceof BrickText) {
           System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
         } else if (brick instanceof BrickImage) {
@@ -139,8 +140,12 @@ public class GeneralTestWizard {
           System.out.printf("\\w ");
         } else throw new Assertion();
       }
+      if (inner.context.foreground.cornerstoneCourse == course) {
+        System.out.format(" **");
+      }
       System.out.printf("\n");
     }
+    System.out.format("\n");
     return this;
   }
 
@@ -197,7 +202,7 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard select(String... path) {
     Object got = inner.context.syntaxLocate(new Path(path));
-    if (got instanceof Atom) ((Atom) got).visual.selectDown(inner.context);
+    if (got instanceof Atom) ((Atom) got).visual.selectAnyChild(inner.context);
     else if (got instanceof Value) ((Value) got).selectInto(inner.context);
     else throw Assertion.format("Invalid path %s", (Object) path);
     return this;

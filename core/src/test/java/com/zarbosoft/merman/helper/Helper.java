@@ -206,14 +206,16 @@ public class Helper {
   }
 
   public static Context buildDoc(final Syntax syntax, final Atom... root) {
-    return buildDoc(idleTask -> {}, limit -> {}, syntax, false, root);
+    return buildDoc(new Context.InitialConfig(), idleTask -> {}, limit -> {}, syntax, false, root);
   }
 
   public static Context buildDoc(
-          final Consumer<IterationTask> addIteration,
-          final Consumer<Integer> flushIteration,
-          final Syntax syntax,
-          boolean startWindowed, final Atom... root) {
+      Context.InitialConfig contextConfig,
+      final Consumer<IterationTask> addIteration,
+      final Consumer<Integer> flushIteration,
+      final Syntax syntax,
+      boolean startWindowed,
+      final Atom... root) {
     final Document doc =
         new Document(
             syntax,
@@ -227,6 +229,7 @@ public class Helper {
                             Arrays.asList(root))))));
     final Context context =
         new Context(
+            contextConfig,
             syntax,
             doc,
             new MockeryDisplay(),

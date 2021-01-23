@@ -21,13 +21,8 @@ public class ValuePrimitive extends Value {
 
   @Override
   public boolean selectInto(final Context context) {
-    if (context.window) {
-      if (visual == null) {
-        context.createWindowForSelection(this, context.ellipsizeThreshold);
-      }
-    }
-    final int length = data.length();
-    visual.select(context, true, length, length);
+    if (context.window) context.windowAdjustMinimalTo(this);
+    visual.select(context, true, data.length(), data.length());
     return true;
   }
 

@@ -63,7 +63,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               if (value.data.isEmpty()) {
                 // Was blank, now ellipsized
                 if (empty != null) empty.destroy(context);
-                context.idleLayBricks(parent, 0, 1, 1, null, null);
+                context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
                 return;
               } else if (add.isEmpty() && remove == value.data.size()) {
                 // Was ellipsized, now blank
@@ -111,7 +111,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
             if (!add.isEmpty()) {
               if (empty != null) empty.destroy(context);
               final int layIndex = visualIndex(index);
-              context.idleLayBricks(
+              context.triggerIdleLayBricks(
                   parent,
                   layIndex,
                   visualIndex(index + add.size()) - layIndex,
@@ -120,7 +120,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
                   i -> children.get(i).getLastBrick(context));
             } else if (value.data.isEmpty()) {
               if (ellipsis != null) ellipsis.destroy(context);
-              context.idleLayBricks(parent, 0, 1, 1, null, null);
+              context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
             }
 
             // Fix hover/selection
@@ -284,8 +284,8 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               }
 
               @Override
-              public boolean selectDown(final Context context) {
-                return nodeVisual.selectDown(context);
+              public boolean selectAnyChild(final Context context) {
+                return nodeVisual.selectAnyChild(context);
               }
 
               @Override
@@ -398,7 +398,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     if (hoverable != null) hoverable.notifySelected(context, start, end);
     if (selection == null) {
       selection = new ArrayCursor(context, this, leadFirst, start, end);
-      context.setSelection(selection);
+      context.setCursor(selection);
     } else {
       selection.setRange(context, start, end);
     }
@@ -426,8 +426,8 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
   }
 
   @Override
-  public boolean selectDown(final Context context) {
-    value.select(context, true, 0, 0);
+  public boolean selectAnyChild(final Context context) {
+    value.selectInto(context, true, 0, 0);
     return true;
   }
 
@@ -466,19 +466,19 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     this.parent = parent;
     if (value.data.isEmpty()) {
       super.root(context, parent, alignments, visualDepth, depthScore);
-      if (empty == null) context.idleLayBricks(parent, 0, 1, 1, null, null);
+      if (empty == null) context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
     } else if (ellipsize(context)) {
       if (!children.isEmpty()) {
         remove(context, 0, children.size());
       }
       super.root(context, parent, alignments, visualDepth, depthScore);
-      if (ellipsis == null) context.idleLayBricks(parent, 0, 1, 1, null, null);
+      if (ellipsis == null) context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
     } else {
       if (ellipsis != null) ellipsis.destroy(context);
       super.root(context, parent, alignments, visualDepth, depthScore);
       if (children.isEmpty()) {
         coreChange(context, 0, 0, value.data);
-        context.idleLayBricks(parent, 0, 1, 1, null, null);
+        context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
       }
     }
   }
@@ -663,7 +663,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       return self.children.get(beginIndex);
     }
 
-    @Override
+      @Override
     public SelectionState saveState() {
       return new ArraySelectionState(self.value, leadFirst, beginIndex, endIndex);
     }
@@ -694,7 +694,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       @Override
       public boolean run(final Context context) {
 
-        return self.value.data.get(beginIndex).visual.selectDown(context);
+        return self.value.data.get(beginIndex).visual.selectAnyChild(context);
       }
     }
 
@@ -812,8 +812,9 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       @Override
       public boolean run(final Context context) {
         final Atom root = self.value.data.get(beginIndex);
-        if (root.visual.selectDown(context)) {
-          context.setAtomWindow(root);
+        if (root.visual.selectAnyChild(context)) {
+          context.windowExact(root);
+          context.triggerIdleLayBricksOutward();
           return true;
         }
         return false;
@@ -837,7 +838,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
 
     @Override
     public void select(final Context context) {
-      value.select(context, leadFirst, start, end);
+      value.selectInto(context, leadFirst, start, end);
     }
   }
 
