@@ -1,0 +1,56 @@
+package com.zarbosoft.pidgoon.nodes;
+
+import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.internal.BaseParent;
+import com.zarbosoft.pidgoon.internal.Parent;
+import com.zarbosoft.pidgoon.Store;
+import com.zarbosoft.pidgoon.nodes.Reference.RefParent;
+import com.zarbosoft.pidgoon.parse.Parse;
+import org.pcollections.PMap;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.function.BiFunction;
+import java.util.function.Consumer;
+
+import static com.zarbosoft.rendaw.common.Common.enumerate;
+
+/** Match exactly one child. */
+public class Union extends Node {
+  List<Node> children = new ArrayList<>();
+
+  public Union add(final Node child) {
+    children.add(child);
+    return this;
+  }
+
+  public <T> Union apply(Consumer<Union> c) {
+    c.accept(this);
+    return this;
+  }
+
+  @Override
+  public void context(
+      final Parse context,
+      final Store store,
+      final Parent parent,
+      final PMap<Object, RefParent> seen,
+      final Object cause) {
+    enumerate(children.stream())
+        .forEach(
+            p -> {
+              p.second.context(
+                  context,
+                  store.push(),
+                  new BaseParent(parent) {
+                    @Override
+                    public void advance(final Parse step, final Store store, final Object cause) {
+                      parent.advance(step, store.pop(), cause);
+                    }
+                  },
+                  seen,
+                  cause);
+            });
+  }
+}
