@@ -1,9 +1,8 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
-import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontSpaceBuilder {
   private final TSSet<String> tags = new TSSet<>();

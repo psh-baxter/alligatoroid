@@ -3,7 +3,7 @@ package com.zarbosoft.merman.syntax.back;
 import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.rendaw.common.TSMap;
 
 public abstract class BaseBackArraySpec extends BackSpecData {
 

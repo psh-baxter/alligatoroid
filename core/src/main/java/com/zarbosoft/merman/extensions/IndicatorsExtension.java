@@ -7,9 +7,9 @@ import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.tags.Tags;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.ROSetRef;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROSetRef;
 
 import java.util.List;
 

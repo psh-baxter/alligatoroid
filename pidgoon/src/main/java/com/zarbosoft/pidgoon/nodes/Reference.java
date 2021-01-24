@@ -4,7 +4,7 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.internal.Parent;
 import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.parse.Parse;
-import org.pcollections.PMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,7 @@ import java.util.List;
 public class Reference extends Node {
   private final Object key;
   private Node base = null;
+
   public Reference(final Object key) {
     super();
     this.key = key;
@@ -23,14 +24,14 @@ public class Reference extends Node {
       final Parse context,
       final Store store,
       final Parent parent,
-      final PMap<Object, RefParent> seen,
+      final ROMap<Object, RefParent> seen,
       final Object cause) {
-    if (seen.containsKey(key)) {
+    if (seen.has(key)) {
       seen.get(key).loopParents.add(parent);
       return;
     }
     final RefParent subParent = new RefParent(parent);
-    get(context).context(context, store.push(), subParent, seen.plus(key, subParent), cause);
+    get(context).context(context, store.push(), subParent, seen.mut().put(key, subParent), cause);
   }
 
   private Node get(final Parse context) {
@@ -71,11 +72,6 @@ public class Reference extends Node {
     public long size(final Parent stopAt, final long start) {
       if (stopAt == this) return start;
       return originalParent.size(stopAt, start + 1);
-    }
-
-    @Override
-    public void cut(final Parse step, final String name) {
-      originalParent.cut(step, name);
     }
   }
 }

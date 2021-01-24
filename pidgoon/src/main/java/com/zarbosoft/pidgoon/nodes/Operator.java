@@ -7,7 +7,7 @@ import com.zarbosoft.pidgoon.internal.BaseParent;
 import com.zarbosoft.pidgoon.internal.Parent;
 import com.zarbosoft.pidgoon.nodes.Reference.RefParent;
 import com.zarbosoft.pidgoon.parse.Parse;
-import org.pcollections.PMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -31,7 +31,7 @@ public abstract class Operator<S extends Store> extends Node {
       final Parse context,
       final Store store,
       final Parent parent,
-      final PMap<Object, RefParent> seen,
+      final ROMap<Object, RefParent> seen,
       final Object cause) {
     if (root == null) {
       parent.advance(context, process((S) store).pop(), cause);

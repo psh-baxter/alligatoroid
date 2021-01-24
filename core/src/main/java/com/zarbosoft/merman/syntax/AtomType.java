@@ -1,15 +1,9 @@
 package com.zarbosoft.merman.syntax;
 
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Sets;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.syntax.back.BackAtomSpec;
@@ -42,12 +36,16 @@ import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Set;
 
 public abstract class AtomType {
   public final ROMap<String, BackSpecData> fields;
@@ -92,7 +90,7 @@ public abstract class AtomType {
             s -> {
               if (!(s instanceof BackSpecData)) return true;
               BackSpecData s1 = (BackSpecData) s;
-              BackSpecData old = fields.put(s1.id, s1);
+              BackSpecData old = fields.putReplace(s1.id, s1);
               if (old != null) errors.add(new DuplicateBackId(s1.id));
               if (s instanceof BaseBackSimpleArraySpec) return false;
               return true;
@@ -162,14 +160,14 @@ public abstract class AtomType {
       e.parent = new NodeBackParent(i);
     }
     {
-      final Set<String> fieldsUsedFront = new HashSet<>();
+      final TSSet<String> fieldsUsedFront = new TSSet<>();
       for (int i = 0; i < front().size(); ++i) {
         FrontSpec e = front().get(i);
         e.finish(subErrors, new Path("front").add(Integer.toString(i)), this, fieldsUsedFront);
       }
-      final Set<String> missing = Sets.difference(fields.keys(), fieldsUsedFront);
+      final TSSet<String> missing = fields.keys().difference(fieldsUsedFront);
       if (!missing.isEmpty()) {
-        subErrors.add(new UnusedBackData(missing));
+        subErrors.add(new UnusedBackData(missing.ro()));
       }
     }
     if (!subErrors.isEmpty()) {
@@ -225,7 +223,7 @@ public abstract class AtomType {
       } else if (next instanceof BackAtomSpec) {
         if (((BackAtomSpec) next).id.equals(id)) return next;
       } else if (next instanceof BackFixedTypeSpec) {
-        stack.addLast(Iterators.singletonIterator(((BackFixedTypeSpec) next).value));
+        stack.addLast(Arrays.asList(((BackFixedTypeSpec) next).value).iterator());
       } else if (next instanceof BackTypeSpec) {
         if (((BackTypeSpec) next).type.equals(id)) return next;
       } else if (next instanceof BackPrimitiveSpec) {

@@ -4,8 +4,8 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.banner.BannerMessage;
 import com.zarbosoft.merman.editor.visual.Visual;
-import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 

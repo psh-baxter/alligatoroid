@@ -2,7 +2,7 @@ package com.zarbosoft.pidgoon.events;
 
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.Store;
-import com.zarbosoft.pidgoon.errors.NoResultsError;
+import com.zarbosoft.pidgoon.errors.NoResults;
 import com.zarbosoft.pidgoon.parse.Parse;
 import com.zarbosoft.rendaw.common.Assertion;
 
@@ -56,7 +56,7 @@ public class ParseEventSink<O> implements EventSink {
   }
 
   public List<O> allResults() {
-    if (context.results.isEmpty()) throw new NoResultsError(context);
+    if (context.results.isEmpty()) throw new NoResults(context);
     return (List<O>) context.results;
   }
 

@@ -1,11 +1,9 @@
 package com.zarbosoft.merman.extensions.hotkeys;
 
 import com.zarbosoft.merman.extensions.hotkeys.grammar.Node;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
-
-import java.util.List;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
 
 public class HotkeyRule {
   public static final boolean DEFAULT_FREE_TYPING = true;

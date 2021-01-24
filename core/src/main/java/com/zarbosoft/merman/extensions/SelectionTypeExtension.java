@@ -4,12 +4,12 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.banner.BannerMessage;
-import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
+import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.format.Format;
+import com.zarbosoft.rendaw.common.TSMap;
 
 public class SelectionTypeExtension {
   private final Format format;
@@ -54,11 +54,11 @@ public class SelectionTypeExtension {
           message.text =
               format.format(
                   new TSMap<String, Object>()
-                      .putChain("outer_id", outerId)
-                      .putChain("outer_name", outerName)
-                      .putChain("part", part)
-                      .putChain("inner_id", innerId)
-                      .putChain("inner_name", innerName));
+                      .put("outer_id", outerId)
+                      .put("outer_name", outerName)
+                      .put("part", part)
+                      .put("inner_id", innerId)
+                      .put("inner_name", innerName));
           context.banner.addMessage(context, message);
           if (oldMessage != null) {
             context.banner.removeMessage(

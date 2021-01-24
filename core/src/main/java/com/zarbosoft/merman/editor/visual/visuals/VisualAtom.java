@@ -1,7 +1,5 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
@@ -13,25 +11,19 @@ import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.TSMap;
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
-import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
-
-import static com.zarbosoft.rendaw.common.Common.enumerate;
-import static com.zarbosoft.rendaw.common.Common.iterable;
-import static com.zarbosoft.rendaw.common.Common.last;
 
 public class VisualAtom extends Visual {
   public final Atom atom;
@@ -40,8 +32,8 @@ public class VisualAtom extends Visual {
   public boolean compact = false;
   private final TSMap<String, Alignment> alignments = new TSMap<>();
   private final Map<String, Alignment> localAlignments = new HashMap<>();
-  public final List<Visual> children = new ArrayList<>();
-  private final List<Visual> selectable = new ArrayList<>();
+  public final TSList<Visual> children = new TSList<>();
+  private final TSList<Visual> selectable = new TSList<>();
   public Brick firstBrick;
   Attachment firstBrickListener =
       new Attachment() {
@@ -73,12 +65,10 @@ public class VisualAtom extends Visual {
       localAlignments.put(entry.getKey(), alignment);
     }
     rootInner(context, parent, alignments, visualDepth, depthScore);
-    for (final Pair<Integer, FrontSpec> pair :
-        iterable(enumerate(Common.stream(atom.type.front())))) {
-      final int index = pair.first;
-      final FrontSpec front = pair.second;
+    for (int index = 0; index < atom.type.front().size(); ++index) {
+      FrontSpec front = atom.type.front().get(index);
       final Visual visual =
-          pair.second.createVisual(
+          front.createVisual(
               context,
               front.field() == null
                   ? new ChildParent(index)
@@ -121,11 +111,6 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public Stream<Brick> streamBricks() {
-    return children.stream().flatMap(child -> child.streamBricks());
-  }
-
-  @Override
   public Brick createOrGetFirstBrick(final Context context) {
     return children.get(0).createOrGetFirstBrick(context);
   }
@@ -137,7 +122,7 @@ public class VisualAtom extends Visual {
 
   @Override
   public Brick createLastBrick(final Context context) {
-    return last(children).createLastBrick(context);
+    return children.last().createLastBrick(context);
   }
 
   @Override
@@ -147,7 +132,7 @@ public class VisualAtom extends Visual {
 
   @Override
   public Brick getLastBrick(final Context context) {
-    return last(children).getLastBrick(context);
+    return children.last().getLastBrick(context);
   }
 
   public int spacePriority() {
@@ -171,12 +156,11 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public Iterable<Pair<Brick, Brick.Properties>> getLeafPropertiesForTagsChange(
-      final Context context, final TagsChange change) {
-    return Iterables.concat(
-        children.stream()
-            .map(c -> c.getLeafPropertiesForTagsChange(context, change))
-            .toArray(Iterable[]::new));
+  public void getLeafPropertiesForTagsChange(
+          final Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, final TagsChange change) {
+    for (Visual child : children) {
+      child.getLeafPropertiesForTagsChange(context, brickProperties, change);
+    }
   }
 
   private void rootInner(
@@ -198,7 +182,7 @@ public class VisualAtom extends Visual {
     this.alignments.putAll(alignments);
     for (final Map.Entry<String, Alignment> alignment : localAlignments.entrySet()) {
       alignment.getValue().root(context, alignments);
-      this.alignments.put(alignment.getKey(), alignment.getValue());
+      this.alignments.putReplaceNull(alignment.getKey(), alignment.getValue());
     }
   }
 
@@ -220,7 +204,10 @@ public class VisualAtom extends Visual {
   public void uproot(final Context context, final Visual root) {
     if (root == this) return;
     atom.visual = null;
-    for (final Visual child : Lists.reverse(children)) child.uproot(context, root);
+    for (int i = children.size(); i > 0; --i) {
+      Visual child = children.get(i - 1);
+      child.uproot(context, root);
+    }
     for (final Map.Entry<String, Alignment> entry : localAlignments.entrySet())
       entry.getValue().destroy(context);
   }

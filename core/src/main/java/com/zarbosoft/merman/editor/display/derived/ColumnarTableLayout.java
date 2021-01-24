@@ -7,6 +7,8 @@ import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +17,7 @@ public class ColumnarTableLayout {
 	public final Group group;
 	private final int maxTransverse;
 	int columns;
-	List<List<DisplayNode>> rows = new ArrayList<>();
+	TSList<ROList<DisplayNode>> rows = new TSList<>();
 
 	public ColumnarTableLayout(final Display display, final int maxTransverse) {
 		this.group = display.group();
@@ -26,7 +28,7 @@ public class ColumnarTableLayout {
 		this(context.display, maxTransverse);
 	}
 
-	public void add(final List<DisplayNode> row) {
+	public void add(final ROList<DisplayNode> row) {
 		columns = Math.max(columns, row.size());
 		rows.add(row);
 		for (final DisplayNode node : row)
@@ -35,7 +37,6 @@ public class ColumnarTableLayout {
 
 	public void layout(final Context context) {
 		int start = 0;
-		final int converseSum = 0;
 		int columnEdge = 0;
 		while (start < rows.size()) {
 			int newColumnEdge = 0;
@@ -49,7 +50,7 @@ public class ColumnarTableLayout {
 				for (int y = start; y < rows.size(); ++y) {
 					int ascent = 0;
 					int descent = 0;
-					final List<DisplayNode> row = rows.get(y);
+					final ROList<DisplayNode> row = rows.get(y);
 					for (int x = 0; x < columns; ++x) {
 						final DisplayNode cell = row.get(x);
 						if (cell instanceof Text) {
@@ -74,7 +75,7 @@ public class ColumnarTableLayout {
 
 			// Place everything
 			for (int y = start; y < end; ++y) {
-				final List<DisplayNode> row = rows.get(y);
+				final ROList<DisplayNode> row = rows.get(y);
 				int converse = columnEdge;
 				for (int x = 0; x < columns; ++x) {
 					final DisplayNode cell = row.get(x);

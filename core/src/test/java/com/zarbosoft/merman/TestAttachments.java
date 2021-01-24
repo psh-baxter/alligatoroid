@@ -1,6 +1,5 @@
 package com.zarbosoft.merman;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
@@ -15,11 +14,13 @@ import com.zarbosoft.merman.helper.TypeBuilder;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.rendaw.common.Common;
+import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -32,7 +33,7 @@ import static org.junit.Assert.assertThat;
 public class TestAttachments {
 	@Parameterized.Parameters
 	public static Iterable<Object[]> parameters() {
-		return ImmutableList.of(new Object[] {false}, new Object[] {true});
+		return Arrays.asList(new Object[] {false}, new Object[] {true});
 	}
 
 	final public static FreeAtomType text;
@@ -47,7 +48,7 @@ public class TestAttachments {
 	}
 
 	public TestAttachments(final boolean flipSetOrder) {
-		Context.createSet = () -> new Set() {
+		Context.createSet = () -> new TSSet<>(new Set() {
 			List<Object> inner = new ArrayList<>();
 
 			@Override
@@ -115,7 +116,7 @@ public class TestAttachments {
 			@Override
 			public boolean retainAll(final Collection c) {
 				boolean out = false;
-				for (final Object o : ImmutableList.copyOf(c)) {
+				for (final Object o : new ArrayList<>(c)) {
 					if (!c.contains(o)) {
 						out = true;
 						remove(o);
@@ -140,7 +141,7 @@ public class TestAttachments {
 			public void clear() {
 				inner.clear();
 			}
-		};
+		});
 	}
 
 	@Test

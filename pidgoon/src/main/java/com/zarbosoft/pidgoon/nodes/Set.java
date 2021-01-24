@@ -1,32 +1,31 @@
 package com.zarbosoft.pidgoon.nodes;
 
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.internal.BaseParent;
 import com.zarbosoft.pidgoon.internal.Parent;
-import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.nodes.Reference.RefParent;
 import com.zarbosoft.pidgoon.parse.Parse;
-import com.zarbosoft.rendaw.common.Pair;
-import org.pcollections.HashTreePMap;
-import org.pcollections.PMap;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROSetRef;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.function.Consumer;
 
 /** Match each child exactly once. */
 public class Set extends Node {
-  java.util.Set<Pair<Node, Boolean>> children = new HashSet<>();
+  TSSet<ROPair<Node, Boolean>> children = new TSSet<>();
 
   public Set add(final Node child) {
-    children.add(new Pair<>(child, true));
+    children.add(new ROPair<>(child, true));
     return this;
   }
 
   public Set add(final Node child, final boolean required) {
-    children.add(new Pair<>(child, required));
+    children.add(new ROPair<>(child, required));
     return this;
   }
 
@@ -35,17 +34,12 @@ public class Set extends Node {
     return this;
   }
 
-  public Set visit(final Consumer<Set> visitor) {
-    visitor.accept(this);
-    return this;
-  }
-
   @Override
   public void context(
       final Parse context,
       final Store store,
       final Parent parent,
-      final PMap<Object, RefParent> seen,
+      final ROMap<Object, RefParent> seen,
       final Object cause) {
     advance(context, store, parent, seen, cause, children);
   }
@@ -54,10 +48,17 @@ public class Set extends Node {
       final Parse step,
       final Store store,
       final Parent parent,
-      final PMap<Object, RefParent> seen,
+      final ROMap<Object, RefParent> seen,
       final Object cause,
-      final java.util.Set<Pair<Node, Boolean>> remaining) {
-    if (remaining.stream().noneMatch(c -> c.second)) {
+      final ROSetRef<ROPair<Node, Boolean>> remaining) {
+    boolean matched = false;
+    for (ROPair<Node, Boolean> p : remaining) {
+      if (p.second) {
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) {
       parent.advance(step, store, cause);
     }
     remaining.forEach(
@@ -65,17 +66,17 @@ public class Set extends Node {
           c.first.context(
               step,
               store.push(),
-              new SetParent(parent, Sets.difference(remaining, ImmutableSet.of(c))),
+              new SetParent(parent, remaining.mut().remove(c).ro()),
               seen,
               cause);
         });
   }
 
   private class SetParent extends BaseParent {
-    java.util.Set<Pair<Node, Boolean>> remaining;
+    ROSet<ROPair<Node, Boolean>> remaining;
     Parent parent;
 
-    public SetParent(final Parent parent, final java.util.Set<Pair<Node, Boolean>> remaining) {
+    public SetParent(final Parent parent, final ROSet<ROPair<Node, Boolean>> remaining) {
       super(parent);
       this.parent = parent;
       this.remaining = remaining;
@@ -83,7 +84,7 @@ public class Set extends Node {
 
     @Override
     public void advance(final Parse step, final Store store, final Object cause) {
-      Set.this.advance(step, store.pop(), parent, HashTreePMap.empty(), cause, remaining);
+      Set.this.advance(step, store.pop(), parent, ROMap.empty, cause, remaining);
     }
   }
 }

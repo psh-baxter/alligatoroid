@@ -3,13 +3,16 @@ package com.zarbosoft.merman.syntax.back;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.editor.serialization.EventConsumer;
+import com.zarbosoft.merman.editor.serialization.WriteState;
+import com.zarbosoft.merman.editor.serialization.WriteStateArrayEnd;
+import com.zarbosoft.merman.editor.serialization.WriteStateBack;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -65,10 +68,10 @@ public class BackFixedArraySpec extends BackSpec {
 
   @Override
   public void write(
-    Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer) {
+          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.arrayBegin();
-    stack.addLast(new Write.WriteStateArrayEnd());
-    stack.addLast(new Write.WriteStateBack(data, elements.iterator()));
+    stack.addLast(new WriteStateArrayEnd());
+    stack.addLast(new WriteStateBack(data, elements.iterator()));
   }
 
   @Override

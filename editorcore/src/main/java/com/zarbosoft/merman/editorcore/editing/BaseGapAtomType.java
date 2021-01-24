@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editorcore.editing;
 
 import com.google.common.collect.ImmutableMap;
-import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 

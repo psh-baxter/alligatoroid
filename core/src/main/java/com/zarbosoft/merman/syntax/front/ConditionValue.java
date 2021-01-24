@@ -7,8 +7,7 @@ import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.condition.ConditionAttachment;
 import com.zarbosoft.rendaw.common.DeadCode;
-
-import java.util.List;
+import com.zarbosoft.rendaw.common.ROList;
 
 public class ConditionValue extends ConditionType {
   public final String field;
@@ -77,7 +76,7 @@ public class ConditionValue extends ConditionType {
 
         @Override
         public void changed(
-            final Context context, final int index, final int remove, final List<Atom> add) {
+            final Context context, final int index, final int remove, final ROList<Atom> add) {
           if (((ValueArray) value).data.isEmpty()) {
             setState(context, false);
           } else setState(context, true);

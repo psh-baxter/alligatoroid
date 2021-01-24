@@ -2,12 +2,10 @@ package com.zarbosoft.merman.syntax.style;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Font;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSList;
-import com.zarbosoft.merman.misc.TSSet;
-
-import static com.zarbosoft.rendaw.common.Common.uncheck;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class Style {
   public final ROSet<String> tags;

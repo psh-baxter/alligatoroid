@@ -3,13 +3,11 @@ package com.zarbosoft.merman.extensions;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
-import com.zarbosoft.merman.misc.TSSet;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.zarbosoft.rendaw.common.Common.enumerate;
 
 public class ModesExtension {
   private final List<String> states;
@@ -17,14 +15,11 @@ public class ModesExtension {
 
   public ModesExtension(Context context, List<String> states) {
     this.states = states;
-    context.addActions(
-        this,
-        enumerate(states.stream())
-            .map(
-                pair -> {
-                  return new ActionMode(pair);
-                })
-            .collect(Collectors.toList()));
+    TSList<Action> actions = new TSList<>();
+    for (int i = 0; i < states.size(); ++i) {
+      actions.add(new ActionMode(new ROPair<>(i, states.get(i))));
+    }
+    context.addActions(actions);
     context.changeGlobalTags(TagsChange.add(getTag(state)));
   }
 
@@ -33,9 +28,9 @@ public class ModesExtension {
   }
 
   private class ActionMode extends Action {
-    private final Pair<Integer, String> pair;
+    private final ROPair<Integer, String> pair;
 
-    public ActionMode(final Pair<Integer, String> pair) {
+    public ActionMode(final ROPair<Integer, String> pair) {
       this.pair = pair;
     }
 

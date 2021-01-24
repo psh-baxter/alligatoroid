@@ -4,15 +4,18 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.backevents.EKeyEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectOpenEvent;
-import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.editor.serialization.EventConsumer;
+import com.zarbosoft.merman.editor.serialization.WriteState;
+import com.zarbosoft.merman.editor.serialization.WriteStateRecord;
+import com.zarbosoft.merman.editor.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Set;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -71,10 +74,10 @@ public class BackFixedRecordSpec extends BackSpec {
 
   @Override
   public void write(
-    Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer) {
+          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
-    stack.addLast(new Write.WriteStateRecordEnd());
-    stack.addLast(new Write.WriteStateRecord(data, pairs));
+    stack.addLast(new WriteStateRecordEnd());
+    stack.addLast(new WriteStateRecord(data, pairs));
   }
 
   @Override

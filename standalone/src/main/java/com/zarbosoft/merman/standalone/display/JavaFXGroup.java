@@ -2,10 +2,10 @@ package com.zarbosoft.merman.standalone.display;
 
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Group;
+import com.zarbosoft.rendaw.common.ROList;
 import javafx.scene.Node;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class JavaFXGroup extends JavaFXNode implements Group {
 	javafx.scene.Group group = new javafx.scene.Group();
@@ -18,10 +18,10 @@ public class JavaFXGroup extends JavaFXNode implements Group {
 	}
 
 	@Override
-	public void addAll(final int index, final List<DisplayNode> nodes) {
+	public void addAll(final int index, final ROList<? extends DisplayNode> nodes) {
 		group
 				.getChildren()
-				.addAll(index, nodes.stream().map(node -> ((JavaFXNode) node).node()).collect(Collectors.toList()));
+				.addAll(index, (List)nodes.inner_());
 	}
 
 	@Override

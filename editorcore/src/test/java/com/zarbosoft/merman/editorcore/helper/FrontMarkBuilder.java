@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.editorcore.helper;
 
-import com.zarbosoft.merman.misc.TSSet;
+import com.zarbosoft.rendaw.common.TSSet;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 

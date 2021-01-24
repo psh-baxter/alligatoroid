@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.syntax.error;
 
-import com.google.common.collect.ImmutableMap;
 import com.zarbosoft.merman.syntax.Direction;
 
 public class NotTransverse extends BaseKVError{

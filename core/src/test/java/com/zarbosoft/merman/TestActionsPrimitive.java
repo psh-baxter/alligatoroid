@@ -12,7 +12,6 @@ import com.zarbosoft.merman.helper.MiscSyntax;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import org.junit.Test;
 
-import static com.zarbosoft.merman.helper.Helper.assertTreeEqual;
 import static com.zarbosoft.merman.helper.Helper.buildDoc;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.core.IsEqual.equalTo;

@@ -7,7 +7,7 @@ import com.zarbosoft.pidgoon.State;
 import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.nodes.Reference.RefParent;
 import com.zarbosoft.pidgoon.parse.Parse;
-import org.pcollections.PMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 /** Matches any event/byte. */
 public class Wildcard extends Node {
@@ -16,7 +16,7 @@ public class Wildcard extends Node {
       final Parse context,
       final Store store,
       final Parent parent,
-      final PMap<Object, RefParent> seen,
+      final ROMap<Object, RefParent> seen,
       final Object cause) {
     context.leaves.add(
         new State() {

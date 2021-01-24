@@ -1,22 +1,24 @@
 package com.zarbosoft.merman.syntax.back;
 
 import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.backevents.EKeyEvent;
-import com.zarbosoft.merman.editor.serialization.Write;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.editor.serialization.EventConsumer;
+import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Deque;
 import java.util.Iterator;
 
 public class BackKeySpec extends BaseBackPrimitiveSpec {
 
-  public BackKeySpec(Config config) {
-    super(config);
+  public BackKeySpec(I18nEngine i18n,Config config) {
+    super(i18n,config);
   }
 
   @Override
@@ -37,7 +39,7 @@ public class BackKeySpec extends BaseBackPrimitiveSpec {
 
   @Override
   public void write(
-      Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer) {
+          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.key(((StringBuilder) data.get(id)).toString());
   }
 

@@ -8,10 +8,8 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSetRef;
-
-import java.util.List;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 
 public abstract class VisualFrontAtomFromArray extends VisualFrontAtomBase {
   public final ValueArray value;
@@ -30,7 +28,7 @@ public abstract class VisualFrontAtomFromArray extends VisualFrontAtomBase {
         new ValueArray.Listener() {
           @Override
           public void changed(
-              final Context context, final int index, final int remove, final List<Atom> add) {
+              final Context context, final int index, final int remove, final ROList<Atom> add) {
             set(context, add.get(0));
           }
         };

@@ -23,7 +23,11 @@ public class PrimitiveTestWizard {
   }
 
   public PrimitiveTestWizard check(final String... lines) {
-    assertThat(primitive.lines.stream().map(line -> line.text).toArray(), equalTo(lines));
+    String[] got = new String[primitive.lines.size()];
+    for (int i = 0; i < primitive.lines.size(); ++i) {
+      got[i] = primitive.lines.get(i).text;
+    }
+    assertThat(got, equalTo(lines));
     return this;
   }
 

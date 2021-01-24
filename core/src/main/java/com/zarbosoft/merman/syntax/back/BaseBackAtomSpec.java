@@ -4,12 +4,12 @@ import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.AtomCandidatePluralBack;
 import com.zarbosoft.merman.syntax.error.AtomCandidateTypeNotAllowed;
 import com.zarbosoft.merman.syntax.error.AtomTypeDoesntExist;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Set;
 

@@ -4,7 +4,7 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
@@ -118,7 +118,7 @@ public class GapKey {
     return out;
   }
 
-  public com.zarbosoft.pidgoon.Node matchGrammar(final Object color) {
+  public com.zarbosoft.pidgoon.Node matchGrammar(Context context, final Object color) {
     final Sequence out = new Sequence();
     for (final FrontSpec part : keyParts) {
       if (part instanceof FrontSymbol) {
@@ -128,7 +128,7 @@ public class GapKey {
         out.add(BytesHelper.stringSequence(text));
       } else if (part instanceof FrontPrimitiveSpec) {
         BaseBackPrimitiveSpec middle = ((FrontPrimitiveSpec) part).dataType;
-        out.add((middle.pattern == null ? Pattern.repeatedAny : middle.pattern).build());
+        out.add((middle.pattern == null ? Pattern.repeatedAny : middle.pattern).build(context));
       } else throw new DeadCode();
     }
     return new Color(color, out);
@@ -153,7 +153,7 @@ public class GapKey {
         final BaseBackPrimitiveSpec middle =
             (BaseBackPrimitiveSpec) type.fields.get(((FrontPrimitiveSpec) front).field);
         grammar.add(
-            "root", (middle.pattern == null ? Pattern.repeatedAny : middle.pattern).build());
+            "root", (middle.pattern == null ? Pattern.repeatedAny : middle.pattern).build(context));
       } else throw new DeadCode();
       final Pair<Parse, Position> longest =
           new ParseBuilder<>()

@@ -8,8 +8,7 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
+import com.zarbosoft.rendaw.common.ROMap;
 
 public abstract class VisualFrontAtom extends VisualFrontAtomBase {
   public final ValueAtom value;

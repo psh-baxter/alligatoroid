@@ -20,9 +20,4 @@ public abstract class BaseParent implements Parent {
   public long size(final Parent stopAt, final long start) {
     return parent.size(stopAt, start + 1);
   }
-
-  @Override
-  public void cut(final Parse step, final String name) {
-    parent.cut(step, name);
-  }
 }

@@ -1,7 +1,5 @@
 package com.zarbosoft.merman.editor.wall;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.display.DisplayNode;
@@ -10,19 +8,14 @@ import com.zarbosoft.merman.editor.visual.AlignmentListener;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.ROSetRef;
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.style.Style;
-
-import java.util.Set;
-
-import static com.zarbosoft.rendaw.common.Common.last;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public abstract class Brick implements AlignmentListener {
   public Course parent;
   public int index;
-  Set<Attachment> attachments = Context.createSet.get();
+  TSSet<Attachment> attachments = Context.createSet.get();
   public Style style;
   public Alignment alignment;
   public int minConverse;
@@ -127,30 +120,30 @@ public abstract class Brick implements AlignmentListener {
   public void addAfter(final Context context, final Brick brick) {
     final Properties properties = brick.properties(context);
     if (properties.split) {
-      parent.breakCourse(context, index + 1).add(context, 0, ImmutableList.of(brick));
-    } else parent.add(context, index + 1, ImmutableList.of(brick));
+      parent.breakCourse(context, index + 1).add(context, 0, TSList.of(brick));
+    } else parent.add(context, index + 1, TSList.of(brick));
   }
 
   public void addBefore(final Context context, final Brick brick) {
     if (properties(context).split) {
       if (parent.index == 0) {
-        parent.add(context, 0, ImmutableList.of(brick));
+        parent.add(context, 0, TSList.of(brick));
         parent.breakCourse(context, 1);
       } else {
         if (brick.properties(context).split) {
           final Course previousCourse = parent.parent.children.get(parent.index - 1);
           final int insertIndex = previousCourse.children.size();
-          previousCourse.add(context, insertIndex, ImmutableList.of(brick));
+          previousCourse.add(context, insertIndex, TSList.of(brick));
           previousCourse.breakCourse(context, insertIndex);
         } else {
           final Course previousCourse = parent.parent.children.get(parent.index - 1);
-          previousCourse.add(context, previousCourse.children.size(), ImmutableList.of(brick));
+          previousCourse.add(context, previousCourse.children.size(), TSList.of(brick));
         }
       }
     } else {
       if (index > 0 && brick.properties(context).split) {
-        parent.breakCourse(context, index).add(context, 0, ImmutableList.of(brick));
-      } else parent.add(context, index, ImmutableList.of(brick));
+        parent.breakCourse(context, index).add(context, 0, TSList.of(brick));
+      } else parent.add(context, index, TSList.of(brick));
     }
   }
 
@@ -159,7 +152,7 @@ public abstract class Brick implements AlignmentListener {
       if (parent.index == 0) {
         return null;
       }
-      return last(parent.parent.children.get(parent.index - 1).children);
+      return parent.parent.children.get(parent.index - 1).children.last();
     }
     return parent.children.get(index - 1);
   }
@@ -196,7 +189,7 @@ public abstract class Brick implements AlignmentListener {
     attachments.remove(attachment);
   }
 
-  public Set<Attachment> getAttachments() {
+  public TSSet<Attachment> getAttachments() {
     return attachments;
   }
 
@@ -206,7 +199,9 @@ public abstract class Brick implements AlignmentListener {
   }
 
   public void destroy(final Context context) {
-    ImmutableSet.copyOf(attachments).forEach(a -> a.destroy(context));
+    for (Attachment attachment : attachments.mut()) {
+      attachment.destroy(context);
+    }
     parent.removeFromSystem(context, index);
     destroyed(context);
   }

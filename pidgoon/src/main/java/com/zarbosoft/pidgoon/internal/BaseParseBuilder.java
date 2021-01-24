@@ -2,8 +2,6 @@ package com.zarbosoft.pidgoon.internal;
 
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.Store;
-import org.pcollections.HashTreePMap;
-import org.pcollections.PMap;
 
 import java.util.Map;
 
@@ -14,7 +12,6 @@ public abstract class BaseParseBuilder<P extends BaseParseBuilder<P>> {
   protected int errorHistoryLimit;
   protected int uncertaintyLimit;
   protected boolean dumpAmbiguity;
-  protected PMap env;
 
   public BaseParseBuilder() {
     super();
@@ -29,7 +26,6 @@ public abstract class BaseParseBuilder<P extends BaseParseBuilder<P>> {
     errorHistoryLimit = other.errorHistoryLimit;
     uncertaintyLimit = other.uncertaintyLimit;
     dumpAmbiguity = other.dumpAmbiguity;
-    env = other.env;
   }
 
   public P grammar(final Grammar grammar) {
@@ -52,9 +48,6 @@ public abstract class BaseParseBuilder<P extends BaseParseBuilder<P>> {
   public P store(final Store store) {
     if (this.initialStore != null)
       throw new IllegalArgumentException("Initial store supplier already specified");
-    if (this.env != null)
-      throw new IllegalArgumentException(
-          "Env values already set, would be clobbered initial store.");
     final P out = split();
     out.initialStore = store;
     return out;
@@ -80,21 +73,6 @@ public abstract class BaseParseBuilder<P extends BaseParseBuilder<P>> {
     if (this.dumpAmbiguity) throw new IllegalArgumentException("Dump ambiguity already specified");
     final P out = split();
     out.dumpAmbiguity = dumpAmbiguity;
-    return out;
-  }
-
-  public P env(Object key, Object val) {
-    final P out = split();
-    if (out.env == null) out.env = HashTreePMap.empty();
-    out.env = out.env.plus(key, val);
-    return out;
-  }
-
-  public P env(Map values) {
-    if (values == null) return (P) this;
-    final P out = split();
-    if (out.env == null) out.env = HashTreePMap.empty();
-    out.env = out.env.plusAll(values);
     return out;
   }
 }

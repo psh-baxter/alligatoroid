@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
-import com.google.common.collect.Iterables;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
@@ -10,14 +9,12 @@ import com.zarbosoft.merman.editor.visual.condition.ConditionAttachment;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.style.Style;
-import com.zarbosoft.rendaw.common.Pair;
-
-import java.util.Arrays;
-import java.util.stream.Stream;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class VisualSymbol extends Visual
     implements VisualLeaf, ConditionAttachment.Listener, BrickInterface {
@@ -102,10 +99,12 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public Iterable<Pair<Brick, Brick.Properties>> getLeafPropertiesForTagsChange(
-      final Context context, final TagsChange change) {
-    if (brick == null) return Iterables.concat();
-    return Arrays.asList(new Pair<>(brick, brick.getPropertiesForTagsChange(context, change)));
+  public void getLeafPropertiesForTagsChange(
+      final Context context,
+      TSList<ROPair<Brick, Brick.Properties>> brickProperties,
+      final TagsChange change) {
+    if (brick == null) return;
+    brickProperties.add(new ROPair<>(brick, brick.getPropertiesForTagsChange(context, change)));
   }
 
   @Override
@@ -153,11 +152,5 @@ public class VisualSymbol extends Visual
   @Override
   public TSSet<String> getTags(final Context context) {
     return atomVisual().getTags(context).addAll(frontSymbol.tags).add(frontSymbol.type.partTag());
-  }
-
-  @Override
-  public Stream<Brick> streamBricks() {
-    if (brick == null) return Stream.empty();
-    return Stream.of(brick);
   }
 }

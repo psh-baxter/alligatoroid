@@ -1,22 +1,24 @@
 package com.zarbosoft.merman.syntax.back;
 
 import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.backevents.JIntEvent;
-import com.zarbosoft.merman.editor.serialization.Write;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.editor.serialization.EventConsumer;
+import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.primitivepattern.Digits;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Deque;
 import java.util.Iterator;
 
 public class BackJSONIntSpec extends BaseBackPrimitiveSpec {
-  protected BackJSONIntSpec(String id) {
-    super(new Config(id, new Digits()));
+  protected BackJSONIntSpec(I18nEngine i18n,String id) {
+    super(i18n,new Config(id, new Digits()));
   }
 
   @Override
@@ -37,7 +39,7 @@ public class BackJSONIntSpec extends BaseBackPrimitiveSpec {
 
   @Override
   public void write(
-      Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer) {
+          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.jsonInt(((StringBuilder) data.get(id)).toString());
   }
 

@@ -1,17 +1,14 @@
 package com.zarbosoft.merman.syntax.primitivepattern;
 
-import com.google.common.collect.ImmutableRangeSet;
-import com.google.common.collect.Range;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.pidgoon.Node;
-import com.zarbosoft.pidgoon.bytes.nodes.Terminal;
+import com.zarbosoft.pidgoon.nodes.Union;
 
 public class Letters extends Pattern {
   @Override
-  public Node build() {
-    return new Terminal(
-        ImmutableRangeSet.<Byte>builder()
-            .add(Range.closed((byte) 'a', (byte) 'z'))
-            .add(Range.closed((byte) 'A', (byte) 'Z'))
-            .build());
+  public Node build(I18nEngine i18n) {
+    return new Union()
+        .add(new CharacterRangeTerminal('a', 'z'))
+        .add(new CharacterRangeTerminal('A', 'Z'));
   }
 }

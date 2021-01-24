@@ -8,14 +8,13 @@ import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtom;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
-
-import java.util.Set;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontAtomSpec extends FrontSpec {
   private final String field;
@@ -68,7 +67,7 @@ public class FrontAtomSpec extends FrontSpec {
 
   @Override
   public void finish(
-      MultiError errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
+      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
     middleUsed.add(field);
     dataType = atomType.getDataAtom(errors, typePath, field);
   }

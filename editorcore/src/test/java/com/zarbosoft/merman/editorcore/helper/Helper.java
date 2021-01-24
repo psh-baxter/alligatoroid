@@ -15,7 +15,7 @@ import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.syntax.back.BackAtomSpec;
@@ -68,7 +68,7 @@ public class Helper {
           writer.recordBegin();
           value
               .fields
-              .keySet()
+              .keys()
               .forEach(
                   k ->
                       dump(
@@ -144,8 +144,8 @@ public class Helper {
           String.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
               expected.type, got.type, got.getSyntaxPath()));
-    final Set<String> expectedKeys = expected.fields.keySet();
-    final Set<String> gotKeys = got.fields.keySet();
+    final Set<String> expectedKeys = expected.fields.keys();
+    final Set<String> gotKeys = got.fields.keys();
     {
       final Set<String> missing = Sets.difference(expectedKeys, gotKeys);
       if (!missing.isEmpty())

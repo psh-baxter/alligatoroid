@@ -1,13 +1,14 @@
 package com.zarbosoft.merman.syntax;
 
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSList;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class GapAtomType extends BaseGapAtomType {
   public final String backType;
@@ -38,7 +39,7 @@ public class GapAtomType extends BaseGapAtomType {
     }
   }
 
-  public GapAtomType(Config config) {
+  public GapAtomType(I18nEngine i18n,Config config) {
     super(
         new AtomType.Config(
             config.id,
@@ -47,7 +48,7 @@ public class GapAtomType extends BaseGapAtomType {
                 new BackFixedTypeSpec(
                     new BackFixedTypeSpec.Config(
                         config.backType,
-                        new BackPrimitiveSpec(
+                        new BackPrimitiveSpec(i18n,
                             new BaseBackPrimitiveSpec.Config(GAP_PRIMITIVE_KEY, null))))),
             new TSList<FrontSpec>()
                 .addAll(config.frontPrefix)

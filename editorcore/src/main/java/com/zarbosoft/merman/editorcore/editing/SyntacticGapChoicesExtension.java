@@ -11,7 +11,7 @@ import com.zarbosoft.merman.editorcore.editing.gap.GapAtomType;
 import com.zarbosoft.merman.editorcore.editing.suffixgap.SuffixGapAtomType;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeNodeSet;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
@@ -116,7 +116,7 @@ public class SyntacticGapChoicesExtension {
         }
         FrontSpec front = type.front().get(0);
         if (front instanceof FrontSymbol) {
-          createGapChoice(state, grammar, GapKey.gapKeys(type).get(0), type);
+          createGapChoice(context, state, grammar, GapKey.gapKeys(type).get(0), type);
         } else if (front instanceof FrontArraySpecBase) {
           if (((FrontArraySpecBase) front).prefix.isEmpty()) {
             stack.add(
@@ -126,13 +126,13 @@ public class SyntacticGapChoicesExtension {
                     .get(((FrontArraySpecBase) front).dataType().elementAtomType())
                     .iterator());
           } else {
-            createGapChoice(state, grammar, GapKey.gapKeys(type).get(0), type);
+            createGapChoice(context, state, grammar, GapKey.gapKeys(type).get(0), type);
           }
         } else if (front instanceof FrontAtomSpec) {
           stack.add(
               context.syntax.splayedTypes.get(((FrontAtomSpec) front).getDataType().type).iterator());
         } else if (front instanceof FrontPrimitiveSpec) {
-          createGapChoice(state, grammar, GapKey.gapKeys(type).get(0), type);
+          createGapChoice(context, state, grammar, GapKey.gapKeys(type).get(0), type);
         }
       }
       state.grammar = new Grammar().add(Grammar.DEFAULT_ROOT_KEY, grammar);
@@ -169,10 +169,10 @@ public class SyntacticGapChoicesExtension {
     }
 
     private void createGapChoice(
-        GapCompletionState state, Union grammar, GapKey key, FreeAtomType type) {
+            Context context, GapCompletionState state, Union grammar, GapKey key, FreeAtomType type) {
       grammar.add(
           key.matchGrammar(
-              new SyntacticGapChoice(type, key) {
+                  context, new SyntacticGapChoice(type, key) {
                 @Override
                 public void choose(Context context) {
                   /// Build atom
@@ -252,7 +252,7 @@ public class SyntacticGapChoicesExtension {
 
     @Override
     public State createSuffixGapCompletionState(
-        ExtensionContext context, List<Atom> preceding, String baseType) {
+        Context context, List<Atom> preceding, String baseType) {
       GapCompletionState state = new GapCompletionState();
       Union gapTextGrammar = new Union();
       Deque<Iterator<FreeAtomType>> stack = new ArrayDeque<>();
@@ -282,7 +282,7 @@ public class SyntacticGapChoicesExtension {
                       reversePreceding.stream()
                           .map(a -> new AtomEvent(a))
                           .collect(Collectors.toList()));
-          createSuffixGapChoice(
+          createSuffixGapChoice(context,
               state,
               gapTextGrammar,
               gapKey,
@@ -313,14 +313,14 @@ public class SyntacticGapChoicesExtension {
     }
 
     private void createSuffixGapChoice(
-        GapCompletionState state,
-        Union grammar,
-        GapKey key,
-        FreeAtomType type,
-        TSMap<FrontSpec, Placement> precedingPlacements,
-        int precedingConsumed) {
+            Context context, GapCompletionState state,
+            Union grammar,
+            GapKey key,
+            FreeAtomType type,
+            TSMap<FrontSpec, Placement> precedingPlacements,
+            int precedingConsumed) {
       grammar.add(
-          key.matchGrammar(
+          key.matchGrammar(context,
               new SyntacticGapChoice(type, key) {
                 @Override
                 public void choose(Context context) {

@@ -1,6 +1,5 @@
 package com.zarbosoft.merman;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.merman.editor.display.MockeryGroup;
@@ -9,6 +8,7 @@ import com.zarbosoft.merman.editor.display.derived.CLayout;
 import com.zarbosoft.merman.editor.display.derived.ColumnarTableLayout;
 import com.zarbosoft.merman.editor.display.derived.RowLayout;
 import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -28,32 +28,32 @@ public class TestDisplayDerived {
 			leftGroup.add(left);
 			final Text right = display.text();
 			right.setText(null, "aaa");
-			layout.add(ImmutableList.of(leftGroup, right));
+			layout.add(TSList.of(leftGroup, right));
 		}
 		{
 			final Text left = display.text();
 			left.setText(null, "333");
 			final Text right = display.text();
 			right.setText(null, "bb");
-			layout.add(ImmutableList.of(left, right));
+			layout.add(TSList.of(left, right));
 		}
 		{
 			final Text left = display.text();
 			left.setText(null, "22");
 			final Text right = display.text();
 			right.setText(null, "c");
-			layout.add(ImmutableList.of(left, right));
+			layout.add(TSList.of(left, right));
 		}
 		{
 			final Text left = display.text();
 			left.setText(null, "4444");
 			final Text right = display.text();
 			right.setText(null, "dddd");
-			layout.add(ImmutableList.of(left, right));
+			layout.add(TSList.of(left, right));
 		}
 		layout.layout(null);
 		int index = 0;
-		for (final Pair<Integer, Integer> pair : ImmutableList.of(new Pair<>(0, 0),
+		for (final Pair<Integer, Integer> pair : TSList.of(new Pair<>(0, 0),
 				new Pair<>(30, 10),
 				new Pair<>(0, 20),
 				new Pair<>(30, 20),
@@ -106,7 +106,7 @@ public class TestDisplayDerived {
 		}
 		layout.layout(null);
 		int index = 0;
-		for (final Pair<Integer, Integer> pair : ImmutableList.of(new Pair<>(0, 0),
+		for (final Pair<Integer, Integer> pair : TSList.of(new Pair<>(0, 0),
 				new Pair<>(30, 0),
 				new Pair<>(80, 0),
 				new Pair<>(90, 0)
@@ -155,7 +155,7 @@ public class TestDisplayDerived {
 		}
 		layout.layout(null);
 		int index = 0;
-		for (final Pair<Integer, Integer> pair : ImmutableList.of(new Pair<>(0, 0),
+		for (final Pair<Integer, Integer> pair : TSList.of(new Pair<>(0, 0),
 				new Pair<>(30, 10),
 				new Pair<>(80, 0),
 				new Pair<>(90, 10)

@@ -13,8 +13,8 @@ import com.zarbosoft.merman.helper.MiscSyntax;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.misc.TSList;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
 
 import static com.zarbosoft.merman.helper.Helper.buildDoc;

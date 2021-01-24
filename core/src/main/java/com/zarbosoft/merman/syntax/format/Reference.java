@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.syntax.format;
 
-import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 public class Reference implements Element {
 

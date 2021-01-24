@@ -1,8 +1,5 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.visual.Alignment;
@@ -10,14 +7,13 @@ import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.function.IntFunction;
-import java.util.stream.Stream;
 
 import static com.zarbosoft.rendaw.common.Common.last;
 
@@ -35,11 +31,6 @@ public class VisualGroup extends Visual {
   protected VisualGroup(final int visualDepth) {
     /* Should only be called by inheritors... temp private */
     super(visualDepth);
-  }
-
-  @Override
-  public Stream<Brick> streamBricks() {
-    return children.stream().flatMap(child -> child.streamBricks());
   }
 
   @Override
@@ -111,7 +102,8 @@ public class VisualGroup extends Visual {
         index + 1 >= this.children.size()
             ? parent.getNextBrick(context)
             : children.get(index + 1).getFirstBrick(context);
-    if (previousBrick != null && nextBrick != null) context.triggerIdleLayBricksAfterEnd(previousBrick);
+    if (previousBrick != null && nextBrick != null)
+      context.triggerIdleLayBricksAfterEnd(previousBrick);
   }
 
   protected VisualParent createParent(final int index) {
@@ -143,11 +135,12 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public Iterator<Visual> children() {
-    return Iterators.concat(
-        children.stream()
-            .map(c -> c.children())
-            .toArray((IntFunction<Iterator<Visual>[]>) Iterator[]::new));
+  public ROList<Visual> children() {
+    TSList<Visual> out = new TSList<>();
+    for (Visual child : children) {
+      out.addAll(child.children());
+    }
+    return out;
   }
 
   @Override
@@ -161,12 +154,11 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public Iterable<Pair<Brick, Brick.Properties>> getLeafPropertiesForTagsChange(
-      final Context context, final TagsChange change) {
-    return Iterables.concat(
-        children.stream()
-            .map(c -> c.getLeafPropertiesForTagsChange(context, change))
-            .toArray(Iterable[]::new));
+  public void getLeafPropertiesForTagsChange(
+          final Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, final TagsChange change) {
+    for (Visual child : children) {
+      child.getLeafPropertiesForTagsChange(context,brickProperties,change);
+    }
   }
 
   @Override
@@ -186,7 +178,10 @@ public class VisualGroup extends Visual {
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    for (final Visual child : Lists.reverse(children)) child.uproot(context, root);
+    for (int i = children.size(); i > 0; --i) {
+      Visual child = children.get(i - 1);
+      child.uproot(context, root);
+    }
   }
 
   public static class Parent extends VisualParent {

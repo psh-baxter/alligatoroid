@@ -1,11 +1,6 @@
 package com.zarbosoft.merman.helper;
 
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSList;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Padding;
@@ -15,11 +10,13 @@ import com.zarbosoft.merman.syntax.alignments.AbsoluteAlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
-import com.zarbosoft.merman.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Map;
 import java.util.Set;
 
 public class SyntaxBuilder {
@@ -53,7 +50,7 @@ public class SyntaxBuilder {
                 TSList.of(front.build()),
                 alignments));
 
-    Syntax.Config config = new Syntax.Config(types, splayed, root);
+    Syntax.Config config = new Syntax.Config(Helper.i18n,types, splayed, root);
     config.pad = this.padding;
     config.styles = styles;
     Syntax syntax = new Syntax(config);

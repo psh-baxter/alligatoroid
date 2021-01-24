@@ -17,7 +17,7 @@ import com.zarbosoft.merman.editorcore.editing.TwoColumnChoice;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
@@ -238,7 +238,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                             union.add(
                                 new Color(
                                     choice,
-                                    new Operator<StackClipStore>(key.matchGrammar(type)) {
+                                    new Operator<StackClipStore>(key.matchGrammar(context, type)) {
                                       @Override
                                       protected StackClipStore process(StackClipStore store) {
                                         return store.pushStack(choice);

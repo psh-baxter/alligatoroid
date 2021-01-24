@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.editorcore.helper;
 
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 

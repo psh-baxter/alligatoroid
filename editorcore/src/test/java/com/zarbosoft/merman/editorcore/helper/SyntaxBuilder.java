@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.editorcore.helper;
 
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSList;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Padding;

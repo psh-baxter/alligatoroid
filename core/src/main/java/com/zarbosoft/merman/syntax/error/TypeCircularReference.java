@@ -1,12 +1,10 @@
 package com.zarbosoft.merman.syntax.error;
 
-import com.google.common.collect.ImmutableMap;
-
-import java.util.List;
+import com.zarbosoft.rendaw.common.ROList;
 
 public class TypeCircularReference extends BaseKVError{
 
-  public TypeCircularReference(List<String> subpath) {
+  public TypeCircularReference(ROList<String> subpath) {
         put("subpath", subpath);
   }
 

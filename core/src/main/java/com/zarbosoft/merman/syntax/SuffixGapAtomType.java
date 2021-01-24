@@ -1,9 +1,6 @@
 package com.zarbosoft.merman.syntax;
 
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSList;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
@@ -17,6 +14,10 @@ import com.zarbosoft.merman.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 
 public class SuffixGapAtomType extends BaseGapAtomType {
   public static final String GAP_ARRAY_KEY = "value";
@@ -48,7 +49,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
     }
   }
 
-  public SuffixGapAtomType(Config config) {
+  public SuffixGapAtomType(I18nEngine i18n,Config config) {
     super(
         new AtomType.Config(
             config.id,
@@ -59,16 +60,16 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                         config.backType,
                         new BackFixedRecordSpec(
                             new TSMap<String, BackSpec>()
-                                .putChain(
+                                .put(
                                     "value",
                                     new BackArraySpec(
                                         new BaseBackSimpleArraySpec.Config(
                                             GAP_ARRAY_KEY,
                                             new BackAtomSpec(
                                                 new BaseBackAtomSpec.Config(null, null)))))
-                                .putChain(
+                                .put(
                                     "gap",
-                                    new BackPrimitiveSpec(
+                                    new BackPrimitiveSpec(i18n,
                                         new BaseBackPrimitiveSpec.Config(
                                             GAP_PRIMITIVE_KEY, null))))))),
             new TSList<FrontSpec>()

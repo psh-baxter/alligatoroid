@@ -18,16 +18,15 @@ import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.Pair;
-
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   protected VisualAtom body;
@@ -169,9 +168,9 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   @Override
-  public Iterable<Pair<Brick, Brick.Properties>> getLeafPropertiesForTagsChange(
-      final Context context, final TagsChange change) {
-    return body.getLeafPropertiesForTagsChange(context, change);
+  public void getLeafPropertiesForTagsChange(
+          final Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, final TagsChange change) {
+    body.getLeafPropertiesForTagsChange(context, brickProperties, change);
   }
 
   private Brick createEllipsis(final Context context) {
@@ -224,12 +223,6 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     if (hoverable != null) hoverable.tagsChanged(context);
   }
 
-  @Override
-  public Stream<Brick> streamBricks() {
-    if (ellipsis != null) return Stream.of(ellipsis);
-    return body.streamBricks();
-  }
-
   private boolean ellipsize(final Context context) {
     if (!context.window) return false;
     if (parent.atomVisual() == null) return false;
@@ -280,6 +273,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   public static class NestedCursor extends Cursor {
+    private final ROList<Action> actions;
     private BorderAttachment border;
     public VisualFrontAtomBase base;
 
@@ -290,15 +284,13 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
       border.setFirst(context, first);
       border.setLast(context, base.body.getLastBrick(context));
       context.addActions(
-          this,
-          Stream.of(
+          this.actions = TSList.of(
                   new AtomActionEnter(base),
                   new AtomActionExit(base),
                   new AtomActionNext(base),
                   new AtomActionPrevious(base),
                   new AtomActionWindow(base),
-                  new AtomActionCopy(base))
-              .collect(Collectors.toList()));
+                  new AtomActionCopy(base)));
     }
 
     @Override
@@ -306,7 +298,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
       border.destroy(context);
       border = null;
       base.selection = null;
-      context.removeActions(this);
+      context.removeActions(actions);
     }
 
     @Override

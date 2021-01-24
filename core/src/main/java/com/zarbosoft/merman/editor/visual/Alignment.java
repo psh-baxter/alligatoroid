@@ -1,11 +1,10 @@
 package com.zarbosoft.merman.editor.visual;
 
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public abstract class Alignment {
 	public int converse = 0;

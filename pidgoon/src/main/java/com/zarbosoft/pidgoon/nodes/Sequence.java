@@ -6,7 +6,7 @@ import com.zarbosoft.pidgoon.internal.Parent;
 import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.nodes.Reference.RefParent;
 import com.zarbosoft.pidgoon.parse.Parse;
-import org.pcollections.PMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,7 @@ public class Sequence extends Node {
       final Parse context,
       final Store store,
       final Parent parent,
-      final PMap<Object, RefParent> seen,
+      final ROMap<Object, RefParent> seen,
       final Object cause) {
     if (children.isEmpty()) {
       parent.advance(context, store, cause);

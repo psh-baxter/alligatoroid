@@ -1,7 +1,5 @@
 package com.zarbosoft.merman.syntax.error;
 
-import com.zarbosoft.merman.misc.TSMap;
-
 public class DuplicateAtomTypeIdsInGroup extends BaseKVError {
   public DuplicateAtomTypeIdsInGroup(String group) {
     put("group", group);

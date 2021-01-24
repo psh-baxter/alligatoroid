@@ -1,12 +1,10 @@
 package com.zarbosoft.merman.syntax.error;
 
-import com.google.common.collect.ImmutableMap;
-
-import java.util.Set;
+import com.zarbosoft.rendaw.common.ROSet;
 
 public class UnusedBackData extends BaseKVError {
 
-  public UnusedBackData(Set<String> unused) {
+  public UnusedBackData(ROSet<String> unused) {
     put("unused", unused);
   }
 

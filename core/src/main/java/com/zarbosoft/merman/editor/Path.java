@@ -1,9 +1,7 @@
 package com.zarbosoft.merman.editor;
 
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.TSList;
-
-import java.util.stream.Collectors;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class Path {
   public final ROList<String> segments;

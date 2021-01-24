@@ -2,13 +2,14 @@ package com.zarbosoft.merman.syntax.back;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueAtom;
-import com.zarbosoft.merman.editor.serialization.Write;
-import com.zarbosoft.merman.misc.TSMap;
+import com.zarbosoft.merman.editor.serialization.EventConsumer;
+import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Deque;
 import java.util.Iterator;
@@ -36,7 +37,7 @@ public class BackAtomSpec extends BaseBackAtomSpec {
 
   @Override
   public void write(
-      Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer) {
+          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     ((Atom) data.getNull(id)).write(stack);
   }
 

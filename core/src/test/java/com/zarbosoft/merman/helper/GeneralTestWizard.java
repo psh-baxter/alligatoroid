@@ -22,12 +22,12 @@ import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
 import com.zarbosoft.merman.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
 
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static com.zarbosoft.rendaw.common.Common.iterable;
 import static com.zarbosoft.rendaw.common.Common.zip;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.hasItem;
@@ -123,7 +123,7 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard dumpCourses() {
-    List<Course> courses = inner.context.foreground.children;
+    ROList<Course> courses = inner.context.foreground.children;
     for (int i = 0; i < courses.size(); ++i) {
       Course course = courses.get(i);
       System.out.printf(" %02d  ", i);
@@ -150,7 +150,7 @@ public class GeneralTestWizard {
   }
 
   private Course getCourse(final int courseIndex) {
-    List<Course> courses = inner.context.foreground.children;
+    ROList<Course> courses = inner.context.foreground.children;
     if (courseIndex >= courses.size()) {
       dumpCourses();
       assertThat(courses.size(), greaterThan(courseIndex));
@@ -209,7 +209,7 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard act(final String name) {
-    for (final Action action : iterable(inner.context.actions())) {
+    for (final Action action : inner.context.actions()) {
       if (action.id().equals(name)) {
         action.run(inner.context);
         assertThat(inner.context.cursor, is(notNullValue()));
@@ -228,9 +228,13 @@ public class GeneralTestWizard {
     return this;
   }
 
-  public GeneralTestWizard checkBrickCount(final int i) {
+  public GeneralTestWizard checkTotalBrickCount(final int i) {
+    int got = 0;
+    for (Course course : inner.context.foreground.children) {
+      got += course.children.size();
+    }
     assertThat(
-        inner.context.foreground.children.stream().mapToInt(course -> course.children.size()).sum(),
+        got,
         equalTo(i));
     return this;
   }
@@ -245,11 +249,9 @@ public class GeneralTestWizard {
     final ValueArray documentAtoms =
         (ValueArray) inner.context.document.root.fields.getOpt("value");
     assertThat(documentAtoms.data.size(), equalTo(atoms.length));
-    zip(Stream.of(atoms), documentAtoms.data.stream())
-        .forEach(
-            pair -> {
-              Helper.assertTreeEqual(pair.first, pair.second);
-            });
+    for (int i = 0; i < atoms.length; ++i) {
+      Helper.assertTreeEqual(atoms[i], documentAtoms.data.get(i));
+    }
     return this;
   }
 

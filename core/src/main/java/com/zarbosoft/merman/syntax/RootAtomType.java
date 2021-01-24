@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.syntax;
 
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
 
 public class RootAtomType extends AtomType {
   public static final String ROOT_TYPE_ID = "root";

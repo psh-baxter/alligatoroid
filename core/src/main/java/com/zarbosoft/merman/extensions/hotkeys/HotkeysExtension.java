@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.extensions.hotkeys;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.details.DetailsPage;
@@ -11,10 +10,6 @@ import com.zarbosoft.merman.editor.display.derived.TLayout;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.extensions.hotkeys.grammar.Node;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSList;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
@@ -26,10 +21,13 @@ import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 
+import java.util.Arrays;
 import java.util.Comparator;
-
-import static com.zarbosoft.rendaw.common.Common.iterable;
 
 public class HotkeysExtension {
   private static final Comparator<Pair<Integer, Action>> matchComparator =
@@ -87,7 +85,7 @@ public class HotkeysExtension {
     }
     hotkeyGrammar = new Grammar();
     final Union union = new Union();
-    for (final Action action : iterable(context.actions())) {
+    for (Action action : context.actions()) {
       if (hotkeys.contains(action.id())) {
         for (final Node hotkey : hotkeys.get(action.id())) {
           union.add(
@@ -186,7 +184,7 @@ public class HotkeysExtension {
         name.setColor(context, lineStyle.color);
         name.setFont(context, lineStyle.getFont(context));
         name.setText(context, action.id());
-        table.add(ImmutableList.of(rule, name));
+        table.add(TSList.of(rule, name));
       }
       table.layout(context);
       layout.add(table.group);

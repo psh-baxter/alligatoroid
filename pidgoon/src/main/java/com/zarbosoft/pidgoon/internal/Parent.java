@@ -9,6 +9,4 @@ public interface Parent {
   void error(Parse step, Store store, Object cause);
 
   long size(Parent stopAt, long start);
-
-  void cut(Parse step, String name);
 }

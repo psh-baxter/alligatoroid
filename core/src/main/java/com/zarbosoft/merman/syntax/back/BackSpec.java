@@ -1,17 +1,17 @@
 package com.zarbosoft.merman.syntax.back;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.editor.serialization.EventConsumer;
+import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.List;
 import java.util.function.Function;
 
 public abstract class BackSpec {
@@ -19,7 +19,7 @@ public abstract class BackSpec {
 
   public static void walk(BackSpec root, Function<BackSpec, Boolean> consumer) {
     Deque<Iterator<BackSpec>> stack = new ArrayDeque<>();
-    stack.addLast(ImmutableList.of(root).iterator());
+    stack.addLast(Arrays.asList(root).iterator());
     while (!stack.isEmpty()) {
       Iterator<BackSpec> top = stack.getLast();
       BackSpec next = top.next();
@@ -55,7 +55,7 @@ public abstract class BackSpec {
    * @param writer
    */
   public abstract void write(
-      Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer);
+          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer);
 
   /**
    * Can this represent a single value (non key/type) field in back type Subarrays can represent a

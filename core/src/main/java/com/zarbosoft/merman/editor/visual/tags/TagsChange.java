@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.editor.visual.tags;
 
-import com.zarbosoft.merman.misc.TSSet;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class TagsChange {
   public final TSSet<String> add;

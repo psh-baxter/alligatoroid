@@ -2,12 +2,9 @@ package com.zarbosoft.merman.syntax.back;
 
 import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
-import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.TSMap;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.syntax.primitivepattern.Pattern;
+import com.zarbosoft.rendaw.common.ROMap;
 
 public abstract class BaseBackPrimitiveSpec extends BackSpecData {
   public final Pattern.Matcher matcher;
@@ -22,9 +19,9 @@ public abstract class BaseBackPrimitiveSpec extends BackSpecData {
     }
   }
 
-  protected BaseBackPrimitiveSpec(Config config) {
+  protected BaseBackPrimitiveSpec(I18nEngine i18n, Config config) {
     super(config.id);
-    if (config.pattern != null) matcher = config.pattern.new Matcher();
+    if (config.pattern != null) matcher = config.pattern.new Matcher(i18n);
     else matcher = null;
   }
 

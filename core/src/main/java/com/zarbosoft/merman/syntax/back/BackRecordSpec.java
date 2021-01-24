@@ -5,9 +5,11 @@ import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectOpenEvent;
-import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.editor.serialization.EventConsumer;
+import com.zarbosoft.merman.editor.serialization.WriteState;
+import com.zarbosoft.merman.editor.serialization.WriteStateDataArray;
+import com.zarbosoft.merman.editor.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.RecordChildMissingValue;
@@ -20,9 +22,9 @@ import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
@@ -68,9 +70,9 @@ public class BackRecordSpec extends BaseBackArraySpec {
     return new Operator<StackStore>(sequence) {
       @Override
       protected StackStore process(StackStore store) {
-        final List<Atom> temp = new ArrayList<>();
+        final TSList<Atom> temp = new TSList<>();
         store = store.popVarSingleList(temp);
-        Collections.reverse(temp);
+        temp.reverse();
         final ValueArray value = new ValueArray(BackRecordSpec.this, temp);
         return store.stackVarDoubleElement(id, value);
       }
@@ -79,10 +81,10 @@ public class BackRecordSpec extends BaseBackArraySpec {
 
   @Override
   public void write(
-      Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer) {
+          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
-    stack.addLast(new Write.WriteStateRecordEnd());
-    stack.addLast(new Write.WriteStateDataArray(((List<Atom>) data.get(id))));
+    stack.addLast(new WriteStateRecordEnd());
+    stack.addLast(new WriteStateDataArray(((List<Atom>) data.get(id))));
   }
 
   @Override

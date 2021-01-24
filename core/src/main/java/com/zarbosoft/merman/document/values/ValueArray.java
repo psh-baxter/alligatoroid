@@ -8,30 +8,24 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomFromArray;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
-import static com.zarbosoft.rendaw.common.Common.enumerate;
-import static com.zarbosoft.rendaw.common.Common.iterable;
-
 public class ValueArray extends Value {
-  public final List<Atom> data = new ArrayList<>();
+  public final TSList<Atom> data = new TSList<>();
   public final Set<Listener> listeners = new HashSet<>();
   private final BaseBackArraySpec back;
   public Visual visual = null;
 
-  public ValueArray(final BaseBackArraySpec back, final List<Atom> data) {
+  public ValueArray(final BaseBackArraySpec back, final TSList<Atom> data) {
     this.back = back;
     this.data.addAll(data);
-    data.stream()
-        .forEach(
-            v -> {
-              v.setValueParentRef(new ArrayParent(this));
-            });
+    for (Atom v : data) {
+      v.setValueParentRef(new ArrayParent(this));
+    }
     renumber(0);
   }
 
@@ -44,11 +38,12 @@ public class ValueArray extends Value {
       final ArrayParent parent = (ArrayParent) prior.valueParentRef;
       sum = parent.actualIndex + prior.type.back().size();
     }
-    for (final Pair<Integer, Atom> p : iterable(enumerate(data.stream().skip(from), from))) {
-      final ArrayParent parent = ((ArrayParent) p.second.valueParentRef);
-      parent.index = p.first;
+    for (int i = from; i < data.size(); ++i) {
+      Atom atom = data.get(i);
+      final ArrayParent parent = ((ArrayParent) atom.valueParentRef);
+      parent.index = i;
       parent.actualIndex = sum;
-      sum += p.second.type.back().size();
+      sum += atom.type.back().size();
     }
   }
 
@@ -109,7 +104,7 @@ public class ValueArray extends Value {
 
   public interface Listener {
 
-    void changed(Context context, int index, int remove, List<Atom> add);
+    void changed(Context context, int index, int remove, ROList<Atom> add);
   }
 
   public static class ArrayParent extends Parent<ValueArray> {

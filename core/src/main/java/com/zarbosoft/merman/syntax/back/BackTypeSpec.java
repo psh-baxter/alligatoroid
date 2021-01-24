@@ -1,12 +1,13 @@
 package com.zarbosoft.merman.syntax.back;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.backevents.ETypeEvent;
-import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.editor.serialization.EventConsumer;
+import com.zarbosoft.merman.editor.serialization.WriteState;
+import com.zarbosoft.merman.editor.serialization.WriteStateBack;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.TypeInvalidAtLocation;
 import com.zarbosoft.pidgoon.Node;
@@ -14,7 +15,9 @@ import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.rendaw.common.TSMap;
 
+import java.util.Arrays;
 import java.util.Deque;
 import java.util.Iterator;
 
@@ -36,8 +39,8 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
     }
   }
 
-  protected BackTypeSpec(Config config) {
-    super(config.base);
+  protected BackTypeSpec(I18nEngine i18n,Config config) {
+    super(i18n, config.base);
     this.type = config.type;
     this.value = config.value;
   }
@@ -63,9 +66,9 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
 
   @Override
   public void write(
-      Deque<Write.WriteState> stack, TSMap<String, Object> data, Write.EventConsumer writer) {
+          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.type(((StringBuilder) data.get(type)).toString());
-    stack.addLast(new Write.WriteStateBack(data, ImmutableList.of(value).iterator()));
+    stack.addLast(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }
 
   @Override

@@ -6,7 +6,6 @@ import java.util.stream.Collectors;
 
 /** There were too many branches when parsing. This is configurable in the Parse. */
 public class GrammarTooUncertain extends RuntimeException {
-  private static final long serialVersionUID = -1049832348704101941L;
   public final Object position;
   public final Parse context;
 

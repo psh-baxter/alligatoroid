@@ -1,9 +1,7 @@
 package com.zarbosoft.merman.helper;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
 import com.zarbosoft.luxem.write.Writer;
+import com.zarbosoft.merman.JavaI18nEngine;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.document.values.Value;
@@ -13,9 +11,9 @@ import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.syntax.back.BackAtomSpec;
@@ -24,8 +22,8 @@ import com.zarbosoft.merman.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.back.BackRecordSpec;
-import com.zarbosoft.merman.syntax.back.BackSubArraySpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.merman.syntax.back.BackSubArraySpec;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
@@ -34,24 +32,32 @@ import com.zarbosoft.merman.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.rendaw.common.DeadCode;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.ComparisonFailure;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static com.zarbosoft.rendaw.common.Common.iterable;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 import static com.zarbosoft.rendaw.common.Common.zip;
 
 public class Helper {
+  public static I18nEngine i18n = new JavaI18nEngine(Locale.US);
+
   public static void dump(final Value value, final Writer writer) {
     uncheck(
         () -> {
           if (value.getClass() == ValueArray.class) {
             writer.arrayBegin();
-            ((ValueArray) value).data.stream().forEach(element -> dump(element, writer));
+            for (Atom element : ((ValueArray) value).data) {
+              dump(element, writer);
+            }
             writer.arrayEnd();
           } else if (value.getClass() == ValueAtom.class) {
             dump(((ValueAtom) value).get(), writer);
@@ -68,7 +74,7 @@ public class Helper {
           writer.recordBegin();
           value
               .fields
-              .keySet()
+              .keys()
               .forEach(
                   k ->
                       dump(
@@ -85,7 +91,7 @@ public class Helper {
   }
 
   public static void act(final Context context, final String name) {
-    for (final Action action : iterable(context.actions())) {
+    for (final Action action : context.actions()) {
       if (action.id().equals(name)) {
         action.run(context);
         return;
@@ -107,15 +113,15 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataPrimitive(final String id) {
-    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackPrimitiveSpec(i18n,new BaseBackPrimitiveSpec.Config(id, null));
   }
 
   public static BackSpec buildBackDataPrimitiveLetters(final String id) {
-    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Letters())));
+    return new BackPrimitiveSpec(i18n,new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Letters())));
   }
 
   public static BackSpec buildBackDataPrimitiveDigits(final String id) {
-    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Digits())));
+    return new BackPrimitiveSpec(i18n,new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Digits())));
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
@@ -123,7 +129,7 @@ public class Helper {
   }
 
   public static BackKeySpec buildBackDataKey(final String id) {
-    return new BackKeySpec(new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackKeySpec(i18n,new BaseBackPrimitiveSpec.Config(id, null));
   }
 
   public static BackArraySpec buildBackDataArray(final String id, String type) {
@@ -144,21 +150,21 @@ public class Helper {
           String.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
               expected.type, got.type, got.getSyntaxPath()));
-    final Set<String> expectedKeys = expected.fields.keySet();
-    final Set<String> gotKeys = got.fields.keySet();
+    final ROSet<String> expectedKeys = expected.fields.keys();
+    final ROSet<String> gotKeys = got.fields.keys();
     {
-      final Set<String> missing = Sets.difference(expectedKeys, gotKeys);
+      final TSSet<String> missing = expectedKeys.difference(gotKeys);
       if (!missing.isEmpty())
         throw new AssertionError(
             String.format("Missing fields: %s\nAt: %s", missing, got.getSyntaxPath()));
     }
     {
-      final Set<String> extra = Sets.difference(gotKeys, expectedKeys);
+      final TSSet<String> extra = gotKeys.difference(expectedKeys);
       if (!extra.isEmpty())
         throw new AssertionError(
             String.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
     }
-    for (final String key : Sets.intersection(expectedKeys, gotKeys)) {
+    for (final String key : expectedKeys.intersect(gotKeys)) {
       assertTreeEqual(expected.fields.getOpt(key), got.fields.getOpt(key));
     }
   }
@@ -172,8 +178,9 @@ public class Helper {
             String.format(
                 "Array length mismatch.\nExpected: %s\nGot: %s\nAt: %s",
                 expectedValue.data.size(), gotValue.data.size(), got.getSyntaxPath()));
-      zip(expectedValue.data.stream(), gotValue.data.stream())
-          .forEach(pair -> assertTreeEqual(pair.first, pair.second));
+      for (int i = 0; i < expectedValue.data.size(); ++i) {
+        assertTreeEqual(expectedValue.data.get(i), gotValue.data.get(i));
+      }
     } else if (expected.getClass() == ValueAtom.class) {
       final ValueAtom expectedValue = (ValueAtom) expected;
       final ValueAtom gotValue = (ValueAtom) got;
@@ -197,7 +204,7 @@ public class Helper {
     assertTreeEqual(
         new ValueArray(
             (BaseBackArraySpec) context.syntax.root.fields.get("value"),
-            ImmutableList.of(expected)),
+            TSList.of(expected)),
         got);
   }
 
@@ -221,12 +228,11 @@ public class Helper {
             syntax,
             new Atom(
                 syntax.root,
-                new TSMap<>(
-                    ImmutableMap.of(
+                new TSMap<String, Value>().put(
                         "value",
                         new ValueArray(
                             (BaseBackArraySpec) syntax.root.fields.get("value"),
-                            Arrays.asList(root))))));
+                            TSList.of(root)))));
     final Context context =
         new Context(
             contextConfig,
@@ -259,7 +265,7 @@ public class Helper {
                 return string;
               }
             },
-            startWindowed);
+                null, startWindowed, i18n);
     return context;
   }
 }

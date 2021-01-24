@@ -1,12 +1,8 @@
 package com.zarbosoft.merman.editor.hid;
 
-import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.extensions.hotkeys.Key;
-import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.pidgoon.events.Event;
-
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.zarbosoft.rendaw.common.ROSet;
 
 public class HIDEvent implements Event {
   public final Key key;

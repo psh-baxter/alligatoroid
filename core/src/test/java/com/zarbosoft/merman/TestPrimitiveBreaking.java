@@ -6,9 +6,6 @@ import com.zarbosoft.merman.helper.PrimitiveTestWizard;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import org.junit.Test;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
-
 public class TestPrimitiveBreaking {
 
   @Test

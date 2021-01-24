@@ -1,8 +1,5 @@
 package com.zarbosoft.merman.syntax.front;
 
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.syntax.symbol.Symbol;
-
 public class FrontArraySpec extends FrontArraySpecBase {
   private final String back;
 

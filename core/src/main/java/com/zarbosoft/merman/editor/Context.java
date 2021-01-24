@@ -1,7 +1,5 @@
 package com.zarbosoft.merman.editor;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.luxem.read.InvalidStream;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
@@ -12,8 +10,7 @@ import com.zarbosoft.merman.editor.details.Details;
 import com.zarbosoft.merman.editor.display.Display;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.editor.serialization.Load;
-import com.zarbosoft.merman.editor.serialization.Write;
+import com.zarbosoft.merman.editor.serialization.Serializer;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
@@ -23,25 +20,23 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Wall;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.ROSetRef;
-import com.zarbosoft.merman.misc.TSList;
-import com.zarbosoft.merman.misc.TSMap;
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROSetRef;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSSet;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.text.BreakIterator;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Set;
@@ -49,12 +44,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.zarbosoft.rendaw.common.Common.last;
 
 public class Context {
-  public static Supplier<Set> createSet = () -> new HashSet<>();
+  public static Supplier<TSSet> createSet = () -> new TSSet();
   // Settings
   public boolean animateCoursePlacement;
   public boolean animateDetails;
@@ -73,16 +65,18 @@ public class Context {
   public final Display display;
   public final Syntax syntax;
   public final Document document;
-  public final Set<SelectionListener> cursorListeners = new HashSet<>();
-  public final Set<HoverListener> hoverListeners = new HashSet<>();
-  private final Set<TagsListener> selectionTagsChangeListeners = new HashSet<>();
-  private final Set<TagsListener> globalTagsChangeListeners = new HashSet<>();
-  private final Set<ActionChangeListener> actionChangeListeners = new HashSet<>();
-  private final Map<Object, List<Action>> actions = new HashMap<>();
+  public final Serializer serializer;
+  public final I18nEngine i18n;
+  public final TSSet<SelectionListener> cursorListeners = new TSSet<>();
+  public final TSSet<HoverListener> hoverListeners = new TSSet<>();
+  private final TSSet<TagsListener> selectionTagsChangeListeners = new TSSet<>();
+  private final TSSet<TagsListener> globalTagsChangeListeners = new TSSet<>();
+  private final TSSet<ActionChangeListener> actionChangeListeners = new TSSet<>();
+  private final TSList<Action> actions = new TSList<>();
   private final Consumer<IterationTask> addIteration;
   private final Consumer<Integer> flushIteration;
   public boolean window;
-  private Atom windowAtom;
+    private Atom windowAtom;
   private final TSSet<String> globalTags = new TSSet<String>();
   public KeyListener keyListener;
   public TextListener textListener;
@@ -126,25 +120,25 @@ public class Context {
   }
 
   public Context(
-      InitialConfig config,
-      Syntax syntax,
-      Document document,
-      Display display,
-      Consumer<IterationTask> addIteration,
-      Consumer<Integer> flushIteration,
-      ClipboardEngine clipboardEngine,
-      boolean startWindowed) {
-    actions.put(
-        this,
-        ImmutableList.of(
-            new ActionWindowClear(),
-            new ActionWindowTowardsRoot(),
-            new ActionWindowTowardsCursor(),
-            new ActionScrollNext(),
-            new ActionScrollNextAlot(),
-            new ActionScrollPrevious(),
-            new ActionScrollPreviousAlot(),
-            new ActionScrollReset()));
+          InitialConfig config,
+          Syntax syntax,
+          Document document,
+          Display display,
+          Consumer<IterationTask> addIteration,
+          Consumer<Integer> flushIteration,
+          ClipboardEngine clipboardEngine,
+          Serializer serializer, boolean startWindowed, I18nEngine i18n) {
+    this.serializer = serializer;
+    this.i18n = i18n;
+    actions.add(
+        new ActionWindowClear(),
+        new ActionWindowTowardsRoot(),
+        new ActionWindowTowardsCursor(),
+        new ActionScrollNext(),
+        new ActionScrollNextAlot(),
+        new ActionScrollPrevious(),
+        new ActionScrollPreviousAlot(),
+        new ActionScrollReset());
     this.syntax = syntax;
     this.document = document;
     this.display = display;
@@ -325,14 +319,18 @@ public class Context {
     this.flushIteration.accept(limit);
   }
 
-  public void addActions(final Object key, final List<Action> actions) {
-    this.actions.put(key, actions);
-    ImmutableSet.copyOf(actionChangeListeners).forEach(listener -> listener.actionsAdded(this));
+  public void addActions(final ROList<Action> actions) {
+    this.actions.addAll(actions);
+    for (ActionChangeListener l : actionChangeListeners.copy()) {
+      l.actionsAdded(this);
+    }
   }
 
-  public void removeActions(final Object key) {
-    this.actions.remove(key);
-    ImmutableSet.copyOf(actionChangeListeners).forEach(listener -> listener.actionsRemoved(this));
+  public void removeActions(final ROList<Action> key) {
+    this.actions.removeAll(key);
+    for (ActionChangeListener l : actionChangeListeners.copy()) {
+      l.actionsRemoved(this);
+    }
   }
 
   public void addActionChangeListener(final ActionChangeListener listener) {
@@ -343,8 +341,8 @@ public class Context {
     actionChangeListeners.remove(listener);
   }
 
-  public Stream<Action> actions() {
-    return actions.entrySet().stream().flatMap(e -> e.getValue().stream());
+  public ROList<Action> actions() {
+    return actions;
   }
 
   public void addConverseEdgeListener(final ContextIntListener listener) {
@@ -363,25 +361,23 @@ public class Context {
     transverseEdgeListeners.remove(listener);
   }
 
-  public void copy(final List<Atom> atoms) {
-    final ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    Write.write(atoms, document.syntax, stream);
-    clipboardEngine.set(stream.toByteArray());
+  public void copy(final ROList<Atom> atoms) {
+    clipboardEngine.set(serializer.write(atoms));
   }
 
   public void copy(final String string) {
     clipboardEngine.setString(string);
   }
 
-  public List<Atom> uncopy(final String type) {
+  public ROList<Atom> uncopy(final String type) {
     final byte[] bytes = clipboardEngine.get();
-    if (bytes == null) return ImmutableList.of();
+    if (bytes == null) return ROList.empty;
     try {
-      return Load.loadMultiple(syntax, type, new ByteArrayInputStream(bytes));
+      return serializer.load(syntax, type, bytes);
     } catch (final InvalidStream ignored) {
     } catch (final InvalidDocument ignored) {
     }
-    return ImmutableList.of();
+    return ROList.empty;
   }
 
   public String uncopyString() {
@@ -612,12 +608,14 @@ public class Context {
     banner.tagsChanged(this);
     details.tagsChanged(this);
     windowAtom.visual.tagsChanged(this);
-    ImmutableList.copyOf(globalTagsChangeListeners).forEach(listener -> listener.tagsChanged(this));
+    for (TagsListener l : globalTagsChangeListeners.copy()) {
+      l.tagsChanged(this);
+    }
   }
 
   public void triggerIdleLayBricksOutward() {
     triggerIdleLayBricksBeforeStart(foreground.children.get(0).children.get(0));
-    triggerIdleLayBricksAfterEnd(last(last(foreground.children).children));
+    triggerIdleLayBricksAfterEnd(foreground.children.last().children.last());
   }
 
   public void clearSelection() {
@@ -633,7 +631,9 @@ public class Context {
       oldCursor.clear(this);
     }
     if (localToken != selectToken) return;
-    ImmutableSet.copyOf(cursorListeners).forEach(l -> l.cursorChanged(this, cursor));
+    for (SelectionListener l : cursorListeners.copy()) {
+      l.cursorChanged(this, cursor);
+    }
     selectionTagsChanged();
     triggerIdleLayBricksOutward();
   }
@@ -642,8 +642,9 @@ public class Context {
     if (cursor == null) return;
     banner.tagsChanged(this);
     details.tagsChanged(this);
-    ImmutableList.copyOf(selectionTagsChangeListeners)
-        .forEach(listener -> listener.tagsChanged(this));
+    for (TagsListener l : selectionTagsChangeListeners.copy()) {
+      l.tagsChanged(this);
+    }
   }
 
   public Style getStyle(final ROSet<String> tags) {
@@ -857,7 +858,9 @@ public class Context {
         hover = at.hover(context, point);
         if (hover != old) {
           if (old != null) old.clear(context);
-          ImmutableSet.copyOf(hoverListeners).forEach(l -> l.hoverChanged(context, hover));
+          for (HoverListener l : hoverListeners.copy()) {
+            l.hoverChanged(context, hover);
+          }
         }
         hoverBrick = at;
         hoverIdle = null;

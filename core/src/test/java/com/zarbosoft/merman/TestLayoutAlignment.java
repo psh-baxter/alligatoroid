@@ -1,8 +1,6 @@
 package com.zarbosoft.merman;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
@@ -22,6 +20,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.util.Arrays;
+
 @RunWith(Parameterized.class)
 public class TestLayoutAlignment {
   private final int layBrickBatchSize;
@@ -39,7 +39,7 @@ public class TestLayoutAlignment {
 
   @Parameterized.Parameters
   public static Iterable<Object[]> parameters() {
-    return ImmutableList.of(new Object[] {1}, new Object[] {2}, new Object[] {10});
+    return Arrays.asList(new Object[] {1}, new Object[] {2}, new Object[] {10});
   }
 
   /** Simply check that root level absolute aligned elements have correct converse offset. */
@@ -324,8 +324,9 @@ public class TestLayoutAlignment {
   }
 
   /**
-   * The concensus value lingers after breaking, so an element that goes past the edge of the screen will stay offscreen at first placement
-   * Then the concensus resets greatly reducing the line length, triggers expand -> endless loop
+   * The concensus value lingers after breaking, so an element that goes past the edge of the screen
+   * will stay offscreen at first placement Then the concensus resets greatly reducing the line
+   * length, triggers expand -> endless loop
    */
   @Test
   public void testConcensusBreak() {
@@ -348,12 +349,7 @@ public class TestLayoutAlignment {
         new SyntaxBuilder("any")
             .type(primitive)
             .type(pair)
-            .group(
-                "any",
-                new GroupBuilder()
-                    .type(primitive)
-                    .type(pair)
-                    .build())
+            .group("any", new GroupBuilder().type(primitive).type(pair).build())
             .concensusAlignment("concensus1")
             .addRootFrontPrefix(new FrontSpaceBuilder().tag("compact_split").build())
             .style(
@@ -362,8 +358,8 @@ public class TestLayoutAlignment {
             .build();
     new GeneralTestWizard(
             syntax,
-                    new TreeBuilder(primitive).add("value", "one").build(),
-                    new TreeBuilder(pair).add("first", "two").add("second", "three").build())
+            new TreeBuilder(primitive).add("value", "one").build(),
+            new TreeBuilder(pair).add("first", "two").add("second", "three").build())
         .checkCourseCount(1)
         .resize(80)
         .checkCourseCount(2)
@@ -373,9 +369,7 @@ public class TestLayoutAlignment {
         .checkCourseCount(1);
   }
 
-  /**
-   * Accidentally found an issue where the primitive doesn't get tagged compact
-   */
+  /** Accidentally found an issue where the primitive doesn't get tagged compact */
   @Test
   public void testConcensusBreak2() {
     final FreeAtomType pair =
@@ -406,12 +400,7 @@ public class TestLayoutAlignment {
         new SyntaxBuilder("any")
             .type(pair)
             .type(splitPair)
-            .group(
-                "any",
-                new GroupBuilder()
-                    .type(pair)
-                    .type(splitPair)
-                    .build())
+            .group("any", new GroupBuilder().type(pair).type(splitPair).build())
             .concensusAlignment("concensus1")
             .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
             .style(new StyleBuilder().tag("split").split(true).build())
@@ -474,13 +463,7 @@ public class TestLayoutAlignment {
             .type(primitive)
             .type(pair)
             .type(atomPair)
-            .group(
-                "any",
-                new GroupBuilder()
-                    .type(primitive)
-                    .type(pair)
-                    .type(atomPair)
-                    .build())
+            .group("any", new GroupBuilder().type(primitive).type(pair).type(atomPair).build())
             .concensusAlignment("concensus1")
             .concensusAlignment("concensus2")
             .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
@@ -513,8 +496,9 @@ public class TestLayoutAlignment {
   }
 
   /**
-   * If two concensus alignments are crossed (one element after the other, then the othe way in a different line)
-   * In this case, the first alignment to get 2 elements is respected, the other ignored (within the cross).
+   * If two concensus alignments are crossed (one element after the other, then the othe way in a
+   * different line) In this case, the first alignment to get 2 elements is respected, the other
+   * ignored (within the cross).
    */
   @Test
   public void testMultiCourseConcensusLoop() {
@@ -546,12 +530,7 @@ public class TestLayoutAlignment {
         new SyntaxBuilder("any")
             .type(triple)
             .type(reverseTriple)
-            .group(
-                "any",
-                new GroupBuilder()
-                    .type(triple)
-                    .type(reverseTriple)
-                    .build())
+            .group("any", new GroupBuilder().type(triple).type(reverseTriple).build())
             .concensusAlignment("concensus1")
             .concensusAlignment("concensus2")
             .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
@@ -577,9 +556,7 @@ public class TestLayoutAlignment {
         .checkBrick(1, 3, 220);
   }
 
-  /**
-   * Test issue with split line not expandedting
-   */
+  /** Test issue with split line not expandedting */
   @Test
   public void testPartiallyExpandConsecutiveLines() {
     final FreeAtomType threeLine2 =

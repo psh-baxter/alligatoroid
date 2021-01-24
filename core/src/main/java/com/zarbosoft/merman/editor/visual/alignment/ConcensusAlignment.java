@@ -5,17 +5,15 @@ import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.AlignmentListener;
-import com.zarbosoft.merman.misc.ROMap;
-
-import java.util.HashSet;
-import java.util.Set;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class ConcensusAlignment extends Alignment {
 	private boolean disabled = false;
 	/**
 	 * Any alignments that have ocurred before (directoy or transitively) this alignment in a course
 	 */
-	public Set<ConcensusAlignment> superior = new HashSet<>();
+	public TSSet<ConcensusAlignment> superior = new TSSet<>();
 	private IterationAlign iterationAlign;
 
 	private class IterationAlign extends IterationTask {

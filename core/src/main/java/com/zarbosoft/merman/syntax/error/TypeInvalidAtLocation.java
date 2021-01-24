@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.syntax.error;
 
-import com.google.common.collect.ImmutableMap;
 import com.zarbosoft.merman.editor.Path;
 
 public class TypeInvalidAtLocation extends BaseKVError{

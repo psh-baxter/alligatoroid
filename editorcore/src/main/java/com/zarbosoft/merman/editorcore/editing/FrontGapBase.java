@@ -10,13 +10,12 @@ import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
-
-import java.util.Set;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public abstract class FrontGapBase extends FrontSpec {
   public BaseBackPrimitiveSpec dataType;
@@ -39,7 +38,7 @@ public abstract class FrontGapBase extends FrontSpec {
 
   @Override
   public void finish(
-          MultiError errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
+          MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
     middleUsed.add(field());
     this.dataType = atomType.getDataPrimitive(errors, typePath, field());
   }

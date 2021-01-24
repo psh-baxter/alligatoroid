@@ -1,13 +1,7 @@
 package com.zarbosoft.merman.syntax;
 
-import com.google.common.collect.ImmutableSet;
-import com.zarbosoft.merman.document.Document;
-import com.zarbosoft.merman.editor.serialization.Load;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.TSMap;
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.error.DuplicateAtomTypeIds;
 import com.zarbosoft.merman.syntax.error.DuplicateAtomTypeIdsInGroup;
 import com.zarbosoft.merman.syntax.error.GroupChildDoesntExist;
@@ -21,28 +15,19 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Pair;
-import org.pcollections.PVector;
-import org.pcollections.TreePVector;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSSet;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static com.zarbosoft.rendaw.common.Common.last;
-import static com.zarbosoft.rendaw.common.Common.sublist;
 
 public class Syntax {
   public final BackType backType;
@@ -74,19 +59,21 @@ public class Syntax {
     public final ROList<AtomType> types;
     public final ROMap<String, Set<AtomType>> splayedTypes;
     public final RootAtomType root;
-    public GapAtomType gap = new GapAtomType(new GapAtomType.Config());
-    public SuffixGapAtomType suffixGap = new SuffixGapAtomType(new SuffixGapAtomType.Config());
+    public GapAtomType gap;
+    public SuffixGapAtomType suffixGap;
     public Direction converseDirection = Direction.RIGHT;
     public Direction transverseDirection = Direction.DOWN;
 
-    public Config(
+    public Config(I18nEngine i18n,
         ROList<AtomType> types, ROMap<String, Set<AtomType>> splayedTypes, RootAtomType root) {
       this.types = types;
       this.splayedTypes = splayedTypes;
       this.root = root;
+      gap = new GapAtomType(i18n,new GapAtomType.Config());
+      suffixGap = new SuffixGapAtomType(i18n,new SuffixGapAtomType.Config());
     }
 
-    public Config(
+    public Config(I18nEngine i18n,
         BackType backType,
         ModelColor background,
         Padding pad,
@@ -113,7 +100,9 @@ public class Syntax {
       this.types = types;
       this.splayedTypes = splayedTypes;
       this.root = root;
+      this.gap = new GapAtomType(i18n,new GapAtomType.Config());
       this.gap = gap;
+      this.suffixGap = new SuffixGapAtomType(i18n,new SuffixGapAtomType.Config());
       this.suffixGap = suffixGap;
       this.converseDirection = converseDirection;
       this.transverseDirection = transverseDirection;
@@ -123,7 +112,7 @@ public class Syntax {
   public Syntax(Config config) {
     MultiError errors = new MultiError();
     // jfx, qt, and swing don't support vertical languages
-    if (!ImmutableSet.of(Direction.LEFT, Direction.RIGHT).contains(config.converseDirection)
+    if (!TSSet.of(Direction.LEFT, Direction.RIGHT).contains(config.converseDirection)
         || (config.transverseDirection != Direction.DOWN)) {
       errors.add(new UnsupportedDirections());
     }
@@ -188,20 +177,20 @@ public class Syntax {
       if (group.getValue().toSet().size() != group.getValue().size()) {
         errors.add(new DuplicateAtomTypeIdsInGroup(group.getKey()));
       }
-      final Deque<Pair<PVector<String>, Iterator<String>>> stack = new ArrayDeque<>();
+      final Deque<Pair<ROList<String>, Iterator<String>>> stack = new ArrayDeque<>();
       Iterator<String> seed = group.getValue().iterator();
       Set<AtomType> out = new HashSet<>();
       if (seed.hasNext()) {
-        stack.addLast(new Pair<>(TreePVector.singleton(group.getKey()), seed));
+        stack.addLast(new Pair<ROList<String>, Iterator<String>>(TSList.of(group.getKey()), seed));
         while (!stack.isEmpty()) {
-          Pair<PVector<String>, Iterator<String>> top = stack.peekLast();
+          Pair<ROList<String>, Iterator<String>> top = stack.peekLast();
           final String childKey = top.second.next();
           if (!top.second.hasNext()) stack.removeLast();
 
           int pathContainsChild = top.first.lastIndexOf(childKey);
-          PVector<String> newPath = top.first.plus(childKey);
+          ROList<String> newPath = top.first.mut().add(childKey);
           if (pathContainsChild != -1) {
-            errors.add(new TypeCircularReference(sublist(newPath, pathContainsChild)));
+            errors.add(new TypeCircularReference(newPath.subFrom(pathContainsChild)));
             continue;
           }
 
@@ -223,7 +212,7 @@ public class Syntax {
             continue;
           }
 
-          errors.add(new GroupChildDoesntExist(last(top.first), childKey));
+          errors.add(new GroupChildDoesntExist(top.first.last(), childKey));
         }
       }
       splayedTypes.put(group.getKey(), out);
@@ -274,19 +263,5 @@ public class Syntax {
       grammar.add("root", root.buildBackRule(this));
     }
     return grammar;
-  }
-
-  public Document load(final Path path) throws FileNotFoundException, IOException {
-    try (InputStream data = Files.newInputStream(path)) {
-      return load(data);
-    }
-  }
-
-  public Document load(final InputStream data) {
-    return Load.load(this, data);
-  }
-
-  public Document load(final String string) {
-    return load(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
   }
 }

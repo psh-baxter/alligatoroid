@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.rendaw.common.TSList;
 
 @Action.StaticID(id = "copy")
 class AtomActionCopy extends Action {
@@ -14,8 +14,7 @@ class AtomActionCopy extends Action {
 
     @Override
     public boolean run(final Context context) {
-
-        context.copy(ImmutableList.of(base.atomGet()));
+        context.copy(TSList.of(base.atomGet()));
         return true;
     }
 

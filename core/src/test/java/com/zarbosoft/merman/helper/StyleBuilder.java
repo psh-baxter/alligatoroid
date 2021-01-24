@@ -1,8 +1,7 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.misc.TSList;
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class StyleBuilder {
   private final TSSet<String> with = new TSSet<>();

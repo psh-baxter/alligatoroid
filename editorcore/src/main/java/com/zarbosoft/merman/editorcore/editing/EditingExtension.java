@@ -201,7 +201,7 @@ public class EditingExtension {
                                                                               + text
                                                                               + preview.substring(
                                                                               cursor.range.endOffset, preview.length());
-                                                              if (!value.middle.matcher.match(preview)) {
+                                                              if (!value.middle.matcher.match(context,preview)) {
                                                                   VisualAtom atomVisual = cursor.visualPrimitive.atomVisual();
                                                                   if (cursor.range.endOffset == value.length()
                                                                           && last(atomVisual.children) == cursor.visualPrimitive) {

@@ -1,7 +1,8 @@
 package com.zarbosoft.merman.syntax.primitivepattern;
 
-import com.zarbosoft.merman.misc.ROList;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.rendaw.common.ROList;
 
 public class PatternSequence extends Pattern {
   public final ROList<Pattern> children;
@@ -11,9 +12,9 @@ public class PatternSequence extends Pattern {
   }
 
   @Override
-  public Node build() {
+  public Node build(I18nEngine i18n) {
     final com.zarbosoft.pidgoon.nodes.Sequence out = new com.zarbosoft.pidgoon.nodes.Sequence();
-    for (final Pattern child : children) out.add(child.build());
+    for (final Pattern child : children) out.add(child.build(i18n));
     return out;
   }
 }

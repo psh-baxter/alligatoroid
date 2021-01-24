@@ -8,7 +8,7 @@ import com.zarbosoft.pidgoon.State;
 import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.nodes.Reference.RefParent;
 import com.zarbosoft.pidgoon.parse.Parse;
-import org.pcollections.PMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 /** Base node to match a single event. Define `matches` to use. */
 public abstract class Terminal extends Node {
@@ -19,7 +19,7 @@ public abstract class Terminal extends Node {
       final Parse context,
       final Store prestore,
       final Parent parent,
-      final PMap<Object, RefParent> seen,
+      final ROMap<Object, RefParent> seen,
       final Object cause) {
     context.leaves.add(
         new State() {

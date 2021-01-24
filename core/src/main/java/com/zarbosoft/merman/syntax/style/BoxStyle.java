@@ -1,8 +1,6 @@
 package com.zarbosoft.merman.syntax.style;
 
-import com.zarbosoft.merman.misc.ROList;
-
-import static com.zarbosoft.rendaw.common.Common.uncheck;
+import com.zarbosoft.rendaw.common.ROList;
 
 public class BoxStyle {
   public final Integer padding;

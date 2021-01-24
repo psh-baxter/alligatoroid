@@ -92,19 +92,9 @@ public class Parse {
               public long size(final Parent stopAt, final long start) {
                 throw new UnsupportedOperationException();
               }
-
-              @Override
-              public void cut(final Parse step, final String name) {
-                step.cut(null);
-              }
             },
             "<SOF>");
     return context;
-  }
-
-  public void cut(final Object marker) {
-    if (marker == null) leaves.clear();
-    else leaves.removeIf(l -> l.cutStops.contains(marker));
   }
 
   /**

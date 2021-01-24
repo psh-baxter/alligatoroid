@@ -1,25 +1,21 @@
 package com.zarbosoft.merman.editor.wall;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.rendaw.common.ChainComparator;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.*;
+import java.util.PriorityQueue;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.zarbosoft.rendaw.common.Common.flatStream;
-import static com.zarbosoft.rendaw.common.Common.last;
 
 public class Wall {
   public final Group visual;
-  public List<Course> children = new ArrayList<>();
+  public TSList<Course> children = new TSList<>();
   private IterationAdjustTask idleAdjust;
   private IterationCompactTask idleCompact;
   private IterationExpandTask idleExpand;
@@ -27,11 +23,11 @@ public class Wall {
   public Brick cornerstone;
 
   public Course cornerstoneCourse;
-  Set<Bedding> bedding = new HashSet<>();
+  TSSet<Bedding> bedding = new TSSet<>();
   public int beddingBefore = 0;
   int beddingAfter = 0;
-  Set<BeddingListener> beddingListeners = new HashSet<>();
-  Set<CornerstoneListener> cornerstoneListeners = new HashSet<>();
+  TSSet<BeddingListener> beddingListeners = new TSSet<>();
+  TSSet<CornerstoneListener> cornerstoneListeners = new TSSet<>();
   public PriorityQueue<VisualFrontPrimitive> splitPrimitives =
       new PriorityQueue<>(
           11,
@@ -63,20 +59,8 @@ public class Wall {
         });
   }
 
-  public Stream<Brick> streamRange(
-      final int courseStart, final int brickStart, final int courseEnd, final int brickEnd) {
-    final List<Brick> startBricks = children.get(courseStart).children;
-    if (courseStart == courseEnd) return startBricks.subList(brickStart, brickEnd + 1).stream();
-    final List<Brick> endBricks = children.get(courseEnd).children;
-    return flatStream(
-        startBricks.subList(brickStart, startBricks.size()).stream(),
-        children.subList(courseStart + 1, courseEnd).stream()
-            .flatMap(course -> course.children.stream()),
-        endBricks.subList(0, brickEnd).stream());
-  }
-
   public void clear(final Context context) {
-    while (!children.isEmpty()) last(children).destroy(context);
+    while (!children.isEmpty()) children.last().destroy(context);
     if (idleCompact != null) idleCompact.destroy();
     if (idleExpand != null) idleExpand.destroy();
     if (idleAdjust != null) idleAdjust.destroy();
@@ -95,12 +79,15 @@ public class Wall {
     }
   }
 
-  void add(final Context context, final int at, final List<Course> courses) {
-    final boolean adjustForward = cornerstoneCourse == null ? true : at > cornerstoneCourse.index;
-    children.addAll(at, courses);
-    courses.stream().forEach(l -> l.parent = this);
+  void add(final Context context, final int at, final ROList<Course> courses) {
+    children.insertAll(at, courses);
+    for (Course course : courses) {
+      course.parent = this;
+    }
     renumber(at);
-    visual.addAll(at, courses.stream().map(l -> l.visual).collect(Collectors.toList()));
+    for (Course course : courses) {
+      visual.add(course.visual);
+    }
     getIdle(context);
     if (children.size() > 1) {
       if (idleAdjust.backward >= at) idleAdjust.backward += 1;
@@ -142,7 +129,7 @@ public class Wall {
     idleExpand.at = 0;
   }
 
-  public Set<BeddingListener> getBeddingListeners() {
+  public TSSet<BeddingListener> getBeddingListeners() {
     return beddingListeners;
   }
 
@@ -175,15 +162,15 @@ public class Wall {
   }
 
   private void beddingChanged(final Context context) {
-    final Pair<Integer, Integer> pair =
-        ImmutableList.copyOf(bedding).stream()
-            .map(b -> new Pair<>(b.before, b.after))
-            .reduce((a, b) -> new Pair<>(a.first + b.first, a.second + b.second))
-            .orElse(new Pair<>(0, 0));
-    beddingBefore = pair.first;
-    beddingAfter = pair.second;
-    ImmutableList.copyOf(beddingListeners).stream()
-        .forEach(a -> a.beddingChanged(context, beddingBefore, beddingAfter));
+    beddingBefore = 0;
+    beddingAfter = 0;
+    for (Bedding b : bedding) {
+      beddingBefore += b.before;
+      beddingAfter += b.after;
+    }
+    for (BeddingListener l : beddingListeners.copy()) {
+      l.beddingChanged(context, beddingBefore, beddingAfter);
+    }
     if (cornerstoneCourse != null) adjust(context, cornerstoneCourse.index);
   }
 
@@ -207,15 +194,16 @@ public class Wall {
           } else {
             clear(context);
             final Course course = new Course(context, 0);
-            add(context, 0, ImmutableList.of(course));
-            course.add(context, 0, ImmutableList.of(cornerstone));
+            add(context, 0, TSList.of(course));
+            course.add(context, 0, TSList.of(cornerstone));
           }
         }
       }
       this.cornerstoneCourse = cornerstone.parent;
       if (beddingBefore > 0 || beddingAfter > 0) adjust(context, cornerstoneCourse.index);
-      ImmutableList.copyOf(cornerstoneListeners)
-          .forEach(listener -> listener.cornerstoneChanged(context, cornerstone));
+      for (CornerstoneListener l : cornerstoneListeners.copy()) {
+        l.cornerstoneChanged(context, cornerstone);
+      }
       context.triggerIdleLayBricksBeforeStart(cornerstone);
       context.triggerIdleLayBricksAfterEnd(cornerstone);
     }

@@ -3,7 +3,7 @@
 
     <groupId>com.zarbosoft.rendaw</groupId>
     <artifactId>common</artifactId>
-    <version>1.0.11</version>
+    <version>99.0.0</version>
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Common data and routines</description>
     <url>https://gitlab.com/rendaw/java-common</url>

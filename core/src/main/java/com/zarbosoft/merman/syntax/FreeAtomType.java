@@ -1,8 +1,7 @@
 package com.zarbosoft.merman.syntax;
 
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
+import com.zarbosoft.rendaw.common.ROMap;
 
 public class FreeAtomType extends AtomType {
   public final String name;

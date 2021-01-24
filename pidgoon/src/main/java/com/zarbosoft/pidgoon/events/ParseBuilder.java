@@ -20,21 +20,6 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
   public ParseBuilder() {}
 
   /**
-   * Parse by pulling events from the stream.
-   *
-   * @param data
-   * @return
-   */
-  public O parse(final Stream<Pair<? extends Event, Object>> data) {
-    final Common.Mutable<ParseEventSink<O>> eventStream = new Common.Mutable<>(parse());
-    data.forEach(
-        pair -> {
-          eventStream.value = eventStream.value.push(pair.first, pair.second);
-        });
-    return eventStream.value.result();
-  }
-
-  /**
    * Parse by pulling events from the list
    *
    * @param data
@@ -57,7 +42,7 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
   public ParseEventSink<O> parse() {
     final Store store =
         initialStore == null
-            ? new StackStore(env == null ? null : new HashMap<>(env))
+            ? new StackStore()
             : initialStore;
     return new ParseEventSink<>(
         grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
@@ -74,7 +59,7 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
   public Pair<Parse, Position> longestMatchFromStart(final List<Event> events) {
     final Store store =
         initialStore == null
-            ? new StackStore(env == null ? null : new HashMap<>(env))
+            ? new StackStore()
             : initialStore;
     Parse context =
         Parse.prepare(grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);

@@ -7,13 +7,10 @@ import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.ROSetRef;
 import com.zarbosoft.merman.syntax.AtomType;
-
-import java.util.Set;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public abstract class FrontSpec {
 
@@ -32,7 +29,7 @@ public abstract class FrontSpec {
           int depthScore);
 
   public void finish(
-      MultiError errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {}
+      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {}
 
   public abstract String field();
 

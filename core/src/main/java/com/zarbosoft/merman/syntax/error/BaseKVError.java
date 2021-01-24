@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.syntax.error;
 
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
 import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

@@ -1,8 +1,5 @@
 package com.zarbosoft.merman;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.extensions.hotkeys.HotkeyRule;
 import com.zarbosoft.merman.extensions.hotkeys.HotkeysExtension;
@@ -16,16 +13,13 @@ import com.zarbosoft.merman.helper.StyleBuilder;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSList;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 import org.junit.Test;
-
-import static org.hamcrest.core.IsEqual.equalTo;
-import static org.junit.Assert.assertThat;
 
 public class TestExtensionHotkeys {
   @Test
@@ -59,7 +53,7 @@ public class TestExtensionHotkeys {
                       ROSet.empty,
                       ROSet.empty,
                       new TSMap<String, ROList<Node>>()
-                          .putChain("enter", TSList.of(new Terminal(Key.Q, true, ROSet.empty))),
+                          .put("enter", TSList.of(new Terminal(Key.Q, true, ROSet.empty))),
                       false));
             })
         .select("value", "0")

@@ -63,6 +63,11 @@ public class Main extends Application {
     launch(args);
   }
 
+  public static void save(Path path) {
+          context.document.write(dest);
+          context.history.clearModified(context);
+  }
+
   public static boolean confirmDialog(final Stage stage, final String text) {
     final Alert confirm =
         new Alert(Alert.AlertType.CONFIRMATION, text, ButtonType.NO, ButtonType.YES);

@@ -5,8 +5,7 @@ import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.internal.BranchingStack;
 import com.zarbosoft.pidgoon.nodes.Operator;
-import org.pcollections.PVector;
-import org.pcollections.TreePVector;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.List;
 import java.util.Map;
@@ -32,22 +31,13 @@ public class StackStore extends Store {
   private BranchingStack<Object> stack;
 
   public StackStore() {
-    this(null);
-  }
-
-  public StackStore(Map env) {
-    super(null, TreePVector.empty(), env);
+    super(null);
     top = null;
     stack = null;
   }
 
-  public StackStore(
-      final Object color,
-      final PVector<Object> cutStops,
-      final Map env,
-      final BranchingStack<Object> stack,
-      final Event top) {
-    super(color, cutStops, env);
+  public StackStore(final Object color, final BranchingStack<Object> stack, final Event top) {
+    super(color);
     this.top = top;
     this.stack = stack;
     this.color = color;
@@ -90,7 +80,7 @@ public class StackStore extends Store {
 
   @Override
   public <Y> Y split() {
-    return (Y) new StackStore(color, cutStops, env, stack, top);
+    return (Y) new StackStore(color, stack, top);
   }
 
   @Override
@@ -189,14 +179,14 @@ public class StackStore extends Store {
     return s;
   }
 
-  public <T> StackStore popVarSingleList(List<T> out) {
+  public <T> StackStore popVarSingleList(TSList<T> out) {
     StackStore s = this;
     final Integer count = s.stackTop();
     s = s.popStack();
     return s.popFixedSingleList(count, out);
   }
 
-  public <T> StackStore popFixedSingleList(final int length, List<T> out) {
+  public <T> StackStore popFixedSingleList(final int length, TSList<T> out) {
     StackStore s = this;
     for (int i = 0; i < length; ++i) {
       out.add(s.stackTop());

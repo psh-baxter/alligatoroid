@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.Action;
@@ -20,21 +19,18 @@ import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
-import com.zarbosoft.merman.misc.ROList;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
-
-import static com.zarbosoft.rendaw.common.Common.last;
 
 public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf {
   public final ValueArray value;
@@ -58,7 +54,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
 
           @Override
           public void changed(
-              final Context context, final int index, final int remove, final List<Atom> add) {
+              final Context context, final int index, final int remove, final ROList<Atom> add) {
             if (ellipsize(context)) {
               if (value.data.isEmpty()) {
                 // Was blank, now ellipsized
@@ -163,7 +159,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
   }
 
   private void coreChange(
-      final Context context, final int index, final int remove, final List<Atom> add) {
+      final Context context, final int index, final int remove, final ROList<Atom> add) {
     final ROMap<String, Alignment> alignments = parent.atomVisual().alignments();
     int visualIndex = index;
     int visualRemove = remove;
@@ -262,9 +258,8 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               public void expand(final Context context) {}
 
               @Override
-              public Iterable<Pair<Brick, Brick.Properties>> getLeafPropertiesForTagsChange(
-                  final Context context, final TagsChange change) {
-                return ImmutableList.of();
+              public void getLeafPropertiesForTagsChange(
+                      final Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, final TagsChange change) {
               }
 
               @Override
@@ -286,11 +281,6 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               @Override
               public boolean selectAnyChild(final Context context) {
                 return nodeVisual.selectAnyChild(context);
-              }
-
-              @Override
-              public Stream<Brick> streamBricks() {
-                return nodeVisual.streamBricks();
               }
             });
         for (final FrontSymbol fix : getElementSuffix())
@@ -404,14 +394,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     }
   }
 
-  @Override
-  public Stream<Brick> streamBricks() {
-    if (empty != null) return Stream.of(empty);
-    if (ellipsis != null) return Stream.of(ellipsis);
-    return super.streamBricks();
-  }
-
-  @Override
+    @Override
   public Brick getFirstBrick(final Context context) {
     if (empty != null) return empty;
     if (ellipsize(context)) return ellipsis;
@@ -563,7 +546,8 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
 
   public static class ArrayCursor extends Cursor {
     public final VisualFrontArray self;
-    public int beginIndex;
+      private final ROList<Action> actions;
+      public int beginIndex;
     public int endIndex;
     public boolean leadFirst;
     BorderAttachment border;
@@ -578,9 +562,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       border = new BorderAttachment(context, getBorderStyle(context).obbox);
       this.leadFirst = leadFirst;
       setRange(context, start, end);
-      context.addActions(
-          this,
-          ImmutableList.of(
+      context.addActions(this.actions = TSList.of(
               new ActionEnter(),
               new ActionExit(),
               new ActionNext(),
@@ -655,7 +637,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     public void clear(final Context context) {
       border.destroy(context);
       self.selection = null;
-      context.removeActions(this);
+      context.removeActions(actions);
     }
 
     @Override
@@ -752,7 +734,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     private class ActionCopy extends Action {
       @Override
       public boolean run(final Context context) {
-        context.copy(self.value.data.subList(beginIndex, endIndex + 1));
+        context.copy(self.value.data.sublist(beginIndex, endIndex + 1));
         return true;
       }
     }

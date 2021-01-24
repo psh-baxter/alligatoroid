@@ -20,7 +20,6 @@ import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import org.junit.Test;
 
-import static com.zarbosoft.merman.helper.Helper.assertTreeEqual;
 import static com.zarbosoft.merman.helper.Helper.buildDoc;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;

@@ -1,7 +1,6 @@
 package com.zarbosoft.pidgoon;
 
 import com.zarbosoft.pidgoon.parse.Parse;
-import org.pcollections.PVector;
 
 public abstract class State {
   protected State() {

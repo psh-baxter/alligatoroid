@@ -1,7 +1,5 @@
 package com.zarbosoft.pidgoon;
 
-import org.pcollections.PVector;
-
 import java.util.Map;
 
 /**
@@ -12,11 +10,9 @@ import java.util.Map;
  */
 public abstract class Store {
   public Object color;
-  public final Map env;
 
-  public Store(final Object color, Map env) {
+  public Store(final Object color) {
     this.color = color;
-    this.env = env;
   }
 
   public abstract <Y> Y split();
@@ -70,8 +66,4 @@ public abstract class Store {
    * @return
    */
   public abstract Store record(Position position);
-
-  public <T> T getEnv(Object key) {
-    return (T) env.get(key);
-  }
 }

@@ -5,7 +5,7 @@ import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.internal.Parent;
 import com.zarbosoft.pidgoon.parse.Parse;
 import com.zarbosoft.rendaw.common.Pair;
-import org.pcollections.PMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 /**
  * A node whose behavior is dynamic.  Implement generate to output the real nodes to use based on store data.
@@ -14,11 +14,11 @@ import org.pcollections.PMap;
 public abstract class Dynamic<T extends Store> extends Node {
   @Override
   public void context(
-      Parse context,
-      Store store,
-      Parent parent,
-      PMap<Object, Reference.RefParent> seen,
-      Object cause) {
+          Parse context,
+          Store store,
+          Parent parent,
+          ROMap<Object, Reference.RefParent> seen,
+          Object cause) {
     Pair<T, Node> generated = generate((T) store);
     generated.second.context(context, generated.first, parent, cause);
   }

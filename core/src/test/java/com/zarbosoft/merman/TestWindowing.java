@@ -1,8 +1,8 @@
 package com.zarbosoft.merman;
 
-import com.google.common.collect.ImmutableMap;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
+import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.editor.Action;
@@ -26,19 +26,18 @@ import com.zarbosoft.merman.helper.StyleBuilder;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.misc.TSMap;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 import org.junit.Test;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
-import static com.zarbosoft.merman.helper.Helper.buildDoc;
-import static com.zarbosoft.rendaw.common.Common.iterable;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -71,12 +70,11 @@ public class TestWindowing {
               syntax,
               new Atom(
                   syntax.root,
-                  new TSMap<>(
-                      ImmutableMap.of(
+                  new TSMap<String, Value>().put(
                           "value",
                           new ValueArray(
                               (BaseBackArraySpec) syntax.root.fields.get("value"),
-                              Arrays.asList(atoms))))));
+                              TSList.of(atoms)))));
       Context.InitialConfig initialConfig = new Context.InitialConfig();
       initialConfig.ellipsizeThreshold = 3;
       context =
@@ -111,12 +109,12 @@ public class TestWindowing {
                   return string;
                 }
               },
-              startWindowed);
+                  null, startWindowed, Helper.i18n);
       runner.flush();
     }
 
     private Course getCourse(final int courseIndex) {
-      List<Course> courses = context.foreground.children;
+      ROList<Course> courses = context.foreground.children;
       if (courseIndex >= courses.size()) {
         dumpWall();
         assertThat(courses.size(), greaterThan(courseIndex));
@@ -152,7 +150,7 @@ public class TestWindowing {
     }
 
     public GeneralTestWizard act(final String name) {
-      for (final Action action : iterable(context.actions())) {
+      for (final Action action : context.actions()) {
         if (action.id().equals(name)) {
           action.run(context);
           assertThat(context.cursor, is(notNullValue()));
@@ -164,7 +162,7 @@ public class TestWindowing {
     }
 
     public GeneralTestWizard dumpWall() {
-      List<Course> courses = context.foreground.children;
+      ROList<Course> courses = context.foreground.children;
       for (int i = 0; i < courses.size(); ++i) {
         Course course = courses.get(i);
         System.out.printf(" %02d  ", i);

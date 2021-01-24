@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.syntax.front;
 
-import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
@@ -9,10 +8,11 @@ import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.misc.ROMap;
-import com.zarbosoft.merman.misc.ROSet;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.Set;
 
@@ -48,7 +48,7 @@ public class FrontPrimitiveSpec extends FrontSpec {
 
   @Override
   public void finish(
-      MultiError errors, Path typePath, final AtomType atomType, final Set<String> middleUsed) {
+      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
     middleUsed.add(field);
     this.dataType = atomType.getDataPrimitive(errors, typePath, field);
   }
@@ -61,9 +61,5 @@ public class FrontPrimitiveSpec extends FrontSpec {
   @Override
   public void dispatch(final DispatchHandler handler) {
     handler.handle(this);
-  }
-
-  public Set<String> tags() {
-    return ImmutableSet.copyOf(tags);
   }
 }

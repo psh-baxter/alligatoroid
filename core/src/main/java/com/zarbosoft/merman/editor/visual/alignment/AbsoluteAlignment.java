@@ -3,7 +3,7 @@ package com.zarbosoft.merman.editor.visual.alignment;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.AlignmentListener;
-import com.zarbosoft.merman.misc.ROMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 public class AbsoluteAlignment extends Alignment implements AlignmentListener {
 	public AbsoluteAlignment(final int offset) {

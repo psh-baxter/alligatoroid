@@ -5,7 +5,7 @@ import com.zarbosoft.pidgoon.internal.BaseParent;
 import com.zarbosoft.pidgoon.internal.Parent;
 import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.parse.Parse;
-import org.pcollections.PMap;
+import com.zarbosoft.rendaw.common.ROMap;
 
 /**
  * Attaches a color to a parse subtree. If this branch fails to parse, the color will be used in
@@ -25,7 +25,7 @@ public class Color extends Node {
       final Parse context,
       final Store store,
       final Parent parent,
-      final PMap<Object, Reference.RefParent> seen,
+      final ROMap<Object, Reference.RefParent> seen,
       final Object cause) {
     Object wasColor = store.color;
     store.color = color;

@@ -1,10 +1,7 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.misc.TSSet;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
-
-import java.util.HashSet;
-import java.util.Set;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontDataPrimitiveBuilder {
   private final String field;

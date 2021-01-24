@@ -1,8 +1,6 @@
 package com.zarbosoft.merman.editor;
 
-import com.zarbosoft.merman.misc.ROList;
-
-import java.util.List;
+import com.zarbosoft.rendaw.common.ROList;
 
 public class InvalidPath extends RuntimeException {
   private final ROList<String> valid;
