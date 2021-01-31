@@ -6,12 +6,12 @@ import com.zarbosoft.merman.editor.visual.AlignmentListener;
 import com.zarbosoft.rendaw.common.ROMap;
 
 public class RelativeAlignment extends Alignment implements AlignmentListener {
-	private final String base;
+	private final String baseKey;
 	private final int offset;
-	private Alignment alignment;
+	private Alignment base;
 
-	public RelativeAlignment(final String base, final int offset) {
-		this.base = base;
+	public RelativeAlignment(final String baseKey, final int offset) {
+		this.baseKey = baseKey;
 		this.offset = offset;
 		converse = offset;
 	}
@@ -23,14 +23,14 @@ public class RelativeAlignment extends Alignment implements AlignmentListener {
 
 	@Override
 	public void root(final Context context, final ROMap<String, Alignment> parents) {
-		if (alignment != null) {
-			alignment.removeListener(context, this);
+		if (base != null) {
+			base.removeListener(context, this);
 		}
-		alignment = parents.getOpt(base);
-		if (alignment == this)
+		base = parents.getOpt(baseKey);
+		if (base == this)
 			throw new AssertionError("Alignment parented to self");
-		if (alignment != null)
-			alignment.addListener(context, this);
+		if (base != null)
+			base.addListener(context, this);
 		align(context);
 	}
 
@@ -41,17 +41,17 @@ public class RelativeAlignment extends Alignment implements AlignmentListener {
 
 	@Override
 	public void align(final Context context) {
-		converse = (alignment == null ? 0 : alignment.converse) + offset;
+		converse = (base == null ? 0 : base.converse) + offset;
 		submit(context);
 	}
 
 	@Override
-	public int getMinConverse(final Context context) {
+	public int getConverseLowerBound(final Context context) {
 		return converse;
 	}
 
 	@Override
 	public String toString() {
-		return String.format("relative-%d-p-%s", converse, alignment);
+		return String.format("relative-%d-p-%s", converse, base);
 	}
 }

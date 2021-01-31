@@ -11,7 +11,7 @@ import com.zarbosoft.rendaw.common.TSSet;
 public class ConcensusAlignment extends Alignment {
 	private boolean disabled = false;
 	/**
-	 * Any alignments that have ocurred before (directoy or transitively) this alignment in a course
+	 * Alignments that have appeared before this alignment on any course
 	 */
 	public TSSet<ConcensusAlignment> superior = new TSSet<>();
 	private IterationAlign iterationAlign;
@@ -28,7 +28,7 @@ public class ConcensusAlignment extends Alignment {
 			final int oldConverse = converse;
 			converse = disabled ?
 					0 :
-					listeners.stream().mapToInt(listeners -> listeners.getMinConverse(context)).max().orElse(0);
+					listeners.stream().mapToInt(listeners -> listeners.getConverseLowerBound(context)).max().orElse(0);
 			if (oldConverse != converse)
 				listeners.stream().forEach(listener -> listener.align(context));
 			return false;
@@ -56,7 +56,7 @@ public class ConcensusAlignment extends Alignment {
 	@Override
 	public void removeListener(final Context context, final AlignmentListener listener) {
 		super.removeListener(context, listener);
-		if (listener.getMinConverse(context) == converse)
+		if (listener.getConverseLowerBound(context) == converse)
 			iterationAlign(context);
 	}
 

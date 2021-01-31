@@ -39,13 +39,10 @@ import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.ComparisonFailure;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Locale;
-import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
-import static com.zarbosoft.rendaw.common.Common.zip;
 
 public class Helper {
   public static I18nEngine i18n = new JavaI18nEngine(Locale.US);
@@ -109,7 +106,7 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataAtom(final String id, String type) {
-    return new BackAtomSpec(new BaseBackAtomSpec.Config(type, id));
+    return new BackAtomSpec(new BaseBackAtomSpec.Config(id, type));
   }
 
   public static BackSpec buildBackDataPrimitive(final String id) {
@@ -135,13 +132,13 @@ public class Helper {
   public static BackArraySpec buildBackDataArray(final String id, String type) {
     return new BackArraySpec(
         new BaseBackSimpleArraySpec.Config(
-            id, new BackAtomSpec(new BaseBackAtomSpec.Config(type, null))));
+            id, new BackAtomSpec(new BaseBackAtomSpec.Config(null, type))));
   }
 
   public static BackSubArraySpec buildBackDataRootArray(final String id, String type) {
     return new BackSubArraySpec(
         new BaseBackSimpleArraySpec.Config(
-            id, new BackAtomSpec(new BaseBackAtomSpec.Config(type, null))));
+            id, new BackAtomSpec(new BaseBackAtomSpec.Config(null, type))));
   }
 
   public static void assertTreeEqual(final Atom expected, final Atom got) {

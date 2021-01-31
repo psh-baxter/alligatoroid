@@ -43,7 +43,7 @@ public abstract class Brick implements AlignmentListener {
   }
 
   @Override
-  public final int getMinConverse(final Context context) {
+  public final int getConverseLowerBound(final Context context) {
     return minConverse;
   }
 

@@ -3,11 +3,9 @@ package com.zarbosoft.merman.editorcore.display;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Image;
 
-import java.nio.file.Path;
-
 public class MockeryImage extends MockeryDisplayNode implements Image {
 	@Override
-	public void setImage(final Context context, final Path path) {
+	public void setImage(final Context context, final String path) {
 
 	}
 

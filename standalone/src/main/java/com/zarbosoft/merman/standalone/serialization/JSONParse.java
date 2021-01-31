@@ -11,11 +11,9 @@ import com.zarbosoft.merman.editor.backevents.EKeyEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.editor.backevents.EPrimitiveEvent;
-import com.zarbosoft.merman.editor.backevents.JFalseEvent;
-import com.zarbosoft.merman.editor.backevents.JFloatEvent;
-import com.zarbosoft.merman.editor.backevents.JIntEvent;
-import com.zarbosoft.merman.editor.backevents.JNullEvent;
-import com.zarbosoft.merman.editor.backevents.JTrueEvent;
+import com.zarbosoft.merman.editor.backevents.JSpecialPrimitiveEvent;
+import com.zarbosoft.merman.editor.serialization.JSONObjectPath;
+import com.zarbosoft.merman.editor.serialization.JSONPath;
 import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseEventSink;
@@ -28,7 +26,6 @@ import com.zarbosoft.rendaw.common.Pair;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
@@ -124,28 +121,23 @@ public class JSONParse<O> extends BaseParseBuilder<JSONParse<O>> {
                         break;
                       }
                     case VALUE_NUMBER_INT:
-                      {
-                        e = new JIntEvent(stream1.getValueAsString());
-                        break;
-                      }
-                    case VALUE_NUMBER_FLOAT:
-                      {
-                        e = new JFloatEvent(stream1.getValueAsString());
+                    case VALUE_NUMBER_FLOAT: {
+                        e = new JSpecialPrimitiveEvent(stream1.getValueAsString());
                         break;
                       }
                     case VALUE_TRUE:
                       {
-                        e = new JTrueEvent();
+                        e = new JSpecialPrimitiveEvent("true");
                         break;
                       }
                     case VALUE_FALSE:
                       {
-                        e = new JFalseEvent();
+                        e = new JSpecialPrimitiveEvent("false");
                         break;
                       }
                     case VALUE_NULL:
                       {
-                        e = new JNullEvent();
+                        e = new JSpecialPrimitiveEvent("null");
                         break;
                       }
                     default:

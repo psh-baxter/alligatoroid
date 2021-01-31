@@ -28,7 +28,7 @@ public class BrickImage extends Brick implements AlignmentListener {
 		alignment = inter.getAlignment(style);
 		if (alignment != null)
 			alignment.addListener(context, this);
-		image.setImage(context, Paths.get(style.image));
+		image.setImage(context, style.image);
 		image.rotate(context, style.rotate);
 		changed(context);
 	}

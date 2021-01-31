@@ -7,5 +7,11 @@ public interface Font {
 
 	int getWidth(String text);
 
-	int getUnder(String text, int converse);
+	/**
+	 * Index of first character that starts at or before converse (relative to start of text)
+	 * @param text
+	 * @param converse
+	 * @return
+	 */
+	int getIndexAtConverse(String text, int converse);
 }

@@ -24,7 +24,7 @@ public class MockeryFont implements Font {
 	}
 
 	@Override
-	public int getUnder(final String text, final int converse) {
+	public int getIndexAtConverse(final String text, final int converse) {
 		return Math.min(text.length(), converse / size);
 	}
 }

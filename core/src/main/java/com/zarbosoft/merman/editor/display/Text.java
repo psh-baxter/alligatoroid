@@ -14,7 +14,9 @@ public interface Text extends DisplayNode {
 
 	void setFont(Context context, Font font);
 
-	int getIndexAtConverse(final Context context, final int converse);
+	default int getIndexAtConverse(final Context context, final int converse) {
+		return font().getIndexAtConverse(text(), converse);
+	}
 
 	int getConverseAtIndex(final int index);
 

@@ -10,11 +10,15 @@ import com.zarbosoft.merman.editor.serialization.WriteStateRecord;
 import com.zarbosoft.merman.editor.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.syntax.error.RecordDiscardDuplicateKey;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
+import com.zarbosoft.pidgoon.nodes.Reference;
+import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Set;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Deque;
@@ -24,9 +28,25 @@ import java.util.Map;
 public class BackFixedRecordSpec extends BackSpec {
 
   public final ROMap<String, BackSpec> pairs;
+  /**
+   * Discard these keys if they appear in the data - warning! Even if you don't perform any edits
+   * saving a loaded file will cause data in discard keys to be removed.
+   */
+  public final ROSet<String> discard;
 
-  public BackFixedRecordSpec(ROMap<String, BackSpec> pairs) {
-    this.pairs = pairs;
+  public static class Config {
+    public final ROMap<String, BackSpec> pairs;
+    public final ROSet<String> discard;
+
+    public Config(ROMap<String, BackSpec> pairs, ROSet<String> discard) {
+      this.pairs = pairs;
+      this.discard = discard;
+    }
+  }
+
+  public BackFixedRecordSpec(Config config) {
+    this.pairs = config.pairs;
+    this.discard = config.discard;
   }
 
   @Override
@@ -37,9 +57,17 @@ public class BackFixedRecordSpec extends BackSpec {
     final Set set = new Set();
     for (Map.Entry<String, BackSpec> pair : pairs) {
       set.add(
-              new Sequence()
-                      .add(new MatchingEventTerminal(new EKeyEvent(pair.getKey())))
-                      .add(pair.getValue().buildBackRule(syntax)));
+          new Sequence()
+              .add(new MatchingEventTerminal(new EKeyEvent(pair.getKey())))
+              .add(pair.getValue().buildBackRule(syntax)));
+    }
+    for (String key : discard) {
+      set.add(
+          new Repeat(
+                  new Sequence()
+                      .add(new MatchingEventTerminal(new EKeyEvent(key)))
+                      .add(new Reference(Syntax.GRAMMAR_WILDCARD_KEY)))
+              .max(1));
     }
     sequence.add(set);
     sequence.add(new MatchingEventTerminal(new EObjectCloseEvent()));
@@ -48,11 +76,11 @@ public class BackFixedRecordSpec extends BackSpec {
 
   @Override
   public void finish(
-          MultiError errors,
-          final Syntax syntax,
-          final Path typePath,
-          boolean singularRestriction, boolean typeRestriction
-  ) {
+      MultiError errors,
+      final Syntax syntax,
+      final Path typePath,
+      boolean singularRestriction,
+      boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
     for (Map.Entry<String, BackSpec> e : pairs) {
       String k = e.getKey();
@@ -70,11 +98,13 @@ public class BackFixedRecordSpec extends BackSpec {
             }
           };
     }
+    for (String s : discard) {
+      if (pairs.has(s)) errors.add(new RecordDiscardDuplicateKey(s));
+    }
   }
 
   @Override
-  public void write(
-          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
     stack.addLast(new WriteStateRecordEnd());
     stack.addLast(new WriteStateRecord(data, pairs));

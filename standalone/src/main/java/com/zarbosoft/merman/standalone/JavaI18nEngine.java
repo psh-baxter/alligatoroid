@@ -36,17 +36,17 @@ public class JavaI18nEngine implements I18nEngine {
   }
 
   @Override
-  public I18nEngine.Walker glyphWalker() {
+  public I18nEngine.Walker glyphWalker(String s) {
     return new Walker(BreakIterator.getCharacterInstance(locale));
   }
 
   @Override
-  public I18nEngine.Walker wordWalker() {
+  public I18nEngine.Walker wordWalker(String s) {
     return new Walker(BreakIterator.getWordInstance(locale));
   }
 
   @Override
-  public I18nEngine.Walker lineWalker() {
+  public I18nEngine.Walker lineWalker(String s) {
     return new Walker(BreakIterator.getLineInstance(locale));
   }
 }

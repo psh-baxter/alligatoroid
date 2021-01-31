@@ -5,11 +5,17 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class TSMap<K, V> implements ROMap<K, V> {
   private static final Object missing = new Object();
   public Map<K, V> inner;
+
+  public TSMap(Consumer<TSMap<K, V>> build) {
+    this.inner = new HashMap<>();
+    build.accept(this);
+  }
 
   public TSMap() {
     this.inner = new HashMap<>();

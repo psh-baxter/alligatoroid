@@ -1,6 +1,14 @@
 package com.zarbosoft.merman.syntax;
 
 import com.zarbosoft.merman.editor.I18nEngine;
+import com.zarbosoft.merman.editor.backevents.EArrayCloseEvent;
+import com.zarbosoft.merman.editor.backevents.EArrayOpenEvent;
+import com.zarbosoft.merman.editor.backevents.EKeyEvent;
+import com.zarbosoft.merman.editor.backevents.EObjectCloseEvent;
+import com.zarbosoft.merman.editor.backevents.EObjectOpenEvent;
+import com.zarbosoft.merman.editor.backevents.EPrimitiveEvent;
+import com.zarbosoft.merman.editor.backevents.ETypeEvent;
+import com.zarbosoft.merman.editor.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.error.DuplicateAtomTypeIds;
 import com.zarbosoft.merman.syntax.error.DuplicateAtomTypeIdsInGroup;
@@ -12,7 +20,10 @@ import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
 import com.zarbosoft.pidgoon.nodes.Reference;
+import com.zarbosoft.pidgoon.nodes.Repeat;
+import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
@@ -30,6 +41,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class Syntax {
+  public static final Object GRAMMAR_WILDCARD_KEY = new Object();
+  private static final Object GRAMMAR_WILDCARD_KEY_UNTYPED = new Object();
   public final BackType backType;
   public final ModelColor background;
   public final Padding pad;
@@ -64,16 +77,20 @@ public class Syntax {
     public Direction converseDirection = Direction.RIGHT;
     public Direction transverseDirection = Direction.DOWN;
 
-    public Config(I18nEngine i18n,
-        ROList<AtomType> types, ROMap<String, Set<AtomType>> splayedTypes, RootAtomType root) {
+    public Config(
+        I18nEngine i18n,
+        ROList<AtomType> types,
+        ROMap<String, Set<AtomType>> splayedTypes,
+        RootAtomType root) {
       this.types = types;
       this.splayedTypes = splayedTypes;
       this.root = root;
-      gap = new GapAtomType(i18n,new GapAtomType.Config());
-      suffixGap = new SuffixGapAtomType(i18n,new SuffixGapAtomType.Config());
+      gap = new GapAtomType(i18n, new GapAtomType.Config());
+      suffixGap = new SuffixGapAtomType(i18n, new SuffixGapAtomType.Config());
     }
 
-    public Config(I18nEngine i18n,
+    public Config(
+        I18nEngine i18n,
         BackType backType,
         ModelColor background,
         Padding pad,
@@ -100,9 +117,9 @@ public class Syntax {
       this.types = types;
       this.splayedTypes = splayedTypes;
       this.root = root;
-      this.gap = new GapAtomType(i18n,new GapAtomType.Config());
+      this.gap = new GapAtomType(i18n, new GapAtomType.Config());
       this.gap = gap;
-      this.suffixGap = new SuffixGapAtomType(i18n,new SuffixGapAtomType.Config());
+      this.suffixGap = new SuffixGapAtomType(i18n, new SuffixGapAtomType.Config());
       this.suffixGap = suffixGap;
       this.converseDirection = converseDirection;
       this.transverseDirection = transverseDirection;
@@ -245,6 +262,33 @@ public class Syntax {
   public Grammar getGrammar() {
     if (grammar == null) {
       grammar = new Grammar();
+      grammar.add(
+          GRAMMAR_WILDCARD_KEY_UNTYPED,
+          new Union()
+              .add(new ClassEqTerminal(EPrimitiveEvent.class))
+                  .add(new ClassEqTerminal(JSpecialPrimitiveEvent.class))
+              .add(
+                  new Sequence()
+                      .add(new ClassEqTerminal(EArrayOpenEvent.class))
+                      .add(new Repeat(new Reference(GRAMMAR_WILDCARD_KEY)))
+                      .add(new ClassEqTerminal(EArrayCloseEvent.class)))
+              .add(
+                  new Sequence()
+                      .add(new ClassEqTerminal(EObjectOpenEvent.class))
+                      .add(
+                          new Reference(
+                              new Sequence()
+                                  .add(new ClassEqTerminal(EKeyEvent.class))
+                                  .add(new Reference(GRAMMAR_WILDCARD_KEY))))
+                      .add(new ClassEqTerminal(EObjectCloseEvent.class))));
+      grammar.add(
+          GRAMMAR_WILDCARD_KEY,
+          new Union()
+              .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))
+              .add(
+                  new Sequence()
+                      .add(new ClassEqTerminal(ETypeEvent.class))
+                      .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))));
       for (Map.Entry<String, Set<AtomType>> entry : splayedTypes) {
         Set<AtomType> types = entry.getValue();
         String key = entry.getKey();

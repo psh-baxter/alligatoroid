@@ -102,7 +102,7 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataAtom(final String id, String type) {
-    return new BackAtomSpec(new BaseBackAtomSpec.Config(type, id));
+    return new BackAtomSpec(new BaseBackAtomSpec.Config(id, type));
   }
 
   public static BackSpec buildBackDataPrimitive(final String id) {
@@ -128,13 +128,13 @@ public class Helper {
   public static BackArraySpec buildBackDataArray(final String id, String type) {
     return new BackArraySpec(
         new BaseBackSimpleArraySpec.Config(
-            id, new BackAtomSpec(new BaseBackAtomSpec.Config(type, null))));
+            id, new BackAtomSpec(new BaseBackAtomSpec.Config(null, type))));
   }
 
   public static BackSubArraySpec buildBackDataRootArray(final String id, String type) {
     return new BackSubArraySpec(
         new BaseBackSimpleArraySpec.Config(
-            id, new BackAtomSpec(new BaseBackAtomSpec.Config(type, null))));
+            id, new BackAtomSpec(new BaseBackAtomSpec.Config(null, type))));
   }
 
   public static void assertTreeEqual(final Atom expected, final Atom got) {

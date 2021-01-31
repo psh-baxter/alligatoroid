@@ -2,13 +2,12 @@ package com.zarbosoft.merman.syntax.primitivepattern;
 
 import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.pidgoon.Node;
-
-import java.util.List;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class PatternUnion extends Pattern {
-  public final List<Pattern> children;
+  public final TSList<Pattern> children;
 
-  public PatternUnion(List<Pattern> children) {
+  public PatternUnion(TSList<Pattern> children) {
     this.children = children;
   }
 

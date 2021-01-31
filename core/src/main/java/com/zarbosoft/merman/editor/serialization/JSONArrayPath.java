@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.standalone.serialization;
+package com.zarbosoft.merman.editor.serialization;
 
 public class JSONArrayPath extends JSONPath {
 

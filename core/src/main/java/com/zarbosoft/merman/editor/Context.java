@@ -33,7 +33,6 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.text.BreakIterator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -150,8 +149,8 @@ public class Context {
     this.scrollFactor = config.scrollFactor;
     this.scrollAlotFactor = config.scrollAlotFactor;
     display.setBackgroundColor(syntax.background);
-    edge = display.edge(this);
-    transverseEdge = display.transverseEdge(this);
+    edge = display.edge();
+    transverseEdge = display.transverseEdge();
     background = display.group();
     midground = display.group();
     this.foreground = new Wall(this);

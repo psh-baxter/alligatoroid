@@ -31,7 +31,7 @@ public class AbsoluteAlignment extends Alignment implements AlignmentListener {
 	}
 
 	@Override
-	public int getMinConverse(final Context context) {
+	public int getConverseLowerBound(final Context context) {
 		return converse;
 	}
 

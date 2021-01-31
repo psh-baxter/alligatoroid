@@ -21,7 +21,7 @@ public abstract class BaseBackAtomSpec extends BackSpecData {
     public final String type;
     public final String id;
 
-    public Config(String type, String id) {
+    public Config(String id, String type) {
       this.type = type;
       this.id = id;
     }

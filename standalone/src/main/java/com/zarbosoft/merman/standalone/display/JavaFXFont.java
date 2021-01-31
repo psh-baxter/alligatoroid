@@ -69,7 +69,7 @@ public class JavaFXFont implements Font {
 	}
 
 	@Override
-	public int getUnder(final String text, final int converse) {
+	public int getIndexAtConverse(final String text, final int converse) {
 		helper.setText(text);
 		helper.setFont(font);
 		// Note that the wrapping width needs to be set to zero before

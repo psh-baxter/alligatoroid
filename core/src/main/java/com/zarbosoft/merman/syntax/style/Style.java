@@ -35,7 +35,9 @@ public class Style {
   // Image only
 
   public final String image;
-
+  /**
+   * Degrees
+   */
   public final Integer rotate;
 
   // Space only

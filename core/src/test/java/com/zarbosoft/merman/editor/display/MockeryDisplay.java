@@ -9,13 +9,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class MockeryDisplay implements Display {
+public class MockeryDisplay extends Display {
 	int edge = 10000;
 	int transverseEdge = 10000;
 	List<IntListener> converseEdgeListeners = new ArrayList<>();
 	List<IntListener> transverseEdgeListeners = new ArrayList<>();
 	List<Consumer<HIDEvent>> hidEventListeners = new ArrayList<>();
 	List<DisplayNode> nodes = new ArrayList<>();
+
+	public MockeryDisplay() {
+		super(converseDirection, transverseDirection);
+	}
 
 	@Override
 	public Group group() {
@@ -67,12 +71,7 @@ public class MockeryDisplay implements Display {
 
 	}
 
-	@Override
-	public void focus() {
-
-	}
-
-	@Override
+    @Override
 	public int edge(final Context context) {
 		return edge;
 	}
@@ -108,7 +107,7 @@ public class MockeryDisplay implements Display {
 	}
 
 	@Override
-	public int size() {
+	public int childCount() {
 		return nodes.size();
 	}
 

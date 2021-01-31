@@ -76,6 +76,9 @@ public class Common {
   public static <T extends Comparable<T>> boolean isOrdered(final T a, final T b) {
     return a.compareTo(b) <= 0;
   }
+  public static <T extends Comparable<T>> boolean isOrderedExclusive(final T a, final T b) {
+    return a.compareTo(b) < 0;
+  }
 
   public static RuntimeException uncheckAll(final Throwable e) {
     if (e instanceof Exception) {

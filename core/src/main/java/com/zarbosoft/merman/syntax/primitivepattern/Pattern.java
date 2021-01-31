@@ -13,16 +13,18 @@ import com.zarbosoft.pidgoon.events.nodes.Terminal;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.zarbosoft.rendaw.common.Common.isOrdered;
+
 public abstract class Pattern {
   public static Pattern repeatedAny = new Repeat0(new Any());
 
   public abstract Node build(I18nEngine i18n);
 
   protected static class CharacterRangeTerminal extends Terminal {
-    final char low;
-    final char high;
+    final String low;
+    final String high;
 
-    public CharacterRangeTerminal(char low, char high) {
+    public CharacterRangeTerminal(String low, String high) {
       this.low = low;
       this.high = high;
     }
@@ -31,14 +33,12 @@ public abstract class Pattern {
     protected boolean matches(Event event0, Store store) {
       String v = ((CharacterEvent) event0).value;
       if (v.length() != 1) return false;
-      char c = v.charAt(0);
-      return c >= low && c <= high;
+      return isOrdered(low, v) && isOrdered(v, high);
     }
   }
 
   public static List<? extends Event> splitGlyphs(I18nEngine i18n, String text) {
-    I18nEngine.Walker walker = i18n.glyphWalker();
-    walker.setText(text);
+    I18nEngine.Walker walker = i18n.glyphWalker(text);
     List<CharacterEvent> glyphs = new ArrayList<>();
     int end = 0;
     while (true) {

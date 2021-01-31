@@ -61,10 +61,6 @@ public class Editor {
     context.addActions(key, actions);
   }
 
-  public void focus() {
-    context.display.focus();
-  }
-
   private abstract static class ActionBase extends Action {
     public static String group() {
       return "editor";

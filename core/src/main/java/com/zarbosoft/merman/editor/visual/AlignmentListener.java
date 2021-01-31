@@ -9,5 +9,5 @@ public interface AlignmentListener {
 	 * @param context
 	 * @return the converse position of the brick if it were unaligned.
 	 */
-	int getMinConverse(Context context);
+	int getConverseLowerBound(Context context);
 }

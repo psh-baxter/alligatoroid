@@ -2,6 +2,7 @@ package com.zarbosoft.merman.helper;
 
 import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class BackRecordBuilder {
@@ -13,6 +14,6 @@ public class BackRecordBuilder {
   }
 
   public BackSpec build() {
-    return new BackFixedRecordSpec(pairs);
+    return new BackFixedRecordSpec(new BackFixedRecordSpec.Config(pairs, ROSet.empty));
   }
 }

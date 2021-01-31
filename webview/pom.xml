@@ -1,0 +1,56 @@
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.zarbosoft.merman</groupId>
+    <artifactId>webview</artifactId>
+    <version>0.0.0</version>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compver}</version>
+                <configuration>
+                    <source>${jver}</source>
+                    <target>${jver}</target>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.jsweet</groupId>
+                <artifactId>jsweet-maven-plugin</artifactId>
+                <version>2.0.0-rc1</version>
+                <configuration>
+                    <sourceMap>true</sourceMap>
+                    <outDir>target/js</outDir>
+                    <targetVersion>ES6</targetVersion>
+                    <bundle>true</bundle>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <repositories>
+        <repository>
+            <id>jsweet-central</id>
+            <name>libs-release</name>
+            <url>http://repository.jsweet.org/artifactory/libs-release-local</url>
+        </repository>
+    </repositories>
+    <dependencies>
+        <dependency>
+            <groupId>org.jsweet</groupId>
+            <artifactId>jsweet-core</artifactId>
+            <version>6.0.4</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jsweet</groupId>
+            <artifactId>j4ts</artifactId>
+            <version>0.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.zarbosoft.merman</groupId>
+            <artifactId>core</artifactId>
+            <version>0.0.0</version>
+        </dependency>
+    </dependencies>
+</project>

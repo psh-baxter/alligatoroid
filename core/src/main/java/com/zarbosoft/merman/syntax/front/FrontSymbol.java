@@ -14,12 +14,12 @@ import com.zarbosoft.rendaw.common.ROSet;
 public class FrontSymbol extends FrontSpec {
 
   public final Symbol type;
-
+  /** Nullable */
   public final ConditionType condition;
 
   /**
-   * When filling a gap:
-   * Text to match non-text symbols, or override the text of text symbols
+   * Non-null, "" okay. When filling a gap: Text to match non-text symbols, or override the text of
+   * text symbols
    */
   public final String gapKey;
 
@@ -45,22 +45,22 @@ public class FrontSymbol extends FrontSpec {
   }
 
   public Visual createVisual(
-          final Context context,
-          final VisualParent parent,
-          final ROMap<String, Alignment> alignments,
-          final int visualDepth,
-          final int depthScore) {
+      final Context context,
+      final VisualParent parent,
+      final ROMap<String, Alignment> alignments,
+      final int visualDepth,
+      final int depthScore) {
     return createVisual(context, parent, null, alignments, visualDepth, depthScore);
   }
 
   @Override
   public Visual createVisual(
-          final Context context,
-          final VisualParent parent,
-          final Atom atom,
-          final ROMap<String, Alignment> alignments,
-          final int visualDepth,
-          final int depthScore) {
+      final Context context,
+      final VisualParent parent,
+      final Atom atom,
+      final ROMap<String, Alignment> alignments,
+      final int visualDepth,
+      final int depthScore) {
     return new VisualSymbol(
         parent,
         this,

@@ -4,8 +4,6 @@ public interface I18nEngine {
   public static final int DONE = -1;
 
   public static interface Walker {
-    void setText(String text);
-
     /**
      * Next split before offset, -1 if none
      *
@@ -27,20 +25,23 @@ public interface I18nEngine {
    * Split the string into glyphs
    *
    * @return
+   * @param s
    */
-  public Walker glyphWalker();
+  public Walker glyphWalker(String s);
 
   /**
    * Split the string into word-ish things
    *
    * @return
+   * @param s
    */
-  public Walker wordWalker();
+  public Walker wordWalker(String s);
 
   /**
    * Split the string into good places to break a line
    *
    * @return
+   * @param s
    */
-  public Walker lineWalker();
+  public Walker lineWalker(String s);
 }

@@ -17,6 +17,7 @@ import com.zarbosoft.merman.editorcore.editing.TwoColumnChoice;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
@@ -73,9 +74,10 @@ public class SuffixGapAtomType extends BaseGapAtomType {
       backArray.element = new BackAtomSpec();
       backPrimitive = new BackPrimitiveSpec();
       backPrimitive.id = GAP_PRIMITIVE_KEY;
-      final BackFixedRecordSpec backRecord = new BackFixedRecordSpec(pairs);
-      backRecord.pairs.put("value", backArray);
-      backRecord.pairs.put("gap", backPrimitive);
+      final BackFixedRecordSpec backRecord =
+          new BackFixedRecordSpec(
+              new BackFixedRecordSpec.Config(
+                  new TSMap<>(s -> s.put("value", backArray).put("gap", backPrimitive)), ROSet.empty));
       final BackFixedTypeSpec backType = new BackFixedTypeSpec();
       backType.type = type;
       backType.value = backRecord;

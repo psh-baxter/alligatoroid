@@ -4,6 +4,7 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.Group;
+import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.editor.visual.alignment.ConcensusAlignment;
 import com.zarbosoft.merman.editor.visual.tags.Tags;
@@ -230,9 +231,22 @@ public class Course {
     }
   }
 
+  /**
+   * State of layout on a single course
+   */
   private static class BrickAdvanceContext {
+    /**
+     * Current converse offset
+     */
     final int converse;
+    /**
+     * Alignments encountered up to here on this course
+     */
     final ROSet<ConcensusAlignment> seenAlignments;
+    /**
+     * All alignments that came before this on this course, plus any alignments that came before those alignments on
+     * other courses
+     */
     final ROSet<ConcensusAlignment> seenAlignmentsTransitive;
 
     public BrickAdvanceContext(
@@ -261,6 +275,8 @@ public class Course {
         // If the same alignment appears twice feedback is disabled so converse will be low
         ignoreAlignment = true;
       } else if (advanceContext.seenAlignmentsTransitive.contains(concensusAlignment)) {
+        // This alignment didn't appear on this course yet but it appeared before another alignment on a different course (criss-crossed)
+
         // No need to disable here
         disableAlignment = true;
       } else {
@@ -306,7 +322,7 @@ public class Course {
 
     @Override
     public boolean runImplementation(final IterationContext iterationContext) {
-      // Update transverse space
+      /// Update transverse space
       boolean newAscent = false, newDescent = false;
       for (final Brick brick : changed) {
         final Brick.Properties properties = brick.properties(context);
@@ -343,30 +359,28 @@ public class Course {
           b.getAttachments().forEach(a -> a.setTransverseSpan(context, ascent, descent));
         }
 
-      // Do converse placement
+      /// Do converse placement
       final int at = first;
-      BrickAdvanceContext advanceContext =
-          new BrickAdvanceContext(
-              at == 0
-                  ? 0
-                  : (at >= children.size() ? children.last() : children.get(at - 1))
-                      .converseEdge(context),
-              ROSet.empty,
-              ROSet.empty);
-      for (int index = 0; index < at && index < children.size(); ++index) {
-        final Brick brick = children.get(index);
-        final Brick.Properties properties = brick.properties(context);
-        if (properties.alignment == null || !(properties.alignment instanceof ConcensusAlignment))
-          continue;
-        advanceContext =
-            new BrickAdvanceContext(
-                advanceContext.converse,
-                advanceContext.seenAlignments.mut().add((ConcensusAlignment) properties.alignment).ro(),
-                advanceContext
-                    .seenAlignmentsTransitive
-                    .mut().add((ConcensusAlignment) properties.alignment)
-                    .addAll(((ConcensusAlignment) properties.alignment).superior).ro());
+      BrickAdvanceContext advanceContext;
+      {
+        int converse = at == 0
+                ? 0
+                : (at >= children.size() ? children.last() : children.get(at - 1))
+                .converseEdge(context);
+        TSSet<ConcensusAlignment> seenAlignments = new TSSet<>();
+        TSSet<ConcensusAlignment> seenAlignmentsTransitive = new TSSet<>();
+        for (int index = 0; index < at && index < children.size(); ++index) {
+          final Brick brick = children.get(index);
+          final Brick.Properties properties = brick.properties(context);
+          if (properties.alignment == null || !(properties.alignment instanceof ConcensusAlignment))
+            continue;
+          seenAlignments.add((ConcensusAlignment) properties.alignment);
+          seenAlignmentsTransitive.add((ConcensusAlignment) properties.alignment);
+          seenAlignmentsTransitive.addAll(((ConcensusAlignment) properties.alignment).superior);
+        }
+        advanceContext = new BrickAdvanceContext(converse,seenAlignments.ro(),seenAlignmentsTransitive.ro());
       }
+
       for (int index = at; index < children.size(); ++index) {
         final Brick brick = children.get(index);
         final Brick.Properties properties = brick.properties(context);

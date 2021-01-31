@@ -8,7 +8,7 @@ public class Letters extends Pattern {
   @Override
   public Node build(I18nEngine i18n) {
     return new Union()
-        .add(new CharacterRangeTerminal('a', 'z'))
-        .add(new CharacterRangeTerminal('A', 'Z'));
+        .add(new CharacterRangeTerminal("a", "z"))
+        .add(new CharacterRangeTerminal("A", "Z"));
   }
 }

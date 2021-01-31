@@ -35,7 +35,6 @@ import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.text.BreakIterator;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Deque;
@@ -356,10 +355,13 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   @Override
   public void getLeafPropertiesForTagsChange(
-          final Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, final TagsChange change) {
+      final Context context,
+      TSList<ROPair<Brick, Brick.Properties>> brickProperties,
+      final TagsChange change) {
     for (Line line : lines) {
       if (line.brick == null) continue;
-      brickProperties.add(new ROPair<>(line.brick, line.brick.getPropertiesForTagsChange(context, change)));
+      brickProperties.add(
+          new ROPair<>(line.brick, line.brick.getPropertiesForTagsChange(context, change)));
     }
   }
 
@@ -409,7 +411,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     return null;
   }
 
-    private ResplitResult resplitOne(final Context context, final int i) {
+  private ResplitResult resplitOne(final Context context, final int i) {
     final VisualAtom atom = parent.atomVisual();
     final ResplitResult result = new ResplitResult();
     class Builder {
@@ -426,19 +428,17 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         final int edge = converse + width;
         int split;
         if (converse < context.edge && edge > context.edge) {
-          final BreakIterator lineIter = BreakIterator.getLineInstance();
-          lineIter.setText(text);
+          final I18nEngine.Walker lineIter = context.i18n.lineWalker(text);
           final int edgeOffset = context.edge - converse;
-          final int under = font.getUnder(text, edgeOffset);
+          final int under = font.getIndexAtConverse(text, edgeOffset);
           if (under == text.length()) split = under;
           else {
             split = lineIter.preceding(under + 1);
-            if (split == 0 || split == BreakIterator.DONE) {
-              final BreakIterator clusterIter = BreakIterator.getCharacterInstance();
-              clusterIter.setText(text);
+            if (split == 0 || split == I18nEngine.DONE) {
+              final I18nEngine.Walker clusterIter = context.i18n.glyphWalker(text);
               split = clusterIter.preceding(under + 1);
             }
-            if (split < 4 || split == BreakIterator.DONE) {
+            if (split < 4 || split == I18nEngine.DONE) {
               split = text.length();
               result.compactLimit = true;
             }
@@ -814,7 +814,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   public static class PrimitiveCursor extends Cursor {
     public final RangeAttachment range;
-    final I18nEngine.Walker clusterIterator;
+    I18nEngine.Walker clusterIterator;
     private final ValuePrimitive.Listener clusterListener;
     public final VisualFrontPrimitive visualPrimitive;
     private final TSList<Action> actions;
@@ -830,24 +830,24 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       range.setStyle(context, getBorderStyle(context).obbox);
       range.leadFirst = leadFirst;
       range.setOffsets(context, beginOffset, endOffset);
-      clusterIterator = context.i18n.glyphWalker();
-      clusterIterator.setText(visualPrimitive.value.get());
-      clusterListener = new ValuePrimitive.Listener() {
-        @Override
-        public void set(final Context context, final String text) {
-          clusterIterator.setText(text);
-        }
+      clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
+      clusterListener =
+          new ValuePrimitive.Listener() {
+            @Override
+            public void set(final Context context, final String text) {
+              clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
+            }
 
-        @Override
-        public void added(final Context context, final int index, final String text) {
-          clusterIterator.setText(visualPrimitive.value.get());
-        }
+            @Override
+            public void added(final Context context, final int index, final String text) {
+              clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
+            }
 
-        @Override
-        public void removed(final Context context, final int index, final int count) {
-          clusterIterator.setText(visualPrimitive.value.get());
-        }
-      };
+            @Override
+            public void removed(final Context context, final int index, final int count) {
+              clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
+            }
+          };
       visualPrimitive.value.addListener(this.clusterListener);
       this.actions =
           TSList.of(
@@ -889,7 +889,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     private int preceding(final I18nEngine.Walker iter, final int offset) {
       int to = iter.preceding(offset);
-      if (to == BreakIterator.DONE) to = 0;
+      if (to == I18nEngine.DONE) to = 0;
       return Math.max(0, to);
     }
 
@@ -912,14 +912,12 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     private int nextWord(Context context, final int source) {
-      final I18nEngine.Walker iter = context.i18n.wordWalker();
-      iter.setText(visualPrimitive.value.get());
+      final I18nEngine.Walker iter = context.i18n.wordWalker(visualPrimitive.value.get());
       return following(iter, source);
     }
 
     private int previousWord(Context context, final int source) {
-      final I18nEngine.Walker iter = context.i18n.wordWalker();
-      iter.setText(visualPrimitive.value.get());
+      final I18nEngine.Walker iter = context.i18n.wordWalker(visualPrimitive.value.get());
       return preceding(iter, source);
     }
 
@@ -1054,7 +1052,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     private class ActionPreviousWord extends Action {
       @Override
       public boolean run(final Context context) {
-        final int newIndex = previousWord(context,range.beginOffset);
+        final int newIndex = previousWord(context, range.beginOffset);
         if (range.beginOffset == newIndex && range.endOffset == newIndex) return false;
         range.setOffsets(context, newIndex);
         return true;
@@ -1278,7 +1276,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       @Override
       public boolean run(final Context context) {
 
-        final int newIndex = Math.min(range.endOffset, nextWord(context,range.beginOffset));
+        final int newIndex = Math.min(range.endOffset, nextWord(context, range.beginOffset));
         if (range.beginOffset == newIndex) return false;
         range.setBeginOffset(context, newIndex);
         return true;

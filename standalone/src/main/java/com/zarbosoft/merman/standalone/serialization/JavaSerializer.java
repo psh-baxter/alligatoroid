@@ -38,10 +38,10 @@ import java.util.Deque;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class Serializer implements com.zarbosoft.merman.editor.serialization.Serializer {
+public class JavaSerializer implements com.zarbosoft.merman.editor.serialization.Serializer {
   private final BackType backType;
 
-  public Serializer(BackType backType) {
+  public JavaSerializer(BackType backType) {
     this.backType = backType;
   }
 
@@ -158,27 +158,7 @@ public class Serializer implements com.zarbosoft.merman.editor.serialization.Ser
       }
 
       @Override
-      public void jsonInt(final String value) {
-        throw new AssertionError();
-      }
-
-      @Override
-      public void jsonFloat(final String value) {
-        throw new AssertionError();
-      }
-
-      @Override
-      public void jsonTrue() {
-        throw new AssertionError();
-      }
-
-      @Override
-      public void jsonFalse() {
-        throw new AssertionError();
-      }
-
-      @Override
-      public void jsonNull() {
+      public void jsonSpecialPrimitive(final String value) {
         throw new AssertionError();
       }
     };
@@ -222,28 +202,8 @@ public class Serializer implements com.zarbosoft.merman.editor.serialization.Ser
       }
 
       @Override
-      public void jsonInt(final String value) {
+      public void jsonSpecialPrimitive(final String value) {
         uncheck(() -> generator.writeRaw(value));
-      }
-
-      @Override
-      public void jsonFloat(final String value) {
-        uncheck(() -> generator.writeRaw(value));
-      }
-
-      @Override
-      public void jsonTrue() {
-        uncheck(() -> generator.writeBoolean(true));
-      }
-
-      @Override
-      public void jsonFalse() {
-        uncheck(() -> generator.writeBoolean(false));
-      }
-
-      @Override
-      public void jsonNull() {
-        uncheck(() -> generator.writeNull());
       }
     };
   }

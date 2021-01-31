@@ -15,13 +15,5 @@ public interface EventConsumer {
 
     void key(String s);
 
-    void jsonInt(String value);
-
-    void jsonFloat(String value);
-
-    void jsonTrue();
-
-    void jsonFalse();
-
-    void jsonNull();
+    void jsonSpecialPrimitive(String value);
 }
