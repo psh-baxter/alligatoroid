@@ -44,9 +44,9 @@ public class TestPrimitiveBreaking {
                 .run(
                         context -> {
                             assertThat(
-                                    primitive.visual.selection.range.cursor.drawing.transverse(context), is(-13));
+                                    primitive.visual.selection.range.cursor.drawing.transverse(), is(-13));
                             assertThat(
-                                    primitive.visual.selection.range.cursor.drawing.transverseEdge(context), is(1));
+                                    primitive.visual.selection.range.cursor.drawing.transverseEdge(), is(1));
                         });
     }
 
@@ -70,9 +70,9 @@ public class TestPrimitiveBreaking {
                 .run(
                         context -> {
                             assertThat(
-                                    primitive.visual.selection.range.cursor.drawing.transverse(context), is(-13));
+                                    primitive.visual.selection.range.cursor.drawing.transverse(), is(-13));
                             assertThat(
-                                    primitive.visual.selection.range.cursor.drawing.transverseEdge(context), is(1));
+                                    primitive.visual.selection.range.cursor.drawing.transverseEdge(), is(1));
                         });
     }
 

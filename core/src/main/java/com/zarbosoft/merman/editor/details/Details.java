@@ -116,20 +116,20 @@ public class Details {
     final int padStart = context.syntax.detailPad.transverseStart;
     final int padEnd = context.syntax.detailPad.transverseEnd;
     return Math.min(
-        context.transverseEdge - padStart - current.node.transverseSpan(context) - padEnd,
+        context.transverseEdge - padStart - current.node.transverseSpan() - padEnd,
         -documentScroll + transverse + transverseSpan + padStart);
   }
 
   private void place(final Context context, final boolean animate) {
     final int transverse = pageTransverse(context);
     current.node.setPosition(
-        context, new Vector(context.syntax.detailPad.converseStart, transverse), animate);
-    if (background != null) background.setPosition(context, new Vector(0, transverse), animate);
+            new Vector(context.syntax.detailPad.converseStart, transverse), animate);
+    if (background != null) background.setPosition(new Vector(0, transverse), animate);
   }
 
   private void resizeBackground(final Context context) {
     if (background == null) return;
-    background.setSize(context, context.edge * 2, current.node.transverseSpan(context));
+    background.setSize(context, context.edge * 2, current.node.transverseSpan());
   }
 
   public Details(final Context context) {
@@ -186,7 +186,7 @@ public class Details {
           new Bedding(
               0,
               context.syntax.detailPad.transverseStart
-                  + current.node.transverseSpan(context)
+                  + current.node.transverseSpan()
                   + context.syntax.detailPad.transverseEnd);
       context.foreground.addBedding(context, bedding);
     }

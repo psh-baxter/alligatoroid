@@ -10,7 +10,6 @@ import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Padding;
 import com.zarbosoft.merman.syntax.RootAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.alignments.AbsoluteAlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
@@ -83,7 +82,7 @@ public class SyntaxBuilder {
 
   public SyntaxBuilder relativeAlignment(final String name, final int offset) {
     final RelativeAlignmentSpec definition =
-        new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(null, offset));
+        new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(null, offset, false));
     alignments.put(name, definition);
     return this;
   }

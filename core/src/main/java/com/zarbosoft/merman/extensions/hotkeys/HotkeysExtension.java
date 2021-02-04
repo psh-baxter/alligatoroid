@@ -26,7 +26,6 @@ import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Arrays;
 import java.util.Comparator;
 
 public class HotkeysExtension {
@@ -186,9 +185,9 @@ public class HotkeysExtension {
         name.setText(context, action.id());
         table.add(TSList.of(rule, name));
       }
-      table.layout(context);
+      table.layout();
       layout.add(table.group);
-      layout.layout(context);
+      layout.layout();
     }
 
     @Override

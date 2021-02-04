@@ -14,7 +14,8 @@ import javafx.scene.transform.Affine;
 public class JavaFXDrawing extends JavaFXNode implements Drawing {
 	final public Canvas node;
 
-	public JavaFXDrawing() {
+	protected JavaFXDrawing(JavaFXDisplay display) {
+		super(display);
 		this.node = new Canvas();
 	}
 

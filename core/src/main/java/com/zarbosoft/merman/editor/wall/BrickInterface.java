@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editor.wall;
 
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.visual.Alignment;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -23,7 +23,7 @@ public interface BrickInterface {
 
   void brickDestroyed(Context context);
 
-  Alignment getAlignment(Style style);
+  Alignment findAlignment(Style style);
 
   TSSet<String> getTags(Context context);
 }

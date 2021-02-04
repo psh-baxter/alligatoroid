@@ -2,7 +2,6 @@ package com.zarbosoft.merman.standalone.helper;
 
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.alignments.AbsoluteAlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
@@ -107,7 +106,7 @@ public class TypeBuilder {
   }
 
   public TypeBuilder relativeAlignment(final String name, final String base, final int offset) {
-    alignments.put(name, new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(base, offset)));
+    alignments.put(name, new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(base, offset, false)));
     return this;
   }
 

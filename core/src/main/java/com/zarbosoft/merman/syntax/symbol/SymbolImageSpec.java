@@ -20,7 +20,7 @@ public class SymbolImageSpec extends Symbol {
   @Override
   public void style(final Context context, final DisplayNode node, final Style style) {
     final Image image = (Image) node;
-    image.setImage(context, Paths.get(style.image));
+    image.setImage(context, style.image);
     image.rotate(context, style.rotate);
   }
 

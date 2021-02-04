@@ -3,12 +3,10 @@ package com.zarbosoft.merman.syntax.front;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -24,7 +22,6 @@ public abstract class FrontSpec {
           Context context,
           VisualParent parent,
           Atom atom,
-          ROMap<String, Alignment> alignments,
           int visualDepth,
           int depthScore);
 

@@ -7,12 +7,12 @@ public class MockeryBlank extends MockeryDisplayNode implements Blank {
 	private int transverse;
 
 	@Override
-	public int converseSpan(final Context context) {
+	public int converseSpan() {
 		return converse;
 	}
 
 	@Override
-	public int transverseSpan(final Context context) {
+	public int transverseSpan() {
 		return transverse;
 	}
 

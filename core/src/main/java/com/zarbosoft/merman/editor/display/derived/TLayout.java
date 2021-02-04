@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editor.display.derived;
 
-import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Group;
 
@@ -19,11 +18,11 @@ public class TLayout {
 		group.add(node);
 	}
 
-	public void layout(final Context context) {
+	public void layout() {
 		int transverse = 0;
 		for (final DisplayNode node : nodes) {
-			node.setTransverse(context, transverse, false);
-			transverse += node.transverseSpan(context);
+			node.setTransverse(transverse, false);
+			transverse += node.transverseSpan();
 		}
 	}
 }

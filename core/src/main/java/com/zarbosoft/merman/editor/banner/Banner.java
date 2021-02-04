@@ -90,10 +90,10 @@ public class Banner {
     final int calculatedTransverse =
         transverse - text.font().getDescent() - context.syntax.bannerPad.transverseEnd - scroll;
     text.setPosition(
-        context, new Vector(context.syntax.bannerPad.converseStart, calculatedTransverse), animate);
+            new Vector(context.syntax.bannerPad.converseStart, calculatedTransverse), animate);
     if (background != null)
       background.setPosition(
-          context, new Vector(0, calculatedTransverse - text.font().getAscent()), animate);
+              new Vector(0, calculatedTransverse - text.font().getAscent()), animate);
   }
 
   private void resizeBackground(final Context context) {
@@ -154,7 +154,7 @@ public class Banner {
     if (bedding != null) context.foreground.removeBedding(context, bedding);
     bedding =
         new Bedding(
-            text.transverseSpan(context)
+            text.transverseSpan()
                 + context.syntax.bannerPad.transverseStart
                 + context.syntax.bannerPad.transverseEnd,
             0);

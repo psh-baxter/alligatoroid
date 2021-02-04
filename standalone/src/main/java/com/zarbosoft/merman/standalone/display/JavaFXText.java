@@ -13,7 +13,8 @@ import javafx.scene.Node;
 public class JavaFXText extends JavaFXNode implements Text {
 	protected final javafx.scene.text.Text text = new javafx.scene.text.Text();
 
-	public JavaFXText() {
+	protected JavaFXText(JavaFXDisplay display) {
+		super(display);
 		text.setTextOrigin(VPos.BASELINE);
 	}
 
@@ -23,9 +24,8 @@ public class JavaFXText extends JavaFXNode implements Text {
 	}
 
 	public void setText(final Context context, final String newText) {
-		final Vector at = position(context);
 		text.setText(newText);
-		setPosition(context, at, false);
+		fixPosition();
 	}
 
 	@Override
@@ -56,10 +56,10 @@ public class JavaFXText extends JavaFXNode implements Text {
 		switch (context.syntax.converseDirection) {
 			case UP:
 			case DOWN:
-				return text.hitTest(new Point2D(text.getX(), converse - converse(context))).getInsertionIndex();
+				return text.hitTest(new Point2D(text.getX(), converse - converse())).getInsertionIndex();
 			case LEFT:
 			case RIGHT:
-				return text.hitTest(new Point2D(converse - converse(context), text.getY())).getInsertionIndex();
+				return text.hitTest(new Point2D(converse - converse(), text.getY())).getInsertionIndex();
 		}
 		throw new DeadCode();
 	}
@@ -77,116 +77,7 @@ public class JavaFXText extends JavaFXNode implements Text {
 	}
 
 	@Override
-	public int converse(final Context context) {
-		switch (context.syntax.converseDirection) {
-			case UP:
-			case DOWN:
-				return (int) text.getLayoutY();
-			case LEFT:
-			case RIGHT:
-				return (int) text.getLayoutX();
-			default:
-				throw new DeadCode();
-		}
-	}
-
-	@Override
-	public int transverse(final Context context) {
-		switch (context.syntax.transverseDirection) {
-			case UP:
-			case DOWN:
-				return (int) text.getLayoutY();
-			case LEFT:
-			case RIGHT:
-				return (int) text.getLayoutX();
-			default:
-				throw new DeadCode();
-		}
-	}
-
-	@Override
-	public Vector position(final Context context) {
-		final int converse;
-		final int transverse;
-		switch (context.syntax.converseDirection) {
-			case UP:
-			case DOWN:
-				converse = (int) text.getLayoutY();
-				break;
-			case LEFT:
-			case RIGHT:
-				converse = (int) text.getLayoutX();
-				break;
-			default:
-				throw new DeadCode();
-		}
-		switch (context.syntax.transverseDirection) {
-			case UP:
-			case DOWN:
-				transverse = (int) text.getLayoutY();
-				break;
-			case LEFT:
-			case RIGHT:
-				transverse = (int) text.getLayoutX();
-				break;
-			default:
-				throw new DeadCode();
-		}
-		return new Vector(converse, transverse);
-	}
-
-	@Override
-	public void setConverse(final Context context, final int converse, final boolean animate) {
-		Integer x = null;
-		Integer y = null;
-		switch (context.syntax.converseDirection) {
-			case UP:
-			case DOWN:
-				y = converse;
-				break;
-			case LEFT:
-			case RIGHT:
-				x = converse;
-				break;
-		}
-		if (x != null) {
-			if (animate)
-				new TransitionSmoothOut(text, x - node().getLayoutX(), null).play();
-			node().setLayoutX(x);
-		} else {
-			if (animate)
-				new TransitionSmoothOut(text, null, y - node().getLayoutY()).play();
-			node().setLayoutY(y);
-		}
-	}
-
-	@Override
-	public void setTransverse(final Context context, final int transverse, final boolean animate) {
-		Integer x = null;
-		Integer y = null;
-		switch (context.syntax.transverseDirection) {
-			case UP:
-			case DOWN:
-				y = transverse;
-				break;
-			case LEFT:
-			case RIGHT:
-				x = transverse;
-				break;
-		}
-		if (x != null) {
-			if (animate)
-				new TransitionSmoothOut(text, x - node().getLayoutX(), null).play();
-			node().setLayoutX(x);
-		} else {
-			if (animate)
-				new TransitionSmoothOut(text, null, y - node().getLayoutY()).play();
-			node().setLayoutY(y);
-		}
-	}
-
-	@Override
-	public void setPosition(final Context context, final Vector vector, final boolean animate) {
+	public void setPosition(final Vector vector, final boolean animate) {
 		int x = 0;
 		int y = 0;
 		switch (context.syntax.converseDirection) {

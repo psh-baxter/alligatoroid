@@ -26,6 +26,7 @@ import com.zarbosoft.merman.helper.StyleBuilder;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
+import com.zarbosoft.merman.syntax.Direction;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
@@ -82,7 +83,7 @@ public class TestWindowing {
               initialConfig,
               syntax,
               doc,
-              new MockeryDisplay(),
+              new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
               runner::addIteration,
               runner::flushIteration,
               new ClipboardEngine() {

@@ -94,13 +94,13 @@ public class IndicatorsExtension {
           descent = font.getDescent();
         } else {
           ascent = 0;
-          descent = node.transverseSpan(context);
+          descent = node.transverseSpan();
         }
         transverse += ascent;
-        node.setTransverse(context, transverse);
+        node.setTransverse(transverse);
         transverse += descent;
         if (!converseStart) {
-          node.setConverse(context, -node.converseSpan(context));
+          node.setConverse(-node.converseSpan());
         }
         offset += 1;
       } else {
@@ -114,11 +114,10 @@ public class IndicatorsExtension {
 
   public void updatePosition(final Context context) {
     group.setPosition(
-        context,
-        new Vector(
+            new Vector(
             converseStart
                 ? conversePadding
-                : (context.edge - conversePadding - group.converseSpan(context)),
+                : (context.edge - conversePadding - group.converseSpan()),
             transverseStart ? transversePadding : (context.edge - transversePadding)),
         false);
   }

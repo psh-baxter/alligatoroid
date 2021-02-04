@@ -63,8 +63,8 @@ public abstract class Display {
   private final TSList<IntListener> transverseEdgeListeners = new TSList<>();
   private double width;
   private double height;
-  private int converseEdge;
-  private int transverseEdge;
+  private int converseEdge = Integer.MAX_VALUE;
+  private int transverseEdge = Integer.MAX_VALUE;
 
   protected Display(Direction converseDirection, Direction transverseDirection) {
     switch (converseDirection) {
@@ -525,9 +525,9 @@ public abstract class Display {
     void changed(int oldValue, int newValue);
   }
 
-  protected abstract double width();
+  public abstract double width();
 
-  protected abstract double height();
+  public abstract double height();
 
   public final int edge() {
     return halfConvert.convert(width(), height()).converse;

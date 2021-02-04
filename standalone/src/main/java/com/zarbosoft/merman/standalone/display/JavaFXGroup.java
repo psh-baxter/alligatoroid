@@ -10,6 +10,10 @@ import java.util.List;
 public class JavaFXGroup extends JavaFXNode implements Group {
 	javafx.scene.Group group = new javafx.scene.Group();
 
+	protected JavaFXGroup(JavaFXDisplay display) {
+		super(display);
+	}
+
 	@Override
 	public void add(
 			final int index, final DisplayNode node

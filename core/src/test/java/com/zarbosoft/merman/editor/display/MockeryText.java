@@ -46,12 +46,12 @@ public class MockeryText extends MockeryDisplayNode implements Text {
 	}
 
 	@Override
-	public int converseSpan(final Context context) {
+	public int converseSpan() {
 		return font.getWidth(text);
 	}
 
 	@Override
-	public int transverseSpan(final Context context) {
+	public int transverseSpan() {
 		return font.getAscent() + font.getDescent();
 	}
 }

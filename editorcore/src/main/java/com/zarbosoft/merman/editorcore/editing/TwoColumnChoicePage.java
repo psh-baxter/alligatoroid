@@ -59,7 +59,7 @@ public class TwoColumnChoicePage extends DetailsPage {
       rows.add(display);
       table.add(ImmutableList.of(display.first, display.second));
     }
-    table.layout(context);
+    table.layout();
     changeChoice(context, 0);
     final List<Action> actions =
         new ArrayList<>(
@@ -74,10 +74,10 @@ public class TwoColumnChoicePage extends DetailsPage {
     final Pair<DisplayNode, DisplayNode> row = rows.get(index);
     final DisplayNode preview = row.first;
     final DisplayNode text = row.second;
-    final int converse = preview.converse(context);
-    final int converseEdge = text.converseEdge(context);
+    final int converse = preview.converse();
+    final int converseEdge = text.converseEdge();
     scroll = Math.min(converse, Math.max(converseEdge - context.edge, scroll));
-    tableGroup.setConverse(context, scroll, context.syntax.animateDetails);
+    tableGroup.setConverse(scroll, context.syntax.animateDetails);
   }
 
   private void changeChoice(final Context context, final int index) {
@@ -85,13 +85,13 @@ public class TwoColumnChoicePage extends DetailsPage {
     final Pair<DisplayNode, DisplayNode> row = rows.get(index);
     final DisplayNode preview = row.first;
     final DisplayNode text = row.second;
-    final int converse = preview.converse(context);
-    final int transverse = Math.min(preview.transverse(context), text.transverse(context));
-    final int converseEdge = text.converseEdge(context);
+    final int converse = preview.converse();
+    final int transverse = Math.min(preview.transverse(), text.transverse());
+    final int converseEdge = text.converseEdge();
     final int transverseEdge =
-        Math.max(preview.transverseEdge(context), text.transverseEdge(context));
+        Math.max(preview.transverseEdge(), text.transverseEdge());
     highlight.setSize(context, converseEdge - converse, transverseEdge - transverse);
-    highlight.setPosition(context, new Vector(converse, transverse), false);
+    highlight.setPosition(new Vector(converse, transverse), false);
     updateScroll(context);
   }
 

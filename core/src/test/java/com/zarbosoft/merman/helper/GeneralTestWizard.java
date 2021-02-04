@@ -24,11 +24,8 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 
-import java.util.List;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
-import static com.zarbosoft.rendaw.common.Common.zip;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -61,27 +58,27 @@ public class GeneralTestWizard {
     inner.runner.flush();
   }
 
-  public GeneralTestWizard resize(final int size) {
-    inner.resize(size);
+  public GeneralTestWizard displayWidth(final int size) {
+    inner.displayWidth(size);
     return this;
   }
 
-  public GeneralTestWizard resizeTransitive(final int size) {
-    inner.resizeTransitive(size);
+  public GeneralTestWizard displayHeight(final int size) {
+    inner.displayHeight(size);
     return this;
   }
 
   private void checkNode(
       final DisplayNode node, final int c, final int t, final int ce, final int te) {
-    assertThat(node.converse(inner.context), equalTo(c));
-    assertThat(node.transverse(inner.context), equalTo(t));
-    assertThat(node.converseEdge(inner.context), equalTo(ce));
-    assertThat(node.transverseEdge(inner.context), equalTo(te));
+    assertThat(node.converse(), equalTo(c));
+    assertThat(node.transverse(), equalTo(t));
+    assertThat(node.converseEdge(), equalTo(ce));
+    assertThat(node.transverseEdge(), equalTo(te));
   }
 
   private void checkNode(final DisplayNode node, final int t, final int te) {
-    assertThat(node.transverse(inner.context), equalTo(t));
-    assertThat(node.transverseEdge(inner.context), equalTo(te));
+    assertThat(node.transverse(), equalTo(t));
+    assertThat(node.transverseEdge(), equalTo(te));
   }
 
   public GeneralTestWizard checkBanner(final int transversePlusAscent, final int transverseEdge) {

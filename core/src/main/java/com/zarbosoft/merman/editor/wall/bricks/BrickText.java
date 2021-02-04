@@ -4,14 +4,13 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.display.Text;
-import com.zarbosoft.merman.editor.visual.Alignment;
-import com.zarbosoft.merman.editor.visual.AlignmentListener;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.style.Style;
 
-public class BrickText extends Brick implements AlignmentListener {
+public class BrickText extends Brick {
   public Text text;
 
   public BrickText(final Context context, final BrickInterface inter) {
@@ -21,8 +20,13 @@ public class BrickText extends Brick implements AlignmentListener {
   }
 
   @Override
-  public int converseEdge(final Context context) {
-    return text.converseEdge(context);
+  public int converseEdge() {
+    return text.converseEdge();
+  }
+
+  @Override
+  public int converseSpan() {
+    return text.converseSpan();
   }
 
   public Properties properties(final Context context, final Style style) {
@@ -31,7 +35,7 @@ public class BrickText extends Brick implements AlignmentListener {
         style.split,
         font.getAscent(),
         font.getDescent(),
-        inter.getAlignment(style),
+        inter.findAlignment(style),
         font.getWidth(text.text()));
   }
 
@@ -46,12 +50,7 @@ public class BrickText extends Brick implements AlignmentListener {
       text.setColor(context, style.color);
       text.setFont(context, style.getFont(context));
     }
-    final Alignment newAlignment = inter.getAlignment(style);
-    if (alignment != newAlignment) {
-      if (alignment != null) alignment.removeListener(context, this);
-      if (newAlignment != null) newAlignment.addListener(context, this);
-      alignment = newAlignment;
-    }
+    alignment = inter.findAlignment(style);
     changed(context);
   }
 
@@ -62,13 +61,13 @@ public class BrickText extends Brick implements AlignmentListener {
 
   @Override
   public void setConverse(final Context context, final int minConverse, final int converse) {
-    this.minConverse = minConverse;
-    text.setConverse(context, converse);
+    this.preAlignConverse = minConverse;
+    text.setConverse(converse);
   }
 
   @Override
   public void allocateTransverse(final Context context, final int ascent, final int descent) {
-    text.setTransverse(context, ascent);
+    text.setTransverse(ascent);
   }
 
   public void setText(final Context context, final String text) {
@@ -78,7 +77,7 @@ public class BrickText extends Brick implements AlignmentListener {
 
   @Override
   public int getConverse(final Context context) {
-    return text.converse(context);
+    return text.converse();
   }
 
   public Font getFont() {

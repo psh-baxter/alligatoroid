@@ -3,12 +3,10 @@ package com.zarbosoft.merman.syntax.front;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
-import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.visuals.VisualSymbol;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
 
 public class FrontSymbol extends FrontSpec {
@@ -45,22 +43,20 @@ public class FrontSymbol extends FrontSpec {
   }
 
   public Visual createVisual(
-      final Context context,
-      final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
-      final int visualDepth,
-      final int depthScore) {
-    return createVisual(context, parent, null, alignments, visualDepth, depthScore);
+          final Context context,
+          final VisualParent parent,
+          final int visualDepth,
+          final int depthScore) {
+    return createVisual(context, parent, null, visualDepth, depthScore);
   }
 
   @Override
   public Visual createVisual(
-      final Context context,
-      final VisualParent parent,
-      final Atom atom,
-      final ROMap<String, Alignment> alignments,
-      final int visualDepth,
-      final int depthScore) {
+          final Context context,
+          final VisualParent parent,
+          final Atom atom,
+          final int visualDepth,
+          final int depthScore) {
     return new VisualSymbol(
         parent,
         this,

@@ -59,7 +59,7 @@ public class TestLayoutRootArray {
         .checkTextBrick(0, 1, "one")
         .checkSpaceBrick(0, 2)
         .checkTextBrick(0, 3, "one")
-        .resize(40)
+        .displayWidth(40)
         .checkSpaceBrick(0, 0)
         .checkTextBrick(0, 1, "one")
         .checkSpaceBrick(1, 0)

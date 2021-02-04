@@ -20,8 +20,8 @@ public class Box {
 
   int radius = 0;
 
-  public void setPosition(final Context context, final Vector vector, final boolean animate) {
-    drawing.setPosition(context, offset.add(vector), animate);
+  public void setPosition(final Vector vector, final boolean animate) {
+    drawing.setPosition(offset.add(vector), animate);
   }
 
   public void setSize(final Context context, int converseSpan, int transverseSpan) {

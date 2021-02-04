@@ -3,7 +3,6 @@ package com.zarbosoft.merman.syntax.front;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtom;
@@ -12,7 +11,6 @@ import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -49,14 +47,13 @@ public class FrontAtomSpec extends FrontSpec {
 
   @Override
   public Visual createVisual(
-      final Context context,
-      final VisualParent parent,
-      final Atom atom,
-      final ROMap<String, Alignment> alignments,
-      final int visualDepth,
-      final int depthScore) {
+          final Context context,
+          final VisualParent parent,
+          final Atom atom,
+          final int visualDepth,
+          final int depthScore) {
     return new VisualFrontAtom(
-        context, parent, dataType.get(atom.fields), alignments, visualDepth, depthScore) {
+        context, parent, dataType.get(atom.fields), visualDepth, depthScore) {
 
       @Override
       protected Symbol ellipsis() {

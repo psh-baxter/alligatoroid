@@ -20,11 +20,6 @@ public class JavaI18nEngine implements I18nEngine {
     }
 
     @Override
-    public void setText(String text) {
-      i.setText(text);
-    }
-
-    @Override
     public int preceding(int offset) {
       return i.preceding(offset);
     }
@@ -37,16 +32,22 @@ public class JavaI18nEngine implements I18nEngine {
 
   @Override
   public I18nEngine.Walker glyphWalker(String s) {
-    return new Walker(BreakIterator.getCharacterInstance(locale));
+    BreakIterator i = BreakIterator.getCharacterInstance(locale);
+    i.setText(s);
+    return new Walker(i);
   }
 
   @Override
   public I18nEngine.Walker wordWalker(String s) {
-    return new Walker(BreakIterator.getWordInstance(locale));
+    BreakIterator i = BreakIterator.getWordInstance(locale);
+    i.setText(s);
+    return new Walker(i);
   }
 
   @Override
   public I18nEngine.Walker lineWalker(String s) {
-    return new Walker(BreakIterator.getLineInstance(locale));
+    BreakIterator i = BreakIterator.getLineInstance(locale);
+    i.setText(s);
+    return new Walker(i);
   }
 }

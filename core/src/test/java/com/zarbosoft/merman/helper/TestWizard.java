@@ -27,14 +27,14 @@ public class TestWizard {
     runner.flush();
   }
 
-  public TestWizard resize(final int size) {
-    display.setConverseEdge(context, size);
+  public TestWizard displayWidth(final int size) {
+    display.setWidth(size);
     runner.flush();
     return this;
   }
 
-  public TestWizard resizeTransitive(final int size) {
-    display.setTransverseEdge(context, size);
+  public TestWizard displayHeight(final int size) {
+    display.setHeight(size);
     runner.flush();
     return this;
   }

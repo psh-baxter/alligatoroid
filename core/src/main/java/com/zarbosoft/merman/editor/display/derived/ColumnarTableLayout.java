@@ -35,7 +35,7 @@ public class ColumnarTableLayout {
 			group.add(node);
 	}
 
-	public void layout(final Context context) {
+	public void layout() {
 		int start = 0;
 		int columnEdge = 0;
 		while (start < rows.size()) {
@@ -58,14 +58,14 @@ public class ColumnarTableLayout {
 							descent = Math.max(descent, ((Text) cell).font().getDescent());
 						}
 						if (!(cell instanceof Text))
-							ascent = Math.max(ascent, cell.transverseSpan(context));
+							ascent = Math.max(ascent, cell.transverseSpan());
 					}
 					if (end > start && transverse + ascent + descent >= maxTransverse) {
 						break;
 					}
 					for (int x = 0; x < columns; ++x) {
 						final DisplayNode cell = row.get(x);
-						columnSpans[x] = Math.max(columnSpans[x], cell.converseSpan(context));
+						columnSpans[x] = Math.max(columnSpans[x], cell.converseSpan());
 					}
 					rowStarts.add(new Pair<>(transverse, ascent));
 					transverse += ascent + descent;
@@ -83,7 +83,7 @@ public class ColumnarTableLayout {
 					int transverse = rowTransverse.first;
 					if (cell instanceof Text)
 						transverse += rowTransverse.second;
-					cell.setPosition(context, new Vector(converse, transverse), false);
+					cell.setPosition(new Vector(converse, transverse), false);
 					converse += columnSpans[x];
 				}
 				newColumnEdge = Math.max(newColumnEdge, converse);

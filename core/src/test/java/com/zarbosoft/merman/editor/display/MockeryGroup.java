@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editor.display;
 
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -42,20 +43,20 @@ public class MockeryGroup extends MockeryDisplayNode implements Group {
 	}
 
 	@Override
-	public int converseSpan(final Context context) {
+	public int converseSpan() {
 		int max = 0;
     for (MockeryDisplayNode node : nodes) {
-		int got = node.converseEdge(context);
+		int got = node.converseEdge();
 		if (got > max) max = got;
 	}
     return max;
 	}
 
 	@Override
-	public int transverseSpan(final Context context) {
+	public int transverseSpan() {
 		int max = 0;
 		for (MockeryDisplayNode node : nodes) {
-			int got = node.transverseEdge(context);
+			int got = node.transverseEdge();
 			if (got > max) max = got;
 		}
 		return max;

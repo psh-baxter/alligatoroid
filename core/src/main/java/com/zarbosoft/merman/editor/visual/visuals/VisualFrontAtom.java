@@ -5,10 +5,8 @@ import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.rendaw.common.ROMap;
 
 public abstract class VisualFrontAtom extends VisualFrontAtomBase {
   public final ValueAtom value;
@@ -20,12 +18,11 @@ public abstract class VisualFrontAtom extends VisualFrontAtomBase {
   }
 
   public VisualFrontAtom(
-      final Context context,
-      final VisualParent parent,
-      final ValueAtom value,
-      final ROMap<String, Alignment> alignments,
-      final int visualDepth,
-      final int depthScore) {
+          final Context context,
+          final VisualParent parent,
+          final ValueAtom value,
+          final int visualDepth,
+          final int depthScore) {
     super(visualDepth);
     this.value = value;
     dataListener =
@@ -37,7 +34,7 @@ public abstract class VisualFrontAtom extends VisualFrontAtomBase {
         };
     value.addListener(dataListener);
     value.visual = this;
-    root(context, parent, alignments, visualDepth, depthScore);
+    root(context, parent, visualDepth, depthScore);
   }
 
   @Override

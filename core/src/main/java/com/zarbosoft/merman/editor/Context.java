@@ -26,7 +26,6 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
@@ -305,11 +304,11 @@ public class Context {
   public void applyScroll() {
     final int newScroll = scroll + peek;
     foreground.visual.setPosition(
-        this, new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
+            new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
     background.setPosition(
-        this, new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
+            new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
     overlay.setPosition(
-        this, new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
+            new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
     banner.setScroll(this, newScroll);
     details.setScroll(this, newScroll);
   }
@@ -541,7 +540,7 @@ public class Context {
   public void windowClear() {
     window = false;
     windowAtom = document.root;
-    document.root.ensureVisual(this, null, ROMap.empty, 0, 0);
+    document.root.ensureVisual(this, null, 0, 0);
     changeGlobalTags(
         new TagsChange(
             TSSet.of(), TSSet.of(Tags.TAG_GLOBAL_WINDOWED, Tags.TAG_GLOBAL_ROOT_WINDOW)));
@@ -557,7 +556,7 @@ public class Context {
     boolean wasRoot = windowAtom == document.root;
     final Visual oldWindow = windowAtom.visual;
     windowAtom = tree;
-    Visual windowVisual = windowAtom.ensureVisual(this, null, ROMap.empty, 0, 0);
+    Visual windowVisual = windowAtom.ensureVisual(this, null, 0, 0);
     oldWindow.uproot(this, windowVisual);
     if (wasRoot) {
       changeGlobalTags(
@@ -576,7 +575,7 @@ public class Context {
   private void windowToSupertree(Atom supertree) {
     window = true;
     windowAtom = supertree;
-    windowAtom.ensureVisual(this, null, ROMap.empty, 0, 0);
+    windowAtom.ensureVisual(this, null, 0, 0);
     if (supertree == document.root)
       changeGlobalTags(
           new TagsChange(
@@ -849,7 +848,7 @@ public class Context {
         while (point.converse < at.getConverse(context) && at.index > 0) {
           at = at.parent.children.get(at.index - 1);
         }
-        while (point.converse >= at.converseEdge(context)
+        while (point.converse >= at.converseEdge()
             && at.index < at.parent.children.size() - 1) {
           at = at.parent.children.get(at.index + 1);
         }

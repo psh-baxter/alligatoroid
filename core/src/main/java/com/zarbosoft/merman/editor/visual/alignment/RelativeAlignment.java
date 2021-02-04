@@ -1,57 +1,67 @@
 package com.zarbosoft.merman.editor.visual.alignment;
 
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.visual.Alignment;
-import com.zarbosoft.merman.editor.visual.AlignmentListener;
-import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
+import com.zarbosoft.merman.editor.wall.Brick;
 
-public class RelativeAlignment extends Alignment implements AlignmentListener {
-	private final String baseKey;
-	private final int offset;
-	private Alignment base;
+public class RelativeAlignment extends Alignment {
+  private final String baseKey;
+  private final int offset;
+  public final boolean collapse;
+  private Alignment base;
 
-	public RelativeAlignment(final String baseKey, final int offset) {
-		this.baseKey = baseKey;
-		this.offset = offset;
-		converse = offset;
-	}
+  public RelativeAlignment(
+      /** Name of alignment in ancestors (closest) */
+      final String baseKey,
+      /** Pixel offset from base alignment */
+      final int offset,
+      /**
+       * If true, doesn't contribute offset to derived alignments if this alignment doesn't have any
+       * bricks
+       */
+      boolean collapse) {
+    this.baseKey = baseKey;
+    this.offset = offset;
+    this.collapse = collapse;
+    converse = offset;
+  }
 
-	@Override
-	public void feedback(final Context context, final int position) {
+  @Override
+  public void feedback(final Context context, final int position) {}
 
-	}
+  @Override
+  public void root(final Context context, final VisualAtom atom) {
+    if (base != null) {
+      base.removeDerived(this);
+    }
+    base = atom.findParentAlignment(baseKey);
+    if (base == this) throw new AssertionError("Alignment parented to self");
+    if (base != null) base.addDerived(this);
+    changed(context);
+  }
 
-	@Override
-	public void root(final Context context, final ROMap<String, Alignment> parents) {
-		if (base != null) {
-			base.removeListener(context, this);
-		}
-		base = parents.getOpt(baseKey);
-		if (base == this)
-			throw new AssertionError("Alignment parented to self");
-		if (base != null)
-			base.addListener(context, this);
-		align(context);
-	}
+  @Override
+  public void addBrick(Context context, Brick brick) {
+    super.addBrick(context, brick);
+    if (collapse && bricks.size() == 1) changed(context);
+  }
 
-	@Override
-	public void destroy(final Context context) {
+  @Override
+  public void removeBrick(Context context, Brick brick) {
+    super.removeBrick(context, brick);
+    if (collapse && bricks.isEmpty()) changed(context);
+  }
 
-	}
+  @Override
+  public void destroy(final Context context) {}
 
-	@Override
-	public void align(final Context context) {
-		converse = (base == null ? 0 : base.converse) + offset;
-		submit(context);
-	}
+  @Override
+  public void changed(Context context) {
+    converse = (base == null ? 0 : base.converse) + (collapse && bricks.isEmpty() ? 0 : offset);
+    super.changed(context);
+  }
 
-	@Override
-	public int getConverseLowerBound(final Context context) {
-		return converse;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("relative-%d-p-%s", converse, base);
-	}
+  public int getPreAlignConverse() {
+    return converse;
+  }
 }

@@ -42,25 +42,6 @@ public class TestLayoutAlignment {
     return Arrays.asList(new Object[] {1}, new Object[] {2}, new Object[] {10});
   }
 
-  /** Simply check that root level absolute aligned elements have correct converse offset. */
-  @Test
-  public void testRootAbsoluteAlignment() {
-    FreeAtomType absolute =
-        new TypeBuilder("absolute")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .frontDataPrimitive("value")
-            .build();
-    final Syntax syntax =
-        new SyntaxBuilder("any")
-            .type(absolute)
-            .group("any", new GroupBuilder().type(absolute).build())
-            .absoluteAlignment("absolute", 7)
-            .style(new StyleBuilder().tag("absolute").alignment("absolute").build())
-            .build();
-    new GeneralTestWizard(syntax, new TreeBuilder(absolute).add("value", "hi").build())
-        .checkBrick(0, 0, 7);
-  }
-
   /**
    * Simply check that root level relatively aligned elements have correct converse offset relative
    * to a 0 baseline (no base)
@@ -81,35 +62,6 @@ public class TestLayoutAlignment {
             .build();
     new GeneralTestWizard(syntax, new TreeBuilder(relative).add("value", "hi").build())
         .checkBrick(0, 0, 3);
-  }
-
-  /** Test absolute alignment produces correct converse offset when scoped. */
-  @Test
-  public void testAbsoluteAlignment() {
-    FreeAtomType absolute =
-        new TypeBuilder("absolute")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .frontDataPrimitive("value")
-            .build();
-    final FreeAtomType array =
-        new TypeBuilder("array")
-            .back(Helper.buildBackDataArray("value", absolute.id()))
-            .front(new FrontDataArrayBuilder("value").build())
-            .absoluteAlignment("absolute", 11)
-            .build();
-    final Syntax syntax =
-        new SyntaxBuilder(array.id())
-            .type(absolute)
-            .type(array)
-            .absoluteAlignment("absolute", 7)
-            .style(new StyleBuilder().tag("absolute").alignment("absolute").build())
-            .build();
-    new GeneralTestWizard(
-            syntax,
-            new TreeBuilder(array)
-                .addArray("value", new TreeBuilder(absolute).add("value", "hi").build())
-                .build())
-        .checkBrick(0, 0, 11);
   }
 
   /**
@@ -203,57 +155,6 @@ public class TestLayoutAlignment {
   }
 
   /**
-   * If multiple bricks affected by different concensus alignments are on the same line, the offsets
-   * are calculated and stack properly (the 2nd concensus' offset is the max of the 2nd elements
-   * which is based on the offset of the first elements which is aligned by the first concensus)
-   */
-  @Test
-  public void testDoubleConcensusAlignmentMultiple() {
-    final FreeAtomType triple =
-        new TypeBuilder("triple")
-            .back(
-                new BackArrayBuilder()
-                    .add(Helper.buildBackDataPrimitive("first"))
-                    .add(Helper.buildBackDataPrimitive("second"))
-                    .add(Helper.buildBackDataPrimitive("third"))
-                    .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus1").build())
-            .front(new FrontDataPrimitiveBuilder("third").tag("concensus2").build())
-            .build();
-    final Syntax syntax =
-        new SyntaxBuilder(triple.id())
-            .type(triple)
-            .concensusAlignment("concensus1")
-            .concensusAlignment("concensus2")
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
-            .style(new StyleBuilder().tag("split").split(true).build())
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
-            .style(new StyleBuilder().tag("concensus2").alignment("concensus2").build())
-            .build();
-    new GeneralTestWizard(
-            syntax,
-            new TreeBuilder(triple)
-                .add("first", "three")
-                .add("second", "lumbar")
-                .add("third", "a")
-                .build(),
-            new TreeBuilder(triple)
-                .add("first", "elephant")
-                .add("second", "minx")
-                .add("third", "b")
-                .build(),
-            new TreeBuilder(triple)
-                .add("first", "tag")
-                .add("second", "pedantic")
-                .add("third", "c")
-                .build())
-        .checkBrick(0, 3, 160)
-        .checkBrick(1, 3, 160)
-        .checkBrick(2, 3, 160);
-  }
-
-  /**
    * Alignment ignored for 2 bricks on the same line in same concensus alignment. No offset since
    * there's no other lines with bricks in concensus.
    */
@@ -311,15 +212,15 @@ public class TestLayoutAlignment {
             new TreeBuilder(pair).add("first", "a").add("second", "b").build(),
             new TreeBuilder(pair).add("first", "cccc").add("second", "d").build())
         .checkCourseCount(1)
-        .resize(60)
+        .displayWidth(60)
         .checkCourseCount(2)
         .checkTextBrick(0, 1, "a")
         .checkTextBrick(1, 1, "cccc")
-        .resize(70)
+        .displayWidth(70)
         .checkCourseCount(2)
-        .resize(95)
+        .displayWidth(95)
         .checkCourseCount(2)
-        .resize(100)
+        .displayWidth(100)
         .checkCourseCount(1);
   }
 
@@ -361,11 +262,11 @@ public class TestLayoutAlignment {
             new TreeBuilder(primitive).add("value", "one").build(),
             new TreeBuilder(pair).add("first", "two").add("second", "three").build())
         .checkCourseCount(1)
-        .resize(80)
+        .displayWidth(80)
         .checkCourseCount(2)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 1, "two")
-        .resize(10000)
+        .displayWidth(10000)
         .checkCourseCount(1);
   }
 
@@ -419,13 +320,13 @@ public class TestLayoutAlignment {
             new TreeBuilder(pair).add("first", "lumberpass").add("second", "ink").build(),
             new TreeBuilder(splitPair).add("first", "dog").add("second", "equifortress").build())
         .checkCourseCount(2)
-        .resize(200)
+        .displayWidth(200)
         .checkCourseCount(3)
         .checkTextBrick(0, 1, "lumberpass")
         .checkTextBrick(0, 2, "ink")
         .checkTextBrick(1, 1, "dog")
         .checkTextBrick(2, 0, "equifortress")
-        .resize(10000)
+        .displayWidth(10000)
         .checkCourseCount(2);
   }
 
@@ -486,74 +387,13 @@ public class TestLayoutAlignment {
                 .add("second", new TreeBuilder(primitive).add("value", "equifortress").build())
                 .build())
         .checkCourseCount(2)
-        .resize(200)
-        .resize(205)
+        .displayWidth(200)
+        .displayWidth(205)
         .checkCourseCount(3)
         .checkTextBrick(0, 1, "lumberpass")
         .checkTextBrick(0, 2, "ink")
         .checkTextBrick(1, 2, "dog")
         .checkTextBrick(2, 1, "equifortress");
-  }
-
-  /**
-   * If two concensus alignments are crossed (one element after the other, then the othe way in a
-   * different line) In this case, the first alignment to get 2 elements is respected, the other
-   * ignored (within the cross).
-   */
-  @Test
-  public void testMultiCourseConcensusLoop() {
-    final FreeAtomType triple =
-        new TypeBuilder("triple")
-            .back(
-                new BackArrayBuilder()
-                    .add(Helper.buildBackDataPrimitive("first"))
-                    .add(Helper.buildBackDataPrimitive("second"))
-                    .add(Helper.buildBackDataPrimitive("third"))
-                    .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus1").build())
-            .front(new FrontDataPrimitiveBuilder("third").tag("concensus2").build())
-            .build();
-    final FreeAtomType reverseTriple =
-        new TypeBuilder("reverseTriple")
-            .back(
-                new BackArrayBuilder()
-                    .add(Helper.buildBackDataPrimitive("first"))
-                    .add(Helper.buildBackDataPrimitive("second"))
-                    .add(Helper.buildBackDataPrimitive("third"))
-                    .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus2").build())
-            .front(new FrontDataPrimitiveBuilder("third").tag("concensus1").build())
-            .build();
-    final Syntax syntax =
-        new SyntaxBuilder("any")
-            .type(triple)
-            .type(reverseTriple)
-            .group("any", new GroupBuilder().type(triple).type(reverseTriple).build())
-            .concensusAlignment("concensus1")
-            .concensusAlignment("concensus2")
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
-            .style(new StyleBuilder().tag("split").split(true).build())
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
-            .style(new StyleBuilder().tag("concensus2").alignment("concensus2").build())
-            .build();
-    new GeneralTestWizard(
-            syntax,
-            new TreeBuilder(triple)
-                .add("first", "hower")
-                .add("second", "tuber")
-                .add("third", "breem")
-                .build(),
-            new TreeBuilder(reverseTriple)
-                .add("first", "ank")
-                .add("second", "reindeerkick")
-                .add("third", "whatever")
-                .build())
-        .checkBrick(0, 2, 50)
-        .checkBrick(0, 3, 100)
-        .checkBrick(1, 2, 100)
-        .checkBrick(1, 3, 220);
   }
 
   /** Test issue with split line not expandedting */
@@ -576,60 +416,9 @@ public class TestLayoutAlignment {
                 new StyleBuilder().tag("compact_split").tag(Tags.TAG_COMPACT).split(true).build())
             .build();
     new GeneralTestWizard(syntax, new TreeBuilder(threeLine2).build())
-        .resize(50)
-        .resize(120)
+        .displayWidth(50)
+        .displayWidth(120)
         .checkCourseCount(2);
-  }
-
-  /** */
-  @Test
-  public void testSplitMultiCourseStackedAlignments() {
-    final FreeAtomType threeLine =
-        new TypeBuilder("threeLine")
-            .back(Helper.buildBackPrimitive("threeLine"))
-            /* Line 1 */
-            .front(new FrontMarkBuilder("width2").tag("expandedconcensus1").build())
-            .front(new FrontMarkBuilder("b").tag("concensus2").build())
-            /* Line 2 */
-            .front(new FrontSpaceBuilder().tag("split").build())
-            .front(
-                new FrontMarkBuilder("width3")
-                    .tag("compact_split")
-                    .tag("expandedconcensus2")
-                    .build())
-            /* Line 3 */
-            .front(new FrontMarkBuilder("width1").tag("split").build())
-            .front(new FrontMarkBuilder("a").tag("concensus1").build())
-            .build();
-    final Syntax syntax =
-        new SyntaxBuilder("any")
-            .type(threeLine)
-            .group("any", new GroupBuilder().type(threeLine).build())
-            .concensusAlignment("concensus1")
-            .concensusAlignment("concensus2")
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
-            .style(new StyleBuilder().tag("split").split(true).build())
-            .style(
-                new StyleBuilder().tag("compact_split").tag(Tags.TAG_COMPACT).split(true).build())
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
-            .style(
-                new StyleBuilder()
-                    .tag("expandedconcensus1")
-                    .notag(Tags.TAG_COMPACT)
-                    .alignment("concensus1")
-                    .build())
-            .style(new StyleBuilder().tag("concensus2").alignment("concensus2").build())
-            .style(
-                new StyleBuilder()
-                    .tag("expandedconcensus2")
-                    .notag(Tags.TAG_COMPACT)
-                    .alignment("concensus2")
-                    .build())
-            .build();
-    new GeneralTestWizard(syntax, new TreeBuilder(threeLine).build())
-        .resize(160)
-        .resize(170)
-        .checkCourseCount(4);
   }
 
   /**

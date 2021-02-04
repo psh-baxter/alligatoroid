@@ -4,36 +4,33 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.Vector;
 
 public interface DisplayNode {
-	int converse(Context context);
+  int converse();
 
-	int transverse(Context context);
+  int transverse();
 
-	int converseSpan(Context context);
+  int converseSpan();
 
-	int transverseSpan(Context context);
+  int transverseSpan();
 
-	void setConverse(Context context, int converse, boolean animate);
+  void setConverse(int converse, boolean animate);
 
-	default void setConverse(final Context context, final int converse) {
-		setConverse(context, converse, false);
-	}
+  default void setConverse(final int converse) {
+    setConverse(converse, false);
+  }
 
-	void setTransverse(Context context, int transverse, boolean animate);
+  void setTransverse(int transverse, boolean animate);
 
-	default void setTransverse(final Context context, final int transverse) {
-		setTransverse(context, transverse, false);
-	}
+  default void setTransverse(final int transverse) {
+    setTransverse(transverse, false);
+  }
 
-	default void setPosition(final Context context, final Vector vector, final boolean animate) {
-		setConverse(context, vector.converse, animate);
-		setTransverse(context, vector.transverse, animate);
-	}
+  void setPosition(final Vector vector, final boolean animate);
 
-	default int converseEdge(final Context context) {
-		return converse(context) + converseSpan(context);
-	}
+  default int converseEdge() {
+    return converse() + converseSpan();
+  }
 
-	default int transverseEdge(final Context context) {
-		return transverse(context) + transverseSpan(context);
-	}
+  default int transverseEdge() {
+    return transverse() + transverseSpan();
+  }
 }

@@ -26,21 +26,21 @@ public class RowLayout {
 		nodes.add(node);
 	}
 
-	public void layout(final Context context) {
+	public void layout() {
 		int converse = 0;
 		int maxAscent = 0;
 		for (final DisplayNode node : nodes) {
 			if (node instanceof Text)
 				maxAscent = Math.max(maxAscent, ((Text) node).font().getAscent());
 			else
-				maxAscent = Math.max(maxAscent, node.transverseSpan(context));
+				maxAscent = Math.max(maxAscent, node.transverseSpan());
 		}
 		for (final DisplayNode node : nodes) {
 			if (node instanceof Text) {
-				node.setTransverse(context, maxAscent);
+				node.setTransverse(maxAscent);
 			}
-			node.setConverse(context, converse, false);
-			converse += node.converseSpan(context);
+			node.setConverse(converse, false);
+			converse += node.converseSpan();
 		}
 	}
 }

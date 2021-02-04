@@ -110,7 +110,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(two).build(),
             new TreeBuilder(one).build(),
             new TreeBuilder(one).build())
-        .resizeTransitive(40)
+        .displayHeight(40)
         .checkScroll(-10)
         .checkBanner(8, 10)
         .checkDetails(20, 27);
@@ -126,7 +126,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(two).build(),
             new TreeBuilder(one).build(),
             new TreeBuilder(one).build())
-        .resizeTransitive(40)
+        .displayHeight(40)
         .run(
             context -> {
               Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
@@ -149,7 +149,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(two).build(),
             new TreeBuilder(one).build(),
             new TreeBuilder(one).build())
-        .resizeTransitive(40)
+        .displayHeight(40)
         .run(
             context -> {
               Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
@@ -173,7 +173,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(two).build(),
             new TreeBuilder(one).build(),
             new TreeBuilder(one).build())
-        .resizeTransitive(50)
+        .displayHeight(50)
         .run(
             context -> {
               Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
@@ -196,7 +196,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(two).build(),
             new TreeBuilder(one).build(),
             new TreeBuilder(one).build())
-        .resizeTransitive(50)
+        .displayHeight(50)
         .run(
             context -> {
               Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
@@ -220,7 +220,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(two).build(),
             new TreeBuilder(big).build(),
             new TreeBuilder(one).build())
-        .resizeTransitive(40)
+        .displayHeight(40)
         .run(
             context -> {
               Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);
@@ -243,7 +243,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(two).build(),
             new TreeBuilder(big).build(),
             new TreeBuilder(one).build())
-        .resizeTransitive(40)
+        .displayHeight(40)
         .run(
             context -> {
               Helper.rootArray(context.document).data.get(4).valueParentRef.selectValue(context);

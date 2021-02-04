@@ -5,7 +5,7 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.gap.TwoColumnChoice;
 import com.zarbosoft.merman.editor.gap.GapVisualPrimitive;
-import com.zarbosoft.merman.editor.visual.Alignment;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.tags.Tag;

@@ -32,12 +32,12 @@ public class PrimitiveTestWizard {
   }
 
   public PrimitiveTestWizard resize(final int size) {
-    inner.resize(size);
+    inner.displayWidth(size);
     return this;
   }
 
   public PrimitiveTestWizard resizeTransitive(final int size) {
-    inner.resizeTransitive(size);
+    inner.displayHeight(size);
     return this;
   }
 }

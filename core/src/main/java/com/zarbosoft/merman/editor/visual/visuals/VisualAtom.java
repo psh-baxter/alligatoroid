@@ -3,7 +3,7 @@ package com.zarbosoft.merman.editor.visual.visuals;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
-import com.zarbosoft.merman.editor.visual.Alignment;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
@@ -15,14 +15,12 @@ import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 
 public class VisualAtom extends Visual {
@@ -30,8 +28,9 @@ public class VisualAtom extends Visual {
   private VisualParent parent;
   public int depthScore = 0;
   public boolean compact = false;
-  private final TSMap<String, Alignment> alignments = new TSMap<>();
-  private final Map<String, Alignment> localAlignments = new HashMap<>();
+  /** Merged map of parent alignments and this alignments */
+  private final TSMap<String, Alignment> localAlignments = new TSMap<>();
+
   public final TSList<Visual> children = new TSList<>();
   private final TSList<Visual> selectable = new TSList<>();
   public Brick firstBrick;
@@ -55,16 +54,14 @@ public class VisualAtom extends Visual {
       final Context context,
       final VisualParent parent,
       final Atom atom,
-      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
     super(visualDepth);
     this.atom = atom;
     for (final Map.Entry<String, AlignmentSpec> entry : atom.type.alignments()) {
-      final Alignment alignment = entry.getValue().create();
-      localAlignments.put(entry.getKey(), alignment);
+      localAlignments.put(entry.getKey(), entry.getValue().create());
     }
-    rootInner(context, parent, alignments, visualDepth, depthScore);
+    rootInner(context, parent, visualDepth, depthScore);
     for (int index = 0; index < atom.type.front().size(); ++index) {
       FrontSpec front = atom.type.front().get(index);
       final Visual visual =
@@ -74,7 +71,6 @@ public class VisualAtom extends Visual {
                   ? new ChildParent(index)
                   : new SelectableChildParent(index, selectable.size()),
               atom,
-              alignments,
               this.visualDepth + 1,
               this.depthScore);
       children.add(visual);
@@ -95,12 +91,10 @@ public class VisualAtom extends Visual {
     }
   }
 
-  public ROMap<String, Alignment> alignments() {
-    return alignments;
-  }
-
-  public Alignment getAlignment(final String alignment) {
-    return alignments.getOpt(alignment);
+  public Alignment findAlignment(final String alignment) {
+    Alignment found = localAlignments.getOpt(alignment);
+    if (found != null) return found;
+    return findParentAlignment(alignment);
   }
 
   @Override
@@ -157,7 +151,9 @@ public class VisualAtom extends Visual {
 
   @Override
   public void getLeafPropertiesForTagsChange(
-          final Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, final TagsChange change) {
+      final Context context,
+      TSList<ROPair<Brick, Brick.Properties>> brickProperties,
+      final TagsChange change) {
     for (Visual child : children) {
       child.getLeafPropertiesForTagsChange(context, brickProperties, change);
     }
@@ -166,7 +162,6 @@ public class VisualAtom extends Visual {
   private void rootInner(
       final Context context,
       final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
     compact = false;
@@ -178,11 +173,8 @@ public class VisualAtom extends Visual {
       this.visualDepth = visualDepth;
       this.depthScore = depthScore + atom.type.depthScore();
     }
-    this.alignments.clear();
-    this.alignments.putAll(alignments);
-    for (final Map.Entry<String, Alignment> alignment : localAlignments.entrySet()) {
-      alignment.getValue().root(context, alignments);
-      this.alignments.putReplaceNull(alignment.getKey(), alignment.getValue());
+    for (final Map.Entry<String, Alignment> alignment : localAlignments) {
+      alignment.getValue().root(context, this);
     }
   }
 
@@ -190,13 +182,12 @@ public class VisualAtom extends Visual {
   public void root(
       final Context context,
       final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
-    rootInner(context, parent, alignments, visualDepth, depthScore);
+    rootInner(context, parent, visualDepth, depthScore);
     for (int index = 0; index < children.size(); ++index) {
       final Visual child = children.get(index);
-      child.root(context, child.parent(), this.alignments, this.visualDepth + 1, this.depthScore);
+      child.root(context, child.parent(), this.visualDepth + 1, this.depthScore);
     }
   }
 
@@ -208,7 +199,7 @@ public class VisualAtom extends Visual {
       Visual child = children.get(i - 1);
       child.uproot(context, root);
     }
-    for (final Map.Entry<String, Alignment> entry : localAlignments.entrySet())
+    for (final Map.Entry<String, Alignment> entry : localAlignments)
       entry.getValue().destroy(context);
   }
 
@@ -220,6 +211,20 @@ public class VisualAtom extends Visual {
     TSSet<String> out = context.getGlobalTags().mut().addAll(atom.getTags()).add(atom.type.id());
     if (compact) out.add(Tags.TAG_COMPACT);
     return out;
+  }
+
+  public Alignment findParentAlignment(String key) {
+    if (this.parent == null) return null;
+    VisualAtom at = this.parent.atomVisual();
+    while (true) {
+      Alignment found = at.localAlignments.getOpt(key);
+      if (found != null) {
+        return found;
+      }
+      if (at.parent == null) break;
+      at = at.parent.atomVisual();
+    }
+    return null;
   }
 
   private class ChildParent extends VisualParent {

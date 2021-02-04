@@ -157,12 +157,12 @@ public class TestAttachments {
 			}
 		};
 		new GeneralTestWizard(syntax,  textAtom)
-				.resize(60)
+				.displayWidth(60)
 				.checkCourseCount(2)
 				.run(context -> {
 					textAtom.visual.getLastBrick(context).addAttachment(context, listener);
 				})
-				.resize(100000)
+				.displayWidth(100000)
 				.checkCourseCount(1)
 				.run(context -> assertThat(lastBrick.value, equalTo(value.visual.lines.get(0).brick)));
 	}

@@ -21,7 +21,7 @@ public interface Text extends DisplayNode {
 	int getConverseAtIndex(final int index);
 
 	@Override
-	default int transverseEdge(final Context context) {
-		return transverse(context) + font().getDescent();
+	default int transverseEdge() {
+		return transverse() + font().getDescent();
 	}
 }

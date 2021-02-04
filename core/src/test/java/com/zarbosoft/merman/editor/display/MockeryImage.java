@@ -14,12 +14,12 @@ public class MockeryImage extends MockeryDisplayNode implements Image {
 	}
 
 	@Override
-	public int converseSpan(final Context context) {
+	public int converseSpan() {
 		return 25;
 	}
 
 	@Override
-	public int transverseSpan(final Context context) {
+	public int transverseSpan() {
 		return 25;
 	}
 }

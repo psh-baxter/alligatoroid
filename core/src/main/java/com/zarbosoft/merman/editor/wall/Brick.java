@@ -3,8 +3,7 @@ package com.zarbosoft.merman.editor.wall;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.display.DisplayNode;
-import com.zarbosoft.merman.editor.visual.Alignment;
-import com.zarbosoft.merman.editor.visual.AlignmentListener;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
@@ -12,13 +11,15 @@ import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
-public abstract class Brick implements AlignmentListener {
+public abstract class Brick  {
   public Course parent;
   public int index;
   TSSet<Attachment> attachments = Context.createSet.get();
   public Style style;
   public Alignment alignment;
-  public int minConverse;
+  /** Used to recalc alignment min when a brick is removed from alignment */
+  protected int preAlignConverse;
+
   public final BrickInterface inter;
 
   protected Brick(final BrickInterface inter) {
@@ -27,7 +28,8 @@ public abstract class Brick implements AlignmentListener {
 
   public abstract int getConverse(Context context);
 
-  public abstract int converseEdge(final Context context);
+  public abstract int converseEdge();
+  public abstract int converseSpan();
 
   public abstract DisplayNode getDisplayNode();
 
@@ -37,14 +39,8 @@ public abstract class Brick implements AlignmentListener {
 
   public abstract Properties properties(final Context context, final Style style);
 
-  @Override
-  public final void align(final Context context) {
-    changed(context);
-  }
-
-  @Override
-  public final int getConverseLowerBound(final Context context) {
-    return minConverse;
+  public final int getPreAlignConverse() {
+    return preAlignConverse;
   }
 
   /**
@@ -195,7 +191,7 @@ public abstract class Brick implements AlignmentListener {
 
   protected void destroyed(final Context context) {
     inter.brickDestroyed(context);
-    if (alignment != null) alignment.removeListener(context, this);
+    if (alignment != null) alignment.removeBrick(context, this);
   }
 
   public void destroy(final Context context) {

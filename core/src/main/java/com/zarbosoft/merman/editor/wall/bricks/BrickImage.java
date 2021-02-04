@@ -3,14 +3,11 @@ package com.zarbosoft.merman.editor.wall.bricks;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Image;
-import com.zarbosoft.merman.editor.visual.AlignmentListener;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.style.Style;
 
-import java.nio.file.Paths;
-
-public class BrickImage extends Brick implements AlignmentListener {
+public class BrickImage extends Brick {
 	private final Image image;
 	private Style style;
 
@@ -23,11 +20,7 @@ public class BrickImage extends Brick implements AlignmentListener {
 	@Override
 	public void tagsChanged(final Context context) {
 		this.style = context.getStyle(inter.getTags(context).ro());
-		if (alignment != null)
-			alignment.removeListener(context, this);
-		alignment = inter.getAlignment(style);
-		if (alignment != null)
-			alignment.addListener(context, this);
+		alignment = inter.findAlignment(style);
 		image.setImage(context, style.image);
 		image.rotate(context, style.rotate);
 		changed(context);
@@ -36,33 +29,31 @@ public class BrickImage extends Brick implements AlignmentListener {
 	public Properties properties(final Context context, final Style style) {
 		return new Properties(
 				style.split,
-				(int) image.transverseSpan(context),
+				(int) image.transverseSpan(),
 				(int) 0,
-				inter.getAlignment(style),
-				(int) image.converseSpan(context)
+				inter.findAlignment(style),
+				(int) image.converseSpan()
 		);
 	}
 
 	@Override
 	public void allocateTransverse(final Context context, final int ascent, final int descent) {
-		image.setTransverse(context, ascent, false);
+		image.setTransverse(ascent, false);
 	}
 
 	@Override
-	public void destroyed(final Context context) {
-		super.destroyed(context);
-		if (alignment != null)
-			alignment.removeListener(context, this);
+	public int converseEdge() {
+		return image.converseEdge();
 	}
 
 	@Override
-	public int converseEdge(final Context context) {
-		return image.converseEdge(context);
+	public int converseSpan() {
+		return image.converseSpan();
 	}
 
 	@Override
 	public int getConverse(final Context context) {
-		return image.converse(context);
+		return image.converse();
 	}
 
 	@Override
@@ -72,7 +63,7 @@ public class BrickImage extends Brick implements AlignmentListener {
 
 	@Override
 	public void setConverse(final Context context, final int minConverse, final int converse) {
-		this.minConverse = minConverse;
-		image.setConverse(context, converse, false);
+		this.preAlignConverse = minConverse;
+		image.setConverse(converse, false);
 	}
 }

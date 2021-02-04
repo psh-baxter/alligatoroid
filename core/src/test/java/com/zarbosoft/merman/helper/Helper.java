@@ -14,6 +14,7 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
+import com.zarbosoft.merman.syntax.Direction;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.syntax.back.BackAtomSpec;
@@ -235,7 +236,7 @@ public class Helper {
             contextConfig,
             syntax,
             doc,
-            new MockeryDisplay(),
+            new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
             addIteration,
             flushIteration,
             new ClipboardEngine() {

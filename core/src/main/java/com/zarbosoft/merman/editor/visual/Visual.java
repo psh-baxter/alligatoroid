@@ -39,6 +39,12 @@ public abstract class Visual {
 
   public abstract void expand(Context context);
 
+  /**
+   * Returns bricks in order because the expansion algorithm tests expandability in courses in order
+   * @param context
+   * @param brickProperties
+   * @param change
+   */
   public abstract void getLeafPropertiesForTagsChange(
           Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, TagsChange change);
 
@@ -53,11 +59,10 @@ public abstract class Visual {
   public abstract void uproot(Context context, Visual root);
 
   public void root(
-      final Context context,
-      final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
-      final int depth,
-      final int depthScore) {
+          final Context context,
+          final VisualParent parent,
+          final int depth,
+          final int depthScore) {
     this.visualDepth = depth;
   }
 

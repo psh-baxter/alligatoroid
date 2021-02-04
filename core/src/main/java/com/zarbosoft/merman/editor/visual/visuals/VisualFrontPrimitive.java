@@ -11,7 +11,7 @@ import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.SelectionState;
 import com.zarbosoft.merman.editor.display.Font;
-import com.zarbosoft.merman.editor.visual.Alignment;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
@@ -29,7 +29,6 @@ import com.zarbosoft.merman.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -334,7 +333,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     for (int i = lines.size() - 1; i >= 0; --i) {
       final Line line = lines.get(i);
       if (line.brick == null) continue;
-      final int edge = line.brick.converseEdge(context);
+      final int edge = line.brick.converseEdge();
       if (!rebreak && edge > context.edge) {
         rebreak = true;
       }
@@ -377,12 +376,11 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   @Override
   public void root(
-      final Context context,
-      final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
-      final int visualDepth,
-      final int depthScore) {
-    super.root(context, parent, alignments, visualDepth, depthScore);
+          final Context context,
+          final VisualParent parent,
+          final int visualDepth,
+          final int depthScore) {
+    super.root(context, parent, visualDepth, depthScore);
     if (canExpand) context.foreground.splitPrimitives.remove(this);
     // Force expand
     final StringBuilder aggregate = new StringBuilder();
@@ -488,7 +486,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         final Style style =
             j == 0 ? brickStyle.firstStyle : j == i ? brickStyle.hardStyle : brickStyle.softStyle;
         font = style.getFont(context);
-        final Alignment alignment = atom.getAlignment(style.alignment);
+        final Alignment alignment = atom.findAlignment(style.alignment);
         if (alignment == null) converse = 0;
         else converse = alignment.converse;
       } else {
@@ -508,7 +506,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         line.setIndex(context, j);
         final Style style = brickStyle.softStyle;
         final Font font = style.getFont(context);
-        final Alignment alignment = atom.getAlignment(style.alignment);
+        final Alignment alignment = atom.findAlignment(style.alignment);
         final int converse;
         if (alignment == null) converse = 0;
         else converse = alignment.converse;
@@ -634,7 +632,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       for (int i = lines.size() - 1; i >= 0; --i) {
         final Line line = lines.get(i);
         if (line.brick == null) continue;
-        final int converseEdge = line.brick.converseEdge(context);
+        final int converseEdge = line.brick.converseEdge();
         if (converseEdge <= context.edge
             && converseEdge * context.retryExpandFactor >= context.edge) go = false;
         if (line.hard) {
@@ -1449,8 +1447,8 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
-    public Alignment getAlignment(final Style style) {
-      return parent.atomVisual().getAlignment(style.alignment);
+    public Alignment findAlignment(final Style style) {
+      return parent.atomVisual().findAlignment(style.alignment);
     }
 
     @Override

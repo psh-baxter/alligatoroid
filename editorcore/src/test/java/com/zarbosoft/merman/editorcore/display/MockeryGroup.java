@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editorcore.display;
 
-import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Group;
 
@@ -42,13 +41,13 @@ public class MockeryGroup extends MockeryDisplayNode implements Group {
 	}
 
 	@Override
-	public int converseSpan(final Context context) {
+	public int converseSpan() {
 		return nodes.stream().mapToInt(n -> n.converseEdge(context)).max().orElse(0);
 	}
 
 	@Override
-	public int transverseSpan(final Context context) {
-		return nodes.stream().mapToInt(n -> n.transverseEdge(context)).max().orElse(0);
+	public int transverseSpan() {
+		return nodes.stream().mapToInt(n -> n.transverseEdge()).max().orElse(0);
 	}
 
 	public int count() {

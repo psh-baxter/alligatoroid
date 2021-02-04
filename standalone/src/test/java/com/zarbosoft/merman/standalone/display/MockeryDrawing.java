@@ -9,12 +9,12 @@ public class MockeryDrawing extends MockeryDisplayNode implements Drawing {
 	private Vector size = new Vector(0, 0);
 
 	@Override
-	public int converseSpan(final Context context) {
+	public int converseSpan() {
 		return size.converse;
 	}
 
 	@Override
-	public int transverseSpan(final Context context) {
+	public int transverseSpan() {
 		return size.transverse;
 	}
 

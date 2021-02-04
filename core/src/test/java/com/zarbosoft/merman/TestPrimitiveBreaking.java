@@ -115,7 +115,7 @@ public class TestPrimitiveBreaking {
             new TreeBuilder(PrimitiveSyntax.primitive).add("value", "nyibhye").build())
         .checkTextBrick(0, 1, "oret")
         .checkTextBrick(0, 3, "nyibhye")
-        .resize(50)
+        .displayWidth(50)
         .checkTextBrick(0, 1, "oret")
         .checkTextBrick(1, 1, "nyibh")
         .checkTextBrick(2, 0, "ye");
@@ -133,7 +133,7 @@ public class TestPrimitiveBreaking {
                 .build())
         .checkTextBrick(0, 1, "oret")
         .checkTextBrick(0, 2, "nyibhye")
-        .resize(90)
+        .displayWidth(90)
         .checkTextBrick(0, 1, "oret")
         .checkTextBrick(0, 2, "nyibh")
         .checkTextBrick(1, 0, "ye");
@@ -144,7 +144,7 @@ public class TestPrimitiveBreaking {
     new GeneralTestWizard(
             PrimitiveSyntax.syntax,
              new TreeBuilder(PrimitiveSyntax.quoted).add("value", "123456").build())
-        .resize(50)
+        .displayWidth(50)
         .checkCourseCount(2);
   }
 
@@ -153,7 +153,7 @@ public class TestPrimitiveBreaking {
     new GeneralTestWizard(
             PrimitiveSyntax.syntax,
              new TreeBuilder(PrimitiveSyntax.primitive).add("value", "1234").build())
-        .resize(30)
+        .displayWidth(30)
         .checkCourseCount(1);
   }
 }

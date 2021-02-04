@@ -100,7 +100,7 @@ public class BorderAttachment {
         startConverse,
         startTransverse,
         startTransverse + startTransverseSpan,
-        last.converseEdge(context),
+        last.converseEdge(),
         endTransverse,
         endTransverse + endTransverseSpan);
   }

@@ -2,13 +2,11 @@ package com.zarbosoft.merman.editor.visual.visuals;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
-import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -25,7 +23,7 @@ public class VisualGroup extends Visual {
       final int visualDepth,
       final int depthScore) {
     super(visualDepth);
-    root(context, parent, parent.atomVisual().alignments(), visualDepth, depthScore);
+    root(context, parent, visualDepth, depthScore);
   }
 
   protected VisualGroup(final int visualDepth) {
@@ -163,16 +161,15 @@ public class VisualGroup extends Visual {
 
   @Override
   public void root(
-      final Context context,
-      final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
-      final int depth,
-      final int depthScore) {
-    super.root(context, parent, alignments, depth, depthScore);
+          final Context context,
+          final VisualParent parent,
+          final int depth,
+          final int depthScore) {
+    super.root(context, parent, depth, depthScore);
     this.parent = parent;
     for (int index = 0; index < children.size(); ++index) {
       final Visual child = children.get(index);
-      child.root(context, child.parent(), alignments, depth + 1, depthScore);
+      child.root(context, child.parent(), depth + 1, depthScore);
     }
   }
 

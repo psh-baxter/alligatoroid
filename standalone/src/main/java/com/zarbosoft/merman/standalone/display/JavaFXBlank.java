@@ -8,6 +8,10 @@ import javafx.scene.layout.Region;
 public class JavaFXBlank extends JavaFXNode implements Blank {
 	Region node = new Region();
 
+	protected JavaFXBlank(JavaFXDisplay display) {
+		super(display);
+	}
+
 	@Override
 	protected Node node() {
 		return node;

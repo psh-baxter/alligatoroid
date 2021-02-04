@@ -8,7 +8,7 @@ import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.SelectionState;
-import com.zarbosoft.merman.editor.visual.Alignment;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
@@ -22,7 +22,6 @@ import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -86,7 +85,6 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   public void root(
       final Context context,
       final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
     this.parent = parent;
@@ -102,7 +100,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
         if (body == null) {
           coreSet(context, atomGet());
           context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
-        } else body.root(context, new NestedParent(), alignments, visualDepth + 1, depthScore);
+        } else body.root(context, new NestedParent(), visualDepth + 1, depthScore);
       }
     }
   }
@@ -169,7 +167,9 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
   @Override
   public void getLeafPropertiesForTagsChange(
-          final Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, final TagsChange change) {
+      final Context context,
+      TSList<ROPair<Brick, Brick.Properties>> brickProperties,
+      final TagsChange change) {
     body.getLeafPropertiesForTagsChange(context, brickProperties, change);
   }
 
@@ -201,8 +201,8 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
                   }
 
                   @Override
-                  public Alignment getAlignment(final Style style) {
-                    return parent.atomVisual().getAlignment(style.alignment);
+                  public Alignment findAlignment(final Style style) {
+                    return parent.atomVisual().findAlignment(style.alignment);
                   }
 
                   @Override
@@ -284,7 +284,8 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
       border.setFirst(context, first);
       border.setLast(context, base.body.getLastBrick(context));
       context.addActions(
-          this.actions = TSList.of(
+          this.actions =
+              TSList.of(
                   new AtomActionEnter(base),
                   new AtomActionExit(base),
                   new AtomActionNext(base),
@@ -393,13 +394,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   private void coreSet(final Context context, final Atom data) {
     if (body != null) body.uproot(context, null);
     this.body =
-        (VisualAtom)
-            data.ensureVisual(
-                context,
-                new NestedParent(),
-                parent.atomVisual().alignments(),
-                visualDepth + 1,
-                depthScore());
+        (VisualAtom) data.ensureVisual(context, new NestedParent(), visualDepth + 1, depthScore());
     if (selection != null) selection.nudge(context);
   }
 

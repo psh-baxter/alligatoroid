@@ -35,7 +35,7 @@ public class Obbox {
     final Vector wh =
         new Vector(context.edge + style.padding * 2 + buffer * 2, ete - st + buffer * 2);
     drawing.resize(context, wh);
-    drawing.setPosition(context, new Vector(-(buffer + style.padding), st - buffer), false);
+    drawing.setPosition(new Vector(-(buffer + style.padding), st - buffer), false);
     final Drawing.DrawingContext gc = drawing.begin(context);
     gc.translate(buffer + style.padding, buffer);
     ste -= st;

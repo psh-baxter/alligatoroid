@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.visual.Alignment;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.editor.visual.VisualParent;
@@ -11,7 +11,6 @@ import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.style.Style;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -109,12 +108,11 @@ public class VisualSymbol extends Visual
 
   @Override
   public void root(
-      final Context context,
-      final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
-      final int visualDepth,
-      final int depthScore) {
-    super.root(context, parent, alignments, visualDepth, depthScore);
+          final Context context,
+          final VisualParent parent,
+          final int visualDepth,
+          final int depthScore) {
+    super.root(context, parent, visualDepth, depthScore);
     expand(context);
   }
 
@@ -145,8 +143,8 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public Alignment getAlignment(final Style style) {
-    return parent.atomVisual().getAlignment(style.alignment);
+  public Alignment findAlignment(final Style style) {
+    return parent.atomVisual().findAlignment(style.alignment);
   }
 
   @Override

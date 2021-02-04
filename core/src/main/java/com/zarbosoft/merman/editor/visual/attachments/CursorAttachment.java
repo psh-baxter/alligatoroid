@@ -16,19 +16,19 @@ public class CursorAttachment {
         @Override
         public void setTransverse(final Context context, final int transverse) {
           startTransverse = transverse;
-          place(context);
+          place();
         }
 
         @Override
         public void setConverse(final Context context, final int converse) {
           startConverse = converse;
-          place(context);
+          place();
         }
 
         @Override
         public void setTransverseSpan(final Context context, final int ascent, final int descent) {
           transverseAscent = ascent;
-          place(context);
+          place();
         }
 
         @Override
@@ -39,11 +39,10 @@ public class CursorAttachment {
       };
   private int index;
 
-  private void place(final Context context) {
+  private void place() {
     if (offset == null) return;
     drawing.setPosition(
-        context,
-        new Vector(
+            new Vector(
                 startConverse + brick.getConverseOffset(index), startTransverse + transverseAscent)
             .add(offset),
         false);
@@ -70,7 +69,7 @@ public class CursorAttachment {
       redraw(context);
     }
     this.index = index;
-    place(context);
+    place();
   }
 
   private void redraw(final Context context) {

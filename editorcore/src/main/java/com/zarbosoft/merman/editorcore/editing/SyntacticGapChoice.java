@@ -49,7 +49,7 @@ public abstract class SyntacticGapChoice extends TwoColumnChoice {
     final Blank space = context.display.blank();
     space.setConverseSpan(context, 8);
     previewLayout.add(space);
-    previewLayout.layout(context);
+    previewLayout.layout();
 
     final Text text = context.display.text();
     text.setColor(context, lineStyle.color);

@@ -3,13 +3,12 @@ package com.zarbosoft.merman.editor.wall.bricks;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Blank;
 import com.zarbosoft.merman.editor.display.DisplayNode;
-import com.zarbosoft.merman.editor.visual.AlignmentListener;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.style.Style;
 
-public class BrickSpace extends Brick implements AlignmentListener {
+public class BrickSpace extends Brick {
 	private int converse = 0;
 	private final Blank visual;
 
@@ -22,17 +21,18 @@ public class BrickSpace extends Brick implements AlignmentListener {
 	@Override
 	public void tagsChanged(final Context context) {
 		this.style = context.getStyle(inter.getTags(context).ro());
-		if (alignment != null)
-			alignment.removeListener(context, this);
-		alignment = inter.getAlignment(style);
-		if (alignment != null)
-			alignment.addListener(context, this);
+		alignment = inter.findAlignment(style);
 		changed(context);
 	}
 
 	@Override
-	public int converseEdge(final Context context) {
-		return Math.max(Math.min(converse + style.space, context.edge), converse);
+	public int converseEdge() {
+		return converse + style.space;
+	}
+
+	@Override
+	public int converseSpan() {
+		return style.space;
 	}
 
 	@Override
@@ -53,21 +53,14 @@ public class BrickSpace extends Brick implements AlignmentListener {
 
 	@Override
 	public void setConverse(final Context context, final int minConverse, final int converse) {
-		this.minConverse = minConverse;
+		this.preAlignConverse = minConverse;
 		this.converse = converse;
-		visual.setPosition(context, new Vector(converse, 0), false);
+		visual.setPosition(new Vector(converse, 0), false);
 	}
 
 	@Override
 	public void allocateTransverse(final Context context, final int ascent, final int descent) {
 
-	}
-
-	@Override
-	public void destroyed(final Context context) {
-		super.destroyed(context);
-		if (alignment != null)
-			alignment.removeListener(context, this);
 	}
 
 	@Override

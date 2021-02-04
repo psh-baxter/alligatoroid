@@ -7,6 +7,7 @@ import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.editor.display.derived.CLayout;
 import com.zarbosoft.merman.editor.display.derived.ColumnarTableLayout;
 import com.zarbosoft.merman.editor.display.derived.RowLayout;
+import com.zarbosoft.merman.syntax.Direction;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
@@ -18,13 +19,13 @@ public class TestDisplayDerived {
 
 	@Test
 	public void testColumnarTableLayout() {
-		final MockeryDisplay display = new MockeryDisplay();
+		final MockeryDisplay display = new MockeryDisplay(Direction.RIGHT, Direction.DOWN);
 		final ColumnarTableLayout layout = new ColumnarTableLayout(display, 35);
 		{
 			final Group leftGroup = display.group();
 			final Text left = display.text();
 			left.setText(null, "1");
-			left.setTransverse(null, 8);
+			left.setTransverse(8);
 			leftGroup.add(left);
 			final Text right = display.text();
 			right.setText(null, "aaa");
@@ -51,7 +52,7 @@ public class TestDisplayDerived {
 			right.setText(null, "dddd");
 			layout.add(TSList.of(left, right));
 		}
-		layout.layout(null);
+		layout.layout();
 		int index = 0;
 		for (final Pair<Integer, Integer> pair : TSList.of(new Pair<>(0, 0),
 				new Pair<>(30, 10),
@@ -64,11 +65,11 @@ public class TestDisplayDerived {
 		)) {
 			final int index2 = index++;
 			assertThat(String.format("for index %s, converse", index2),
-					((MockeryGroup) layout.group).get(index2).converse(null),
+					((MockeryGroup) layout.group).get(index2).converse(),
 					equalTo(pair.first)
 			);
 			assertThat(String.format("for index %s, transverse", index2),
-					((MockeryGroup) layout.group).get(index2).transverse(null),
+					((MockeryGroup) layout.group).get(index2).transverse(),
 					equalTo(pair.second)
 			);
 		}
@@ -76,13 +77,13 @@ public class TestDisplayDerived {
 
 	@Test
 	public void testCLayout() {
-		final MockeryDisplay display = new MockeryDisplay();
+		final MockeryDisplay display = new MockeryDisplay(Direction.RIGHT, Direction.DOWN);
 		final CLayout layout = new CLayout(display);
 		{
 			final Group itemGroup = display.group();
 			final Text item = display.text();
 			item.setText(null, "dog");
-			item.setTransverse(null, 8);
+			item.setTransverse(8);
 			itemGroup.add(item);
 			layout.add(itemGroup);
 		}
@@ -95,7 +96,7 @@ public class TestDisplayDerived {
 			final Group itemGroup = display.group();
 			final Text item = display.text();
 			item.setText(null, "9");
-			item.setTransverse(null, 8);
+			item.setTransverse(8);
 			itemGroup.add(item);
 			layout.add(itemGroup);
 		}
@@ -104,7 +105,7 @@ public class TestDisplayDerived {
 			item.setText(null, "apple");
 			layout.add(item);
 		}
-		layout.layout(null);
+		layout.layout();
 		int index = 0;
 		for (final Pair<Integer, Integer> pair : TSList.of(new Pair<>(0, 0),
 				new Pair<>(30, 0),
@@ -113,11 +114,11 @@ public class TestDisplayDerived {
 		)) {
 			final int index2 = index++;
 			assertThat(String.format("for index %s, converse", index2),
-					((MockeryGroup) layout.group).get(index2).converse(null),
+					((MockeryGroup) layout.group).get(index2).converse(),
 					equalTo(pair.first)
 			);
 			assertThat(String.format("for index %s, transverse", index2),
-					((MockeryGroup) layout.group).get(index2).transverse(null),
+					((MockeryGroup) layout.group).get(index2).transverse(),
 					equalTo(pair.second)
 			);
 		}
@@ -125,13 +126,13 @@ public class TestDisplayDerived {
 
 	@Test
 	public void testRowLayout() {
-		final MockeryDisplay display = new MockeryDisplay();
+		final MockeryDisplay display = new MockeryDisplay(Direction.RIGHT, Direction.DOWN);
 		final RowLayout layout = new RowLayout(display);
 		{
 			final Group itemGroup = display.group();
 			final Text item = display.text();
 			item.setText(null, "dog");
-			item.setTransverse(null, 8);
+			item.setTransverse(8);
 			itemGroup.add(item);
 			layout.add(itemGroup);
 		}
@@ -144,7 +145,7 @@ public class TestDisplayDerived {
 			final Group itemGroup = display.group();
 			final Text item = display.text();
 			item.setText(null, "9");
-			item.setTransverse(null, 8);
+			item.setTransverse(8);
 			itemGroup.add(item);
 			layout.add(itemGroup);
 		}
@@ -153,7 +154,7 @@ public class TestDisplayDerived {
 			item.setText(null, "apple");
 			layout.add(item);
 		}
-		layout.layout(null);
+		layout.layout();
 		int index = 0;
 		for (final Pair<Integer, Integer> pair : TSList.of(new Pair<>(0, 0),
 				new Pair<>(30, 10),
@@ -162,11 +163,11 @@ public class TestDisplayDerived {
 		)) {
 			final int index2 = index++;
 			assertThat(String.format("for index %s, converse", index2),
-					((MockeryGroup) layout.group).get(index2).converse(null),
+					((MockeryGroup) layout.group).get(index2).converse(),
 					equalTo(pair.first)
 			);
 			assertThat(String.format("for index %s, transverse", index2),
-					((MockeryGroup) layout.group).get(index2).transverse(null),
+					((MockeryGroup) layout.group).get(index2).transverse(),
 					equalTo(pair.second)
 			);
 		}

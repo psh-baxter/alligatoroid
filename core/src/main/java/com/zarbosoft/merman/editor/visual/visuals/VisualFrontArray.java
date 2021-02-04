@@ -8,7 +8,7 @@ import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.SelectionState;
-import com.zarbosoft.merman.editor.visual.Alignment;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
@@ -24,7 +24,6 @@ import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -44,7 +43,6 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       final Context context,
       final VisualParent parent,
       final ValueArray value,
-      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
     super(visualDepth);
@@ -155,12 +153,11 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
         };
     value.addListener(dataListener);
     value.visual = this;
-    root(context, parent, alignments, depthScore, depthScore);
+    root(context, parent, depthScore, depthScore);
   }
 
   private void coreChange(
       final Context context, final int index, final int remove, final ROList<Atom> add) {
-    final ROMap<String, Alignment> alignments = parent.atomVisual().alignments();
     int visualIndex = index;
     int visualRemove = remove;
     if (!getSeparator().isEmpty()) {
@@ -183,11 +180,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               group.add(
                   context,
                   fix.createVisual(
-                      context,
-                      group.createParent(fixIndex),
-                      alignments,
-                      group.visualDepth + 1,
-                      depthScore()));
+                      context, group.createParent(fixIndex), group.visualDepth + 1, depthScore()));
             }
             if (atomVisual().compact) group.compact(context);
             super.add(context, group, addAt);
@@ -202,19 +195,11 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
           group.add(
               context,
               fix.createVisual(
-                  context,
-                  group.createParent(groupIndex++),
-                  alignments,
-                  group.visualDepth + 1,
-                  depthScore()));
+                  context, group.createParent(groupIndex++), group.visualDepth + 1, depthScore()));
         final VisualAtom nodeVisual =
             (VisualAtom)
                 atom.ensureVisual(
-                    context,
-                    group.createParent(groupIndex++),
-                    alignments,
-                    group.visualDepth + 2,
-                    depthScore());
+                    context, group.createParent(groupIndex++), group.visualDepth + 2, depthScore());
         group.add(
             context,
             new Visual(group.visualDepth + 1) {
@@ -259,8 +244,9 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
 
               @Override
               public void getLeafPropertiesForTagsChange(
-                      final Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, final TagsChange change) {
-              }
+                  final Context context,
+                  TSList<ROPair<Brick, Brick.Properties>> brickProperties,
+                  final TagsChange change) {}
 
               @Override
               public void uproot(final Context context, final Visual root) {
@@ -271,11 +257,10 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               public void root(
                   final Context context,
                   final VisualParent parent,
-                  final ROMap<String, Alignment> alignments,
                   final int depth,
                   final int depthScore) {
-                super.root(context, parent, alignments, depth, depthScore);
-                nodeVisual.root(context, parent, alignments, depth + 1, depthScore);
+                super.root(context, parent, depth, depthScore);
+                nodeVisual.root(context, parent, depth + 1, depthScore);
               }
 
               @Override
@@ -287,11 +272,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
           group.add(
               context,
               fix.createVisual(
-                  context,
-                  group.createParent(groupIndex++),
-                  alignments,
-                  group.visualDepth + 1,
-                  depthScore()));
+                  context, group.createParent(groupIndex++), group.visualDepth + 1, depthScore()));
         if (atomVisual().compact) group.compact(context);
         super.add(context, group, addIndex++);
       }
@@ -356,8 +337,8 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               }
 
               @Override
-              public Alignment getAlignment(final Style style) {
-                return parent.atomVisual().getAlignment(style.alignment);
+              public Alignment findAlignment(final Style style) {
+                return parent.atomVisual().findAlignment(style.alignment);
               }
 
               @Override
@@ -394,7 +375,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     }
   }
 
-    @Override
+  @Override
   public Brick getFirstBrick(final Context context) {
     if (empty != null) return empty;
     if (ellipsize(context)) return ellipsis;
@@ -443,22 +424,21 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
   public void root(
       final Context context,
       final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
       final int visualDepth,
       final int depthScore) {
     this.parent = parent;
     if (value.data.isEmpty()) {
-      super.root(context, parent, alignments, visualDepth, depthScore);
+      super.root(context, parent, visualDepth, depthScore);
       if (empty == null) context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
     } else if (ellipsize(context)) {
       if (!children.isEmpty()) {
         remove(context, 0, children.size());
       }
-      super.root(context, parent, alignments, visualDepth, depthScore);
+      super.root(context, parent, visualDepth, depthScore);
       if (ellipsis == null) context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
     } else {
       if (ellipsis != null) ellipsis.destroy(context);
-      super.root(context, parent, alignments, visualDepth, depthScore);
+      super.root(context, parent, visualDepth, depthScore);
       if (children.isEmpty()) {
         coreChange(context, 0, 0, value.data);
         context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
@@ -494,8 +474,8 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
                   }
 
                   @Override
-                  public Alignment getAlignment(final Style style) {
-                    return parent.atomVisual().getAlignment(style.alignment);
+                  public Alignment findAlignment(final Style style) {
+                    return parent.atomVisual().findAlignment(style.alignment);
                   }
 
                   @Override
@@ -546,8 +526,8 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
 
   public static class ArrayCursor extends Cursor {
     public final VisualFrontArray self;
-      private final ROList<Action> actions;
-      public int beginIndex;
+    private final ROList<Action> actions;
+    public int beginIndex;
     public int endIndex;
     public boolean leadFirst;
     BorderAttachment border;
@@ -562,19 +542,21 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       border = new BorderAttachment(context, getBorderStyle(context).obbox);
       this.leadFirst = leadFirst;
       setRange(context, start, end);
-      context.addActions(this.actions = TSList.of(
-              new ActionEnter(),
-              new ActionExit(),
-              new ActionNext(),
-              new ActionPrevious(),
-              new ActionNextElement(),
-              new ActionPreviousElement(),
-              new ActionCopy(),
-              new ActionGatherNext(),
-              new ActionReleaseNext(),
-              new ActionGatherPrevious(),
-              new ActionReleasePrevious(),
-              new ActionWindow()));
+      context.addActions(
+          this.actions =
+              TSList.of(
+                  new ActionEnter(),
+                  new ActionExit(),
+                  new ActionNext(),
+                  new ActionPrevious(),
+                  new ActionNextElement(),
+                  new ActionPreviousElement(),
+                  new ActionCopy(),
+                  new ActionGatherNext(),
+                  new ActionReleaseNext(),
+                  new ActionGatherPrevious(),
+                  new ActionReleasePrevious(),
+                  new ActionWindow()));
     }
 
     public void setRange(final Context context, final int begin, final int end) {
@@ -645,7 +627,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       return self.children.get(beginIndex);
     }
 
-      @Override
+    @Override
     public SelectionState saveState() {
       return new ArraySelectionState(self.value, leadFirst, beginIndex, endIndex);
     }

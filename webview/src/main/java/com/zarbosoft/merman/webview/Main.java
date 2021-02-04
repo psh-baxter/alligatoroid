@@ -104,7 +104,7 @@ public class Main {
                         new SymbolSpaceSpec(), null, "", TSSet.of("break").ro())))
             .build();
     AlignmentSpec blockAlignment =
-        new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(baseAlign, indentPx));
+        new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(baseAlign, indentPx, false));
     BackArraySpec statementBackArray =
         new BackArraySpec(
             new BaseBackSimpleArraySpec.Config(

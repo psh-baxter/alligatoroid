@@ -22,7 +22,7 @@ public class BrickLine extends BrickText {
         line.index == 0 ? style.split : true,
         font.getAscent(),
         font.getDescent(),
-        inter.getAlignment(style),
+        inter.findAlignment(style),
         font.getWidth(text.text()));
   }
 

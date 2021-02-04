@@ -8,14 +8,12 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.editor.serialization.WriteStateBack;
-import com.zarbosoft.merman.editor.visual.Alignment;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -69,15 +67,14 @@ public class Atom {
   }
 
   public Visual ensureVisual(
-      final Context context,
-      final VisualParent parent,
-      final ROMap<String, Alignment> alignments,
-      final int depth,
-      final int depthScore) {
+          final Context context,
+          final VisualParent parent,
+          final int depth,
+          final int depthScore) {
     if (visual != null) {
-      visual.root(context, parent, alignments, depth, depthScore);
+      visual.root(context, parent, depth, depthScore);
     } else {
-      this.visual = new VisualAtom(context, parent, this, alignments, depth, depthScore);
+      this.visual = new VisualAtom(context, parent, this, depth, depthScore);
     }
     return visual;
   }
