@@ -56,7 +56,7 @@ public class StackReader {
             stack.peekLast().value(new String(b, StandardCharsets.UTF_8));
           }
         };
-    Reader.stream(reader, stream).forEach(b -> {});
+    Reader.feed(reader, stream);
     return (List) top.get();
   }
 

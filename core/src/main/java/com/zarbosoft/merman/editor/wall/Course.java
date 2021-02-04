@@ -22,24 +22,28 @@ import java.util.PriorityQueue;
 import java.util.Set;
 
 import static com.zarbosoft.rendaw.common.Common.isOrdered;
-import static com.zarbosoft.rendaw.common.Common.last;
-import static com.zarbosoft.rendaw.common.Common.stream;
 
 public class Course {
-  public int index;
+  private static final Comparator<VisualAtom> compactComparator =
+      new ChainComparator<VisualAtom>()
+          .greaterFirst(VisualAtom::spacePriority)
+          .lesserFirst(a -> a.depthScore)
+          .build();
+  private static final Comparator<VisualAtom> expandComparator = compactComparator.reversed();
   final Group visual;
   final Group brickVisual;
+  public int index;
   public Wall parent;
-  private IterationPlaceTask idlePlace;
-  private IterationCompactTask idleCompact;
-  private IterationExpandTask idleExpand;
   public int transverseStart;
   public int ascent = 0;
   public int descent = 0;
   public TSList<Brick> children = new TSList<>();
-  int lastExpandCheckConverse = 0;
   public Alignment alignment;
   public Brick alignmentBrick;
+  int lastExpandCheckConverse = 0;
+  private IterationPlaceTask idlePlace;
+  private IterationCompactTask idleCompact;
+  private IterationExpandTask idleExpand;
 
   Course(final Context context, final int transverseStart) {
     visual = context.display.group();
@@ -47,6 +51,30 @@ public class Course {
     visual.add(0, brickVisual);
     this.transverseStart = transverseStart;
     visual.setTransverse(transverseStart);
+  }
+
+  /**
+   * When adjusting bricks in a course, calculate the state after the current brick and return this
+   * brick's new converse
+   *
+   * @param calcContext
+   * @param converse
+   * @param brick
+   * @param properties
+   * @return converse, minConverse (without alignment)
+   */
+  private static ROPair<Integer, Integer> calculateNextBrickAdvance(
+      CalculateCourseConverseContext calcContext, Brick brick, Brick.Properties properties) {
+    int out = calcContext.converse;
+    int out1 = calcContext.preAlignConverse;
+    if (calcContext.alignment == null && properties.alignment != null) {
+      calcContext.alignment = properties.alignment;
+      calcContext.alignedBrick = brick;
+      if (properties.alignment.converse > out) out = properties.alignment.converse;
+    }
+    calcContext.preAlignConverse += properties.converseSpan;
+    calcContext.converse = out + properties.converseSpan;
+    return new ROPair<>(out, out1);
   }
 
   public int transverseEdge() {
@@ -315,13 +343,6 @@ public class Course {
     }
   }
 
-  private static final Comparator<VisualAtom> compactComparator =
-      new ChainComparator<VisualAtom>()
-          .greaterFirst(VisualAtom::spacePriority)
-          .lesserFirst(a -> a.depthScore)
-          .build();
-  private static final Comparator<VisualAtom> expandComparator = compactComparator.reversed();
-
   class IterationCompactTask extends IterationTask {
     private final Context context;
     private final Set<VisualAtom> skip = new HashSet<>();
@@ -368,30 +389,6 @@ public class Course {
     protected void destroyed() {
       idleCompact = null;
     }
-  }
-
-  /**
-   * When adjusting bricks in a course, calculate the state after the current brick and return this
-   * brick's new converse
-   *
-   * @param calcContext
-   * @param converse
-   * @param brick
-   * @param properties
-   * @return converse, minConverse (without alignment)
-   */
-  private static ROPair<Integer, Integer> calculateNextBrickAdvance(
-      CalculateCourseConverseContext calcContext, Brick brick, Brick.Properties properties) {
-    int out = calcContext.converse;
-    int out1 = calcContext.preAlignConverse;
-    if (calcContext.alignment == null && properties.alignment != null) {
-      calcContext.alignment = properties.alignment;
-      calcContext.alignedBrick = brick;
-      if (properties.alignment.converse > out) out = properties.alignment.converse;
-    }
-    calcContext.preAlignConverse += properties.converseSpan;
-    calcContext.converse = out + properties.converseSpan;
-    return new ROPair<>(out, out1);
   }
 
   class IterationExpandTask extends IterationTask {

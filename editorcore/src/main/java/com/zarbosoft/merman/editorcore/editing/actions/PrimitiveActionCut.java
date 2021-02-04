@@ -7,8 +7,10 @@ import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 
-@Action.StaticID(id = "cut")
 public class PrimitiveActionCut extends EditAction {
+    public String id() {
+        return "cut";
+    }
   private final VisualFrontPrimitive.PrimitiveCursor cursor;
 
   public PrimitiveActionCut(EditingExtension edit, VisualFrontPrimitive.PrimitiveCursor cursor) {

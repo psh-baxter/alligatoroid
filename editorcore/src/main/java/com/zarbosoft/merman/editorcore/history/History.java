@@ -9,6 +9,7 @@ import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.DeadCode;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class History {
 
   private static class Level extends Change {
     private final int id;
-    public final List<Change> subchanges = new ArrayList<>();
+    public final TSList<Change> subchanges = new TSList<>();
     private SelectionState select;
 
     private Level(final int id) {
@@ -59,7 +60,7 @@ public class History {
     public boolean merge(final Change other) {
       if (subchanges.isEmpty()) {
         subchanges.add(other);
-      } else if (Common.last(subchanges).merge(other)) {
+      } else if (subchanges.last().merge(other)) {
       } else subchanges.add(other);
       return true;
     }
@@ -68,7 +69,8 @@ public class History {
     public Change apply(final Context context) {
       final Level out = new Level(id);
       out.select = context.cursor.saveState();
-      for (final Change change : Lists.reverse(subchanges)) {
+      for (int i = 0; i < subchanges.size(); ++i) {
+        Change change = subchanges.getRev(i);
         out.subchanges.add(change.apply(context));
       }
       if (select != null) select.select(context);

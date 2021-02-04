@@ -1,8 +1,8 @@
 package com.zarbosoft.pidgoon;
 
 import com.zarbosoft.pidgoon.errors.InvalidStream;
-import com.zarbosoft.pidgoon.events.ParseEventSink;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
+import com.zarbosoft.pidgoon.events.ParseEventSink;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;

@@ -8,8 +8,10 @@ import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveAdd;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 
-@Action.StaticID(id = "join")
 public class PrimitiveActionJoinLines extends EditAction {
+    public String id() {
+        return "join";
+    }
   private final VisualFrontPrimitive.PrimitiveCursor cursor;
 
   public PrimitiveActionJoinLines(EditingExtension edit, VisualFrontPrimitive.PrimitiveCursor cursor) {

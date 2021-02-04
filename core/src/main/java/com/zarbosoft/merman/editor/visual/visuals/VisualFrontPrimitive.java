@@ -39,8 +39,6 @@ import java.util.Arrays;
 import java.util.Deque;
 import java.util.function.Function;
 
-import static com.zarbosoft.rendaw.common.Common.enumerate;
-
 public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   // INVARIANT: Leaf nodes must always create at least one brick
   // INVARIANT: Always at least one line
@@ -208,19 +206,19 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   private void set(final Context context, final String text) {
     clear(context);
-    final Common.Mutable<Integer> offset = new Common.Mutable<>(0);
+    int offset = 0;
     hardLineCount = 0;
-    enumerate(Arrays.stream(text.split("\n", -1)))
-        .forEach(
-            pair -> {
-              final Line line = new Line(true);
-              hardLineCount += 1;
-              line.setText(context, pair.second);
-              line.setIndex(context, pair.first);
-              line.offset = offset.value;
-              lines.add(line);
-              offset.value += 1 + pair.second.length();
-            });
+    String[] rawLines = text.split("\n", -1);
+    for (int i = 0; i < rawLines.length;++i) {
+      String rawLine = rawLines[i];
+      final Line line = new Line(true);
+      hardLineCount += 1;
+      line.setText(context, rawLine);
+      line.setIndex(context, i);
+      line.offset = offset;
+      this.lines.add(line);
+      offset += 1 + rawLine.length();
+    }
     if (selection != null) {
       selection.range.setOffsets(
           context, Math.max(0, Math.min(text.length(), selection.range.beginOffset)));
@@ -983,8 +981,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       dispatcher.handle(this);
     }
 
-    @Action.StaticID(id = "exit")
-    private class ActionExit extends Action {
+    private class ActionExit implements Action {
+    public String id() {
+        return "exit";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -994,24 +994,30 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "next")
-    private class ActionNext extends Action {
+    private class ActionNext implements Action {
+    public String id() {
+        return "next";
+    }
       @Override
       public boolean run(final Context context) {
         return visualPrimitive.parent.selectNext(context);
       }
     }
 
-    @Action.StaticID(id = "previous")
-    private class ActionPrevious extends Action {
+    private class ActionPrevious implements Action {
+    public String id() {
+        return "previous";
+    }
       @Override
       public boolean run(final Context context) {
         return visualPrimitive.parent.selectPrevious(context);
       }
     }
 
-    @Action.StaticID(id = "next_element")
-    private class ActionNextElement extends Action {
+    private class ActionNextElement implements Action {
+    public String id() {
+        return "next_element";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1022,8 +1028,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "previous_element")
-    private class ActionPreviousElement extends Action {
+    private class ActionPreviousElement implements Action {
+    public String id() {
+        return "previous_element";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1034,8 +1042,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "next_word")
-    private class ActionNextWord extends Action {
+    private class ActionNextWord implements Action {
+    public String id() {
+        return "next_word";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1046,8 +1056,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "previous_word")
-    private class ActionPreviousWord extends Action {
+    private class ActionPreviousWord implements Action {
+    public String id() {
+        return "previous_word";
+    }
       @Override
       public boolean run(final Context context) {
         final int newIndex = previousWord(context, range.beginOffset);
@@ -1057,8 +1069,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "line_begin")
-    private class ActionLineBegin extends Action {
+    private class ActionLineBegin implements Action {
+    public String id() {
+        return "line_begin";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1069,8 +1083,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "line_end")
-    private class ActionLineEnd extends Action {
+    private class ActionLineEnd implements Action {
+    public String id() {
+        return "line_end";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1081,8 +1097,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "next_line")
-    private class ActionNextLine extends Action {
+    private class ActionNextLine implements Action {
+    public String id() {
+        return "next_line";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1093,8 +1111,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "previous_line")
-    private class ActionPreviousLine extends Action {
+    private class ActionPreviousLine implements Action {
+    public String id() {
+        return "previous_line";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1105,8 +1125,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "copy")
-    private class ActionCopy extends Action {
+    private class ActionCopy implements Action {
+    public String id() {
+        return "copy";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1115,8 +1137,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "gather_next")
-    private class ActionGatherNext extends Action {
+    private class ActionGatherNext implements Action {
+    public String id() {
+        return "gather_next";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1127,8 +1151,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "gather_next_word")
-    private class ActionGatherNextWord extends Action {
+    private class ActionGatherNextWord implements Action {
+    public String id() {
+        return "gather_next_word";
+    }
       @Override
       public boolean run(final Context context) {
         final int newIndex = nextWord(context, range.endOffset);
@@ -1138,8 +1164,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "gather_next_line_end")
-    private class ActionGatherNextLineEnd extends Action {
+    private class ActionGatherNextLineEnd implements Action {
+    public String id() {
+        return "gather_next_line_end";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1150,8 +1178,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "gather_next_line")
-    private class ActionGatherNextLine extends Action {
+    private class ActionGatherNextLine implements Action {
+    public String id() {
+        return "gather_next_line";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1162,8 +1192,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "release_next")
-    private class ActionReleaseNext extends Action {
+    private class ActionReleaseNext implements Action {
+    public String id() {
+        return "release_next";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1174,8 +1206,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "release_next_word")
-    private class ActionReleaseNextWord extends Action {
+    private class ActionReleaseNextWord implements Action {
+    public String id() {
+        return "release_next_word";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1186,8 +1220,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "release_next_line_end")
-    private class ActionReleaseNextLineEnd extends Action {
+    private class ActionReleaseNextLineEnd implements Action {
+    public String id() {
+        return "release_next_line_end";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1198,8 +1234,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "release_next_line")
-    private class ActionReleaseNextLine extends Action {
+    private class ActionReleaseNextLine implements Action {
+    public String id() {
+        return "release_next_line";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1211,8 +1249,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "gather_previous")
-    private class ActionGatherPrevious extends Action {
+    private class ActionGatherPrevious implements Action {
+    public String id() {
+        return "gather_previous";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1223,8 +1263,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "gather_previous_word")
-    private class ActionGatherPreviousWord extends Action {
+    private class ActionGatherPreviousWord implements Action {
+    public String id() {
+        return "gather_previous_word";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1235,8 +1277,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "gather_previous_line_start")
-    private class ActionGatherPreviousLineStart extends Action {
+    private class ActionGatherPreviousLineStart implements Action {
+    public String id() {
+        return "gather_previous_line_start";
+    }
       @Override
       public boolean run(final Context context) {
         final int newIndex = startOfLine(range.beginLine);
@@ -1246,8 +1290,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "gather_previous_line")
-    private class ActionGatherPreviousLine extends Action {
+    private class ActionGatherPreviousLine implements Action {
+    public String id() {
+        return "gather_previous_line";
+    }
       @Override
       public boolean run(final Context context) {
         final int newIndex = previousLine(range.beginLine, range.beginOffset);
@@ -1257,8 +1303,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "release_previous")
-    private class ActionReleasePrevious extends Action {
+    private class ActionReleasePrevious implements Action {
+    public String id() {
+        return "release_previous";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1269,8 +1317,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "release_previous_word")
-    private class ActionReleasePreviousWord extends Action {
+    private class ActionReleasePreviousWord implements Action {
+    public String id() {
+        return "release_previous_word";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1281,8 +1331,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "release_previous_line_start")
-    private class ActionReleasePreviousLineStart extends Action {
+    private class ActionReleasePreviousLineStart implements Action {
+    public String id() {
+        return "release_previous_line_start";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -1293,8 +1345,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       }
     }
 
-    @Action.StaticID(id = "release_previous_line")
-    private class ActionReleasePreviousLine extends Action {
+    private class ActionReleasePreviousLine implements Action {
+    public String id() {
+        return "release_previous_line";
+    }
       private final int beginOffset;
 
       public ActionReleasePreviousLine(final int beginOffset) {

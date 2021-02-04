@@ -1,18 +1,14 @@
 package com.zarbosoft.pidgoon;
 
 import com.zarbosoft.pidgoon.errors.InvalidStream;
-import com.zarbosoft.pidgoon.events.ParseEventSink;
 import com.zarbosoft.pidgoon.events.MatchingEvent;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
+import com.zarbosoft.pidgoon.events.ParseEventSink;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import org.junit.Test;
 
 public class EventGrammarTest {
-  public static class EventA implements MatchingEvent {}
-
-  public static class EventB implements MatchingEvent {}
-
   @Test(expected = InvalidStream.class)
   public void testEventGrammarFailure() {
     final Grammar inner = new Grammar();
@@ -54,4 +50,8 @@ public class EventGrammarTest {
     //noinspection UnusedAssignment
     parse = parse.push(new EventB(), "");
   }
+
+  public static class EventA implements MatchingEvent {}
+
+  public static class EventB implements MatchingEvent {}
 }

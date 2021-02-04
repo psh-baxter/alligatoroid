@@ -3,8 +3,6 @@ package com.zarbosoft.pidgoon.internal;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.Store;
 
-import java.util.Map;
-
 public abstract class BaseParseBuilder<P extends BaseParseBuilder<P>> {
   protected Grammar grammar;
   protected Object root = Grammar.DEFAULT_ROOT_KEY;
@@ -39,7 +37,8 @@ public abstract class BaseParseBuilder<P extends BaseParseBuilder<P>> {
   protected abstract P split();
 
   public P root(final Object key) {
-    if (!this.root.equals(Grammar.DEFAULT_ROOT_KEY)) throw new IllegalArgumentException("Node already specified");
+    if (!this.root.equals(Grammar.DEFAULT_ROOT_KEY))
+      throw new IllegalArgumentException("Node already specified");
     final P out = split();
     out.root = key;
     return out;

@@ -42,7 +42,6 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
-import static com.zarbosoft.rendaw.common.Common.zip;
 
 public class Helper {
   public static void dump(final Value value, final Writer writer) {
@@ -171,8 +170,11 @@ public class Helper {
             String.format(
                 "Array length mismatch.\nExpected: %s\nGot: %s\nAt: %s",
                 expectedValue.data.size(), gotValue.data.size(), got.getSyntaxPath()));
-      zip(expectedValue.data.stream(), gotValue.data.stream())
-          .forEach(pair -> assertTreeEqual(pair.first, pair.second));
+      for (int i = 0; i < expectedValue.data.size(); ++i) {
+        Atom first = expectedValue.data.get(i);
+        Atom second = gotValue.data.get(i);
+        assertTreeEqual(first, second);
+      }
     } else if (expected.getClass() == ValueAtom.class) {
       final ValueAtom expectedValue = (ValueAtom) expected;
       final ValueAtom gotValue = (ValueAtom) got;

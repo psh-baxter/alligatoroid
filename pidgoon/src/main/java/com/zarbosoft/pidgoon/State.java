@@ -3,8 +3,7 @@ package com.zarbosoft.pidgoon;
 import com.zarbosoft.pidgoon.parse.Parse;
 
 public abstract class State {
-  protected State() {
-  }
+  protected State() {}
 
   /**
    * The current color of this branch, as set by a Color node

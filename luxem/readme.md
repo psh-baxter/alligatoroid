@@ -15,6 +15,7 @@ A library for reading and writing `luxem` in Java.
 # Basic use cases
 
 ### 1. Read a document with no known type
+
 ```
 System.out.format(
 	"%s\n",
@@ -23,6 +24,7 @@ System.out.format(
 ```
 
 ### 2. Read a document into a list of annotated types
+
 ```
 @Configuration
 public class MyType {
@@ -37,11 +39,13 @@ System.out.format(
 ```
 
 Output
+
 ```
 4
 ```
 
 ### 3. Write a document from an annotated type
+
 ```
 @Configuration
 public class MyType {
@@ -55,6 +59,7 @@ Luxem.write(x, System.out);
 ```
 
 Output
+
 ```
 {a:4,},
 ```
@@ -62,6 +67,7 @@ Output
 If you have multiple root elements, use `TypeWriter` and call `write` for each element.
 
 ### 4. Write a document manually
+
 ```
 RawWriter writer = new RawWriter(System.out);
 writer.recordBegin();
@@ -71,6 +77,7 @@ writer.recordEnd();
 ```
 
 Output
+
 ```
 {a:4,},
 ```

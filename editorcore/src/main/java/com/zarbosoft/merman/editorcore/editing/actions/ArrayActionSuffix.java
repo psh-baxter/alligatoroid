@@ -3,21 +3,18 @@ package com.zarbosoft.merman.editorcore.editing.actions;
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editorcore.editing.BaseGapAtomType;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
+import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.zarbosoft.rendaw.common.Common.sublist;
-
-@Action.StaticID(id = "suffix")
 public class ArrayActionSuffix extends EditAction {
+    public String id() {
+        return "suffix";
+    }
   private final VisualFrontArray.ArrayCursor cursor;
 
   public ArrayActionSuffix(EditingExtension edit, VisualFrontArray.ArrayCursor cursor) {
@@ -28,8 +25,8 @@ public class ArrayActionSuffix extends EditAction {
   @Override
   public boolean run1(final Context context) {
     final Atom gap = edit.suffixGap.create();
-    List<Atom> transplant =
-        new ArrayList<>(sublist(cursor.self.value.data, cursor.beginIndex, cursor.endIndex));
+    TSList<Atom> transplant =
+        cursor.self.value.data.sublist(cursor.beginIndex, cursor.endIndex).mut();
     edit.history.apply(
         context,
         new ChangeArray(

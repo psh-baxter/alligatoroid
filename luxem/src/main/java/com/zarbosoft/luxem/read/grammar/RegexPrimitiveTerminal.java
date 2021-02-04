@@ -9,8 +9,10 @@ import java.util.regex.Pattern;
 
 public class RegexPrimitiveTerminal extends Terminal {
   public static final RegexPrimitiveTerminal integerTerminal = new RegexPrimitiveTerminal("-?\\d+");
-  public static final RegexPrimitiveTerminal posIntegerTerminal = new RegexPrimitiveTerminal("\\d+");
-  public static final RegexPrimitiveTerminal decimalTerminal = new RegexPrimitiveTerminal("\\d+(\\.\\d+)?");
+  public static final RegexPrimitiveTerminal posIntegerTerminal =
+      new RegexPrimitiveTerminal("\\d+");
+  public static final RegexPrimitiveTerminal decimalTerminal =
+      new RegexPrimitiveTerminal("\\d+(\\.\\d+)?");
   private final Pattern pattern;
 
   public RegexPrimitiveTerminal(String pattern) {

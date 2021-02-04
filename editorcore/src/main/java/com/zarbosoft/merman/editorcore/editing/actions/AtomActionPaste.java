@@ -12,8 +12,10 @@ import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 
 import java.util.List;
 
-@Action.StaticID(id = "paste")
 public class AtomActionPaste extends EditAction {
+    public String id() {
+        return "paste";
+    }
   private final VisualFrontAtomBase base;
 
   public AtomActionPaste(EditingExtension edit, VisualFrontAtomBase base) {

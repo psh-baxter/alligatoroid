@@ -6,8 +6,10 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 
-@Action.StaticID(id = "delete")
 public class AtomActionDelete extends EditAction {
+    public String id() {
+        return "delete";
+    }
   private final VisualFrontAtomBase base;
 
   public AtomActionDelete(EditingExtension edit, VisualFrontAtomBase base) {

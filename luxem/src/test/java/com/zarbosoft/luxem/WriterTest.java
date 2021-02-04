@@ -12,11 +12,6 @@ import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class WriterTest {
-  @FunctionalInterface
-  public interface Case {
-    public void accept(Writer writer) throws IOException;
-  }
-
   private void check(final String expected, final Case consumer) {
     final ByteArrayOutputStream stream = new ByteArrayOutputStream();
     final Writer writer = new Writer(stream, (byte) '\t', 1);
@@ -66,6 +61,11 @@ public class WriterTest {
   @Test
   public void testPrimitiveWhitespaceEscaping() {
     check("\"a\\tb\\n\",", rawWriter -> rawWriter.primitive("a\tb\n"));
+  }
+
+  @FunctionalInterface
+  public interface Case {
+    public void accept(Writer writer) throws IOException;
   }
 
   // TODO test escaping

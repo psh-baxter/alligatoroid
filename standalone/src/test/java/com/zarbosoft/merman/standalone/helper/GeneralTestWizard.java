@@ -19,9 +19,7 @@ import com.zarbosoft.merman.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.syntax.Syntax;
 
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
-import static com.zarbosoft.rendaw.common.Common.zip;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.not;
@@ -186,11 +184,11 @@ public class GeneralTestWizard {
     final ValueArray documentAtoms =
         (ValueArray) inner.context.document.root.fields.getOpt("value");
     assertThat(documentAtoms.data.size(), equalTo(atoms.length));
-    zip(Stream.of(atoms), documentAtoms.data.stream())
-        .forEach(
-            pair -> {
-              Helper.assertTreeEqual(pair.first, pair.second);
-            });
+    for (int i = 0; i < atoms.length; ++i) {
+      Atom first = atoms[i];
+      Atom second = documentAtoms.data.get(i);
+      Helper.assertTreeEqual(first, second);
+    }
     return this;
   }
 

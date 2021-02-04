@@ -27,7 +27,7 @@ public class ModesExtension {
     return String.format("mode_%s", states.get(state));
   }
 
-  private class ActionMode extends Action {
+  private class ActionMode implements Action {
     private final ROPair<Integer, String> pair;
 
     public ActionMode(final ROPair<Integer, String> pair) {

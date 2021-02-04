@@ -10,11 +10,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static com.zarbosoft.rendaw.common.Common.last;
-
 public class VisualGroup extends Visual {
 
   public VisualGroup(
@@ -40,7 +35,7 @@ public class VisualGroup extends Visual {
   @Override
   public Brick getLastBrick(final Context context) {
     if (children.isEmpty()) return null;
-    return last(children).getLastBrick(context);
+    return children.last().getLastBrick(context);
   }
 
   @Override
@@ -66,13 +61,13 @@ public class VisualGroup extends Visual {
   @Override
   public Brick createLastBrick(final Context context) {
     if (children.isEmpty()) return null;
-    return last(children).createLastBrick(context);
+    return children.last().createLastBrick(context);
   }
 
   public VisualParent parent = null;
 
   // State
-  public List<Visual> children = new ArrayList<>();
+  public TSList<Visual> children = new TSList<>();
 
   @Override
   public VisualParent parent() {
@@ -90,8 +85,11 @@ public class VisualGroup extends Visual {
     if (index < 0) throw new AssertionError("Inserting visual atom at negative index.");
     if (index >= this.children.size() + 1)
       throw new AssertionError("Inserting visual atom after group end.");
-    this.children.stream().skip(index).forEach(n -> ((Parent) n.parent()).index += 1);
-    this.children.add(index, node);
+    for (int i = index; i < children.size(); ++i) {
+      Visual child = children.get(i);
+      ((Parent) child.parent()).index += 1;
+    }
+    this.children.insert(index, node);
     final Brick previousBrick =
         index == 0
             ? parent.getPreviousBrick(context)
@@ -119,7 +117,10 @@ public class VisualGroup extends Visual {
     final Visual node = children.get(index);
     node.uproot(context, null);
     this.children.remove(index);
-    this.children.stream().skip(index).forEach(n -> ((Parent) n.parent()).index -= 1);
+    for (int i = index; i < children.size(); ++i) {
+      Visual child = children.get(i);
+      ((Parent) child.parent()).index -= 1;
+    }
   }
 
   public void remove(final Context context, final int start, final int size) {

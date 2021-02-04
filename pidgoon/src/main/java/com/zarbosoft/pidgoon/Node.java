@@ -12,5 +12,5 @@ public abstract class Node {
   }
 
   public abstract void context(
-          Parse context, Store store, Parent parent, ROMap<Object, RefParent> seen, Object cause);
+      Parse context, Store store, Parent parent, ROMap<Object, RefParent> seen, Object cause);
 }

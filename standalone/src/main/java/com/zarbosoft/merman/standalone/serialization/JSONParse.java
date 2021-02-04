@@ -3,7 +3,6 @@ package com.zarbosoft.merman.standalone.serialization;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonToken;
-import com.zarbosoft.luxem.read.InvalidStream;
 import com.zarbosoft.merman.editor.backevents.BackEvent;
 import com.zarbosoft.merman.editor.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EArrayOpenEvent;
@@ -21,15 +20,12 @@ import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.internal.BaseParseBuilder;
 import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROPair;
 
-import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Iterator;
-import java.util.stream.Stream;
+import java.util.ArrayList;
+import java.util.List;
 
-import static com.zarbosoft.rendaw.common.Common.concatNull;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class JSONParse<O> extends BaseParseBuilder<JSONParse<O>> {
@@ -42,6 +38,83 @@ public class JSONParse<O> extends BaseParseBuilder<JSONParse<O>> {
   }
 
   public JSONParse() {}
+
+  public static List<ROPair<? extends Event, Object>> streamEvents(InputStream stream) {
+    List<ROPair<? extends Event, Object>> out = new ArrayList<>();
+    final JsonParser stream1 = uncheck(() -> new JsonFactory().createParser(stream));
+    JSONPath path = new JSONObjectPath(null);
+    JsonToken token = uncheck(() -> stream1.nextToken());
+
+    while (token != null) {
+      JsonToken token2 = token;
+      token = uncheck(() -> stream1.nextToken());
+      BackEvent e;
+      switch (token2) {
+        case NOT_AVAILABLE:
+          // Only async mode
+          throw new DeadCode();
+        case START_OBJECT:
+          {
+            e = new EObjectOpenEvent();
+            break;
+          }
+        case END_OBJECT:
+          {
+            e = new EObjectCloseEvent();
+            break;
+          }
+        case START_ARRAY:
+          {
+            e = new EArrayOpenEvent();
+            break;
+          }
+        case END_ARRAY:
+          {
+            e = new EArrayCloseEvent();
+            break;
+          }
+        case FIELD_NAME:
+          {
+            e = new EKeyEvent(uncheck(() -> stream1.getCurrentName()));
+            break;
+          }
+        case VALUE_EMBEDDED_OBJECT:
+          // Supposedly shouldn't apply with normal options
+          throw new DeadCode();
+        case VALUE_STRING:
+          {
+            e = new EPrimitiveEvent(uncheck(() -> stream1.getValueAsString()));
+            break;
+          }
+        case VALUE_NUMBER_INT:
+        case VALUE_NUMBER_FLOAT:
+          {
+            e = new JSpecialPrimitiveEvent(uncheck(() -> stream1.getValueAsString()));
+            break;
+          }
+        case VALUE_TRUE:
+          {
+            e = new JSpecialPrimitiveEvent("true");
+            break;
+          }
+        case VALUE_FALSE:
+          {
+            e = new JSpecialPrimitiveEvent("false");
+            break;
+          }
+        case VALUE_NULL:
+          {
+            e = new JSpecialPrimitiveEvent("null");
+            break;
+          }
+        default:
+          throw new DeadCode();
+      }
+      out.add(new ROPair<>(e, path));
+      path = path.push(e);
+    }
+    return out;
+  }
 
   public JSONParse<O> eventUncertainty(final int limit) {
     if (eventUncertainty != 20)
@@ -56,140 +129,6 @@ public class JSONParse<O> extends BaseParseBuilder<JSONParse<O>> {
     return new JSONParse<>(this);
   }
 
-  public Stream<O> parseByElement(final String string) {
-    return parseByElement(new ByteArrayInputStream(string.getBytes(StandardCharsets.UTF_8)));
-  }
-
-  public Stream<O> parseByElement(final InputStream stream) {
-    return parseByElement(streamEvents(stream));
-  }
-
-  public static Stream<Pair<? extends Event, Object>> streamEvents(InputStream stream) {
-    return Common.stream(
-        new Iterator<Pair<? extends Event, Object>>() {
-          final JsonParser stream1 = uncheck(() -> new JsonFactory().createParser(stream));
-          JSONPath path = new JSONObjectPath(null);
-          JsonToken token = uncheck(() -> stream1.nextToken());
-
-          @Override
-          public boolean hasNext() {
-            return token != null;
-          }
-
-          @Override
-          public Pair<Event, Object> next() {
-            return uncheck(
-                () -> {
-                  JsonToken token = this.token;
-                  this.token = stream1.nextToken();
-                  BackEvent e;
-                  switch (token) {
-                    case NOT_AVAILABLE:
-                      // Only async mode
-                      throw new DeadCode();
-                    case START_OBJECT:
-                      {
-                        e = new EObjectOpenEvent();
-                        break;
-                      }
-                    case END_OBJECT:
-                      {
-                        e = new EObjectCloseEvent();
-                        break;
-                      }
-                    case START_ARRAY:
-                      {
-                        e = new EArrayOpenEvent();
-                        break;
-                      }
-                    case END_ARRAY:
-                      {
-                        e = new EArrayCloseEvent();
-                        break;
-                      }
-                    case FIELD_NAME:
-                      {
-                        e = new EKeyEvent(stream1.getCurrentName());
-                        break;
-                      }
-                    case VALUE_EMBEDDED_OBJECT:
-                      // Supposedly shouldn't apply with normal options
-                      throw new DeadCode();
-                    case VALUE_STRING:
-                      {
-                        e = new EPrimitiveEvent(stream1.getValueAsString());
-                        break;
-                      }
-                    case VALUE_NUMBER_INT:
-                    case VALUE_NUMBER_FLOAT: {
-                        e = new JSpecialPrimitiveEvent(stream1.getValueAsString());
-                        break;
-                      }
-                    case VALUE_TRUE:
-                      {
-                        e = new JSpecialPrimitiveEvent("true");
-                        break;
-                      }
-                    case VALUE_FALSE:
-                      {
-                        e = new JSpecialPrimitiveEvent("false");
-                        break;
-                      }
-                    case VALUE_NULL:
-                      {
-                        e = new JSpecialPrimitiveEvent("null");
-                        break;
-                      }
-                    default:
-                      throw new DeadCode();
-                  }
-                  Pair<Event, Object> out = new Pair<>(e, path);
-                  path = path.push(e);
-                  return out;
-                });
-          }
-        });
-  }
-
-  public Stream<O> parseByElement(final Stream<Pair<? extends Event, Object>> stream) {
-    class State {
-      ParseEventSink<O> stream = null;
-
-      private void createStream() {
-        stream =
-            new com.zarbosoft.pidgoon.events.ParseBuilder<O>()
-                .grammar(grammar)
-                .root(root)
-                .store(initialStore)
-                .errorHistory(errorHistoryLimit)
-                .dumpAmbiguity(dumpAmbiguity)
-                .uncertainty(eventUncertainty)
-                .parse();
-      }
-
-      public void handleEvent(final Pair<? extends Event, Object> pair) {
-        stream = stream.push(pair.first, pair.second);
-      }
-    }
-    final State state = new State();
-    return concatNull(stream)
-        .map(
-            pair -> {
-              if (pair == null) {
-                if (state.stream == null) return null;
-                else throw new InvalidStream(-1, "Input stream ended mid-element.");
-              }
-              if (state.stream == null) state.createStream();
-              state.handleEvent(pair);
-              if (state.stream.ended()) {
-                O result = state.stream.result();
-                state.stream = null;
-                return result;
-              } else return null;
-            })
-        .filter(o -> o != null);
-  }
-
   public O parse(InputStream stream) {
     return parse(streamEvents(stream));
   }
@@ -200,13 +139,12 @@ public class JSONParse<O> extends BaseParseBuilder<JSONParse<O>> {
    * @param data
    * @return
    */
-  public O parse(final Stream<Pair<? extends Event, Object>> data) {
-    final Common.Mutable<ParseEventSink<O>> eventStream = new Common.Mutable<>(parse());
-    data.forEach(
-        pair -> {
-          eventStream.value = eventStream.value.push(pair.first, pair.second.toString());
-        });
-    return eventStream.value.result();
+  public O parse(final List<ROPair<? extends Event, Object>> data) {
+    ParseEventSink<O> eventStream = parse();
+    for (ROPair<? extends Event, Object> pair : data) {
+      eventStream = eventStream.push(pair.first, pair.second.toString());
+    }
+    return eventStream.result();
   }
 
   /**

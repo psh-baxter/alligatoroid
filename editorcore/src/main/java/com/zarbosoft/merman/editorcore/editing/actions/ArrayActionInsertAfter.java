@@ -1,19 +1,21 @@
 package com.zarbosoft.merman.editorcore.editing.actions;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 
-@Action.StaticID(id = "insert_after")
 public class ArrayActionInsertAfter extends EditAction {
   private final VisualFrontArray.ArrayCursor cursor;
 
   public ArrayActionInsertAfter(EditingExtension edit, VisualFrontArray.ArrayCursor cursor) {
     super(edit);
     this.cursor = cursor;
+  }
+
+  public String id() {
+    return "insert_after";
   }
 
   @Override

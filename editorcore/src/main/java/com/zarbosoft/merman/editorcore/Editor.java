@@ -10,12 +10,8 @@ import com.zarbosoft.merman.editor.display.Display;
 import com.zarbosoft.merman.editor.history.History;
 import com.zarbosoft.merman.syntax.Syntax;
 
-import java.nio.file.Path;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 /**
  * Invariants and inner workings - Bricks are only created -- outward from the cornerstone when
@@ -61,30 +57,30 @@ public class Editor {
     context.addActions(key, actions);
   }
 
-  private abstract static class ActionBase extends Action {
-    public static String group() {
-      return "editor";
+  private static class ActionUndo implements Action {
+    public String id() {
+        return "undo";
     }
-  }
-
-  @Action.StaticID(id = "undo")
-  private static class ActionUndo extends ActionBase {
     @Override
     public boolean run(final Context context) {
       return context.history.undo(context);
     }
   }
 
-  @Action.StaticID(id = "redo")
-  private static class ActionRedo extends ActionBase {
+  private static class ActionRedo implements Action {
+    public String id() {
+        return "redo";
+    }
     @Override
     public boolean run(final Context context) {
       return context.history.redo(context);
     }
   }
 
-  @Action.StaticID(id = "click_hovered")
-  private static class ActionClickHovered extends ActionBase {
+  private static class ActionClickHovered implements Action {
+    public String id() {
+        return "click_hovered";
+    }
     @Override
     public boolean run(final Context context) {
       if (context.hover == null) return false;

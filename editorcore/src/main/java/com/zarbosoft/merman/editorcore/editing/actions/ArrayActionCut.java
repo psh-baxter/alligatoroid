@@ -8,8 +8,10 @@ import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 
-@Action.StaticID(id = "cut")
 public class ArrayActionCut extends EditAction {
+    public String id() {
+        return "cut";
+    }
   private final VisualFrontArray.ArrayCursor cursor;
 
   public ArrayActionCut(EditingExtension edit, VisualFrontArray.ArrayCursor cursor) {

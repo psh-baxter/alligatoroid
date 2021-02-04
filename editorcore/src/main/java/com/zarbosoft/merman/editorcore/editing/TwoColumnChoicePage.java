@@ -103,14 +103,10 @@ public class TwoColumnChoicePage extends DetailsPage {
   @Override
   public void tagsChanged(final Context context) {}
 
-  private abstract static class ActionBase extends Action {
-    public static String group() {
-      return "gap";
+  private class ActionChoose implements Action {
+    public String id() {
+        return "choose";
     }
-  }
-
-  @Action.StaticID(id = "choose")
-  private class ActionChoose extends ActionBase {
     private final List<? extends TwoColumnChoice> choices;
 
     public ActionChoose(final List<? extends TwoColumnChoice> choices) {
@@ -124,8 +120,10 @@ public class TwoColumnChoicePage extends DetailsPage {
     }
   }
 
-  @Action.StaticID(id = "next_choice")
-  private class ActionNextChoice extends ActionBase {
+  private class ActionNextChoice implements Action {
+    public String id() {
+        return "next_choice";
+    }
     private final List<? extends TwoColumnChoice> choices;
 
     public ActionNextChoice(final List<? extends TwoColumnChoice> choices) {
@@ -139,8 +137,10 @@ public class TwoColumnChoicePage extends DetailsPage {
     }
   }
 
-  @Action.StaticID(id = "previous_choice")
-  private class ActionPreviousChoice extends ActionBase {
+  private class ActionPreviousChoice implements Action {
+    public String id() {
+        return "previous_choice";
+    }
     private final List<? extends TwoColumnChoice> choices;
 
     public ActionPreviousChoice(final List<? extends TwoColumnChoice> choices) {

@@ -45,16 +45,6 @@ import java.util.stream.Collectors;
 
 public class Context {
   public static Supplier<TSSet> createSet = () -> new TSSet();
-  // Settings
-  public boolean animateCoursePlacement;
-  public boolean animateDetails;
-  public int ellipsizeThreshold;
-  public int layBrickBatchSize;
-  public double retryExpandFactor;
-  public double scrollFactor;
-  public double scrollAlotFactor;
-
-  // State
   /** Contains the cursor and other marks. Scrolls. */
   public final Group overlay;
   /** Contains the source code. Scrolls. */
@@ -65,6 +55,8 @@ public class Context {
   public final Document document;
   public final Serializer serializer;
   public final I18nEngine i18n;
+
+  // State
   public final TSSet<SelectionListener> cursorListeners = new TSSet<>();
   public final TSSet<HoverListener> hoverListeners = new TSSet<>();
   private final TSSet<TagsListener> selectionTagsChangeListeners = new TSSet<>();
@@ -73,9 +65,16 @@ public class Context {
   private final TSList<Action> actions = new TSList<>();
   private final Consumer<IterationTask> addIteration;
   private final Consumer<Integer> flushIteration;
-  public boolean window;
-    private Atom windowAtom;
   private final TSSet<String> globalTags = new TSSet<String>();
+  // Settings
+  public boolean animateCoursePlacement;
+  public boolean animateDetails;
+  public int ellipsizeThreshold;
+  public int layBrickBatchSize;
+  public double retryExpandFactor;
+  public double scrollFactor;
+  public double scrollAlotFactor;
+  public boolean window;
   public KeyListener keyListener;
   public TextListener textListener;
   public ClipboardEngine clipboardEngine;
@@ -105,27 +104,20 @@ public class Context {
   int selectToken = 0;
   boolean keyHandlingInProgress = false;
   boolean debugInHover = false;
+  private Atom windowAtom;
   private IterationNotifyBricksCreated idleNotifyBricksCreated;
 
-  public static class InitialConfig {
-    public boolean animateCoursePlacement = false;
-    public boolean animateDetails = false;
-    public int ellipsizeThreshold = Integer.MAX_VALUE;
-    public int layBrickBatchSize = 10;
-    public double retryExpandFactor = 1.25;
-    public double scrollFactor = 0.1;
-    public double scrollAlotFactor = 0.8;
-  }
-
   public Context(
-          InitialConfig config,
-          Syntax syntax,
-          Document document,
-          Display display,
-          Consumer<IterationTask> addIteration,
-          Consumer<Integer> flushIteration,
-          ClipboardEngine clipboardEngine,
-          Serializer serializer, boolean startWindowed, I18nEngine i18n) {
+      InitialConfig config,
+      Syntax syntax,
+      Document document,
+      Display display,
+      Consumer<IterationTask> addIteration,
+      Consumer<Integer> flushIteration,
+      ClipboardEngine clipboardEngine,
+      Serializer serializer,
+      boolean startWindowed,
+      I18nEngine i18n) {
     this.serializer = serializer;
     this.i18n = i18n;
     actions.add(
@@ -304,11 +296,10 @@ public class Context {
   public void applyScroll() {
     final int newScroll = scroll + peek;
     foreground.visual.setPosition(
-            new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
+        new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
     background.setPosition(
-            new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
-    overlay.setPosition(
-            new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
+        new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
+    overlay.setPosition(new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
     banner.setScroll(this, newScroll);
     details.setScroll(this, newScroll);
   }
@@ -690,6 +681,16 @@ public class Context {
     public abstract void cursorChanged(Context context, Cursor cursor);
   }
 
+  public static class InitialConfig {
+    public boolean animateCoursePlacement = false;
+    public boolean animateDetails = false;
+    public int ellipsizeThreshold = Integer.MAX_VALUE;
+    public int layBrickBatchSize = 10;
+    public double retryExpandFactor = 1.25;
+    public double scrollFactor = 0.1;
+    public double scrollAlotFactor = 0.8;
+  }
+
   public abstract static class HoverListener {
     public abstract void hoverChanged(Context context, Hoverable selection);
   }
@@ -848,8 +849,7 @@ public class Context {
         while (point.converse < at.getConverse(context) && at.index > 0) {
           at = at.parent.children.get(at.index - 1);
         }
-        while (point.converse >= at.converseEdge()
-            && at.index < at.parent.children.size() - 1) {
+        while (point.converse >= at.converseEdge() && at.index < at.parent.children.size() - 1) {
           at = at.parent.children.get(at.index + 1);
         }
         final Hoverable old = hover;
@@ -875,8 +875,11 @@ public class Context {
     }
   }
 
-  @Action.StaticID(id = "window_clear")
-  private class ActionWindowClear extends Action {
+  private class ActionWindowClear implements Action {
+    public String id() {
+      return "window_clear";
+    }
+
     @Override
     public boolean run(final Context context) {
       if (!window) return false;
@@ -886,9 +889,12 @@ public class Context {
     }
   }
 
-  @Action.StaticID(id = "window_up")
-  private class ActionWindowTowardsRoot extends Action {
+  private class ActionWindowTowardsRoot implements Action {
     public ActionWindowTowardsRoot() {}
+
+    public String id() {
+      return "window_up";
+    }
 
     @Override
     public boolean run(final Context context) {
@@ -900,8 +906,11 @@ public class Context {
     }
   }
 
-  @Action.StaticID(id = "window_down")
-  private class ActionWindowTowardsCursor extends Action {
+  private class ActionWindowTowardsCursor implements Action {
+    public String id() {
+      return "window_down";
+    }
+
     @Override
     public boolean run(final Context context) {
       if (!window) return false;
@@ -922,8 +931,10 @@ public class Context {
     }
   }
 
-  @Action.StaticID(id = "scroll_previous")
-  private class ActionScrollNext extends Action {
+  private class ActionScrollNext implements Action {
+    public String id() {
+      return "scroll_previous";
+    }
 
     @Override
     public boolean run(final Context context) {
@@ -933,8 +944,11 @@ public class Context {
     }
   }
 
-  @Action.StaticID(id = "scroll_previous_alot")
-  private class ActionScrollNextAlot extends Action {
+  private class ActionScrollNextAlot implements Action {
+    public String id() {
+      return "scroll_previous_alot";
+    }
+
     @Override
     public boolean run(final Context context) {
       scroll -= scrollAlotFactor * transverseEdge;
@@ -943,8 +957,11 @@ public class Context {
     }
   }
 
-  @Action.StaticID(id = "scroll_next")
-  private class ActionScrollPrevious extends Action {
+  private class ActionScrollPrevious implements Action {
+    public String id() {
+      return "scroll_next";
+    }
+
     @Override
     public boolean run(final Context context) {
       scroll += scrollFactor * transverseEdge;
@@ -953,8 +970,11 @@ public class Context {
     }
   }
 
-  @Action.StaticID(id = "scroll_next_alot")
-  private class ActionScrollPreviousAlot extends Action {
+  private class ActionScrollPreviousAlot implements Action {
+    public String id() {
+      return "scroll_next_alot";
+    }
+
     @Override
     public boolean run(final Context context) {
       scroll += scrollAlotFactor * transverseEdge;
@@ -963,8 +983,10 @@ public class Context {
     }
   }
 
-  @Action.StaticID(id = "scroll_reset")
-  private class ActionScrollReset extends Action {
+  private class ActionScrollReset implements Action {
+    public String id() {
+      return "scroll_reset";
+    }
 
     @Override
     public boolean run(final Context context) {

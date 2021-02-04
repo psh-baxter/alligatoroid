@@ -44,8 +44,6 @@ import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import java.util.Arrays;
 import java.util.Set;
 
-import static com.zarbosoft.rendaw.common.Common.last;
-
 public class EditingExtension {
     public static final SymbolTextSpec DEFAULT_GAP_PLACEHOLDER = new SymbolTextSpec("•");
     public static final boolean DEFAULT_PRETTY_SAVE = true;
@@ -204,7 +202,7 @@ public class EditingExtension {
                                                               if (!value.middle.matcher.match(context,preview)) {
                                                                   VisualAtom atomVisual = cursor.visualPrimitive.atomVisual();
                                                                   if (cursor.range.endOffset == value.length()
-                                                                          && last(atomVisual.children) == cursor.visualPrimitive) {
+                                                                          && atomVisual.children.last() == cursor.visualPrimitive) {
                                                                       editNext();
                                     /*
                                       // Delete after implementing editNext

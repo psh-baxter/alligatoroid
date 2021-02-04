@@ -27,8 +27,7 @@ public class ParseEventSink<O> implements EventSink {
       final boolean dumpAmbiguity) {
     this.grammar = grammar;
     this.context =
-        Parse.prepare(
-            grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
+        Parse.prepare(grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
   }
 
   public ParseEventSink(final Parse step, final Grammar grammar) {

@@ -3,39 +3,35 @@ package com.zarbosoft.luxem.read;
 import com.zarbosoft.luxem.events.LArrayCloseEvent;
 import com.zarbosoft.luxem.events.LArrayOpenEvent;
 import com.zarbosoft.luxem.events.LKeyEvent;
+import com.zarbosoft.luxem.events.LPrimitiveEvent;
 import com.zarbosoft.luxem.events.LRecordCloseEvent;
 import com.zarbosoft.luxem.events.LRecordOpenEvent;
-import com.zarbosoft.luxem.events.LPrimitiveEvent;
 import com.zarbosoft.luxem.events.LTypeEvent;
 import com.zarbosoft.pidgoon.events.Event;
-import com.zarbosoft.rendaw.common.Common;
 
 import java.io.InputStream;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.stream.Stream;
+
+import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 /** Luxem lexer. Calls the various `eat*` methods when tokens are found. */
 public abstract class Reader {
   private final Deque<State> stack = new ArrayDeque<>();
   private int offset = 0;
+
   public Reader() {
     stack.addLast(new RootArray());
   }
 
-  public static Stream<Boolean> stream(final Reader reader, final InputStream source) {
-    return Common.concatNull(Common.stream(source))
-        .map(
-            bytes -> {
-              if (bytes == null) {
-                // Post-last chunk
-                reader.finish();
-                return true;
-              } else {
-                for (final byte b : bytes) reader.eat(b);
-                return false;
-              }
-            });
+  public static void feed(final Reader reader, final InputStream source) {
+    byte[] buff = new byte[1024];
+    int count = uncheck(() -> source.read(buff));
+    if (count == -1) {
+      reader.finish();
+    } else {
+      for (byte b :buff) reader.eat(b);
+    }
   }
 
   private void finish() {
@@ -181,12 +177,6 @@ public abstract class Reader {
 
   private static class UntypedValue extends State {
 
-    @Override
-    public boolean eat(final Reader raw, final byte next) {
-      if (raw.eatInterstitial(next)) return true;
-      return eatStatic(this, raw, next);
-    }
-
     public static boolean eatStatic(final State state, final Reader raw, final byte next) {
       state.finished(raw);
       switch (next) {
@@ -204,6 +194,12 @@ public abstract class Reader {
       }
       raw.stack.addLast(new Primitive());
       return false;
+    }
+
+    @Override
+    public boolean eat(final Reader raw, final byte next) {
+      if (raw.eatInterstitial(next)) return true;
+      return eatStatic(this, raw, next);
     }
   }
 

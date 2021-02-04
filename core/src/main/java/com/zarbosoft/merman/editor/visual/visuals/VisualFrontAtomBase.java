@@ -472,8 +472,10 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     return value().selectInto(context);
   }
 
-  @Action.StaticID(id = "enter")
-  private static class AtomActionEnter extends Action {
+  private static class AtomActionEnter implements Action {
+    public String id() {
+        return "enter";
+    }
     private final VisualFrontAtomBase base;
 
     public AtomActionEnter(VisualFrontAtomBase base) {
@@ -486,8 +488,10 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
   }
 
-  @Action.StaticID(id = "exit")
-  private static class AtomActionExit extends Action {
+  private static class AtomActionExit implements Action {
+    public String id() {
+        return "exit";
+    }
     private final VisualFrontAtomBase base;
 
     public AtomActionExit(VisualFrontAtomBase base) {
@@ -502,8 +506,10 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
   }
 
-  @Action.StaticID(id = "next")
-  private static class AtomActionNext extends Action {
+  private static class AtomActionNext implements Action {
+    public String id() {
+        return "next";
+    }
     private final VisualFrontAtomBase base;
 
     public AtomActionNext(VisualFrontAtomBase base) {
@@ -516,8 +522,10 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
   }
 
-  @Action.StaticID(id = "previous")
-  private static class AtomActionPrevious extends Action {
+  private static class AtomActionPrevious implements Action {
+    public String id() {
+        return "previous";
+    }
     private final VisualFrontAtomBase base;
 
     public AtomActionPrevious(VisualFrontAtomBase base) {
@@ -530,8 +538,10 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
   }
 
-  @Action.StaticID(id = "window")
-  private static class AtomActionWindow extends Action {
+  private static class AtomActionWindow implements Action {
+    public String id() {
+        return "window";
+    }
     private final VisualFrontAtomBase base;
 
     public AtomActionWindow(VisualFrontAtomBase base) {

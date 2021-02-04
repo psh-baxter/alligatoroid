@@ -10,8 +10,10 @@ import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 
-@Action.StaticID(id = "suffix")
 public class AtomActionSuffix extends EditAction {
+    public String id() {
+        return "suffix";
+    }
   private final VisualFrontAtomBase base;
 
   public AtomActionSuffix(EditingExtension edit, VisualFrontAtomBase base) {

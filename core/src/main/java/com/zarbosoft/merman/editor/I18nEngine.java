@@ -7,6 +7,8 @@ public interface I18nEngine {
     /**
      * Next split before offset, -1 if none
      *
+     * Includes 0 and string.size()
+     *
      * @param offset
      * @return
      */
@@ -14,6 +16,8 @@ public interface I18nEngine {
 
     /**
      * Next split after offset, -1 if none
+     *
+     * Includes 0 and string.size()
      *
      * @param offset
      * @return

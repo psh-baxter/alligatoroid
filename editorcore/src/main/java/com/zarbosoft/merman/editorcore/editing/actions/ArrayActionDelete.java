@@ -8,8 +8,10 @@ import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 
-@Action.StaticID(id = "delete")
 public class ArrayActionDelete extends EditAction {
+    public String id() {
+        return "delete";
+    }
   private final VisualFrontArray.ArrayCursor cursor;
 
   public ArrayActionDelete(EditingExtension edit, VisualFrontArray.ArrayCursor cursor) {

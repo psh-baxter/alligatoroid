@@ -13,7 +13,6 @@ import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.Collection;
-import java.util.HashSet;
 
 /** Match each child exactly once. */
 public class Set extends Node {

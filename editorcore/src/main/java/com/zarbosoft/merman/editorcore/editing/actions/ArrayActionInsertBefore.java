@@ -8,8 +8,10 @@ import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.History;
 
-@Action.StaticID(id = "insert_before")
 public class ArrayActionInsertBefore extends EditAction {
+    public String id() {
+        return "insert_before";
+    }
   private final VisualFrontArray.ArrayCursor cursor;
 
   public ArrayActionInsertBefore(History history, VisualFrontArray.ArrayCursor cursor) {

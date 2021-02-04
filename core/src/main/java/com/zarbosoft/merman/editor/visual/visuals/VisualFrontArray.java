@@ -653,8 +653,10 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       dispatcher.handle(this);
     }
 
-    @Action.StaticID(id = "enter")
-    private class ActionEnter extends Action {
+    private class ActionEnter implements Action {
+    public String id() {
+        return "enter";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -662,32 +664,40 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       }
     }
 
-    @Action.StaticID(id = "exit")
-    private class ActionExit extends Action {
+    private class ActionExit implements Action {
+    public String id() {
+        return "exit";
+    }
       @Override
       public boolean run(final Context context) {
         return self.value.atomParentRef.selectAtomParent(context);
       }
     }
 
-    @Action.StaticID(id = "next")
-    private class ActionNext extends Action {
+    private class ActionNext implements Action {
+    public String id() {
+        return "next";
+    }
       @Override
       public boolean run(final Context context) {
         return self.parent.selectNext(context);
       }
     }
 
-    @Action.StaticID(id = "previous")
-    private class ActionPrevious extends Action {
+    private class ActionPrevious implements Action {
+    public String id() {
+        return "previous";
+    }
       @Override
       public boolean run(final Context context) {
         return self.parent.selectPrevious(context);
       }
     }
 
-    @Action.StaticID(id = "next_element")
-    private class ActionNextElement extends Action {
+    private class ActionNextElement implements Action {
+    public String id() {
+        return "next_element";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -699,8 +709,10 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       }
     }
 
-    @Action.StaticID(id = "previous_element")
-    private class ActionPreviousElement extends Action {
+    private class ActionPreviousElement implements Action {
+    public String id() {
+        return "previous_element";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -712,8 +724,10 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       }
     }
 
-    @Action.StaticID(id = "copy")
-    private class ActionCopy extends Action {
+    private class ActionCopy implements Action {
+    public String id() {
+        return "copy";
+    }
       @Override
       public boolean run(final Context context) {
         context.copy(self.value.data.sublist(beginIndex, endIndex + 1));
@@ -721,8 +735,10 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       }
     }
 
-    @Action.StaticID(id = "gather_next")
-    private class ActionGatherNext extends Action {
+    private class ActionGatherNext implements Action {
+    public String id() {
+        return "gather_next";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -733,8 +749,10 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       }
     }
 
-    @Action.StaticID(id = "release_next")
-    private class ActionReleaseNext extends Action {
+    private class ActionReleaseNext implements Action {
+    public String id() {
+        return "release_next";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -745,8 +763,10 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       }
     }
 
-    @Action.StaticID(id = "gather_previous")
-    private class ActionGatherPrevious extends Action {
+    private class ActionGatherPrevious implements Action {
+    public String id() {
+        return "gather_previous";
+    }
       @Override
       public boolean run(final Context context) {
 
@@ -757,8 +777,10 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       }
     }
 
-    @Action.StaticID(id = "release_previous")
-    private class ActionReleasePrevious extends Action {
+    private class ActionReleasePrevious implements Action {
+    public String id() {
+        return "release_previous";
+    }
 
       @Override
       public boolean run(final Context context) {
@@ -770,8 +792,10 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       }
     }
 
-    @Action.StaticID(id = "window")
-    private class ActionWindow extends Action {
+    private class ActionWindow implements Action {
+    public String id() {
+        return "window";
+    }
 
       @Override
       public boolean run(final Context context) {

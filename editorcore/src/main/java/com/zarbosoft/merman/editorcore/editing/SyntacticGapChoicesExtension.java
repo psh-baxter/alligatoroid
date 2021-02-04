@@ -45,9 +45,6 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static com.zarbosoft.rendaw.common.Common.last;
-
-
 public class SyntacticGapChoicesExtension {
   private static final Supplier<Placement> createPlaceArray = () -> new PlaceArray();
   private static final Supplier<Placement> createPlaceAtom = () -> new PlaceAtom();

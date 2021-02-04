@@ -7,8 +7,10 @@ import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 
-@Action.StaticID(id = "delete_previous")
 public class PrimitiveActionDeletePrevious extends EditAction {
+    public String id() {
+        return "delete_previous";
+    }
   private final VisualFrontPrimitive.PrimitiveCursor cursor;
 
   public PrimitiveActionDeletePrevious(

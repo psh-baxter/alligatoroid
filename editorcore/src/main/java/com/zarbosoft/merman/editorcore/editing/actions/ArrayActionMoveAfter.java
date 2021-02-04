@@ -11,8 +11,10 @@ import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 
 import java.util.List;
 
-@Action.StaticID(id = "move_after")
 public class ArrayActionMoveAfter extends EditAction {
+    public String id() {
+        return "move_after";
+    }
   private final VisualFrontArray.ArrayCursor cursor;
 
   public ArrayActionMoveAfter(EditingExtension edit, VisualFrontArray.ArrayCursor cursor) {

@@ -7,8 +7,10 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 import com.zarbosoft.merman.editorcore.history.EditAction;
 
-@Action.StaticID(id = "cut")
 public class AtomActionCut extends EditAction {
+    public String id() {
+        return "cut";
+    }
   private final VisualFrontAtomBase base;
 
   public AtomActionCut(EditingExtension edit, VisualFrontAtomBase base) {

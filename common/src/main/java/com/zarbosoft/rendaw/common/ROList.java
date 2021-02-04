@@ -25,4 +25,6 @@ public interface ROList<T> extends Iterable<T> {
   int lastIndexOf(T value);
 
   T last();
+
+    T getRev(int i);
 }

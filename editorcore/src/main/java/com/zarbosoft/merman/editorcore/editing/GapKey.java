@@ -56,8 +56,8 @@ public class GapKey {
 
   public static List<GapKey> gapKeys(final FreeAtomType type) {
     final List<GapKey> out = new ArrayList<>();
-    final Common.Mutable<GapKey> top = new Common.Mutable<>(new GapKey());
-    top.value.indexBefore = -1;
+    final GapKey[] top = {new GapKey()};
+    top[0].indexBefore = -1;
     for (int frontIndex0 = 0; frontIndex0 < type.front.size(); ++frontIndex0) {
       int frontIndex = frontIndex0;
       FrontSpec front = type.front.get(frontIndex);
@@ -66,7 +66,7 @@ public class GapKey {
             @Override
             public void handle(final FrontSymbol front) {
               if (front.condition != null && !front.condition.defaultOn()) return;
-              top.value.keyParts.add(front);
+              top[0].keyParts.add(front);
             }
 
             @Override
@@ -87,12 +87,12 @@ public class GapKey {
             }
 
             private void flush() {
-              if (!top.value.keyParts.isEmpty()) {
-                top.value.indexAfter = frontIndex;
-                out.add(top.value);
-                top.value = new GapKey();
+              if (!top[0].keyParts.isEmpty()) {
+                top[0].indexAfter = frontIndex;
+                out.add(top[0]);
+                top[0] = new GapKey();
               }
-              top.value.indexBefore = frontIndex;
+              top[0].indexBefore = frontIndex;
             }
 
             @Override
@@ -102,7 +102,7 @@ public class GapKey {
 
             @Override
             public void handle(final FrontPrimitiveSpec front) {
-              top.value.keyParts.add(front);
+              top[0].keyParts.add(front);
             }
 
             @Override
@@ -111,9 +111,9 @@ public class GapKey {
             }
           });
     }
-    if (!top.value.keyParts.isEmpty()) {
-      top.value.indexAfter = -1;
-      out.add(top.value);
+    if (!top[0].keyParts.isEmpty()) {
+      top[0].indexAfter = -1;
+      out.add(top[0]);
     }
     return out;
   }

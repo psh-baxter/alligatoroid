@@ -25,22 +25,22 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
     super(config.id);
     this.element = config.element;
     MultiError errors = new MultiError();
-    Common.Mutable<BackAtomSpec> atom = new Common.Mutable<>();
+    final BackAtomSpec[] atom = {null};
     BackSpec.walk(
         element,
         child -> {
           if (!(child instanceof BackAtomSpec)) return true;
-          if (atom.value != null) {
-            errors.add(new ArrayMultipleAtoms(this, atom.value, child));
+          if (atom[0] != null) {
+            errors.add(new ArrayMultipleAtoms(this, atom[0], child));
           } else {
-            atom.value = (BackAtomSpec) child;
+            atom[0] = (BackAtomSpec) child;
           }
           return false;
         });
-    if (atom.value == null) {
+    if (atom[0] == null) {
       errors.add(new ArrayMissingAtom(this));
     }
-    elementAtom = atom.value;
+    elementAtom = atom[0];
     errors.raise();
   }
 

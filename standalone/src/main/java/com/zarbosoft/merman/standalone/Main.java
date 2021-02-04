@@ -343,23 +343,21 @@ public class Main extends Application {
     void run() throws Exception;
   }
 
-  private abstract static class ActionBase extends Action {
-    public static String group() {
-      return "application";
+    private static class ActionQuit implements Action {
+    public String id() {
+        return "quit";
     }
-  }
-
-  @Action.StaticID(id = "quit")
-  private static class ActionQuit extends ActionBase {
     @Override
     public boolean run(final Context context) {
       Platform.exit();
       return true;
     }
-  }
+    }
 
-  @Action.StaticID(id = "debug")
-  private static class ActionDebug extends ActionBase {
+  private static class ActionDebug implements Action {
+    public String id() {
+        return "debug";
+    }
     @Override
     public boolean run(final Context context) {
       System.out.format("This is a convenient place to put a breakpoint.\n");
@@ -367,8 +365,10 @@ public class Main extends Application {
     }
   }
 
-  @Action.StaticID(id = "save")
-  private class ActionSave extends ActionBase {
+  private class ActionSave implements Action {
+    public String id() {
+        return "save";
+    }
     @Override
     public boolean run(final Context context) {
       editor.save(filename);

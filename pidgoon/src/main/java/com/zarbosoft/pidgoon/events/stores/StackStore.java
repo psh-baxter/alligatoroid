@@ -7,7 +7,6 @@ import com.zarbosoft.pidgoon.internal.BranchingStack;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;

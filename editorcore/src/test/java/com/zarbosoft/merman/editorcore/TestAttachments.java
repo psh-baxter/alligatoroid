@@ -31,18 +31,18 @@ public class TestAttachments {
 
         final Atom textAtom = new TreeBuilder(text).add("value", "hi\ndog").build();
         final ValuePrimitive value = (ValuePrimitive) textAtom.fields.getOpt("value");
-        final Common.Mutable<Brick> lastBrick = new Common.Mutable<>(null);
+        final Brick[] lastBrick = {null};
         final Attachment listener = new Attachment() {
             @Override
             public void destroy(final Context context) {
-                lastBrick.value = textAtom.visual.getLastBrick(context);
-                lastBrick.value.addAttachment(context, this);
+                lastBrick[0] = textAtom.visual.getLastBrick(context);
+                lastBrick[0].addAttachment(context, this);
             }
         };
         new GeneralTestWizard(syntax, textAtom).run(context -> {
             textAtom.visual.getLastBrick(context).addAttachment(context, listener);
         }).run(context -> context.history.apply(context, new ChangePrimitiveRemove(value, 2, 1))).run(context -> {
-            assertThat(lastBrick.value, equalTo(value.visual.lines.get(0).brick));
+            assertThat(lastBrick[0], equalTo(value.visual.lines.get(0).brick));
         });
     }
 }

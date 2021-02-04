@@ -148,12 +148,12 @@ public class TestAttachments {
 	public void testPrimitiveExpandAttachments() {
 		final Atom textAtom = new TreeBuilder(text).add("value", "higgs dogoid").build();
 		final ValuePrimitive value = (ValuePrimitive) textAtom.fields.getOpt("value");
-		final Common.Mutable<Brick> lastBrick = new Common.Mutable<>(null);
+		final Brick[] lastBrick = {null};
 		final Attachment listener = new Attachment() {
 			@Override
 			public void destroy(final Context context) {
-				lastBrick.value = textAtom.visual.getLastBrick(context);
-				lastBrick.value.addAttachment(context, this);
+				lastBrick[0] = textAtom.visual.getLastBrick(context);
+				lastBrick[0].addAttachment(context, this);
 			}
 		};
 		new GeneralTestWizard(syntax,  textAtom)
@@ -164,6 +164,6 @@ public class TestAttachments {
 				})
 				.displayWidth(100000)
 				.checkCourseCount(1)
-				.run(context -> assertThat(lastBrick.value, equalTo(value.visual.lines.get(0).brick)));
+				.run(context -> assertThat(lastBrick[0], equalTo(value.visual.lines.get(0).brick)));
 	}
 }

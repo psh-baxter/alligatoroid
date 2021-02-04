@@ -1,7 +1,5 @@
 package com.zarbosoft.pidgoon;
 
-import java.util.Map;
-
 /**
  * This contains user-accessible state for the parse. This is immutable - any modifications return a
  * new Store. This is because parses can branch.

@@ -1,11 +1,11 @@
 package com.zarbosoft.pidgoon.events.nodes;
 
 import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.State;
+import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.internal.Parent;
-import com.zarbosoft.pidgoon.State;
-import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.nodes.Reference.RefParent;
 import com.zarbosoft.pidgoon.parse.Parse;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -29,8 +29,7 @@ public abstract class Terminal extends Node {
           }
 
           @Override
-          public void parse(
-              final Parse step, final com.zarbosoft.pidgoon.Position sourcePosition) {
+          public void parse(final Parse step, final com.zarbosoft.pidgoon.Position sourcePosition) {
             Store store = prestore;
             final Position position = (Position) sourcePosition;
             store = store.record(position);

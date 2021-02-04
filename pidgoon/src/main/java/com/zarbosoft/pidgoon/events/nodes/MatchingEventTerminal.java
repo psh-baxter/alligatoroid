@@ -1,8 +1,8 @@
 package com.zarbosoft.pidgoon.events.nodes;
 
+import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.MatchingEvent;
-import com.zarbosoft.pidgoon.Store;
 
 /** Use this terminal if the events themselves define matching conditions. */
 public class MatchingEventTerminal extends Terminal {

@@ -4,7 +4,7 @@ import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
 
-public abstract class EditAction extends Action {
+public abstract class EditAction implements Action {
   protected final EditingExtension edit;
 
   public EditAction(EditingExtension edit) {

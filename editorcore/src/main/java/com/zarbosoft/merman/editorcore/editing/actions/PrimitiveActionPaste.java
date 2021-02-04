@@ -9,8 +9,10 @@ import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveAdd;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 
-@Action.StaticID(id = "paste")
 public class PrimitiveActionPaste extends EditAction {
+    public String id() {
+        return "paste";
+    }
   private final VisualFrontPrimitive.PrimitiveCursor cursor;
 
   public PrimitiveActionPaste(EditingExtension edit, VisualFrontPrimitive.PrimitiveCursor cursor) {

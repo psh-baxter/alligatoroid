@@ -8,8 +8,10 @@ import com.zarbosoft.merman.editorcore.history.EditAction;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveAdd;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 
-@Action.StaticID(id = "split")
 public class PrimitiveActionSplitLines extends EditAction {
+    public String id() {
+        return "split";
+    }
   private final VisualFrontPrimitive.PrimitiveCursor cursor;
 
   public PrimitiveActionSplitLines(EditingExtension edit, VisualFrontPrimitive.PrimitiveCursor cursor) {

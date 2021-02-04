@@ -3,9 +3,9 @@ package com.zarbosoft.luxem.read.path;
 import com.zarbosoft.luxem.events.LArrayCloseEvent;
 import com.zarbosoft.luxem.events.LArrayOpenEvent;
 import com.zarbosoft.luxem.events.LKeyEvent;
+import com.zarbosoft.luxem.events.LPrimitiveEvent;
 import com.zarbosoft.luxem.events.LRecordCloseEvent;
 import com.zarbosoft.luxem.events.LRecordOpenEvent;
-import com.zarbosoft.luxem.events.LPrimitiveEvent;
 import com.zarbosoft.luxem.events.LTypeEvent;
 import com.zarbosoft.luxem.events.LuxemEvent;
 

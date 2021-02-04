@@ -78,6 +78,11 @@ public class TSList<T> implements ROList<T> {
     return values.get(values.size() - 1);
   }
 
+  @Override
+  public T getRev(int i) {
+    return values.get(values.size() - i - 1);
+  }
+
   public TSList<T> add(T... val) {
     for (T t : val) {
       //noinspection UseBulkOperation

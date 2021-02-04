@@ -5,24 +5,25 @@ import com.zarbosoft.luxem.read.InvalidStream;
 import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.MatchingEvent;
-import com.zarbosoft.rendaw.common.Common;
+import com.zarbosoft.rendaw.common.ROPair;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-
-import static com.zarbosoft.rendaw.common.Common.zip;
 
 public class ReaderTest {
   public List<Event> read(final String source) {
-    return Luxem.streamEvents(
+    List<Event> out = new ArrayList<>();
+    for (ROPair<Event, Object> p :
+        Luxem.streamEvents(
             new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)),
-            new Reader.DefaultEventFactory())
-        .map(pair -> pair.first)
-        .collect(Collectors.toList());
+            new Reader.DefaultEventFactory())) {
+      out.add(p.first);
+    }
+    return out;
   }
 
   public void check(final String source, final Event... events) {
@@ -33,18 +34,14 @@ public class ReaderTest {
           String.format(
               "Size mismatch:\nGot %s: %s\nExpected %s: %s",
               got.size(), got, expected.size(), expected));
-    zip(got.stream(), expected.stream())
-        .map(new Common.Enumerator<>())
-        .forEach(
-            pair -> {
-              if (!((MatchingEvent) pair.second.second)
-                  .matches((MatchingEvent) pair.second.first)) {
-                throw new AssertionError(
-                    String.format(
-                        "Stream mismatch at %s:\nGot: %s\nExpected: %s",
-                        pair.first, pair.second.first, pair.second.second));
-              }
-            });
+    for (int i = 0; i < got.size(); ++i) {
+      Event first = got.get(i);
+      Event second = expected.get(i);
+      if (!((MatchingEvent) second).matches((MatchingEvent) first)) {
+        throw new AssertionError(
+            String.format("Stream mismatch at %s:\nGot: %s\nExpected: %s", i, first, expected));
+      }
+    }
   }
 
   @Test

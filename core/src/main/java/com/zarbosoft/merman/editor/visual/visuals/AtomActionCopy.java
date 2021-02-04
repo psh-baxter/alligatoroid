@@ -4,8 +4,10 @@ import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.rendaw.common.TSList;
 
-@Action.StaticID(id = "copy")
-class AtomActionCopy extends Action {
+class AtomActionCopy implements Action {
+    public String id() {
+        return "copy";
+    }
     private final VisualFrontAtomBase base;
 
     public AtomActionCopy(VisualFrontAtomBase base) {
@@ -17,5 +19,4 @@ class AtomActionCopy extends Action {
         context.copy(TSList.of(base.atomGet()));
         return true;
     }
-
 }

@@ -5,12 +5,9 @@ import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.internal.BaseParseBuilder;
 import com.zarbosoft.pidgoon.parse.Parse;
-import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.Pair;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Stream;
 
 public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
   protected ParseBuilder(final ParseBuilder<O> other) {
@@ -40,10 +37,7 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
    * @return
    */
   public ParseEventSink<O> parse() {
-    final Store store =
-        initialStore == null
-            ? new StackStore()
-            : initialStore;
+    final Store store = initialStore == null ? new StackStore() : initialStore;
     return new ParseEventSink<>(
         grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
   }
@@ -57,10 +51,7 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
    *     length of stream - 1
    */
   public Pair<Parse, Position> longestMatchFromStart(final List<Event> events) {
-    final Store store =
-        initialStore == null
-            ? new StackStore()
-            : initialStore;
+    final Store store = initialStore == null ? new StackStore() : initialStore;
     Parse context =
         Parse.prepare(grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
     Pair<Parse, Position> record = new Pair<>(context, new Position(null, -1));
