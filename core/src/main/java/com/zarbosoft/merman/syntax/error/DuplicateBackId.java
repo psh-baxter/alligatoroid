@@ -6,7 +6,7 @@ public class DuplicateBackId extends BaseKVError {
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "duplicate back ids in atom";
   }
 }

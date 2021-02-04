@@ -6,7 +6,7 @@ public class RecordDiscardDuplicateKey extends BaseKVError {
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "discard key duplicates existing pair";
   }
 }

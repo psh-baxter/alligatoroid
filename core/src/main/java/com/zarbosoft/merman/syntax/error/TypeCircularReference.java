@@ -9,7 +9,7 @@ public class TypeCircularReference extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "type circular reference";
   }
 }

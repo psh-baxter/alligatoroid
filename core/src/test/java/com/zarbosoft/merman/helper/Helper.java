@@ -111,15 +111,17 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataPrimitive(final String id) {
-    return new BackPrimitiveSpec(i18n,new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackPrimitiveSpec(i18n, new BaseBackPrimitiveSpec.Config(id, null));
   }
 
   public static BackSpec buildBackDataPrimitiveLetters(final String id) {
-    return new BackPrimitiveSpec(i18n,new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Letters())));
+    return new BackPrimitiveSpec(
+        i18n, new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Letters())));
   }
 
   public static BackSpec buildBackDataPrimitiveDigits(final String id) {
-    return new BackPrimitiveSpec(i18n,new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Digits())));
+    return new BackPrimitiveSpec(
+        i18n, new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Digits())));
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
@@ -127,19 +129,15 @@ public class Helper {
   }
 
   public static BackKeySpec buildBackDataKey(final String id) {
-    return new BackKeySpec(i18n,new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackKeySpec(i18n, new BaseBackPrimitiveSpec.Config(id, null));
   }
 
   public static BackArraySpec buildBackDataArray(final String id, String type) {
-    return new BackArraySpec(
-        new BaseBackSimpleArraySpec.Config(
-            id, new BackAtomSpec(new BaseBackAtomSpec.Config(null, type))));
+    return new BackArraySpec(new BaseBackSimpleArraySpec.Config(id, type, new TSList<>()));
   }
 
   public static BackSubArraySpec buildBackDataRootArray(final String id, String type) {
-    return new BackSubArraySpec(
-        new BaseBackSimpleArraySpec.Config(
-            id, new BackAtomSpec(new BaseBackAtomSpec.Config(null, type))));
+    return new BackSubArraySpec(new BaseBackSimpleArraySpec.Config(id, type, new TSList<>()));
   }
 
   public static void assertTreeEqual(final Atom expected, final Atom got) {
@@ -201,8 +199,7 @@ public class Helper {
   public static void assertTreeEqual(final Context context, final Atom expected, final Value got) {
     assertTreeEqual(
         new ValueArray(
-            (BaseBackArraySpec) context.syntax.root.fields.get("value"),
-            TSList.of(expected)),
+            (BaseBackArraySpec) context.syntax.root.fields.get("value"), TSList.of(expected)),
         got);
   }
 
@@ -226,7 +223,8 @@ public class Helper {
             syntax,
             new Atom(
                 syntax.root,
-                new TSMap<String, Value>().put(
+                new TSMap<String, Value>()
+                    .put(
                         "value",
                         new ValueArray(
                             (BaseBackArraySpec) syntax.root.fields.get("value"),
@@ -249,11 +247,6 @@ public class Helper {
               }
 
               @Override
-              public void setString(final String string) {
-                this.string = string;
-              }
-
-              @Override
               public byte[] get() {
                 return data;
               }
@@ -262,8 +255,15 @@ public class Helper {
               public String getString() {
                 return string;
               }
+
+              @Override
+              public void setString(final String string) {
+                this.string = string;
+              }
             },
-                null, startWindowed, i18n);
+            null,
+            startWindowed,
+            i18n);
     return context;
   }
 }

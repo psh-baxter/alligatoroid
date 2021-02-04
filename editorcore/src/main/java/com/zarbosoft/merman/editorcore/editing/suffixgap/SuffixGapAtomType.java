@@ -71,7 +71,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
     {
       backArray = new BackArraySpec();
       backArray.id = GAP_ARRAY_KEY;
-      backArray.element = new BackAtomSpec();
+      backArray.type = new BackAtomSpec();
       backPrimitive = new BackPrimitiveSpec();
       backPrimitive.id = GAP_PRIMITIVE_KEY;
       final BackFixedRecordSpec backRecord =

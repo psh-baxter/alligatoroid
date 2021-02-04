@@ -7,7 +7,7 @@ public class DuplicateAtomTypeIds extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "duplicate atom type id";
   }
 }

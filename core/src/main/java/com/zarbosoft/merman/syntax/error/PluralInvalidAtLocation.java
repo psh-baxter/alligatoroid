@@ -9,7 +9,7 @@ public class PluralInvalidAtLocation extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "back field must describe single element (not subarray) here";
   }
 }

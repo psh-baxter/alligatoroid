@@ -11,6 +11,7 @@ import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -26,7 +27,7 @@ public class TreeBuilder {
   }
 
   public TreeBuilder(Syntax syntax, String type) {
-    Set<AtomType> t = syntax.splayedTypes.get(type);
+    ROSet<AtomType> t = syntax.splayedTypes.get(type);
     if (t.size() != 1) throw new Assertion();
     this.type = t.iterator().next();
   }

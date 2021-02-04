@@ -10,7 +10,7 @@ public class MissingBack extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "missing back field";
   }
 }

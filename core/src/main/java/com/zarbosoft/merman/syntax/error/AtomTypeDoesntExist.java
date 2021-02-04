@@ -10,7 +10,7 @@ public class AtomTypeDoesntExist extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "specified candidate type doesn't exist";
   }
 }

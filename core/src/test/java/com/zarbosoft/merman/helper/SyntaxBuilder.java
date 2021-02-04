@@ -38,7 +38,7 @@ public class SyntaxBuilder {
 
   public Syntax build() {
     MultiError splayErrors = new MultiError();
-    TSMap<String, Set<AtomType>> splayed = Syntax.splayGroups(splayErrors, types, groups);
+    TSMap<String, ROSet<AtomType>> splayed = Syntax.splayGroups(splayErrors, types, groups);
     splayErrors.raise();
 
     RootAtomType root =

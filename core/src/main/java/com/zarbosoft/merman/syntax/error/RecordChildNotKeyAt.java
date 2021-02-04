@@ -15,7 +15,7 @@ public class RecordChildNotKeyAt extends BaseKVError {
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "record element candidate back field should be key but was value";
   }
 }

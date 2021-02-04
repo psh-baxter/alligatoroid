@@ -8,7 +8,7 @@ public class TypeInvalidAtLocation extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "type directly within type (invalid luxem)";
   }
 }

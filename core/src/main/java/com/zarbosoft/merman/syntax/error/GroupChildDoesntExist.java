@@ -7,7 +7,7 @@ public class GroupChildDoesntExist extends BaseKVError {
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "specified group child doesn't exist";
   }
 }

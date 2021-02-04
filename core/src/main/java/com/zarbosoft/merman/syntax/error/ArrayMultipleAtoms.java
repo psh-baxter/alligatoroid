@@ -12,7 +12,7 @@ public class ArrayMultipleAtoms extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "array element spec contains more than one atom spec";
   }
 }

@@ -11,7 +11,7 @@ public class AtomCandidatePluralBack extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "atom candidate serializes to multiple values in single value context";
   }
 }

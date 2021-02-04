@@ -12,7 +12,7 @@ public class BackFieldWrongType extends BaseKVError {
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "back field has incompatible type";
   }
 }

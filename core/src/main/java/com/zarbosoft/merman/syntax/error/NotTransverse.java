@@ -10,7 +10,7 @@ public class NotTransverse extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "converse and transverse directions do not cross";
   }
 }

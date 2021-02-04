@@ -5,7 +5,7 @@ public class AtomTypeNoBack extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "atom type, no back";
   }
 }

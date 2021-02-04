@@ -2,6 +2,7 @@ package com.zarbosoft.merman.editor.serialization;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Deque;
@@ -10,13 +11,11 @@ import java.util.List;
 
 public class WriteStateDeepDataArray extends WriteState {
     private final Iterator<Atom> iterator;
-    private final String elementKey;
-    private final BackSpec element;
+    private final ROMap<String, BackSpec> boilerplate;
 
-    public WriteStateDeepDataArray(BackSpec element, String elementKey, final List<Atom> array) {
-        this.element = element;
-        this.elementKey = elementKey;
-        this.iterator = array.iterator();
+    public WriteStateDeepDataArray(final List<Atom> values, final ROMap<String, BackSpec> boilerplate) {
+        this.iterator = values.iterator();
+        this.boilerplate = boilerplate;
     }
 
     @Override
@@ -26,6 +25,11 @@ public class WriteStateDeepDataArray extends WriteState {
             return;
         }
         final Atom next = iterator.next();
-        element.write(stack, new TSMap<String, Object>().put(elementKey, next), writer);
+        BackSpec nextPlate = boilerplate.get(next.type.id());
+        if (nextPlate != null) {
+            nextPlate.write(stack, new TSMap<String, Object>().putNull(null, next), writer);
+        } else {
+            next.write(stack);
+        }
     }
 }

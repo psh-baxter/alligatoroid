@@ -9,7 +9,7 @@ public class UnusedBackData extends BaseKVError {
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "unused data from back fields";
   }
 }

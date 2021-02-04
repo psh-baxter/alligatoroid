@@ -13,12 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class BaseKVError extends TSMap<String, Object> {
-  protected abstract String name();
+  protected abstract String description();
 
   private void formatValue(
       StringBuilder out, Deque<Pair<Integer, Iterator>> stack, int indent, Object value) {
     if (value instanceof BaseKVError) {
-      out.append(((BaseKVError) value).name());
+      out.append(((BaseKVError) value).description());
       Iterator<Map.Entry<String, Object>> nextLevel = ((BaseKVError) value).iterator();
       if (nextLevel.hasNext()) stack.addLast(new Pair<>(indent + 1, nextLevel));
     } else if (value instanceof List) {
@@ -48,7 +48,7 @@ public abstract class BaseKVError extends TSMap<String, Object> {
     if (!seed.hasNext()) return "(empty)";
     stack.addLast(new Pair<>(1, seed));
     StringBuilder out = new StringBuilder();
-    out.append(name());
+    out.append(description());
     out.append("\n");
     while (!stack.isEmpty()) {
       Pair<Integer, Iterator> pair = stack.peekLast();

@@ -10,7 +10,7 @@ public class AtomCandidateTypeNotAllowed extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "this candidate would result in directly nested types (invalid luxem)";
   }
 }

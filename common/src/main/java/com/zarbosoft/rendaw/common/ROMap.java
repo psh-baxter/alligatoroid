@@ -41,4 +41,7 @@ public interface ROMap<K, V> extends Iterable<Map.Entry<K, V>> {
   public V getNull(K k);
 
   TSMap<K, V> mut();
+
+  boolean some();
+  boolean none();
 }

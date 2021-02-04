@@ -11,7 +11,7 @@ public class RecordChildMissingValue extends BaseKVError{
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "record element candidate has key but no value";
   }
 }

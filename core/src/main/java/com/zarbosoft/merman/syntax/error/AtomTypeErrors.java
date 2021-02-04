@@ -10,7 +10,7 @@ public class AtomTypeErrors extends BaseKVError {
   }
 
   @Override
-  protected String name() {
+  protected String description() {
     return "atom type suberrors";
   }
 }

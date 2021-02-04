@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class TSMap<K, V> implements ROMap<K, V> {
@@ -99,6 +100,20 @@ public class TSMap<K, V> implements ROMap<K, V> {
   public TSMap<K, V> put(K k, V v) {
     putNull(k, v);
     return this;
+  }
+
+  public V update(K k, Function<V, V> map) {
+    return inner.computeIfPresent(k, (k2, v2) -> map.apply(v2));
+  }
+
+  @Override
+  public boolean some() {
+    return !inner.isEmpty();
+  }
+
+  @Override
+  public boolean none() {
+    return inner.isEmpty();
   }
 
   @Override

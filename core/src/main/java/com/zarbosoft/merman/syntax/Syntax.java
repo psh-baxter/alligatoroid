@@ -28,6 +28,7 @@ import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -52,7 +53,7 @@ public class Syntax {
   public final Padding detailPad;
   public final int detailSpan;
   public final ROList<AtomType> types;
-  public final ROMap<String, Set<AtomType>> splayedTypes;
+  public final ROMap<String, ROSet<AtomType>> splayedTypes;
   public final RootAtomType root;
   public final GapAtomType gap;
   public final SuffixGapAtomType suffixGap;
@@ -70,7 +71,7 @@ public class Syntax {
     public Padding detailPad = Padding.empty;
     public int detailSpan = 300;
     public final ROList<AtomType> types;
-    public final ROMap<String, Set<AtomType>> splayedTypes;
+    public final ROMap<String, ROSet<AtomType>> splayedTypes;
     public final RootAtomType root;
     public GapAtomType gap;
     public SuffixGapAtomType suffixGap;
@@ -80,7 +81,7 @@ public class Syntax {
     public Config(
         I18nEngine i18n,
         ROList<AtomType> types,
-        ROMap<String, Set<AtomType>> splayedTypes,
+        ROMap<String, ROSet<AtomType>> splayedTypes,
         RootAtomType root) {
       this.types = types;
       this.splayedTypes = splayedTypes;
@@ -100,7 +101,7 @@ public class Syntax {
         Padding detailPad,
         int detailSpan,
         ROList<AtomType> types,
-        ROMap<String, Set<AtomType>> splayedTypes,
+        ROMap<String, ROSet<AtomType>> splayedTypes,
         RootAtomType root,
         GapAtomType gap,
         SuffixGapAtomType suffixGap,
@@ -177,14 +178,14 @@ public class Syntax {
    * @param groups
    * @return
    */
-  public static TSMap<String, Set<AtomType>> splayGroups(
+  public static TSMap<String, ROSet<AtomType>> splayGroups(
       MultiError errors, ROList<AtomType> types, ROMap<String, ROList<String>> groups) {
-    TSMap<String, Set<AtomType>> splayedTypes = new TSMap<>();
+    TSMap<String, ROSet<AtomType>> splayedTypes = new TSMap<>();
 
     TSMap<String, AtomType> typeLookup = new TSMap<>();
     for (AtomType entry : types) {
       typeLookup.put(entry.id(), entry);
-      splayedTypes.put(entry.id(), new HashSet<>(Arrays.asList(entry)));
+      splayedTypes.put(entry.id(), TSSet.of(entry).ro());
     }
 
     for (Map.Entry<String, ROList<String>> group : groups) {
@@ -196,7 +197,7 @@ public class Syntax {
       }
       final Deque<Pair<ROList<String>, Iterator<String>>> stack = new ArrayDeque<>();
       Iterator<String> seed = group.getValue().iterator();
-      Set<AtomType> out = new HashSet<>();
+      TSSet<AtomType> out = new TSSet<>();
       if (seed.hasNext()) {
         stack.addLast(new Pair<ROList<String>, Iterator<String>>(TSList.of(group.getKey()), seed));
         while (!stack.isEmpty()) {
@@ -211,7 +212,7 @@ public class Syntax {
             continue;
           }
 
-          final Set<AtomType> splayed = splayedTypes.getOpt(childKey);
+          final ROSet<AtomType> splayed = splayedTypes.getOpt(childKey);
           if (splayed != null) {
             out.addAll(splayed);
             continue;
@@ -232,7 +233,7 @@ public class Syntax {
           errors.add(new GroupChildDoesntExist(top.first.last(), childKey));
         }
       }
-      splayedTypes.put(group.getKey(), out);
+      splayedTypes.put(group.getKey(), out.ro());
     }
 
     return splayedTypes;
@@ -240,7 +241,7 @@ public class Syntax {
 
   public void finish(MultiError errors) {
     TSSet<AtomType> seen = new TSSet<>();
-    for (Map.Entry<String, Set<AtomType>> splayedType : splayedTypes) {
+    for (Map.Entry<String, ROSet<AtomType>> splayedType : splayedTypes) {
       for (AtomType atomType : splayedType.getValue()) {
         if (!seen.addNew(atomType)) continue;
         atomType.finish(errors, this);
@@ -289,8 +290,8 @@ public class Syntax {
                   new Sequence()
                       .add(new ClassEqTerminal(ETypeEvent.class))
                       .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))));
-      for (Map.Entry<String, Set<AtomType>> entry : splayedTypes) {
-        Set<AtomType> types = entry.getValue();
+      for (Map.Entry<String, ROSet<AtomType>> entry : splayedTypes) {
+        ROSet<AtomType> types = entry.getValue();
         String key = entry.getKey();
         AtomType firstType = types.iterator().next();
         if (types.size() == 1 && key.equals(firstType.id())) {
