@@ -2,6 +2,7 @@ package com.zarbosoft.merman.editor.display.derived;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Drawing;
+import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.BoxStyle;
 
@@ -32,7 +33,7 @@ public class Box {
     final int buffer = (int) (style.lineThickness + 1);
     drawing.resize(context, new Vector(converseSpan + buffer * 2, transverseSpan + buffer * 2));
     offset = new Vector(-(buffer + style.padding), -(buffer + style.padding));
-    final Drawing.DrawingContext gc = drawing.begin(context);
+    final DrawingContext gc = drawing.begin(context);
     gc.translate(buffer, buffer);
     if (style.fill) {
       gc.beginFillPath();
@@ -50,7 +51,7 @@ public class Box {
   }
 
   private void path(
-      final Drawing.DrawingContext gc, final int converseSpan, final int transverseSpan) {
+          final DrawingContext gc, final int converseSpan, final int transverseSpan) {
     moveTo(gc, 0, transverseSpan / 2);
     cornerTo(gc, style.roundStart, 0, 0, converseSpan / 2, 0);
     cornerTo(gc, style.roundOuterEdges, converseSpan, 0, converseSpan, transverseSpan / 2);
@@ -58,12 +59,12 @@ public class Box {
     cornerTo(gc, style.roundOuterEdges, 0, transverseSpan, 0, transverseSpan / 2);
   }
 
-  private void moveTo(final Drawing.DrawingContext gc, final int c, final int t) {
+  private void moveTo(final DrawingContext gc, final int c, final int t) {
     gc.moveTo(c, t);
   }
 
   private void cornerTo(
-      final Drawing.DrawingContext gc,
+      final DrawingContext gc,
       final boolean round,
       final int c,
       final int t,

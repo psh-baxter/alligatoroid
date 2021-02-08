@@ -25,7 +25,6 @@ import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
@@ -81,10 +80,10 @@ public class BackRecordSpec extends BaseBackArraySpec {
 
   @Override
   public void write(
-          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
-    stack.addLast(new WriteStateRecordEnd());
-    stack.addLast(new WriteStateDataArray(((List<Atom>) data.get(id))));
+    stack.add(new WriteStateRecordEnd());
+    stack.add(new WriteStateDataArray(((List<Atom>) data.get(id))));
   }
 
   @Override

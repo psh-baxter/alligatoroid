@@ -34,14 +34,7 @@ public class TSMap<K, V> implements ROMap<K, V> {
   @Override
   public V get(K k) {
     if (k == null) throw new Assertion();
-    return getNull(k);
-  }
-
-  @Override
-  public V getNull(K k) {
-    Object out = ((Map) inner).getOrDefault(k, missing);
-    if (out == missing) throw new Assertion();
-    return (V) out;
+    return inner.get(k);
   }
 
   @Override
@@ -51,8 +44,8 @@ public class TSMap<K, V> implements ROMap<K, V> {
 
   @Override
   public V getOr(K k, Supplier<V> v) {
-    Object out = ((Map) inner).getOrDefault(k, missing);
-    if (out == missing) return v.get();
+    Object out = get(k);
+    if (out == null) return v.get();
     return (V) out;
   }
 
@@ -94,7 +87,12 @@ public class TSMap<K, V> implements ROMap<K, V> {
   }
 
   public V getCreate(K k, Supplier<V> s) {
-    return inner.computeIfAbsent(k, ignored -> s.get());
+    V got = inner.get(k);
+    if (got != null) {
+      return got;
+    }
+    got = s.get(); inner.put(k, got);
+    return got;
   }
 
   public TSMap<K, V> put(K k, V v) {
@@ -103,7 +101,9 @@ public class TSMap<K, V> implements ROMap<K, V> {
   }
 
   public V update(K k, Function<V, V> map) {
-    return inner.computeIfPresent(k, (k2, v2) -> map.apply(v2));
+    V got = map.apply(inner.get(k));
+    inner.put(k, got);
+    return got;
   }
 
   @Override

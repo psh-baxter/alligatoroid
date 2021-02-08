@@ -7,15 +7,17 @@
     <packaging>pom</packaging>
     <modules>
         <module>core</module>
+        <!--
         <module>editorcore</module>
         <module>standalone</module>
-        <module>webview</module>
         <module>luxem</module>
+        -->
+        <module>webview</module>
         <module>pidgoon</module>
         <module>common</module>
     </modules>
     <properties>
-        <jver>11</jver>
+        <jver>8</jver>
         <compver>3.8.1</compver>
     </properties>
     <build>

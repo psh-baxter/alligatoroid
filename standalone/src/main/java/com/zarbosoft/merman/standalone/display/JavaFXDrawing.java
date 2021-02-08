@@ -2,6 +2,7 @@ package com.zarbosoft.merman.standalone.display;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Drawing;
+import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import javafx.geometry.Point2D;

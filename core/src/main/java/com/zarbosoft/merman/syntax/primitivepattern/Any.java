@@ -5,6 +5,8 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.nodes.Wildcard;
 
 public class Any extends Pattern {
+  public static Pattern repeatedAny = new Repeat0(new Any());
+
   @Override
   public Node build(I18nEngine i18n) {
     return new Wildcard();

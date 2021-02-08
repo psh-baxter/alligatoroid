@@ -119,13 +119,10 @@ public class Parse {
       } else {
         nextStep.errorHistory = new ArrayList<>();
         nextStep.errorHistory.add(new Pair<>(position, nextStep.errors));
-        errorHistory.stream()
-            .allMatch(
-                s -> {
-                  if (nextStep.errorHistory.size() >= errorHistoryLimit) return false;
-                  nextStep.errorHistory.add(s);
-                  return true;
-                });
+        for (Pair<Position, List<Object>> s : errorHistory) {
+          if (nextStep.errorHistory.size() >= errorHistoryLimit) break;
+          nextStep.errorHistory.add(s);
+        }
       }
     }
     if (nextStep.ambiguityHistory != null) {

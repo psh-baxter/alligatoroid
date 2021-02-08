@@ -3,13 +3,12 @@ package com.zarbosoft.merman.editor.visual.visuals;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
-import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
-import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
@@ -20,35 +19,17 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.ArrayList;
 import java.util.Map;
 
 public class VisualAtom extends Visual {
   public final Atom atom;
-  private VisualParent parent;
-  public int depthScore = 0;
-  public boolean compact = false;
+  public final TSList<Visual> children = new TSList<>();
   /** Merged map of parent alignments and this alignments */
   private final TSMap<String, Alignment> localAlignments = new TSMap<>();
-
-  public final TSList<Visual> children = new TSList<>();
   private final TSList<Visual> selectable = new TSList<>();
-  public Brick firstBrick;
-  Attachment firstBrickListener =
-      new Attachment() {
-        @Override
-        public void destroy(final Context context) {
-          firstBrick = null;
-        }
-      };
-  public Brick lastBrick;
-  Attachment lastBrickListener =
-      new Attachment() {
-        @Override
-        public void destroy(final Context context) {
-          lastBrick = null;
-        }
-      };
+  public int depthScore = 0;
+  public boolean compact = false;
+  private VisualParent parent;
 
   public VisualAtom(
       final Context context,
@@ -135,7 +116,9 @@ public class VisualAtom extends Visual {
 
   @Override
   public void compact(final Context context) {
-    children.forEach(c -> c.compact(context));
+    for (Visual child : children) {
+      child.compact(context);
+    }
     boolean wasCompact = compact;
     compact = true;
     if (!wasCompact) tagsChanged(context);
@@ -143,7 +126,9 @@ public class VisualAtom extends Visual {
 
   @Override
   public void expand(final Context context) {
-    children.forEach(c -> c.expand(context));
+    for (Visual c : children) {
+      c.expand(context);
+    }
     boolean wasCompact = compact;
     compact = false;
     if (wasCompact) tagsChanged(context);
@@ -314,40 +299,6 @@ public class VisualAtom extends Visual {
     @Override
     public boolean selectNext(final Context context) {
       throw new DeadCode();
-    }
-
-    @Override
-    public void bricksCreated(final Context context, final ArrayList<Brick> bricks) {
-      Brick min = firstBrick;
-      Brick max = lastBrick;
-      for (final Brick brick : bricks) {
-        if (min == null
-            || brick.parent.index < min.parent.index
-            || brick.parent.index == min.parent.index && brick.index < min.index) {
-          min = brick;
-        }
-        if (max == null
-            || brick.parent.index > max.parent.index
-            || brick.parent.index == max.parent.index && brick.index > max.index) {
-          max = brick;
-        }
-      }
-      final ArrayList<Brick> out = new ArrayList<>();
-      if (min != firstBrick) {
-        if (firstBrick == null) firstBrick.removeAttachment(firstBrickListener);
-        firstBrick = min;
-        firstBrick.addAttachment(context, firstBrickListener);
-        if (parent != null) parent.firstBrickChanged(context, firstBrick);
-        out.add(min);
-      }
-      if (max != lastBrick) {
-        if (lastBrick == null) lastBrick.removeAttachment(lastBrickListener);
-        lastBrick = max;
-        lastBrick.addAttachment(context, lastBrickListener);
-        if (parent != null) parent.lastBrickChanged(context, lastBrick);
-        out.add(max);
-      }
-      context.bricksCreated(VisualAtom.this, out);
     }
   }
 

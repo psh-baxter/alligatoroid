@@ -24,8 +24,44 @@ public abstract class FrontArraySpecBase extends FrontSpec {
   public final Symbol ellipsis;
   private BaseBackArraySpec dataType;
 
+  public FrontArraySpecBase(Config config) {
+    super(config.tags);
+    this.prefix = config.prefix;
+    this.suffix = config.suffix;
+    this.separator = config.separator;
+    this.tagFirst = config.tagFirst;
+    this.tagLast = config.tagLast;
+    this.ellipsis = config.ellipsis;
+  }
+
   public BaseBackArraySpec dataType() {
     return dataType;
+  }
+
+  @Override
+  public Visual createVisual(
+      final Context context,
+      final VisualParent parent,
+      final Atom atom,
+      final int visualDepth,
+      final int depthScore) {
+    LocalVisualFrontArray out = new LocalVisualFrontArray(this, context, parent, atom, visualDepth, depthScore);
+    out.root(context, parent, depthScore, depthScore);
+    return out;
+  }
+
+  @Override
+  public void finish(
+      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
+    middleUsed.add(field());
+    dataType = atomType.getDataArray(errors, typePath, field());
+  }
+
+  public abstract String field();
+
+  @Override
+  public void dispatch(final DispatchHandler handler) {
+    handler.handle(this);
   }
 
   public static class Config {
@@ -57,69 +93,48 @@ public abstract class FrontArraySpecBase extends FrontSpec {
     }
   }
 
-  public FrontArraySpecBase(Config config) {
-    super(config.tags);
-    this.prefix = config.prefix;
-    this.suffix = config.suffix;
-    this.separator = config.separator;
-    this.tagFirst = config.tagFirst;
-    this.tagLast = config.tagLast;
-    this.ellipsis = config.ellipsis;
-  }
+  private static class LocalVisualFrontArray extends VisualFrontArray {
+    private final FrontArraySpecBase frontArraySpecBase;
 
-  @Override
-  public Visual createVisual(
-          final Context context,
-          final VisualParent parent,
-          final Atom atom,
-          final int visualDepth,
-          final int depthScore) {
-    return new VisualFrontArray(
-        context, parent, dataType.get(atom.fields), visualDepth, depthScore) {
+    public LocalVisualFrontArray(
+        FrontArraySpecBase frontArraySpecBase,
+        Context context,
+        VisualParent parent,
+        Atom atom,
+        int visualDepth,
+        int depthScore) {
+      super(parent, frontArraySpecBase.dataType.get(atom.fields), visualDepth);
+      this.frontArraySpecBase = frontArraySpecBase;
+    }
 
-      @Override
-      protected boolean tagLast() {
-        return tagLast;
-      }
+    @Override
+    protected boolean tagLast() {
+      return frontArraySpecBase.tagLast;
+    }
 
-      @Override
-      protected boolean tagFirst() {
-        return tagFirst;
-      }
+    @Override
+    protected boolean tagFirst() {
+      return frontArraySpecBase.tagFirst;
+    }
 
-      @Override
-      protected ROList<FrontSymbol> getElementPrefix() {
-        return prefix;
-      }
+    @Override
+    protected ROList<FrontSymbol> getElementPrefix() {
+      return frontArraySpecBase.prefix;
+    }
 
-      @Override
-      protected ROList<FrontSymbol> getSeparator() {
-        return separator;
-      }
+    @Override
+    protected ROList<FrontSymbol> getSeparator() {
+      return frontArraySpecBase.separator;
+    }
 
-      @Override
-      protected ROList<FrontSymbol> getElementSuffix() {
-        return suffix;
-      }
+    @Override
+    protected ROList<FrontSymbol> getElementSuffix() {
+      return frontArraySpecBase.suffix;
+    }
 
-      @Override
-      protected Symbol ellipsis() {
-        return ellipsis;
-      }
-    };
-  }
-
-  @Override
-  public void finish(
-      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
-    middleUsed.add(field());
-    dataType = atomType.getDataArray(errors, typePath, field());
-  }
-
-  public abstract String field();
-
-  @Override
-  public void dispatch(final DispatchHandler handler) {
-    handler.handle(this);
+    @Override
+    protected Symbol ellipsis() {
+      return frontArraySpecBase.ellipsis;
+    }
   }
 }

@@ -17,6 +17,8 @@ import com.zarbosoft.rendaw.common.Pair;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
 
+import java.util.function.BiConsumer;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
 
@@ -41,7 +43,7 @@ public class TestCursorChanges {
       final Syntax syntax,
       final Atom begin,
       Path selectBegin,
-      final Pair.Consumer<Context, Atom> transform,
+      final BiConsumer<Context, Atom> transform,
       final Atom end,
       final Path selectEnd) {
     final Context context = Helper.buildDoc(syntax, begin);

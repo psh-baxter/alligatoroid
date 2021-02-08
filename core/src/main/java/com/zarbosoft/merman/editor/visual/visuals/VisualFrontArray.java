@@ -8,11 +8,11 @@ import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.SelectionState;
-import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.editor.visual.VisualParent;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.attachments.BorderAttachment;
 import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
@@ -40,120 +40,14 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
   private ArrayHoverable hoverable;
 
   public VisualFrontArray(
-      final Context context,
-      final VisualParent parent,
-      final ValueArray value,
-      final int visualDepth,
-      final int depthScore) {
+          final VisualParent parent,
+          final ValueArray value,
+          final int visualDepth) {
     super(visualDepth);
     this.value = value;
-    dataListener =
-        new ValueArray.Listener() {
-
-          @Override
-          public void changed(
-              final Context context, final int index, final int remove, final ROList<Atom> add) {
-            if (ellipsize(context)) {
-              if (value.data.isEmpty()) {
-                // Was blank, now ellipsized
-                if (empty != null) empty.destroy(context);
-                context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
-                return;
-              } else if (add.isEmpty() && remove == value.data.size()) {
-                // Was ellipsized, now blank
-              } else {
-                // Was ellipsized, no change
-                return;
-              }
-            }
-
-            // Prep to fix selection if deep under an element
-            Integer fixDeepSelectionIndex = null;
-            Integer fixDeepHoverIndex = null;
-            Integer oldSelectionBeginIndex = null;
-            Integer oldSelectionEndIndex = null;
-            if (selection != null) {
-              oldSelectionBeginIndex = selection.beginIndex;
-              oldSelectionEndIndex = selection.endIndex;
-            } else if (context.cursor != null) {
-              VisualParent parent = context.cursor.getVisual().parent();
-              while (parent != null) {
-                final Visual visual = parent.visual();
-                if (visual == VisualFrontArray.this) {
-                  fixDeepSelectionIndex = ((ArrayVisualParent) parent).valueIndex();
-                  break;
-                }
-                parent = visual.parent();
-              }
-            }
-            if (hoverable == null && context.hover != null) {
-              VisualParent parent = context.hover.visual().parent();
-              while (parent != null) {
-                final Visual visual = parent.visual();
-                if (visual == VisualFrontArray.this) {
-                  fixDeepHoverIndex = ((ArrayVisualParent) parent).valueIndex();
-                  break;
-                }
-                parent = visual.parent();
-              }
-            }
-
-            // Create child visuals
-            coreChange(context, index, remove, add);
-
-            // Lay bricks if children added/totally cleared
-            if (!add.isEmpty()) {
-              if (empty != null) empty.destroy(context);
-              final int layIndex = visualIndex(index);
-              context.triggerIdleLayBricks(
-                  parent,
-                  layIndex,
-                  visualIndex(index + add.size()) - layIndex,
-                  children.size(),
-                  i -> children.get(i).getFirstBrick(context),
-                  i -> children.get(i).getLastBrick(context));
-            } else if (value.data.isEmpty()) {
-              if (ellipsis != null) ellipsis.destroy(context);
-              context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
-            }
-
-            // Fix hover/selection
-            if (hoverable != null) {
-              hoverable.notifyRangeAdjusted(context, index, remove, add.size());
-            } else if (fixDeepHoverIndex != null
-                && fixDeepHoverIndex >= index
-                && fixDeepHoverIndex < index + remove) {
-              context.clearHover();
-            }
-            if (oldSelectionBeginIndex != null) {
-              if (value.data.isEmpty()) value.atomParentRef.selectAtomParent(context);
-              else {
-                if (oldSelectionBeginIndex >= index + remove)
-                  selection.setBegin(context, oldSelectionBeginIndex - remove + add.size());
-                else if (oldSelectionBeginIndex >= index)
-                  selection.setBegin(
-                      context,
-                      Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
-                if (oldSelectionEndIndex >= index + remove)
-                  selection.setEnd(context, oldSelectionEndIndex - remove + add.size());
-                else if (oldSelectionEndIndex >= index)
-                  selection.setEnd(
-                      context,
-                      Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
-              }
-            } else if (fixDeepSelectionIndex != null) {
-              if (value.data.isEmpty()) value.atomParentRef.selectAtomParent(context);
-              else if (fixDeepSelectionIndex >= index && fixDeepSelectionIndex < index + remove) {
-                final int newIndex =
-                    Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1));
-                select(context, true, newIndex, newIndex);
-              }
-            }
-          }
-        };
+    dataListener = new DataListener(value, parent);
     value.addListener(dataListener);
     value.visual = this;
-    root(context, parent, depthScore, depthScore);
   }
 
   private void coreChange(
@@ -346,7 +240,6 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
                 return VisualFrontArray.this.getTags(context).add(Tags.TAG_PART_EMPTY);
               }
             });
-    context.bricksCreated(this, empty);
     return empty;
   }
 
@@ -483,7 +376,6 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
                     return VisualFrontArray.this.getTags(context).add(Tags.TAG_PART_ELLIPSIS);
                   }
                 });
-    context.bricksCreated(this, ellipsis);
     return ellipsis;
   }
 
@@ -654,158 +546,159 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     }
 
     private class ActionEnter implements Action {
-    public String id() {
+      public String id() {
         return "enter";
-    }
-      @Override
-      public boolean run(final Context context) {
+      }
 
-        return self.value.data.get(beginIndex).visual.selectAnyChild(context);
+      @Override
+      public void run(final Context context) {
+        self.value.data.get(beginIndex).visual.selectAnyChild(context);
       }
     }
 
     private class ActionExit implements Action {
-    public String id() {
+      public String id() {
         return "exit";
-    }
+      }
+
       @Override
-      public boolean run(final Context context) {
-        return self.value.atomParentRef.selectAtomParent(context);
+      public void run(final Context context) {
+        self.value.atomParentRef.selectAtomParent(context);
       }
     }
 
     private class ActionNext implements Action {
-    public String id() {
+      public String id() {
         return "next";
-    }
+      }
+
       @Override
-      public boolean run(final Context context) {
-        return self.parent.selectNext(context);
+      public void run(final Context context) {
+        self.parent.selectNext(context);
       }
     }
 
     private class ActionPrevious implements Action {
-    public String id() {
+      public String id() {
         return "previous";
-    }
+      }
+
       @Override
-      public boolean run(final Context context) {
-        return self.parent.selectPrevious(context);
+      public void run(final Context context) {
+        self.parent.selectPrevious(context);
       }
     }
 
     private class ActionNextElement implements Action {
-    public String id() {
+      public String id() {
         return "next_element";
-    }
+      }
+
       @Override
-      public boolean run(final Context context) {
+      public void run(final Context context) {
 
         ArrayCursor.this.leadFirst = true;
         final int newIndex = Math.min(self.value.data.size() - 1, endIndex + 1);
-        if (newIndex == beginIndex && newIndex == endIndex) return false;
+        if (newIndex == beginIndex && newIndex == endIndex) return;
         setPosition(context, newIndex);
-        return true;
       }
     }
 
     private class ActionPreviousElement implements Action {
-    public String id() {
+      public String id() {
         return "previous_element";
-    }
+      }
+
       @Override
-      public boolean run(final Context context) {
+      public void run(final Context context) {
 
         ArrayCursor.this.leadFirst = true;
         final int newIndex = Math.max(0, beginIndex - 1);
-        if (newIndex == beginIndex && newIndex == endIndex) return false;
+        if (newIndex == beginIndex && newIndex == endIndex) return;
         setPosition(context, newIndex);
-        return true;
       }
     }
 
     private class ActionCopy implements Action {
-    public String id() {
+      public String id() {
         return "copy";
-    }
+      }
+
       @Override
-      public boolean run(final Context context) {
+      public void run(final Context context) {
         context.copy(self.value.data.sublist(beginIndex, endIndex + 1));
-        return true;
       }
     }
 
     private class ActionGatherNext implements Action {
-    public String id() {
+      public String id() {
         return "gather_next";
-    }
+      }
+
       @Override
-      public boolean run(final Context context) {
+      public void run(final Context context) {
 
         final int newIndex = Math.min(self.value.data.size() - 1, endIndex + 1);
-        if (endIndex == newIndex) return false;
+        if (endIndex == newIndex) return;
         setEnd(context, newIndex);
-        return true;
       }
     }
 
     private class ActionReleaseNext implements Action {
-    public String id() {
+      public String id() {
         return "release_next";
-    }
+      }
+
       @Override
-      public boolean run(final Context context) {
+      public void run(final Context context) {
 
         final int newIndex = Math.max(beginIndex, endIndex - 1);
-        if (endIndex == newIndex) return false;
+        if (endIndex == newIndex) return;
         setEnd(context, newIndex);
-        return true;
       }
     }
 
     private class ActionGatherPrevious implements Action {
-    public String id() {
+      public String id() {
         return "gather_previous";
-    }
+      }
+
       @Override
-      public boolean run(final Context context) {
+      public void run(final Context context) {
 
         final int newIndex = Math.max(0, beginIndex - 1);
-        if (beginIndex == newIndex) return false;
+        if (beginIndex == newIndex) return;
         setBegin(context, newIndex);
-        return true;
       }
     }
 
     private class ActionReleasePrevious implements Action {
-    public String id() {
+      public String id() {
         return "release_previous";
-    }
+      }
 
       @Override
-      public boolean run(final Context context) {
+      public void run(final Context context) {
 
         final int newIndex = Math.min(endIndex, beginIndex + 1);
-        if (beginIndex == newIndex) return false;
+        if (beginIndex == newIndex) return;
         setBegin(context, newIndex);
-        return true;
       }
     }
 
     private class ActionWindow implements Action {
-    public String id() {
+      public String id() {
         return "window";
-    }
+      }
 
       @Override
-      public boolean run(final Context context) {
+      public void run(final Context context) {
         final Atom root = self.value.data.get(beginIndex);
         if (root.visual.selectAnyChild(context)) {
           context.windowExact(root);
           context.triggerIdleLayBricksOutward();
-          return true;
+          return;
         }
-        return false;
       }
     }
   }
@@ -978,6 +871,114 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
         selection.border.setLast(context, lastBrick);
       if (hoverable != null && valueIndex() == ((ElementHoverable) hoverable).index)
         ((ElementHoverable) hoverable).border.setLast(context, lastBrick);
+    }
+  }
+
+  private class DataListener implements ValueArray.Listener {
+    private final ValueArray value;
+    private final VisualParent parent;
+
+    public DataListener(ValueArray value, VisualParent parent) {
+      this.value = value;
+      this.parent = parent;
+    }
+
+    @Override
+    public void changed(
+        final Context context, final int index, final int remove, final ROList<Atom> add) {
+      if (ellipsize(context)) {
+        if (value.data.isEmpty()) {
+          // Was blank, now ellipsized
+          if (empty != null) empty.destroy(context);
+          context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
+          return;
+        } else if (add.isEmpty() && remove == value.data.size()) {
+          // Was ellipsized, now blank
+        } else {
+          // Was ellipsized, no change
+          return;
+        }
+      }
+
+      // Prep to fix selection if deep under an element
+      Integer fixDeepSelectionIndex = null;
+      Integer fixDeepHoverIndex = null;
+      Integer oldSelectionBeginIndex = null;
+      Integer oldSelectionEndIndex = null;
+      if (selection != null) {
+        oldSelectionBeginIndex = selection.beginIndex;
+        oldSelectionEndIndex = selection.endIndex;
+      } else if (context.cursor != null) {
+        VisualParent parent = context.cursor.getVisual().parent();
+        while (parent != null) {
+          final Visual visual = parent.visual();
+          if (visual == VisualFrontArray.this) {
+            fixDeepSelectionIndex = ((ArrayVisualParent) parent).valueIndex();
+            break;
+          }
+          parent = visual.parent();
+        }
+      }
+      if (hoverable == null && context.hover != null) {
+        VisualParent parent = context.hover.visual().parent();
+        while (parent != null) {
+          final Visual visual = parent.visual();
+          if (visual == VisualFrontArray.this) {
+            fixDeepHoverIndex = ((ArrayVisualParent) parent).valueIndex();
+            break;
+          }
+          parent = visual.parent();
+        }
+      }
+
+      // Create child visuals
+      coreChange(context, index, remove, add);
+
+      // Lay bricks if children added/totally cleared
+      if (!add.isEmpty()) {
+        if (empty != null) empty.destroy(context);
+        final int layIndex = visualIndex(index);
+        context.triggerIdleLayBricks(
+            parent,
+            layIndex,
+            visualIndex(index + add.size()) - layIndex,
+            children.size(),
+            i -> children.get(i).getFirstBrick(context),
+            i -> children.get(i).getLastBrick(context));
+      } else if (value.data.isEmpty()) {
+        if (ellipsis != null) ellipsis.destroy(context);
+        context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
+      }
+
+      // Fix hover/selection
+      if (hoverable != null) {
+        hoverable.notifyRangeAdjusted(context, index, remove, add.size());
+      } else if (fixDeepHoverIndex != null
+          && fixDeepHoverIndex >= index
+          && fixDeepHoverIndex < index + remove) {
+        context.clearHover();
+      }
+      if (oldSelectionBeginIndex != null) {
+        if (value.data.isEmpty()) value.atomParentRef.selectAtomParent(context);
+        else {
+          if (oldSelectionBeginIndex >= index + remove)
+            selection.setBegin(context, oldSelectionBeginIndex - remove + add.size());
+          else if (oldSelectionBeginIndex >= index)
+            selection.setBegin(
+                context, Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
+          if (oldSelectionEndIndex >= index + remove)
+            selection.setEnd(context, oldSelectionEndIndex - remove + add.size());
+          else if (oldSelectionEndIndex >= index)
+            selection.setEnd(
+                context, Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
+        }
+      } else if (fixDeepSelectionIndex != null) {
+        if (value.data.isEmpty()) value.atomParentRef.selectAtomParent(context);
+        else if (fixDeepSelectionIndex >= index && fixDeepSelectionIndex < index + remove) {
+          final int newIndex = Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1));
+          select(context, true, newIndex, newIndex);
+        }
+      }
     }
   }
 }

@@ -10,9 +10,9 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Deque;
 import java.util.Iterator;
 
 public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
@@ -28,7 +28,7 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
 
   @Override
   public Node buildBackRule(final Syntax syntax) {
-    return new Operator<StackStore>(new ClassEqTerminal(JSpecialPrimitiveEvent.class)) {
+    return new Operator<StackStore>(new ClassEqTerminal(JSpecialPrimitiveEvent.class.getName())) {
       @Override
       protected StackStore process(StackStore store) {
         return store.stackVarDoubleElement(
@@ -40,7 +40,7 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public void write(Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.jsonSpecialPrimitive(((StringBuilder) data.get(id)).toString());
   }
 

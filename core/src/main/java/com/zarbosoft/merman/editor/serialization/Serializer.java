@@ -9,5 +9,12 @@ public interface Serializer {
 
   byte[] write(ROList<Atom> atom);
 
-  ROList<Atom> load(Syntax syntax, String type, byte[] data);
+  /**
+   * Per clipboard, data is bytes or string depending on execution environment (js vs java)
+   * @param syntax
+   * @param type
+   * @param data
+   * @return
+   */
+  ROList<Atom> loadFromClipboard(Syntax syntax, String type, Object data);
 }

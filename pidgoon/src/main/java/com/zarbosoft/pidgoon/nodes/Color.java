@@ -29,17 +29,21 @@ public class Color extends Node {
       final Object cause) {
     Object wasColor = store.color;
     store.color = color;
-    child.context(
-        context,
-        store,
-        new BaseParent(parent) {
-          @Override
-          public void advance(final Parse step, final Store store, final Object cause) {
-            store.color = wasColor;
-            parent.advance(step, store, cause);
-          }
-        },
-        seen,
-        cause);
+    child.context(context, store, new ColorParent(parent, wasColor), seen, cause);
+  }
+
+  private static class ColorParent extends BaseParent {
+    private final Object wasColor;
+
+    public ColorParent(Parent parent, Object wasColor) {
+      super(parent);
+      this.wasColor = wasColor;
+    }
+
+    @Override
+    public void advance(final Parse step, final Store store, final Object cause) {
+      store.color = wasColor;
+      parent.advance(step, store, cause);
+    }
   }
 }

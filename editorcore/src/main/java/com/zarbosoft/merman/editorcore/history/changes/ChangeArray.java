@@ -1,10 +1,11 @@
 package com.zarbosoft.merman.editorcore.history.changes;
 
-import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueArray;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editorcore.history.Change;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,12 +13,12 @@ import java.util.List;
 public class ChangeArray extends Change {
 
   private final ValueArray value;
+  private final TSList<Atom> add = new TSList<>();
   private int index;
   private int remove;
-  private final List<Atom> add = new ArrayList<>();
 
   public ChangeArray(
-      final ValueArray value, final int index, final int remove, final List<Atom> add) {
+      final ValueArray value, final int index, final int remove, final ROList<Atom> add) {
     this.value = value;
     this.index = index;
     this.remove = remove;
@@ -36,7 +37,7 @@ public class ChangeArray extends Change {
     if (other2.index + other2.remove == index) {
       index = other2.index;
       remove += other2.remove;
-      add.addAll(0, other2.add);
+      add.insertAll(0, other2.add);
     } else if (index + remove == other2.index) {
       remove += other2.remove;
       add.addAll(other2.add);
@@ -51,7 +52,7 @@ public class ChangeArray extends Change {
         new ChangeArray(value, index, add.size(), ImmutableList.copyOf(clearSublist));
     clearSublist.stream().forEach(v -> v.setValueParentRef(null));
     clearSublist.clear();
-    value.data.addAll(index, add);
+    value.data.insertAll(index, add);
     add.stream()
         .forEach(
             v -> {

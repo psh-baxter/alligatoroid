@@ -1,15 +1,14 @@
 package com.zarbosoft.merman.syntax.back;
 
-import com.zarbosoft.merman.editor.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.editor.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Deque;
 import java.util.Iterator;
 
 public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
@@ -25,7 +24,7 @@ public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
   }
 
   @Override
-  public void write(Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.jsonSpecialPrimitive(value);
   }
 

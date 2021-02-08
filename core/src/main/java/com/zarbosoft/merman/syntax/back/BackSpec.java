@@ -6,6 +6,7 @@ import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.ArrayDeque;
@@ -18,10 +19,10 @@ public abstract class BackSpec {
   public Parent parent = null;
 
   public static void walk(BackSpec root, Function<BackSpec, Boolean> consumer) {
-    Deque<Iterator<BackSpec>> stack = new ArrayDeque<>();
-    stack.addLast(Arrays.asList(root).iterator());
+    TSList<Iterator<BackSpec>> stack = new TSList<>();
+    stack.add(Arrays.asList(root).iterator());
     while (!stack.isEmpty()) {
-      Iterator<BackSpec> top = stack.getLast();
+      Iterator<BackSpec> top = stack.last();
       BackSpec next = top.next();
       if (!top.hasNext()) {
         stack.removeLast();
@@ -30,7 +31,7 @@ public abstract class BackSpec {
       if (cont) {
         Iterator<BackSpec> children = next.walkStep();
         if (children != null && children.hasNext()) {
-          stack.addLast(children);
+          stack.add(children);
         }
       }
     }
@@ -55,7 +56,7 @@ public abstract class BackSpec {
    * @param writer
    */
   public abstract void write(
-          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer);
+          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer);
 
   /**
    * Can this represent a single value (non key/type) field in back type Subarrays can represent a

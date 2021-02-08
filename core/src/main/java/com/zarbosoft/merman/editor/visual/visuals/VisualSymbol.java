@@ -66,7 +66,6 @@ public class VisualSymbol extends Visual
     if (brick != null) return null;
     if (condition != null && !condition.show()) return null;
     brick = frontSymbol.type.createBrick(context, this);
-    context.bricksCreated(this, brick);
     return brick;
   }
 

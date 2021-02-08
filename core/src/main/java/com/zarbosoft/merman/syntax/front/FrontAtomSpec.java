@@ -19,8 +19,41 @@ public class FrontAtomSpec extends FrontSpec {
   private final Symbol ellipsis;
   private BaseBackAtomSpec dataType;
 
+  public FrontAtomSpec(Config config) {
+    super(config.tags);
+    field = config.middle;
+    ellipsis = config.ellipsis;
+  }
+
   public BaseBackAtomSpec getDataType() {
     return dataType;
+  }
+
+  @Override
+  public Visual createVisual(
+      final Context context,
+      final VisualParent parent,
+      final Atom atom,
+      final int visualDepth,
+      final int depthScore) {
+    return new LocalVisualFrontAtom(this, context, parent, atom, visualDepth, depthScore);
+  }
+
+  @Override
+  public void finish(
+      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
+    middleUsed.add(field);
+    dataType = atomType.getDataAtom(errors, typePath, field);
+  }
+
+  @Override
+  public String field() {
+    return field;
+  }
+
+  @Override
+  public void dispatch(final DispatchHandler handler) {
+    handler.handle(this);
   }
 
   public static class Config {
@@ -39,43 +72,23 @@ public class FrontAtomSpec extends FrontSpec {
     }
   }
 
-  public FrontAtomSpec(Config config) {
-    super(config.tags);
-    field = config.middle;
-    ellipsis = config.ellipsis;
-  }
+  private static class LocalVisualFrontAtom extends VisualFrontAtom {
+    private final FrontAtomSpec frontAtomSpec;
 
-  @Override
-  public Visual createVisual(
-          final Context context,
-          final VisualParent parent,
-          final Atom atom,
-          final int visualDepth,
-          final int depthScore) {
-    return new VisualFrontAtom(
-        context, parent, dataType.get(atom.fields), visualDepth, depthScore) {
+    public LocalVisualFrontAtom(
+        FrontAtomSpec frontAtomSpec,
+        Context context,
+        VisualParent parent,
+        Atom atom,
+        int visualDepth,
+        int depthScore) {
+      super(context, parent, frontAtomSpec.dataType.get(atom.fields), visualDepth, depthScore);
+      this.frontAtomSpec = frontAtomSpec;
+    }
 
-      @Override
-      protected Symbol ellipsis() {
-        return ellipsis;
-      }
-    };
-  }
-
-  @Override
-  public void finish(
-      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
-    middleUsed.add(field);
-    dataType = atomType.getDataAtom(errors, typePath, field);
-  }
-
-  @Override
-  public String field() {
-    return field;
-  }
-
-  @Override
-  public void dispatch(final DispatchHandler handler) {
-    handler.handle(this);
+    @Override
+    protected Symbol ellipsis() {
+      return frontAtomSpec.ellipsis;
+    }
   }
 }

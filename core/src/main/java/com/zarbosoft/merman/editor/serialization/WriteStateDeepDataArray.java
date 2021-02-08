@@ -3,9 +3,9 @@ package com.zarbosoft.merman.editor.serialization;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.syntax.back.BackSpec;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
@@ -19,7 +19,7 @@ public class WriteStateDeepDataArray extends WriteState {
     }
 
     @Override
-    public void run(final Deque<WriteState> stack, final EventConsumer writer) {
+    public void run(final TSList<WriteState> stack, final EventConsumer writer) {
         if (!iterator.hasNext()) {
             stack.removeLast();
             return;

@@ -19,7 +19,7 @@ public class ArrayActionInsertAfter extends EditAction {
   }
 
   @Override
-  public boolean run1(final Context context) {
+  public void run1(final Context context) {
     final Atom created =
         edit.arrayInsertNewDefault(context, edit.history, cursor.self.value, cursor.endIndex + 1);
     if (!created.visual.selectAnyChild(context)) cursor.setPosition(context, cursor.endIndex + 1);

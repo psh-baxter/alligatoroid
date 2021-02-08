@@ -12,12 +12,11 @@ public abstract class EditAction implements Action {
   }
 
   @Override
-  public final boolean run(Context context) {
+  public final void run(Context context) {
     edit.history.finishChange(context);
-    boolean out = run1(context);
+    run1(context);
     edit.history.finishChange(context);
-    return out;
   }
 
-  protected abstract boolean run1(Context context);
+  protected abstract void run1(Context context);
 }

@@ -40,32 +40,35 @@ public class Sequence extends Node {
     if (children.isEmpty()) {
       parent.advance(context, store, cause);
     } else {
-      class SeqParent extends BaseParent {
-        final int step;
-
-        public SeqParent(final Parent parent, final int step) {
-          super(parent);
-          this.step = step;
-        }
-
-        @Override
-        public void advance(final Parse step, final Store store, final Object cause) {
-          final Store tempStore = store.pop();
-          final int nextStep = this.step + 1;
-          if (nextStep >= children.size()) {
-            parent.advance(step, tempStore, cause);
-          } else {
-            children
-                .get(nextStep)
-                .context(step, tempStore.push(), new SeqParent(parent, nextStep), cause);
-          }
-        }
-      }
-      children.get(0).context(context, store.push(), new SeqParent(parent, 0), seen, cause);
+      children.get(0).context(context, store.push(), new SeqParent(this, parent, 0), seen, cause);
     }
   }
 
   public boolean isEmpty() {
     return children.isEmpty();
+  }
+
+  private static class SeqParent extends BaseParent {
+    final int step;
+    private final Sequence self;
+
+    public SeqParent(Sequence self, final Parent parent, final int step) {
+      super(parent);
+      this.step = step;
+      this.self = self;
+    }
+
+    @Override
+    public void advance(final Parse step, final Store store, final Object cause) {
+      final Store tempStore = store.pop();
+      final int nextStep = this.step + 1;
+      if (nextStep >= self.children.size()) {
+        parent.advance(step, tempStore, cause);
+      } else {
+        self.children
+            .get(nextStep)
+            .context(step, tempStore.push(), new SeqParent(self, parent, nextStep), cause);
+      }
+    }
   }
 }

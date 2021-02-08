@@ -1,21 +1,29 @@
 package com.zarbosoft.merman.standalone;
 
 import com.zarbosoft.merman.editor.ClipboardEngine;
+import com.zarbosoft.merman.syntax.BackType;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 
 import java.nio.charset.StandardCharsets;
+import java.util.function.Consumer;
 
 public class SimpleClipboardEngine extends ClipboardEngine {
+	private final DataFormat dataFormat;
 	Clipboard clipboard = Clipboard.getSystemClipboard();
-	DataFormat dataFormat = new DataFormat("application/luxem");
+	public final BackType backType;
+
+	public SimpleClipboardEngine(BackType backType) {
+		this.backType = backType;
+		dataFormat = new DataFormat(backType.mime());
+	}
 
 	@Override
-	public void set(final byte[] bytes) {
+	public void set(final Object bytes) {
 		final ClipboardContent content = new ClipboardContent();
 		content.put(dataFormat, bytes);
-		content.putString(new String(bytes, StandardCharsets.UTF_8));
+		content.putString(new String((byte[])bytes, StandardCharsets.UTF_8));
 		clipboard.setContent(content);
 	}
 
@@ -27,7 +35,7 @@ public class SimpleClipboardEngine extends ClipboardEngine {
 	}
 
 	@Override
-	public byte[] get() {
+	public void get(Consumer<Object> cb) {
 		byte[] out = (byte[]) clipboard.getContent(dataFormat);
 		if (out == null) {
 			final String temp = clipboard.getString();
@@ -35,11 +43,11 @@ public class SimpleClipboardEngine extends ClipboardEngine {
 				out = temp.getBytes(StandardCharsets.UTF_8);
 			}
 		}
-		return out;
+		cb.accept(out);
 	}
 
 	@Override
-	public String getString() {
+	public void getString(Consumer<String> cb) {
 		return clipboard.getString();
 	}
 }

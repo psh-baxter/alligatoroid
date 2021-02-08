@@ -2,6 +2,7 @@ package com.zarbosoft.merman.editor.visual.attachments;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Drawing;
+import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.wall.Attachment;
@@ -81,7 +82,7 @@ public class CursorAttachment {
     final Vector size = new Vector(buffer + 1, ascent + (style.roundStart ? buffer : 0));
     drawing.clear();
     drawing.resize(context, size);
-    final Drawing.DrawingContext gc = drawing.begin(context);
+    final DrawingContext gc = drawing.begin(context);
     gc.setLineThickness(style.lineThickness);
     if (style.roundStart) gc.setLineCapRound();
     else gc.setLineCapFlat();

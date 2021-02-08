@@ -297,12 +297,16 @@ public class Course {
       if (newAscent || newDescent) {
         for (Brick b : children) {
           b.allocateTransverse(context, ascent, descent);
-          b.getAttachments().forEach(a -> a.setTransverseSpan(context, ascent, descent));
+          for (Attachment attachment : b.getAttachments()) {
+            attachment.setTransverseSpan(context,ascent,descent);
+          }
         }
       } else
         for (Brick b : changed) {
           b.allocateTransverse(context, ascent, descent);
-          b.getAttachments().forEach(a -> a.setTransverseSpan(context, ascent, descent));
+          for (Attachment a : b.getAttachments()) {
+            a.setTransverseSpan(context, ascent, descent);
+          }
         }
 
       /// Do converse placement

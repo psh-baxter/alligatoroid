@@ -20,10 +20,11 @@ import def.dom.HTMLDivElement;
 import def.dom.KeyboardEvent;
 import def.dom.MouseEvent;
 import def.dom.WheelEvent;
-import def.js.ResizeObserver;
 import jsweet.util.StringTypes;
 
 import java.util.function.Consumer;
+
+import static jsweet.util.Lang.$insert;
 
 public class JSDisplay extends Display {
   private final HTMLDivElement base;
@@ -42,7 +43,9 @@ public class JSDisplay extends Display {
       HTMLDivElement base) {
     super(converseDirection, transverseDirection);
     this.base = base;
-    new ResizeObserver(() -> widthHeightChanged(width(), height())).observe(base);
+    //noinspection unused
+    Runnable resizeCb = () -> widthHeightChanged(width(), height());
+    $insert("new (window as any).ResizeObserver(resizeCb).observe(base);");
     this.base.addEventListener(
         StringTypes.mousemove,
         mouseEvent -> {
@@ -1216,19 +1219,19 @@ public class JSDisplay extends Display {
   }
 
   @Override
-  protected double width() {
+  public double width() {
     return (int) base.clientWidth;
   }
 
   @Override
-  protected double height() {
+  public double height() {
     return (int) base.clientHeight;
   }
 
   @Override
   public void add(int index, DisplayNode node) {
     if (index < base.childNodes.length) base.appendChild(((JSDisplayNode) node).js());
-    else base.childNodes.$get(index + 1).insertBefore(((JSDisplayNode) node).js());
+    else base.insertBefore(((JSDisplayNode) node).js(), base.childNodes.$get(index));
   }
 
   @Override

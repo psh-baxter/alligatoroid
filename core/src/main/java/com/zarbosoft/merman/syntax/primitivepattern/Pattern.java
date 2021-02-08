@@ -16,8 +16,6 @@ import java.util.List;
 import static com.zarbosoft.rendaw.common.Common.isOrdered;
 
 public abstract class Pattern {
-  public static Pattern repeatedAny = new Repeat0(new Any());
-
   public abstract Node build(I18nEngine i18n);
 
   protected static class CharacterRangeTerminal extends Terminal {
@@ -50,12 +48,12 @@ public abstract class Pattern {
     return glyphs;
   }
 
-  public class Matcher {
+  public static class Matcher {
     private final Grammar grammar;
 
-    public Matcher(I18nEngine i18n) {
+    public Matcher(Pattern pattern, I18nEngine i18n) {
       grammar = new Grammar();
-      grammar.add("root", build(i18n));
+      grammar.add("root", pattern.build(i18n));
     }
 
     public boolean match(Context context, final String value) {

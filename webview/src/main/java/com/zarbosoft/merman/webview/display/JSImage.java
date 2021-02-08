@@ -12,7 +12,7 @@ public class JSImage extends JSDisplayNode implements Image {
 
   public JSImage(JSDisplay display) {
     super(display);
-    element = Globals.document.createElement(StringTypes.img);
+    element = Globals.window.document.createElement(StringTypes.img);
     element.classList.add("merman-display-img");
   }
 

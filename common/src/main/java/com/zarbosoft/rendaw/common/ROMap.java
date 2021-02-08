@@ -3,6 +3,7 @@ package com.zarbosoft.rendaw.common;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public interface ROMap<K, V> extends Iterable<Map.Entry<K, V>> {
@@ -15,6 +16,11 @@ public interface ROMap<K, V> extends Iterable<Map.Entry<K, V>> {
   Iterator<V> iterValues();
 
   boolean has(K k);
+
+  @Override
+  default void forEach(Consumer<? super Map.Entry<K, V>> action) {
+    throw new Assertion();
+  }
 
   /**
    * Get, no assertions
@@ -31,14 +37,6 @@ public interface ROMap<K, V> extends Iterable<Map.Entry<K, V>> {
    * @return
    */
   public V get(K k);
-
-  /**
-   * Get, asserts value exists
-   *
-   * @param k
-   * @return
-   */
-  public V getNull(K k);
 
   TSMap<K, V> mut();
 

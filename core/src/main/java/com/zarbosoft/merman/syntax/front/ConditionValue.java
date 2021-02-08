@@ -13,6 +13,32 @@ public class ConditionValue extends ConditionType {
   public final String field;
   public final Is is;
 
+  public ConditionValue(Config config) {
+    super(config.invert);
+    this.field = config.field;
+    this.is = config.is;
+  }
+
+  @Override
+  public ConditionAttachment create(final Context context, final Atom atom) {
+    final Value value = atom.fields.getOpt(field);
+    if (value instanceof ValuePrimitive) {
+      return new PrimitiveCondition(invert, (ValuePrimitive) value);
+    } else if (value instanceof ValueArray) {
+      return new ArrayCondition(invert, (ValueArray) value);
+    } else throw new DeadCode();
+  }
+
+  @Override
+  protected boolean defaultOnImplementation() {
+    if (is == ConditionValue.Is.EMPTY) return false;
+    return true;
+  }
+
+  public static enum Is {
+    EMPTY,
+  }
+
   public static class Config {
     public final String field;
     public final Is is;
@@ -25,74 +51,55 @@ public class ConditionValue extends ConditionType {
     }
   }
 
-    public ConditionValue(Config config) {
-        super(config.invert);
-        this.field = config.field;
-        this.is = config.is;
+  private static class PrimitiveCondition extends ConditionAttachment
+      implements ValuePrimitive.Listener {
+    private final ValuePrimitive value;
+
+    PrimitiveCondition(boolean invert, ValuePrimitive value) {
+      super(invert);
+      this.value = value;
     }
 
     @Override
-  public ConditionAttachment create(final Context context, final Atom atom) {
-    final Value value = atom.fields.getOpt(field);
-    if (value instanceof ValuePrimitive) {
-      class PrimitiveCondition extends ConditionAttachment implements ValuePrimitive.Listener {
+    public void destroy(final Context context) {}
 
-        PrimitiveCondition() {
-          super(invert);
-        }
+    @Override
+    public void set(final Context context, final String value) {
+      if (value.isEmpty()) {
+        setState(context, false);
+      } else setState(context, true);
+    }
 
-        @Override
-        public void destroy(final Context context) {}
+    @Override
+    public void added(final Context context, final int index, final String value) {
+      setState(context, true);
+    }
 
-        @Override
-        public void set(final Context context, final String value) {
-          if (value.isEmpty()) {
-            setState(context, false);
-          } else setState(context, true);
-        }
-
-        @Override
-        public void added(final Context context, final int index, final String value) {
-          setState(context, true);
-        }
-
-        @Override
-        public void removed(final Context context, final int index, final int count) {
-          if (((ValuePrimitive) value).get().isEmpty()) {
-            setState(context, false);
-          }
-        }
+    @Override
+    public void removed(final Context context, final int index, final int count) {
+      if (((ValuePrimitive) value).get().isEmpty()) {
+        setState(context, false);
       }
-      return new PrimitiveCondition();
-    } else if (value instanceof ValueArray) {
-      class ArrayCondition extends ConditionAttachment implements ValueArray.Listener {
-
-        ArrayCondition() {
-          super(invert);
-        }
-
-        @Override
-        public void destroy(final Context context) {}
-
-        @Override
-        public void changed(
-            final Context context, final int index, final int remove, final ROList<Atom> add) {
-          if (((ValueArray) value).data.isEmpty()) {
-            setState(context, false);
-          } else setState(context, true);
-        }
-      }
-      return new ArrayCondition();
-    } else throw new DeadCode();
+    }
   }
 
-  @Override
-  protected boolean defaultOnImplementation() {
-    if (is == ConditionValue.Is.EMPTY) return false;
-    return true;
-  }
+  private static class ArrayCondition extends ConditionAttachment implements ValueArray.Listener {
+    private final ValueArray value;
 
-  public static enum Is {
-    EMPTY,
+    ArrayCondition(boolean invert, ValueArray value) {
+      super(invert);
+      this.value = value;
+    }
+
+    @Override
+    public void destroy(final Context context) {}
+
+    @Override
+    public void changed(
+        final Context context, final int index, final int remove, final ROList<Atom> add) {
+      if (((ValueArray) value).data.isEmpty()) {
+        setState(context, false);
+      } else setState(context, true);
+    }
   }
 }

@@ -94,6 +94,8 @@ public class MockeryDisplay extends Display {
   }
 
   public void sendHIDEvent(final HIDEvent event) {
-    hidEventListeners.forEach(listener -> listener.accept(event));
+    for (Consumer<HIDEvent> listener : hidEventListeners) {
+      listener.accept(event);
+    }
   }
 }

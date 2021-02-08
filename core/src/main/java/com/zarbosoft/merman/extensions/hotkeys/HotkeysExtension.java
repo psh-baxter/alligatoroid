@@ -19,18 +19,13 @@ import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Union;
-import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Comparator;
-
 public class HotkeysExtension {
-  private static final Comparator<Pair<Integer, Action>> matchComparator =
-      new ChainComparator<Pair<Integer, Action>>().greaterFirst(p -> p.first).build();
   // Settings
   public final TSList<HotkeyRule> rules = new TSList<>();
   public boolean showDetails;
@@ -45,28 +40,11 @@ public class HotkeysExtension {
 
   public HotkeysExtension(final Context context) {
     this.showDetails = showDetails;
-    context.keyListener = this::handleEvent;
-    final Context.TagsListener tagsListener =
-        new Context.TagsListener() {
-          @Override
-          public void tagsChanged(final Context context) {
-            update(context);
-          }
-        };
+    context.keyListener = (context1, event) -> handleEvent(context1, event);
+    final Context.TagsListener tagsListener = new TagsListener(this);
     context.addSelectionTagsChangeListener(tagsListener);
     context.addGlobalTagsChangeListener(tagsListener);
-    context.addActionChangeListener(
-        new Context.ActionChangeListener() {
-          @Override
-          public void actionsAdded(final Context context) {
-            update(context);
-          }
-
-          @Override
-          public void actionsRemoved(final Context context) {
-            update(context);
-          }
-        });
+    context.addActionChangeListener(new ActionChangeListener(this));
     update(context);
   }
 
@@ -121,14 +99,19 @@ public class HotkeysExtension {
       return freeTyping ? false : true;
     }
     if (hotkeyParse.ended()) {
-      final Action action =
-          hotkeyParse.allResults().stream().sorted(matchComparator).findFirst().get().second;
+      Pair<Integer, Action> best = null;
+      for (Pair<Integer, Action> res : hotkeyParse.allResults()) {
+        if (best == null || res.first > best.first) {
+          best = res;
+        }
+      }
+      final Action action = best.second;
       clean(context);
       action.run(context);
     } else {
       if (showDetails) {
         if (hotkeyDetails != null) context.details.removePage(context, hotkeyDetails);
-        hotkeyDetails = new HotkeyDetails(context);
+        hotkeyDetails = new HotkeyDetails(this, context);
         context.details.addPage(context, hotkeyDetails);
       }
     }
@@ -144,8 +127,21 @@ public class HotkeysExtension {
     }
   }
 
-  private class HotkeyDetails extends DetailsPage {
-    public HotkeyDetails(final Context context) {
+  private static class TagsListener extends Context.TagsListener {
+    private final HotkeysExtension hotkeysExtension;
+
+    public TagsListener(HotkeysExtension hotkeysExtension) {
+      this.hotkeysExtension = hotkeysExtension;
+    }
+
+    @Override
+    public void tagsChanged(final Context context) {
+      hotkeysExtension.update(context);
+    }
+  }
+
+  private static class HotkeyDetails extends DetailsPage {
+    public HotkeyDetails(HotkeysExtension hotkeysExtension, final Context context) {
       final Group group = context.display.group();
       this.node = group;
       final TLayout layout = new TLayout(group);
@@ -161,7 +157,7 @@ public class HotkeysExtension {
                   .ro());
       first.setColor(context, firstStyle.color);
       first.setFont(context, firstStyle.getFont(context));
-      first.setText(context, hotkeySequence);
+      first.setText(context, hotkeysExtension.hotkeySequence);
       layout.add(first);
 
       final Style lineStyle =
@@ -173,12 +169,12 @@ public class HotkeysExtension {
                   .add(Tags.TAG_PART_DETAILS)
                   .ro());
       final ColumnarTableLayout table = new ColumnarTableLayout(context, context.syntax.detailSpan);
-      for (final com.zarbosoft.pidgoon.State leaf : hotkeyParse.context().leaves) {
+      for (final com.zarbosoft.pidgoon.State leaf : hotkeysExtension.hotkeyParse.context().leaves) {
         final Action action = leaf.color();
         final Text rule = context.display.text();
         rule.setColor(context, lineStyle.color);
         rule.setFont(context, lineStyle.getFont(context));
-        rule.setText(context, hotkeyGrammar.getNode(action.id()).toString());
+        rule.setText(context, hotkeysExtension.hotkeyGrammar.getNode(action.id()).toString());
         final Text name = context.display.text();
         name.setColor(context, lineStyle.color);
         name.setFont(context, lineStyle.getFont(context));
@@ -192,5 +188,23 @@ public class HotkeysExtension {
 
     @Override
     public void tagsChanged(final Context context) {}
+  }
+
+  private static class ActionChangeListener implements Context.ActionChangeListener {
+    private final HotkeysExtension hotkeysExtension;
+
+    public ActionChangeListener(HotkeysExtension hotkeysExtension) {
+      this.hotkeysExtension = hotkeysExtension;
+    }
+
+    @Override
+    public void actionsAdded(final Context context) {
+      hotkeysExtension.update(context);
+    }
+
+    @Override
+    public void actionsRemoved(final Context context) {
+      hotkeysExtension.update(context);
+    }
   }
 }

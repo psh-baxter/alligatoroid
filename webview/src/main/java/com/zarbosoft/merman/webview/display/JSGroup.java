@@ -14,14 +14,14 @@ public class JSGroup extends JSDisplayNode implements Group {
 
   protected JSGroup(JSDisplay display) {
     super(display);
-    element = Globals.document.createElement(StringTypes.div);
+    element = Globals.window.document.createElement(StringTypes.div);
     element.classList.add("merman-display-group");
   }
 
   @Override
   public void add(int index, DisplayNode node) {
     if (index < element.childNodes.length) element.appendChild(((JSDisplayNode) node).js());
-    else element.childNodes.$get(index + 1).insertBefore(((JSDisplayNode) node).js());
+    else element.insertBefore(((JSDisplayNode) node).js(), element.childNodes.$get(index));
     fixPosition();
   }
 
@@ -30,7 +30,7 @@ public class JSGroup extends JSDisplayNode implements Group {
     for (int i = 0; i < nodes.size(); ++i) {
       DisplayNode node = nodes.get(i);
       if (index < element.childNodes.length) element.appendChild(((JSDisplayNode) node).js());
-      else element.childNodes.$get(index + 1).insertBefore(((JSDisplayNode) node).js());
+      else element.insertBefore(((JSDisplayNode) node).js(), element.childNodes.$get(index));
       index += 1;
     }
     fixPosition();

@@ -2,6 +2,7 @@ package com.zarbosoft.merman.editor.display.derived;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Drawing;
+import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.ObboxStyle;
 
@@ -36,7 +37,7 @@ public class Obbox {
         new Vector(context.edge + style.padding * 2 + buffer * 2, ete - st + buffer * 2);
     drawing.resize(context, wh);
     drawing.setPosition(new Vector(-(buffer + style.padding), st - buffer), false);
-    final Drawing.DrawingContext gc = drawing.begin(context);
+    final DrawingContext gc = drawing.begin(context);
     gc.translate(buffer + style.padding, buffer);
     ste -= st;
     et -= st;
@@ -58,7 +59,7 @@ public class Obbox {
   }
 
   private void path(
-      final Drawing.DrawingContext gc,
+      final DrawingContext gc,
       final boolean oneLine,
       final int converseZero,
       final int converseEdge,
@@ -179,12 +180,12 @@ public class Obbox {
     }
   }
 
-  private void moveTo(final Drawing.DrawingContext gc, final int c, final int t) {
+  private void moveTo(final DrawingContext gc, final int c, final int t) {
     gc.moveTo(c, t);
   }
 
   private void cornerTo(
-      final Drawing.DrawingContext gc,
+      final DrawingContext gc,
       final boolean round,
       final int c,
       final int t,

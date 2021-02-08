@@ -1,41 +1,49 @@
 package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.editor.I18nEngine;
+import com.zarbosoft.merman.webview.compat.intl.Segment;
+import com.zarbosoft.merman.webview.compat.intl.Segmenter;
+import com.zarbosoft.merman.webview.compat.intl.SegmenterOptions;
+import com.zarbosoft.merman.webview.compat.intl.Segments;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSSet;
-import def.js.Intl;
+
+import static jsweet.util.Lang.$insert;
 
 public class JSI18nEngine implements I18nEngine {
-  private final Intl.Segmenter wordSegmenter;
-  private final Intl.Segmenter glyphSegmenter;
+  private final Segmenter wordSegmenter;
+  private final Segmenter glyphSegmenter;
 
   public JSI18nEngine(String lang) {
-    wordSegmenter =
-        new Intl.Segmenter(
-            lang,
-            new Intl.SegmenterOptions() {
-              {
-                granularity = "word";
-              }
-            });
-    glyphSegmenter =
-        new Intl.Segmenter(
-            lang,
-            new Intl.SegmenterOptions() {
-              {
-                granularity = "grapheme";
-              }
-            });
+    {
+      //noinspection UnusedAssignment
+      SegmenterOptions segmenterOptions =
+          new SegmenterOptions() {
+            {
+              granularity = "word";
+            }
+          };
+      wordSegmenter = $insert("new (Intl as any).Segmenter(lang, segmenterOptions)");
+    }
+    {
+      //noinspection UnusedAssignment
+      SegmenterOptions segmenterOptions =
+          new SegmenterOptions() {
+            {
+              granularity = "grapheme";
+            }
+          };
+      glyphSegmenter = $insert("new (Intl as any).Segmenter(lang, segmenterOptions)");
+    }
   }
 
   private static class Walker implements I18nEngine.Walker {
     private final TSList<Integer> segments = new TSList<>();
     private int index;
 
-    private Walker(Intl.Segmenter segmenter, String text) {
-      Intl.Segments segments0 = segmenter.segment(text);
-      Intl.Segment last = null;
-      for (Intl.Segment segment : segments0) {
+    private Walker(Segmenter segmenter, String text) {
+      Segments segments0 = segmenter.segment(text);
+      Segment last = null;
+      for (Segment segment : segments0) {
         segments.add(segment.index);
         last = segment;
       }

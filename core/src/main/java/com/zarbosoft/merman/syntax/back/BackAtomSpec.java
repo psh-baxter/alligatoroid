@@ -9,9 +9,9 @@ import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Deque;
 import java.util.Iterator;
 
 public class BackAtomSpec extends BaseBackAtomSpec {
@@ -37,8 +37,8 @@ public class BackAtomSpec extends BaseBackAtomSpec {
 
   @Override
   public void write(
-          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
-    ((Atom) data.getNull(id)).write(stack);
+          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+    ((Atom) data.get(id)).write(stack);
   }
 
   @Override

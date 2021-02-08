@@ -23,7 +23,7 @@ public class ArrayActionSuffix extends EditAction {
   }
 
   @Override
-  public boolean run1(final Context context) {
+  public void run1(final Context context) {
     final Atom gap = edit.suffixGap.create();
     TSList<Atom> transplant =
         cursor.self.value.data.sublist(cursor.beginIndex, cursor.endIndex).mut();

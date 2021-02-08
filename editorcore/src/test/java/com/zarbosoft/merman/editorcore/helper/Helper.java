@@ -13,6 +13,7 @@ import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.DelayEngine;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -234,12 +235,22 @@ public class Helper {
             new MockeryDisplay(),
             addIteration,
             flushIteration,
+                new DelayEngine() {
+                  @Override
+                  public Handle delay(long ms, Runnable r) {
+                    r.run();
+                    return new Handle() {
+                      @Override
+                      public void cancel() {}
+                    };
+                  }
+                },
             new ClipboardEngine() {
               byte[] data = null;
               String string = null;
 
               @Override
-              public void set(final byte[] bytes) {
+              public void set(final Object bytes) {
                 data = bytes;
               }
 
@@ -249,12 +260,12 @@ public class Helper {
               }
 
               @Override
-              public byte[] get() {
+              public void get(Consumer<Object> cb) {
                 return data;
               }
 
               @Override
-              public String getString() {
+              public void getString(Consumer<String> cb) {
                 return string;
               }
             },

@@ -4,6 +4,7 @@ import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.syntax.primitivepattern.Any;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
@@ -12,7 +13,6 @@ import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.primitivepattern.Pattern;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.pidgoon.Grammar;
 import com.zarbosoft.pidgoon.bytes.BytesHelper;
@@ -21,7 +21,6 @@ import com.zarbosoft.pidgoon.bytes.Position;
 import com.zarbosoft.pidgoon.nodes.Color;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.parse.Parse;
-import com.zarbosoft.rendaw.common.Common;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.Pair;
 
@@ -128,7 +127,7 @@ public class GapKey {
         out.add(BytesHelper.stringSequence(text));
       } else if (part instanceof FrontPrimitiveSpec) {
         BaseBackPrimitiveSpec middle = ((FrontPrimitiveSpec) part).dataType;
-        out.add((middle.pattern == null ? Pattern.repeatedAny : middle.pattern).build(context));
+        out.add((middle.pattern == null ? Any.repeatedAny : middle.pattern).build(context));
       } else throw new DeadCode();
     }
     return new Color(color, out);
@@ -153,7 +152,7 @@ public class GapKey {
         final BaseBackPrimitiveSpec middle =
             (BaseBackPrimitiveSpec) type.fields.get(((FrontPrimitiveSpec) front).field);
         grammar.add(
-            "root", (middle.pattern == null ? Pattern.repeatedAny : middle.pattern).build(context));
+            "root", (middle.pattern == null ? Any.repeatedAny : middle.pattern).build(context));
       } else throw new DeadCode();
       final Pair<Parse, Position> longest =
           new ParseBuilder<>()

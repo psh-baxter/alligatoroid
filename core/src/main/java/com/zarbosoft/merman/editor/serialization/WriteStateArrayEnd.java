@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.editor.serialization;
 
-import java.util.Deque;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class WriteStateArrayEnd extends WriteState {
     @Override
-    public void run(final Deque<WriteState> stack, final EventConsumer writer) {
+    public void run(final TSList<WriteState> stack, final EventConsumer writer) {
         writer.arrayEnd();
         stack.removeLast();
     }

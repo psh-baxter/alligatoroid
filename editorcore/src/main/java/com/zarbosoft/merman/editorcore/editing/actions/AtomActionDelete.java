@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editorcore.editing.actions;
 
-import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
@@ -18,7 +17,7 @@ public class AtomActionDelete extends EditAction {
   }
 
   @Override
-  public boolean run1(final Context context) {
+  public void run1(final Context context) {
     edit.atomSet(context, edit.history, base, edit.gap.create());
     return true;
   }

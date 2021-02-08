@@ -30,10 +30,6 @@ public abstract class VisualParent {
 
 	public abstract boolean selectNext(Context context);
 
-	public void bricksCreated(final Context context, final ArrayList<Brick> bricks) {
-		context.bricksCreated(visual(), bricks);
-	}
-
 	public void firstBrickChanged(final Context context, final Brick firstBrick) {
 	}
 

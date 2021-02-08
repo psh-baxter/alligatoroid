@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.merman.JavaI18nEngine;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
@@ -11,6 +10,7 @@ import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.DelayEngine;
 import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
@@ -32,14 +32,12 @@ import com.zarbosoft.merman.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.syntax.primitivepattern.Repeat1;
-import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.ComparisonFailure;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.function.Consumer;
 
@@ -47,46 +45,6 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Helper {
   public static I18nEngine i18n = new JavaI18nEngine(Locale.US);
-
-  public static void dump(final Value value, final Writer writer) {
-    uncheck(
-        () -> {
-          if (value.getClass() == ValueArray.class) {
-            writer.arrayBegin();
-            for (Atom element : ((ValueArray) value).data) {
-              dump(element, writer);
-            }
-            writer.arrayEnd();
-          } else if (value.getClass() == ValueAtom.class) {
-            dump(((ValueAtom) value).get(), writer);
-          } else if (value.getClass() == ValuePrimitive.class) {
-            writer.quotedPrimitive(((ValuePrimitive) value).get().getBytes(StandardCharsets.UTF_8));
-          } else throw new DeadCode();
-        });
-  }
-
-  private static void dump(final Atom value, final Writer writer) {
-    uncheck(
-        () -> {
-          writer.type(value.type.id().getBytes(StandardCharsets.UTF_8));
-          writer.recordBegin();
-          value
-              .fields
-              .keys()
-              .forEach(
-                  k ->
-                      dump(
-                          value.fields.getOpt(k),
-                          uncheck(() -> writer.key(k.getBytes(StandardCharsets.UTF_8)))));
-          writer.recordEnd();
-        });
-  }
-
-  public static void dump(final Value value) {
-    dump(value, new Writer(System.out, (byte) ' ', 4));
-    System.out.write('\n');
-    System.out.flush();
-  }
 
   public static void act(final Context context, final String name) {
     for (final Action action : context.actions()) {
@@ -237,23 +195,33 @@ public class Helper {
             new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
             addIteration,
             flushIteration,
+                new DelayEngine() {
+                  @Override
+                  public Handle delay(long ms, Runnable r) {
+                    r.run();
+                    return new Handle() {
+                      @Override
+                      public void cancel() {}
+                    };
+                  }
+                },
             new ClipboardEngine() {
               byte[] data = null;
               String string = null;
 
               @Override
-              public void set(final byte[] bytes) {
-                data = bytes;
+              public void set(final Object bytes) {
+                data = (byte[]) bytes;
               }
 
               @Override
-              public byte[] get() {
-                return data;
+              public void get(Consumer<Object> cb) {
+                cb.accept(data);
               }
 
               @Override
-              public String getString() {
-                return string;
+              public void getString(Consumer<String> cb) {
+                cb.accept(string);
               }
 
               @Override

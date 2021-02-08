@@ -112,11 +112,11 @@ public class JavaSerializer implements com.zarbosoft.merman.editor.serialization
   }
 
   private static void write(final Atom atom, final EventConsumer writer) {
-    final Deque<WriteState> stack = new ArrayDeque<>();
+    final TSList<WriteState> stack = new TSList<>();
     atom.write(stack);
     uncheck(
         () -> {
-          while (!stack.isEmpty()) stack.getLast().run(stack, writer);
+          while (!stack.isEmpty()) stack.removeLast().run(stack, writer);
         });
   }
 

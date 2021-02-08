@@ -8,6 +8,7 @@ import com.zarbosoft.merman.document.values.ValueAtom;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.DelayEngine;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.merman.editor.display.MockeryText;
@@ -36,7 +37,6 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import org.junit.Test;
 
-import java.util.List;
 import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
@@ -59,144 +59,6 @@ public class TestWindowing {
   public static final FreeAtomType a3_1;
   public static final FreeAtomType oneAtom;
   public static final FreeAtomType array;
-
-  public static class GeneralTestWizard {
-    public final IterationRunner runner;
-    public final Context context;
-
-    public GeneralTestWizard(final Syntax syntax, boolean startWindowed, final Atom... atoms) {
-      this.runner = new IterationRunner();
-      final Document doc =
-          new Document(
-              syntax,
-              new Atom(
-                  syntax.root,
-                  new TSMap<String, Value>().put(
-                          "value",
-                          new ValueArray(
-                              (BaseBackArraySpec) syntax.root.fields.get("value"),
-                              TSList.of(atoms)))));
-      Context.InitialConfig initialConfig = new Context.InitialConfig();
-      initialConfig.ellipsizeThreshold = 3;
-      context =
-          new Context(
-              initialConfig,
-              syntax,
-              doc,
-              new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
-              runner::addIteration,
-              runner::flushIteration,
-              new ClipboardEngine() {
-                byte[] data = null;
-                String string = null;
-
-                @Override
-                public void set(final byte[] bytes) {
-                  data = bytes;
-                }
-
-                @Override
-                public void setString(final String string) {
-                  this.string = string;
-                }
-
-                @Override
-                public byte[] get() {
-                  return data;
-                }
-
-                @Override
-                public String getString() {
-                  return string;
-                }
-              },
-                  null, startWindowed, Helper.i18n);
-      runner.flush();
-    }
-
-    private Course getCourse(final int courseIndex) {
-      ROList<Course> courses = context.foreground.children;
-      if (courseIndex >= courses.size()) {
-        dumpWall();
-        assertThat(courses.size(), greaterThan(courseIndex));
-      }
-      return courses.get(courseIndex);
-    }
-
-    private Brick getBrick(final int courseIndex, final int brickIndex) {
-      final Course course = getCourse(courseIndex);
-      if (brickIndex >= course.children.size()) {
-        dumpWall();
-        assertThat(course.children.size(), greaterThan(brickIndex));
-      }
-      return course.children.get(brickIndex);
-    }
-
-    public GeneralTestWizard checkTextBrick(
-        final int courseIndex, final int brickIndex, final String text) {
-      final Brick brick = getBrick(courseIndex, brickIndex);
-      if (!(brick instanceof BrickText)) {
-        dumpWall();
-        assertThat(brick, instanceOf(BrickText.class));
-      }
-      assertThat(((BrickText) brick).text.text(), equalTo(text));
-      return this;
-    }
-
-    public GeneralTestWizard run(final Consumer<Context> r) {
-      r.accept(context);
-      assertThat(context.cursor, is(notNullValue()));
-      runner.flush();
-      return this;
-    }
-
-    public GeneralTestWizard act(final String name) {
-      for (final Action action : context.actions()) {
-        if (action.id().equals(name)) {
-          action.run(context);
-          assertThat(context.cursor, is(notNullValue()));
-          runner.flush();
-          return this;
-        }
-      }
-      throw new AssertionError(String.format("No action named [%s]", name));
-    }
-
-    public GeneralTestWizard dumpWall() {
-      ROList<Course> courses = context.foreground.children;
-      for (int i = 0; i < courses.size(); ++i) {
-        Course course = courses.get(i);
-        System.out.printf(" %02d  ", i);
-        for (int j = 0; j < course.children.size(); ++j) {
-          Brick brick = course.children.get(j);
-          if (context.foreground.cornerstone == brick) System.out.format("*");
-          if (brick instanceof BrickText) {
-            System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
-          } else if (brick instanceof BrickImage) {
-            System.out.printf("\\i ");
-          } else if (brick instanceof BrickLine) {
-            System.out.printf("\\l ");
-          } else if (brick instanceof BrickSpace) {
-            System.out.printf("\\w ");
-          } else throw new Assertion();
-        }
-        if (context.foreground.cornerstoneCourse == course) {
-          System.out.format(" **");
-        }
-        System.out.printf("\n");
-      }
-      System.out.format("\n");
-      return this;
-    }
-
-    public GeneralTestWizard checkCourseCount(final int i) {
-      if (context.foreground.children.size() != i) {
-        dumpWall();
-        assertThat(context.foreground.children.size(), equalTo(i));
-      }
-      return this;
-    }
-  }
 
   static {
     a0_0 = new TypeBuilder("a0_0").back(Helper.buildBackPrimitive("a0_0")).frontMark("0_0").build();
@@ -653,5 +515,156 @@ public class TestWindowing {
         .checkTextBrick(i++, 0, "4")
         .checkTextBrick(i++, 0, "5")
         .checkTextBrick(i++, 0, "3_1");
+  }
+
+  public static class GeneralTestWizard {
+    public final IterationRunner runner;
+    public final Context context;
+
+    public GeneralTestWizard(final Syntax syntax, boolean startWindowed, final Atom... atoms) {
+      this.runner = new IterationRunner();
+      final Document doc =
+          new Document(
+              syntax,
+              new Atom(
+                  syntax.root,
+                  new TSMap<String, Value>()
+                      .put(
+                          "value",
+                          new ValueArray(
+                              (BaseBackArraySpec) syntax.root.fields.get("value"),
+                              TSList.of(atoms)))));
+      Context.InitialConfig initialConfig = new Context.InitialConfig();
+      initialConfig.ellipsizeThreshold = 3;
+      context =
+          new Context(
+              initialConfig,
+              syntax,
+              doc,
+              new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
+              runner::addIteration,
+              runner::flushIteration,
+              new DelayEngine() {
+                @Override
+                public Handle delay(long ms, Runnable r) {
+                  r.run();
+                  return new Handle() {
+                    @Override
+                    public void cancel() {}
+                  };
+                }
+              },
+              new ClipboardEngine() {
+                byte[] data = null;
+                String string = null;
+
+                @Override
+                public void set(final Object bytes) {
+                  data = (byte[]) bytes;
+                }
+
+                @Override
+                public void setString(final String string) {
+                  this.string = string;
+                }
+
+                @Override
+                public void get(Consumer<Object> cb) {
+                  cb.accept(data);
+                }
+
+                @Override
+                public void getString(Consumer<String> cb) {
+                  cb.accept(string);
+                }
+              },
+              null,
+              startWindowed,
+              Helper.i18n);
+      runner.flush();
+    }
+
+    private Course getCourse(final int courseIndex) {
+      ROList<Course> courses = context.foreground.children;
+      if (courseIndex >= courses.size()) {
+        dumpWall();
+        assertThat(courses.size(), greaterThan(courseIndex));
+      }
+      return courses.get(courseIndex);
+    }
+
+    private Brick getBrick(final int courseIndex, final int brickIndex) {
+      final Course course = getCourse(courseIndex);
+      if (brickIndex >= course.children.size()) {
+        dumpWall();
+        assertThat(course.children.size(), greaterThan(brickIndex));
+      }
+      return course.children.get(brickIndex);
+    }
+
+    public GeneralTestWizard checkTextBrick(
+        final int courseIndex, final int brickIndex, final String text) {
+      final Brick brick = getBrick(courseIndex, brickIndex);
+      if (!(brick instanceof BrickText)) {
+        dumpWall();
+        assertThat(brick, instanceOf(BrickText.class));
+      }
+      assertThat(((BrickText) brick).text.text(), equalTo(text));
+      return this;
+    }
+
+    public GeneralTestWizard run(final Consumer<Context> r) {
+      r.accept(context);
+      assertThat(context.cursor, is(notNullValue()));
+      runner.flush();
+      return this;
+    }
+
+    public GeneralTestWizard act(final String name) {
+      for (final Action action : context.actions()) {
+        if (action.id().equals(name)) {
+          action.run(context);
+          assertThat(context.cursor, is(notNullValue()));
+          runner.flush();
+          return this;
+        }
+      }
+      throw new AssertionError(String.format("No action named [%s]", name));
+    }
+
+    public GeneralTestWizard dumpWall() {
+      ROList<Course> courses = context.foreground.children;
+      for (int i = 0; i < courses.size(); ++i) {
+        Course course = courses.get(i);
+        System.out.printf(" %02d  ", i);
+        for (int j = 0; j < course.children.size(); ++j) {
+          Brick brick = course.children.get(j);
+          if (context.foreground.cornerstone == brick) System.out.format("*");
+          if (brick instanceof BrickText) {
+            System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
+          } else if (brick instanceof BrickImage) {
+            System.out.printf("\\i ");
+          } else if (brick instanceof BrickLine) {
+            System.out.printf("\\l ");
+          } else if (brick instanceof BrickSpace) {
+            System.out.printf("\\w ");
+          } else throw new Assertion();
+        }
+        if (context.foreground.cornerstoneCourse == course) {
+          System.out.format(" **");
+        }
+        System.out.printf("\n");
+      }
+      System.out.format("\n");
+      return this;
+    }
+
+    public GeneralTestWizard checkCourseCount(final int i) {
+      if (context.foreground.children.size() != i) {
+        dumpWall();
+        assertThat(context.foreground.children.size(), equalTo(i));
+      }
+      return this;
+    }
   }
 }

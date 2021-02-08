@@ -37,14 +37,20 @@ public class Union extends Node {
           child.context(
                   context,
                   store.push(),
-                  new BaseParent(parent) {
-                      @Override
-                      public void advance(final Parse step, final Store store, final Object cause) {
-                          parent.advance(step, store.pop(), cause);
-                      }
-                  },
+                  new UnionParent(parent),
                   seen,
                   cause);
       }
   }
+
+    private static class UnionParent extends BaseParent {
+        public UnionParent(Parent parent) {
+            super(parent);
+        }
+
+        @Override
+        public void advance(final Parse step, final Store store, final Object cause) {
+            parent.advance(step, store.pop(), cause);
+        }
+    }
 }

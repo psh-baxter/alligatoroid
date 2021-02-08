@@ -15,7 +15,7 @@ public class JSText extends JSDisplayNode implements Text {
 
   protected JSText(JSDisplay display) {
     super(display);
-    element = Globals.document.createElement(StringTypes.div);
+    element = Globals.window.document.createElement(StringTypes.div);
     element.classList.add("merman-display-text");
   }
 

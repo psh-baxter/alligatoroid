@@ -36,28 +36,31 @@ public class Repeat extends Node {
       final Parent parent,
       final ROMap<Object, RefParent> seen,
       final Object cause) {
-    class RepParent extends BaseParent {
-      final long count;
+    root.context(context, store.push(), new RepParent(this, parent, 0), seen, cause);
+    if (min == 0) parent.advance(context, store, cause);
+  }
 
-      public RepParent(final long count) {
-        super(parent);
-        this.count = count;
-      }
+  private static class RepParent extends BaseParent {
+    final long count;
+    private final Repeat self;
 
-      @Override
-      public void advance(final Parse step, final Store store, final Object cause) {
-        final Store tempStore = store.pop();
-        final long nextCount = count + 1;
-        if ((max == 0) && (nextCount == max)) {
-          parent.advance(step, tempStore, cause);
-          return;
-        } else {
-          root.context(step, tempStore.push(), new RepParent(nextCount), cause);
-          if ((min == 0) || (nextCount >= min)) parent.advance(step, tempStore, cause);
-        }
+    public RepParent(Repeat self, Parent parent, final long count) {
+      super(parent);
+      this.count = count;
+      this.self = self;
+    }
+
+    @Override
+    public void advance(final Parse step, final Store store, final Object cause) {
+      final Store tempStore = store.pop();
+      final long nextCount = count + 1;
+      if ((self.max == 0) && (nextCount == self.max)) {
+        parent.advance(step, tempStore, cause);
+        return;
+      } else {
+        self.root.context(step, tempStore.push(), new RepParent(self, parent, nextCount), cause);
+        if ((self.min == 0) || (nextCount >= self.min)) parent.advance(step, tempStore, cause);
       }
     }
-    root.context(context, store.push(), new RepParent(0), seen, cause);
-    if (min == 0) parent.advance(context, store, cause);
   }
 }

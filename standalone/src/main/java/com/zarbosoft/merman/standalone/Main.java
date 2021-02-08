@@ -4,10 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.Editor;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
-import com.zarbosoft.merman.editor.history.History;
+import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.standalone.display.JavaFXDisplay;
 import com.zarbosoft.merman.syntax.Syntax;
 import javafx.application.Application;
@@ -132,7 +131,7 @@ public class Main extends Application {
             this::addIteration,
             this::flushIteration,
             history,
-            new SimpleClipboardEngine());
+            new SimpleClipboardEngine(backType));
     editor.addActions(
         this, ImmutableList.of(new ActionSave(), new ActionQuit(), new ActionDebug()));
     final HBox filesystemLayout = new HBox();
@@ -348,7 +347,7 @@ public class Main extends Application {
         return "quit";
     }
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       Platform.exit();
       return true;
     }
@@ -359,7 +358,7 @@ public class Main extends Application {
         return "debug";
     }
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       System.out.format("This is a convenient place to put a breakpoint.\n");
       return true;
     }
@@ -370,7 +369,7 @@ public class Main extends Application {
         return "save";
     }
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       editor.save(filename);
       return true;
     }

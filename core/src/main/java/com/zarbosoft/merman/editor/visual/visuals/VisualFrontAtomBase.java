@@ -211,7 +211,6 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
                   }
                 });
     ellipsis.tagsChanged(context);
-    context.bricksCreated(this, ellipsis);
     return ellipsis;
   }
 
@@ -483,8 +482,8 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public boolean run(final Context context) {
-      return base.body.selectAnyChild(context);
+    public void run(final Context context) {
+      base.body.selectAnyChild(context);
     }
   }
 
@@ -499,10 +498,10 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
 
-      if (base.value().atomParentRef == null) return false;
-      return base.value().atomParentRef.selectAtomParent(context);
+      if (base.value().atomParentRef == null) return ;
+      base.value().atomParentRef.selectAtomParent(context);
     }
   }
 
@@ -517,8 +516,8 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public boolean run(final Context context) {
-      return base.parent.selectNext(context);
+    public void run(final Context context) {
+      base.parent.selectNext(context);
     }
   }
 
@@ -533,8 +532,8 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public boolean run(final Context context) {
-      return base.parent.selectPrevious(context);
+    public void run(final Context context) {
+      base.parent.selectPrevious(context);
     }
   }
 
@@ -549,12 +548,11 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       final Atom root = base.atomGet();
-      if (!root.visual.selectAnyChild(context)) return false;
+      if (!root.visual.selectAnyChild(context)) return ;
       context.windowExact(root);
       context.triggerIdleLayBricksOutward();
-      return true;
     }
   }
 }

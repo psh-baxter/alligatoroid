@@ -15,8 +15,7 @@ class AtomActionCopy implements Action {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
         context.copy(TSList.of(base.atomGet()));
-        return true;
     }
 }

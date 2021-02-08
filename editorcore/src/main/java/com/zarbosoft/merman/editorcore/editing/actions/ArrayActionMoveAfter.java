@@ -2,7 +2,6 @@ package com.zarbosoft.merman.editorcore.editing.actions;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
@@ -23,7 +22,7 @@ public class ArrayActionMoveAfter extends EditAction {
   }
 
   @Override
-  public boolean run1(final Context context) {
+  public void run1(final Context context) {
     if (cursor.endIndex == cursor.self.value.data.size() - 1) return false;
     int index = cursor.beginIndex;
     final List<Atom> atoms =

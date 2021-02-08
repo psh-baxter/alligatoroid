@@ -4,15 +4,11 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.function.Consumer;
 
 public class Common {
-  public static <T> Iterable<T> iterable(final Iterator<T> iterator) {
-    return new Iterable<T>() {
-      @Override
-      public Iterator<T> iterator() {
-        return iterator;
-      }
-    };
+  public static <T> Iterable<T> iterable(final Iterator<T> arg) {
+    return new IteratorIterable<>(arg);
   }
 
   public static <T> boolean isOrdered(final Comparator<T> comparator, final T a, final T b) {
@@ -62,6 +58,24 @@ public class Common {
   public static class UncheckedException extends RuntimeException {
     public UncheckedException(final Throwable e) {
       super(e);
+    }
+  }
+
+  private static class IteratorIterable<T> implements Iterable<T> {
+    private final Iterator<T> arg;
+
+    public IteratorIterable(Iterator<T> arg) {
+      this.arg = arg;
+    }
+
+    @Override
+    public void forEach(Consumer<? super T> action) {
+      throw new Assertion();
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+      return arg;
     }
   }
 }

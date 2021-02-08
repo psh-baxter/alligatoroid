@@ -4,6 +4,7 @@ import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.ArrayDeque;
@@ -16,20 +17,20 @@ public abstract class BaseKVError extends TSMap<String, Object> {
   protected abstract String description();
 
   private void formatValue(
-      StringBuilder out, Deque<Pair<Integer, Iterator>> stack, int indent, Object value) {
+      StringBuilder out, TSList<Pair<Integer, Iterator>> stack, int indent, Object value) {
     if (value instanceof BaseKVError) {
       out.append(((BaseKVError) value).description());
       Iterator<Map.Entry<String, Object>> nextLevel = ((BaseKVError) value).iterator();
-      if (nextLevel.hasNext()) stack.addLast(new Pair<>(indent + 1, nextLevel));
+      if (nextLevel.hasNext()) stack.add(new Pair<>(indent + 1, nextLevel));
     } else if (value instanceof List) {
       Iterator nextLevel = ((List<?>) value).iterator();
-      if (nextLevel.hasNext()) stack.addLast(new Pair<>(indent + 1, nextLevel));
+      if (nextLevel.hasNext()) stack.add(new Pair<>(indent + 1, nextLevel));
     } else if (value instanceof ROList) {
       Iterator nextLevel = ((ROList<?>) value).iterator();
-      if (nextLevel.hasNext()) stack.addLast(new Pair<>(indent + 1, nextLevel));
+      if (nextLevel.hasNext()) stack.add(new Pair<>(indent + 1, nextLevel));
     } else if (value instanceof MultiError) {
       Iterator nextLevel = ((MultiError) value).errors.iterator();
-      if (nextLevel.hasNext()) stack.addLast(new Pair<>(indent + 1, nextLevel));
+      if (nextLevel.hasNext()) stack.add(new Pair<>(indent + 1, nextLevel));
     } else {
       if (value instanceof BackSpecData) {
         out.append(
@@ -43,15 +44,15 @@ public abstract class BaseKVError extends TSMap<String, Object> {
 
   @Override
   public String toString() {
-    Deque<Pair<Integer, Iterator>> stack = new ArrayDeque<>();
+    TSList<Pair<Integer, Iterator>> stack = new TSList<>();
     Iterator seed = iterator();
     if (!seed.hasNext()) return "(empty)";
-    stack.addLast(new Pair<>(1, seed));
+    stack.add(new Pair<>(1, seed));
     StringBuilder out = new StringBuilder();
     out.append(description());
     out.append("\n");
     while (!stack.isEmpty()) {
-      Pair<Integer, Iterator> pair = stack.peekLast();
+      Pair<Integer, Iterator> pair = stack.last();
       int indent = pair.first;
       Iterator top = pair.second;
       Object next = top.next();

@@ -144,4 +144,8 @@ public class TSList<T> implements ROList<T> {
       values.set(ri, t);
     }
   }
+
+  public T removeLast() {
+    return values.remove(values.size() - 1);
+  }
 }

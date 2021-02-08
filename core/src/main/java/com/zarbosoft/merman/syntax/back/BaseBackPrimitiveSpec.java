@@ -21,7 +21,7 @@ public abstract class BaseBackPrimitiveSpec extends BackSpecData {
 
   protected BaseBackPrimitiveSpec(I18nEngine i18n, Config config) {
     super(config.id);
-    if (config.pattern != null) matcher = config.pattern.new Matcher(i18n);
+    if (config.pattern != null) matcher = new Pattern.Matcher(config.pattern, i18n);
     else matcher = null;
   }
 

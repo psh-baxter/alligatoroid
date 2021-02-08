@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.editor.serialization;
 
 import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Deque;
 import java.util.Iterator;
 
 public class WriteStateBack extends WriteState {
@@ -16,7 +16,7 @@ public class WriteStateBack extends WriteState {
     }
 
     @Override
-    public void run(final Deque<WriteState> stack, final EventConsumer writer) {
+    public void run(final TSList<WriteState> stack, final EventConsumer writer) {
         if (!iterator.hasNext()) {
             stack.removeLast();
             return;

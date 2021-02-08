@@ -15,6 +15,7 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROSetRef;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -87,7 +88,7 @@ public class Atom {
     return fields.getOpt(segment);
   }
 
-  public void write(Deque<WriteState> stack) {
+  public void write(TSList<WriteState> stack) {
     TSMap<String, Object> childData = new TSMap<>();
     for (Map.Entry<String, Value> entry : fields.entries()) {
       if (entry.getValue() instanceof ValueAtom) {
@@ -98,7 +99,7 @@ public class Atom {
         childData.put(entry.getKey(), ((ValuePrimitive) entry.getValue()).data);
       } else throw new Assertion();
     }
-    stack.addLast(new WriteStateBack(childData, type.back().iterator()));
+    stack.add(new WriteStateBack(childData, type.back().iterator()));
   }
 
   public ROSetRef<String> getTags() {

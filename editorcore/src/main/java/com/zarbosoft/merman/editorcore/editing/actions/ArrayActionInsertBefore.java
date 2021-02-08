@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.editorcore.editing.actions;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
@@ -20,7 +19,7 @@ public class ArrayActionInsertBefore extends EditAction {
   }
 
   @Override
-  public boolean run1(final Context context) {
+  public void run1(final Context context) {
     final Atom created =
         EditingExtension.arrayInsertNewDefault(
             context, history, cursor.self.value, cursor.beginIndex);

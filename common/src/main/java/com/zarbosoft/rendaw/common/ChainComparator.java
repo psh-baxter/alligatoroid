@@ -3,15 +3,11 @@ package com.zarbosoft.rendaw.common;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class ChainComparator<T> {
-  @FunctionalInterface
-  private interface Step<T> {
-    int apply(T o1, T o2);
-  }
-
-  private final List<Step<T>> steps = new ArrayList<>();
+  private final List<BiFunction<T, T, Integer>> steps = new ArrayList<>();
 
   public ChainComparator() {}
 
@@ -36,16 +32,23 @@ public class ChainComparator<T> {
   }
 
   public Comparator<T> build() {
-    return new Comparator<T>() {
-      @Override
-      public int compare(final T o1, final T o2) {
-        int result = 0;
-        for (final Step step : steps) {
-          result = step.apply(o1, o2);
-          if (result != 0) return result;
-        }
-        return 0;
+    return new InnerComparator<T>(steps);
+  }
+
+  private static class InnerComparator<T> implements Comparator<T> {
+    private final List<BiFunction<T, T, Integer>> steps;
+
+    public InnerComparator(List<BiFunction<T, T, Integer>> steps) {
+      this.steps = steps;
+    }
+
+    @Override
+    public int compare(final T o1, final T o2) {
+      for (final BiFunction<T, T, Integer> step : steps) {
+        int result = step.apply(o1, o2);
+        if (result != 0) return result;
       }
-    };
+      return 0;
+    }
   }
 }

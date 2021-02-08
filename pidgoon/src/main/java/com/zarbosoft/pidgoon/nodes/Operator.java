@@ -9,9 +9,6 @@ import com.zarbosoft.pidgoon.nodes.Reference.RefParent;
 import com.zarbosoft.pidgoon.parse.Parse;
 import com.zarbosoft.rendaw.common.ROMap;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 public abstract class Operator<S extends Store> extends Node {
   private final Node root;
 
@@ -36,34 +33,7 @@ public abstract class Operator<S extends Store> extends Node {
     if (root == null) {
       parent.advance(context, process((S) store).pop(), cause);
     } else {
-      root.context(
-          context,
-          store.push(),
-          new BaseParent(parent) {
-            @Override
-            public void advance(final Parse step, final Store store, final Object cause) {
-              Store tempStore = store;
-              try {
-                tempStore = process((S) store);
-              } catch (final AbortParse a) {
-                parent.error(
-                    step,
-                    tempStore,
-                    new Object() {
-                      @Override
-                      public String toString() {
-                        StringWriter writer = new StringWriter();
-                        a.printStackTrace(new PrintWriter(writer));
-                        return writer.toString().trim();
-                      }
-                    });
-                return;
-              }
-              parent.advance(step, tempStore.pop(), cause);
-            }
-          },
-          seen,
-          cause);
+      root.context(context, store.push(), new OperatorParent(this, parent), seen, cause);
     }
   }
 
@@ -75,5 +45,26 @@ public abstract class Operator<S extends Store> extends Node {
    */
   protected S process(S store) {
     return store;
+  }
+
+  private static class OperatorParent<S extends Store> extends BaseParent {
+    private Operator<S> operator;
+
+    public OperatorParent(Operator<S> operator, Parent parent) {
+      super(parent);
+      this.operator = operator;
+    }
+
+    @Override
+    public void advance(final Parse step, final Store store, final Object cause) {
+      Store tempStore = store;
+      try {
+        tempStore = operator.process((S) store);
+      } catch (final AbortParse a) {
+        parent.error(step, tempStore, a);
+        return;
+      }
+      parent.advance(step, tempStore.pop(), cause);
+    }
   }
 }

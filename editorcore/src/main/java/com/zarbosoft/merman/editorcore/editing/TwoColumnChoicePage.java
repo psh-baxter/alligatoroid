@@ -114,7 +114,7 @@ public class TwoColumnChoicePage extends DetailsPage {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       choices.get(index).choose(context);
       return true;
     }
@@ -131,7 +131,7 @@ public class TwoColumnChoicePage extends DetailsPage {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       changeChoice(context, (index + 1) % choices.size());
       return true;
     }
@@ -148,7 +148,7 @@ public class TwoColumnChoicePage extends DetailsPage {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       changeChoice(context, (index + choices.size() - 1) % choices.size());
       return true;
     }

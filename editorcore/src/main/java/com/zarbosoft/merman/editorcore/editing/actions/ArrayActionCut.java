@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.editorcore.editing.actions;
 
 import com.google.common.collect.ImmutableList;
-import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
@@ -20,7 +19,7 @@ public class ArrayActionCut extends EditAction {
   }
 
   @Override
-  public boolean run1(final Context context) {
+  public void run1(final Context context) {
     context.copy(cursor.self.value.data.subList(cursor.beginIndex, cursor.endIndex + 1));
     edit.history.apply(
         context,

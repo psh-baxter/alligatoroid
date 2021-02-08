@@ -35,7 +35,7 @@ public class ROPair<T1, T2> implements Comparable<ROPair> {
 
   @Override
   public int compareTo(final ROPair o) {
-    return comparator.compare((ROPair<? extends Comparable, ? extends Comparable>) this, o);
+    return comparator.compare((ROPair) this, o);
   }
 
   @Override

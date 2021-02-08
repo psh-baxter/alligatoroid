@@ -16,8 +16,6 @@ public abstract class IterationTask implements Comparable<IterationTask> {
 		public static double wallExpand = -100;
 	}
 
-	private static final Comparator<IterationTask> comparator =
-			new ChainComparator<IterationTask>().greaterFirst(t -> t.priority()).build();
 	public boolean destroyed = false;
 
 	protected double priority() {
@@ -37,7 +35,7 @@ public abstract class IterationTask implements Comparable<IterationTask> {
 
 	@Override
 	public int compareTo(final IterationTask t) {
-		return comparator.compare(this, t);
+		return -Double.compare(priority(), t.priority());
 	}
 
 	public void destroy() {

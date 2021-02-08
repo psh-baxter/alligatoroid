@@ -3,6 +3,7 @@ package com.zarbosoft.merman.webview.display;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Display;
 import com.zarbosoft.merman.editor.display.Drawing;
+import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import def.dom.CanvasRenderingContext2D;
@@ -18,7 +19,7 @@ public class JSDrawing extends JSDisplayNode implements Drawing {
 
   protected JSDrawing(JSDisplay display) {
     super(display);
-    element = Globals.document.createElement(StringTypes.canvas);
+    element = Globals.window.document.createElement(StringTypes.canvas);
     element.classList.add("merman-display-drawing");
   }
 

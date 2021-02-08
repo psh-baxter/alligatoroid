@@ -4,7 +4,7 @@ import com.zarbosoft.pidgoon.Store;
 import com.zarbosoft.pidgoon.parse.Parse;
 
 public abstract class BaseParent implements Parent {
-  private final Parent parent;
+  public final Parent parent;
 
   public BaseParent(final Parent parent) {
     super();

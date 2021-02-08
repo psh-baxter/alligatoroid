@@ -12,10 +12,10 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.ArrayList;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 
@@ -68,10 +68,10 @@ public class BackFixedArraySpec extends BackSpec {
 
   @Override
   public void write(
-          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.arrayBegin();
-    stack.addLast(new WriteStateArrayEnd());
-    stack.addLast(new WriteStateBack(data, elements.iterator()));
+    stack.add(new WriteStateArrayEnd());
+    stack.add(new WriteStateBack(data, elements.iterator()));
   }
 
   @Override

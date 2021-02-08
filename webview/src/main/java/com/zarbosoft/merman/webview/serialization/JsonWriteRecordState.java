@@ -1,16 +1,15 @@
 package com.zarbosoft.merman.webview.serialization;
 
-import def.js.Map;
-
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class JsonWriteRecordState implements com.zarbosoft.merman.webview.serialization.JsonWriteState {
-    public final Map value = new Map();
+    public final Map value = new HashMap();
     private String key;
 
     @Override
     public void value(Object value) {
-        this.value.set(key, value);
+        this.value.put(key, value);
     }
 
     @Override

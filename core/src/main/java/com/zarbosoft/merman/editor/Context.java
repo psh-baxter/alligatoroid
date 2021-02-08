@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editor;
 
-import com.zarbosoft.luxem.read.InvalidStream;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.document.InvalidDocument;
@@ -23,8 +22,6 @@ import com.zarbosoft.merman.editor.wall.Wall;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.ChainComparator;
-import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROSetRef;
@@ -35,13 +32,10 @@ import com.zarbosoft.rendaw.common.TSSet;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 public class Context {
   public static Supplier<TSSet> createSet = () -> new TSSet();
@@ -63,10 +57,12 @@ public class Context {
   private final TSSet<TagsListener> globalTagsChangeListeners = new TSSet<>();
   private final TSSet<ActionChangeListener> actionChangeListeners = new TSSet<>();
   private final TSList<Action> actions = new TSList<>();
+  private final TSSet<String> globalTags = new TSSet<String>();
+
+  // Settings
+  public final DelayEngine delayEngine;
   private final Consumer<IterationTask> addIteration;
   private final Consumer<Integer> flushIteration;
-  private final TSSet<String> globalTags = new TSSet<String>();
-  // Settings
   public boolean animateCoursePlacement;
   public boolean animateDetails;
   public int ellipsizeThreshold;
@@ -105,7 +101,6 @@ public class Context {
   boolean keyHandlingInProgress = false;
   boolean debugInHover = false;
   private Atom windowAtom;
-  private IterationNotifyBricksCreated idleNotifyBricksCreated;
 
   public Context(
       InitialConfig config,
@@ -114,6 +109,7 @@ public class Context {
       Display display,
       Consumer<IterationTask> addIteration,
       Consumer<Integer> flushIteration,
+      DelayEngine delayEngine,
       ClipboardEngine clipboardEngine,
       Serializer serializer,
       boolean startWindowed,
@@ -139,6 +135,7 @@ public class Context {
     this.retryExpandFactor = config.retryExpandFactor;
     this.scrollFactor = config.scrollFactor;
     this.scrollAlotFactor = config.scrollAlotFactor;
+    this.delayEngine = delayEngine;
     display.setBackgroundColor(syntax.background);
     edge = display.edge();
     transverseEdge = display.transverseEdge();
@@ -161,13 +158,17 @@ public class Context {
               Math.max(
                   0,
                   newValue - document.syntax.pad.converseStart - document.syntax.pad.converseEnd);
-          converseEdgeListeners.forEach(listener -> listener.changed(this, oldValue, newValue));
+          for (ContextIntListener l : converseEdgeListeners) {
+            l.changed(this, oldValue, newValue);
+          }
         });
     display.addTransverseEdgeListener(
         ((oldValue, newValue) -> {
           transverseEdge = newValue;
           scrollVisible();
-          transverseEdgeListeners.forEach(listener -> listener.changed(this, oldValue, newValue));
+          for (ContextIntListener l : transverseEdgeListeners) {
+            l.changed(this, oldValue, newValue);
+          }
         }));
     display.addHIDEventListener(
         hidEvent -> {
@@ -358,19 +359,24 @@ public class Context {
     clipboardEngine.setString(string);
   }
 
-  public ROList<Atom> uncopy(final String type) {
-    final byte[] bytes = clipboardEngine.get();
-    if (bytes == null) return ROList.empty;
-    try {
-      return serializer.load(syntax, type, bytes);
-    } catch (final InvalidStream ignored) {
-    } catch (final InvalidDocument ignored) {
-    }
-    return ROList.empty;
+  public void uncopy(final String type, Consumer<ROList<Atom>> cb) {
+    clipboardEngine.get(
+        data -> {
+          if (data == null) {
+            cb.accept(ROList.empty);
+            return;
+          }
+          try {
+            cb.accept(serializer.loadFromClipboard(syntax, type, data));
+            return;
+          } catch (final InvalidDocument ignored) {
+          }
+          cb.accept(ROList.empty);
+        });
   }
 
-  public String uncopyString() {
-    return clipboardEngine.getString();
+  public void uncopyString(Consumer<String> cb) {
+    clipboardEngine.getString(cb);
   }
 
   public Object syntaxLocate(final Path path) {
@@ -490,19 +496,6 @@ public class Context {
       addIteration(idleLayBricks);
     }
     idleLayBricks.starts.add(start);
-  }
-
-  public void bricksCreated(final Visual visual, final Brick brick) {
-    final ArrayList<Brick> out = new ArrayList<>();
-    out.add(brick);
-    bricksCreated(visual, out);
-  }
-
-  public void bricksCreated(final Visual visual, final ArrayList<Brick> bricks) {
-    if (idleNotifyBricksCreated == null) {
-      idleNotifyBricksCreated = new IterationNotifyBricksCreated();
-    }
-    idleNotifyBricksCreated.newBricks.add(new Pair<>(visual, bricks));
   }
 
   public void windowAdjustMinimalTo(final Value value) {
@@ -737,79 +730,12 @@ public class Context {
           }
         }
       }
-      if (idleNotifyBricksCreated != null) {
-        idleNotifyBricksCreated.run(iterationContext);
-      }
       return true;
     }
 
     @Override
     protected void destroyed() {
       idleLayBricks = null;
-    }
-  }
-
-  private class IterationNotifyBricksCreated extends IterationTask {
-    private final Queue<Pair<Visual, ArrayList<Brick>>> newBricks =
-        new PriorityQueue<>(
-            11,
-            new ChainComparator<Pair<Visual, ArrayList<Brick>>>()
-                .greaterFirst(pair -> pair.first.visualDepth)
-                .build());
-
-    @Override
-    protected double priority() {
-      // After laying bricks.  May be prematurely flushed after a brick laying batch.
-      return P.notifyBricks;
-    }
-
-    @Override
-    protected boolean runImplementation(final IterationContext iterationContext) {
-      final List<Pair<Visual, ArrayList<Brick>>> level = new ArrayList<>();
-      while (!newBricks.isEmpty()) {
-        // Find all bricks at next highest depth
-        level.clear();
-        Integer levelDepth = null;
-        while (!newBricks.isEmpty()) {
-          final Pair<Visual, ArrayList<Brick>> next = newBricks.poll();
-          final int depth = next.first.visualDepth;
-          if (levelDepth == null) {
-            levelDepth = depth;
-          } else if (depth == levelDepth) {
-
-          } else {
-            newBricks.add(next);
-            break;
-          }
-        }
-
-        // Group by visual and pass to bricksCreated in that visual
-        level.stream()
-            .collect(
-                Collectors.groupingBy(
-                    pair -> pair.first,
-                    Collectors.reducing(
-                        null,
-                        pair -> pair.second,
-                        (a, b) -> {
-                          a.addAll(b);
-                          return a;
-                        })))
-            .entrySet()
-            .stream()
-            .forEach(
-                entry -> {
-                  final Visual visual = entry.getKey();
-                  if (visual.parent() == null) return;
-                  visual.parent().bricksCreated(Context.this, entry.getValue());
-                });
-      }
-      return false;
-    }
-
-    @Override
-    protected void destroyed() {
-      idleNotifyBricksCreated = null;
     }
   }
 
@@ -881,11 +807,10 @@ public class Context {
     }
 
     @Override
-    public boolean run(final Context context) {
-      if (!window) return false;
+    public void run(final Context context) {
+      if (!window) return;
       windowClear();
       triggerIdleLayBricksOutward();
-      return true;
     }
   }
 
@@ -897,12 +822,11 @@ public class Context {
     }
 
     @Override
-    public boolean run(final Context context) {
-      if (!window) return false;
-      if (windowAtom == document.root) return false;
+    public void run(final Context context) {
+      if (!window) return;
+      if (windowAtom == document.root) return;
       windowToSupertree(windowAtom.valueParentRef.value.atomParentRef.atom());
       triggerIdleLayBricksOutward();
-      return true;
     }
   }
 
@@ -912,11 +836,11 @@ public class Context {
     }
 
     @Override
-    public boolean run(final Context context) {
-      if (!window) return false;
+    public void run(final Context context) {
+      if (!window) return;
       VisualAtom windowNext = null;
       final VisualAtom stop = windowAtom.visual;
-      if (cursor.getVisual().parent() == null) return false;
+      if (cursor.getVisual().parent() == null) return;
       VisualAtom at = cursor.getVisual().parent().atomVisual();
       while (at != null) {
         if (at == stop) break;
@@ -924,10 +848,10 @@ public class Context {
         windowNext = at;
         at = at.parent().atomVisual();
       }
-      if (windowNext == null) return false;
+      if (windowNext == null) return;
       context.windowToNonSupertree(windowNext.atom);
       triggerIdleLayBricksOutward();
-      return true;
+      return;
     }
   }
 
@@ -937,10 +861,9 @@ public class Context {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       scroll -= scrollFactor * transverseEdge;
       applyScroll();
-      return false;
     }
   }
 
@@ -950,10 +873,9 @@ public class Context {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       scroll -= scrollAlotFactor * transverseEdge;
       applyScroll();
-      return false;
     }
   }
 
@@ -963,10 +885,9 @@ public class Context {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       scroll += scrollFactor * transverseEdge;
       applyScroll();
-      return false;
     }
   }
 
@@ -976,10 +897,9 @@ public class Context {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       scroll += scrollAlotFactor * transverseEdge;
       applyScroll();
-      return false;
     }
   }
 
@@ -989,9 +909,8 @@ public class Context {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       scrollVisible();
-      return false;
     }
   }
 }

@@ -15,10 +15,10 @@ import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
 import com.zarbosoft.pidgoon.events.stores.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.Iterator;
 
 public class BackTypeSpec extends BaseBackPrimitiveSpec {
@@ -54,7 +54,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   public Node buildBackRule(final Syntax syntax) {
     return new Sequence()
         .add(
-            new Operator<StackStore>(new ClassEqTerminal(ETypeEvent.class)) {
+            new Operator<StackStore>(new ClassEqTerminal(ETypeEvent.class.getName())) {
               @Override
               protected StackStore process(StackStore store) {
                 return store.stackVarDoubleElement(
@@ -66,9 +66,9 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
 
   @Override
   public void write(
-          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.type(((StringBuilder) data.get(type)).toString());
-    stack.addLast(new WriteStateBack(data, Arrays.asList(value).iterator()));
+    stack.add(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }
 
   @Override

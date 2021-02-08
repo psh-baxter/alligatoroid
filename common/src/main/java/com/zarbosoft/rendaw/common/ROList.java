@@ -1,7 +1,7 @@
 package com.zarbosoft.rendaw.common;
 
-import java.math.BigDecimal;
 import java.util.List;
+import java.util.function.Consumer;
 
 public interface ROList<T> extends Iterable<T> {
   @SuppressWarnings("rawtypes")
@@ -16,9 +16,10 @@ public interface ROList<T> extends Iterable<T> {
   TSSet<T> toSet();
 
   ROList<T> sublist(int start, int end);
+
   ROList<T> subFrom(int start);
 
-    List<T> inner_();
+  List<T> inner_();
 
   TSList<T> mut();
 
@@ -26,5 +27,9 @@ public interface ROList<T> extends Iterable<T> {
 
   T last();
 
-    T getRev(int i);
+  T getRev(int i);
+
+  default void forEach(Consumer<? super T> action) {
+    throw new Assertion();
+  }
 }

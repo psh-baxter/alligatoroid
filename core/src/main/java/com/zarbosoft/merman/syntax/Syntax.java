@@ -195,13 +195,13 @@ public class Syntax {
       if (group.getValue().toSet().size() != group.getValue().size()) {
         errors.add(new DuplicateAtomTypeIdsInGroup(group.getKey()));
       }
-      final Deque<Pair<ROList<String>, Iterator<String>>> stack = new ArrayDeque<>();
+      final TSList<Pair<ROList<String>, Iterator<String>>> stack = new TSList<>();
       Iterator<String> seed = group.getValue().iterator();
       TSSet<AtomType> out = new TSSet<>();
       if (seed.hasNext()) {
-        stack.addLast(new Pair<ROList<String>, Iterator<String>>(TSList.of(group.getKey()), seed));
+        stack.add(new Pair<ROList<String>, Iterator<String>>(TSList.of(group.getKey()), seed));
         while (!stack.isEmpty()) {
-          Pair<ROList<String>, Iterator<String>> top = stack.peekLast();
+          Pair<ROList<String>, Iterator<String>> top = stack.last();
           final String childKey = top.second.next();
           if (!top.second.hasNext()) stack.removeLast();
 
@@ -220,7 +220,7 @@ public class Syntax {
 
           final ROList<String> childGroup = groups.getOpt(childKey);
           if (childGroup != null) {
-            stack.addLast(new Pair<>(newPath, childGroup.iterator()));
+            stack.add(new Pair<>(newPath, childGroup.iterator()));
             continue;
           }
 
@@ -266,29 +266,29 @@ public class Syntax {
       grammar.add(
           GRAMMAR_WILDCARD_KEY_UNTYPED,
           new Union()
-              .add(new ClassEqTerminal(EPrimitiveEvent.class))
-                  .add(new ClassEqTerminal(JSpecialPrimitiveEvent.class))
+              .add(new ClassEqTerminal(EPrimitiveEvent.class.getName()))
+                  .add(new ClassEqTerminal(JSpecialPrimitiveEvent.class.getName()))
               .add(
                   new Sequence()
-                      .add(new ClassEqTerminal(EArrayOpenEvent.class))
+                      .add(new ClassEqTerminal(EArrayOpenEvent.class.getName()))
                       .add(new Repeat(new Reference(GRAMMAR_WILDCARD_KEY)))
-                      .add(new ClassEqTerminal(EArrayCloseEvent.class)))
+                      .add(new ClassEqTerminal(EArrayCloseEvent.class.getName())))
               .add(
                   new Sequence()
-                      .add(new ClassEqTerminal(EObjectOpenEvent.class))
+                      .add(new ClassEqTerminal(EObjectOpenEvent.class.getName()))
                       .add(
                           new Reference(
                               new Sequence()
-                                  .add(new ClassEqTerminal(EKeyEvent.class))
+                                  .add(new ClassEqTerminal(EKeyEvent.class.getName()))
                                   .add(new Reference(GRAMMAR_WILDCARD_KEY))))
-                      .add(new ClassEqTerminal(EObjectCloseEvent.class))));
+                      .add(new ClassEqTerminal(EObjectCloseEvent.class.getName()))));
       grammar.add(
           GRAMMAR_WILDCARD_KEY,
           new Union()
               .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))
               .add(
                   new Sequence()
-                      .add(new ClassEqTerminal(ETypeEvent.class))
+                      .add(new ClassEqTerminal(ETypeEvent.class.getName()))
                       .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))));
       for (Map.Entry<String, ROSet<AtomType>> entry : splayedTypes) {
         ROSet<AtomType> types = entry.getValue();

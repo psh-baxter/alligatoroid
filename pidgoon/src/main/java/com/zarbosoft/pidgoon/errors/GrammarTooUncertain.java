@@ -13,13 +13,4 @@ public class GrammarTooUncertain extends RuntimeException {
     this.context = context;
     this.position = position;
   }
-
-  @Override
-  public String toString() {
-    return String.format(
-        "Grammar too uncertain (%d possible next states) at:\n%s\n%s",
-        context.leaves.size(),
-        position,
-        context.leaves.stream().map(l -> l.toString()).collect(Collectors.joining("\n")));
-  }
 }

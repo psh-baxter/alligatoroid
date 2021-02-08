@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.document.Atom;
+import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.editor.backevents.BackEvent;
 import com.zarbosoft.merman.editor.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EArrayOpenEvent;
@@ -10,6 +11,7 @@ import com.zarbosoft.merman.editor.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.syntax.BackType;
+import com.zarbosoft.merman.syntax.RootAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.webview.serialization.JSEventConsumer;
 import com.zarbosoft.merman.webview.serialization.JsonEventConsumer;
@@ -29,10 +31,8 @@ import def.js.Array;
 import def.js.JSON;
 import def.js.Number;
 import def.js.Object;
-import def.js.Boolean;
 import def.js.String;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
@@ -45,6 +45,15 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
   public JSSerializer(BackType backType) {
     this.backType = backType;
     if (backType == BackType.LUXEM) throw new Assertion();
+  }
+
+  private static void write(final Atom atom, final EventConsumer writer) {
+    final TSList<WriteState> stack = new TSList<>();
+    atom.write(stack);
+    uncheck(
+        () -> {
+          while (!stack.isEmpty()) stack.removeLast().run(stack, writer);
+        });
   }
 
   @Override
@@ -90,22 +99,13 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
         });
   }
 
-  private static void write(final Atom atom, final EventConsumer writer) {
-    final Deque<WriteState> stack = new ArrayDeque<>();
-    atom.write(stack);
-    uncheck(
-        () -> {
-          while (!stack.isEmpty()) stack.getLast().run(stack, writer);
-        });
-  }
-
   private void walkJSJson(TSList<BackEvent> events, java.lang.Object o) {
-    if (o instanceof Number) {
-      events.add(new JSpecialPrimitiveEvent(((Number) o).toString()));
-    } else if (o instanceof Boolean) {
+    if (o instanceof Double) {
+      events.add(new JSpecialPrimitiveEvent(((Double) o).toString()));
+    } else if (o instanceof java.lang.Boolean) {
       events.add(new JSpecialPrimitiveEvent(((Boolean) o).toString()));
-    } else if (o instanceof String) {
-      events.add(new JSpecialPrimitiveEvent(((def.js.String) o).toString()));
+    } else if (o instanceof java.lang.String) {
+      events.add(new JSpecialPrimitiveEvent(((java.lang.String) o).toString()));
     } else if (o instanceof Array) {
       events.add(new EArrayOpenEvent());
       for (int i = 0; i < ((Array<?>) o).length; ++i) {
@@ -122,8 +122,17 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
     } else throw new Assertion();
   }
 
+  public Document loadDocument(Syntax syntax, java.lang.String data) {
+    return new Document(syntax, load(syntax, RootAtomType.ROOT_TYPE_ID, data).get(0));
+  }
+
   @Override
-  public ROList<Atom> load(Syntax syntax, java.lang.String type, byte[] data) {
+  public ROList<Atom> loadFromClipboard(
+      Syntax syntax, java.lang.String type, java.lang.Object data) {
+    return load(syntax, type, (java.lang.String) data);
+  }
+
+  public ROList<Atom> load(Syntax syntax, java.lang.String type, java.lang.String data) {
     switch (backType) {
       case LUXEM:
         // TODO, dead atm
@@ -131,7 +140,7 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
       case JSON:
         {
           TSList<BackEvent> events = new TSList<>();
-          walkJSJson(events, JSON.parse(new java.lang.String(data, StandardCharsets.UTF_8)));
+          walkJSJson(events, JSON.parse(data));
           final Grammar grammar = new Grammar(syntax.getGrammar());
           grammar.add(
               data,

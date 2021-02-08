@@ -15,7 +15,6 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.Iterator;
 
 public class BackFixedTypeSpec extends BackSpec {
@@ -72,9 +71,9 @@ public class BackFixedTypeSpec extends BackSpec {
 
   @Override
   public void write(
-          Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.type(type);
-    stack.addLast(new WriteStateBack(data, Arrays.asList(value).iterator()));
+    stack.add(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }
 
   @Override

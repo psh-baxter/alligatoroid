@@ -3,7 +3,6 @@ package com.zarbosoft.merman.editorcore.editing.actions;
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
@@ -22,7 +21,7 @@ public class AtomActionSuffix extends EditAction {
   }
 
   @Override
-  public boolean run1(final Context context) {
+  public void run1(final Context context) {
     final Atom old = base.atomGet();
     final Atom gap = edit.suffixGap.create();
     edit.atomSet(context, edit.history, base, gap);

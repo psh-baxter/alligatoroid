@@ -32,6 +32,8 @@ public abstract class ConditionAttachment {
 		if (this.show == show)
 			return;
 		this.show = show;
-		listeners.forEach(listener -> listener.conditionChanged(context, show));
+		for (Listener listener : listeners) {
+			listener.conditionChanged(context, show);
+		}
 	}
 }

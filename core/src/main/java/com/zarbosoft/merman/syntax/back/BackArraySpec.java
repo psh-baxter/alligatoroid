@@ -11,9 +11,9 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Deque;
 import java.util.List;
 
 public class BackArraySpec extends BaseBackSimpleArraySpec {
@@ -31,10 +31,10 @@ public class BackArraySpec extends BaseBackSimpleArraySpec {
   }
 
   @Override
-  public void write(Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.arrayBegin();
-    stack.addLast(new WriteStateArrayEnd());
-    stack.addLast(new WriteStateDeepDataArray(((List<Atom>) data.get(id)), splayedBoilerplate));
+    stack.add(new WriteStateArrayEnd());
+    stack.add(new WriteStateDeepDataArray(((List<Atom>) data.get(id)), splayedBoilerplate));
   }
 
   @Override

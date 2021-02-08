@@ -1,12 +1,19 @@
 package com.zarbosoft.rendaw.common;
 
+import java.util.Iterator;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
 public interface ROSetRef<T> extends Iterable<T> {
     Set<T> inner_();
 
     default TSSet<T> union(ROSetRef<T> other) {
         return mut().addAll(other);
+    }
+
+    default void forEach(Consumer<? super T> action) {
+        throw new Assertion();
     }
 
     default TSSet<T> intersect(ROSetRef<T> other) {

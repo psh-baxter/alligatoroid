@@ -19,9 +19,9 @@ import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Set;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -104,10 +104,10 @@ public class BackFixedRecordSpec extends BackSpec {
   }
 
   @Override
-  public void write(Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
-    stack.addLast(new WriteStateRecordEnd());
-    stack.addLast(new WriteStateRecord(data, pairs));
+    stack.add(new WriteStateRecordEnd());
+    stack.add(new WriteStateRecord(data, pairs));
   }
 
   @Override

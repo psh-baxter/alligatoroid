@@ -39,12 +39,11 @@ import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.Iterator;
 
 public abstract class AtomType {
@@ -53,26 +52,6 @@ public abstract class AtomType {
   private final String id;
   private final ROList<BackSpec> back;
   private final ROList<FrontSpec> front;
-
-  public static final class Config {
-    public final String id;
-    public ROSet<String> tags;
-    public final ROList<BackSpec> back;
-    public final ROList<FrontSpec> front;
-
-    public Config(String id, ROList<BackSpec> back, ROList<FrontSpec> front) {
-      this.id = id;
-      this.back = back;
-      this.front = front;
-    }
-
-    public Config(String id, ROSet<String> tags, ROList<BackSpec> back, ROList<FrontSpec> front) {
-      this.id = id;
-      this.tags = tags;
-      this.back = back;
-      this.front = front;
-    }
-  }
 
   public AtomType(Config config) {
     id = config.id;
@@ -186,7 +165,9 @@ public abstract class AtomType {
   public com.zarbosoft.pidgoon.Node buildBackRule(final Syntax syntax) {
     final Sequence seq = new Sequence();
     seq.add(StackStore.prepVarStack);
-    back().forEach(p -> seq.add(p.buildBackRule(syntax)));
+    for (BackSpec p : back()) {
+      seq.add(p.buildBackRule(syntax));
+    }
     return new Color(
         this,
         new Operator<StackStore>(seq) {
@@ -203,17 +184,19 @@ public abstract class AtomType {
   public abstract String name();
 
   public BackSpec getBackPart(final String id) {
-    final Deque<Iterator<BackSpec>> stack = new ArrayDeque<>();
-    stack.addLast(back().iterator());
+    final TSList<Iterator<BackSpec>> stack = new TSList<>();
+    stack.add(back().iterator());
     while (!stack.isEmpty()) {
-      final Iterator<BackSpec> iterator = stack.pollLast();
-      if (!iterator.hasNext()) continue;
-      stack.addLast(iterator);
+      final Iterator<BackSpec> iterator = stack.last();
+      if (!iterator.hasNext()) {
+        stack.removeLast();
+        continue;
+      }
       final BackSpec next = iterator.next();
       if (next instanceof BackFixedArraySpec) {
-        stack.addLast(((BackFixedArraySpec) next).elements.iterator());
+        stack.add(((BackFixedArraySpec) next).elements.iterator());
       } else if (next instanceof BackFixedRecordSpec) {
-        stack.addLast(((BackFixedRecordSpec) next).pairs.iterValues());
+        stack.add(((BackFixedRecordSpec) next).pairs.iterValues());
       } else if (next instanceof BackArraySpec) {
         if (((BackArraySpec) next).id.equals(id)) return next;
       } else if (next instanceof BackSubArraySpec) {
@@ -223,7 +206,7 @@ public abstract class AtomType {
       } else if (next instanceof BackAtomSpec) {
         if (((BackAtomSpec) next).id.equals(id)) return next;
       } else if (next instanceof BackFixedTypeSpec) {
-        stack.addLast(Arrays.asList(((BackFixedTypeSpec) next).value).iterator());
+        stack.add(Arrays.asList(((BackFixedTypeSpec) next).value).iterator());
       } else if (next instanceof BackTypeSpec) {
         if (((BackTypeSpec) next).type.equals(id)) return next;
       } else if (next instanceof BackPrimitiveSpec) {
@@ -269,6 +252,26 @@ public abstract class AtomType {
 
   public final String id() {
     return id;
+  }
+
+  public static final class Config {
+    public final String id;
+    public final ROList<BackSpec> back;
+    public final ROList<FrontSpec> front;
+    public ROSet<String> tags;
+
+    public Config(String id, ROList<BackSpec> back, ROList<FrontSpec> front) {
+      this.id = id;
+      this.back = back;
+      this.front = front;
+    }
+
+    public Config(String id, ROSet<String> tags, ROList<BackSpec> back, ROList<FrontSpec> front) {
+      this.id = id;
+      this.tags = tags;
+      this.back = back;
+      this.front = front;
+    }
   }
 
   public static class NodeBackParent extends BackSpec.Parent {

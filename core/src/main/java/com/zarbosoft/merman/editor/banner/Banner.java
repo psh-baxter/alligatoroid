@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editor.banner;
 
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.DelayEngine;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.Font;
@@ -13,38 +14,52 @@ import com.zarbosoft.merman.editor.wall.Bedding;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Wall;
 import com.zarbosoft.merman.syntax.style.Style;
-import com.zarbosoft.rendaw.common.ChainComparator;
 
+import java.util.Comparator;
 import java.util.PriorityQueue;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Banner {
-  public Text text;
-  public Box background;
   private final PriorityQueue<BannerMessage> queue =
       new PriorityQueue<>(
-          11, new ChainComparator<BannerMessage>().greaterFirst(m -> m.priority).build());
+          11,
+          new Comparator<BannerMessage>() {
+            @Override
+            public int compare(BannerMessage a, BannerMessage b) {
+              return -Double.compare(a.priority, b.priority);
+            }
+          });
+  private final Attachment attachment = new TransverseListener(this);
+  public Text text;
+  public Box background;
+  private DelayEngine.Handle timer = null;
   private BannerMessage current;
-  private final Timer timer = new Timer();
   private Brick brick;
   private int transverse;
   private int scroll;
   private Bedding bedding;
   private IterationPlace idle;
-  private final Attachment attachment =
-      new Attachment() {
-        @Override
-        public void setTransverse(final Context context, final int transverse) {
-          Banner.this.transverse = transverse;
-          idlePlace(context, false);
-        }
 
-        @Override
-        public void destroy(final Context context) {
-          brick = null;
-        }
-      };
+  public Banner(final Context context) {
+    context.foreground.addCornerstoneListener(
+        context,
+        new Wall.CornerstoneListener() {
+          @Override
+          public void cornerstoneChanged(final Context context, final Brick cornerstone) {
+            if (brick != null) {
+              brick.removeAttachment(attachment);
+            }
+            brick = cornerstone;
+            brick.addAttachment(context, attachment);
+          }
+        });
+    context.addConverseEdgeListener(
+        new Context.ContextIntListener() {
+          @Override
+          public void changed(final Context context, final int oldValue, final int newValue) {
+            resizeBackground(context);
+          }
+        });
+  }
 
   private void idlePlace(final Context context, final boolean animate) {
     if (text == null) return;
@@ -64,65 +79,21 @@ public class Banner {
     updateStyle(context);
   }
 
-  private class IterationPlace extends IterationTask {
-    private final Context context;
-    public boolean animate;
-
-    private IterationPlace(final Context context) {
-      this.context = context;
-      animate = context.animateCoursePlacement;
-    }
-
-    @Override
-    protected boolean runImplementation(final IterationContext iterationContext) {
-      place(context, animate);
-      return false;
-    }
-
-    @Override
-    protected void destroyed() {
-      idle = null;
-    }
-  }
-
   private void place(final Context context, final boolean animate) {
     if (text == null) return;
     final int calculatedTransverse =
         transverse - text.font().getDescent() - context.syntax.bannerPad.transverseEnd - scroll;
     text.setPosition(
-            new Vector(context.syntax.bannerPad.converseStart, calculatedTransverse), animate);
+        new Vector(context.syntax.bannerPad.converseStart, calculatedTransverse), animate);
     if (background != null)
       background.setPosition(
-              new Vector(0, calculatedTransverse - text.font().getAscent()), animate);
+          new Vector(0, calculatedTransverse - text.font().getAscent()), animate);
   }
 
   private void resizeBackground(final Context context) {
     if (background == null) return;
     final Font font = text.font();
     background.setSize(context, context.edge * 2, font.getDescent() + font.getAscent());
-  }
-
-  public Banner(final Context context) {
-    context.foreground.addCornerstoneListener(
-        context,
-        new Wall.CornerstoneListener() {
-
-          @Override
-          public void cornerstoneChanged(final Context context, final Brick cornerstone) {
-            if (brick != null) {
-              brick.removeAttachment(attachment);
-            }
-            brick = cornerstone;
-            brick.addAttachment(context, attachment);
-          }
-        });
-    context.addConverseEdgeListener(
-        new Context.ContextIntListener() {
-          @Override
-          public void changed(final Context context, final int oldValue, final int newValue) {
-            resizeBackground(context);
-          }
-        });
   }
 
   public void addMessage(final Context context, final BannerMessage message) {
@@ -177,44 +148,93 @@ public class Banner {
     } else if (queue.peek() != current) {
       current = queue.peek();
       text.setText(context, current.text);
-      timer.purge();
-      if (current.duration != null)
-        try {
-          timer.schedule(
-              new TimerTask() {
-                @Override
-                public void run() {
-                  context.addIteration(
-                      new IterationTask() {
-                        @Override
-                        protected boolean runImplementation(
-                            final IterationContext iterationContext) {
-                          queue.poll();
-                          update(context);
-                          return false;
-                        }
-
-                        @Override
-                        protected void destroyed() {}
-                      });
-                }
-              },
-              current.duration.toMillis());
-        } catch (final IllegalStateException e) {
-          // While shutting down
-        }
+      if (timer != null) {
+        timer.cancel();
+        timer = null;
+      }
+      if (current.duration != 0)
+        timer =
+            context.delayEngine.delay(
+                current.duration,
+                () -> context.addIteration(new IterationNextPage(Banner.this, context)));
     }
   }
 
   public void destroy() {
-    timer.cancel();
+    if (timer != null) {
+      timer.cancel();
+      timer = null;
+    }
   }
 
   public void removeMessage(final Context context, final BannerMessage message) {
     if (queue.isEmpty())
       return; // TODO implement message destroy cb, extraneous removeMessages unnecessary
     queue.remove(message);
-    if (queue.isEmpty()) timer.purge();
+    if (queue.isEmpty() && timer != null) {
+      timer.cancel();
+      timer = null;
+    }
     update(context);
+  }
+
+  private static class IterationNextPage extends IterationTask {
+    private final Context context;
+    private final Banner banner;
+
+    public IterationNextPage(Banner banner, Context context) {
+      this.context = context;
+      this.banner = banner;
+    }
+
+    @Override
+    protected boolean runImplementation(final IterationContext iterationContext) {
+      banner.queue.poll();
+      banner.update(context);
+      return false;
+    }
+
+    @Override
+    protected void destroyed() {}
+  }
+
+  private static class TransverseListener extends Attachment {
+    private final Banner banner;
+
+    public TransverseListener(Banner banner) {
+      this.banner = banner;
+    }
+
+    @Override
+    public void setTransverse(final Context context, final int transverse) {
+      banner.transverse = transverse;
+      banner.idlePlace(context, false);
+    }
+
+    @Override
+    public void destroy(final Context context) {
+      banner.brick = null;
+    }
+  }
+
+  private class IterationPlace extends IterationTask {
+    private final Context context;
+    public boolean animate;
+
+    private IterationPlace(final Context context) {
+      this.context = context;
+      animate = context.animateCoursePlacement;
+    }
+
+    @Override
+    protected boolean runImplementation(final IterationContext iterationContext) {
+      place(context, animate);
+      return false;
+    }
+
+    @Override
+    protected void destroyed() {
+      idle = null;
+    }
   }
 }

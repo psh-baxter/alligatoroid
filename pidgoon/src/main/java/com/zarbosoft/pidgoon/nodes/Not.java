@@ -22,23 +22,7 @@ public class Not extends Node {
       final Parent parent,
       final ROMap<Object, RefParent> seen,
       final Object cause) {
-    root.context(
-        context,
-        store.push(),
-        new BaseParent(parent) {
-          @Override
-          public void error(final Parse step, final Store store, final Object cause) {
-            parent.advance(step, store.pop(), cause);
-          }
-
-          @Override
-          public void advance(final Parse step, Store store, final Object cause) {
-            store = store.pop();
-            super.error(step, store, cause);
-          }
-        },
-        seen,
-        cause);
+    root.context(context, store.push(), new OperatorParent(parent), seen, cause);
   }
 
   @Override
@@ -50,5 +34,22 @@ public class Not extends Node {
       out = String.format("~%s", root);
     }
     return out;
+  }
+
+  private static class OperatorParent extends BaseParent {
+    public OperatorParent(Parent parent) {
+      super(parent);
+    }
+
+    @Override
+    public void error(final Parse step, final Store store, final Object cause) {
+      parent.advance(step, store.pop(), cause);
+    }
+
+    @Override
+    public void advance(final Parse step, Store store, final Object cause) {
+      store = store.pop();
+      super.error(step, store, cause);
+    }
   }
 }

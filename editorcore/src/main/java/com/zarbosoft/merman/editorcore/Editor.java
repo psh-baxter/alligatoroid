@@ -62,7 +62,7 @@ public class Editor {
         return "undo";
     }
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       return context.history.undo(context);
     }
   }
@@ -72,7 +72,7 @@ public class Editor {
         return "redo";
     }
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       return context.history.redo(context);
     }
   }
@@ -82,7 +82,7 @@ public class Editor {
         return "click_hovered";
     }
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       if (context.hover == null) return false;
       context.hover.click(context);
 

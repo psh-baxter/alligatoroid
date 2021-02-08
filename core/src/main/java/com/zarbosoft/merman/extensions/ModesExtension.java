@@ -35,12 +35,11 @@ public class ModesExtension {
     }
 
     @Override
-    public boolean run(final Context context) {
+    public void run(final Context context) {
       context.changeGlobalTags(
           new TagsChange(
               new TSSet<String>().add(getTag(pair.first)), new TSSet<String>().add(getTag(state))));
       state = pair.first;
-      return true;
     }
 
     @Override

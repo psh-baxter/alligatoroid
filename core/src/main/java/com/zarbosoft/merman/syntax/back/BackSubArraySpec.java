@@ -10,9 +10,9 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.PluralInvalidAtLocation;
 import com.zarbosoft.pidgoon.Node;
 import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Deque;
 import java.util.List;
 
 public class BackSubArraySpec extends BaseBackSimpleArraySpec {
@@ -43,8 +43,8 @@ public class BackSubArraySpec extends BaseBackSimpleArraySpec {
   }
 
   @Override
-  public void write(Deque<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
-    stack.addLast(new WriteStateDeepDataArray(((List<Atom>) data.get(id)), splayedBoilerplate));
+  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+    stack.add(new WriteStateDeepDataArray(((List<Atom>) data.get(id)), splayedBoilerplate));
   }
 
   @Override
