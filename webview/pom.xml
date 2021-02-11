@@ -11,41 +11,31 @@
     </parent>
     <dependencies>
         <dependency>
-            <groupId>org.jsweet</groupId>
-            <artifactId>jsweet-core</artifactId>
-            <version>6.0.4</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jsweet</groupId>
-            <artifactId>j4ts</artifactId>
-            <version>2.0.0</version>
-        </dependency>
-        <dependency>
             <groupId>com.zarbosoft.merman</groupId>
             <artifactId>core</artifactId>
             <version>0.0.0</version>
         </dependency>
+        <dependency>
+            <groupId>com.google.jsinterop</groupId>
+            <artifactId>jsinterop-annotations</artifactId>
+            <version>1.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.elemental2</groupId>
+            <artifactId>elemental2-core</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.elemental2</groupId>
+            <artifactId>elemental2-dom</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.elemental2</groupId>
+            <artifactId>elemental2-promise</artifactId>
+            <version>1.1.0</version>
+        </dependency>
     </dependencies>
-    <repositories>
-        <repository>
-            <id>jsweet-central</id>
-            <name>libs-release</name>
-            <url>http://repository.jsweet.org/artifactory/libs-release-local</url>
-        </repository>
-    </repositories>
-    <pluginRepositories>
-        <pluginRepository>
-            <id>jsweet-plugins-release</id>
-            <name>plugins-release</name>
-            <url>http://repository.jsweet.org/artifactory/plugins-release-local</url>
-        </pluginRepository>
-        <pluginRepository>
-            <snapshots/>
-            <id>jsweet-plugins-snapshots</id>
-            <name>plugins-snapshot</name>
-            <url>http://repository.jsweet.org/artifactory/plugins-snapshot-local</url>
-        </pluginRepository>
-    </pluginRepositories>
     <build>
         <plugins>
             <plugin>
@@ -81,109 +71,23 @@
                             <outputDirectory>${project.build.directory}/sources</outputDirectory>
                         </configuration>
                     </execution>
-                    <execution>
-                        <id>Aggregater dependency sources 2</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>unpack-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeGroupIds>org.jsweet</includeGroupIds>
-                            <includeArtifactIds>j4ts</includeArtifactIds>
-                            <classifier>sources</classifier>
-                            <failOnMissingClassifierArtifact>true</failOnMissingClassifierArtifact>
-                            <outputDirectory>${project.build.directory}/sources</outputDirectory>
-                        </configuration>
-                    </execution>
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <sources>${project.build.directory}/sources</sources>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.jsweet</groupId>
-                <artifactId>jsweet-maven-plugin</artifactId>
-                <version>2.4.0-SNAPSHOT</version>
+                <groupId>com.zarbosoft</groupId>
+                <artifactId>zarboj2cl</artifactId>
+                <version>0.0.1</version>
                 <configuration>
-                    <outDir>${project.build.directory}/javascript</outDir>
-                    <candiesJsOut>${project.build.directory}/candies</candiesJsOut>
-                    <bundle>none</bundle>
-                    <targetVersion>ES5</targetVersion>
-                    <bundle>true</bundle>
+                    <sourcePath>${project.build.directory}/sources</sourcePath>
                 </configuration>
                 <executions>
                     <execution>
-                        <id>generate-js</id>
-                        <phase>package</phase>
                         <goals>
-                            <goal>jsweet</goal>
+                            <goal>zarboj2cl</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <version>1.8</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <configuration>
-                            <target>
-                                <property name="targetBundlePath" value="${project.build.directory}/${artifactId}-bundle.js"/>
-                                <echo message="Generating full bundle to ${targetBundlePath}"/>
-                                <concat destfile="${targetBundlePath}" force="yes">
-                                    <filelist dir="${project.build.directory}">
-                                        <file name="candies/j4ts-2.0.0/bundle.js"/>
-                                        <file name="candies/j4ts-2.0.0/Manifest.js"/>
-                                        <file name="javascript/bundle.js"/>
-                                    </filelist>
-                                </concat>
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <!--
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>2.5</version>
-                <executions>
-                    <execution>
-                        <id>delete copied sources to prevent ide from getting confused</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                        <configuration>
-                            <filesets>
-                                <fileset>
-                                    <directory>${project.build.directory}/sources</directory>
-                                </fileset>
-                            </filesets>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            -->
         </plugins>
     </build>
 </project>

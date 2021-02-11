@@ -18,10 +18,10 @@ import com.zarbosoft.merman.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.syntax.BackType;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.pidgoon.Grammar;
+import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
-import com.zarbosoft.pidgoon.events.stores.StackStore;
+import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
@@ -32,9 +32,7 @@ import com.zarbosoft.rendaw.common.TSList;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.Deque;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 

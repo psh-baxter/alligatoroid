@@ -3,9 +3,9 @@ package com.zarbosoft.merman.editorcore.editing;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.gap.GapCompletionEngine;
 import com.zarbosoft.merman.editor.gap.TwoColumnChoice;
-import com.zarbosoft.pidgoon.Grammar;
+import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.bytes.Position;
-import com.zarbosoft.pidgoon.parse.Parse;
+import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.rendaw.common.Pair;
 
 import java.io.ByteArrayInputStream;

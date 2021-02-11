@@ -1,13 +1,11 @@
 package com.zarbosoft.pidgoon.nodes;
 
-import com.zarbosoft.pidgoon.Node;
-import com.zarbosoft.pidgoon.Store;
-import com.zarbosoft.pidgoon.internal.Parent;
-import com.zarbosoft.pidgoon.parse.Parse;
+import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.model.RefParent;
+import com.zarbosoft.pidgoon.model.Store;
+import com.zarbosoft.pidgoon.model.Parent;
+import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.rendaw.common.ROMap;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /** Recurse via the grammar rule of this name. */
 public class Reference extends Node {
@@ -44,34 +42,5 @@ public class Reference extends Node {
   @Override
   public String toString() {
     return key.toString();
-  }
-
-  public static class RefParent implements Parent {
-    Parent originalParent;
-    List<Parent> loopParents = new ArrayList<>();
-
-    public RefParent(final Parent parent) {
-      originalParent = parent;
-    }
-
-    @Override
-    public void advance(final Parse step, final Store store, final Object cause) {
-      final Store tempStore = store.pop();
-      originalParent.advance(step, tempStore, cause);
-      for (final Parent p : loopParents) {
-        p.advance(step, tempStore.inject(p.size(this, 1)), cause);
-      }
-    }
-
-    @Override
-    public void error(final Parse step, final Store store, final Object cause) {
-      originalParent.error(step, store, cause);
-    }
-
-    @Override
-    public long size(final Parent stopAt, final long start) {
-      if (stopAt == this) return start;
-      return originalParent.size(stopAt, start + 1);
-    }
   }
 }

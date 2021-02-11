@@ -1,6 +1,6 @@
 package com.zarbosoft.pidgoon.events.nodes;
 
-import com.zarbosoft.pidgoon.Store;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.MatchingEvent;
 

@@ -1,7 +1,8 @@
-package com.zarbosoft.pidgoon.internal;
+package com.zarbosoft.pidgoon;
 
-import com.zarbosoft.pidgoon.Store;
-import com.zarbosoft.pidgoon.parse.Parse;
+import com.zarbosoft.pidgoon.model.Parent;
+import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.Store;
 
 public abstract class BaseParent implements Parent {
   public final Parent parent;

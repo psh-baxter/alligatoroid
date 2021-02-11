@@ -1,9 +1,10 @@
 package com.zarbosoft.pidgoon.events;
 
-import com.zarbosoft.pidgoon.Grammar;
-import com.zarbosoft.pidgoon.Store;
+import com.zarbosoft.pidgoon.Pidgoon;
+import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.errors.NoResults;
-import com.zarbosoft.pidgoon.parse.Parse;
+import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.rendaw.common.Assertion;
 
 import java.util.List;
@@ -27,7 +28,7 @@ public class ParseEventSink<O> implements EventSink {
       final boolean dumpAmbiguity) {
     this.grammar = grammar;
     this.context =
-        Parse.prepare(grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
+        Pidgoon.prepare(grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
   }
 
   public ParseEventSink(final Parse step, final Grammar grammar) {
@@ -38,7 +39,7 @@ public class ParseEventSink<O> implements EventSink {
   @Override
   public ParseEventSink<O> push(final Event event, final Object at) {
     if (ended()) throw new Assertion();
-    final Parse nextStep = context.step(new Position(event, at));
+    final Parse nextStep = Pidgoon.step(context, new Position(event, at));
     return new ParseEventSink<O>(nextStep, grammar);
   }
 

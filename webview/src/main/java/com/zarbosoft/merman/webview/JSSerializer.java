@@ -15,10 +15,10 @@ import com.zarbosoft.merman.syntax.RootAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.webview.serialization.JSEventConsumer;
 import com.zarbosoft.merman.webview.serialization.JsonEventConsumer;
-import com.zarbosoft.pidgoon.Grammar;
+import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
-import com.zarbosoft.pidgoon.events.stores.StackStore;
+import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
@@ -27,15 +27,12 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
-import def.js.Array;
-import def.js.JSON;
-import def.js.Number;
-import def.js.Object;
-import def.js.String;
+import elemental2.core.Global;
+import elemental2.core.JsArray;
+import elemental2.core.JsObject;
+import jsinterop.base.JsPropertyMap;
 
-import java.util.ArrayDeque;
 import java.util.Collections;
-import java.util.Deque;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -106,17 +103,19 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
       events.add(new JSpecialPrimitiveEvent(((Boolean) o).toString()));
     } else if (o instanceof java.lang.String) {
       events.add(new JSpecialPrimitiveEvent(((java.lang.String) o).toString()));
-    } else if (o instanceof Array) {
+    } else if (o instanceof JsArray) {
       events.add(new EArrayOpenEvent());
-      for (int i = 0; i < ((Array<?>) o).length; ++i) {
-        walkJSJson(events, ((Array<?>) o).$get(i));
+      for (int i = 0; i < ((JsArray<?>) o).length; ++i) {
+        walkJSJson(events, ((JsArray<?>) o).getAt(i));
       }
       events.add(new EArrayCloseEvent());
-    } else if (o instanceof Object) {
+    } else if (o instanceof JsObject) {
       events.add(new EObjectOpenEvent());
-      for (String key : Object.keys(o)) {
-        if (!((Object) o).hasOwnProperty(key)) continue;
-        walkJSJson(events, ((Object) o).$get(key));
+      JsArray<String> keys = JsObject.keys(o);
+      for (int i = 0; i < keys.length; ++i) {
+        String key = keys.getAt(i);
+        if (!((JsObject) o).hasOwnProperty(key)) continue;
+        walkJSJson(events, ((JsPropertyMap) o).get(key));
       }
       events.add(new EObjectCloseEvent());
     } else throw new Assertion();
@@ -140,7 +139,7 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
       case JSON:
         {
           TSList<BackEvent> events = new TSList<>();
-          walkJSJson(events, JSON.parse(data));
+          walkJSJson(events, Global.JSON.parse(data));
           final Grammar grammar = new Grammar(syntax.getGrammar());
           grammar.add(
               data,

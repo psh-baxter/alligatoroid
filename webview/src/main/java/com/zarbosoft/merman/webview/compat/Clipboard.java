@@ -1,11 +1,17 @@
 package com.zarbosoft.merman.webview.compat;
 
-import def.dom.DataTransfer;
-import def.js.Promise;
+import elemental2.core.JsArray;
+import elemental2.dom.DataTransfer;
+import elemental2.promise.Promise;
+import jsinterop.annotations.JsType;
 
-public interface Clipboard {
-    Promise<DataTransfer> read();
-    Promise<java.lang.String> readText();
-    Promise<java.lang.Object> write(Object[] items);
-    Promise<java.lang.Object> writeText(java.lang.String text);
+import static jsinterop.annotations.JsPackage.GLOBAL;
+
+@JsType(isNative = true, namespace = GLOBAL)
+public class Clipboard {
+  public native void write(JsArray<ClipboardItem> items);
+  public native void writeText(String string);
+
+  public native Promise<DataTransfer> read();
+  public native Promise<String> readText();
 }

@@ -6,12 +6,10 @@ import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.webview.display.JSDisplay;
-import def.dom.Globals;
-import def.dom.HTMLDivElement;
-import jsweet.util.StringTypes;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.HTMLDivElement;
 
 import java.util.PriorityQueue;
-import java.util.function.Consumer;
 
 public class JSSourceView {
   public final HTMLDivElement element;
@@ -21,7 +19,7 @@ public class JSSourceView {
   private IterationContext iterationContext = null;
 
   public JSSourceView(Syntax syntax, I18nEngine i18n, String rawDoc) {
-    element = Globals.window.document.createElement(StringTypes.div);
+    element = (HTMLDivElement) DomGlobal.document.createElement("div");
     JSSerializer serializer = new JSSerializer(syntax.backType);
     new Context(
         new Context.InitialConfig(),
@@ -66,7 +64,15 @@ public class JSSourceView {
   private void addIteration(final IterationTask task) {
     iterationQueue.add(task);
     if (iterationTimer == null) {
-      iterationTimer = Globals.window.setTimeout((Consumer<Void>)(ignored) -> handleTimer(), 50);
+      iterationTimer =
+          DomGlobal.setTimeout(
+              new DomGlobal.SetTimeoutCallbackFn() {
+                @Override
+                public void onInvoke(Object... p0) {
+                  handleTimer();
+                }
+              },
+              50);
     }
   }
 

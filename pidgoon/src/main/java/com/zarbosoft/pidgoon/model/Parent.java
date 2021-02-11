@@ -1,7 +1,4 @@
-package com.zarbosoft.pidgoon.internal;
-
-import com.zarbosoft.pidgoon.Store;
-import com.zarbosoft.pidgoon.parse.Parse;
+package com.zarbosoft.pidgoon.model;
 
 public interface Parent {
   void advance(Parse step, Store store, Object cause);

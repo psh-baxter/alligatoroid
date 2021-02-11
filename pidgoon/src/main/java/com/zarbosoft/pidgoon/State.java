@@ -1,6 +1,7 @@
 package com.zarbosoft.pidgoon;
 
-import com.zarbosoft.pidgoon.parse.Parse;
+import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.Position;
 
 public abstract class State {
   protected State() {}

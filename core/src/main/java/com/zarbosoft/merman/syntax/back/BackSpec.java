@@ -5,13 +5,11 @@ import com.zarbosoft.merman.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.ArrayDeque;
 import java.util.Arrays;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.function.Function;
 

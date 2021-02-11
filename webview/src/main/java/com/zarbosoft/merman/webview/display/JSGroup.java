@@ -1,27 +1,25 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.rendaw.common.ROList;
-import def.dom.Globals;
-import def.dom.HTMLDivElement;
-import def.dom.HTMLElement;
-import jsweet.util.StringTypes;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.HTMLDivElement;
+import elemental2.dom.HTMLElement;
 
 public class JSGroup extends JSDisplayNode implements Group {
   private final HTMLDivElement element;
 
   protected JSGroup(JSDisplay display) {
     super(display);
-    element = Globals.window.document.createElement(StringTypes.div);
+    element = (HTMLDivElement) DomGlobal.document.createElement("div");
     element.classList.add("merman-display-group");
   }
 
   @Override
   public void add(int index, DisplayNode node) {
     if (index < element.childNodes.length) element.appendChild(((JSDisplayNode) node).js());
-    else element.insertBefore(((JSDisplayNode) node).js(), element.childNodes.$get(index));
+    else element.insertBefore(((JSDisplayNode) node).js(), element.childNodes.getAt(index));
     fixPosition();
   }
 
@@ -30,7 +28,7 @@ public class JSGroup extends JSDisplayNode implements Group {
     for (int i = 0; i < nodes.size(); ++i) {
       DisplayNode node = nodes.get(i);
       if (index < element.childNodes.length) element.appendChild(((JSDisplayNode) node).js());
-      else element.insertBefore(((JSDisplayNode) node).js(), element.childNodes.$get(index));
+      else element.insertBefore(((JSDisplayNode) node).js(), element.childNodes.getAt(index));
       index += 1;
     }
     fixPosition();
@@ -39,7 +37,7 @@ public class JSGroup extends JSDisplayNode implements Group {
   @Override
   public void remove(int index, int count) {
     for (int i = 0; i < count; ++i) {
-      ((HTMLElement) element.childNodes.$get(i)).remove();
+      ((HTMLElement) element.childNodes.getAt(i)).remove();
     }
     fixPosition();
   }

@@ -1,9 +1,8 @@
-package com.zarbosoft.pidgoon.events.stores;
+package com.zarbosoft.pidgoon.events;
 
-import com.zarbosoft.pidgoon.Position;
-import com.zarbosoft.pidgoon.Store;
-import com.zarbosoft.pidgoon.events.Event;
-import com.zarbosoft.pidgoon.internal.BranchingStack;
+import com.zarbosoft.pidgoon.model.Position;
+import com.zarbosoft.pidgoon.model.Store;
+import com.zarbosoft.pidgoon.BranchingStack;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.rendaw.common.TSList;
 

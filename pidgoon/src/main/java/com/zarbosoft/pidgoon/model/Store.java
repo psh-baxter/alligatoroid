@@ -1,4 +1,4 @@
-package com.zarbosoft.pidgoon;
+package com.zarbosoft.pidgoon.model;
 
 /**
  * This contains user-accessible state for the parse. This is immutable - any modifications return a

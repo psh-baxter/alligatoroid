@@ -1,7 +1,7 @@
 package com.zarbosoft.pidgoon.errors;
 
-import com.zarbosoft.pidgoon.Position;
-import com.zarbosoft.pidgoon.parse.Parse;
+import com.zarbosoft.pidgoon.model.Position;
+import com.zarbosoft.pidgoon.model.Parse;
 
 /** The grammar couldn't match the stream (all branches failed before the stream ended). */
 public class InvalidStream extends RuntimeException {

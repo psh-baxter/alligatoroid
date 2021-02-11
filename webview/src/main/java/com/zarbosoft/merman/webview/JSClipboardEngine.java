@@ -2,13 +2,16 @@ package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.syntax.BackType;
-import def.dom.DataTransfer;
-import def.dom.DataTransferItem;
-import def.js.Promise;
+import com.zarbosoft.merman.webview.compat.ClipboardItem;
+import com.zarbosoft.merman.webview.compat.Navigator;
+import elemental2.core.JsArray;
+import elemental2.dom.DataTransfer;
+import elemental2.dom.DataTransferItem;
+import elemental2.dom.DomGlobal;
+import elemental2.promise.IThenable;
+import jsinterop.base.JsPropertyMap;
 
 import java.util.function.Consumer;
-
-import static jsweet.util.Lang.$insert;
 
 public class JSClipboardEngine extends ClipboardEngine {
   public final String mime;
@@ -19,46 +22,65 @@ public class JSClipboardEngine extends ClipboardEngine {
 
   @Override
   public void set(Object bytes) {
-    $insert(
-        "(navigator.clipboard as any).write(["
-            + "new (window as any).ClipboardItem({[this.mime]: bytes})"
-            + "]);");
+    ((Navigator) DomGlobal.navigator)
+        .clipboard.write(JsArray.of(new ClipboardItem(JsPropertyMap.of(mime, bytes))));
   }
 
   @Override
   public void get(Consumer<Object> cb) {
-    ((Promise<DataTransfer>) $insert("(navigator.clipboard as any).read()"))
+    ((Navigator) DomGlobal.navigator)
+        .clipboard
+        .read()
         .then(
-            d -> {
-              DataTransferItem backup = null;
-              for (Object f0 : d.items) {
-                DataTransferItem f = (DataTransferItem) f0;
-                if (mime.equals(f.type)) {
-                  f.getAsString(
+            new IThenable.ThenOnFulfilledCallbackFn<DataTransfer, Object>() {
+              @Override
+              public IThenable<Object> onInvoke(DataTransfer d) {
+                DataTransferItem backup = null;
+                for (int i = 0; i < d.items.length; ++i) {
+                  DataTransferItem f = d.items.getAt(i);
+                  if (mime.equals(f.type)) {
+                    f.getAsString(
+                        new DataTransferItem.GetAsStringCallbackFn() {
+                          @Override
+                          public Object onInvoke(String p0) {
+                            cb.accept(p0);
+                            return null;
+                          }
+                        });
+                    return null;
+                  } else if (backup == null && "text/plain".equals(f.type)) {
+                    backup = f;
+                  }
+                }
+                if (backup != null) {
+                  backup.getAsString(
                       s -> {
                         cb.accept(s);
+                        return null;
                       });
-                  return;
-                } else if (backup == null && "text/plain".equals(f.type)) {
-                  backup = f;
                 }
-              }
-              if (backup != null) {
-                backup.getAsString(
-                    s -> {
-                      cb.accept(s);
-                    });
+                return null;
               }
             });
   }
 
   @Override
   public void getString(Consumer<String> cb) {
-    ((Promise<String>) $insert("navigator.clipboard.readText()")).then(cb);
+    ((Navigator) DomGlobal.navigator)
+        .clipboard
+        .readText()
+        .then(
+            new IThenable.ThenOnFulfilledCallbackFn<String, Object>() {
+              @Override
+              public IThenable<Object> onInvoke(String p0) {
+                cb.accept(p0);
+                return null;
+              }
+            });
   }
 
   @Override
   public void setString(String string) {
-    $insert("(navigator.clipboard as any).writeText(string);");
+    ((Navigator) DomGlobal.navigator).clipboard.writeText(string);
   }
 }

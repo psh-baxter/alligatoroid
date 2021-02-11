@@ -30,7 +30,8 @@ import com.zarbosoft.merman.syntax.error.UnusedBackData;
 import com.zarbosoft.merman.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
-import com.zarbosoft.pidgoon.events.stores.StackStore;
+import com.zarbosoft.pidgoon.events.StackStore;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Color;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
@@ -162,7 +163,7 @@ public abstract class AtomType {
     return back;
   }
 
-  public com.zarbosoft.pidgoon.Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(final Syntax syntax) {
     final Sequence seq = new Sequence();
     seq.add(StackStore.prepVarStack);
     for (BackSpec p : back()) {

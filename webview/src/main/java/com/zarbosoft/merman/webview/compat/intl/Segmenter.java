@@ -1,8 +1,12 @@
 package com.zarbosoft.merman.webview.compat.intl;
 
-import def.js.Object;
+import elemental2.core.JsArray;
+import jsinterop.annotations.JsType;
+import jsinterop.base.JsPropertyMap;
 
-public interface Segmenter {
+@JsType(isNative = true, namespace = "Intl")
+public class Segmenter {
+  public Segmenter(String lang, JsPropertyMap<Object> options) {}
 
-    public Segments segment(String text);
+  public native JsArray<Segment> segment(String text);
 }

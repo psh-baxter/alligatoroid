@@ -6,20 +6,20 @@ import com.zarbosoft.merman.editor.display.Drawing;
 import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.ModelColor;
-import def.dom.CanvasRenderingContext2D;
-import def.dom.Globals;
-import def.dom.HTMLCanvasElement;
-import def.dom.HTMLElement;
-import jsweet.util.StringTypes;
-
-import static jsweet.util.Lang.union;
+import elemental2.dom.BaseRenderingContext2D;
+import elemental2.dom.CSSProperties;
+import elemental2.dom.CanvasRenderingContext2D;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.HTMLCanvasElement;
+import elemental2.dom.HTMLElement;
+import jsinterop.annotations.JsType;
 
 public class JSDrawing extends JSDisplayNode implements Drawing {
   private final HTMLCanvasElement element;
 
   protected JSDrawing(JSDisplay display) {
     super(display);
-    element = Globals.window.document.createElement(StringTypes.canvas);
+    element = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
     element.classList.add("merman-display-drawing");
   }
 
@@ -30,20 +30,20 @@ public class JSDrawing extends JSDisplayNode implements Drawing {
   public void resize(Context context, Vector vector) {
     Display.UnconvertVector v =
         display.halfConvert.unconvertSpan(vector.converse, vector.transverse);
-    element.style.width = v.x + "px";
-    element.style.height = v.y + "px";
+    element.style.width = CSSProperties.WidthUnionType.of(v.x + "px");
+    element.style.height = CSSProperties.HeightUnionType.of(v.y + "px");
     fixPosition();
   }
 
   @Override
   public DrawingContext begin(Context context) {
-    CanvasRenderingContext2D ctx = element.getContext(StringTypes._2d);
+    CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object)element.getContext("2d");
     return new DrawingContext() {
       private boolean stroke = true;
 
       @Override
       public void setLineColor(ModelColor color) {
-        ctx.strokeStyle = union(JSDisplay.cssColor(color));
+        ctx.strokeStyle = BaseRenderingContext2D.StrokeStyleUnionType.of(JSDisplay.cssColor(color));
       }
 
       @Override
@@ -63,7 +63,7 @@ public class JSDrawing extends JSDisplayNode implements Drawing {
 
       @Override
       public void setFillColor(ModelColor color) {
-        ctx.fillStyle = union(JSDisplay.cssColor(color));
+        ctx.fillStyle = BaseRenderingContext2D.FillStyleUnionType.of(JSDisplay.cssColor(color));
       }
 
       @Override

@@ -8,7 +8,7 @@ import com.zarbosoft.merman.editor.serialization.WriteStateDeepDataArray;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.PluralInvalidAtLocation;
-import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;

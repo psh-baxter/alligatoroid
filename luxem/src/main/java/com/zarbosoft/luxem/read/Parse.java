@@ -3,7 +3,7 @@ package com.zarbosoft.luxem.read;
 import com.zarbosoft.luxem.Luxem;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseEventSink;
-import com.zarbosoft.pidgoon.internal.BaseParseBuilder;
+import com.zarbosoft.pidgoon.BaseParseBuilder;
 import com.zarbosoft.rendaw.common.Pair;
 
 import java.io.ByteArrayInputStream;

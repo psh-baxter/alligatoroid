@@ -5,6 +5,7 @@ import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.document.values.ValuePrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.syntax.primitivepattern.Any;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
@@ -14,13 +15,13 @@ import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.pidgoon.Grammar;
+import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.bytes.BytesHelper;
 import com.zarbosoft.pidgoon.bytes.ParseBuilder;
 import com.zarbosoft.pidgoon.bytes.Position;
 import com.zarbosoft.pidgoon.nodes.Color;
 import com.zarbosoft.pidgoon.nodes.Sequence;
-import com.zarbosoft.pidgoon.parse.Parse;
+import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.Pair;
 
@@ -117,7 +118,7 @@ public class GapKey {
     return out;
   }
 
-  public com.zarbosoft.pidgoon.Node matchGrammar(Context context, final Object color) {
+  public Node matchGrammar(Context context, final Object color) {
     final Sequence out = new Sequence();
     for (final FrontSpec part : keyParts) {
       if (part instanceof FrontSymbol) {

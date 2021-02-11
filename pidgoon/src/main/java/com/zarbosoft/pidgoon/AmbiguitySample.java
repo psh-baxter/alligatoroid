@@ -1,6 +1,6 @@
-package com.zarbosoft.pidgoon.parse;
+package com.zarbosoft.pidgoon;
 
-import com.zarbosoft.pidgoon.Position;
+import com.zarbosoft.pidgoon.model.Position;
 
 public class AmbiguitySample {
   public int step;

@@ -1,10 +1,11 @@
 package com.zarbosoft.merman.webview.display;
 
 import com.zarbosoft.merman.editor.display.Font;
-import def.dom.CanvasRenderingContext2D;
-import def.dom.Globals;
-import jsweet.lang.Interface;
-import jsweet.util.StringTypes;
+import elemental2.dom.CanvasRenderingContext2D;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.HTMLCanvasElement;
+import elemental2.dom.TextMetrics;
+import jsinterop.annotations.JsType;
 
 public class JSFont implements Font {
   public final String name;
@@ -26,7 +27,9 @@ public class JSFont implements Font {
 
   public TextMetrics measure(String text) {
     CanvasRenderingContext2D context =
-        Globals.window.document.createElement(StringTypes.canvas).getContext(StringTypes._2d);
+        (CanvasRenderingContext2D)
+            (Object)
+                ((HTMLCanvasElement) DomGlobal.document.createElement("canvas")).getContext("2d");
     context.font = cssString();
     return (TextMetrics) (Object) context.measureText(text);
   }
@@ -57,9 +60,7 @@ public class JSFont implements Font {
     return (int) last;
   }
 
-  @Interface
-  public static class TextMetrics {
-    public double width;
+  public static class TextMetrics extends elemental2.dom.TextMetrics {
     public double fontBoundingBoxAscent;
     public double fontBoundingBoxDescent;
   }

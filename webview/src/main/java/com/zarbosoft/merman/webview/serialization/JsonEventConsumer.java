@@ -1,12 +1,12 @@
 package com.zarbosoft.merman.webview.serialization;
 
 import com.zarbosoft.rendaw.common.TSList;
-import def.js.JSON;
+import elemental2.core.JSONType;
+import elemental2.core.JsNumber;
 
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayDeque;
-import java.util.Deque;
-import java.util.function.BiFunction;
+
+import static elemental2.core.Global.JSON;
 
 public class JsonEventConsumer implements JSEventConsumer {
   TSList<JsonWriteState> stack = new TSList<>();
@@ -18,13 +18,16 @@ public class JsonEventConsumer implements JSEventConsumer {
   @Override
   public byte[] resultOne() {
     return JSON.stringify(
-            ((JsonWriteArrayState) stack.last()).value.get(0), (BiFunction) null, "    ")
+            ((JsonWriteArrayState) stack.last()).value.get(0),
+            (JSONType.StringifyReplacerFn) null,
+            "    ")
         .getBytes(StandardCharsets.UTF_8);
   }
 
   @Override
   public byte[] resultMany() {
-    return JSON.stringify(((JsonWriteArrayState) stack.last()).value, (BiFunction) null, "    ")
+    return JSON.stringify(
+            ((JsonWriteArrayState) stack.last()).value, (JSONType.StringifyReplacerFn) null, "    ")
         .getBytes(StandardCharsets.UTF_8);
   }
 
@@ -67,6 +70,10 @@ public class JsonEventConsumer implements JSEventConsumer {
 
   @Override
   public void jsonSpecialPrimitive(String value) {
-    stack.last().value(value);
+    if ("true".equals(value)) stack.last().value(true);
+    else if ("false".equals(value)) stack.last().value(false);
+    else if ("null".equals(value)) stack.last().value(null);
+    else if (!value.contains(".")) stack.last().value(JsNumber.parseInt(value, 10));
+    else stack.last().value(JsNumber.parseFloat(value));
   }
 }

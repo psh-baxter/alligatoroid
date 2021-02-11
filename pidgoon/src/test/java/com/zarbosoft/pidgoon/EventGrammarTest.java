@@ -5,6 +5,7 @@ import com.zarbosoft.pidgoon.events.MatchingEvent;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
 import com.zarbosoft.pidgoon.events.ParseEventSink;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
+import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import org.junit.Test;
 

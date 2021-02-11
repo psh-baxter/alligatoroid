@@ -1,7 +1,7 @@
 package com.zarbosoft.luxem.read.grammar;
 
 import com.zarbosoft.luxem.events.LPrimitiveEvent;
-import com.zarbosoft.pidgoon.Store;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.nodes.Terminal;
 

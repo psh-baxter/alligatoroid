@@ -41,7 +41,7 @@ import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
-import def.dom.Globals;
+import elemental2.dom.DomGlobal;
 
 public class Main {
   public static final String rawDoc =
@@ -728,7 +728,7 @@ public class Main {
                 .split()
                 .build(),
             new StyleBuilder().with(spaceTag).space(spacePx).build());
-    Globals.window.document.body.appendChild(
+    DomGlobal.document.body.appendChild(
         new JSSourceView(new Syntax(syntaxConfig), i18n, rawDoc).element);
   }
 

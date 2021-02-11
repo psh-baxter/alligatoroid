@@ -1,4 +1,4 @@
-package com.zarbosoft.pidgoon.parse;
+package com.zarbosoft.pidgoon;
 
 public class Stats {
   public int totalLeaves = 0;

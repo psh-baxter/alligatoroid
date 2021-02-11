@@ -13,12 +13,11 @@ import com.zarbosoft.merman.editor.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.editor.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.editor.serialization.JSONObjectPath;
 import com.zarbosoft.merman.editor.serialization.JSONPath;
-import com.zarbosoft.pidgoon.Store;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseEventSink;
-import com.zarbosoft.pidgoon.events.stores.StackStore;
-import com.zarbosoft.pidgoon.internal.BaseParseBuilder;
-import com.zarbosoft.rendaw.common.Common;
+import com.zarbosoft.pidgoon.events.StackStore;
+import com.zarbosoft.pidgoon.BaseParseBuilder;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROPair;
 

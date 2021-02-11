@@ -1,10 +1,9 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Display;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.visual.Vector;
-import def.dom.HTMLElement;
+import elemental2.dom.HTMLElement;
 
 public abstract class JSDisplayNode implements DisplayNode {
   public static final String CSS_ANIMATE_LEFT = "animate-left";

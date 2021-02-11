@@ -2,17 +2,16 @@ package com.zarbosoft.merman.webview.display;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Image;
-import def.dom.Globals;
-import def.dom.HTMLElement;
-import def.dom.HTMLImageElement;
-import jsweet.util.StringTypes;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.HTMLElement;
+import elemental2.dom.HTMLImageElement;
 
 public class JSImage extends JSDisplayNode implements Image {
   private final HTMLImageElement element;
 
   public JSImage(JSDisplay display) {
     super(display);
-    element = Globals.window.document.createElement(StringTypes.img);
+    element = (HTMLImageElement) DomGlobal.document.createElement("img");
     element.classList.add("merman-display-img");
   }
 

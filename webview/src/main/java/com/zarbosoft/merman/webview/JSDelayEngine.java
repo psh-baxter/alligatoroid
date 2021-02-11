@@ -1,12 +1,20 @@
 package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.editor.DelayEngine;
-import def.dom.Globals;
+import elemental2.dom.DomGlobal;
 
 public class JSDelayEngine implements DelayEngine {
   @Override
   public Handle delay(long ms, Runnable r) {
-    return new Handle(Globals.window.setTimeout(r, ms));
+    return new Handle(
+        DomGlobal.setTimeout(
+            new DomGlobal.SetTimeoutCallbackFn() {
+              @Override
+              public void onInvoke(Object... p0) {
+                r.run();
+              }
+            },
+            ms));
   }
 
   public static class Handle implements DelayEngine.Handle {
@@ -18,7 +26,7 @@ public class JSDelayEngine implements DelayEngine {
 
     @Override
     public void cancel() {
-      Globals.window.clearTimeout(id);
+      DomGlobal.clearTimeout(id);
     }
   }
 }

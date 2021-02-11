@@ -1,10 +1,11 @@
 package com.zarbosoft.pidgoon.nodes;
 
-import com.zarbosoft.pidgoon.Node;
-import com.zarbosoft.pidgoon.Store;
-import com.zarbosoft.pidgoon.internal.BaseParent;
-import com.zarbosoft.pidgoon.internal.Parent;
-import com.zarbosoft.pidgoon.parse.Parse;
+import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.model.RefParent;
+import com.zarbosoft.pidgoon.model.Store;
+import com.zarbosoft.pidgoon.BaseParent;
+import com.zarbosoft.pidgoon.model.Parent;
+import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.rendaw.common.ROMap;
 
 /**
@@ -25,7 +26,7 @@ public class Color extends Node {
       final Parse context,
       final Store store,
       final Parent parent,
-      final ROMap<Object, Reference.RefParent> seen,
+      final ROMap<Object, RefParent> seen,
       final Object cause) {
     Object wasColor = store.color;
     store.color = color;

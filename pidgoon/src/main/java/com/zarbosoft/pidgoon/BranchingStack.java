@@ -1,4 +1,4 @@
-package com.zarbosoft.pidgoon.internal;
+package com.zarbosoft.pidgoon;
 
 public class BranchingStack<T> {
   private final T top;

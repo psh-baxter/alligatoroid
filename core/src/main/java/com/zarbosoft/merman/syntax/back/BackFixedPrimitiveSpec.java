@@ -4,7 +4,7 @@ import com.zarbosoft.merman.editor.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;

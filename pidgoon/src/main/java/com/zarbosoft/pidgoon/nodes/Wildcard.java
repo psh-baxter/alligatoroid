@@ -1,12 +1,12 @@
 package com.zarbosoft.pidgoon.nodes;
 
-import com.zarbosoft.pidgoon.Node;
-import com.zarbosoft.pidgoon.Position;
+import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.model.Position;
 import com.zarbosoft.pidgoon.State;
-import com.zarbosoft.pidgoon.Store;
-import com.zarbosoft.pidgoon.internal.Parent;
-import com.zarbosoft.pidgoon.nodes.Reference.RefParent;
-import com.zarbosoft.pidgoon.parse.Parse;
+import com.zarbosoft.pidgoon.model.RefParent;
+import com.zarbosoft.pidgoon.model.Store;
+import com.zarbosoft.pidgoon.model.Parent;
+import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.rendaw.common.ROMap;
 
 /** Matches any event/byte. */

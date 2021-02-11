@@ -18,8 +18,8 @@ import com.zarbosoft.merman.syntax.error.TypeCircularReference;
 import com.zarbosoft.merman.syntax.error.UnsupportedDirections;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.syntax.style.Style;
-import com.zarbosoft.pidgoon.Grammar;
-import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
@@ -33,13 +33,8 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 
 public class Syntax {
   public static final Object GRAMMAR_WILDCARD_KEY = new Object();

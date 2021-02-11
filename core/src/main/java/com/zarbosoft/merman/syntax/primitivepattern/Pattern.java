@@ -2,9 +2,9 @@ package com.zarbosoft.merman.syntax.primitivepattern;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.I18nEngine;
-import com.zarbosoft.pidgoon.Grammar;
-import com.zarbosoft.pidgoon.Node;
-import com.zarbosoft.pidgoon.Store;
+import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseBuilder;

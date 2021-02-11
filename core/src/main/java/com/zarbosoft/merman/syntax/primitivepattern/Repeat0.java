@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.syntax.primitivepattern;
 
 import com.zarbosoft.merman.editor.I18nEngine;
-import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 
 public class Repeat0 extends Pattern {

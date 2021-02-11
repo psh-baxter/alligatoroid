@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.webview.compat.intl;
 
-import jsweet.lang.Interface;
+import jsinterop.annotations.JsType;
 
-@Interface
-public abstract class Segment {
-    public String segment;
-    public int index;
-    boolean wordLike;
+@JsType(isNative = true)
+public class Segment {
+  public String segment;
+  public int index;
+  boolean wordLike;
 }

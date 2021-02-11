@@ -1,6 +1,4 @@
-package com.zarbosoft.pidgoon;
-
-import com.zarbosoft.pidgoon.errors.InvalidGrammar;
+package com.zarbosoft.pidgoon.model;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -25,7 +23,7 @@ public class Grammar {
   }
 
   public Node getNode(final Object key) {
-    if (!nodes.containsKey(key)) throw new InvalidGrammar(String.format("No rule named %s", key));
+    if (!nodes.containsKey(key)) throw new RuntimeException(String.format("No rule named %s", key));
     return nodes.get(key);
   }
 }

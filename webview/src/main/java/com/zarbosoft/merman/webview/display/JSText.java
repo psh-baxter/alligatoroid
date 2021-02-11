@@ -4,18 +4,18 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.syntax.style.ModelColor;
-import def.dom.Globals;
-import def.dom.HTMLDivElement;
-import def.dom.HTMLElement;
-import jsweet.util.StringTypes;
+import elemental2.dom.CSSProperties;
+import elemental2.dom.DomGlobal;
+import elemental2.dom.HTMLDivElement;
+import elemental2.dom.HTMLElement;
 
 public class JSText extends JSDisplayNode implements Text {
-  private JSFont font;
   private final HTMLDivElement element;
+  private JSFont font;
 
   protected JSText(JSDisplay display) {
     super(display);
-    element = Globals.window.document.createElement(StringTypes.div);
+    element = (HTMLDivElement) DomGlobal.document.createElement("div");
     element.classList.add("merman-display-text");
   }
 
@@ -44,7 +44,7 @@ public class JSText extends JSDisplayNode implements Text {
   public void setFont(Context context, Font font) {
     this.font = (JSFont) font;
     element.style.fontFamily = this.font.name;
-    element.style.fontSize = this.font.size + "pt";
+    element.style.fontSize = CSSProperties.FontSizeUnionType.of(this.font.size + "pt");
     fixPosition();
   }
 

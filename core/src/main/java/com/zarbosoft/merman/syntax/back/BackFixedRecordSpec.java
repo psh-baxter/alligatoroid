@@ -11,7 +11,7 @@ import com.zarbosoft.merman.editor.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.RecordDiscardDuplicateKey;
-import com.zarbosoft.pidgoon.Node;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;

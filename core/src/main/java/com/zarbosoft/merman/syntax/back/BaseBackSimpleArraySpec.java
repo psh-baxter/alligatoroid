@@ -13,7 +13,7 @@ import com.zarbosoft.merman.syntax.error.ArrayBoilerplateMissingAtom;
 import com.zarbosoft.merman.syntax.error.ArrayBoilerplateNotInBaseSet;
 import com.zarbosoft.merman.syntax.error.ArrayBoilerplateOverlaps;
 import com.zarbosoft.merman.syntax.error.ArrayMultipleAtoms;
-import com.zarbosoft.pidgoon.events.stores.StackStore;
+import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;

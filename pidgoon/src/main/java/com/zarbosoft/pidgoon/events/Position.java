@@ -1,6 +1,6 @@
 package com.zarbosoft.pidgoon.events;
 
-public class Position implements com.zarbosoft.pidgoon.Position {
+public class Position implements com.zarbosoft.pidgoon.model.Position {
   public final Event event;
   public final Object at;
 
@@ -10,7 +10,7 @@ public class Position implements com.zarbosoft.pidgoon.Position {
   }
 
   @Override
-  public com.zarbosoft.pidgoon.Position advance() {
+  public com.zarbosoft.pidgoon.model.Position advance() {
     return this;
   }
 

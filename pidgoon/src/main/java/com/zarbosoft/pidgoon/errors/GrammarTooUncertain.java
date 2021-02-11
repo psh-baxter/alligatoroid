@@ -1,8 +1,6 @@
 package com.zarbosoft.pidgoon.errors;
 
-import com.zarbosoft.pidgoon.parse.Parse;
-
-import java.util.stream.Collectors;
+import com.zarbosoft.pidgoon.model.Parse;
 
 /** There were too many branches when parsing. This is configurable in the Parse. */
 public class GrammarTooUncertain extends RuntimeException {
