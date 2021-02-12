@@ -136,6 +136,18 @@ public class ZarboJ2CL extends AbstractMojo {
                 .getBytes(StandardCharsets.UTF_8));
       }
 
+      try (OutputStream os = Files.newOutputStream(sourcePath.resolve("BUILD"))) {
+        os.write(
+            ("load(\"@com_google_j2cl//build_defs:rules.bzl\", \"j2cl_application\")\n"
+                    + "\n"
+                    + "j2cl_application(\n"
+                    + "    name = \"entry\",\n"
+                    + "    entry_points = [\"com.zarbosoft.merman.webview.entry\"],\n"
+                    + "    deps = [\"//com/zarbosoft/merman:editor\"],\n"
+                    + ")\n")
+                .getBytes(StandardCharsets.UTF_8));
+      }
+
       /// Build BUILD files and map dependencies
       Path editorRoot = Paths.get("com/zarbosoft/merman");
       BazelPackage editorPackage = new BazelPackage(editorRoot);
@@ -199,9 +211,7 @@ public class ZarboJ2CL extends AbstractMojo {
               "/usr/bin/bazel", "build", String.format("%s:entry", entry[0].getParent())
       };
        */
-      String[] commandline = {
-        "/usr/bin/bazel", "build", String.format("%s:editor", editorPackage.dir)
-      };
+      String[] commandline = {"/usr/bin/bazel", "build", String.format(":entry")};
       ProcessBuilder processBuilder =
           new ProcessBuilder().command(commandline).directory(sourcePath.toFile());
       processBuilder.environment().put("JAVA_HOME", "/usr/lib/jvm/java-11-openjdk");
@@ -263,7 +273,6 @@ public class ZarboJ2CL extends AbstractMojo {
     private final String name;
     private final List<Path> sources = new ArrayList<>();
     private final BazelPackage bazelPackage;
-    private Path app;
 
     public BazelLibrary(BazelPackage bazelPackage, String name) {
       this.name = name;
@@ -275,12 +284,8 @@ public class ZarboJ2CL extends AbstractMojo {
     }
 
     public BazelLibrary process(Path source) {
-      if (source.getFileName().toString().equals("main.js")) {
-        app = source;
-      } else {
-        sources.add(source);
-        lookup.put(source, this);
-      }
+      sources.add(source);
+      lookup.put(source, this);
       return this;
     }
 
@@ -297,10 +302,6 @@ public class ZarboJ2CL extends AbstractMojo {
                   ("        \"" + bazelPackage.dir.relativize(source).toString() + "\",\n")
                       .getBytes(StandardCharsets.UTF_8));
             }
-            if (app != null)
-              os.write(
-                  ("        \"" + bazelPackage.dir.relativize(app).toString() + "\",\n")
-                      .getBytes(StandardCharsets.UTF_8));
 
             os.write(("    ],\n" + "    deps = [\n").getBytes(StandardCharsets.UTF_8));
             Set<String> seenDeps = new HashSet<>();
@@ -338,21 +339,14 @@ public class ZarboJ2CL extends AbstractMojo {
                 os.write(("        \"" + dep + "\",\n").getBytes(StandardCharsets.UTF_8));
               }
             }
-            os.write(("    ],\n" + ")\n").getBytes(StandardCharsets.UTF_8));
-
-            if (app != null) {
-              os.write(
-                  ("load(\"@com_google_j2cl//build_defs:rules.bzl\", \"j2cl_application\")\n"
-                          + "\n"
-                          + "j2cl_application(\n"
-                          + "    name = \"entry\",\n"
-                          + "    entry_points = [\"com.zarbosoft.merman.webview.entry\"],\n"
-                          + "    deps = [\":"
-                          + name
-                          + "\"],\n"
-                          + ")\n")
-                      .getBytes(StandardCharsets.UTF_8));
-            }
+            os.write(
+                ("    ],\n"
+                        + "    js_suppress = [\n"
+                        + "        \"undefinedVars\",\n"
+                        + "        \"missingProperties\",\n"
+                        + "        \"unrecognizedTypeError\"],\n"
+                        + ")\n")
+                    .getBytes(StandardCharsets.UTF_8));
           });
     }
   }

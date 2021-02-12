@@ -42,6 +42,8 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 import elemental2.dom.DomGlobal;
+import jsinterop.annotations.JsFunction;
+import jsinterop.annotations.JsMethod;
 
 public class Main {
   public static final String rawDoc =
@@ -452,6 +454,7 @@ public class Main {
       new FrontSymbol(
           new FrontSymbol.Config(new SymbolSpaceSpec(), null, "", TSSet.of(spaceTag).ro()));
 
+  @JsMethod
   public static void main() {
     JSI18nEngine i18n = new JSI18nEngine("en");
 
