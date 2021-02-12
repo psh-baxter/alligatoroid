@@ -119,7 +119,7 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard checkBrick(
       final int courseIndex, final int brickIndex, final int converse) {
-    assertThat(getBrick(courseIndex, brickIndex).getConverse(inner.context), equalTo(converse));
+    assertThat(getBrick(courseIndex, brickIndex).getConverse(), equalTo(converse));
     return this;
   }
 

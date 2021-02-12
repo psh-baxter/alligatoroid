@@ -1,5 +1,7 @@
 package com.zarbosoft.merman.editor.serialization;
 
+import com.zarbosoft.rendaw.common.Format;
+
 public class JSONArrayPath extends JSONPath {
 
   private boolean type = false;
@@ -33,7 +35,7 @@ public class JSONArrayPath extends JSONPath {
 
   @Override
   public String toString() {
-    return String.format(
+    return Format.format(
         "%s/%s",
         parent == null ? "" : parent.toString(), index == -1 ? "" : ((Integer) index).toString());
   }

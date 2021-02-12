@@ -22,6 +22,7 @@ import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
 import com.zarbosoft.merman.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 
 import java.util.function.Consumer;
@@ -166,7 +167,7 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard checkBrick(
       final int courseIndex, final int brickIndex, final int converse) {
-    assertThat(getBrick(courseIndex, brickIndex).getConverse(inner.context), equalTo(converse));
+    assertThat(getBrick(courseIndex, brickIndex).getConverse(), equalTo(converse));
     return this;
   }
 
@@ -214,7 +215,7 @@ public class GeneralTestWizard {
         return this;
       }
     }
-    throw new AssertionError(String.format("No action named [%s]", name));
+    throw new AssertionError(Format.format("No action named [%s]", name));
   }
 
   public GeneralTestWizard checkCourseCount(final int i) {

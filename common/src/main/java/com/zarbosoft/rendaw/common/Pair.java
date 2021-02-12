@@ -21,7 +21,7 @@ public class Pair<T1, T2> implements Comparable<Pair> {
 
   @Override
   public String toString() {
-    return String.format("Pair[%s, %s]", first, second);
+    return Format.format("Pair[%s, %s]", first, second);
   }
 
   @Override

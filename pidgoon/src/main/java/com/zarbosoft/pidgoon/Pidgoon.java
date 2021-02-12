@@ -63,7 +63,7 @@ public class Pidgoon {
 
       final Parse nextStep = new Parse(parse);
 
-      for (final State leaf : parse.leaves) leaf.parse(nextStep, position);
+      for (final Parse.State leaf : parse.leaves) leaf.parse(nextStep, position);
 
       if (parse.errorHistoryLimit > 0) {
         if (nextStep.errors.isEmpty()) {
@@ -81,7 +81,7 @@ public class Pidgoon {
       if (nextStep.ambiguityHistory != null) {
         int dupeCount = 0;
         final Set<String> unique = new HashSet<>();
-        for (final State leaf : nextStep.leaves) {
+        for (final Parse.State leaf : nextStep.leaves) {
           if (unique.contains(leaf.toString())) {
             dupeCount += 1;
           } else {

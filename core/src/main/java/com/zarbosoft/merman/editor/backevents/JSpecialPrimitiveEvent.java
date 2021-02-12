@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editor.backevents;
 
 import com.zarbosoft.pidgoon.events.MatchingEvent;
+import com.zarbosoft.rendaw.common.Format;
 
 public class JSpecialPrimitiveEvent implements BackEvent {
   public String value = null;
@@ -20,6 +21,6 @@ public class JSpecialPrimitiveEvent implements BackEvent {
   @Override
   public String toString() {
     if (value == null) return "*";
-    return String.format("\"%s\"", value);
+    return Format.format("\"%s\"", value);
   }
 }

@@ -2,13 +2,12 @@ package com.zarbosoft.merman.syntax.error;
 
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -34,7 +33,7 @@ public abstract class BaseKVError extends TSMap<String, Object> {
     } else {
       if (value instanceof BackSpecData) {
         out.append(
-            String.format("%s (%s)", ((BackSpecData) value).id, value.getClass().getSimpleName()));
+            Format.format("%s (%s)", ((BackSpecData) value).id, value.getClass().getSimpleName()));
       } else {
         out.append(value.toString());
       }

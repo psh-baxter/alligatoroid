@@ -2,7 +2,6 @@ package com.zarbosoft.pidgoon.model;
 
 import com.zarbosoft.pidgoon.AmbiguitySample;
 import com.zarbosoft.pidgoon.BranchingStack;
-import com.zarbosoft.pidgoon.State;
 import com.zarbosoft.pidgoon.Stats;
 import com.zarbosoft.rendaw.common.Pair;
 
@@ -55,5 +54,19 @@ public class Parse {
     this.errorHistoryLimit = previous.errorHistoryLimit;
     this.uncertaintyLimit = previous.uncertaintyLimit;
     this.ambiguityHistory = previous.ambiguityHistory;
+  }
+
+  public abstract static class State {
+    protected State() {}
+
+    /**
+     * The current color of this branch, as set by a Color node
+     *
+     * @param <T>
+     * @return
+     */
+    public abstract <T> T color();
+
+    public abstract void parse(Parse step, Position position);
   }
 }

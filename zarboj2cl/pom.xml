@@ -51,5 +51,11 @@
             <version>3.5</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.zarbosoft.rendaw</groupId>
+            <artifactId>common</artifactId>
+            <version>99.0.0</version>
+            <scope>compile</scope>
+        </dependency>
     </dependencies>
 </project>

@@ -2,7 +2,6 @@ package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Position;
-import com.zarbosoft.pidgoon.State;
 import com.zarbosoft.pidgoon.model.RefParent;
 import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.model.Parent;
@@ -19,7 +18,7 @@ public class Wildcard extends Node {
       final ROMap<Object, RefParent> seen,
       final Object cause) {
     context.leaves.add(
-        new State() {
+        new Parse.State() {
           @Override
           public <T> T color() {
             return (T) store.color;

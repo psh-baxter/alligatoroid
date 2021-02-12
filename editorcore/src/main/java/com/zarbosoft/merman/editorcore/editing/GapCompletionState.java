@@ -33,7 +33,7 @@ public class GapCompletionState implements GapCompletionEngine.State {
     for (Object result : longest.first.results) {
       choices.add((SyntacticGapChoice) result);
     }
-    for (com.zarbosoft.pidgoon.State leaf : longest.first.leaves) {
+    for (Parse.State leaf : longest.first.leaves) {
       choices.add(leaf.color());
     }
     if (longest.second.absolute == string.length()) {

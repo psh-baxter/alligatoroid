@@ -33,9 +33,6 @@ import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.ArrayDeque;
-import java.util.Arrays;
-import java.util.Deque;
 import java.util.function.Function;
 
 public class VisualFrontPrimitive extends Visual implements VisualLeaf {
@@ -321,13 +318,13 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       if (line.brick == null) {
         final Style style =
             j == 0 ? brickStyle.firstStyle : j == i ? brickStyle.hardStyle : brickStyle.softStyle;
-        font = style.getFont(context);
+        font = Context.getFont(style, context);
         final Alignment alignment = atom.findAlignment(style.alignment);
         if (alignment == null) converse = 0;
         else converse = alignment.converse;
       } else {
         font = line.brick.getFont();
-        converse = line.brick.getConverse(context);
+        converse = line.brick.getConverse();
       }
       result.merge(build.build(line, font, converse));
     }
@@ -341,7 +338,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         final Line line = new Line(this, false);
         line.setIndex(context, j);
         final Style style = brickStyle.softStyle;
-        final Font font = style.getFont(context);
+        final Font font = Context.getFont(style, context);
         final Alignment alignment = atom.findAlignment(style.alignment);
         final int converse;
         if (alignment == null) converse = 0;

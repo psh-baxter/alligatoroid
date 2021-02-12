@@ -26,7 +26,7 @@ public abstract class Brick  {
     this.inter = inter;
   }
 
-  public abstract int getConverse(Context context);
+  public abstract int getConverse();
 
   public abstract int converseEdge();
   public abstract int converseSpan();
@@ -174,7 +174,7 @@ public abstract class Brick  {
 
   public void addAttachment(final Context context, final Attachment attachment) {
     attachments.add(attachment);
-    attachment.setConverse(context, getConverse(context));
+    attachment.setConverse(context, getConverse());
     if (parent != null) {
       attachment.setTransverse(context, parent.transverseStart);
       attachment.setTransverseSpan(context, parent.ascent, parent.descent);

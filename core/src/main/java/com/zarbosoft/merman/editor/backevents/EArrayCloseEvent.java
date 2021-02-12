@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editor.backevents;
 
 import com.zarbosoft.pidgoon.events.MatchingEvent;
+import com.zarbosoft.rendaw.common.Format;
 
 public class EArrayCloseEvent implements BackEvent {
 
@@ -11,6 +12,6 @@ public class EArrayCloseEvent implements BackEvent {
 
   @Override
   public String toString() {
-    return String.format("ARRAY CLOSE");
+    return Format.format("ARRAY CLOSE");
   }
 }

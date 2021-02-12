@@ -1,5 +1,7 @@
 package com.zarbosoft.merman.editor.serialization;
 
+import com.zarbosoft.rendaw.common.Format;
+
 public class JSONObjectPath extends JSONPath {
 
   private String key;
@@ -30,6 +32,6 @@ public class JSONObjectPath extends JSONPath {
 
   @Override
   public String toString() {
-    return String.format("%s/%s", parent == null ? "" : parent.toString(), key == null ? "" : key);
+    return Format.format("%s/%s", parent == null ? "" : parent.toString(), key == null ? "" : key);
   }
 }

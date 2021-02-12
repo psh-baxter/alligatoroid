@@ -4,7 +4,6 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.display.Text;
-import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
@@ -30,7 +29,7 @@ public class BrickText extends Brick {
   }
 
   public Properties properties(final Context context, final Style style) {
-    final Font font = style.getFont(context);
+    final Font font = Context.getFont(style, context);
     return new Properties(
         style.split,
         font.getAscent(),
@@ -48,7 +47,7 @@ public class BrickText extends Brick {
     this.style = style;
     if (text != null) {
       text.setColor(context, style.color);
-      text.setFont(context, style.getFont(context));
+      text.setFont(context, Context.getFont(style, context));
     }
     alignment = inter.findAlignment(style);
     changed(context);
@@ -76,7 +75,7 @@ public class BrickText extends Brick {
   }
 
   @Override
-  public int getConverse(final Context context) {
+  public int getConverse() {
     return text.converse();
   }
 

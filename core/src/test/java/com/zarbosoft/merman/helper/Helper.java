@@ -32,6 +32,7 @@ import com.zarbosoft.merman.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.syntax.primitivepattern.Repeat1;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -40,8 +41,6 @@ import org.junit.ComparisonFailure;
 
 import java.util.Locale;
 import java.util.function.Consumer;
-
-import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Helper {
   public static I18nEngine i18n = new JavaI18nEngine(Locale.US);
@@ -53,7 +52,7 @@ public class Helper {
         return;
       }
     }
-    throw new AssertionError(String.format("No action named [%s]", name));
+    throw new AssertionError(Format.format("No action named [%s]", name));
   }
 
   public static BackSpec buildBackType(final String type, final BackSpec child) {
@@ -101,7 +100,7 @@ public class Helper {
   public static void assertTreeEqual(final Atom expected, final Atom got) {
     if (expected.type != got.type)
       throw new AssertionError(
-          String.format(
+          Format.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
               expected.type, got.type, got.getSyntaxPath()));
     final ROSet<String> expectedKeys = expected.fields.keys();
@@ -110,13 +109,13 @@ public class Helper {
       final TSSet<String> missing = expectedKeys.difference(gotKeys);
       if (!missing.isEmpty())
         throw new AssertionError(
-            String.format("Missing fields: %s\nAt: %s", missing, got.getSyntaxPath()));
+            Format.format("Missing fields: %s\nAt: %s", missing, got.getSyntaxPath()));
     }
     {
       final TSSet<String> extra = gotKeys.difference(expectedKeys);
       if (!extra.isEmpty())
         throw new AssertionError(
-            String.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
+            Format.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
     }
     for (final String key : expectedKeys.intersect(gotKeys)) {
       assertTreeEqual(expected.fields.getOpt(key), got.fields.getOpt(key));
@@ -129,7 +128,7 @@ public class Helper {
       final ValueArray gotValue = (ValueArray) got;
       if (expectedValue.data.size() != gotValue.data.size())
         throw new AssertionError(
-            String.format(
+            Format.format(
                 "Array length mismatch.\nExpected: %s\nGot: %s\nAt: %s",
                 expectedValue.data.size(), gotValue.data.size(), got.getSyntaxPath()));
       for (int i = 0; i < expectedValue.data.size(); ++i) {
@@ -144,12 +143,12 @@ public class Helper {
       final ValuePrimitive gotValue = (ValuePrimitive) got;
       if (!expectedValue.get().equals(gotValue.get()))
         throw new ComparisonFailure(
-            String.format("Array length mismatch.\nAt: %s", got.getSyntaxPath()),
+            Format.format("Array length mismatch.\nAt: %s", got.getSyntaxPath()),
             expectedValue.get(),
             gotValue.get());
     } else
       throw new AssertionError(
-          String.format(
+          Format.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
               expected.getClass(), got.getClass(), got.getSyntaxPath()));
   }

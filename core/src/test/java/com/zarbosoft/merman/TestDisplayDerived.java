@@ -8,6 +8,7 @@ import com.zarbosoft.merman.editor.display.derived.CLayout;
 import com.zarbosoft.merman.editor.display.derived.ColumnarTableLayout;
 import com.zarbosoft.merman.editor.display.derived.RowLayout;
 import com.zarbosoft.merman.syntax.Direction;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
@@ -64,11 +65,11 @@ public class TestDisplayDerived {
 				new Pair<>(100, 8)
 		)) {
 			final int index2 = index++;
-			assertThat(String.format("for index %s, converse", index2),
+			assertThat(Format.format("for index %s, converse", index2),
 					((MockeryGroup) layout.group).get(index2).converse(),
 					equalTo(pair.first)
 			);
-			assertThat(String.format("for index %s, transverse", index2),
+			assertThat(Format.format("for index %s, transverse", index2),
 					((MockeryGroup) layout.group).get(index2).transverse(),
 					equalTo(pair.second)
 			);
@@ -113,11 +114,11 @@ public class TestDisplayDerived {
 				new Pair<>(90, 0)
 		)) {
 			final int index2 = index++;
-			assertThat(String.format("for index %s, converse", index2),
+			assertThat(Format.format("for index %s, converse", index2),
 					((MockeryGroup) layout.group).get(index2).converse(),
 					equalTo(pair.first)
 			);
-			assertThat(String.format("for index %s, transverse", index2),
+			assertThat(Format.format("for index %s, transverse", index2),
 					((MockeryGroup) layout.group).get(index2).transverse(),
 					equalTo(pair.second)
 			);
@@ -162,11 +163,11 @@ public class TestDisplayDerived {
 				new Pair<>(90, 10)
 		)) {
 			final int index2 = index++;
-			assertThat(String.format("for index %s, converse", index2),
+			assertThat(Format.format("for index %s, converse", index2),
 					((MockeryGroup) layout.group).get(index2).converse(),
 					equalTo(pair.first)
 			);
-			assertThat(String.format("for index %s, transverse", index2),
+			assertThat(Format.format("for index %s, transverse", index2),
 					((MockeryGroup) layout.group).get(index2).transverse(),
 					equalTo(pair.second)
 			);

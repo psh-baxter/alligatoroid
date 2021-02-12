@@ -1,7 +1,6 @@
 package com.zarbosoft.pidgoon.events.nodes;
 
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.State;
 import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.Position;
@@ -22,7 +21,7 @@ public abstract class Terminal extends Node {
       final ROMap<Object, RefParent> seen,
       final Object cause) {
     context.leaves.add(
-        new State() {
+        new Parse.State() {
           @Override
           public <T> T color() {
             return (T) prestore.color;

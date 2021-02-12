@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.editor;
 
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class InvalidPath extends RuntimeException {
@@ -13,6 +14,6 @@ public class InvalidPath extends RuntimeException {
 
   @Override
   public String toString() {
-    return String.format("valid %s, full %s", valid, full);
+    return Format.format("valid %s, full %s", valid, full);
   }
 }

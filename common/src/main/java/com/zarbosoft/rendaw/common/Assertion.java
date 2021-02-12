@@ -9,6 +9,6 @@ public class Assertion extends RuntimeException {
   public Assertion() {}
 
   public static Assertion format(final String template, final Object... args) {
-    return new Assertion(String.format(template, args));
+    return new Assertion(Format.format(template, args));
   }
 }

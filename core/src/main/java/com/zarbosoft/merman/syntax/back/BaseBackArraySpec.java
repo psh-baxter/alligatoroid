@@ -14,7 +14,7 @@ public abstract class BaseBackArraySpec extends BackSpecData {
   public abstract String elementAtomType();
 
   public Path getPath(final ValueArray value, final int actualIndex) {
-    return value.getSyntaxPath().add(String.format("%d", actualIndex));
+    return value.getSyntaxPath().add(Integer.toString( actualIndex));
   }
 
   public ValueArray get(final TSMap<String, Value> data) {

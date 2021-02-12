@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.webview.display;
 
 import com.zarbosoft.merman.editor.display.Font;
+import com.zarbosoft.rendaw.common.Format;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLCanvasElement;
-import elemental2.dom.TextMetrics;
 import jsinterop.annotations.JsType;
 
 public class JSFont implements Font {
@@ -22,7 +22,7 @@ public class JSFont implements Font {
   }
 
   public String cssString() {
-    return String.format("%s %dpt", name, size);
+    return Format.format("%s %spt", name, size);
   }
 
   public TextMetrics measure(String text) {
@@ -60,6 +60,7 @@ public class JSFont implements Font {
     return (int) last;
   }
 
+  @JsType(isNative = true)
   public static class TextMetrics extends elemental2.dom.TextMetrics {
     public double fontBoundingBoxAscent;
     public double fontBoundingBoxDescent;

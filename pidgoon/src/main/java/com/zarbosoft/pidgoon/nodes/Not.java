@@ -1,11 +1,12 @@
 package com.zarbosoft.pidgoon.nodes;
 
-import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.model.RefParent;
-import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.BaseParent;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.RefParent;
+import com.zarbosoft.pidgoon.model.Store;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROMap;
 
 public class Not extends Node {
@@ -29,9 +30,9 @@ public class Not extends Node {
   public String toString() {
     final String out;
     if ((root instanceof Sequence) || (root instanceof Union) || (root instanceof Repeat)) {
-      out = String.format("~(%s)", root);
+      out = Format.format("~(%s)", root);
     } else {
-      out = String.format("~%s", root);
+      out = Format.format("~%s", root);
     }
     return out;
   }

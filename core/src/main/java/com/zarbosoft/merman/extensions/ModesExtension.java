@@ -3,6 +3,7 @@ package com.zarbosoft.merman.extensions;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.tags.TagsChange;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -24,7 +25,7 @@ public class ModesExtension {
   }
 
   private String getTag(final int state) {
-    return String.format("mode_%s", states.get(state));
+    return Format.format("mode_%s", states.get(state));
   }
 
   private class ActionMode implements Action {
@@ -44,7 +45,7 @@ public class ModesExtension {
 
     @Override
     public String id() {
-      return String.format("mode_%s", pair.second);
+      return Format.format("mode_%s", pair.second);
     }
   }
 }

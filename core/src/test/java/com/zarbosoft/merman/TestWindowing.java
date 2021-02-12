@@ -32,6 +32,7 @@ import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -629,7 +630,7 @@ public class TestWindowing {
           return this;
         }
       }
-      throw new AssertionError(String.format("No action named [%s]", name));
+      throw new AssertionError(Format.format("No action named [%s]", name));
     }
 
     public GeneralTestWizard dumpWall() {

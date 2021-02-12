@@ -152,8 +152,8 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
           else splayedBoilerplate.put(sub.id(), e.getValue());
         }
       }
+      this.splayedBoilerplate = splayedBoilerplate;
     }
-    this.splayedBoilerplate = splayedBoilerplate;
   }
 
   @Override

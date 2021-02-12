@@ -26,7 +26,7 @@ public class SymbolTextSpec extends Symbol {
   @Override
   public void style(final Context context, final DisplayNode node, final Style style) {
     final Text text = (Text) node;
-    text.setFont(context, style.getFont(context));
+    text.setFont(context, Context.getFont(style, context));
     text.setColor(context, style.color);
   }
 

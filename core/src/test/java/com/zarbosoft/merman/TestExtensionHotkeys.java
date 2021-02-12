@@ -47,7 +47,7 @@ public class TestExtensionHotkeys {
                 .build())
         .run(
             c -> {
-              final HotkeysExtension hotkeys = new HotkeysExtension(c);
+              final HotkeysExtension hotkeys = new HotkeysExtension(c, false);
               hotkeys.rules.add(
                   new HotkeyRule(
                       ROSet.empty,

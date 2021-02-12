@@ -37,6 +37,7 @@ import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
@@ -231,10 +232,13 @@ public abstract class AtomType {
       errors.add(new MissingBack(typePath, id));
       return null;
     }
-    if (!type.isAssignableFrom(found.getClass())) {
+    // Needs reflection
+    /*
+    if (type != found.getClass()) {
       errors.add(new BackFieldWrongType(typePath, id, found, type));
       return null;
     }
+     */
     return (D) found;
   }
 
@@ -244,11 +248,6 @@ public abstract class AtomType {
 
   public BaseBackArraySpec getDataArray(MultiError errors, Path typePath, final String key) {
     return getBack(errors, typePath, BaseBackArraySpec.class, key);
-  }
-
-  @Override
-  public String toString() {
-    return String.format("<type %s>", id());
   }
 
   public final String id() {

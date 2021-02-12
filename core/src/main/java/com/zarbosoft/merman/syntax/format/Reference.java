@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.syntax.format;
 
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROMap;
 
 public class Reference implements Element {
@@ -12,6 +13,6 @@ public class Reference implements Element {
 
   @Override
   public String format(final ROMap<String, Object> data) {
-    return data.getOr(name, () -> String.format("<BADKEY:%s>", name)).toString();
+    return data.getOr(name, () -> Format.format("<BADKEY:%s>", name)).toString();
   }
 }

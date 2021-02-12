@@ -9,8 +9,6 @@ import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.editor.wall.bricks.BrickImage;
 import com.zarbosoft.merman.syntax.style.Style;
 
-import java.nio.file.Paths;
-
 public class SymbolImageSpec extends Symbol {
   @Override
   public DisplayNode createDisplay(final Context context) {

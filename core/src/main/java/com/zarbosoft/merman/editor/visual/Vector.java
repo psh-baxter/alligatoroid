@@ -1,5 +1,7 @@
 package com.zarbosoft.merman.editor.visual;
 
+import com.zarbosoft.rendaw.common.Format;
+
 public class Vector {
 	public final int converse;
 	public final int transverse;
@@ -27,10 +29,6 @@ public class Vector {
 
 	public Vector addConverse(final int converse) {
 		return new Vector(this.converse + converse, transverse);
-	}
-
-	public String toString() {
-		return String.format("<%d,%d>", converse, transverse);
 	}
 
 	public boolean lessThan(final Vector other) {

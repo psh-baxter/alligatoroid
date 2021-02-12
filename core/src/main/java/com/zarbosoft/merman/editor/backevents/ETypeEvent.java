@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editor.backevents;
 
 import com.zarbosoft.pidgoon.events.MatchingEvent;
+import com.zarbosoft.rendaw.common.Format;
 
 public class ETypeEvent implements BackEvent {
   public String value;
@@ -19,6 +20,6 @@ public class ETypeEvent implements BackEvent {
 
   @Override
   public String toString() {
-    return String.format("TYPE %s", value == null ? "*" : value);
+    return Format.format("TYPE %s", value == null ? "*" : value);
   }
 }

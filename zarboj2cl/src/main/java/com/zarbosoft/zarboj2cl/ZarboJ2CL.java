@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -29,8 +28,16 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.zarbosoft.rendaw.common.Common.uncheck;
+
 @Mojo(name = "zarboj2cl", defaultPhase = LifecyclePhase.PACKAGE)
 public class ZarboJ2CL extends AbstractMojo {
+  private static final Pattern importPattern =
+      Pattern.compile(
+          "^import ((?:[a-z][a-zA-Z0-9]*\\.)+)([a-zA-Z0-9]+)(?:\\.[a-zA-Z0-9])*;",
+          Pattern.MULTILINE);
+  Map<Path, BazelLibrary> lookup = new HashMap<>();
+
   @SuppressWarnings("unused")
   @Parameter(property = "project", readonly = true)
   private MavenProject project;
@@ -39,24 +46,10 @@ public class ZarboJ2CL extends AbstractMojo {
   @Parameter(property = "sourcePath", required = true)
   private String sourcePath;
 
-  private static String lswrap(String prefix, Collection<?> list, String suffix) {
-    StringBuilder b = new StringBuilder();
-    List list2 = new ArrayList(list);
-    Collections.sort(list2);
-    for (Object o : list2) {
-      b.append(prefix);
-      b.append(o.toString());
-      b.append(suffix);
-    }
-    return b.toString();
-  }
-
   public void execute() throws MojoExecutionException, MojoFailureException {
     Path sourcePath = Paths.get(this.sourcePath);
-    Pattern importPattern =
-        Pattern.compile("^import ((?:[a-z][a-zA-Z0-9]*\\.)+)[a-zA-Z0-9]+;", Pattern.MULTILINE);
-    final Path[] entry = {null};
     try {
+      /// Copy main source
       for (String root0 : project.getCompileSourceRoots()) {
         Path root = Paths.get(root0);
         System.out.format("Copying %s to %s\n", root, sourcePath);
@@ -91,6 +84,8 @@ public class ZarboJ2CL extends AbstractMojo {
               }
             });
       }
+
+      /// Bazel root boilerplate
       try (OutputStream os = Files.newOutputStream(sourcePath.resolve(".bazelversion"))) {
         os.write("3.3.0\n".getBytes(StandardCharsets.UTF_8));
       }
@@ -112,6 +107,20 @@ public class ZarboJ2CL extends AbstractMojo {
                     + "load(\"@com_google_j2cl//build_defs:rules.bzl\", \"setup_j2cl_workspace\")\n"
                     + "setup_j2cl_workspace()\n"
                     + "\n"
+                    + "_JSINTEROP_BASE_VERSION = \"1.0.0\"\n"
+                    + "http_archive(\n"
+                    + "    name = \"com_google_jsinterop_base\",\n"
+                    + "    strip_prefix = \"jsinterop-base-%s\" % _JSINTEROP_BASE_VERSION,\n"
+                    + "    url = \"https://github.com/google/jsinterop-base/archive/%s.zip\" % _JSINTEROP_BASE_VERSION,\n"
+                    + ")\n"
+                    + "\n"
+                    + "_JSINTEROP_ANNOTATIONS_VERSION = \"2.0.0\"\n"
+                    + "http_archive(\n"
+                    + "    name = \"com_google_jsinterop_annotations\",\n"
+                    + "    strip_prefix = \"jsinterop-annotations-%s\" % _JSINTEROP_ANNOTATIONS_VERSION,\n"
+                    + "    url = \"https://github.com/google/jsinterop-annotations/archive/%s.zip\" % _JSINTEROP_ANNOTATIONS_VERSION,\n"
+                    + ")\n"
+                    + "\n"
                     + "http_archive(\n"
                     + "    name = \"com_google_elemental2\",\n"
                     + "    strip_prefix = \"elemental2-1.1.0\",\n"
@@ -126,14 +135,28 @@ public class ZarboJ2CL extends AbstractMojo {
                     + "\n")
                 .getBytes(StandardCharsets.UTF_8));
       }
+
+      /// Build BUILD files and map dependencies
+      Path editorRoot = Paths.get("com/zarbosoft/merman");
+      BazelPackage editorPackage = new BazelPackage(editorRoot);
+      BazelLibrary editorLibrary = editorPackage.library("editor");
+
+      Path pidgoonRoot = Paths.get("com/zarbosoft/pidgoon");
+      BazelPackage pidgoonPackage = new BazelPackage(pidgoonRoot);
+      BazelLibrary pidgoonLibrary = pidgoonPackage.library("pidgoon");
+
+      Map<Path, BazelPackage> bazelPackageMap = new HashMap<>();
+      Map<Path, BazelLibrary> bazelLibraryMap = new HashMap<>();
       Files.walkFileTree(
           sourcePath,
           new FileVisitor<Path>() {
-            final Map<Path, DirectoryState> dependencies = new HashMap<>();
-
             @Override
             public FileVisitResult preVisitDirectory(
-                Path path, BasicFileAttributes basicFileAttributes) throws IOException {
+                Path abs, BasicFileAttributes basicFileAttributes) throws IOException {
+              Path rel = sourcePath.relativize(abs);
+              BazelPackage p = new BazelPackage(rel);
+              bazelPackageMap.put(rel, p);
+              bazelLibraryMap.put(rel, p.library(rel.getFileName().toString() + "_"));
               return FileVisitResult.CONTINUE;
             }
 
@@ -141,34 +164,15 @@ public class ZarboJ2CL extends AbstractMojo {
             public FileVisitResult visitFile(Path abs, BasicFileAttributes basicFileAttributes)
                 throws IOException {
               Path rel = sourcePath.relativize(abs);
-              Path base = rel.getParent();
               String filename = rel.getFileName().toString();
-              if (!filename.endsWith(".java")) return FileVisitResult.CONTINUE;
-              DirectoryState dir =
-                  dependencies.computeIfAbsent(base, ignore -> new DirectoryState());
-              if (filename.equals("Main.java")) {
-                entry[0] = base;
-                dir.main = true;
-              }
-              Matcher matcher =
-                  importPattern.matcher(
-                      new String(Files.readAllBytes(abs), StandardCharsets.UTF_8));
-              while (matcher.find()) {
-                String importPackage = matcher.group(1).replace(".", "/");
-                if (importPackage.startsWith("elemental2/core"))
-                  importPackage = "@com_google_elemental2//:elemental2-core-j2cl";
-                else if (importPackage.startsWith("elemental2/dom"))
-                  importPackage = "@com_google_elemental2//:elemental2-dom-j2cl";
-                else if (importPackage.startsWith("elemental2/promise"))
-                  importPackage = "@com_google_elemental2//:elemental2-promise-j2cl";
-                else if (importPackage.startsWith("java")) continue;
-                else if (importPackage.startsWith("jsinterop")) continue;
-                else {
-                  Path pathImport = Paths.get(importPackage);
-                  if (pathImport.equals(base)) continue;
-                  importPackage = "//" + pathImport.toString() + ":package0";
-                }
-                dir.dependencies.add(importPackage);
+              if (!(filename.endsWith(".java") || filename.endsWith(".js")))
+                return FileVisitResult.CONTINUE;
+              if (rel.startsWith(editorRoot)) {
+                editorLibrary.process(rel);
+              } else if (rel.startsWith(pidgoonRoot)) {
+                pidgoonLibrary.process(rel);
+              } else {
+                bazelLibraryMap.get(rel.getParent()).process(rel);
               }
               return FileVisitResult.CONTINUE;
             }
@@ -180,62 +184,28 @@ public class ZarboJ2CL extends AbstractMojo {
 
             @Override
             public FileVisitResult postVisitDirectory(Path abs, IOException e) throws IOException {
-              Path rel = sourcePath.relativize(abs);
-              DirectoryState dir = dependencies.get(rel);
-              if (dir == null) return FileVisitResult.CONTINUE;
-              try (OutputStream os = Files.newOutputStream(abs.resolve("BUILD"))) {
-                if (dir.main) {
-                  os.write(
-                      "load(\"@com_google_j2cl//build_defs:rules.bzl\", \"j2cl_application\")\n"
-                          .getBytes(StandardCharsets.UTF_8));
-                }
-                String uid = "package0";
-                os.write(
-                    ("\n"
-                            + "load(\"@com_google_j2cl//build_defs:rules.bzl\", \"j2cl_library\")\n"
-                            + "\n"
-                            + "package(\n"
-                            + "    default_visibility = [\"//visibility:public\"],\n"
-                            + ")\n"
-                            + "\n"
-                            + "j2cl_library(\n"
-                            + "    name = \""
-                            + uid
-                            + "\",\n"
-                            + "    srcs = glob([\n"
-                            + "        \"*.java\",\n"
-                            + "    ]),\n"
-                            + "    deps = [\n"
-                            + lswrap("        \"", dir.dependencies, "\",\n")
-                            + "    ],\n"
-                            + ")\n")
-                        .getBytes(StandardCharsets.UTF_8));
-                if (dir.main)
-                  os.write(
-                      String.format(
-                              "\n"
-                                  + "j2cl_application(\n"
-                                  + "    name = \"main\",\n"
-                                  + "    entry_points = [\""
-                                  + rel.toString().replace("/", ".")
-                                  + "\"],\n"
-                                  + "    deps = [\":"
-                                  + uid
-                                  + "\"],\n"
-                                  + ")\n")
-                          .getBytes(StandardCharsets.UTF_8));
-              }
               return FileVisitResult.CONTINUE;
             }
           });
+      pidgoonPackage.write();
+      editorPackage.write();
+      for (BazelPackage bazelPackage : bazelPackageMap.values()) {
+        bazelPackage.write();
+      }
+      // if (entry[0] == null) throw new RuntimeException();
       // bazel=bazelisk
-      String[] commandline = {"/usr/bin/bazel", "build", String.format("%s:main", entry[0])};
-      Process proc =
-          new ProcessBuilder()
-              .command(commandline)
-              .directory(sourcePath.toFile())
-              .inheritIO()
-              .start();
+      /*
+      String[] commandline = {
+              "/usr/bin/bazel", "build", String.format("%s:entry", entry[0].getParent())
+      };
+       */
+      String[] commandline = {
+        "/usr/bin/bazel", "build", String.format("%s:editor", editorPackage.dir)
+      };
+      ProcessBuilder processBuilder =
+          new ProcessBuilder().command(commandline).directory(sourcePath.toFile());
+      processBuilder.environment().put("JAVA_HOME", "/usr/lib/jvm/java-11-openjdk");
+      Process proc = processBuilder.inheritIO().start();
       proc.waitFor();
       if (proc.exitValue() != 0) {
         throw new RuntimeException(
@@ -246,8 +216,144 @@ public class ZarboJ2CL extends AbstractMojo {
     }
   }
 
-  public static class DirectoryState {
-    public final Set<String> dependencies = new HashSet<>();
-    public boolean main;
+  public class BazelPackage {
+    public final Path dir;
+    public final List<BazelLibrary> libraries = new ArrayList<>();
+
+    public BazelPackage(Path dir) {
+      this.dir = dir;
+    }
+
+    public BazelLibrary library(String name) {
+      BazelLibrary l = new BazelLibrary(this, name);
+      libraries.add(l);
+      return l;
+    }
+
+    public void write() {
+      uncheck(
+          () -> {
+            boolean empty = true;
+            for (BazelLibrary library : libraries) {
+              if (!library.empty()) empty = false;
+            }
+            if (empty) return;
+            Path sourcePath = Paths.get(ZarboJ2CL.this.sourcePath);
+            try (OutputStream os =
+                Files.newOutputStream(sourcePath.resolve(dir).resolve("BUILD"))) {
+              os.write(
+                  ("\n"
+                          + "load(\"@com_google_j2cl//build_defs:rules.bzl\", \"j2cl_library\")\n"
+                          + "\n"
+                          + "package(\n"
+                          + "    default_visibility = [\"//visibility:public\"],\n"
+                          + ")\n"
+                          + "\n")
+                      .getBytes(StandardCharsets.UTF_8));
+
+              for (BazelLibrary library : libraries) {
+                library.write(os);
+              }
+            }
+          });
+    }
+  }
+
+  public class BazelLibrary {
+    private final String name;
+    private final List<Path> sources = new ArrayList<>();
+    private final BazelPackage bazelPackage;
+    private Path app;
+
+    public BazelLibrary(BazelPackage bazelPackage, String name) {
+      this.name = name;
+      this.bazelPackage = bazelPackage;
+    }
+
+    public boolean empty() {
+      return sources.isEmpty();
+    }
+
+    public BazelLibrary process(Path source) {
+      if (source.getFileName().toString().equals("main.js")) {
+        app = source;
+      } else {
+        sources.add(source);
+        lookup.put(source, this);
+      }
+      return this;
+    }
+
+    public void write(OutputStream os) {
+      uncheck(
+          () -> {
+            os.write(
+                ("\n" + "j2cl_library(\n" + "    name = \"" + name + "\",\n" + "    srcs = [\n")
+                    .getBytes(StandardCharsets.UTF_8));
+
+            Collections.sort(sources);
+            for (Path source : sources) {
+              os.write(
+                  ("        \"" + bazelPackage.dir.relativize(source).toString() + "\",\n")
+                      .getBytes(StandardCharsets.UTF_8));
+            }
+            if (app != null)
+              os.write(
+                  ("        \"" + bazelPackage.dir.relativize(app).toString() + "\",\n")
+                      .getBytes(StandardCharsets.UTF_8));
+
+            os.write(("    ],\n" + "    deps = [\n").getBytes(StandardCharsets.UTF_8));
+            Set<String> seenDeps = new HashSet<>();
+            Path sourcePath = Paths.get(ZarboJ2CL.this.sourcePath);
+            for (Path source : sources) {
+              if (source.getFileName().toString().endsWith(".js")) continue;
+              Matcher matcher =
+                  importPattern.matcher(
+                      new String(
+                          Files.readAllBytes(sourcePath.resolve(source)), StandardCharsets.UTF_8));
+              while (matcher.find()) {
+                String dep = matcher.group(1).replace(".", "/");
+                String importName = matcher.group(2) + ".java";
+                if (dep.startsWith("elemental2/core"))
+                  dep = "@com_google_elemental2//:elemental2-core-j2cl";
+                else if (dep.startsWith("elemental2/dom"))
+                  dep = "@com_google_elemental2//:elemental2-dom-j2cl";
+                else if (dep.startsWith("elemental2/promise"))
+                  dep = "@com_google_elemental2//:elemental2-promise-j2cl";
+                else if (dep.startsWith("java")) {
+                  continue;
+                  // dep = "@bazel_tools//tools/jdk:current_java_runtime";
+                } else if (dep.startsWith("jsinterop/base")) {
+                  dep = "@com_google_jsinterop_base//:jsinterop-base-j2cl";
+                } else if (dep.startsWith("jsinterop/annotations")) {
+                  dep = "@com_google_j2cl//:jsinterop-annotations-j2cl";
+                } else {
+                  Path localDep = Paths.get(dep).resolve(importName);
+                  BazelLibrary dest = lookup.get(localDep);
+                  if (dest == this) continue;
+                  dep = "//" + dest.bazelPackage.dir.toString() + ":" + dest.name;
+                }
+                if (seenDeps.contains(dep)) continue;
+                seenDeps.add(dep);
+                os.write(("        \"" + dep + "\",\n").getBytes(StandardCharsets.UTF_8));
+              }
+            }
+            os.write(("    ],\n" + ")\n").getBytes(StandardCharsets.UTF_8));
+
+            if (app != null) {
+              os.write(
+                  ("load(\"@com_google_j2cl//build_defs:rules.bzl\", \"j2cl_application\")\n"
+                          + "\n"
+                          + "j2cl_application(\n"
+                          + "    name = \"entry\",\n"
+                          + "    entry_points = [\"com.zarbosoft.merman.webview.entry\"],\n"
+                          + "    deps = [\":"
+                          + name
+                          + "\"],\n"
+                          + ")\n")
+                      .getBytes(StandardCharsets.UTF_8));
+            }
+          });
+    }
   }
 }

@@ -64,7 +64,7 @@ public class BrickSpace extends Brick {
 	}
 
 	@Override
-	public int getConverse(final Context context) {
+	public int getConverse() {
 		return converse;
 	}
 }

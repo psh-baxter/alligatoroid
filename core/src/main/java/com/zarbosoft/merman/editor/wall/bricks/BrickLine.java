@@ -17,7 +17,7 @@ public class BrickLine extends BrickText {
 
   @Override
   public Properties properties(final Context context, final Style style) {
-    final Font font = style.getFont(context);
+    final Font font = Context.getFont(style, context);
     return new Properties(
         line.index == 0 ? style.split : true,
         font.getAscent(),

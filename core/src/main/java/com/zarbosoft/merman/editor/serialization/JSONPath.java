@@ -8,6 +8,7 @@ import com.zarbosoft.merman.editor.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.editor.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.editor.backevents.JSpecialPrimitiveEvent;
+import com.zarbosoft.rendaw.common.Format;
 
 public abstract class JSONPath {
   public JSONPath parent;
@@ -29,7 +30,7 @@ public abstract class JSONPath {
       return value();
     } else if (e instanceof JSpecialPrimitiveEvent) {
       return value();
-    } else throw new AssertionError(String.format("Unknown JSON event type [%s]", e));
+    } else throw new AssertionError(Format.format("Unknown JSON event type [%s]", e));
   }
 
   public abstract JSONPath value();

@@ -120,7 +120,7 @@ public class Banner {
     if (text == null) return;
     final Style style = getStyle(context);
     background.setStyle(style.box);
-    text.setFont(context, style.getFont(context));
+    text.setFont(context, Context.getFont(style, context));
     text.setColor(context, style.color);
     if (bedding != null) context.foreground.removeBedding(context, bedding);
     bedding =

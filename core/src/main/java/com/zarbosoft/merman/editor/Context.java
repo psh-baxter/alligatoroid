@@ -7,6 +7,7 @@ import com.zarbosoft.merman.document.values.Value;
 import com.zarbosoft.merman.editor.banner.Banner;
 import com.zarbosoft.merman.editor.details.Details;
 import com.zarbosoft.merman.editor.display.Display;
+import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.editor.serialization.Serializer;
@@ -259,6 +260,11 @@ public class Context {
         });
     document.root.visual.selectAnyChild(this);
     triggerIdleLayBricksOutward();
+  }
+
+  public static Font getFont(Style style, final Context context) {
+    if (style.font == null) return context.display.font(null, style.fontSize);
+    return context.display.font(style.font, style.fontSize);
   }
 
   public void clearHover() {
@@ -772,7 +778,7 @@ public class Context {
           && at.parent.index < foreground.children.size() - 1) {
         at = context.foreground.children.get(at.parent.index + 1).children.get(0);
       } else {
-        while (point.converse < at.getConverse(context) && at.index > 0) {
+        while (point.converse < at.getConverse() && at.index > 0) {
           at = at.parent.children.get(at.index - 1);
         }
         while (point.converse >= at.converseEdge() && at.index < at.parent.children.size() - 1) {

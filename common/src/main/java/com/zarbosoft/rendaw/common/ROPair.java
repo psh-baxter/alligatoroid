@@ -21,7 +21,7 @@ public class ROPair<T1, T2> implements Comparable<ROPair> {
 
   @Override
   public String toString() {
-    return String.format("ROPair[%s, %s]", first, second);
+    return Format.format("ROPair[%s, %s]", first, second);
   }
 
   @Override

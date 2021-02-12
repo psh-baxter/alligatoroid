@@ -16,6 +16,7 @@ import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
 import com.zarbosoft.pidgoon.events.ParseEventSink;
 import com.zarbosoft.pidgoon.events.StackStore;
+import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Union;
@@ -28,7 +29,7 @@ import com.zarbosoft.rendaw.common.TSMap;
 public class HotkeysExtension {
   // Settings
   public final TSList<HotkeyRule> rules = new TSList<>();
-  public boolean showDetails;
+  public final boolean showDetails;
 
   // State
   private TSMap<String, ROList<Node>> hotkeys = new TSMap<>();
@@ -38,7 +39,7 @@ public class HotkeysExtension {
   private String hotkeySequence = "";
   private HotkeyDetails hotkeyDetails = null;
 
-  public HotkeysExtension(final Context context) {
+  public HotkeysExtension(final Context context, boolean showDetails) {
     this.showDetails = showDetails;
     context.keyListener = (context1, event) -> handleEvent(context1, event);
     final Context.TagsListener tagsListener = new TagsListener(this);
@@ -156,7 +157,7 @@ public class HotkeysExtension {
                   .add(Tags.TAG_PART_DETAILS)
                   .ro());
       first.setColor(context, firstStyle.color);
-      first.setFont(context, firstStyle.getFont(context));
+      first.setFont(context, Context.getFont(firstStyle, context));
       first.setText(context, hotkeysExtension.hotkeySequence);
       layout.add(first);
 
@@ -169,15 +170,15 @@ public class HotkeysExtension {
                   .add(Tags.TAG_PART_DETAILS)
                   .ro());
       final ColumnarTableLayout table = new ColumnarTableLayout(context, context.syntax.detailSpan);
-      for (final com.zarbosoft.pidgoon.State leaf : hotkeysExtension.hotkeyParse.context().leaves) {
+      for (final Parse.State leaf : hotkeysExtension.hotkeyParse.context().leaves) {
         final Action action = leaf.color();
         final Text rule = context.display.text();
         rule.setColor(context, lineStyle.color);
-        rule.setFont(context, lineStyle.getFont(context));
+        rule.setFont(context, Context.getFont(lineStyle, context));
         rule.setText(context, hotkeysExtension.hotkeyGrammar.getNode(action.id()).toString());
         final Text name = context.display.text();
         name.setColor(context, lineStyle.color);
-        name.setFont(context, lineStyle.getFont(context));
+        name.setFont(context, Context.getFont(lineStyle, context));
         name.setText(context, action.id());
         table.add(TSList.of(rule, name));
       }
