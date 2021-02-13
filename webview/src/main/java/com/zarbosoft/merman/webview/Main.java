@@ -485,6 +485,7 @@ public class Main {
                                 new BaseBackAtomSpec.Config(null, expresisonGroupType)))
                         .build())));
 
+    /*
     TSList<AtomType> types =
         TSList.of(
             new TypeBuilder(blockType, "Block")
@@ -733,6 +734,7 @@ public class Main {
             new StyleBuilder().with(spaceTag).space(spacePx).build());
     DomGlobal.document.body.appendChild(
         new JSSourceView(new Syntax(syntaxConfig), i18n, rawDoc).element);
+     */
   }
 
   private static FreeAtomType binaryOperator(

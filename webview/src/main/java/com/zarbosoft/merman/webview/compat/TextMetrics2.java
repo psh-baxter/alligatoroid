@@ -1,13 +1,16 @@
 package com.zarbosoft.merman.webview.compat;
 
-import elemental2.core.JsObject;
 import jsinterop.annotations.JsProperty;
 import jsinterop.annotations.JsType;
 
 import static jsinterop.annotations.JsPackage.GLOBAL;
 
 @JsType(isNative = true, namespace = GLOBAL)
-public class Navigator extends elemental2.dom.Navigator {
-  @JsProperty
-  public JsObject clipboard;
+public class TextMetrics2 {
+    @JsProperty
+    public double width;
+    @JsProperty
+    public double fontBoundingBoxAscent;
+    @JsProperty
+    public double fontBoundingBoxDescent;
 }

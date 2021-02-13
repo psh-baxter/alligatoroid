@@ -2,6 +2,7 @@ package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.syntax.BackType;
+import com.zarbosoft.merman.webview.compat.Clipboard2;
 import com.zarbosoft.merman.webview.compat.ClipboardItem;
 import com.zarbosoft.merman.webview.compat.Navigator;
 import elemental2.core.JsArray;
@@ -22,14 +23,13 @@ public class JSClipboardEngine extends ClipboardEngine {
 
   @Override
   public void set(Object bytes) {
-    ((Navigator) DomGlobal.navigator)
-        .clipboard.write(JsArray.of(new ClipboardItem(JsPropertyMap.of(mime, bytes))));
+    ((Clipboard2) (Object) ((Navigator) DomGlobal.navigator).clipboard)
+        .write(JsArray.of(new ClipboardItem(JsPropertyMap.of(mime, bytes))));
   }
 
   @Override
   public void get(Consumer<Object> cb) {
-    ((Navigator) DomGlobal.navigator)
-        .clipboard
+    ((Clipboard2) (Object) ((Navigator) DomGlobal.navigator).clipboard)
         .read()
         .then(
             new IThenable.ThenOnFulfilledCallbackFn<DataTransfer, Object>() {
@@ -66,8 +66,7 @@ public class JSClipboardEngine extends ClipboardEngine {
 
   @Override
   public void getString(Consumer<String> cb) {
-    ((Navigator) DomGlobal.navigator)
-        .clipboard
+    ((Clipboard2) (Object) ((Navigator) DomGlobal.navigator).clipboard)
         .readText()
         .then(
             new IThenable.ThenOnFulfilledCallbackFn<String, Object>() {
@@ -81,6 +80,6 @@ public class JSClipboardEngine extends ClipboardEngine {
 
   @Override
   public void setString(String string) {
-    ((Navigator) DomGlobal.navigator).clipboard.writeText(string);
+    ((Clipboard2) (Object) ((Navigator) DomGlobal.navigator).clipboard).writeText(string);
   }
 }

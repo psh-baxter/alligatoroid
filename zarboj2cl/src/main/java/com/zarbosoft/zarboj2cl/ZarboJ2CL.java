@@ -341,10 +341,6 @@ public class ZarboJ2CL extends AbstractMojo {
             }
             os.write(
                 ("    ],\n"
-                        + "    js_suppress = [\n"
-                        + "        \"undefinedVars\",\n"
-                        + "        \"missingProperties\",\n"
-                        + "        \"unrecognizedTypeError\"],\n"
                         + ")\n")
                     .getBytes(StandardCharsets.UTF_8));
           });

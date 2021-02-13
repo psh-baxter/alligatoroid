@@ -9,7 +9,7 @@ import jsinterop.annotations.JsType;
 import static jsinterop.annotations.JsPackage.GLOBAL;
 
 @JsType(isNative = true, namespace = GLOBAL)
-public class Clipboard {
+public class Clipboard2 {
   @JsMethod
   public native void write(JsArray<ClipboardItem> items);
   @JsMethod
