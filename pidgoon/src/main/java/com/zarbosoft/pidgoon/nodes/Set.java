@@ -1,5 +1,6 @@
 package com.zarbosoft.pidgoon.nodes;
 
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.RefParent;
 import com.zarbosoft.pidgoon.model.Store;
@@ -11,8 +12,6 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSSet;
-
-import java.util.Collection;
 
 /** Match each child exactly once. */
 public class Set extends Node {
@@ -28,18 +27,13 @@ public class Set extends Node {
     return this;
   }
 
-  public Set addAll(final Collection<Node> children) {
-    children.addAll(children);
-    return this;
-  }
-
   @Override
   public void context(
       final Parse context,
       final Store store,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause) {
+      final MismatchCause cause) {
     advance(context, store, parent, seen, cause, children);
   }
 
@@ -48,27 +42,26 @@ public class Set extends Node {
       final Store store,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause,
+      final MismatchCause cause,
       final ROSetRef<ROPair<Node, Boolean>> remaining) {
-    boolean matched = false;
+    boolean requiredRemain = false;
     for (ROPair<Node, Boolean> p : remaining) {
       if (p.second) {
-        matched = true;
+        requiredRemain = true;
         break;
       }
     }
-    if (!matched) {
+    if (!requiredRemain) {
       parent.advance(step, store, cause);
     }
-    remaining.forEach(
-        c -> {
-          c.first.context(
+    for (ROPair<Node, Boolean> c : remaining) {
+      c.first.context(
               step,
               store.push(),
               new SetParent(parent, remaining.mut().remove(c).ro()),
               seen,
               cause);
-        });
+    }
   }
 
   private class SetParent extends BaseParent {
@@ -82,7 +75,7 @@ public class Set extends Node {
     }
 
     @Override
-    public void advance(final Parse step, final Store store, final Object cause) {
+    public void advance(final Parse step, final Store store, final MismatchCause cause) {
       Set.this.advance(step, store.pop(), parent, ROMap.empty, cause, remaining);
     }
   }

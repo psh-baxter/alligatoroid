@@ -35,9 +35,9 @@ public class JSGroup extends JSDisplayNode implements Group {
   }
 
   @Override
-  public void remove(int index, int count) {
+  public void remove(int start, int count) {
     for (int i = 0; i < count; ++i) {
-      ((HTMLElement) element.childNodes.getAt(i)).remove();
+      ((HTMLElement) element.childNodes.getAt(start)).remove();
     }
     fixPosition();
   }

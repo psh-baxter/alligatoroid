@@ -3,7 +3,7 @@ package com.zarbosoft.merman.misc;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MultiError extends RuntimeException {
+public class MultiError {
   public final List errors = new ArrayList();
 
   public void add(Object e) {
@@ -12,24 +12,28 @@ public class MultiError extends RuntimeException {
 
   public void raise() {
     if (errors.isEmpty()) return;
-    throw this;
+    throw new Exception(errors);
   }
 
   public boolean isEmpty() {
     return errors.isEmpty();
   }
 
-  @Override
-  public String toString() {
-    StringBuilder out = new StringBuilder();
-    for (int i = 0; i < errors.size(); ++i) {
-      String t = errors.get(i).toString();
+  public static class Exception extends RuntimeException {
+    public final List errors;
 
+    public Exception(List errors) {
+      this.errors = errors;
     }
-    for (Object error : errors) {
-      out.append(error.toString());
-      out.append("\n");
+
+    @Override
+    public String toString() {
+      StringBuilder out = new StringBuilder();
+      for (Object error : errors) {
+        out.append(error.toString());
+        out.append("\n");
+      }
+      return out.toString();
     }
-    return out.toString();
   }
 }

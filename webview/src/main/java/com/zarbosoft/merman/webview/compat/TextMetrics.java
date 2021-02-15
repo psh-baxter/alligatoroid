@@ -6,9 +6,7 @@ import jsinterop.annotations.JsType;
 import static jsinterop.annotations.JsPackage.GLOBAL;
 
 @JsType(isNative = true, namespace = GLOBAL)
-public class TextMetrics2 {
-    @JsProperty
-    public double width;
+public class TextMetrics extends elemental2.dom.TextMetrics {
     @JsProperty
     public double fontBoundingBoxAscent;
     @JsProperty

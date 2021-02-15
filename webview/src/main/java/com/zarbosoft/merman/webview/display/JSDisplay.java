@@ -236,16 +236,16 @@ public class JSDisplay extends Display {
   public static String cssColor(ModelColor color) {
     if (color instanceof ModelColor.RGB) {
       return Format.format(
-          "rgb(%d, %d, %d)",
-          ((ModelColor.RGB) color).r * 255,
-          ((ModelColor.RGB) color).g * 255,
-          ((ModelColor.RGB) color).b * 255);
+          "rgb(%s, %s, %s)",
+          (int) ((ModelColor.RGB) color).r * 255,
+          (int) ((ModelColor.RGB) color).g * 255,
+          (int) ((ModelColor.RGB) color).b * 255);
     } else if (color instanceof ModelColor.RGBA) {
       return Format.format(
-          "rgba(%d, %d, %d, %f)",
-          ((ModelColor.RGBA) color).r * 255,
-          ((ModelColor.RGBA) color).g * 255,
-          ((ModelColor.RGBA) color).b * 255,
+          "rgba(%s, %s, %d, %s)",
+          (int) ((ModelColor.RGBA) color).r * 255,
+          (int) ((ModelColor.RGBA) color).g * 255,
+          (int) ((ModelColor.RGBA) color).b * 255,
           ((ModelColor.RGBA) color).a);
     } else throw new Assertion();
   }

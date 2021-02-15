@@ -1,5 +1,7 @@
 package com.zarbosoft.pidgoon.nodes;
 
+import com.zarbosoft.pidgoon.model.ExceptionMismatchCause;
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.RefParent;
 import com.zarbosoft.pidgoon.model.Store;
@@ -29,7 +31,7 @@ public abstract class Operator<S extends Store> extends Node {
       final Store store,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause) {
+      final MismatchCause cause) {
     if (root == null) {
       parent.advance(context, process((S) store).pop(), cause);
     } else {
@@ -56,12 +58,12 @@ public abstract class Operator<S extends Store> extends Node {
     }
 
     @Override
-    public void advance(final Parse step, final Store store, final Object cause) {
+    public void advance(final Parse step, final Store store, final MismatchCause cause) {
       Store tempStore = store;
       try {
         tempStore = operator.process((S) store);
       } catch (final AbortParse a) {
-        parent.error(step, tempStore, a);
+        parent.error(step, tempStore, new ExceptionMismatchCause(operator, store.color, a));
         return;
       }
       parent.advance(step, tempStore.pop(), cause);

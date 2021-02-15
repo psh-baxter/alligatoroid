@@ -15,7 +15,7 @@ import java.util.List;
 public class Parse {
   public final Grammar grammar;
   /** An error for each branch that failed in the previous step of the parse. */
-  public final List<Object> errors = new ArrayList<>();
+  public final List<MismatchCause> errors = new ArrayList<>();
 
   public final int errorHistoryLimit;
   public final int uncertaintyLimit;
@@ -29,7 +29,7 @@ public class Parse {
    */
   public final List<Object> results = new ArrayList<>();
   /** The error from steps before the previous (controlled by errorHistoryLimit). */
-  public List<Pair<Position, List<Object>>> errorHistory;
+  public List<Pair<Position, List<MismatchCause>>> errorHistory;
 
   public BranchingStack<AmbiguitySample> ambiguityHistory;
 

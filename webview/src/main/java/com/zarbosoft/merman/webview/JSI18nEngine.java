@@ -1,10 +1,13 @@
 package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.editor.I18nEngine;
-import com.zarbosoft.merman.webview.compat.intl.Segment;
-import com.zarbosoft.merman.webview.compat.intl.Segmenter;
+import com.zarbosoft.merman.webview.compat.CompatOverlay;
+import com.zarbosoft.merman.webview.compat.Segmenter;
 import com.zarbosoft.rendaw.common.TSList;
-import elemental2.core.JsArray;
+import elemental2.core.JsIIterableResult;
+import elemental2.core.JsIteratorIterable;
+import elemental2.core.JsObject;
+import elemental2.core.Symbol;
 import jsinterop.base.JsPropertyMap;
 
 public class JSI18nEngine implements I18nEngine {
@@ -36,12 +39,16 @@ public class JSI18nEngine implements I18nEngine {
     private int index;
 
     private Walker(Segmenter segmenter, String text) {
-      JsArray<Segment> segments0 = segmenter.segment(text);
-      Segment last = null;
-      for (int i = 0; i < segments0.length; ++i) {
-        Segment segment = segments0.getAt(i);
-        segments.add(segment.index);
+      JsObject segments0 = segmenter.segment(text);
+      JsPropertyMap last = null;
+      JsIteratorIterable<JsPropertyMap> iter =
+          (JsIteratorIterable<JsPropertyMap>) CompatOverlay.getSymbol(segments0, Symbol.iterator);
+      JsIIterableResult<JsPropertyMap> at = iter.next();
+      while (!at.isDone()) {
+        JsPropertyMap segment = at.getValue();
+        segments.add((int)(double)segment.get("index"));
         last = segment;
+        at = iter.next();
       }
       if (last != null) {
         segments.add(text.length());

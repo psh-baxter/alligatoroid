@@ -1,11 +1,12 @@
 package com.zarbosoft.pidgoon.events;
 
-import com.zarbosoft.pidgoon.Pidgoon;
-import com.zarbosoft.pidgoon.model.Store;
-import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.BaseParseBuilder;
+import com.zarbosoft.pidgoon.Pidgoon;
+import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROPair;
 
 import java.util.List;
 
@@ -26,6 +27,14 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
     ParseEventSink<O> eventStream = parse();
     for (int i = 0; i < data.size(); ++i) {
       eventStream = eventStream.push(data.get(i), i);
+    }
+    return eventStream.result();
+  }
+
+  public O parsePosition(final List<? extends ROPair<? extends Event, ?>> data) {
+    ParseEventSink<O> eventStream = parse();
+    for (ROPair<? extends Event, ?> pair : data) {
+      eventStream = eventStream.push(pair.first, pair.second);
     }
     return eventStream.result();
   }

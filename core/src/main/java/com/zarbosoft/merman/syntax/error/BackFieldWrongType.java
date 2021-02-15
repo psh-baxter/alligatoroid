@@ -4,7 +4,7 @@ import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
 
 public class BackFieldWrongType extends BaseKVError {
-  public BackFieldWrongType(Path typePath, String field, BackSpecData found, Class expected) {
+  public BackFieldWrongType(Path typePath, String field, BackSpecData found, String expected) {
             put("typePath", typePath);
             put("field", field);
             put("found", found);

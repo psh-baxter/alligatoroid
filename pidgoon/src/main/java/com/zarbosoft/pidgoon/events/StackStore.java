@@ -61,7 +61,7 @@ public class StackStore extends Store {
   }
 
   public StackStore pushStack(final Object o) {
-    final StackStore out = new StackStore();
+    final StackStore out = push();
     if (stack == null) {
       out.stack = new BranchingStack<>(o);
     } else {
@@ -71,14 +71,14 @@ public class StackStore extends Store {
   }
 
   public StackStore popStack() {
-    final StackStore out = split();
+    final StackStore out = push();
     out.stack = stack.pop();
     return out;
   }
 
   @Override
-  public <Y> Y split() {
-    return (Y) new StackStore(color, stack, top);
+  public StackStore push() {
+    return new StackStore(color, stack, top);
   }
 
   @Override
@@ -93,7 +93,7 @@ public class StackStore extends Store {
 
   @Override
   public Store record(final Position position) {
-    final StackStore out = split();
+    final StackStore out = push();
     out.top = ((com.zarbosoft.pidgoon.events.Position) position).get();
     return out;
   }

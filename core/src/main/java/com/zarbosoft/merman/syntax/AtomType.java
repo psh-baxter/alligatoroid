@@ -37,7 +37,6 @@ import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
@@ -171,7 +170,7 @@ public abstract class AtomType {
       seq.add(p.buildBackRule(syntax));
     }
     return new Color(
-        this,
+        "atom " + id,
         new Operator<StackStore>(seq) {
           @Override
           protected StackStore process(StackStore store) {
@@ -222,32 +221,42 @@ public abstract class AtomType {
 
   public BaseBackPrimitiveSpec getDataPrimitive(
       MultiError errors, Path typePath, final String key) {
-    return getBack(errors, typePath, BaseBackPrimitiveSpec.class, key);
+    BackSpecData found = getBack(errors, typePath, key);
+    try {
+      return (BaseBackPrimitiveSpec) found;
+    } catch (ClassCastException e) {
+      errors.add(new BackFieldWrongType(typePath, id, found, "primitive"));
+      return null;
+    }
   }
 
-  public <D extends BackSpecData> D getBack(
-      MultiError errors, Path typePath, final Class<D> type, final String id) {
+  private BackSpecData getBack(MultiError errors, Path typePath, final String id) {
     final BackSpecData found = fields.getOpt(id);
     if (found == null) {
       errors.add(new MissingBack(typePath, id));
       return null;
     }
-    // Needs reflection
-    /*
-    if (type != found.getClass()) {
-      errors.add(new BackFieldWrongType(typePath, id, found, type));
-      return null;
-    }
-     */
-    return (D) found;
+    return found;
   }
 
   public BaseBackAtomSpec getDataAtom(MultiError errors, Path typePath, final String key) {
-    return getBack(errors, typePath, BaseBackAtomSpec.class, key);
+    BackSpecData found = getBack(errors, typePath, key);
+    try {
+      return (BaseBackAtomSpec) found;
+    } catch (ClassCastException e) {
+      errors.add(new BackFieldWrongType(typePath, id, found, "atom"));
+      return null;
+    }
   }
 
   public BaseBackArraySpec getDataArray(MultiError errors, Path typePath, final String key) {
-    return getBack(errors, typePath, BaseBackArraySpec.class, key);
+    BackSpecData found = getBack(errors, typePath, key);
+    try {
+      return (BaseBackArraySpec) found;
+    } catch (ClassCastException e) {
+      errors.add(new BackFieldWrongType(typePath, id, found, "array"));
+      return null;
+    }
   }
 
   public final String id() {

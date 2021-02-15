@@ -1,6 +1,7 @@
-package com.zarbosoft.merman.webview.compat.intl;
+package com.zarbosoft.merman.webview.compat;
 
 import elemental2.core.JsArray;
+import elemental2.core.JsObject;
 import jsinterop.annotations.JsConstructor;
 import jsinterop.annotations.JsMethod;
 import jsinterop.annotations.JsType;
@@ -14,5 +15,5 @@ public class Segmenter {
   public Segmenter(String lang, JsPropertyMap<Object> options) {}
 
   @JsMethod
-  public native JsArray<Segment> segment(String text);
+  public native JsObject segment(String text);
 }

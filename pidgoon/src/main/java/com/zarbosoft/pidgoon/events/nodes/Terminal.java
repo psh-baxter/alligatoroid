@@ -1,5 +1,6 @@
 package com.zarbosoft.pidgoon.events.nodes;
 
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.events.Event;
@@ -19,7 +20,7 @@ public abstract class Terminal extends Node {
       final Store prestore,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause) {
+      final MismatchCause cause) {
     context.leaves.add(
         new Parse.State() {
           @Override
@@ -33,11 +34,16 @@ public abstract class Terminal extends Node {
             final Position position = (Position) sourcePosition;
             store = store.record(position);
             if (matches(position.get(), store)) {
-              parent.advance(step, store, this);
+              parent.advance(step, store, new MismatchCause(Terminal.this, prestore.color));
             } else {
-              parent.error(step, store, this);
+              parent.error(step, store, new MismatchCause(Terminal.this, prestore.color));
             }
           }
+
+            @Override
+            public String toString() {
+                return Terminal.this.toString();
+            }
         });
   }
 

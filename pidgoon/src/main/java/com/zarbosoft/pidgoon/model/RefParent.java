@@ -12,7 +12,7 @@ public class RefParent implements Parent {
   }
 
   @Override
-  public void advance(final Parse step, final Store store, final Object cause) {
+  public void advance(final Parse step, final Store store, final MismatchCause cause) {
     final Store tempStore = store.pop();
     originalParent.advance(step, tempStore, cause);
     for (final Parent p : loopParents) {
@@ -21,7 +21,7 @@ public class RefParent implements Parent {
   }
 
   @Override
-  public void error(final Parse step, final Store store, final Object cause) {
+  public void error(final Parse step, final Store store, final MismatchCause cause) {
     originalParent.error(step, store, cause);
   }
 

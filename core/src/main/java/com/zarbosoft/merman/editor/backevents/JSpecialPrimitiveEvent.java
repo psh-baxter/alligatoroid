@@ -20,7 +20,6 @@ public class JSpecialPrimitiveEvent implements BackEvent {
 
   @Override
   public String toString() {
-    if (value == null) return "*";
-    return Format.format("\"%s\"", value);
+    return Format.format("JSON NON-STRING %s", value == null ? "*" : "\""+value+"\"");
   }
 }

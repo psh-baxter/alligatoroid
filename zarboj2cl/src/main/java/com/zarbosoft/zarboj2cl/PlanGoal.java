@@ -30,8 +30,8 @@ import java.util.regex.Pattern;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-@Mojo(name = "zarboj2cl", defaultPhase = LifecyclePhase.PACKAGE)
-public class ZarboJ2CL extends AbstractMojo {
+@Mojo(name = "plan", defaultPhase = LifecyclePhase.COMPILE)
+public class PlanGoal extends AbstractMojo {
   private static final Pattern importPattern =
       Pattern.compile(
           "^import ((?:[a-z][a-zA-Z0-9]*\\.)+)([a-zA-Z0-9]+)(?:\\.[a-zA-Z0-9])*;",
@@ -47,8 +47,9 @@ public class ZarboJ2CL extends AbstractMojo {
   private String sourcePath;
 
   public void execute() throws MojoExecutionException, MojoFailureException {
-    Path sourcePath = Paths.get(this.sourcePath);
     try {
+        Path sourcePath = Paths.get(this.sourcePath);
+
       /// Copy main source
       for (String root0 : project.getCompileSourceRoots()) {
         Path root = Paths.get(root0);
@@ -106,20 +107,6 @@ public class ZarboJ2CL extends AbstractMojo {
                     + "\n"
                     + "load(\"@com_google_j2cl//build_defs:rules.bzl\", \"setup_j2cl_workspace\")\n"
                     + "setup_j2cl_workspace()\n"
-                    + "\n"
-                    + "_JSINTEROP_BASE_VERSION = \"1.0.0\"\n"
-                    + "http_archive(\n"
-                    + "    name = \"com_google_jsinterop_base\",\n"
-                    + "    strip_prefix = \"jsinterop-base-%s\" % _JSINTEROP_BASE_VERSION,\n"
-                    + "    url = \"https://github.com/google/jsinterop-base/archive/%s.zip\" % _JSINTEROP_BASE_VERSION,\n"
-                    + ")\n"
-                    + "\n"
-                    + "_JSINTEROP_ANNOTATIONS_VERSION = \"2.0.0\"\n"
-                    + "http_archive(\n"
-                    + "    name = \"com_google_jsinterop_annotations\",\n"
-                    + "    strip_prefix = \"jsinterop-annotations-%s\" % _JSINTEROP_ANNOTATIONS_VERSION,\n"
-                    + "    url = \"https://github.com/google/jsinterop-annotations/archive/%s.zip\" % _JSINTEROP_ANNOTATIONS_VERSION,\n"
-                    + ")\n"
                     + "\n"
                     + "http_archive(\n"
                     + "    name = \"com_google_elemental2\",\n"
@@ -204,23 +191,6 @@ public class ZarboJ2CL extends AbstractMojo {
       for (BazelPackage bazelPackage : bazelPackageMap.values()) {
         bazelPackage.write();
       }
-      // if (entry[0] == null) throw new RuntimeException();
-      // bazel=bazelisk
-      /*
-      String[] commandline = {
-              "/usr/bin/bazel", "build", String.format("%s:entry", entry[0].getParent())
-      };
-       */
-      String[] commandline = {"/usr/bin/bazel", "build", String.format(":entry")};
-      ProcessBuilder processBuilder =
-          new ProcessBuilder().command(commandline).directory(sourcePath.toFile());
-      processBuilder.environment().put("JAVA_HOME", "/usr/lib/jvm/java-11-openjdk");
-      Process proc = processBuilder.inheritIO().start();
-      proc.waitFor();
-      if (proc.exitValue() != 0) {
-        throw new RuntimeException(
-            String.format("Bazel build failed with error code %d", proc.exitValue()));
-      }
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -248,7 +218,7 @@ public class ZarboJ2CL extends AbstractMojo {
               if (!library.empty()) empty = false;
             }
             if (empty) return;
-            Path sourcePath = Paths.get(ZarboJ2CL.this.sourcePath);
+            Path sourcePath = Paths.get(PlanGoal.this.sourcePath);
             try (OutputStream os =
                 Files.newOutputStream(sourcePath.resolve(dir).resolve("BUILD"))) {
               os.write(
@@ -305,7 +275,7 @@ public class ZarboJ2CL extends AbstractMojo {
 
             os.write(("    ],\n" + "    deps = [\n").getBytes(StandardCharsets.UTF_8));
             Set<String> seenDeps = new HashSet<>();
-            Path sourcePath = Paths.get(ZarboJ2CL.this.sourcePath);
+            Path sourcePath = Paths.get(PlanGoal.this.sourcePath);
             for (Path source : sources) {
               if (source.getFileName().toString().endsWith(".js")) continue;
               Matcher matcher =

@@ -3,6 +3,7 @@ package com.zarbosoft.pidgoon;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.pidgoon.model.Position;
@@ -31,12 +32,12 @@ public class Pidgoon {
               initialStore,
               new Parent() {
                 @Override
-                public void advance(final Parse step, final Store store, final Object cause) {
+                public void advance(final Parse step, final Store store, final MismatchCause cause) {
                   if (store.hasResult()) step.results.add(store.result());
                 }
 
                 @Override
-                public void error(final Parse step, final Store store, final Object cause) {
+                public void error(final Parse step, final Store store, final MismatchCause cause) {
                   step.errors.add(cause);
                 }
 
@@ -45,7 +46,7 @@ public class Pidgoon {
                   throw new UnsupportedOperationException();
                 }
               },
-              "<SOF>");
+              null);
       return context;
     }
 
@@ -72,7 +73,7 @@ public class Pidgoon {
         } else {
           nextStep.errorHistory = new ArrayList<>();
           nextStep.errorHistory.add(new Pair<>(position, nextStep.errors));
-          for (Pair<Position, List<Object>> s : parse.errorHistory) {
+          for (Pair<Position, List<MismatchCause>> s : parse.errorHistory) {
             if (nextStep.errorHistory.size() >= parse.errorHistoryLimit) break;
             nextStep.errorHistory.add(s);
           }

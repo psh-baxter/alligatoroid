@@ -82,8 +82,15 @@
                 </configuration>
                 <executions>
                     <execution>
+                        <id>prep js build</id>
                         <goals>
-                            <goal>zarboj2cl</goal>
+                            <goal>plan</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>build js bundle</id>
+                        <goals>
+                            <goal>build</goal>
                         </goals>
                     </execution>
                 </executions>

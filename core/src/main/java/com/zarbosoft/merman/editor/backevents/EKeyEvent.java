@@ -19,6 +19,6 @@ public class EKeyEvent implements BackEvent {
 
   @Override
   public String toString() {
-    return Format.format("KEY %s", value == null ? "*" : value);
+    return Format.format("KEY %s", value == null ? "*" : value + ":");
   }
 }

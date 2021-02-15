@@ -1,5 +1,6 @@
 package com.zarbosoft.pidgoon;
 
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.pidgoon.model.Store;
@@ -13,7 +14,7 @@ public abstract class BaseParent implements Parent {
   }
 
   @Override
-  public void error(final Parse step, final Store store, final Object cause) {
+  public void error(final Parse step, final Store store, final MismatchCause cause) {
     parent.error(step, store, cause);
   }
 

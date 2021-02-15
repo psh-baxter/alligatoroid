@@ -5,7 +5,7 @@ import com.zarbosoft.rendaw.common.ROSet;
 public class UnusedBackData extends BaseKVError {
 
   public UnusedBackData(ROSet<String> unused) {
-    put("unused", unused);
+    put("unused", unused.inner_());
   }
 
   @Override

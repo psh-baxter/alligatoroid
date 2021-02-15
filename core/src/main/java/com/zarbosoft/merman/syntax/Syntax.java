@@ -18,13 +18,14 @@ import com.zarbosoft.merman.syntax.error.TypeCircularReference;
 import com.zarbosoft.merman.syntax.error.UnsupportedDirections;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Union;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -38,7 +39,8 @@ import java.util.Map;
 
 public class Syntax {
   public static final Object GRAMMAR_WILDCARD_KEY = new Object();
-  private static final Object GRAMMAR_WILDCARD_KEY_UNTYPED = new Object();
+  public static final Object GRAMMAR_WILDCARD_KEY_UNTYPED = new Object();
+  public static final Object GRAMMAR_ROOT = new Object();
   public final BackType backType;
   public final ModelColor background;
   public final Padding pad;
@@ -54,73 +56,7 @@ public class Syntax {
   public final SuffixGapAtomType suffixGap;
   public final Direction converseDirection;
   public final Direction transverseDirection;
-  private Grammar grammar;
-
-  public static class Config {
-    public BackType backType = BackType.LUXEM;
-    public ModelColor background = ModelColor.RGB.white;
-    public Padding pad = Padding.empty;
-    public String unprintable = "▢";
-    public ROList<Style.Spec> styles = ROList.empty;
-    public Padding bannerPad = Padding.empty;
-    public Padding detailPad = Padding.empty;
-    public int detailSpan = 300;
-    public final ROList<AtomType> types;
-    public final ROMap<String, ROSet<AtomType>> splayedTypes;
-    public final RootAtomType root;
-    public GapAtomType gap;
-    public SuffixGapAtomType suffixGap;
-    public Direction converseDirection = Direction.RIGHT;
-    public Direction transverseDirection = Direction.DOWN;
-
-    public Config(
-        I18nEngine i18n,
-        ROList<AtomType> types,
-        ROMap<String, ROSet<AtomType>> splayedTypes,
-        RootAtomType root) {
-      this.types = types;
-      this.splayedTypes = splayedTypes;
-      this.root = root;
-      gap = new GapAtomType(i18n, new GapAtomType.Config());
-      suffixGap = new SuffixGapAtomType(i18n, new SuffixGapAtomType.Config());
-    }
-
-    public Config(
-        I18nEngine i18n,
-        BackType backType,
-        ModelColor background,
-        Padding pad,
-        String unprintable,
-        ROList<Style.Spec> styles,
-        Padding bannerPad,
-        Padding detailPad,
-        int detailSpan,
-        ROList<AtomType> types,
-        ROMap<String, ROSet<AtomType>> splayedTypes,
-        RootAtomType root,
-        GapAtomType gap,
-        SuffixGapAtomType suffixGap,
-        Direction converseDirection,
-        Direction transverseDirection) {
-      this.backType = backType;
-      this.background = background;
-      this.pad = pad;
-      this.unprintable = unprintable;
-      this.styles = styles;
-      this.bannerPad = bannerPad;
-      this.detailPad = detailPad;
-      this.detailSpan = detailSpan;
-      this.types = types;
-      this.splayedTypes = splayedTypes;
-      this.root = root;
-      this.gap = new GapAtomType(i18n, new GapAtomType.Config());
-      this.gap = gap;
-      this.suffixGap = new SuffixGapAtomType(i18n, new SuffixGapAtomType.Config());
-      this.suffixGap = suffixGap;
-      this.converseDirection = converseDirection;
-      this.transverseDirection = transverseDirection;
-    }
-  }
+  private final Grammar grammar;
 
   public Syntax(Config config) {
     MultiError errors = new MultiError();
@@ -162,6 +98,63 @@ public class Syntax {
     this.suffixGap = config.suffixGap;
     this.converseDirection = config.converseDirection;
     this.transverseDirection = config.transverseDirection;
+
+    TSSet<AtomType> seen = new TSSet<>();
+    for (Map.Entry<String, ROSet<AtomType>> splayedType : splayedTypes) {
+      for (AtomType atomType : splayedType.getValue()) {
+        if (!seen.addNew(atomType)) continue;
+        atomType.finish(errors, this);
+      }
+    }
+    root.finish(errors, this);
+    gap.finish(errors, this);
+    suffixGap.finish(errors, this);
+
+    grammar = new Grammar();
+    grammar.add(
+        GRAMMAR_WILDCARD_KEY_UNTYPED,
+        new Union()
+            .add(new MatchingEventTerminal(new EPrimitiveEvent()))
+            .add(new MatchingEventTerminal(new JSpecialPrimitiveEvent()))
+            .add(
+                new Sequence()
+                    .add(new MatchingEventTerminal(new EArrayOpenEvent()))
+                    .add(new Repeat(new Reference(GRAMMAR_WILDCARD_KEY)))
+                    .add(new MatchingEventTerminal(new EArrayCloseEvent())))
+            .add(
+                new Sequence()
+                    .add(new MatchingEventTerminal(new EObjectOpenEvent()))
+                    .add(
+                        new Reference(
+                            new Sequence()
+                                .add(new MatchingEventTerminal(new EKeyEvent()))
+                                .add(new Reference(GRAMMAR_WILDCARD_KEY))))
+                    .add(new MatchingEventTerminal(new EObjectCloseEvent()))));
+    grammar.add(
+        GRAMMAR_WILDCARD_KEY,
+        new Union()
+            .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))
+            .add(
+                new Sequence()
+                    .add(new MatchingEventTerminal(new ETypeEvent()))
+                    .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))));
+    for (Map.Entry<String, ROSet<AtomType>> entry : splayedTypes) {
+      ROSet<AtomType> types = entry.getValue();
+      String key = entry.getKey();
+      AtomType firstType = types.iterator().next();
+      if (types.size() == 1 && key.equals(firstType.id())) {
+        AtomType type = firstType;
+        grammar.add(type.id(), type.buildBackRule(this));
+      } else {
+        final Union group = new Union();
+        for (AtomType type : types) {
+          group.add(new Reference(type.id()));
+        }
+        grammar.add(key, group);
+      }
+    }
+    grammar.add(RootAtomType.ROOT_TYPE_ID, root.buildBackRule(this));
+
     errors.raise();
   }
 
@@ -179,8 +172,11 @@ public class Syntax {
 
     TSMap<String, AtomType> typeLookup = new TSMap<>();
     for (AtomType entry : types) {
-      typeLookup.put(entry.id(), entry);
-      splayedTypes.put(entry.id(), TSSet.of(entry).ro());
+      if (typeLookup.putReplace(entry.id(), entry) != null) {
+        errors.add(new DuplicateAtomTypeIds(entry.id()));
+      }
+      ;
+      splayedTypes.putReplace(entry.id(), TSSet.of(entry).ro());
     }
 
     for (Map.Entry<String, ROList<String>> group : groups) {
@@ -234,19 +230,6 @@ public class Syntax {
     return splayedTypes;
   }
 
-  public void finish(MultiError errors) {
-    TSSet<AtomType> seen = new TSSet<>();
-    for (Map.Entry<String, ROSet<AtomType>> splayedType : splayedTypes) {
-      for (AtomType atomType : splayedType.getValue()) {
-        if (!seen.addNew(atomType)) continue;
-        atomType.finish(errors, this);
-      }
-    }
-    root.finish(errors, this);
-    gap.finish(errors, this);
-    suffixGap.finish(errors, this);
-  }
-
   public Node backRuleRef(final String type) {
     final Union out = new Union();
     out.add(new Reference(type));
@@ -256,52 +239,73 @@ public class Syntax {
   }
 
   public Grammar getGrammar() {
-    if (grammar == null) {
-      grammar = new Grammar();
-      grammar.add(
-          GRAMMAR_WILDCARD_KEY_UNTYPED,
-          new Union()
-              .add(new ClassEqTerminal(EPrimitiveEvent.class.getName()))
-                  .add(new ClassEqTerminal(JSpecialPrimitiveEvent.class.getName()))
-              .add(
-                  new Sequence()
-                      .add(new ClassEqTerminal(EArrayOpenEvent.class.getName()))
-                      .add(new Repeat(new Reference(GRAMMAR_WILDCARD_KEY)))
-                      .add(new ClassEqTerminal(EArrayCloseEvent.class.getName())))
-              .add(
-                  new Sequence()
-                      .add(new ClassEqTerminal(EObjectOpenEvent.class.getName()))
-                      .add(
-                          new Reference(
-                              new Sequence()
-                                  .add(new ClassEqTerminal(EKeyEvent.class.getName()))
-                                  .add(new Reference(GRAMMAR_WILDCARD_KEY))))
-                      .add(new ClassEqTerminal(EObjectCloseEvent.class.getName()))));
-      grammar.add(
-          GRAMMAR_WILDCARD_KEY,
-          new Union()
-              .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))
-              .add(
-                  new Sequence()
-                      .add(new ClassEqTerminal(ETypeEvent.class.getName()))
-                      .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))));
-      for (Map.Entry<String, ROSet<AtomType>> entry : splayedTypes) {
-        ROSet<AtomType> types = entry.getValue();
-        String key = entry.getKey();
-        AtomType firstType = types.iterator().next();
-        if (types.size() == 1 && key.equals(firstType.id())) {
-          AtomType type = firstType;
-          grammar.add(type.id(), type.buildBackRule(this));
-        } else {
-          final Union group = new Union();
-          for (AtomType type : types) {
-            group.add(new Reference(type.id()));
-          }
-          grammar.add(key, group);
-        }
-      }
-      grammar.add("root", root.buildBackRule(this));
-    }
+    if (grammar == null) throw new Assertion("finish() never called on syntax");
     return grammar;
+  }
+
+  public static class Config {
+    public final ROList<AtomType> types;
+    public final ROMap<String, ROSet<AtomType>> splayedTypes;
+    public final RootAtomType root;
+    public BackType backType = BackType.LUXEM;
+    public ModelColor background = ModelColor.RGB.white;
+    public Padding pad = Padding.empty;
+    public String unprintable = "▢";
+    public ROList<Style.Spec> styles = ROList.empty;
+    public Padding bannerPad = Padding.empty;
+    public Padding detailPad = Padding.empty;
+    public int detailSpan = 300;
+    public GapAtomType gap;
+    public SuffixGapAtomType suffixGap;
+    public Direction converseDirection = Direction.RIGHT;
+    public Direction transverseDirection = Direction.DOWN;
+
+    public Config(
+        I18nEngine i18n,
+        ROList<AtomType> types,
+        ROMap<String, ROSet<AtomType>> splayedTypes,
+        RootAtomType root) {
+      this.types = types;
+      this.splayedTypes = splayedTypes;
+      this.root = root;
+      gap = new GapAtomType(i18n, new GapAtomType.Config());
+      suffixGap = new SuffixGapAtomType(i18n, new SuffixGapAtomType.Config());
+    }
+
+    public Config(
+        I18nEngine i18n,
+        BackType backType,
+        ModelColor background,
+        Padding pad,
+        String unprintable,
+        ROList<Style.Spec> styles,
+        Padding bannerPad,
+        Padding detailPad,
+        int detailSpan,
+        ROList<AtomType> types,
+        ROMap<String, ROSet<AtomType>> splayedTypes,
+        RootAtomType root,
+        GapAtomType gap,
+        SuffixGapAtomType suffixGap,
+        Direction converseDirection,
+        Direction transverseDirection) {
+      this.backType = backType;
+      this.background = background;
+      this.pad = pad;
+      this.unprintable = unprintable;
+      this.styles = styles;
+      this.bannerPad = bannerPad;
+      this.detailPad = detailPad;
+      this.detailSpan = detailSpan;
+      this.types = types;
+      this.splayedTypes = splayedTypes;
+      this.root = root;
+      this.gap = new GapAtomType(i18n, new GapAtomType.Config());
+      this.gap = gap;
+      this.suffixGap = new SuffixGapAtomType(i18n, new SuffixGapAtomType.Config());
+      this.suffixGap = suffixGap;
+      this.converseDirection = converseDirection;
+      this.transverseDirection = transverseDirection;
+    }
   }
 }

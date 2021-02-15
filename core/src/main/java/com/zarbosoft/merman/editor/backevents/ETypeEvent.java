@@ -20,6 +20,6 @@ public class ETypeEvent implements BackEvent {
 
   @Override
   public String toString() {
-    return Format.format("TYPE %s", value == null ? "*" : value);
+    return Format.format("TYPE %s", value == null ? "*" : "(" + value +")");
   }
 }

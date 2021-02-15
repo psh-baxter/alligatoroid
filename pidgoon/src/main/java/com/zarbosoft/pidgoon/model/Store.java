@@ -13,8 +13,6 @@ public abstract class Store {
     this.color = color;
   }
 
-  public abstract <Y> Y split();
-
   /**
    * Called when the parse exits a branch/leaf in the syntax tree.
    *

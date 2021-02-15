@@ -1,5 +1,6 @@
 package com.zarbosoft.pidgoon.nodes;
 
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.RefParent;
 import com.zarbosoft.pidgoon.model.Store;
@@ -32,7 +33,7 @@ public class Union extends Node {
       final Store store,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause) {
+      final MismatchCause cause) {
     for (Node child : children) {
           child.context(
                   context,
@@ -49,7 +50,7 @@ public class Union extends Node {
         }
 
         @Override
-        public void advance(final Parse step, final Store store, final Object cause) {
+        public void advance(final Parse step, final Store store, final MismatchCause cause) {
             parent.advance(step, store.pop(), cause);
         }
     }

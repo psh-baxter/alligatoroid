@@ -1,5 +1,6 @@
 package com.zarbosoft.pidgoon.nodes;
 
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.RefParent;
 import com.zarbosoft.pidgoon.model.Store;
@@ -35,7 +36,7 @@ public class Repeat extends Node {
       final Store store,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause) {
+      final MismatchCause cause) {
     root.context(context, store.push(), new RepParent(this, parent, 0), seen, cause);
     if (min == 0) parent.advance(context, store, cause);
   }
@@ -51,7 +52,7 @@ public class Repeat extends Node {
     }
 
     @Override
-    public void advance(final Parse step, final Store store, final Object cause) {
+    public void advance(final Parse step, final Store store, final MismatchCause cause) {
       final Store tempStore = store.pop();
       final long nextCount = count + 1;
       if ((self.max == 0) && (nextCount == self.max)) {

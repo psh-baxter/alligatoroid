@@ -1,10 +1,12 @@
 package com.zarbosoft.pidgoon.nodes;
 
+import com.zarbosoft.pidgoon.model.ExceptionMismatchCause;
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.model.RefParent;
-import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.RefParent;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.rendaw.common.ROMap;
 
 /** Recurse via the grammar rule of this name. */
@@ -23,24 +25,25 @@ public class Reference extends Node {
       final Store store,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause) {
+      final MismatchCause cause) {
     if (seen.has(key)) {
       seen.get(key).loopParents.add(parent);
       return;
     }
     final RefParent subParent = new RefParent(parent);
-    get(context).context(context, store.push(), subParent, seen.mut().put(key, subParent), cause);
-  }
-
-  private Node get(final Parse context) {
     if (base == null) {
-      base = context.grammar.getNode(key);
+      try {
+        base = context.grammar.getNode(key);
+      } catch (Exception e) {
+        parent.error(context, store, new ExceptionMismatchCause(this, store.color, e));
+        return;
+      }
     }
-    return base;
+    base.context(context, store.push(), subParent, seen.mut().put(key, subParent), cause);
   }
 
   @Override
   public String toString() {
-    return key.toString();
+    return "REFERENCE " +key.toString();
   }
 }

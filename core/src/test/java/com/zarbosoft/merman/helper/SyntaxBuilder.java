@@ -53,9 +53,6 @@ public class SyntaxBuilder {
     config.pad = this.padding;
     config.styles = styles;
     Syntax syntax = new Syntax(config);
-    MultiError errors = new MultiError();
-    syntax.finish(errors);
-    errors.raise();
 
     return syntax;
   }

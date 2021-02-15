@@ -1,5 +1,6 @@
 package com.zarbosoft.pidgoon.nodes;
 
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.RefParent;
 import com.zarbosoft.pidgoon.model.Store;
@@ -36,7 +37,7 @@ public class Sequence extends Node {
       final Store store,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause) {
+      final MismatchCause cause) {
     if (children.isEmpty()) {
       parent.advance(context, store, cause);
     } else {
@@ -59,7 +60,7 @@ public class Sequence extends Node {
     }
 
     @Override
-    public void advance(final Parse step, final Store store, final Object cause) {
+    public void advance(final Parse step, final Store store, final MismatchCause cause) {
       final Store tempStore = store.pop();
       final int nextStep = this.step + 1;
       if (nextStep >= self.children.size()) {

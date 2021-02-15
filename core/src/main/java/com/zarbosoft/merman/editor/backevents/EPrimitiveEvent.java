@@ -20,7 +20,6 @@ public class EPrimitiveEvent implements BackEvent {
 
   @Override
   public String toString() {
-    if (value == null) return "*";
-    return Format.format("\"%s\"", value);
+    return Format.format("PRIMITIVE %s", value == null ? "*" : "\""+value+"\"");
   }
 }

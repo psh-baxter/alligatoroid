@@ -44,27 +44,26 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
     {
       TSMap<String, BackSpec> out = new TSMap<>();
       for (int i = 0; i < config.boilerplate.size(); ++i) {
-        BackSpec b = config.boilerplate.get(i);
-        final BackAtomSpec[] atom = {null};
+        BackSpec boilerplate = config.boilerplate.get(i);
+        final BackAtomSpec[] boilerplateAtom = {null};
         BackSpec.walk(
-            b,
+            boilerplate,
             child -> {
               if (!(child instanceof BackAtomSpec)) return true;
               if (((BackAtomSpec) child).id != null)
                 errors.add(new ArrayBoilerplateAtomIdNotNull(((BackAtomSpec) child).type));
-              if (atom[0] != null) {
-                errors.add(new ArrayMultipleAtoms(this, atom[0], child));
+              if (boilerplateAtom[0] != null) {
+                errors.add(new ArrayMultipleAtoms(this, boilerplateAtom[0], child));
               } else {
-                out.put(((BackAtomSpec) child).type, b);
-                atom[0] = (BackAtomSpec) child;
+                boilerplateAtom[0] = (BackAtomSpec) child;
               }
               return false;
             });
-        if (atom[0] == null) {
+        if (boilerplateAtom[0] == null) {
           errors.add(new ArrayBoilerplateMissingAtom(i));
         } else {
-          if (out.putReplace(atom[0].type, b) != null) {
-            errors.add(new ArrayBoilerplateDuplicateType(atom[0].type));
+          if (out.putReplace(boilerplateAtom[0].type, boilerplate) != null) {
+            errors.add(new ArrayBoilerplateDuplicateType(boilerplateAtom[0].type));
           }
         }
       }
@@ -79,7 +78,7 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
           @Override
           protected StackStore process(StackStore store) {
             final TSList<Atom> temp = new TSList<>();
-            store = store.<String, ValueAtom>popVarDouble((_k, v) -> temp.add(v.data));
+            store = store.<Atom>popVarSingle(v -> temp.add(v));
             temp.reverse();
             return store.stackVarDoubleElement(
                 id, new ValueArray(BaseBackSimpleArraySpec.this, temp));
@@ -91,25 +90,46 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
     s.add(StackStore.prepVarStack)
         .add(
             new Repeat(
-                boilerplate.none()
-                    ? new Reference(type)
-                    : new Union()
-                        .apply(
-                            union -> {
-                              TSSet<String> remaining = new TSSet<>();
-                              for (AtomType core : syntax.splayedTypes.get(type)) {
-                                remaining.add(core.id());
-                              }
-                              for (Map.Entry<String, BackSpec> plated : boilerplate) {
-                                for (AtomType sub : syntax.splayedTypes.get(plated.getKey())) {
-                                  remaining.remove(sub.id());
-                                }
-                                union.add(plated.getValue().buildBackRule(syntax));
-                              }
-                              for (String unplated : remaining) {
-                                union.add(new Reference(unplated));
-                              }
-                            })));
+                new Sequence()
+                    .add(
+                        boilerplate.none()
+                            ? new Reference(type)
+                            : new Union()
+                                .apply(
+                                    union -> {
+                                      TSSet<String> remaining = new TSSet<>();
+                                      for (AtomType core : syntax.splayedTypes.get(type)) {
+                                        remaining.add(core.id());
+                                      }
+                                      for (Map.Entry<String, BackSpec> plated : boilerplate) {
+                                        for (AtomType sub :
+                                            syntax.splayedTypes.get(plated.getKey())) {
+                                          remaining.remove(sub.id());
+                                        }
+                                        union.add(
+                                            new Sequence()
+                                                .add(plated.getValue().buildBackRule(syntax))
+                                                .add(
+                                                    new Operator<StackStore>() {
+                                                      @Override
+                                                      protected StackStore process(
+                                                          StackStore store) {
+                                                        // The inner atom reuses the array counter, reduce for when it's incremented below
+                                                        int counter = store.stackTop();
+                                                        store = store.popStack(); // counter
+                                                        store = store.popStack(); // key
+                                                        ValueAtom inner = store.stackTop();
+                                                        store = store.popStack();
+                                                        // Reset to pre-var-push state, with atom on top
+                                                        return store.pushStack(counter - 1).pushStack(inner.data);
+                                                      }
+                                                    }));
+                                      }
+                                      for (String unplated : remaining) {
+                                        union.add(new Reference(unplated));
+                                      }
+                                    }))
+                    .add(StackStore.pushVarStackSingle)));
   }
 
   @Override

@@ -1,6 +1,7 @@
 package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.BaseParent;
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Parse;
@@ -22,7 +23,7 @@ public class Not extends Node {
       final Store store,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause) {
+      final MismatchCause cause) {
     root.context(context, store.push(), new OperatorParent(parent), seen, cause);
   }
 
@@ -43,12 +44,12 @@ public class Not extends Node {
     }
 
     @Override
-    public void error(final Parse step, final Store store, final Object cause) {
+    public void error(final Parse step, final Store store, final MismatchCause cause) {
       parent.advance(step, store.pop(), cause);
     }
 
     @Override
-    public void advance(final Parse step, Store store, final Object cause) {
+    public void advance(final Parse step, Store store, final MismatchCause cause) {
       store = store.pop();
       super.error(step, store, cause);
     }

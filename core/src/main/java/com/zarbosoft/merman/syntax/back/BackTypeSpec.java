@@ -11,7 +11,7 @@ import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.TypeInvalidAtLocation;
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
+import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
@@ -54,7 +54,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   public Node buildBackRule(final Syntax syntax) {
     return new Sequence()
         .add(
-            new Operator<StackStore>(new ClassEqTerminal(ETypeEvent.class.getName())) {
+            new Operator<StackStore>(new MatchingEventTerminal(new ETypeEvent())) {
               @Override
               protected StackStore process(StackStore store) {
                 return store.stackVarDoubleElement(

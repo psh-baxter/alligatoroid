@@ -23,7 +23,7 @@ public class TSList<T> implements ROList<T> {
   }
 
   public static <T> TSList<T> of(T... values) {
-    return new TSList<>(Arrays.asList(values));
+    return new TSList<>(new ArrayList<>(Arrays.asList(values)));
   }
 
   @Override
@@ -83,15 +83,17 @@ public class TSList<T> implements ROList<T> {
     return values.get(values.size() - i - 1);
   }
 
-  public TSList<T> add(T... val) {
-    for (T t : val) {
-      //noinspection UseBulkOperation
-      values.add(t);
-    }
+  public TSList<T> add(T val) {
+    values.add(val);
     return this;
   }
 
-  public void insert(int offset, T ...val) {
+  public TSList<T> addVar(T... val) {
+    values.addAll(Arrays.asList(val));
+    return this;
+  }
+
+  public void insert(int offset, T... val) {
     values.addAll(offset, Arrays.asList(val));
   }
 

@@ -1,11 +1,12 @@
 package com.zarbosoft.pidgoon.nodes;
 
-import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.model.RefParent;
-import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.BaseParent;
+import com.zarbosoft.pidgoon.model.MismatchCause;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.RefParent;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.rendaw.common.ROMap;
 
 /**
@@ -27,7 +28,7 @@ public class Color extends Node {
       final Store store,
       final Parent parent,
       final ROMap<Object, RefParent> seen,
-      final Object cause) {
+      final MismatchCause cause) {
     Object wasColor = store.color;
     store.color = color;
     child.context(context, store, new ColorParent(parent, wasColor), seen, cause);
@@ -42,7 +43,7 @@ public class Color extends Node {
     }
 
     @Override
-    public void advance(final Parse step, final Store store, final Object cause) {
+    public void advance(final Parse step, final Store store, final MismatchCause cause) {
       store.color = wasColor;
       parent.advance(step, store, cause);
     }

@@ -117,7 +117,7 @@ public class Context {
       I18nEngine i18n) {
     this.serializer = serializer;
     this.i18n = i18n;
-    actions.add(
+    actions.addVar(
         new ActionWindowClear(),
         new ActionWindowTowardsRoot(),
         new ActionWindowTowardsCursor(),

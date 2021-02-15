@@ -11,10 +11,9 @@ import com.zarbosoft.merman.editor.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.RecordDiscardDuplicateKey;
-import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Reference;
-import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Set;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -34,16 +33,6 @@ public class BackFixedRecordSpec extends BackSpec {
    */
   public final ROSet<String> discard;
 
-  public static class Config {
-    public final ROMap<String, BackSpec> pairs;
-    public final ROSet<String> discard;
-
-    public Config(ROMap<String, BackSpec> pairs, ROSet<String> discard) {
-      this.pairs = pairs;
-      this.discard = discard;
-    }
-  }
-
   public BackFixedRecordSpec(Config config) {
     this.pairs = config.pairs;
     this.discard = config.discard;
@@ -59,15 +48,15 @@ public class BackFixedRecordSpec extends BackSpec {
       set.add(
           new Sequence()
               .add(new MatchingEventTerminal(new EKeyEvent(pair.getKey())))
-              .add(pair.getValue().buildBackRule(syntax)));
+              .add(pair.getValue().buildBackRule(syntax)),
+          true);
     }
     for (String key : discard) {
       set.add(
-          new Repeat(
-                  new Sequence()
-                      .add(new MatchingEventTerminal(new EKeyEvent(key)))
-                      .add(new Reference(Syntax.GRAMMAR_WILDCARD_KEY)))
-              .max(1));
+          new Sequence()
+              .add(new MatchingEventTerminal(new EKeyEvent(key)))
+              .add(new Reference(Syntax.GRAMMAR_WILDCARD_KEY)),
+          false);
     }
     sequence.add(set);
     sequence.add(new MatchingEventTerminal(new EObjectCloseEvent()));
@@ -123,5 +112,15 @@ public class BackFixedRecordSpec extends BackSpec {
   @Override
   protected Iterator<BackSpec> walkStep() {
     return pairs.iterValues();
+  }
+
+  public static class Config {
+    public final ROMap<String, BackSpec> pairs;
+    public final ROSet<String> discard;
+
+    public Config(ROMap<String, BackSpec> pairs, ROSet<String> discard) {
+      this.pairs = pairs;
+      this.discard = discard;
+    }
   }
 }

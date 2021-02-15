@@ -1,6 +1,6 @@
 package com.zarbosoft.rendaw.common;
 
-public class Assertion extends RuntimeException {
+public class Assertion extends Error {
 
   public Assertion(final String message) {
     super(message);

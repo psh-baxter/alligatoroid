@@ -7,7 +7,7 @@ import com.zarbosoft.merman.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.events.nodes.ClassEqTerminal;
+import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.rendaw.common.TSList;
@@ -28,7 +28,7 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
 
   @Override
   public Node buildBackRule(final Syntax syntax) {
-    return new Operator<StackStore>(new ClassEqTerminal(JSpecialPrimitiveEvent.class.getName())) {
+    return new Operator<StackStore>(new MatchingEventTerminal(new JSpecialPrimitiveEvent())) {
       @Override
       protected StackStore process(StackStore store) {
         return store.stackVarDoubleElement(

@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.webview.display;
 
 import com.zarbosoft.merman.editor.display.Font;
-import com.zarbosoft.merman.webview.compat.TextMetrics2;
+import com.zarbosoft.merman.webview.compat.TextMetrics;
 import com.zarbosoft.rendaw.common.Format;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
@@ -16,7 +16,7 @@ public class JSFont implements Font {
   public JSFont(String name, int size) {
     this.name = name;
     this.size = size;
-    TextMetrics2 basis = measure("W");
+    TextMetrics basis = measure("W");
     ascent = basis.fontBoundingBoxAscent;
     descent = basis.fontBoundingBoxDescent;
   }
@@ -25,13 +25,13 @@ public class JSFont implements Font {
     return Format.format("%s %spt", name, size);
   }
 
-  public TextMetrics2 measure(String text) {
+  public TextMetrics measure(String text) {
     CanvasRenderingContext2D context =
         (CanvasRenderingContext2D)
             (Object)
                 ((HTMLCanvasElement) DomGlobal.document.createElement("canvas")).getContext("2d");
     context.font = cssString();
-    return (TextMetrics2) (Object) context.measureText(text);
+    return (TextMetrics) context.measureText(text);
   }
 
   @Override

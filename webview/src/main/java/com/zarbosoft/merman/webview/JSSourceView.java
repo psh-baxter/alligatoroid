@@ -4,8 +4,10 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
+import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.webview.display.JSDisplay;
+import com.zarbosoft.rendaw.common.ROList;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLDivElement;
 
@@ -18,9 +20,10 @@ public class JSSourceView {
   private Double iterationTimer = null;
   private IterationContext iterationContext = null;
 
-  public JSSourceView(Syntax syntax, I18nEngine i18n, String rawDoc) {
+  public JSSourceView(
+      Syntax syntax, I18nEngine i18n, String rawDoc, ROList<String> prioritizeKeys) {
     element = (HTMLDivElement) DomGlobal.document.createElement("div");
-    JSSerializer serializer = new JSSerializer(syntax.backType);
+    JSSerializer serializer = new JSSerializer(syntax.backType, prioritizeKeys);
     new Context(
         new Context.InitialConfig(),
         syntax,
