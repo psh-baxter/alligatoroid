@@ -15,7 +15,7 @@ public class TypeBuilder {
   private final String humanName;
   private int depthScore = 1;
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
-  private int precedence = 0;
+  private int precedence = Integer.MAX_VALUE;
   private boolean associateForward = false;
   private int autoChooseAmbiguity = 1;
 
@@ -31,6 +31,16 @@ public class TypeBuilder {
 
   public TypeBuilder front(FrontSpec spec) {
     front.add(spec);
+    return this;
+  }
+
+  public TypeBuilder precedence(int precedence) {
+    this.precedence = precedence;
+    return this;
+  }
+
+  public TypeBuilder associateForward() {
+    this.associateForward = true;
     return this;
   }
 

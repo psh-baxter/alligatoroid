@@ -6,7 +6,6 @@ import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.BackType;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
 import com.zarbosoft.merman.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.syntax.back.BackAtomSpec;
@@ -34,6 +33,7 @@ import com.zarbosoft.merman.syntax.primitivepattern.PatternSequence;
 import com.zarbosoft.merman.syntax.primitivepattern.PatternString;
 import com.zarbosoft.merman.syntax.primitivepattern.PatternUnion;
 import com.zarbosoft.merman.syntax.primitivepattern.Repeat1;
+import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
@@ -49,6 +49,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 import elemental2.dom.DomGlobal;
+import elemental2.dom.HTMLStyleElement;
 import jsinterop.annotations.JsMethod;
 
 public class Main {
@@ -415,6 +416,27 @@ public class Main {
           + "  \"sourceType\": \"script\"\n"
           + "}\n";
 
+  public static final String style =
+      ".merman-block-view-container {\n"
+          + "    width: 100%;\n"
+          + "    min-width: 10em;\n"
+          + "    height: 100%;\n"
+          + "    min-height: 1em;\n"
+          + "    margin: 0;\n"
+          + "    padding: 0;\n"
+          + "    position: relative;\n"
+          + "}\n"
+          + ".merman-display {\n"
+          + "    position: absolute;\n"
+          + "}\n"
+          + ".merman-display-blank {}\n"
+          + ".merman-display-img {}\n"
+          + ".merman-display-drawing {}\n"
+          + ".merman-display-group {}\n"
+          + ".merman-display-text {\n"
+          + "    white-space: pre;\n"
+          + "}\n";
+
   public static final int indentPx = 16;
   public static final int spacePx = 4;
 
@@ -444,24 +466,28 @@ public class Main {
   public static final String addEqualOperatorType = "add_equal";
   public static final String tripleEqualOperatorType = "triple_equal";
 
-  public static final String breakPrefixTag = "es_break";
-  public static final FrontSymbol breakPrefix =
+  public static final String tagCompactIndent = "es_compact_indent";
+  public static final FrontSymbol prefixCompactIndent =
       new FrontSymbol(
-          new FrontSymbol.Config(new SymbolSpaceSpec(), null, "", TSSet.of(breakPrefixTag).ro()));
-  public static final String closeBreakPrefixTag = "es_close_break";
-  public static final FrontSymbol closeBreakPrefix =
-      new FrontSymbol(
-          new FrontSymbol.Config(
-              new SymbolSpaceSpec(), null, "", TSSet.of(closeBreakPrefixTag).ro()));
-  private static final String spaceBreakPrefixTag = "es_space_break";
-  public static final FrontSymbol spaceBreakPrefix =
-      new FrontSymbol(
-          new FrontSymbol.Config(
-              new SymbolSpaceSpec(), null, "", TSSet.of(spaceBreakPrefixTag).ro()));
-  private static final String spaceTag = "es_space";
-  public static final FrontSymbol space =
-      new FrontSymbol(
-          new FrontSymbol.Config(new SymbolSpaceSpec(), null, "", TSSet.of(spaceTag).ro()));
+          new FrontSymbol.Config(new SymbolSpaceSpec(), null, "", TSSet.of(tagCompactIndent).ro()));
+  public static final Style.Spec styleCompactIndent =
+      new StyleBuilder()
+          .with(tagCompactIndent)
+          .with(Tags.TAG_COMPACT)
+          .split()
+          .align(indentAlign)
+          .build();
+
+  public static final String tagCompactBase = "es_compact_base";
+  public static final Style.Spec styleCompactBase =
+      new StyleBuilder()
+          .with(tagCompactBase)
+          .with(Tags.TAG_COMPACT)
+          .split()
+          .align(baseAlign)
+          .build();
+
+  public static final FrontSymbol space = text(" ");
 
   @JsMethod
   public static void main() {
@@ -479,8 +505,6 @@ public class Main {
                       new FrontSymbol.Config(
                           new SymbolSpaceSpec(), null, "", TSSet.of("break").ro())))
               .build();
-      AlignmentSpec blockAlignment =
-          new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(baseAlign, indentPx, true));
       BackArraySpec statementBackArray =
           new BackArraySpec(
               new BaseBackSimpleArraySpec.Config(
@@ -497,21 +521,24 @@ public class Main {
 
       TSList<AtomType> types =
           TSList.of(
-              new TypeBuilder(blockType, "Block")
+              estreeTypeBuilder(blockType, "Block")
                   .back(
                       estreeBackBuilder()
                           .field("type", new BackFixedPrimitiveSpec("BlockStatement"))
                           .field("body", statementBackArray)
                           .build())
-                  .alignment(baseAlign, blockAlignment)
-                  .front(text("{"))
-                  .front(new FrontArraySpecBuilder("statements").prefix(spaceBreakPrefix).build())
-                  .front(closeBreakPrefix)
-                  .front(text("}"))
+                  .front(text("{ "))
+                  .front(
+                      new FrontArraySpecBuilder("statements")
+                          .prefix(prefixCompactIndent)
+                          .suffix(text("; "))
+                          .build())
+                  .front(text("}", tagCompactBase))
+                  .precedence(0)
                   .build(),
               //
               /// Declaration
-              new TypeBuilder(letType, "Declare - let (outer)")
+              estreeTypeBuilder(letType, "Declare - let (outer)")
                   .back(
                       estreeBackBuilder()
                           .field("type", new BackFixedPrimitiveSpec("VariableDeclaration"))
@@ -522,13 +549,15 @@ public class Main {
                                   new BaseBackSimpleArraySpec.Config(
                                       "declarations", declareInner, new TSList<>())))
                           .build())
+                  .front(text("let "))
                   .front(
                       new FrontArraySpecBuilder("declarations")
-                          .separator(text(","))
-                          .separator(spaceBreakPrefix)
+                          .prefix(prefixCompactIndent)
+                          .separator(text(", "))
                           .build())
+                  .precedence(10)
                   .build(),
-              new TypeBuilder(declareInner, "Declare (inner)")
+              estreeTypeBuilder(declareInner, "Declare (inner)")
                   .back(
                       estreeBackBuilder()
                           .field("type", new BackFixedPrimitiveSpec("VariableDeclarator"))
@@ -539,18 +568,16 @@ public class Main {
                                   new BaseBackAtomSpec.Config("init", expresisonGroupType)))
                           .build())
                   .front(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config("id", ROSet.empty)))
-                  .front(space)
-                  .front(text("="))
-                  .front(spaceBreakPrefix)
+                  .front(text(" = "))
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("init")))
                   .build(),
               //
               /// Access
-              new TypeBuilder(identifierType, "Identifier")
+              estreeTypeBuilder(identifierType, "Identifier")
                   .back(identifierBack(i18n, "name"))
                   .front(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config("name", ROSet.empty)))
                   .build(),
-              new TypeBuilder(memberType, "Member")
+              estreeTypeBuilder(memberType, "Member")
                   .back(
                       estreeBackBuilder()
                           .field("type", new BackFixedPrimitiveSpec("MemberExpression"))
@@ -563,15 +590,15 @@ public class Main {
                           .field("optional", new BackFixedJSONSpecialPrimitiveSpec("false"))
                           .build())
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("object")))
-                  .front(text("."))
-                  .front(breakPrefix)
+                  .front(text(".", tagCompactIndent))
                   .front(
                       new FrontPrimitiveSpec(
                           new FrontPrimitiveSpec.Config("property", ROSet.empty)))
+                  .precedence(200)
                   .build(),
               //
               /// Literal
-              new TypeBuilder(symbolLiteralType, "Symbol literal")
+              estreeTypeBuilder(symbolLiteralType, "Symbol literal")
                   .back(
                       estreeBackBuilder()
                           .field("type", new BackFixedPrimitiveSpec("Literal"))
@@ -591,7 +618,7 @@ public class Main {
                   .front(
                       new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config("value", ROSet.empty)))
                   .build(),
-              new TypeBuilder(stringLiteralType, "String literal")
+              estreeTypeBuilder(stringLiteralType, "String literal")
                   .back(
                       estreeBackBuilder()
                           .field("type", new BackFixedPrimitiveSpec("Literal"))
@@ -607,7 +634,7 @@ public class Main {
                   .build(),
               //
               /// Control
-              new TypeBuilder(forType, "For")
+              estreeTypeBuilder(forType, "For")
                   .back(
                       estreeBackBuilder()
                           .field("type", new BackFixedPrimitiveSpec("ForStatement"))
@@ -629,19 +656,19 @@ public class Main {
                                   new BaseBackAtomSpec.Config("body", statementGroupType)))
                           .build())
                   .front(text("for ("))
-                  .front(breakPrefix)
+                  .front(prefixCompactIndent)
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("init")))
-                  .front(text(";"))
-                  .front(spaceBreakPrefix)
+                  .front(text("; "))
+                  .front(prefixCompactIndent)
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("test")))
-                  .front(text(";"))
-                  .front(spaceBreakPrefix)
+                  .front(text("; "))
+                  .front(prefixCompactIndent)
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("update")))
-                  .front(text(")"))
-                  .front(space)
+                  .front(text(") ", tagCompactBase))
+                  .front(prefixCompactIndent)
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("body")))
                   .build(),
-              new TypeBuilder(ifType, "If")
+              estreeTypeBuilder(ifType, "If")
                   .back(
                       estreeBackBuilder()
                           .field("type", new BackFixedPrimitiveSpec("IfStatement"))
@@ -657,46 +684,52 @@ public class Main {
                           .build())
                   .front(text("if ("))
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("test")))
-                  .front(text(")"))
-                  .front(spaceBreakPrefix)
+                  .front(text(") "))
+                  .front(prefixCompactIndent)
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("consequent")))
                   .build(),
               //
               /// Operators
-              prefixOperator(preincrementOperatorType, "++", "UpdateExpression", accessGroupType),
+              prefixOperator(
+                  preincrementOperatorType, "++", 170, "UpdateExpression", accessGroupType),
               binaryOperator(
                   addOperatorType,
                   "+",
+                  140,
                   "BinaryExpression",
                   expresisonGroupType,
                   expresisonGroupType),
               binaryOperator(
                   lessThanEqualOperatorType,
                   "<=",
+                  120,
                   "BinaryExpression",
                   expresisonGroupType,
                   expresisonGroupType),
               binaryOperator(
                   moduloOperatorType,
                   "%",
+                  150,
                   "BinaryExpression",
                   expresisonGroupType,
                   expresisonGroupType),
               binaryOperator(
                   addEqualOperatorType,
                   "+=",
+                  30,
                   "AssignmentExpression",
                   accessGroupType,
                   expresisonGroupType),
               binaryOperator(
                   tripleEqualOperatorType,
                   "===",
+                  110,
                   "BinaryExpression",
                   expresisonGroupType,
                   expresisonGroupType),
               //
               /// Other expressions
-              new TypeBuilder(callType, "Call")
+              estreeTypeBuilder(callType, "Call")
                   .back(
                       estreeBackBuilder()
                           .field("type", new BackFixedPrimitiveSpec("CallExpression"))
@@ -715,11 +748,11 @@ public class Main {
                   .front(text("("))
                   .front(
                       new FrontArraySpecBuilder("arguments")
-                          .prefix(breakPrefix)
+                          .prefix(prefixCompactIndent)
                           .separator(text(", "))
                           .build())
-                  .front(closeBreakPrefix)
-                  .front(text(")"))
+                  .front(text(")", tagCompactBase))
+                  .precedence(0)
                   .build());
       TSMap<String, ROList<String>> groups =
           new TSMap<>(
@@ -758,34 +791,19 @@ public class Main {
                           .field("sourceType", new BackFixedPrimitiveSpec("script"))
                           .field("body", statementBackArray)
                           .build())
-                  .alignment(baseAlign, blockAlignment)
                   .front(statementsFront)
                   .build());
       syntaxConfig.backType = BackType.JSON;
-      syntaxConfig.styles =
-          TSList.of(
-              new StyleBuilder().with(breakPrefixTag).with(Tags.TAG_COMPACT).split().build(),
-              new StyleBuilder()
-                  .with(closeBreakPrefixTag)
-                  .with(Tags.TAG_COMPACT)
-                  .split()
-                  .align(baseAlign)
-                  .build(),
-              new StyleBuilder()
-                  .with(spaceBreakPrefixTag)
-                  .without(Tags.TAG_COMPACT)
-                  .space(spacePx)
-                  .build(),
-              new StyleBuilder()
-                  .with(spaceBreakPrefixTag)
-                  .with(Tags.TAG_COMPACT)
-                  .split()
-                  .align(indentAlign)
-                  .split()
-                  .build(),
-              new StyleBuilder().with(spaceTag).space(spacePx).build());
+      syntaxConfig.styles = TSList.of(styleCompactBase, styleCompactIndent);
+
+      HTMLStyleElement style = (HTMLStyleElement) DomGlobal.document.createElement("style");
+      style.textContent = Main.style;
+      DomGlobal.document.head.appendChild(style);
+
       DomGlobal.document.body.appendChild(
-          new JSSourceView(new Syntax(syntaxConfig), i18n, rawDoc, TSList.of("type", "operator", "kind")).element);
+          new JSSourceViewBlock(
+                  new Syntax(syntaxConfig), i18n, rawDoc, TSList.of("type", "operator", "kind"))
+              .element);
     } catch (GrammarTooUncertain e) {
       StringBuilder message = new StringBuilder();
       for (Parse.State leaf : e.context.leaves) {
@@ -809,9 +827,26 @@ public class Main {
     }
   }
 
+  public static TypeBuilder estreeTypeBuilder(String callType, String call) {
+    return new TypeBuilder(callType, call)
+        .alignment(
+            baseAlign,
+            new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(indentAlign, 0, false)))
+        .alignment(
+            indentAlign,
+            new RelativeAlignmentSpec(
+                new RelativeAlignmentSpec.Config(indentAlign, indentPx, true)));
+  }
+
   private static FreeAtomType binaryOperator(
-      String id, String symbol, String esType, String leftChildType, String rightChildType) {
-    return new TypeBuilder(id, symbol + " operator")
+      String id,
+      String symbol,
+      int precedence,
+      String esType,
+      String leftChildType,
+      String rightChildType) {
+    return estreeTypeBuilder(id, symbol + " operator")
+        .precedence(precedence)
         .back(
             estreeBackBuilder()
                 .field("type", new BackFixedPrimitiveSpec(esType))
@@ -822,15 +857,19 @@ public class Main {
                 .build())
         .front(new FrontAtomSpec(new FrontAtomSpec.Config("left")))
         .front(space)
-        .front(text(symbol))
-        .front(spaceBreakPrefix)
+        .front(
+            new FrontSymbol(
+                new FrontSymbol.Config(
+                    new SymbolTextSpec(symbol + " "), null, "", TSSet.of(tagCompactIndent).ro())))
         .front(new FrontAtomSpec(new FrontAtomSpec.Config("right")))
         .build();
   }
 
   private static FreeAtomType prefixOperator(
-      String id, String symbol, String esType, String childType) {
-    return new TypeBuilder(id, symbol + " operator")
+      String id, String symbol, int precedence, String esType, String childType) {
+    return estreeTypeBuilder(id, symbol + " operator")
+        .precedence(precedence)
+        .associateForward()
         .back(
             estreeBackBuilder()
                 .field("type", new BackFixedPrimitiveSpec(esType))
@@ -873,8 +912,9 @@ public class Main {
         .build();
   }
 
-  private static FrontSymbol text(String text) {
-    return new FrontSymbol(new FrontSymbol.Config(new SymbolTextSpec(text), null, "", ROSet.empty));
+  private static FrontSymbol text(String text, String... tags) {
+    return new FrontSymbol(
+        new FrontSymbol.Config(new SymbolTextSpec(text), null, "", TSSet.of(tags).ro()));
   }
 
   private static BackFixedRecordSpecBuilder estreeBackBuilder() {

@@ -1278,8 +1278,9 @@ public class JSDisplay extends Display {
 
   @Override
   public void add(int index, DisplayNode node) {
-    if (index < base.childNodes.length) base.appendChild(((JSDisplayNode) node).js());
-    else base.insertBefore(((JSDisplayNode) node).js(), base.childNodes.getAt(index));
+    if (index < base.childNodes.length)
+      base.insertBefore(((JSDisplayNode) node).js(), base.childNodes.getAt(index));
+    else base.appendChild(((JSDisplayNode) node).js());
   }
 
   @Override

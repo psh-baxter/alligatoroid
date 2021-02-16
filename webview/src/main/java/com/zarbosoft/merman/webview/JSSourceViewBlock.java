@@ -8,21 +8,23 @@ import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.webview.display.JSDisplay;
 import com.zarbosoft.rendaw.common.ROList;
+import elemental2.dom.CSSProperties;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLDivElement;
 
 import java.util.PriorityQueue;
 
-public class JSSourceView {
+public class JSSourceViewBlock {
   public final HTMLDivElement element;
   private final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
   private boolean iterationPending = false;
   private Double iterationTimer = null;
   private IterationContext iterationContext = null;
 
-  public JSSourceView(
+  public JSSourceViewBlock(
       Syntax syntax, I18nEngine i18n, String rawDoc, ROList<String> prioritizeKeys) {
     element = (HTMLDivElement) DomGlobal.document.createElement("div");
+    element.classList.add("merman-block-view-container");
     JSSerializer serializer = new JSSerializer(syntax.backType, prioritizeKeys);
     new Context(
         new Context.InitialConfig(),

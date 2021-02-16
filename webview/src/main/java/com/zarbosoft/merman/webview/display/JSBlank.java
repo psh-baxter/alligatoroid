@@ -14,7 +14,7 @@ public class JSBlank extends JSDisplayNode implements Blank {
   protected JSBlank(JSDisplay display) {
     super(display);
     element = (HTMLDivElement) DomGlobal.document.createElement("div");
-    element.classList.add("merman-display-blank");
+    element.classList.add("merman-display-blank", "merman-display");
   }
 
   @Override

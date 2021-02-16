@@ -31,7 +31,6 @@ public class Course {
           .build();
   private static final Comparator<VisualAtom> expandComparator = compactComparator.reversed();
   final Group visual;
-  final Group brickVisual;
   public int index;
   public Wall parent;
   public int transverseStart;
@@ -47,8 +46,6 @@ public class Course {
 
   Course(final Context context, final int transverseStart) {
     visual = context.display.group();
-    brickVisual = context.display.group();
-    visual.add(0, brickVisual);
     this.transverseStart = transverseStart;
     visual.setTransverse(transverseStart);
   }
@@ -251,7 +248,6 @@ public class Course {
   }
 
   class IterationPlaceTask extends IterationTask {
-
     private final Context context;
     TSSet<Brick> changed = new TSSet<>();
     int removeMaxAscent = 0;
@@ -314,20 +310,21 @@ public class Course {
       for (int index = 0; index < children.size(); ++index) {
         final Brick brick = children.get(index);
         final Brick.Properties properties = brick.properties(context);
+        if (calcContext.alignment == null && properties.alignment != null) {
+          if (alignment != null) alignment.removeBrick(context, alignmentBrick);
+          alignment = properties.alignment;
+          alignmentBrick = brick;
+          alignment.addBrick(context, alignmentBrick);
+          alignment.feedback(context, calcContext.converse);
+        }
         ROPair<Integer, Integer> brickPlacement =
             calculateNextBrickAdvance(calcContext, brick, properties);
         brick.setConverse(context, brickPlacement.second, brickPlacement.first);
         for (final Attachment attachment : brick.getAttachments())
           attachment.setConverse(context, brickPlacement.first);
       }
-      if (calcContext.alignment != alignment) {
+      if (calcContext.alignment == null && alignment != null) {
         if (alignment != null) alignment.removeBrick(context, alignmentBrick);
-        alignment = calcContext.alignment;
-        alignmentBrick = calcContext.alignedBrick;
-        if (alignment != null) alignment.addBrick(context, alignmentBrick);
-      }
-      if (alignment != null) {
-        alignment.feedback(context, alignmentBrick.getPreAlignConverse());
       }
       if (calcContext.converse > context.edge) getIdleCompact(context);
       if (calcContext.converse * context.retryExpandFactor < lastExpandCheckConverse)

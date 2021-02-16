@@ -140,9 +140,9 @@ public class TSList<T> implements ROList<T> {
 
   public void reverse() {
     for (int i = 0; i < values.size() / 2; ++i) {
-      T t = values.get(0);
+      T t = values.get(i);
       int ri = values.size() - i - 1;
-      values.set(0, values.get(ri));
+      values.set(i, values.get(ri));
       values.set(ri, t);
     }
   }

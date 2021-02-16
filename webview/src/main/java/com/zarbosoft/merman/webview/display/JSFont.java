@@ -14,7 +14,7 @@ public class JSFont implements Font {
   private final double descent;
 
   public JSFont(String name, int size) {
-    this.name = name;
+    this.name = name == null ? "monospace" : name;
     this.size = size;
     TextMetrics basis = measure("W");
     ascent = basis.fontBoundingBoxAscent;
@@ -22,7 +22,7 @@ public class JSFont implements Font {
   }
 
   public String cssString() {
-    return Format.format("%s %spt", name, size);
+    return Format.format("%spx %s", size, name);
   }
 
   public TextMetrics measure(String text) {
@@ -30,8 +30,9 @@ public class JSFont implements Font {
         (CanvasRenderingContext2D)
             (Object)
                 ((HTMLCanvasElement) DomGlobal.document.createElement("canvas")).getContext("2d");
-    context.font = cssString();
-    return (TextMetrics) context.measureText(text);
+    context.setFont(cssString());
+    TextMetrics out = (TextMetrics) context.measureText(text);
+    return out;
   }
 
   @Override

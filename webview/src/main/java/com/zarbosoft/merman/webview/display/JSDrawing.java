@@ -6,6 +6,7 @@ import com.zarbosoft.merman.editor.display.Drawing;
 import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.ModelColor;
+import elemental2.core.JsObject;
 import elemental2.dom.BaseRenderingContext2D;
 import elemental2.dom.CSSProperties;
 import elemental2.dom.CanvasRenderingContext2D;
@@ -20,11 +21,14 @@ public class JSDrawing extends JSDisplayNode implements Drawing {
   protected JSDrawing(JSDisplay display) {
     super(display);
     element = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
-    element.classList.add("merman-display-drawing");
+    element.classList.add("merman-display-drawing", "merman-display");
   }
 
   @Override
-  public void clear() {}
+  public void clear() {
+    CanvasRenderingContext2D ctx = (CanvasRenderingContext2D)(Object)element.getContext("2d");
+    ctx.clearRect(0, 0, element.width, element.height);
+  }
 
   @Override
   public void resize(Context context, Vector vector) {

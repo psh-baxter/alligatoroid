@@ -16,7 +16,7 @@ public class JSText extends JSDisplayNode implements Text {
   protected JSText(JSDisplay display) {
     super(display);
     element = (HTMLDivElement) DomGlobal.document.createElement("div");
-    element.classList.add("merman-display-text");
+    element.classList.add("merman-display-text", "merman-display");
   }
 
   @Override
@@ -44,7 +44,7 @@ public class JSText extends JSDisplayNode implements Text {
   public void setFont(Context context, Font font) {
     this.font = (JSFont) font;
     element.style.fontFamily = this.font.name;
-    element.style.fontSize = CSSProperties.FontSizeUnionType.of(this.font.size + "pt");
+    element.style.fontSize = CSSProperties.FontSizeUnionType.of(this.font.size + "px");
     fixPosition();
   }
 
