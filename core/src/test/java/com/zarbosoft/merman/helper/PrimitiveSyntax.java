@@ -1,8 +1,10 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
 
 public class PrimitiveSyntax {
   public static final FreeAtomType primitive;
@@ -61,13 +63,10 @@ public class PrimitiveSyntax {
                     .type(quoted)
                     .type(array)
                     .build())
-            .style(
-                new StyleBuilder()
-                    .tag(Tags.TAG_COMPACT)
-                    .tag("split")
-                    .split(true)
-                    .build())
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
+            .addRootFrontPrefix(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
   }
 }

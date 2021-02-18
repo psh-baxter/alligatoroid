@@ -14,8 +14,6 @@ import com.zarbosoft.merman.editor.serialization.Serializer;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
@@ -24,10 +22,7 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROSet;
-import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.ArrayList;
@@ -54,14 +49,14 @@ public class Context {
   // State
   public final TSSet<SelectionListener> cursorListeners = new TSSet<>();
   public final TSSet<HoverListener> hoverListeners = new TSSet<>();
+  // Settings
+  public final DelayEngine delayEngine;
+  public final Style cursorStyle;
+  public final Style hoverStyle;
   private final TSSet<TagsListener> selectionTagsChangeListeners = new TSSet<>();
   private final TSSet<TagsListener> globalTagsChangeListeners = new TSSet<>();
   private final TSSet<ActionChangeListener> actionChangeListeners = new TSSet<>();
   private final TSList<Action> actions = new TSList<>();
-  private final TSSet<String> globalTags = new TSSet<String>();
-
-  // Settings
-  public final DelayEngine delayEngine;
   private final Consumer<IterationTask> addIteration;
   private final Consumer<Integer> flushIteration;
   public boolean animateCoursePlacement;
@@ -91,7 +86,6 @@ public class Context {
   public Hoverable hover;
   public HoverIteration hoverIdle;
   public Cursor cursor;
-  TSMap<ROSet<String>, Style> styleCache = new TSMap<>();
   List<ContextIntListener> converseEdgeListeners = new ArrayList<>();
   List<ContextIntListener> transverseEdgeListeners = new ArrayList<>();
   int scrollStart;
@@ -137,6 +131,8 @@ public class Context {
     this.scrollFactor = config.scrollFactor;
     this.scrollAlotFactor = config.scrollAlotFactor;
     this.delayEngine = delayEngine;
+    this.cursorStyle = config.cursorStyle.create();
+    this.hoverStyle = config.hoverStyle.create();
     display.setBackgroundColor(syntax.background);
     edge = display.edge();
     transverseEdge = display.transverseEdge();
@@ -150,8 +146,8 @@ public class Context {
     display.add(overlay);
     this.addIteration = addIteration;
     this.flushIteration = flushIteration;
-    banner = new Banner(this);
-    details = new Details(this);
+    banner = new Banner(this, config.bannerStyle.create());
+    details = new Details(this, config.detailsStyle.create());
     this.clipboardEngine = clipboardEngine;
     display.addConverseEdgeListener(
         (oldValue, newValue) -> {
@@ -531,9 +527,6 @@ public class Context {
     window = false;
     windowAtom = document.root;
     document.root.ensureVisual(this, null, 0, 0);
-    changeGlobalTags(
-        new TagsChange(
-            TSSet.of(), TSSet.of(Tags.TAG_GLOBAL_WINDOWED, Tags.TAG_GLOBAL_ROOT_WINDOW)));
   }
 
   /**
@@ -543,18 +536,10 @@ public class Context {
    */
   private void windowToNonSupertree(Atom tree) {
     window = true;
-    boolean wasRoot = windowAtom == document.root;
     final Visual oldWindow = windowAtom.visual;
     windowAtom = tree;
     Visual windowVisual = windowAtom.ensureVisual(this, null, 0, 0);
     oldWindow.uproot(this, windowVisual);
-    if (wasRoot) {
-      changeGlobalTags(
-          new TagsChange(TSSet.of(Tags.TAG_GLOBAL_WINDOWED, Tags.TAG_GLOBAL_WINDOWED), TSSet.of()));
-    } else {
-      changeGlobalTags(
-          new TagsChange(TSSet.of(Tags.TAG_GLOBAL_WINDOWED), TSSet.of(Tags.TAG_GLOBAL_WINDOWED)));
-    }
   }
 
   /**
@@ -566,11 +551,6 @@ public class Context {
     window = true;
     windowAtom = supertree;
     windowAtom.ensureVisual(this, null, 0, 0);
-    if (supertree == document.root)
-      changeGlobalTags(
-          new TagsChange(
-              TSSet.of(Tags.TAG_GLOBAL_WINDOWED, Tags.TAG_GLOBAL_ROOT_WINDOW), TSSet.of()));
-    else changeGlobalTags(new TagsChange(TSSet.of(Tags.TAG_GLOBAL_WINDOWED), TSSet.of()));
   }
 
   public boolean isSubtree(Atom subtree, Atom supertree) {
@@ -588,16 +568,6 @@ public class Context {
       windowToSupertree(atom);
     } else {
       windowToNonSupertree(atom);
-    }
-  }
-
-  public void changeGlobalTags(final TagsChange change) {
-    if (!change.apply(globalTags)) return;
-    banner.tagsChanged(this);
-    details.tagsChanged(this);
-    windowAtom.visual.tagsChanged(this);
-    for (TagsListener l : globalTagsChangeListeners.copy()) {
-      l.tagsChanged(this);
     }
   }
 
@@ -622,34 +592,7 @@ public class Context {
     for (SelectionListener l : cursorListeners.copy()) {
       l.cursorChanged(this, cursor);
     }
-    selectionTagsChanged();
     triggerIdleLayBricksOutward();
-  }
-
-  public void selectionTagsChanged() {
-    if (cursor == null) return;
-    banner.tagsChanged(this);
-    details.tagsChanged(this);
-    for (TagsListener l : selectionTagsChangeListeners.copy()) {
-      l.tagsChanged(this);
-    }
-  }
-
-  public Style getStyle(final ROSet<String> tags) {
-    return styleCache.getCreate(
-        tags.own(),
-        () -> {
-          TSList<Style.Spec> toMerge = new TSList<Style.Spec>();
-          for (final Style.Spec spec : syntax.styles) {
-            if (!tags.containsAll(spec.with) || tags.intersect(spec.without).some()) continue;
-            toMerge.add(spec);
-          }
-          return Style.create(toMerge);
-        });
-  }
-
-  public ROSetRef<String> getGlobalTags() {
-    return globalTags;
   }
 
   public Atom windowAtom() {
@@ -681,6 +624,10 @@ public class Context {
   }
 
   public static class InitialConfig {
+    public final Style.Config cursorStyle = new Style.Config();
+    public final Style.Config hoverStyle = new Style.Config();
+    public final Style.Config bannerStyle = new Style.Config();
+    public final Style.Config detailsStyle = new Style.Config();
     public boolean animateCoursePlacement = false;
     public boolean animateDetails = false;
     public int ellipsizeThreshold = Integer.MAX_VALUE;

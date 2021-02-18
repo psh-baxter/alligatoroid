@@ -16,16 +16,6 @@ public abstract class Cursor {
 
   public abstract Path getSyntaxPath();
 
-  public void tagsChanged(final Context context) {
-    context.selectionTagsChanged();
-  }
-
-  public Style getBorderStyle(final Context context) {
-    return context.getStyle(getTags(context));
-  }
-
-  public abstract ROSet<String> getTags(Context context);
-
   public interface Dispatcher {
 
     void handle(VisualFrontArray.ArrayCursor cursor);

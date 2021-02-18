@@ -9,9 +9,5 @@ import com.zarbosoft.merman.syntax.style.Style;
 public abstract class Symbol {
   public abstract DisplayNode createDisplay(Context context);
 
-  public abstract void style(Context context, DisplayNode node, Style style);
-
   public abstract Brick createBrick(Context context, BrickInterface inter);
-
-  public abstract String partTag();
 }

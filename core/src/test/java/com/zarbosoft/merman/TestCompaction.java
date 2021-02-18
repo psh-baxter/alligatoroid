@@ -1,123 +1,110 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
-import com.zarbosoft.merman.helper.FrontDataPrimitiveBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
-import com.zarbosoft.merman.helper.FrontSpaceBuilder;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
-import com.zarbosoft.merman.helper.StyleBuilder;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
 import org.junit.Test;
 
+import static com.zarbosoft.merman.syntax.style.Style.SplitMode.COMPACT;
+
 public class TestCompaction {
-  public static final FreeAtomType one;
-  public static final FreeAtomType initialSplitOne;
-  public static final FreeAtomType text;
-  public static final FreeAtomType comboText;
-  public static final FreeAtomType initialSplitText;
-  public static final FreeAtomType infinity;
-  public static final FreeAtomType line;
-  public static final FreeAtomType low;
-  public static final FreeAtomType unary;
-  public static final FreeAtomType mid;
-  public static final FreeAtomType high;
-  public static final Syntax syntax;
-
-  public static class GeneralTestWizard extends com.zarbosoft.merman.helper.GeneralTestWizard {
-    public GeneralTestWizard(Syntax syntax, Atom... atoms) {
-      super(syntax, atoms);
-      this.inner.context.ellipsizeThreshold = 2;
-    }
-  }
-
-  static {
-    infinity =
-        new TypeBuilder("infinity")
+  @Test
+  public void testSplitOnResize() {
+    final FreeAtomType infinity = new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
             .front(new FrontMarkBuilder("infinity").build())
             .build();
-    one =
-        new TypeBuilder("one")
+    final FreeAtomType one = new TypeBuilder("one")
             .back(Helper.buildBackPrimitive("one"))
             .front(new FrontMarkBuilder("one").build())
             .build();
-    initialSplitOne =
-        new TypeBuilder("splitOne")
+    final FreeAtomType initialSplitOne = new TypeBuilder("splitOne")
             .back(Helper.buildBackPrimitive("one"))
-            .front(new FrontMarkBuilder("one").tag("split").build())
+            .front(new FrontMarkBuilder("one").split(COMPACT).build())
             .build();
-    text =
-        new TypeBuilder("text")
+    final FreeAtomType text = new TypeBuilder("text")
             .back(Helper.buildBackDataPrimitive("value"))
             .frontDataPrimitive("value")
             .build();
-    comboText =
-        new TypeBuilder("comboText")
+    final FreeAtomType comboText = new TypeBuilder("comboText")
             .back(Helper.buildBackDataPrimitive("value"))
             .frontDataPrimitive("value")
             .frontMark("123")
             .build();
-    initialSplitText =
-        new TypeBuilder("splitText")
+    final FreeAtomType initialSplitText = new TypeBuilder("splitText")
             .back(Helper.buildBackDataPrimitive("value"))
-            .front(new FrontDataPrimitiveBuilder("value").tag("split").build())
+            .front(
+                    new FrontPrimitiveSpec(
+                            new FrontPrimitiveSpec.Config("value").splitMode(COMPACT)))
             .build();
-    line =
-        new TypeBuilder("line")
+    final FreeAtomType line = new TypeBuilder("line")
             .back(Helper.buildBackDataArray("value", "any"))
             .front(
-                new FrontDataArrayBuilder("value")
-                    .addPrefix(new FrontSpaceBuilder().build())
-                    .build())
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
+                            .build())
             .precedence(0)
             .depthScore(1)
             .build();
-    low =
-        new TypeBuilder("low")
+    final FreeAtomType low = new TypeBuilder("low")
             .back(Helper.buildBackDataArray("value", "any"))
             .front(
-                new FrontDataArrayBuilder("value")
-                    .addPrefix(new FrontSpaceBuilder().tag("split").build())
-                    .build())
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
             .precedence(0)
             .depthScore(1)
             .build();
-    unary =
-        new TypeBuilder("unary")
+    final FreeAtomType unary = new TypeBuilder("unary")
             .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataNode("value")
             .precedence(20)
             .depthScore(1)
             .build();
-    mid =
-        new TypeBuilder("mid")
+    final FreeAtomType mid = new TypeBuilder("mid")
             .back(Helper.buildBackDataArray("value", "any"))
             .front(
-                new FrontDataArrayBuilder("value")
-                    .addPrefix(new FrontSpaceBuilder().tag("split").build())
-                    .build())
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
             .precedence(50)
             .depthScore(1)
             .build();
-    high =
-        new TypeBuilder("high")
+    final FreeAtomType high = new TypeBuilder("high")
             .back(Helper.buildBackDataArray("value", "any"))
             .front(
-                new FrontDataArrayBuilder("value")
-                    .addPrefix(new FrontSpaceBuilder().tag("split").build())
-                    .build())
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
             .precedence(100)
             .depthScore(1)
             .build();
-    syntax =
-        new SyntaxBuilder("any")
+    final Syntax syntax = new SyntaxBuilder("any")
             .type(one)
             .type(initialSplitOne)
             .type(text)
@@ -130,26 +117,21 @@ public class TestCompaction {
             .type(mid)
             .type(high)
             .group(
-                "any",
-                new GroupBuilder()
-                    .type(infinity)
-                    .type(one)
-                    .type(initialSplitOne)
-                    .type(line)
-                    .type(low)
-                    .type(unary)
-                    .type(mid)
-                    .type(high)
-                    .type(text)
-                    .type(comboText)
-                    .type(initialSplitText)
-                    .build())
-            .style(new StyleBuilder().tag("split").tag(Tags.TAG_COMPACT).split(true).build())
+                    "any",
+                    new GroupBuilder()
+                            .type(infinity)
+                            .type(one)
+                            .type(initialSplitOne)
+                            .type(line)
+                            .type(low)
+                            .type(unary)
+                            .type(mid)
+                            .type(high)
+                            .type(text)
+                            .type(comboText)
+                            .type(initialSplitText)
+                            .build())
             .build();
-  }
-
-  @Test
-  public void testSplitOnResize() {
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(low)
@@ -167,6 +149,118 @@ public class TestCompaction {
 
   @Test
   public void testSplitOrder() {
+    final FreeAtomType infinity = new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .build();
+    final FreeAtomType one = new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType initialSplitOne = new TypeBuilder("splitOne")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").split(COMPACT).build())
+            .build();
+    final FreeAtomType text = new TypeBuilder("text")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .build();
+    final FreeAtomType comboText = new TypeBuilder("comboText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .frontMark("123")
+            .build();
+    final FreeAtomType initialSplitText = new TypeBuilder("splitText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .front(
+                    new FrontPrimitiveSpec(
+                            new FrontPrimitiveSpec.Config("value").splitMode(COMPACT)))
+            .build();
+    final FreeAtomType line = new TypeBuilder("line")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType low = new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType unary = new TypeBuilder("unary")
+            .back(Helper.buildBackDataAtom("value", "any"))
+            .frontDataNode("value")
+            .precedence(20)
+            .depthScore(1)
+            .build();
+    final FreeAtomType mid = new TypeBuilder("mid")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(50)
+            .depthScore(1)
+            .build();
+    final FreeAtomType high = new TypeBuilder("high")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(100)
+            .depthScore(1)
+            .build();
+    final Syntax syntax = new SyntaxBuilder("any")
+            .type(one)
+            .type(initialSplitOne)
+            .type(text)
+            .type(comboText)
+            .type(initialSplitText)
+            .type(infinity)
+            .type(line)
+            .type(low)
+            .type(unary)
+            .type(mid)
+            .type(high)
+            .group(
+                    "any",
+                    new GroupBuilder()
+                            .type(infinity)
+                            .type(one)
+                            .type(initialSplitOne)
+                            .type(line)
+                            .type(low)
+                            .type(unary)
+                            .type(mid)
+                            .type(high)
+                            .type(text)
+                            .type(comboText)
+                            .type(initialSplitText)
+                            .build())
+            .build();
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(low)
@@ -201,6 +295,118 @@ public class TestCompaction {
 
   @Test
   public void testSplitOrderInverted() {
+    final FreeAtomType infinity = new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .build();
+    final FreeAtomType one = new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType initialSplitOne = new TypeBuilder("splitOne")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").split(COMPACT).build())
+            .build();
+    final FreeAtomType text = new TypeBuilder("text")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .build();
+    final FreeAtomType comboText = new TypeBuilder("comboText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .frontMark("123")
+            .build();
+    final FreeAtomType initialSplitText = new TypeBuilder("splitText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .front(
+                    new FrontPrimitiveSpec(
+                            new FrontPrimitiveSpec.Config("value").splitMode(COMPACT)))
+            .build();
+    final FreeAtomType line = new TypeBuilder("line")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType low = new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType unary = new TypeBuilder("unary")
+            .back(Helper.buildBackDataAtom("value", "any"))
+            .frontDataNode("value")
+            .precedence(20)
+            .depthScore(1)
+            .build();
+    final FreeAtomType mid = new TypeBuilder("mid")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(50)
+            .depthScore(1)
+            .build();
+    final FreeAtomType high = new TypeBuilder("high")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(100)
+            .depthScore(1)
+            .build();
+    final Syntax syntax = new SyntaxBuilder("any")
+            .type(one)
+            .type(initialSplitOne)
+            .type(text)
+            .type(comboText)
+            .type(initialSplitText)
+            .type(infinity)
+            .type(line)
+            .type(low)
+            .type(unary)
+            .type(mid)
+            .type(high)
+            .group(
+                    "any",
+                    new GroupBuilder()
+                            .type(infinity)
+                            .type(one)
+                            .type(initialSplitOne)
+                            .type(line)
+                            .type(low)
+                            .type(unary)
+                            .type(mid)
+                            .type(high)
+                            .type(text)
+                            .type(comboText)
+                            .type(initialSplitText)
+                            .build())
+            .build();
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(high)
@@ -232,6 +438,118 @@ public class TestCompaction {
 
   @Test
   public void testSplitOrderRule() {
+    final FreeAtomType infinity = new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .build();
+    final FreeAtomType one = new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType initialSplitOne = new TypeBuilder("splitOne")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").split(COMPACT).build())
+            .build();
+    final FreeAtomType text = new TypeBuilder("text")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .build();
+    final FreeAtomType comboText = new TypeBuilder("comboText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .frontMark("123")
+            .build();
+    final FreeAtomType initialSplitText = new TypeBuilder("splitText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .front(
+                    new FrontPrimitiveSpec(
+                            new FrontPrimitiveSpec.Config("value").splitMode(COMPACT)))
+            .build();
+    final FreeAtomType line = new TypeBuilder("line")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType low = new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType unary = new TypeBuilder("unary")
+            .back(Helper.buildBackDataAtom("value", "any"))
+            .frontDataNode("value")
+            .precedence(20)
+            .depthScore(1)
+            .build();
+    final FreeAtomType mid = new TypeBuilder("mid")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(50)
+            .depthScore(1)
+            .build();
+    final FreeAtomType high = new TypeBuilder("high")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(100)
+            .depthScore(1)
+            .build();
+    final Syntax syntax = new SyntaxBuilder("any")
+            .type(one)
+            .type(initialSplitOne)
+            .type(text)
+            .type(comboText)
+            .type(initialSplitText)
+            .type(infinity)
+            .type(line)
+            .type(low)
+            .type(unary)
+            .type(mid)
+            .type(high)
+            .group(
+                    "any",
+                    new GroupBuilder()
+                            .type(infinity)
+                            .type(one)
+                            .type(initialSplitOne)
+                            .type(line)
+                            .type(low)
+                            .type(unary)
+                            .type(mid)
+                            .type(high)
+                            .type(text)
+                            .type(comboText)
+                            .type(initialSplitText)
+                            .build())
+            .build();
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(mid)
@@ -289,6 +607,56 @@ public class TestCompaction {
 
   @Test
   public void testExpandPrimitiveOrder() {
+    final FreeAtomType one = new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType initialSplitText = new TypeBuilder("splitText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .front(
+                    new FrontPrimitiveSpec(
+                            new FrontPrimitiveSpec.Config("value").splitMode(COMPACT)))
+            .build();
+    final FreeAtomType low = new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType mid = new TypeBuilder("mid")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(50)
+            .depthScore(1)
+            .build();
+    final Syntax syntax = new SyntaxBuilder("any")
+            .type(one)
+            .type(initialSplitText)
+            .type(low)
+            .type(mid)
+            .group(
+                    "any",
+                    new GroupBuilder()
+                            .type(one)
+                            .type(low)
+                            .type(mid)
+                            .type(initialSplitText)
+                            .build())
+            .build();
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(low)
@@ -323,6 +691,34 @@ public class TestCompaction {
 
   @Test
   public void testExpandEdge() {
+    final FreeAtomType one = new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType initialSplitOne = new TypeBuilder("splitOne")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").split(COMPACT).build())
+            .build();
+    final FreeAtomType line = new TypeBuilder("line")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final Syntax syntax = new SyntaxBuilder("any")
+            .type(one)
+            .type(initialSplitOne)
+            .type(line)
+            .group(
+                    "any",
+                    new GroupBuilder()
+                            .type(one)
+                            .type(initialSplitOne)
+                            .type(line)
+                            .build())
+            .build();
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(line)
@@ -337,6 +733,118 @@ public class TestCompaction {
 
   @Test
   public void testCompactWindowDownSimple() {
+    final FreeAtomType infinity = new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .build();
+    final FreeAtomType one = new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType initialSplitOne = new TypeBuilder("splitOne")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").split(COMPACT).build())
+            .build();
+    final FreeAtomType text = new TypeBuilder("text")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .build();
+    final FreeAtomType comboText = new TypeBuilder("comboText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .frontMark("123")
+            .build();
+    final FreeAtomType initialSplitText = new TypeBuilder("splitText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .front(
+                    new FrontPrimitiveSpec(
+                            new FrontPrimitiveSpec.Config("value").splitMode(COMPACT)))
+            .build();
+    final FreeAtomType line = new TypeBuilder("line")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType low = new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType unary = new TypeBuilder("unary")
+            .back(Helper.buildBackDataAtom("value", "any"))
+            .frontDataNode("value")
+            .precedence(20)
+            .depthScore(1)
+            .build();
+    final FreeAtomType mid = new TypeBuilder("mid")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(50)
+            .depthScore(1)
+            .build();
+    final FreeAtomType high = new TypeBuilder("high")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(100)
+            .depthScore(1)
+            .build();
+    final Syntax syntax = new SyntaxBuilder("any")
+            .type(one)
+            .type(initialSplitOne)
+            .type(text)
+            .type(comboText)
+            .type(initialSplitText)
+            .type(infinity)
+            .type(line)
+            .type(low)
+            .type(unary)
+            .type(mid)
+            .type(high)
+            .group(
+                    "any",
+                    new GroupBuilder()
+                            .type(infinity)
+                            .type(one)
+                            .type(initialSplitOne)
+                            .type(line)
+                            .type(low)
+                            .type(unary)
+                            .type(mid)
+                            .type(high)
+                            .type(text)
+                            .type(comboText)
+                            .type(initialSplitText)
+                            .build())
+            .build();
     final Atom midAtom =
         new TreeBuilder(mid)
             .addArray(
@@ -363,6 +871,63 @@ public class TestCompaction {
 
   @Test
   public void testCompactWindowDown() {
+    final FreeAtomType one = new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType low = new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType mid = new TypeBuilder("mid")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(50)
+            .depthScore(1)
+            .build();
+    final FreeAtomType high = new TypeBuilder("high")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(100)
+            .depthScore(1)
+            .build();
+    final Syntax syntax = new SyntaxBuilder("any")
+            .type(one)
+            .type(low)
+            .type(mid)
+            .type(high)
+            .group(
+                    "any",
+                    new GroupBuilder()
+                            .type(one)
+                            .type(low)
+                            .type(mid)
+                            .type(high)
+                            .build())
+            .build();
     final Atom midAtom =
         new TreeBuilder(mid)
             .addArray(
@@ -391,6 +956,118 @@ public class TestCompaction {
 
   @Test
   public void testIdentical() {
+    final FreeAtomType infinity = new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .build();
+    final FreeAtomType one = new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType initialSplitOne = new TypeBuilder("splitOne")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").split(COMPACT).build())
+            .build();
+    final FreeAtomType text = new TypeBuilder("text")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .build();
+    final FreeAtomType comboText = new TypeBuilder("comboText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .frontMark("123")
+            .build();
+    final FreeAtomType initialSplitText = new TypeBuilder("splitText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .front(
+                    new FrontPrimitiveSpec(
+                            new FrontPrimitiveSpec.Config("value").splitMode(COMPACT)))
+            .build();
+    final FreeAtomType line = new TypeBuilder("line")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType low = new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType unary = new TypeBuilder("unary")
+            .back(Helper.buildBackDataAtom("value", "any"))
+            .frontDataNode("value")
+            .precedence(20)
+            .depthScore(1)
+            .build();
+    final FreeAtomType mid = new TypeBuilder("mid")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(50)
+            .depthScore(1)
+            .build();
+    final FreeAtomType high = new TypeBuilder("high")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                    new FrontDataArrayBuilder("value")
+                            .addPrefix(
+                                    new FrontSymbol(
+                                            new FrontSymbol.Config(
+                                                    new SymbolSpaceSpec(
+                                                            new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
+                            .build())
+            .precedence(100)
+            .depthScore(1)
+            .build();
+    final Syntax syntax = new SyntaxBuilder("any")
+            .type(one)
+            .type(initialSplitOne)
+            .type(text)
+            .type(comboText)
+            .type(initialSplitText)
+            .type(infinity)
+            .type(line)
+            .type(low)
+            .type(unary)
+            .type(mid)
+            .type(high)
+            .group(
+                    "any",
+                    new GroupBuilder()
+                            .type(infinity)
+                            .type(one)
+                            .type(initialSplitOne)
+                            .type(line)
+                            .type(low)
+                            .type(unary)
+                            .type(mid)
+                            .type(high)
+                            .type(text)
+                            .type(comboText)
+                            .type(initialSplitText)
+                            .build())
+            .build();
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(low)
@@ -433,5 +1110,12 @@ public class TestCompaction {
         .checkTextBrick(0, 5, "one")
         .checkTextBrick(0, 7, "one")
         .checkTextBrick(0, 9, "infinity");
+  }
+
+  public static class GeneralTestWizard extends com.zarbosoft.merman.helper.GeneralTestWizard {
+    public GeneralTestWizard(Syntax syntax, Atom... atoms) {
+      super(syntax, atoms);
+      this.inner.context.ellipsizeThreshold = 2;
+    }
   }
 }

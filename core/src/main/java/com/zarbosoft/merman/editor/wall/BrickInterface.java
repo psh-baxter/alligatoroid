@@ -23,7 +23,5 @@ public interface BrickInterface {
 
   void brickDestroyed(Context context);
 
-  Alignment findAlignment(Style style);
-
-  TSSet<String> getTags(Context context);
+  Alignment findAlignment(String alignment);
 }

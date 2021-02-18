@@ -9,6 +9,7 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtom;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
+import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROSet;
@@ -20,7 +21,6 @@ public class FrontAtomSpec extends FrontSpec {
   private BaseBackAtomSpec dataType;
 
   public FrontAtomSpec(Config config) {
-    super(config.tags);
     field = config.middle;
     ellipsis = config.ellipsis;
   }
@@ -36,7 +36,8 @@ public class FrontAtomSpec extends FrontSpec {
       final Atom atom,
       final int visualDepth,
       final int depthScore) {
-    return new LocalVisualFrontAtom(this, context, parent, atom, visualDepth, depthScore);
+    return new VisualFrontAtom(
+        context, parent, dataType.get(atom.fields), visualDepth, depthScore, ellipsis);
   }
 
   @Override
@@ -58,37 +59,12 @@ public class FrontAtomSpec extends FrontSpec {
 
   public static class Config {
     public final String middle;
-    public Symbol ellipsis = new SymbolTextSpec("...");
+    public final Style.Config ellipsisStyle = new Style.Config();
+    public Symbol ellipsis = new SymbolTextSpec(new SymbolTextSpec.Config("..."));
     public ROSet<String> tags = ROSet.empty;
 
     public Config(String middle) {
       this.middle = middle;
-    }
-
-    public Config(String middle, Symbol ellipsis, ROSet<String> tags) {
-      this.middle = middle;
-      this.ellipsis = ellipsis;
-      this.tags = tags;
-    }
-  }
-
-  private static class LocalVisualFrontAtom extends VisualFrontAtom {
-    private final FrontAtomSpec frontAtomSpec;
-
-    public LocalVisualFrontAtom(
-        FrontAtomSpec frontAtomSpec,
-        Context context,
-        VisualParent parent,
-        Atom atom,
-        int visualDepth,
-        int depthScore) {
-      super(context, parent, frontAtomSpec.dataType.get(atom.fields), visualDepth, depthScore);
-      this.frontAtomSpec = frontAtomSpec;
-    }
-
-    @Override
-    protected Symbol ellipsis() {
-      return frontAtomSpec.ellipsis;
     }
   }
 }

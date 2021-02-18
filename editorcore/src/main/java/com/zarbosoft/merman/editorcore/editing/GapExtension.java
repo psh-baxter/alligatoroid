@@ -15,7 +15,7 @@ import com.zarbosoft.rendaw.common.Assertion;
 import java.util.Arrays;
 
 public class GapExtension {
-    public Symbol gapPlaceholder = new SymbolTextSpec("•");
+    public Symbol gapPlaceholder = new SymbolTextSpec("•", style);
     public BoxStyle gapChoiceStyle = new BoxStyle(padding, roundStart, roundEnd, roundOuterEdges, roundRadius, line, lineColor, lineThickness, fill, fillColor);
 
     public static void install(Context context, History history) {

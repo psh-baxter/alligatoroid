@@ -1,20 +1,20 @@
-package com.zarbosoft.merman;
+package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.extensions.hotkeys.HotkeyRule;
-import com.zarbosoft.merman.extensions.hotkeys.HotkeysExtension;
-import com.zarbosoft.merman.extensions.hotkeys.Key;
-import com.zarbosoft.merman.extensions.hotkeys.grammar.Node;
-import com.zarbosoft.merman.extensions.hotkeys.grammar.Terminal;
-import com.zarbosoft.merman.helper.GeneralTestWizard;
-import com.zarbosoft.merman.helper.GroupBuilder;
-import com.zarbosoft.merman.helper.Helper;
-import com.zarbosoft.merman.helper.StyleBuilder;
-import com.zarbosoft.merman.helper.SyntaxBuilder;
-import com.zarbosoft.merman.helper.TreeBuilder;
-import com.zarbosoft.merman.helper.TypeBuilder;
+import com.zarbosoft.merman.editor.hid.Key;
+import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
+import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
+import com.zarbosoft.merman.editorcore.helper.Helper;
+import com.zarbosoft.merman.editorcore.helper.SyntaxBuilder;
+import com.zarbosoft.merman.editorcore.helper.TreeBuilder;
+import com.zarbosoft.merman.editorcore.helper.TypeBuilder;
+import com.zarbosoft.merman.editorcore.hotkeys.HotkeyRule;
+import com.zarbosoft.merman.editorcore.hotkeys.HotkeysExtension;
+import com.zarbosoft.merman.editorcore.hotkeys.Node;
+import com.zarbosoft.merman.editorcore.hotkeys.Terminal;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -38,7 +38,7 @@ public class TestExtensionHotkeys {
             .type(one)
             .type(arr)
             .group("any", new GroupBuilder().type(one).build())
-            .style(new StyleBuilder().split(true).build())
+            .style(new Style.Config().split(true).build())
             .build();
     new GeneralTestWizard(
             syntax,

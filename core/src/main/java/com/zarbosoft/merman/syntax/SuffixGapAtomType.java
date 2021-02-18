@@ -24,7 +24,6 @@ public class SuffixGapAtomType extends BaseGapAtomType {
     super(
         new AtomType.Config(
             config.id,
-            config.atomTags,
             TSList.of(
                 new BackFixedTypeSpec(
                     new BackFixedTypeSpec.Config(
@@ -50,7 +49,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                         new FrontArraySpec.Config(GAP_ARRAY_KEY, config.frontArrayConfig)),
                     new FrontPrimitiveSpec(
                         new FrontPrimitiveSpec.Config(
-                            GAP_PRIMITIVE_KEY, config.frontPrimitiveTags)))
+                            GAP_PRIMITIVE_KEY)))
                 .addAll(config.frontSuffix)));
     backType = config.backType;
   }
@@ -62,9 +61,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
   public static class Config {
     public String id = "__suffix_gap";
-    public ROSet<String> atomTags = ROSet.empty;
     public String backType = "__suffix_gap";
-    public ROSet<String> frontPrimitiveTags = ROSet.empty;
     public FrontArraySpecBase.Config frontArrayConfig = new FrontArraySpecBase.Config();
     public ROList<FrontSpec> frontSuffix = ROList.empty;
 
@@ -72,15 +69,11 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
     public Config(
         String id,
-        ROSet<String> atomTags,
         String backType,
-        ROSet<String> frontPrimitiveTags,
         FrontArraySpecBase.Config frontArrayConfig,
         ROList<FrontSpec> frontSuffix) {
       this.id = id;
-      this.atomTags = atomTags;
       this.backType = backType;
-      this.frontPrimitiveTags = frontPrimitiveTags;
       this.frontArrayConfig = frontArrayConfig;
       this.frontSuffix = frontSuffix;
     }

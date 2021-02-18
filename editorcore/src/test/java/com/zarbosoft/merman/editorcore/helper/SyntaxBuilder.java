@@ -21,7 +21,7 @@ import java.util.Set;
 public class SyntaxBuilder {
   private final TSList<AtomType> types = new TSList<>();
   private final TSMap<String, ROList<String>> groups = new TSMap<String, ROList<String>>();
-  private final TSList<Style.Spec> styles = new TSList<>();
+  private final TSList<Style.Config> styles = new TSList<>();
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
   private final String rootChildType;
   private final FrontDataArrayBuilder front = new FrontDataArrayBuilder("value");
@@ -67,7 +67,7 @@ public class SyntaxBuilder {
     return this;
   }
 
-  public SyntaxBuilder style(final Style.Spec style) {
+  public SyntaxBuilder style(final Style.Config style) {
     styles.add(style);
     return this;
   }

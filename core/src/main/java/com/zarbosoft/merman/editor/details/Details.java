@@ -5,7 +5,6 @@ import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.derived.Box;
 import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Bedding;
 import com.zarbosoft.merman.editor.wall.Brick;
@@ -19,6 +18,7 @@ public class Details {
   private final PriorityQueue<DetailsPage> queue =
       new PriorityQueue<>(
           11, new ChainComparator<DetailsPage>().greaterFirst(m -> m.priority).build());
+  private final Style style;
   public DetailsPage current;
   public Box background;
   private Brick brick;
@@ -67,13 +67,8 @@ public class Details {
     place(context, false);
   }
 
-  private Style getStyle(final Context context) {
-    return context.getStyle(context.getGlobalTags().mut().add(Tags.TAG_PART_DETAILS).ro());
-  }
-
   private void updateStyle(final Context context) {
     current.tagsChanged(context);
-    final Style style = getStyle(context);
     if (style.box != null) {
       if (background == null) {
         background = new Box(context);
@@ -132,7 +127,8 @@ public class Details {
     background.setSize(context, context.edge * 2, current.node.transverseSpan());
   }
 
-  public Details(final Context context) {
+  public Details(final Context context, Style style) {
+    this.style = style;
     context.foreground.addCornerstoneListener(
         context,
         new Wall.CornerstoneListener() {

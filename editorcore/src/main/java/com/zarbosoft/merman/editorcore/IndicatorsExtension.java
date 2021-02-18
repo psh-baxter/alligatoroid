@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.extensions;
+package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
@@ -6,7 +6,6 @@ import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.ROSetRef;
@@ -79,7 +78,7 @@ public class IndicatorsExtension {
       if (tags.containsAll(indicator.tags)) {
         DisplayNode node = indicator.node;
         if (node == null) {
-          node = indicator.node = indicator.symbol.createDisplay(context);
+          node = indicator.node = indicator.symbol.createDisplay(context, style.create());
           group.add(offset, node);
         }
         indicator.symbol.style(

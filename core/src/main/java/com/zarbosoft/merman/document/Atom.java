@@ -30,12 +30,10 @@ public class Atom {
   public Value.Parent<?> valueParentRef;
   public final AtomType type;
   public VisualAtom visual;
-  private final TSSet<String> tags;
 
   public Atom(final AtomType type, final TSMap<String, Value> fields) {
     this.type = type;
     this.fields = fields;
-    tags = new TSSet<>();
     for (Map.Entry<String, Value> entry : fields.entries()) {
       Value v = entry.getValue();
       v.setAtomParentRef(
@@ -100,14 +98,6 @@ public class Atom {
       } else throw new Assertion();
     }
     stack.add(new WriteStateBack(childData, type.back().iterator()));
-  }
-
-  public ROSetRef<String> getTags() {
-    return tags;
-  }
-
-  public void changeTags(Context context, final TagsChange change) {
-    if (change.apply(tags) && visual != null) visual.tagsChanged(context);
   }
 
   public abstract static class Parent {

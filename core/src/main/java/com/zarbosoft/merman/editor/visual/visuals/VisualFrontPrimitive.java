@@ -6,8 +6,6 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.I18nEngine;
-import com.zarbosoft.merman.editor.IterationContext;
-import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.SelectionState;
 import com.zarbosoft.merman.editor.display.Font;
@@ -18,8 +16,6 @@ import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.attachments.CursorAttachment;
 import com.zarbosoft.merman.editor.visual.attachments.TextBorderAttachment;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.editor.wall.bricks.BrickLine;
@@ -28,12 +24,12 @@ import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.function.Function;
+
+import static com.zarbosoft.merman.syntax.style.Style.SplitMode.ALWAYS;
 
 public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   public final ValuePrimitive value;
@@ -41,16 +37,13 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   // INVARIANT: Always at least one line
   // TODO index line offsets for faster insert/remove
   private final ValuePrimitive.Listener dataListener;
-  private final BrickStyle brickStyle;
   private final FrontPrimitiveSpec spec;
   public VisualParent parent;
   public int brickCount = 0;
   public PrimitiveHoverable hoverable;
   public PrimitiveCursor selection;
   public TSList<Line> lines = new TSList<>();
-  private boolean canExpand = false;
-  private int hardLineCount = 0;
-  private IterationResplit idleResplit = null;
+  public int hardLineCount = 0;
 
   public VisualFrontPrimitive(
       final Context context,
@@ -62,7 +55,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     this.parent = parent;
     this.value = value;
     this.spec = frontPrimitiveSpec;
-    brickStyle = new BrickStyle(context);
     value.visual = this;
     dataListener = new DataListener(this);
     value.addListener(dataListener);
@@ -80,6 +72,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   private void idleLayBricks(final Context context, final int start, final int end) {
     final Function<Integer, Brick> accessor = i -> lines.get(i).brick;
     context.triggerIdleLayBricks(parent, start, end - start, lines.size(), accessor, accessor);
+  }
+
+  public boolean softWrapped() {
+    return lines.size() > hardLineCount;
   }
 
   private void set(final Context context, final String text) {
@@ -104,13 +100,11 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   }
 
   private void clear(final Context context) {
-    if (canExpand) context.foreground.splitPrimitives.remove(this);
     for (final Line line : lines) {
       line.destroy(context);
     }
     lines.clear();
     hardLineCount = 0;
-    canExpand = false;
   }
 
   private void renumber(int index, int offset) {
@@ -121,18 +115,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       line.offset = offset;
       offset += line.text.length();
     }
-  }
-
-  public TSSet<String> softTags(Context context) {
-    return baseTags(context).add(Tags.TAG_PRIMITIVE_SOFT);
-  }
-
-  public TSSet<String> firstTags(Context context) {
-    return hardTags(context).add(Tags.TAG_PRIMITIVE_FIRST);
-  }
-
-  public TSSet<String> hardTags(Context context) {
-    return baseTags(context).add(Tags.TAG_PRIMITIVE_HARD);
   }
 
   protected ROList<Action> getActions() {
@@ -157,24 +139,9 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   protected void commit() {}
 
-  public void idleResplit(final Context context) {
-    if (idleResplit == null && canExpand) {
-      idleResplit = new IterationResplit(context);
-      context.addIteration(idleResplit);
-    }
-  }
-
   @Override
   public VisualParent parent() {
     return parent;
-  }
-
-  public void tagsChanged(final Context context) {
-    brickStyle.update(context);
-    for (final Line line : lines) {
-      line.styleChanged(context, brickStyle);
-    }
-    if (selection != null) context.selectionTagsChanged();
   }
 
   @Override
@@ -202,47 +169,52 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     return lines.last().brick;
   }
 
-  @Override
-  public void compact(final Context context) {
+  /**
+   * Fine grained compact/expand, done last during compact/first during expand
+   *
+   * @param context
+   */
+  public void primitiveReflow(Context context) {
     final ResplitResult result = new ResplitResult();
-    boolean rebreak = false;
+    boolean anyOver = false;
+    boolean allUnder = true;
     for (int i = lines.size() - 1; i >= 0; --i) {
       final Line line = lines.get(i);
       if (line.brick == null) continue;
       final int edge = line.brick.converseEdge();
-      if (!rebreak && edge > context.edge) {
-        rebreak = true;
+      if (!anyOver && edge > context.edge) {
+        anyOver = true;
       }
-      if (line.hard && rebreak) {
+      if (edge <= context.edge && edge * context.retryExpandFactor >= context.edge)
+        allUnder = false;
+      if (line.hard && (anyOver || allUnder)) {
         result.merge(resplitOne(context, i));
-        rebreak = false;
+        anyOver = false;
+        allUnder = true;
       }
-    }
-    final boolean oldCanExpand = canExpand;
-    canExpand = hardLineCount < lines.size();
-    if (canExpand && !oldCanExpand) {
-      context.foreground.splitPrimitives.add(this);
     }
   }
 
   @Override
-  public void expand(final Context context) {}
+  public void compact(final Context context) {
+    lines.get(0).brick.changed(context);
+  }
 
   @Override
-  public void getLeafPropertiesForTagsChange(
-      final Context context,
-      TSList<ROPair<Brick, Brick.Properties>> brickProperties,
-      final TagsChange change) {
+  public void expand(final Context context) {
+    lines.get(0).brick.changed(context);
+  }
+
+  @Override
+  public void getLeafBricks(final Context context, TSList<Brick> bricks) {
     for (Line line : lines) {
       if (line.brick == null) continue;
-      brickProperties.add(
-          new ROPair<>(line.brick, line.brick.getPropertiesForTagsChange(context, change)));
+      bricks.add(line.brick);
     }
   }
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    if (idleResplit != null) idleResplit.destroy();
     if (selection != null) context.clearSelection();
     if (hoverable != null) context.clearHover();
     value.removeListener(dataListener);
@@ -257,7 +229,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       final int visualDepth,
       final int depthScore) {
     super.root(context, parent, visualDepth, depthScore);
-    if (canExpand) context.foreground.splitPrimitives.remove(this);
     // Force expand
     final StringBuilder aggregate = new StringBuilder();
     for (int i = lines.size() - 1; i >= 0; --i) {
@@ -268,7 +239,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         aggregate.setLength(0);
       }
     }
-    canExpand = false;
   }
 
   @Override
@@ -316,8 +286,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       final Font font;
       final int converse;
       if (line.brick == null) {
-        final Style style =
-            j == 0 ? brickStyle.firstStyle : j == i ? brickStyle.hardStyle : brickStyle.softStyle;
+        final Style style = j == 0 ? spec.firstStyle : j == i ? spec.hardStyle : spec.softStyle;
         font = Context.getFont(style, context);
         final Alignment alignment = atom.findAlignment(style.alignment);
         if (alignment == null) converse = 0;
@@ -337,7 +306,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       while (build.hasText()) {
         final Line line = new Line(this, false);
         line.setIndex(context, j);
-        final Style style = brickStyle.softStyle;
+        final Style style = spec.softStyle;
         final Font font = Context.getFont(style, context);
         final Alignment alignment = atom.findAlignment(style.alignment);
         final int converse;
@@ -382,10 +351,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     return result;
-  }
-
-  private TSSet<String> baseTags(Context context) {
-    return atomVisual().getTags(context).addAll(spec.tags).add(Tags.TAG_PART_PRIMITIVE);
   }
 
   private static class ResplitOneBuilder {
@@ -492,7 +457,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         final int endOffset) {
       this.visualPrimitive = visualPrimitive;
       range = new RangeAttachment(visualPrimitive, true);
-      range.setStyle(context, getBorderStyle(context).obbox);
+      range.setStyle(context, context.cursorStyle.obbox);
       range.leadFirst = leadFirst;
       range.setOffsets(context, beginOffset, endOffset);
       clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
@@ -616,17 +581,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     @Override
     public Path getSyntaxPath() {
       return visualPrimitive.value.getSyntaxPath().add(String.valueOf(range.beginOffset));
-    }
-
-    @Override
-    public void tagsChanged(final Context context) {
-      range.setStyle(context, getBorderStyle(context).obbox);
-      super.tagsChanged(context);
-    }
-
-    @Override
-    public ROSet<String> getTags(final Context context) {
-      return visualPrimitive.baseTags(context).ro();
     }
 
     @Override
@@ -1544,8 +1498,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     PrimitiveHoverable(VisualFrontPrimitive visualFrontPrimitive, final Context context) {
       range = new RangeAttachment(visualFrontPrimitive, false);
-      range.setStyle(
-          context, getBorderStyle(context, visualFrontPrimitive.baseTags(context)).obbox);
+      range.setStyle(context, context.hoverStyle.obbox);
       this.visualFrontPrimitive = visualFrontPrimitive;
     }
 
@@ -1572,12 +1525,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     @Override
     public Visual visual() {
       return visualFrontPrimitive;
-    }
-
-    @Override
-    public void tagsChanged(final Context context) {
-      range.setStyle(
-          context, getBorderStyle(context, visualFrontPrimitive.baseTags(context)).obbox);
     }
   }
 
@@ -1649,16 +1596,18 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     public Brick createBrickInternal(final Context context) {
-      brick = new BrickLine(context, this);
-      styleChanged(context, visualFrontPrimitive.brickStyle);
+      brick =
+          new BrickLine(
+              context,
+              this,
+              index == 0 ? visualFrontPrimitive.spec.splitMode : ALWAYS,
+              index == 0
+                  ? visualFrontPrimitive.spec.firstStyle
+                  : hard
+                      ? visualFrontPrimitive.spec.hardStyle
+                      : visualFrontPrimitive.spec.softStyle);
       brick.setText(context, text);
       return brick;
-    }
-
-    public void styleChanged(final Context context, final BrickStyle style) {
-      if (brick == null) return;
-      brick.setStyle(
-          context, index == 0 ? style.firstStyle : hard ? style.hardStyle : style.softStyle);
     }
 
     @Override
@@ -1679,85 +1628,13 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
-    public Alignment findAlignment(final Style style) {
-      return visualFrontPrimitive.parent.atomVisual().findAlignment(style.alignment);
-    }
-
-    @Override
-    public TSSet<String> getTags(final Context context) {
-      return (index == 0
-          ? visualFrontPrimitive.firstTags(context)
-          : hard ? visualFrontPrimitive.hardTags(context) : visualFrontPrimitive.softTags(context));
+    public Alignment findAlignment(String alignment) {
+      return visualFrontPrimitive.parent.atomVisual().findAlignment(alignment);
     }
 
     public Brick createOrGetBrick(final Context context) {
       if (brick != null) return brick;
       return createBrickInternal(context);
-    }
-
-    public void idleResplit(final Context context) {
-      visualFrontPrimitive.idleResplit(context);
-    }
-  }
-
-  public class BrickStyle {
-    public Style softStyle;
-    public Style hardStyle;
-    public Style firstStyle;
-
-    BrickStyle(final Context context) {
-      update(context);
-    }
-
-    public void update(final Context context) {
-      firstStyle = context.getStyle(firstTags(context).ro());
-      hardStyle = context.getStyle(hardTags(context).ro());
-      softStyle = context.getStyle(softTags(context).ro());
-    }
-  }
-
-  private class IterationResplit extends IterationTask {
-    final Context context;
-
-    private IterationResplit(final Context context) {
-      this.context = context;
-    }
-
-    @Override
-    protected double priority() {
-      Line line = lines.get(0);
-      if (line.brick == null) line = lines.last();
-      return 181.0 - (500.0 / (line.brick.parent.index + 200.0 / line.brick.index));
-    }
-
-    @Override
-    protected boolean runImplementation(final IterationContext iterationContext) {
-      final ResplitResult result = new ResplitResult();
-      boolean go = true;
-      for (int i = lines.size() - 1; i >= 0; --i) {
-        final Line line = lines.get(i);
-        if (line.brick == null) continue;
-        final int converseEdge = line.brick.converseEdge();
-        if (converseEdge <= context.edge
-            && converseEdge * context.retryExpandFactor >= context.edge) go = false;
-        if (line.hard) {
-          if (go) result.merge(resplitOne(context, i));
-          else go = true;
-        }
-      }
-      final boolean oldCanExpand = canExpand;
-      canExpand = hardLineCount < lines.size();
-      if (canExpand && !oldCanExpand) {
-        context.foreground.splitPrimitives.add(VisualFrontPrimitive.this);
-      } else if (!canExpand && oldCanExpand) {
-        context.foreground.splitPrimitives.remove(VisualFrontPrimitive.this);
-      }
-      return false;
-    }
-
-    @Override
-    protected void destroyed() {
-      idleResplit = null;
     }
   }
 }

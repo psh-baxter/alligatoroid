@@ -3,41 +3,61 @@ package com.zarbosoft.merman.editor.wall;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.display.DisplayNode;
-import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
+import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
-public abstract class Brick  {
+public abstract class Brick {
+  private Style style;
+  public final Style.SplitMode splitMode;
+  public final BrickInterface inter;
   public Course parent;
   public int index;
-  TSSet<Attachment> attachments = Context.createSet.get();
-  public Style style;
   public Alignment alignment;
+  public int ascent;
+  public int descent;
+  public int converseSpan;
   /** Used to recalc alignment min when a brick is removed from alignment */
   protected int preAlignConverse;
 
-  public final BrickInterface inter;
+  TSSet<Attachment> attachments = Context.createSet.get();
 
-  protected Brick(final BrickInterface inter) {
+  protected Brick(final BrickInterface inter, Style style, Style.SplitMode splitMode) {
+    this.style = style;
+    this.splitMode = splitMode;
     this.inter = inter;
+  }
+
+  public boolean isSplit(boolean compact) {
+    switch (splitMode) {
+      case NEVER:
+        return false;
+      case COMPACT:
+        return compact;
+      case ALWAYS:
+        return true;
+      default:
+        throw new Assertion();
+    }
+  }
+
+  public boolean isSplit() {
+    return isSplit(inter.getVisual().atomVisual().compact);
   }
 
   public abstract int getConverse();
 
   public abstract int converseEdge();
+
   public abstract int converseSpan();
 
   public abstract DisplayNode getDisplayNode();
 
   public abstract void setConverse(Context context, int minConverse, int converse);
-
-  public abstract void tagsChanged(Context context);
-
-  public abstract Properties properties(final Context context, final Style style);
 
   public final int getPreAlignConverse() {
     return preAlignConverse;
@@ -59,24 +79,6 @@ public abstract class Brick  {
     return inter.createNext(context);
   }
 
-  protected Style getStyle() {
-    return style;
-  }
-
-  public TSSet<String> getTags(final Context context) {
-    return inter.getTags(context);
-  }
-
-  public Properties properties(final Context context) {
-    return properties(context, getStyle());
-  }
-
-  public Properties getPropertiesForTagsChange(final Context context, final TagsChange change) {
-    TSSet<String> tags = inter.getTags(context).mut();
-    change.apply(tags);
-    return properties(context, context.getStyle(tags.ro()));
-  }
-
   public Hoverable hover(final Context context, final Vector point) {
     return inter.getVisual().hover(context, point);
   }
@@ -90,43 +92,21 @@ public abstract class Brick  {
     this.index = index;
   }
 
-  public static class Properties {
-    public final boolean split;
-    public final int ascent;
-    public final int descent;
-    public final Alignment alignment;
-    public final int converseSpan;
-
-    public Properties(
-        final boolean split,
-        final int ascent,
-        final int descent,
-        final Alignment alignment,
-        final int converseSpan) {
-      this.split = split;
-      this.ascent = ascent;
-      this.descent = descent;
-      this.alignment = alignment;
-      this.converseSpan = converseSpan;
-    }
-  }
-
   public abstract void allocateTransverse(Context context, int ascent, int descent);
 
   public void addAfter(final Context context, final Brick brick) {
-    final Properties properties = brick.properties(context);
-    if (properties.split) {
+    if (brick.isSplit()) {
       parent.breakCourse(context, index + 1).add(context, 0, TSList.of(brick));
     } else parent.add(context, index + 1, TSList.of(brick));
   }
 
   public void addBefore(final Context context, final Brick brick) {
-    if (properties(context).split) {
+    if (isSplit()) {
       if (parent.index == 0) {
         parent.add(context, 0, TSList.of(brick));
         parent.breakCourse(context, 1);
       } else {
-        if (brick.properties(context).split) {
+        if (brick.isSplit()) {
           final Course previousCourse = parent.parent.children.get(parent.index - 1);
           final int insertIndex = previousCourse.children.size();
           previousCourse.add(context, insertIndex, TSList.of(brick));
@@ -137,7 +117,7 @@ public abstract class Brick  {
         }
       }
     } else {
-      if (index > 0 && brick.properties(context).split) {
+      if (index > 0 && brick.isSplit()) {
         parent.breakCourse(context, index).add(context, 0, TSList.of(brick));
       } else parent.add(context, index, TSList.of(brick));
     }
@@ -169,6 +149,9 @@ public abstract class Brick  {
    * @param context
    */
   public void changed(final Context context) {
+    String alignmentName = isSplit() ? style.splitAlignment : style.alignment;
+    if (alignmentName == null) this.alignment = null;
+    else this.alignment = inter.findAlignment(alignmentName);
     if (parent != null) parent.changed(context, index);
   }
 

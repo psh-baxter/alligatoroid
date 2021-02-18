@@ -1,14 +1,14 @@
-package com.zarbosoft.merman.extensions.hotkeys.grammar;
+package com.zarbosoft.merman.editorcore.hotkeys;
 
 import java.util.List;
 
-public class Sequence implements Node {
+public class Union implements Node {
 
   public List<Node> nodes;
 
   @Override
   public com.zarbosoft.pidgoon.model.Node build() {
-    final com.zarbosoft.pidgoon.nodes.Sequence out = new com.zarbosoft.pidgoon.nodes.Sequence();
+    final com.zarbosoft.pidgoon.nodes.Union out = new com.zarbosoft.pidgoon.nodes.Union();
     for (final Node node : nodes) out.add(node.build());
     return out;
   }

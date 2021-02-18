@@ -22,7 +22,7 @@ public class TypeBuilder {
   private final String id;
   private final TSList<FrontSpec> front = new TSList<>();
   private final TSList<BackSpec> back = new TSList<>();
-  private final FreeAtomType.Config config = new FreeAtomType.Config();
+  private final FreeAtomType.Config config = new FreeAtomType.Config(name);
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
 
   public TypeBuilder(final String id) {
@@ -63,20 +63,20 @@ public class TypeBuilder {
   }
 
   public TypeBuilder frontDataPrimitive(final String middle) {
-    this.front.add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(middle, ROSet.empty)));
+    this.front.add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(middle)));
     return this;
   }
 
   public TypeBuilder frontMark(final String value) {
     this.front.add(
         new FrontSymbol(
-            new FrontSymbol.Config(new SymbolTextSpec(value), null, null, ROSet.empty)));
+            new FrontSymbol.Config(new SymbolTextSpec(value, style))));
     return this;
   }
 
   public TypeBuilder frontSpace() {
     this.front.add(
-        new FrontSymbol(new FrontSymbol.Config(new SymbolSpaceSpec(), null, null, ROSet.empty)));
+        new FrontSymbol(new FrontSymbol.Config(new SymbolSpaceSpec(style))));
     return this;
   }
 

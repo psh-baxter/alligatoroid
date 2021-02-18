@@ -10,12 +10,23 @@ import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.style.Style;
 
 public class BrickText extends Brick {
+  private final Font font;
   public Text text;
 
-  public BrickText(final Context context, final BrickInterface inter) {
-    super(inter);
+  public BrickText(
+      final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style, int hackAvoidChanged) {
+    super(inter, style, splitMode);
     text = context.display.text();
-    tagsChanged(context);
+    text.setColor(context, style.color);
+    text.setFont(context, Context.getFont(style, context));
+    font = Context.getFont(style, context);
+    this.ascent = font.getAscent();
+    this.descent = font.getDescent();
+  }
+  public BrickText(
+          final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
+  this(context,inter,splitMode,style,0);
+    changed(context);
   }
 
   @Override
@@ -26,31 +37,6 @@ public class BrickText extends Brick {
   @Override
   public int converseSpan() {
     return text.converseSpan();
-  }
-
-  public Properties properties(final Context context, final Style style) {
-    final Font font = Context.getFont(style, context);
-    return new Properties(
-        style.split,
-        font.getAscent(),
-        font.getDescent(),
-        inter.findAlignment(style),
-        font.getWidth(text.text()));
-  }
-
-  @Override
-  public void tagsChanged(final Context context) {
-    setStyle(context, context.getStyle(inter.getTags(context).ro()));
-  }
-
-  public void setStyle(final Context context, final Style style) {
-    this.style = style;
-    if (text != null) {
-      text.setColor(context, style.color);
-      text.setFont(context, Context.getFont(style, context));
-    }
-    alignment = inter.findAlignment(style);
-    changed(context);
   }
 
   @Override
@@ -71,6 +57,7 @@ public class BrickText extends Brick {
 
   public void setText(final Context context, final String text) {
     this.text.setText(context, text.replaceAll("\\p{Cntrl}", context.syntax.unprintable));
+    this.converseSpan = font.getWidth(this.text.text());
     changed(context);
   }
 

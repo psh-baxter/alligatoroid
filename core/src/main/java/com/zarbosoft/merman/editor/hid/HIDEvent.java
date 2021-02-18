@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editor.hid;
 
-import com.zarbosoft.merman.extensions.hotkeys.Key;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.rendaw.common.ROSet;
 

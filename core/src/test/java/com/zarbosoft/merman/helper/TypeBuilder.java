@@ -12,9 +12,9 @@ import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -22,12 +22,14 @@ public class TypeBuilder {
   private final String id;
   private final TSList<FrontSpec> front = new TSList<>();
   private final TSList<BackSpec> back = new TSList<>();
-  private final FreeAtomType.Config config = new FreeAtomType.Config();
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
+  private int autoChooseAmbiguity = 0;
+  private int precedence = Integer.MAX_VALUE;
+  private boolean associateForward = true;
+  private int depthScore = 0;
 
   public TypeBuilder(final String id) {
     this.id = id;
-    config.name = id;
   }
 
   public TypeBuilder back(final BackSpec back) {
@@ -36,8 +38,12 @@ public class TypeBuilder {
   }
 
   public FreeAtomType build() {
-    config.base = new AtomType.Config(id, ROSet.empty, back, front);
+    FreeAtomType.Config config = new FreeAtomType.Config(id, new AtomType.Config(id, back, front));
     config.alignments = alignments;
+    config.autoChooseAmbiguity = autoChooseAmbiguity;
+    config.precedence = precedence;
+    config.associateForward = associateForward;
+    config.depthScore = depthScore;
     return new FreeAtomType(config);
   }
 
@@ -47,7 +53,7 @@ public class TypeBuilder {
   }
 
   public TypeBuilder autoComplete(final int x) {
-    config.autoChooseAmbiguity = x;
+    autoChooseAmbiguity = x;
     return this;
   }
 
@@ -63,45 +69,62 @@ public class TypeBuilder {
   }
 
   public TypeBuilder frontDataPrimitive(final String middle) {
-    this.front.add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(middle, ROSet.empty)));
+    this.front.add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(middle)));
+    return this;
+  }
+
+  public TypeBuilder alignedFrontDataPrimitive(final String middle, String alignment) {
+    this.front.add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(middle).style(c -> c.alignment(alignment))));
+    return this;
+  }
+
+  public TypeBuilder frontSplitMark(final String value) {
+    this.front.add(
+        new FrontSymbol(
+            new FrontSymbol.Config(
+                new SymbolTextSpec(new SymbolTextSpec.Config(value).splitMode(Style.SplitMode.ALWAYS)))));
     return this;
   }
 
   public TypeBuilder frontMark(final String value) {
     this.front.add(
         new FrontSymbol(
-            new FrontSymbol.Config(new SymbolTextSpec(value), null, null, ROSet.empty)));
+            new FrontSymbol.Config(
+                new SymbolTextSpec(new SymbolTextSpec.Config(value)))));
     return this;
   }
 
-  public TypeBuilder frontSpace() {
+  public TypeBuilder frontSpace(Style.SplitMode splitMode) {
     this.front.add(
-        new FrontSymbol(new FrontSymbol.Config(new SymbolSpaceSpec(), null, null, ROSet.empty)));
+        new FrontSymbol(
+            new FrontSymbol.Config(
+                new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(splitMode)))));
     return this;
   }
 
   public TypeBuilder precedence(final int precedence) {
-    config.precedence = precedence;
+    this.precedence = precedence;
     return this;
   }
 
   public TypeBuilder associateForward() {
-    config.associateForward = true;
+    associateForward = true;
     return this;
   }
 
   public TypeBuilder associateBackward() {
-    config.associateForward = false;
+    associateForward = false;
     return this;
   }
 
   public TypeBuilder depthScore(final int i) {
-    config.depthScore = i;
+    depthScore = i;
     return this;
   }
 
   public TypeBuilder relativeAlignment(final String name, final String base, final int offset) {
-    alignments.put(name, new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(base, offset, false)));
+    alignments.put(
+        name, new RelativeAlignmentSpec(new RelativeAlignmentSpec.Config(base, offset, false)));
     return this;
   }
 

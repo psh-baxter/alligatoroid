@@ -45,7 +45,7 @@ import java.util.Arrays;
 import java.util.Set;
 
 public class EditingExtension {
-    public static final SymbolTextSpec DEFAULT_GAP_PLACEHOLDER = new SymbolTextSpec("•");
+    public static final SymbolTextSpec DEFAULT_GAP_PLACEHOLDER = new SymbolTextSpec("•", style);
     public static final boolean DEFAULT_PRETTY_SAVE = true;
     public final Symbol gapPlaceholder;
     public final boolean prettySave;

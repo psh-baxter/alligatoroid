@@ -13,7 +13,7 @@ public class FrontMarkBuilder {
   }
 
   public FrontSymbol build() {
-    return new FrontSymbol(new FrontSymbol.Config(new SymbolTextSpec(type), null, null, tags));
+    return new FrontSymbol(new FrontSymbol.Config(new SymbolTextSpec(type, style)));
   }
 
   public FrontMarkBuilder tag(final String tag) {

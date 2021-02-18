@@ -13,7 +13,6 @@ import com.zarbosoft.merman.editor.display.Drawing;
 import com.zarbosoft.merman.editor.display.MockeryText;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Course;
 import com.zarbosoft.merman.editor.wall.bricks.BrickImage;
@@ -28,8 +27,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import java.util.function.Consumer;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -111,7 +108,10 @@ public class GeneralTestWizard {
       dumpCourses();
       assertThat(brick, instanceOf(BrickText.class));
     }
-    assertThat(((BrickText) brick).text.text(), equalTo(text));
+    if (!((BrickText) brick).text.text().equals(text)) {
+      dumpCourses();
+      assertThat(((BrickText) brick).text.text(), equalTo(text));
+    }
     return this;
   }
 
@@ -171,26 +171,6 @@ public class GeneralTestWizard {
     return this;
   }
 
-  public GeneralTestWizard checkBrickNotHasTag(
-      final int courseIndex, final int brickIndex, final String tag) {
-    assertThat(getBrick(courseIndex, brickIndex).getTags(inner.context), not(hasItem(tag)));
-    return this;
-  }
-
-  public GeneralTestWizard checkBrickHasTag(
-      final int courseIndex, final int brickIndex, final String tag) {
-    assertThat(getBrick(courseIndex, brickIndex).getTags(inner.context), hasItem(tag));
-    return this;
-  }
-
-  public GeneralTestWizard checkBrickNotCompact(final int courseIndex, final int brickIndex) {
-    return checkBrickNotHasTag(courseIndex, brickIndex, Tags.TAG_COMPACT);
-  }
-
-  public GeneralTestWizard checkBrickCompact(final int courseIndex, final int brickIndex) {
-    return checkBrickHasTag(courseIndex, brickIndex, Tags.TAG_COMPACT);
-  }
-
   public GeneralTestWizard run(final Consumer<Context> r) {
     r.accept(inner.context);
     assertThat(inner.context.cursor, is(notNullValue()));
@@ -231,9 +211,7 @@ public class GeneralTestWizard {
     for (Course course : inner.context.foreground.children) {
       got += course.children.size();
     }
-    assertThat(
-        got,
-        equalTo(i));
+    assertThat(got, equalTo(i));
     return this;
   }
 

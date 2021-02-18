@@ -35,6 +35,6 @@ public class RootTypeBuilder {
 
   public RootAtomType build() {
     return new RootAtomType(
-        new RootAtomType.Config(ROSet.empty, back.mut(), front.mut(), alignments.mut()));
+        new RootAtomType.Config(back.mut(), front.mut(), alignments.mut()));
   }
 }

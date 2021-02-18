@@ -13,8 +13,8 @@ public class TypeBuilder {
   private final TSList<BackSpec> back = new TSList<>();
   private final TSList<FrontSpec> front = new TSList<>();
   private final String humanName;
-  private int depthScore = 1;
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
+  private int depthScore = 1;
   private int precedence = Integer.MAX_VALUE;
   private boolean associateForward = false;
   private int autoChooseAmbiguity = 1;
@@ -51,13 +51,11 @@ public class TypeBuilder {
 
   public FreeAtomType build() {
     return new FreeAtomType(
-        new FreeAtomType.Config(
-            new AtomType.Config(id, back.mut(), front.mut()),
-            humanName,
-            depthScore,
-            alignments.mut(),
-            precedence,
-            associateForward,
-            autoChooseAmbiguity));
+        new FreeAtomType.Config(humanName, new AtomType.Config(id, back.mut(), front.mut()))
+            .depthScore(depthScore)
+            .alignments(alignments)
+            .precedence(precedence)
+            .associateForward(associateForward)
+            .autoChooseAmbiguity(autoChooseAmbiguity));
   }
 }

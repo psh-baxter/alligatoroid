@@ -6,8 +6,6 @@ import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.editor.visual.alignment.Alignment;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.rendaw.common.ChainComparator;
@@ -61,16 +59,16 @@ public class Course {
    * @return converse, minConverse (without alignment)
    */
   private static ROPair<Integer, Integer> calculateNextBrickAdvance(
-      CalculateCourseConverseContext calcContext, Brick brick, Brick.Properties properties) {
+      CalculateCourseConverseContext calcContext, Brick brick) {
     int out = calcContext.converse;
     int out1 = calcContext.preAlignConverse;
-    if (calcContext.alignment == null && properties.alignment != null) {
-      calcContext.alignment = properties.alignment;
+    if (calcContext.alignment == null && brick.alignment != null) {
+      calcContext.alignment = brick.alignment;
       calcContext.alignedBrick = brick;
-      if (properties.alignment.converse > out) out = properties.alignment.converse;
+      if (brick.alignment.converse > out) out = brick.alignment.converse;
     }
-    calcContext.preAlignConverse += properties.converseSpan;
-    calcContext.converse = out + properties.converseSpan;
+    calcContext.preAlignConverse += brick.converseSpan;
+    calcContext.converse = out + brick.converseSpan;
     return new ROPair<>(out, out1);
   }
 
@@ -92,11 +90,10 @@ public class Course {
 
   void changed(final Context context, final int at) {
     final Brick brick = children.get(at);
-    final Brick.Properties properties = brick.properties(context);
-    if (at > 0 && properties.split) {
+    if (at > 0 && brick.isSplit()) {
       breakCourse(context, at);
       return;
-    } else if (at == 0 && !properties.split && this.index > 0) {
+    } else if (at == 0 && !brick.isSplit() && this.index > 0) {
       joinPreviousCourse(context);
       return;
     }
@@ -123,10 +120,8 @@ public class Course {
       ROList<Brick> transportAdd = transplantRemove.mut();
       getIdlePlace(context);
       for (final Brick brick : transportAdd) {
-        idlePlace.removeMaxAscent =
-            Math.max(idlePlace.removeMaxAscent, brick.properties(context).ascent);
-        idlePlace.removeMaxDescent =
-            Math.max(idlePlace.removeMaxDescent, brick.properties(context).descent);
+        idlePlace.removeMaxAscent = Math.max(idlePlace.removeMaxAscent, brick.ascent);
+        idlePlace.removeMaxDescent = Math.max(idlePlace.removeMaxDescent, brick.descent);
         idlePlace.changed.remove(brick);
         if (brick == parent.cornerstone) resetCornerstone = true;
       }
@@ -184,10 +179,8 @@ public class Course {
         visual.remove(at);
         renumber(at);
         getIdlePlace(context);
-        idlePlace.removeMaxAscent =
-            Math.max(idlePlace.removeMaxAscent, brick.properties(context).ascent);
-        idlePlace.removeMaxDescent =
-            Math.max(idlePlace.removeMaxDescent, brick.properties(context).descent);
+        idlePlace.removeMaxAscent = Math.max(idlePlace.removeMaxAscent, brick.ascent);
+        idlePlace.removeMaxDescent = Math.max(idlePlace.removeMaxDescent, brick.descent);
         idlePlace.changed.remove(brick);
       }
     }
@@ -267,13 +260,12 @@ public class Course {
       /// Update transverse space
       boolean newAscent = false, newDescent = false;
       for (final Brick brick : changed) {
-        final Brick.Properties properties = brick.properties(context);
-        if (properties.ascent > ascent) {
-          ascent = properties.ascent;
+        if (brick.ascent > ascent) {
+          ascent = brick.ascent;
           newAscent = true;
         }
-        if (properties.descent > descent) {
-          descent = properties.descent;
+        if (brick.descent > descent) {
+          descent = brick.descent;
           newDescent = true;
         }
       }
@@ -282,9 +274,8 @@ public class Course {
         descent = 0;
         {
           for (final Brick brick : children) {
-            final Brick.Properties properties = brick.properties(context);
-            ascent = Math.max(ascent, properties.ascent);
-            descent = Math.max(descent, properties.descent);
+            ascent = Math.max(ascent, brick.ascent);
+            descent = Math.max(descent, brick.descent);
           }
         }
         newAscent = true;
@@ -294,7 +285,7 @@ public class Course {
         for (Brick b : children) {
           b.allocateTransverse(context, ascent, descent);
           for (Attachment attachment : b.getAttachments()) {
-            attachment.setTransverseSpan(context,ascent,descent);
+            attachment.setTransverseSpan(context, ascent, descent);
           }
         }
       } else
@@ -309,16 +300,14 @@ public class Course {
       CalculateCourseConverseContext calcContext = new CalculateCourseConverseContext();
       for (int index = 0; index < children.size(); ++index) {
         final Brick brick = children.get(index);
-        final Brick.Properties properties = brick.properties(context);
-        if (calcContext.alignment == null && properties.alignment != null) {
+        if (calcContext.alignment == null && brick.alignment != null) {
           if (alignment != null) alignment.removeBrick(context, alignmentBrick);
-          alignment = properties.alignment;
+          alignment = brick.alignment;
           alignmentBrick = brick;
           alignment.addBrick(context, alignmentBrick);
           alignment.feedback(context, calcContext.converse);
         }
-        ROPair<Integer, Integer> brickPlacement =
-            calculateNextBrickAdvance(calcContext, brick, properties);
+        ROPair<Integer, Integer> brickPlacement = calculateNextBrickAdvance(calcContext, brick);
         brick.setConverse(context, brickPlacement.second, brickPlacement.first);
         for (final Attachment attachment : brick.getAttachments())
           attachment.setConverse(context, brickPlacement.first);
@@ -347,6 +336,7 @@ public class Course {
   class IterationCompactTask extends IterationTask {
     private final Context context;
     private final Set<VisualAtom> skip = new HashSet<>();
+    private final Set<VisualFrontPrimitive> skipPrimitives = new HashSet<>();
 
     IterationCompactTask(final Context context) {
       this.context = context;
@@ -361,29 +351,36 @@ public class Course {
     public boolean runImplementation(final IterationContext iterationContext) {
       // Find higest priority brick in this course
       final PriorityQueue<VisualAtom> priorities = new PriorityQueue<>(11, compactComparator);
+      VisualFrontPrimitive lastPrimitive = null;
       int converse = 0;
-      {
-        for (int index = 0; index < children.size(); ++index) {
-          final Brick brick = children.get(index);
-          final VisualLeaf visual = brick.getVisual();
-          final VisualAtom atomVisual = visual.parent().atomVisual();
-          if (skip.contains(atomVisual)) continue;
-          if (!visual.atomVisual().compact || visual instanceof VisualFrontPrimitive)
-            priorities.add(atomVisual);
-          converse = brick.converseEdge();
-          if (!priorities.isEmpty() && converse > context.edge) break;
-        }
+      for (int index = 0; index < children.size(); ++index) {
+        final Brick brick = children.get(index);
+        final VisualLeaf visual = brick.getVisual();
+        final VisualAtom atomVisual = visual.parent().atomVisual();
+        if (visual instanceof VisualFrontPrimitive && !skipPrimitives.contains(visual))
+          lastPrimitive = (VisualFrontPrimitive) visual;
+        if ((!visual.atomVisual().compact && !skip.contains(atomVisual)))
+          priorities.add(atomVisual);
+        converse = brick.converseEdge();
+        if (!priorities.isEmpty() && converse > context.edge) break;
       }
       if (converse <= context.edge) {
         return false;
       }
       if (priorities.isEmpty()) {
-        return false;
+        if (lastPrimitive != null) {
+          lastPrimitive.primitiveReflow(context);
+          skipPrimitives.add(lastPrimitive);
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        final VisualAtom top = priorities.poll();
+        top.compact(context);
+        skip.add(top);
+        return true;
       }
-      final VisualAtom top = priorities.poll();
-      top.compact(context);
-      skip.add(top);
-      return true;
     }
 
     @Override
@@ -410,6 +407,18 @@ public class Course {
     }
 
     private boolean expand(final Context context, final IterationContext iterationContext) {
+      // Try to unwrap any soft-wrapped primitives first
+      for (Brick child : children) {
+        VisualLeaf visual = child.getVisual();
+        if (!(visual instanceof VisualFrontPrimitive)
+            || !((VisualFrontPrimitive) visual).softWrapped()) continue;
+        int oldLines = ((VisualFrontPrimitive) visual).hardLineCount;
+        ((VisualFrontPrimitive) visual).primitiveReflow(context);
+        int newLines = ((VisualFrontPrimitive) visual).hardLineCount;
+        return oldLines != newLines;
+      }
+
+      // Unwrap nodes based on priority
       final PriorityQueue<VisualAtom> priorities = new PriorityQueue<>(11, expandComparator);
 
       // Find next atom that can be expanded
@@ -420,6 +429,22 @@ public class Course {
       }
       if (priorities.isEmpty()) return false;
       final VisualAtom top = priorities.poll();
+
+      // Check that it's the most precedent in all courses it has bricks (preserve: all higher
+      // precedent atoms are
+      // expanded)
+      {
+        TSList<Brick> bricks = new TSList<>();
+        top.getLeafBricks(context, bricks);
+        for (Brick brick : bricks) {
+          if (brick.parent.index == index) continue;
+          for (Brick otherCourseBrick : parent.children.get(brick.parent.index).children) {
+            if (otherCourseBrick.getVisual().atomVisual() == top) continue;
+            if (isOrdered(expandComparator, top, otherCourseBrick.getVisual().atomVisual()))
+              return false;
+          }
+        }
+      }
 
       // Check that all parents are either expanded or have lower expand priority
       {
@@ -452,21 +477,18 @@ public class Course {
 
       // Check if we actually can expand
       {
-        final TSList<ROPair<Brick, Brick.Properties>> brickProperties = new TSList<>();
-        top.getLeafPropertiesForTagsChange(
-            context, brickProperties, TagsChange.remove(Tags.TAG_COMPACT));
+        final TSList<Brick> brickProperties = new TSList<>();
+        top.getLeafBricks(context, brickProperties);
         Course course = null;
         int courseLastBrick = 0;
         CalculateCourseConverseContext courseCalc = null;
-        for (final ROPair<Brick, Brick.Properties> pair : brickProperties) {
-          final Brick brick = pair.first;
-          Brick.Properties properties = pair.second;
+        for (final Brick brick : brickProperties) {
 
           // Line changed (or first brick)
           if (brick.parent != course) {
             // If jumping to a new non-consecutive line and unbreaking, reset to calculate previous
             // line
-            boolean unsplit = brick.index == 0 && !properties.split && brick.parent.index > 0;
+            boolean unsplit = brick.index == 0 && !brick.isSplit(false) && brick.parent.index > 0;
             if (unsplit) {
               if (course != null && brick.parent.index - 1 == course.index) {
                 // On next line, continue calculation
@@ -482,8 +504,7 @@ public class Course {
             if (course != null) {
               for (; courseLastBrick < course.children.size(); ++courseLastBrick) {
                 Brick brick1 = course.children.get(courseLastBrick);
-                Brick.Properties properties1 = brick1.properties(context);
-                calculateNextBrickAdvance(courseCalc, brick1, properties1);
+                calculateNextBrickAdvance(courseCalc, brick1);
                 if (courseCalc.converse > context.edge) return false;
               }
             }
@@ -498,13 +519,12 @@ public class Course {
           // Sum bricks leading up to modified brick
           for (; courseLastBrick < brick.index; ++courseLastBrick) {
             Brick brick1 = course.children.get(courseLastBrick);
-            Brick.Properties properties1 = brick1.properties(context);
-            calculateNextBrickAdvance(courseCalc, brick1, properties1);
+            calculateNextBrickAdvance(courseCalc, brick1);
             if (courseCalc.converse > context.edge) return false;
           }
 
           // Sum modified brick
-          calculateNextBrickAdvance(courseCalc, brick, properties);
+          calculateNextBrickAdvance(courseCalc, brick);
           if (courseCalc.converse > context.edge) return false;
           courseLastBrick += 1;
         }
@@ -513,8 +533,7 @@ public class Course {
         if (course != null)
           for (; courseLastBrick < course.children.size(); ++courseLastBrick) {
             Brick brick1 = course.children.get(courseLastBrick);
-            Brick.Properties properties1 = brick1.properties(context);
-            calculateNextBrickAdvance(courseCalc, brick1, properties1);
+            calculateNextBrickAdvance(courseCalc, brick1);
             if (courseCalc.converse > context.edge) return false;
           }
       }

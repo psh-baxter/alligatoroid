@@ -28,12 +28,6 @@ public class Wall {
   int beddingAfter = 0;
   TSSet<BeddingListener> beddingListeners = new TSSet<>();
   TSSet<CornerstoneListener> cornerstoneListeners = new TSSet<>();
-  public PriorityQueue<VisualFrontPrimitive> splitPrimitives =
-      new PriorityQueue<>(
-          11,
-          new ChainComparator<VisualFrontPrimitive>()
-              .lesserFirst(visual -> visual.lines.get(0).brick.parent.index)
-              .build());
 
   public abstract static class CornerstoneListener {
     public abstract void cornerstoneChanged(Context context, Brick brick);
@@ -47,16 +41,19 @@ public class Wall {
   public Wall(final Context context) {
     visual = context.display.group();
     context.addConverseEdgeListener(
-        (context1, oldValue, newValue) -> {
-          for (final VisualFrontPrimitive primitive : splitPrimitives) {
-            primitive.idleResplit(context1);
-          }
-          if (newValue < oldValue) {
-            idleCompact(context1);
-          } else if (newValue > oldValue) {
-            idleExpand(context1);
-          }
-        });
+            new Context.ContextIntListener() {
+              int modOldValue = Integer.MAX_VALUE;
+              @Override
+              public void changed(Context context1, int oldValue, int newValue) {
+                if (newValue < modOldValue) {
+                  Wall.this.idleCompact(context1);
+                  modOldValue = newValue;
+                } else if (newValue > modOldValue * context.retryExpandFactor) {
+                  Wall.this.idleExpand(context1);
+                  modOldValue = newValue;
+                }
+              }
+            });
   }
 
   public void clear(final Context context) {
@@ -230,10 +227,10 @@ public class Wall {
       }
       if (compactTask == null) {
         compactTask = children.get(at).new IterationCompactTask(context);
-        at++;
       }
       if (!compactTask.run(iterationContext)) {
         compactTask = null;
+        at++;
       }
       return true;
     }

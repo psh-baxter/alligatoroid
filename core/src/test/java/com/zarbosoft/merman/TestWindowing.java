@@ -23,14 +23,17 @@ import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.IterationRunner;
-import com.zarbosoft.merman.helper.StyleBuilder;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
+import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.Direction;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
@@ -62,16 +65,16 @@ public class TestWindowing {
   public static final FreeAtomType array;
 
   static {
-    a0_0 = new TypeBuilder("a0_0").back(Helper.buildBackPrimitive("a0_0")).frontMark("0_0").build();
-    a1_0 = new TypeBuilder("a1_0").back(Helper.buildBackPrimitive("a1_0")).frontMark("1_0").build();
-    a2_0 = new TypeBuilder("a2_0").back(Helper.buildBackPrimitive("a2_0")).frontMark("2_0").build();
-    a3_0 = new TypeBuilder("a3_0").back(Helper.buildBackPrimitive("a3_0")).frontMark("3_0").build();
-    a4 = new TypeBuilder("a4").back(Helper.buildBackPrimitive("a4")).frontMark("4").build();
-    a5 = new TypeBuilder("a5").back(Helper.buildBackPrimitive("a5")).frontMark("5").build();
-    a0_1 = new TypeBuilder("a0_1").back(Helper.buildBackPrimitive("a0_1")).frontMark("0_1").build();
-    a1_1 = new TypeBuilder("a1_1").back(Helper.buildBackPrimitive("a1_1")).frontMark("1_1").build();
-    a2_1 = new TypeBuilder("a2_1").back(Helper.buildBackPrimitive("a2_1")).frontMark("2_1").build();
-    a3_1 = new TypeBuilder("a3_1").back(Helper.buildBackPrimitive("a3_1")).frontMark("3_1").build();
+    a0_0 = markType("0_0");
+    a1_0 = markType("1_0");
+    a2_0 = markType("2_0");
+    a3_0 = markType("3_0");
+    a4 = markType("4");
+    a5 = markType("5");
+    a0_1 = markType("0_1");
+    a1_1 = markType("1_1");
+    a2_1 = markType("2_1");
+    a3_1 = markType("3_1");
     oneAtom =
         new TypeBuilder("oneAtom")
             .back(
@@ -89,20 +92,35 @@ public class TestWindowing {
             .build();
   }
 
+  public static FreeAtomType markType(String name) {
+    return new FreeAtomType(
+        new FreeAtomType.Config(
+            "a" + name,
+            new AtomType.Config(
+                name,
+                TSList.of(Helper.buildBackPrimitive("a" + name)),
+                TSList.of(
+                    new FrontSymbol(
+                        new FrontSymbol.Config(
+                            new SymbolTextSpec(
+                                new SymbolTextSpec.Config(name)
+                                    )))))));
+  }
+
   @Test
   public void testInitialNoWindow() {
     int i = 0;
     start(false)
-        .checkTextBrick(i++, 0, "0_0")
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "4")
-        .checkTextBrick(i++, 0, "5")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1")
-        .checkTextBrick(i++, 0, "0_1");
+        .checkTextBrick(0, i++, "0_0")
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "4")
+        .checkTextBrick(0, i++, "5")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1")
+        .checkTextBrick(0, i++, "0_1");
   }
 
   public GeneralTestWizard start(final boolean startWindowed) {
@@ -136,7 +154,6 @@ public class TestWindowing {
                     .type(oneAtom)
                     .type(array)
                     .build())
-            .style(new StyleBuilder().split(true).build())
             .build();
     final Syntax syntax = out;
     GeneralTestWizard generalTestWizard =
@@ -180,13 +197,13 @@ public class TestWindowing {
   public void testInitialWindow() {
     int i = 0;
     start(true)
-        .checkTextBrick(i++, 0, "0_0")
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1")
-        .checkTextBrick(i++, 0, "0_1");
+        .checkTextBrick(0, i++, "0_0")
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1")
+        .checkTextBrick(0, i++, "0_1");
   }
 
   @Test
@@ -198,14 +215,14 @@ public class TestWindowing {
                 ((Atom) context.syntaxLocate(new Path("value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1");
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1");
   }
 
   @Test
@@ -218,16 +235,16 @@ public class TestWindowing {
                     .valueParentRef.selectValue(context))
         .checkTextBrick(0, 0, "0_0")
         .act("window")
-        .checkTextBrick(i++, 0, "0_0")
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "4")
-        .checkTextBrick(i++, 0, "5")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1")
-        .checkTextBrick(i++, 0, "0_1");
+        .checkTextBrick(0, i++, "0_0")
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "4")
+        .checkTextBrick(0, i++, "5")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1")
+        .checkTextBrick(0, i++, "0_1");
   }
 
   @Test
@@ -244,12 +261,12 @@ public class TestWindowing {
                 ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "4")
-        .checkTextBrick(i++, 0, "5")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1");
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "4")
+        .checkTextBrick(0, i++, "5")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1");
   }
 
   @Test
@@ -261,7 +278,7 @@ public class TestWindowing {
                 ((ValueAtom) context.syntaxLocate(new Path("value", "0", "value")))
                     .selectInto(context))
         .act("window")
-        .checkTextBrick(i++, 0, "0_0");
+        .checkTextBrick(0, i++, "0_0");
   }
 
   @Test
@@ -273,16 +290,16 @@ public class TestWindowing {
                 ((ValueAtom) context.syntaxLocate(new Path("value", "0", "value", "atom", "value")))
                     .selectInto(context))
         .act("window")
-        .checkTextBrick(i++, 0, "0_0")
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "4")
-        .checkTextBrick(i++, 0, "5")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1")
-        .checkTextBrick(i++, 0, "0_1");
+        .checkTextBrick(0, i++, "0_0")
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "4")
+        .checkTextBrick(0, i++, "5")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1")
+        .checkTextBrick(0, i++, "0_1");
   }
 
   @Test
@@ -296,7 +313,7 @@ public class TestWindowing {
                             new Path("value", "1", "value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
-        .checkTextBrick(i++, 0, "4");
+        .checkTextBrick(0, i++, "4");
   }
 
   @Test
@@ -313,12 +330,12 @@ public class TestWindowing {
                 ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window_down")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "4")
-        .checkTextBrick(i++, 0, "5")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1");
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "4")
+        .checkTextBrick(0, i++, "5")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1");
   }
 
   @Test
@@ -333,7 +350,7 @@ public class TestWindowing {
                     .valueParentRef.selectValue(context))
         .act("window")
         .act("window_down")
-        .checkTextBrick(i++, 0, "4");
+        .checkTextBrick(0, i++, "4");
   }
 
   @Test
@@ -350,10 +367,10 @@ public class TestWindowing {
         .checkCourseCount(1)
         .checkTextBrick(0, 0, "4")
         .act("window_up")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "4")
-        .checkTextBrick(i++, 0, "5")
-        .checkTextBrick(i++, 0, "3_1");
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "4")
+        .checkTextBrick(0, i++, "5")
+        .checkTextBrick(0, i++, "3_1");
   }
 
   /** Moving the window up to the root node shows all root level items */
@@ -368,13 +385,13 @@ public class TestWindowing {
         .act("window")
         .checkTextBrick(0, 0, "1_0")
         .act("window_up")
-        .checkTextBrick(i++, 0, "0_0")
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1")
-        .checkTextBrick(i++, 0, "0_1");
+        .checkTextBrick(0, i++, "0_0")
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1")
+        .checkTextBrick(0, i++, "0_1");
   }
 
   @Test
@@ -387,16 +404,16 @@ public class TestWindowing {
                     .valueParentRef.selectValue(context))
         .act("window")
         .act("window_clear")
-        .checkTextBrick(i++, 0, "0_0")
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "4")
-        .checkTextBrick(i++, 0, "5")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1")
-        .checkTextBrick(i++, 0, "0_1");
+        .checkTextBrick(0, i++, "0_0")
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "4")
+        .checkTextBrick(0, i++, "5")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1")
+        .checkTextBrick(0, i++, "0_1");
   }
 
   @Test
@@ -413,14 +430,14 @@ public class TestWindowing {
             context ->
                 ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1");
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1");
   }
 
   @Test
@@ -437,14 +454,14 @@ public class TestWindowing {
                 ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("enter")
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1");
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1");
   }
 
   @Test
@@ -464,14 +481,14 @@ public class TestWindowing {
                         context.syntaxLocate(
                             new Path("value", "1", "value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "3_1")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1");
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "3_1")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1");
   }
 
   @Test
@@ -489,13 +506,13 @@ public class TestWindowing {
             context ->
                 ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
-        .checkTextBrick(i++, 0, "0_0")
-        .checkTextBrick(i++, 0, "1_0")
-        .checkTextBrick(i++, 0, "2_0")
-        .checkTextBrick(i++, 0, "...")
-        .checkTextBrick(i++, 0, "2_1")
-        .checkTextBrick(i++, 0, "1_1")
-        .checkTextBrick(i++, 0, "0_1");
+        .checkTextBrick(0, i++, "0_0")
+        .checkTextBrick(0, i++, "1_0")
+        .checkTextBrick(0, i++, "2_0")
+        .checkTextBrick(0, i++, "...")
+        .checkTextBrick(0, i++, "2_1")
+        .checkTextBrick(0, i++, "1_1")
+        .checkTextBrick(0, i++, "0_1");
   }
 
   @Test
@@ -512,10 +529,10 @@ public class TestWindowing {
         .checkTextBrick(0, 0, "4")
         .checkCourseCount(1)
         .act("exit")
-        .checkTextBrick(i++, 0, "3_0")
-        .checkTextBrick(i++, 0, "4")
-        .checkTextBrick(i++, 0, "5")
-        .checkTextBrick(i++, 0, "3_1");
+        .checkTextBrick(0, i++, "3_0")
+        .checkTextBrick(0, i++, "4")
+        .checkTextBrick(0, i++, "5")
+        .checkTextBrick(0, i++, "3_1");
   }
 
   public static class GeneralTestWizard {
@@ -610,7 +627,10 @@ public class TestWindowing {
         dumpWall();
         assertThat(brick, instanceOf(BrickText.class));
       }
-      assertThat(((BrickText) brick).text.text(), equalTo(text));
+      if (!((BrickText) brick).text.text().equals(text)) {
+        dumpWall();
+        assertThat(((BrickText) brick).text.text(), equalTo(text));
+      }
       return this;
     }
 

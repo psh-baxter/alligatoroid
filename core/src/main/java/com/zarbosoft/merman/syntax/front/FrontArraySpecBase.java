@@ -9,29 +9,30 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
+import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSSet;
 
+import static com.zarbosoft.merman.syntax.style.Style.SplitMode.NEVER;
+
 public abstract class FrontArraySpecBase extends FrontSpec {
   public final ROList<FrontSymbol> prefix;
   public final ROList<FrontSymbol> suffix;
   public final ROList<FrontSymbol> separator;
-  public final boolean tagFirst;
-  public final boolean tagLast;
   public final Symbol ellipsis;
-  private BaseBackArraySpec dataType;
+  public final Symbol empty;
+  public BaseBackArraySpec dataType;
 
   public FrontArraySpecBase(Config config) {
-    super(config.tags);
     this.prefix = config.prefix;
     this.suffix = config.suffix;
     this.separator = config.separator;
-    this.tagFirst = config.tagFirst;
-    this.tagLast = config.tagLast;
     this.ellipsis = config.ellipsis;
+    empty = config.empty;
   }
 
   public BaseBackArraySpec dataType() {
@@ -45,7 +46,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
       final Atom atom,
       final int visualDepth,
       final int depthScore) {
-    LocalVisualFrontArray out = new LocalVisualFrontArray(this, context, parent, atom, visualDepth, depthScore);
+    VisualFrontArray out = new VisualFrontArray(this,  parent, atom, visualDepth);
     out.root(context, parent, depthScore, depthScore);
     return out;
   }
@@ -71,70 +72,9 @@ public abstract class FrontArraySpecBase extends FrontSpec {
     public ROList<FrontSymbol> separator = ROList.empty;
     public boolean tagFirst = false;
     public boolean tagLast = false;
-    public Symbol ellipsis = new SymbolTextSpec("...");
+    public Symbol ellipsis = new SymbolTextSpec(new SymbolTextSpec.Config("..."));
+    public Symbol empty = new SymbolSpaceSpec(new SymbolSpaceSpec.Config());
 
     public Config() {}
-
-    public Config(
-        ROSet<String> tags,
-        ROList<FrontSymbol> prefix,
-        ROList<FrontSymbol> suffix,
-        ROList<FrontSymbol> separator,
-        boolean tagFirst,
-        boolean tagLast,
-        Symbol ellipsis) {
-      this.tags = tags;
-      this.prefix = prefix;
-      this.suffix = suffix;
-      this.separator = separator;
-      this.tagFirst = tagFirst;
-      this.tagLast = tagLast;
-      this.ellipsis = ellipsis;
-    }
-  }
-
-  private static class LocalVisualFrontArray extends VisualFrontArray {
-    private final FrontArraySpecBase frontArraySpecBase;
-
-    public LocalVisualFrontArray(
-        FrontArraySpecBase frontArraySpecBase,
-        Context context,
-        VisualParent parent,
-        Atom atom,
-        int visualDepth,
-        int depthScore) {
-      super(parent, frontArraySpecBase.dataType.get(atom.fields), visualDepth);
-      this.frontArraySpecBase = frontArraySpecBase;
-    }
-
-    @Override
-    protected boolean tagLast() {
-      return frontArraySpecBase.tagLast;
-    }
-
-    @Override
-    protected boolean tagFirst() {
-      return frontArraySpecBase.tagFirst;
-    }
-
-    @Override
-    protected ROList<FrontSymbol> getElementPrefix() {
-      return frontArraySpecBase.prefix;
-    }
-
-    @Override
-    protected ROList<FrontSymbol> getSeparator() {
-      return frontArraySpecBase.separator;
-    }
-
-    @Override
-    protected ROList<FrontSymbol> getElementSuffix() {
-      return frontArraySpecBase.suffix;
-    }
-
-    @Override
-    protected Symbol ellipsis() {
-      return frontArraySpecBase.ellipsis;
-    }
   }
 }

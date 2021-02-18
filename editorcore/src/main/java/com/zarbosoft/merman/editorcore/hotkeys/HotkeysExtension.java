@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.extensions.hotkeys;
+package com.zarbosoft.merman.editorcore.hotkeys;
 
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
@@ -8,8 +8,6 @@ import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.editor.display.derived.ColumnarTableLayout;
 import com.zarbosoft.merman.editor.display.derived.TLayout;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
-import com.zarbosoft.merman.extensions.hotkeys.grammar.Node;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.errors.InvalidStream;

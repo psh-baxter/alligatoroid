@@ -1,7 +1,7 @@
-package com.zarbosoft.merman.extensions.hotkeys.grammar;
+package com.zarbosoft.merman.editorcore.hotkeys;
 
 import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.extensions.hotkeys.Key;
+import com.zarbosoft.merman.editor.hid.Key;
 import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.StackStore;

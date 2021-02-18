@@ -15,9 +15,7 @@ public class GapAtomType extends BaseGapAtomType {
 
   public static class Config {
     public String id = "__gap";
-    public ROSet<String> atomTags = ROSet.empty;
     public String backType = "__gap";
-    public ROSet<String> frontPrimitiveTags = ROSet.empty;
     public ROList<FrontSpec> frontPrefix = ROList.empty;
     public ROList<FrontSpec> frontSuffix = ROList.empty;
 
@@ -25,15 +23,11 @@ public class GapAtomType extends BaseGapAtomType {
 
     public Config(
         String id,
-        ROSet<String> atomTags,
         String backType,
-        ROSet<String> frontPrimitiveTags,
         ROList<FrontSpec> frontPrefix,
         ROList<FrontSpec> frontSuffix) {
       this.id = id;
-      this.atomTags = atomTags;
       this.backType = backType;
-      this.frontPrimitiveTags = frontPrimitiveTags;
       this.frontPrefix = frontPrefix;
       this.frontSuffix = frontSuffix;
     }
@@ -43,7 +37,6 @@ public class GapAtomType extends BaseGapAtomType {
     super(
         new AtomType.Config(
             config.id,
-            config.atomTags,
             TSList.of(
                 new BackFixedTypeSpec(
                     new BackFixedTypeSpec.Config(
@@ -55,7 +48,7 @@ public class GapAtomType extends BaseGapAtomType {
                 .add(
                     new FrontPrimitiveSpec(
                         new FrontPrimitiveSpec.Config(
-                            GAP_PRIMITIVE_KEY, config.frontPrimitiveTags)))
+                            GAP_PRIMITIVE_KEY)))
                 .addAll(config.frontSuffix)));
     backType = config.backType;
   }

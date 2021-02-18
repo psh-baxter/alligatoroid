@@ -1,6 +1,5 @@
-package com.zarbosoft.merman.extensions.hotkeys;
+package com.zarbosoft.merman.editorcore.hotkeys;
 
-import com.zarbosoft.merman.extensions.hotkeys.grammar.Node;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;

@@ -2,12 +2,9 @@ package com.zarbosoft.merman.editor.visual;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public abstract class Visual {
@@ -18,8 +15,6 @@ public abstract class Visual {
   }
 
   public abstract VisualParent parent();
-
-  public abstract void tagsChanged(Context context);
 
   public abstract Brick createOrGetFirstBrick(Context context);
 
@@ -41,12 +36,10 @@ public abstract class Visual {
 
   /**
    * Returns bricks in order because the expansion algorithm tests expandability in courses in order
-   * @param context
-   * @param brickProperties
-   * @param change
-   */
-  public abstract void getLeafPropertiesForTagsChange(
-          Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, TagsChange change);
+   *  @param context
+   * @param bricks*/
+  public abstract void getLeafBricks(
+          Context context, TSList<Brick> bricks);
 
   public int depthScore() {
     final VisualParent parent = parent();
@@ -59,10 +52,7 @@ public abstract class Visual {
   public abstract void uproot(Context context, Visual root);
 
   public void root(
-          final Context context,
-          final VisualParent parent,
-          final int depth,
-          final int depthScore) {
+      final Context context, final VisualParent parent, final int depth, final int depthScore) {
     this.visualDepth = depth;
   }
 

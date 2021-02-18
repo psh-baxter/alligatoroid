@@ -2,17 +2,19 @@ package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
-import com.zarbosoft.merman.helper.FrontSpaceBuilder;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
-import com.zarbosoft.merman.helper.StyleBuilder;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Padding;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
 import org.junit.Test;
 
 public class TestLayoutGeneral {
@@ -26,34 +28,38 @@ public class TestLayoutGeneral {
 
   static {
     one =
-        new TypeBuilder("one")
-            .back(Helper.buildBackPrimitive("one"))
-            .front(new FrontMarkBuilder("one").build())
-            .build();
+        new TypeBuilder("one").back(Helper.buildBackPrimitive("one")).frontSplitMark("one").build();
     two =
-        new TypeBuilder("two")
-            .back(Helper.buildBackPrimitive("two"))
-            .front(new FrontMarkBuilder("two").build())
-            .build();
+        new TypeBuilder("two").back(Helper.buildBackPrimitive("two")).frontSplitMark("two").build();
     big =
         new TypeBuilder("big")
             .back(Helper.buildBackPrimitive("big"))
-            .front(new FrontSpaceBuilder().build())
+            .front(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS).style(
+                            new Style.Config()
+                                .
+                                /* only in first syntax */ spaceTransverseAfter(60)
+                                )))))
             .build();
     text =
         new TypeBuilder("text")
             .back(Helper.buildBackDataPrimitive("value"))
-            .frontDataPrimitive("value")
+            .front(
+                new FrontPrimitiveSpec(
+                    new FrontPrimitiveSpec.Config("value").splitMode(Style.SplitMode.ALWAYS)
+                        ))
             .build();
     array =
         new TypeBuilder("array")
             .back(Helper.buildBackDataArray("value", "any"))
-            .frontMark("[")
+            .frontSplitMark("[")
             .front(
                 new FrontDataArrayBuilder("value")
-                    .addSeparator(new FrontMarkBuilder(", ").tag("separator").build())
+                    .addSeparator(new FrontMarkBuilder(", ").build())
                     .build())
-            .frontMark("]")
+            .frontSplitMark("]")
             .autoComplete(99)
             .build();
     syntax =
@@ -63,9 +69,6 @@ public class TestLayoutGeneral {
             .type(text)
             .type(array)
             .group("any", new GroupBuilder().type(one).type(two).type(text).type(array).build())
-            .style(new StyleBuilder().split(true).build())
-            .style(new StyleBuilder().tag("separator").split(false).build())
-            .style(new StyleBuilder().tag("big").spaceTransverseAfter(60).build())
             .build();
     syntaxPadded =
         new SyntaxBuilder("any")
@@ -78,8 +81,6 @@ public class TestLayoutGeneral {
             .group(
                 "any",
                 new GroupBuilder().type(one).type(two).type(big).type(text).type(array).build())
-            .style(new StyleBuilder().split(true).build())
-            .style(new StyleBuilder().tag("separator").split(false).build())
             .build();
   }
 

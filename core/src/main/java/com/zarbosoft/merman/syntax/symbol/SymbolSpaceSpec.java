@@ -3,29 +3,44 @@ package com.zarbosoft.merman.syntax.symbol;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Blank;
 import com.zarbosoft.merman.editor.display.DisplayNode;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
 import com.zarbosoft.merman.syntax.style.Style;
 
 public class SymbolSpaceSpec extends Symbol {
+  public final Style.SplitMode splitMode;
+  public final Style style;
+
+  public static class Config {
+    public Style.SplitMode splitMode = Style.SplitMode.NEVER;
+    public Style.Config style = new Style.Config();
+
+    public Config style(Style.Config style) {
+      this.style = style;
+      return this;
+    }
+
+    public Config splitMode(Style.SplitMode splitMode) {
+      this.splitMode = splitMode;
+      return this;
+    }
+  }
+
+  public SymbolSpaceSpec(Config config) {
+    this.style = config.style.create();
+    this.splitMode = config.splitMode;
+  }
+
   @Override
   public DisplayNode createDisplay(final Context context) {
     final Blank blank = context.display.blank();
+    blank.setConverseSpan(context, style.space);
     return blank;
   }
 
   @Override
-  public void style(final Context context, final DisplayNode node, final Style style) {}
-
-  @Override
   public Brick createBrick(final Context context, final BrickInterface inter) {
-    return new BrickSpace(context, inter);
-  }
-
-  @Override
-  public String partTag() {
-    return Tags.TAG_SYMBOL_SPACE;
+    return new BrickSpace(context, inter, splitMode, style);
   }
 }

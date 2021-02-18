@@ -9,10 +9,6 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public interface VisualLeaf {
-	void getLeafPropertiesForTagsChange(
-			Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, TagsChange change
-	);
-
 	Hoverable hover(final Context context, final Vector point); // Should map to method in Visual
 
 	VisualParent parent(); // Should map to method in Visual

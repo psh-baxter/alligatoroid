@@ -2,7 +2,6 @@ package com.zarbosoft.merman.editor.wall.bricks;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
-import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.syntax.style.Style;
@@ -10,30 +9,24 @@ import com.zarbosoft.merman.syntax.style.Style;
 public class BrickLine extends BrickText {
   private final VisualFrontPrimitive.Line line;
 
-  public BrickLine(final Context context, final VisualFrontPrimitive.Line line) {
-    super(context, line);
+  public BrickLine(
+      final Context context,
+      final VisualFrontPrimitive.Line line,
+      Style.SplitMode splitMode,
+      Style style) {
+    super(context, line, splitMode, style, 0);
     this.line = line;
+    changed(context);
   }
 
   @Override
-  public Properties properties(final Context context, final Style style) {
-    final Font font = Context.getFont(style, context);
-    return new Properties(
-        line.index == 0 ? style.split : true,
-        font.getAscent(),
-        font.getDescent(),
-        inter.findAlignment(style),
-        font.getWidth(text.text()));
+  public boolean isSplit(boolean compact) {
+    if (line.index > 0) return true;
+    return super.isSplit(compact);
   }
 
   @Override
   public Hoverable hover(final Context context, final Vector point) {
     return line.hover(context, point);
-  }
-
-  @Override
-  public void setConverse(final Context context, final int minConverse, final int converse) {
-    super.setConverse(context, minConverse, converse);
-    line.idleResplit(context);
   }
 }

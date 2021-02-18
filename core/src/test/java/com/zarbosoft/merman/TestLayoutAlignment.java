@@ -1,21 +1,22 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontDataPrimitiveBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
-import com.zarbosoft.merman.helper.FrontSpaceBuilder;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
-import com.zarbosoft.merman.helper.StyleBuilder;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
+import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -28,13 +29,6 @@ public class TestLayoutAlignment {
 
   public TestLayoutAlignment(final int layBrickBatchSize) {
     this.layBrickBatchSize = layBrickBatchSize;
-  }
-
-  public class GeneralTestWizard extends com.zarbosoft.merman.helper.GeneralTestWizard {
-    public GeneralTestWizard(Syntax syntax, Atom... atoms) {
-      super(syntax, atoms);
-      this.inner.context.layBrickBatchSize = layBrickBatchSize;
-    }
   }
 
   @Parameterized.Parameters
@@ -51,14 +45,13 @@ public class TestLayoutAlignment {
     FreeAtomType relative =
         new TypeBuilder("relative")
             .back(Helper.buildBackDataPrimitive("value"))
-            .frontDataPrimitive("value")
+            .alignedFrontDataPrimitive("value", "relative")
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
             .type(relative)
             .group("any", new GroupBuilder().type(relative).build())
             .relativeAlignment("relative", 3)
-            .style(new StyleBuilder().tag("relative").alignment("relative").build())
             .build();
     new GeneralTestWizard(syntax, new TreeBuilder(relative).add("value", "hi").build())
         .checkBrick(0, 0, 3);
@@ -73,7 +66,7 @@ public class TestLayoutAlignment {
     FreeAtomType relative =
         new TypeBuilder("relative")
             .back(Helper.buildBackDataPrimitive("value"))
-            .frontDataPrimitive("value")
+            .alignedFrontDataPrimitive("value", "relative")
             .build();
     final FreeAtomType array =
         new TypeBuilder("array")
@@ -86,7 +79,6 @@ public class TestLayoutAlignment {
             .type(relative)
             .type(array)
             .relativeAlignment("relative", 3)
-            .style(new StyleBuilder().tag("relative").alignment("relative").build())
             .build();
     new GeneralTestWizard(
             syntax,
@@ -106,15 +98,11 @@ public class TestLayoutAlignment {
                     .add(Helper.buildBackDataPrimitive("first"))
                     .add(Helper.buildBackDataPrimitive("second"))
                     .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus1").build())
+            .frontDataPrimitive("first")
+            .alignedFrontDataPrimitive("second", "concensus1")
             .build();
     final Syntax syntax =
-        new SyntaxBuilder(pair.id())
-            .type(pair)
-            .concensusAlignment("concensus1")
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
-            .build();
+        new SyntaxBuilder(pair.id()).type(pair).concensusAlignment("concensus1").build();
     new GeneralTestWizard(
             syntax, new TreeBuilder(pair).add("first", "three").add("second", "lumbar").build())
         .checkBrick(0, 1, 50);
@@ -133,16 +121,18 @@ public class TestLayoutAlignment {
                     .add(Helper.buildBackDataPrimitive("first"))
                     .add(Helper.buildBackDataPrimitive("second"))
                     .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus1").build())
+            .frontDataPrimitive("first")
+            .alignedFrontDataPrimitive("second", "concensus1")
             .build();
     final Syntax syntax =
         new SyntaxBuilder(pair.id())
             .type(pair)
             .concensusAlignment("concensus1")
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
-            .style(new StyleBuilder().tag("split").split(true).build())
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
+            .addRootFrontPrefix(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolSpaceSpec(
+                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -168,15 +158,11 @@ public class TestLayoutAlignment {
                     .add(Helper.buildBackDataPrimitive("first"))
                     .add(Helper.buildBackDataPrimitive("second"))
                     .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus1").build())
+            .frontDataPrimitive("first")
+            .alignedFrontDataPrimitive("second", "concensus1")
             .build();
     final Syntax syntax =
-        new SyntaxBuilder(pair.id())
-            .type(pair)
-            .concensusAlignment("concensus1")
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
-            .build();
+        new SyntaxBuilder(pair.id()).type(pair).concensusAlignment("concensus1").build();
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(pair).add("first", "a").add("second", "b").build(),
@@ -195,17 +181,18 @@ public class TestLayoutAlignment {
                     .add(Helper.buildBackDataPrimitive("first"))
                     .add(Helper.buildBackDataPrimitive("second"))
                     .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus1").build())
+            .frontDataPrimitive("first")
+            .alignedFrontDataPrimitive("second", "concensus1")
             .build();
     final Syntax syntax =
         new SyntaxBuilder(pair.id())
             .type(pair)
             .concensusAlignment("concensus1")
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("compact_split").build())
-            .style(
-                new StyleBuilder().tag("compact_split").tag(Tags.TAG_COMPACT).split(true).build())
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
+            .addRootFrontPrefix(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolSpaceSpec(
+                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -220,7 +207,7 @@ public class TestLayoutAlignment {
         .checkCourseCount(2)
         .displayWidth(95)
         .checkCourseCount(2)
-        .displayWidth(100)
+        .displayWidth(150)
         .checkCourseCount(1);
   }
 
@@ -243,8 +230,8 @@ public class TestLayoutAlignment {
                     .add(Helper.buildBackDataPrimitive("first"))
                     .add(Helper.buildBackDataPrimitive("second"))
                     .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus1").build())
+            .frontDataPrimitive("first")
+            .alignedFrontDataPrimitive("second", "concensus1")
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
@@ -252,10 +239,11 @@ public class TestLayoutAlignment {
             .type(pair)
             .group("any", new GroupBuilder().type(primitive).type(pair).build())
             .concensusAlignment("concensus1")
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("compact_split").build())
-            .style(
-                new StyleBuilder().tag("compact_split").tag(Tags.TAG_COMPACT).split(true).build())
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
+            .addRootFrontPrefix(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolSpaceSpec(
+                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -280,8 +268,8 @@ public class TestLayoutAlignment {
                     .add(Helper.buildBackDataPrimitive("first"))
                     .add(Helper.buildBackDataPrimitive("second"))
                     .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus1").build())
+            .frontDataPrimitive("first")
+            .alignedFrontDataPrimitive("second", "concensus1")
             .build();
     final FreeAtomType splitPair =
         new TypeBuilder("splitPair")
@@ -292,10 +280,10 @@ public class TestLayoutAlignment {
                     .build())
             .front(new FrontDataPrimitiveBuilder("first").build())
             .front(
-                new FrontDataPrimitiveBuilder("second")
-                    .tag("expandedconcensus1")
-                    .tag("compact_split")
-                    .build())
+                new FrontPrimitiveSpec(
+                    new FrontPrimitiveSpec.Config("second")
+                        .splitMode(Style.SplitMode.COMPACT)
+                        .style(c -> c.alignment("concensus1"))))
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
@@ -303,17 +291,11 @@ public class TestLayoutAlignment {
             .type(splitPair)
             .group("any", new GroupBuilder().type(pair).type(splitPair).build())
             .concensusAlignment("concensus1")
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
-            .style(new StyleBuilder().tag("split").split(true).build())
-            .style(
-                new StyleBuilder().tag("compact_split").tag(Tags.TAG_COMPACT).split(true).build())
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
-            .style(
-                new StyleBuilder()
-                    .tag("expandedconcensus1")
-                    .notag(Tags.TAG_COMPACT)
-                    .alignment("concensus1")
-                    .build())
+            .addRootFrontPrefix(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolSpaceSpec(
+                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -345,7 +327,9 @@ public class TestLayoutAlignment {
                     .add(Helper.buildBackDataPrimitive("second"))
                     .build())
             .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("concensus1").build())
+            .front(
+                new FrontPrimitiveSpec(
+                    new FrontPrimitiveSpec.Config("second").style(c -> c.alignment("concensus1"))))
             .build();
     final FreeAtomType atomPair =
         new TypeBuilder("atomPair")
@@ -354,9 +338,17 @@ public class TestLayoutAlignment {
                     .add(Helper.buildBackDataAtom("first", "any"))
                     .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
-            .front(new FrontSpaceBuilder().build())
+            .front(
+                new FrontSymbol(
+                    new FrontSymbol.Config(new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
             .frontDataNode("first")
-            .front(new FrontSpaceBuilder().tag("expandedconcensus1").tag("compact_split").build())
+            .front(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolSpaceSpec(
+                            new SymbolSpaceSpec.Config()
+                                .splitMode(Style.SplitMode.COMPACT)
+                                .style(new Style.Config().alignment("concensus1"))))))
             .frontDataNode("second")
             .build();
     final Syntax syntax =
@@ -367,17 +359,11 @@ public class TestLayoutAlignment {
             .group("any", new GroupBuilder().type(primitive).type(pair).type(atomPair).build())
             .concensusAlignment("concensus1")
             .concensusAlignment("concensus2")
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
-            .style(new StyleBuilder().tag("split").split(true).build())
-            .style(
-                new StyleBuilder().tag("compact_split").tag(Tags.TAG_COMPACT).split(true).build())
-            .style(new StyleBuilder().tag("concensus1").alignment("concensus1").build())
-            .style(
-                new StyleBuilder()
-                    .tag("expandedconcensus1")
-                    .notag(Tags.TAG_COMPACT)
-                    .alignment("concensus1")
-                    .build())
+            .addRootFrontPrefix(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolSpaceSpec(
+                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(
             syntax,
@@ -403,17 +389,27 @@ public class TestLayoutAlignment {
         new TypeBuilder("threeLine2")
             .back(Helper.buildBackPrimitive("threeLine"))
             .front(new FrontMarkBuilder("line1").build())
-            .front(new FrontMarkBuilder("line2").tag("split").build())
-            .front(new FrontMarkBuilder("line3").tag("compact_split").build())
+            .front(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolTextSpec(
+                            new SymbolTextSpec.Config("line2").splitMode(Style.SplitMode.ALWAYS)))))
+            .front(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolTextSpec(
+                            new SymbolTextSpec.Config("line3")
+                                .splitMode(Style.SplitMode.COMPACT)))))
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
             .type(threeLine2)
             .group("any", new GroupBuilder().type(threeLine2).build())
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
-            .style(new StyleBuilder().tag("split").split(true).build())
-            .style(
-                new StyleBuilder().tag("compact_split").tag(Tags.TAG_COMPACT).split(true).build())
+            .addRootFrontPrefix(
+                new FrontSymbol(
+                    new FrontSymbol.Config(
+                        new SymbolSpaceSpec(
+                            new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
     new GeneralTestWizard(syntax, new TreeBuilder(threeLine2).build())
         .displayWidth(50)
@@ -421,50 +417,10 @@ public class TestLayoutAlignment {
         .checkCourseCount(2);
   }
 
-  /**
-   * A concensus with only one element is disabled and won't affect alignment when the line is
-   * broken (as compared to when the line is broken causing the alignment to activate due to
-   * elements being on separate lines)
-   */
-  @Test
-  public void testDisabledConcensusSplit2() {
-    final FreeAtomType line =
-        new TypeBuilder("line")
-            .back(Helper.buildBackDataArray("value", "any"))
-            .front(new FrontDataArrayBuilder("value").build())
-            .build();
-    final FreeAtomType pair =
-        new TypeBuilder("pair")
-            .back(
-                new BackArrayBuilder()
-                    .add(Helper.buildBackDataPrimitive("first"))
-                    .add(Helper.buildBackDataPrimitive("second"))
-                    .build())
-            .front(new FrontDataPrimitiveBuilder("first").build())
-            .front(new FrontDataPrimitiveBuilder("second").tag("a").build())
-            .build();
-    final Syntax syntax =
-        new SyntaxBuilder("any")
-            .type(line)
-            .type(pair)
-            .group("any", new GroupBuilder().type(line).type(pair).build())
-            .concensusAlignment("a")
-            .addRootFrontPrefix(new FrontSpaceBuilder().tag("split").build())
-            .style(new StyleBuilder().tag("split").tag("a").split(true).build())
-            .style(new StyleBuilder().tag("a").alignment("a").build())
-            .build();
-    final Atom pairAtom1 =
-        new TreeBuilder(pair).add("first", "gmippii").add("second", "mmm").build();
-    new GeneralTestWizard(
-            syntax,
-            new TreeBuilder(line)
-                .addArray(
-                    "value",
-                    pairAtom1,
-                    new TreeBuilder(pair).add("first", "mo").add("second", "oo").build())
-                .build())
-        .checkCourseCount(1)
-        .run(context -> pairAtom1.changeTags(context, TagsChange.add("split")))
-        .checkCourseCount(2);
+  public class GeneralTestWizard extends com.zarbosoft.merman.helper.GeneralTestWizard {
+    public GeneralTestWizard(Syntax syntax, Atom... atoms) {
+      super(syntax, atoms);
+      this.inner.context.layBrickBatchSize = layBrickBatchSize;
+    }
   }
 }

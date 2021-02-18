@@ -9,26 +9,70 @@ import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.TSSet;
+
+import java.util.function.Consumer;
 
 public class FrontPrimitiveSpec extends FrontSpec {
   public final String field;
+  public final Style firstStyle;
+  public final Style hardStyle;
+  public final Style softStyle;
+  public final Style.SplitMode splitMode;
   public BaseBackPrimitiveSpec dataType;
 
   public static class Config {
-    final String field;
-    final ROSet<String> tags;
+    public final String field;
+    public Style.SplitMode splitMode = Style.SplitMode.NEVER;
+    /**
+     * First line (highest priority)
+     */
+    public final Style.Config firstStyle = new Style.Config();
+    /**
+     * Hard new line
+     */
+    public final Style.Config hardStyle = new Style.Config();
+    /**
+     * Soft new line
+     */
+    public final Style.Config softStyle = new Style.Config();
 
-    public Config(String field, ROSet<String> tags) {
+    public Config(String field) {
       this.field = field;
-      this.tags = tags;
+    }
+
+    public Config firstStyle(Consumer<Style.Config> c) {
+      c.accept(firstStyle);
+      return this;
+    }
+    public Config hardStyle(Consumer<Style.Config> c) {
+      c.accept(hardStyle);
+      return this;
+    }
+    public Config softStyle(Consumer<Style.Config> c) {
+      c.accept(softStyle);
+      return this;
+    }
+    public Config style(Consumer<Style.Config> c) {
+      c.accept(softStyle);
+      c.accept(hardStyle);
+      c.accept(firstStyle);
+      return this;
+    }
+
+    public Config splitMode(Style.SplitMode splitMode) {
+      this.splitMode = splitMode;
+      return this;
     }
   }
 
   public FrontPrimitiveSpec(Config config) {
-    super(config.tags);
     field = config.field;
+    firstStyle = config.firstStyle.create();
+    hardStyle = config.hardStyle.create();
+    softStyle = config.softStyle.create();
+    splitMode = config.splitMode;
   }
 
   @Override

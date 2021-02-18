@@ -9,62 +9,46 @@ import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.style.Style;
 
 public class BrickSpace extends Brick {
-	private int converse = 0;
-	private final Blank visual;
+  private final Blank visual;
+  private int converse = 0;
 
-	public BrickSpace(final Context context, final BrickInterface inter) {
-		super(inter);
-		visual = context.display.blank();
-		tagsChanged(context);
-	}
+  public BrickSpace(
+      final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
+    super(inter, style, splitMode);
+    visual = context.display.blank();
+    ascent = style.spaceTransverseBefore;
+    descent = style.spaceTransverseAfter;
+    converseSpan = style.space + style.spaceBefore + style.spaceAfter;
+    changed(context);
+  }
 
-	@Override
-	public void tagsChanged(final Context context) {
-		this.style = context.getStyle(inter.getTags(context).ro());
-		alignment = inter.findAlignment(style);
-		changed(context);
-	}
+  @Override
+  public int converseEdge() {
+    return converse + converseSpan;
+  }
 
-	@Override
-	public int converseEdge() {
-		return converse + style.space;
-	}
+  @Override
+  public int converseSpan() {
+    return converseSpan;
+  }
 
-	@Override
-	public int converseSpan() {
-		return style.space;
-	}
+  @Override
+  public DisplayNode getDisplayNode() {
+    return visual;
+  }
 
-	@Override
-	public Properties properties(final Context context, final Style style) {
-		return new Properties(
-				style.split,
-				style.spaceTransverseBefore,
-				style.spaceTransverseAfter,
-				alignment,
-				style.space + style.spaceBefore + style.spaceAfter
-		);
-	}
+  @Override
+  public void setConverse(final Context context, final int minConverse, final int converse) {
+    this.preAlignConverse = minConverse;
+    this.converse = converse;
+    visual.setPosition(new Vector(converse, 0), false);
+  }
 
-	@Override
-	public DisplayNode getDisplayNode() {
-		return visual;
-	}
+  @Override
+  public void allocateTransverse(final Context context, final int ascent, final int descent) {}
 
-	@Override
-	public void setConverse(final Context context, final int minConverse, final int converse) {
-		this.preAlignConverse = minConverse;
-		this.converse = converse;
-		visual.setPosition(new Vector(converse, 0), false);
-	}
-
-	@Override
-	public void allocateTransverse(final Context context, final int ascent, final int descent) {
-
-	}
-
-	@Override
-	public int getConverse() {
-		return converse;
-	}
+  @Override
+  public int getConverse() {
+    return converse;
+  }
 }

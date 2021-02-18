@@ -12,31 +12,42 @@ public class FreeAtomType extends AtomType {
   public final int autoChooseAmbiguity;
 
   public static class Config {
-    public AtomType.Config base;
-    public String name;
+    public final String name;
+    private final AtomType.Config base;
     public int depthScore = 0;
     public ROMap<String, AlignmentSpec> alignments = ROMap.empty;
     public int precedence = Integer.MAX_VALUE;
     public boolean associateForward = false;
     public int autoChooseAmbiguity = 1;
 
-    public Config() {}
-
-    public Config(
-        AtomType.Config base,
-        String name,
-        int depthScore,
-        ROMap<String, AlignmentSpec> alignments,
-        int precedence,
-        boolean associateForward,
-        int autoChooseAmbiguity) {
-      this.base = base;
+    public Config(String name, AtomType.Config base) {
       this.name = name;
-      this.depthScore = depthScore;
+      this.base = base;
+    }
+
+    public Config depthScore(int score) {
+      this.depthScore =  score;
+      return this;
+    }
+
+    public Config precedence(int val) {
+      this.precedence = val;
+      return this;
+    }
+
+    public Config associateForward(boolean yes) {
+      associateForward = yes;
+      return this;
+    }
+
+    public Config autoChooseAmbiguity(int val) {
+      autoChooseAmbiguity =val;
+      return this;
+    }
+
+    public Config alignments(ROMap<String, AlignmentSpec> alignments) {
       this.alignments = alignments;
-      this.precedence = precedence;
-      this.associateForward = associateForward;
-      this.autoChooseAmbiguity = autoChooseAmbiguity;
+      return this;
     }
   }
 

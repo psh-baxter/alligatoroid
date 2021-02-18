@@ -4,10 +4,8 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class VisualGroup extends Visual {
@@ -72,13 +70,6 @@ public class VisualGroup extends Visual {
   @Override
   public VisualParent parent() {
     return parent;
-  }
-
-  @Override
-  public void tagsChanged(Context context) {
-    for (Visual child : children) {
-      child.tagsChanged(context);
-    }
   }
 
   public void add(final Context context, final Visual node, final int index) {
@@ -153,10 +144,10 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public void getLeafPropertiesForTagsChange(
-          final Context context, TSList<ROPair<Brick, Brick.Properties>> brickProperties, final TagsChange change) {
+  public void getLeafBricks(
+          final Context context, TSList<Brick> bricks) {
     for (Visual child : children) {
-      child.getLeafPropertiesForTagsChange(context,brickProperties,change);
+      child.getLeafBricks(context, bricks);
     }
   }
 

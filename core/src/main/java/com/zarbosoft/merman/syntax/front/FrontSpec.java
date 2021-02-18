@@ -11,13 +11,6 @@ import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public abstract class FrontSpec {
-
-  public final ROSet<String> tags;
-
-  protected FrontSpec(ROSet<String> tags) {
-    this.tags = tags;
-  }
-
   public abstract Visual createVisual(
           Context context,
           VisualParent parent,

@@ -7,17 +7,13 @@ import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.alignment.Alignment;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.Map;
 
@@ -65,13 +61,6 @@ public class VisualAtom extends Visual {
     return parent;
   }
 
-  @Override
-  public void tagsChanged(Context context) {
-    for (Visual child : children) {
-      child.tagsChanged(context);
-    }
-  }
-
   public Alignment findAlignment(final String alignment) {
     Alignment found = localAlignments.getOpt(alignment);
     if (found != null) return found;
@@ -116,31 +105,26 @@ public class VisualAtom extends Visual {
 
   @Override
   public void compact(final Context context) {
+    compact = true;
     for (Visual child : children) {
       child.compact(context);
     }
-    boolean wasCompact = compact;
-    compact = true;
-    if (!wasCompact) tagsChanged(context);
   }
 
   @Override
   public void expand(final Context context) {
+    compact = false;
     for (Visual c : children) {
       c.expand(context);
     }
-    boolean wasCompact = compact;
-    compact = false;
-    if (wasCompact) tagsChanged(context);
   }
 
   @Override
-  public void getLeafPropertiesForTagsChange(
-      final Context context,
-      TSList<ROPair<Brick, Brick.Properties>> brickProperties,
-      final TagsChange change) {
+  public void getLeafBricks(
+          final Context context,
+          TSList<Brick> bricks) {
     for (Visual child : children) {
-      child.getLeafPropertiesForTagsChange(context, brickProperties, change);
+      child.getLeafBricks(context, bricks);
     }
   }
 
@@ -190,12 +174,6 @@ public class VisualAtom extends Visual {
 
   public AtomType type() {
     return atom.type;
-  }
-
-  public TSSet<String> getTags(Context context) {
-    TSSet<String> out = context.getGlobalTags().mut().addAll(atom.getTags()).add(atom.type.id());
-    if (compact) out.add(Tags.TAG_COMPACT);
-    return out;
   }
 
   public Alignment findParentAlignment(String key) {

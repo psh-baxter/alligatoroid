@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.extensions.hotkeys;
+package com.zarbosoft.merman.editor.hid;
 
 public enum Key {
   MOUSE_1,

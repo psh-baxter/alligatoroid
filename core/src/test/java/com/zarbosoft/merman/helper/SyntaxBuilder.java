@@ -16,12 +16,9 @@ import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Set;
-
 public class SyntaxBuilder {
   private final TSList<AtomType> types = new TSList<>();
   private final TSMap<String, ROList<String>> groups = new TSMap<String, ROList<String>>();
-  private final TSList<Style.Spec> styles = new TSList<>();
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
   private final String rootChildType;
   private final FrontDataArrayBuilder front = new FrontDataArrayBuilder("value");
@@ -44,14 +41,12 @@ public class SyntaxBuilder {
     RootAtomType root =
         new RootAtomType(
             new RootAtomType.Config(
-                ROSet.empty,
                 TSList.of(Helper.buildBackDataRootArray("value", rootChildType)),
                 TSList.of(front.build()),
                 alignments));
 
     Syntax.Config config = new Syntax.Config(Helper.i18n,types, splayed, root);
     config.pad = this.padding;
-    config.styles = styles;
     Syntax syntax = new Syntax(config);
 
     return syntax;
@@ -59,11 +54,6 @@ public class SyntaxBuilder {
 
   public SyntaxBuilder group(final String name, final ROList<String> subtypes) {
     groups.putNew(name, subtypes);
-    return this;
-  }
-
-  public SyntaxBuilder style(final Style.Spec style) {
-    styles.add(style);
     return this;
   }
 

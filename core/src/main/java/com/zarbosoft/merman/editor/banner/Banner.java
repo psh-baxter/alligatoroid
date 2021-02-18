@@ -8,7 +8,6 @@ import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.editor.display.derived.Box;
 import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Bedding;
 import com.zarbosoft.merman.editor.wall.Brick;
@@ -29,6 +28,7 @@ public class Banner {
             }
           });
   private final Attachment attachment = new TransverseListener(this);
+  private final Style style;
   public Text text;
   public Box background;
   private DelayEngine.Handle timer = null;
@@ -39,7 +39,8 @@ public class Banner {
   private Bedding bedding;
   private IterationPlace idle;
 
-  public Banner(final Context context) {
+  public Banner(final Context context, Style style) {
+    this.style = style;
     context.foreground.addCornerstoneListener(
         context,
         new Wall.CornerstoneListener() {
@@ -75,10 +76,6 @@ public class Banner {
     idlePlace(context, true);
   }
 
-  public void tagsChanged(final Context context) {
-    updateStyle(context);
-  }
-
   private void place(final Context context, final boolean animate) {
     if (text == null) return;
     final int calculatedTransverse =
@@ -98,7 +95,6 @@ public class Banner {
 
   public void addMessage(final Context context, final BannerMessage message) {
     if (queue.isEmpty()) {
-      final Style style = getStyle(context);
       if (style.box != null) {
         background = new Box(context);
         context.midground.add(background.drawing);
@@ -112,13 +108,8 @@ public class Banner {
     update(context);
   }
 
-  private Style getStyle(final Context context) {
-    return context.getStyle(context.getGlobalTags().mut().add(Tags.TAG_PART_BANNER).ro());
-  }
-
   private void updateStyle(final Context context) {
     if (text == null) return;
-    final Style style = getStyle(context);
     background.setStyle(style.box);
     text.setFont(context, Context.getFont(style, context));
     text.setColor(context, style.color);

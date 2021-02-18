@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.extensions.hotkeys.grammar;
+package com.zarbosoft.merman.editorcore.hotkeys;
 
 public interface Node {
   com.zarbosoft.pidgoon.model.Node build();

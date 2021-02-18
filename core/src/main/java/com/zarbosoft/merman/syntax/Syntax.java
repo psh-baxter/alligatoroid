@@ -45,7 +45,6 @@ public class Syntax {
   public final ModelColor background;
   public final Padding pad;
   public final String unprintable;
-  public final ROList<Style.Spec> styles;
   public final Padding bannerPad;
   public final Padding detailPad;
   public final int detailSpan;
@@ -87,7 +86,6 @@ public class Syntax {
     this.background = config.background;
     this.pad = config.pad;
     this.unprintable = config.unprintable;
-    this.styles = config.styles;
     this.bannerPad = config.bannerPad;
     this.detailPad = config.detailPad;
     this.detailSpan = config.detailSpan;
@@ -251,7 +249,6 @@ public class Syntax {
     public ModelColor background = ModelColor.RGB.white;
     public Padding pad = Padding.empty;
     public String unprintable = "▢";
-    public ROList<Style.Spec> styles = ROList.empty;
     public Padding bannerPad = Padding.empty;
     public Padding detailPad = Padding.empty;
     public int detailSpan = 300;
@@ -278,7 +275,6 @@ public class Syntax {
         ModelColor background,
         Padding pad,
         String unprintable,
-        ROList<Style.Spec> styles,
         Padding bannerPad,
         Padding detailPad,
         int detailSpan,
@@ -293,7 +289,6 @@ public class Syntax {
       this.background = background;
       this.pad = pad;
       this.unprintable = unprintable;
-      this.styles = styles;
       this.bannerPad = bannerPad;
       this.detailPad = detailPad;
       this.detailSpan = detailSpan;

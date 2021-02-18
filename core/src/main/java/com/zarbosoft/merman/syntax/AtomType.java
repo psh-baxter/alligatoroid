@@ -49,14 +49,12 @@ import java.util.Iterator;
 
 public abstract class AtomType {
   public final ROMap<String, BackSpecData> fields;
-  public final ROSet<String> tags;
   private final String id;
   private final ROList<BackSpec> back;
   private final ROList<FrontSpec> front;
 
   public AtomType(Config config) {
     id = config.id;
-    this.tags = config.tags;
     back = config.back;
     front = config.front;
     TSMap<String, BackSpecData> fields = new TSMap<>();
@@ -267,17 +265,9 @@ public abstract class AtomType {
     public final String id;
     public final ROList<BackSpec> back;
     public final ROList<FrontSpec> front;
-    public ROSet<String> tags;
 
     public Config(String id, ROList<BackSpec> back, ROList<FrontSpec> front) {
       this.id = id;
-      this.back = back;
-      this.front = front;
-    }
-
-    public Config(String id, ROSet<String> tags, ROList<BackSpec> back, ROList<FrontSpec> front) {
-      this.id = id;
-      this.tags = tags;
       this.back = back;
       this.front = front;
     }

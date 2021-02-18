@@ -14,37 +14,34 @@ import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.attachments.BorderAttachment;
-import com.zarbosoft.merman.editor.visual.tags.Tags;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
-import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
+import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.style.Style;
-import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.function.Consumer;
 
-public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf {
+public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   public final ValueArray value;
   private final ValueArray.Listener dataListener;
+  private final FrontArraySpecBase front;
   public ArrayCursor selection;
   private Brick ellipsis = null;
   private Brick empty = null;
   private ArrayHoverable hoverable;
 
   public VisualFrontArray(
-          final VisualParent parent,
-          final ValueArray value,
-          final int visualDepth) {
+      final FrontArraySpecBase front,
+      final VisualParent parent,
+      final Atom atom,
+      final int visualDepth) {
     super(visualDepth);
-    this.value = value;
+    this.front = front;
+    this.value = front.dataType.get(atom.fields);
     dataListener = new DataListener(value, parent);
     value.addListener(dataListener);
     value.visual = this;
@@ -54,7 +51,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
       final Context context, final int index, final int remove, final ROList<Atom> add) {
     int visualIndex = index;
     int visualRemove = remove;
-    if (!getSeparator().isEmpty()) {
+    if (!front.separator.isEmpty()) {
       visualIndex = index == 0 ? 0 : visualIndex * 2 - 1;
       visualRemove = Math.min(visualRemove * 2, children.size());
     }
@@ -69,8 +66,8 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
             final VisualGroup group =
                 new VisualGroup(
                     context, new ArrayVisualParent(addAt, false), visualDepth + 1, depthScore());
-            for (int fixIndex = 0; fixIndex < getSeparator().size(); ++fixIndex) {
-              final FrontSymbol fix = getSeparator().get(fixIndex);
+            for (int fixIndex = 0; fixIndex < front.separator.size(); ++fixIndex) {
+              final FrontSymbol fix = front.separator.get(fixIndex);
               group.add(
                   context,
                   fix.createVisual(
@@ -80,12 +77,12 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
             super.add(context, group, addAt);
           };
       for (final Atom atom : add) {
-        if (!getSeparator().isEmpty() && addIndex > 0) addSeparator.accept(addIndex++);
+        if (!front.separator.isEmpty() && addIndex > 0) addSeparator.accept(addIndex++);
         final VisualGroup group =
             new VisualGroup(
                 context, new ArrayVisualParent(addIndex, true), visualDepth + 1, depthScore());
         int groupIndex = 0;
-        for (final FrontSymbol fix : getElementPrefix())
+        for (final FrontSymbol fix : front.prefix)
           group.add(
               context,
               fix.createVisual(
@@ -101,9 +98,6 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               public VisualParent parent() {
                 return nodeVisual.parent();
               }
-
-              @Override
-              public void tagsChanged(Context context) {}
 
               @Override
               public Brick createOrGetFirstBrick(final Context context) {
@@ -137,10 +131,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               public void expand(final Context context) {}
 
               @Override
-              public void getLeafPropertiesForTagsChange(
-                  final Context context,
-                  TSList<ROPair<Brick, Brick.Properties>> brickProperties,
-                  final TagsChange change) {}
+              public void getLeafBricks(final Context context, TSList<Brick> bricks) {}
 
               @Override
               public void uproot(final Context context, final Visual root) {
@@ -162,7 +153,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
                 return nodeVisual.selectAnyChild(context);
               }
             });
-        for (final FrontSymbol fix : getElementSuffix())
+        for (final FrontSymbol fix : front.suffix)
           group.add(
               context,
               fix.createVisual(
@@ -170,44 +161,15 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
         if (atomVisual().compact) group.compact(context);
         super.add(context, group, addIndex++);
       }
-      if (!getSeparator().isEmpty() && visualIndex == 0 && value.data.size() > add.size())
+      if (!front.separator.isEmpty() && visualIndex == 0 && value.data.size() > add.size())
         addSeparator.accept(addIndex++);
     }
-
-    // Cleanup
-    for (int i = 0; i < value.data.size(); ++i) {
-      Atom child = value.data.get(i);
-      TSSet<String> addTags = new TSSet<>();
-      TSSet<String> removeTags = new TSSet<>();
-      if (i == 0) addTags.add(Tags.TAG_ARRAY_FIRST);
-      else removeTags.add(Tags.TAG_ARRAY_FIRST);
-      if (i == value.data.size() - 1) addTags.add(Tags.TAG_ARRAY_LAST);
-      else removeTags.add(Tags.TAG_ARRAY_LAST);
-      if (i % 2 == 0) {
-        addTags.add(Tags.TAG_ARRAY_EVEN);
-        removeTags.add(Tags.TAG_ARRAY_ODD);
-      } else {
-        addTags.add(Tags.TAG_ARRAY_ODD);
-        removeTags.add(Tags.TAG_ARRAY_EVEN);
-      }
-      child.changeTags(context, new TagsChange(addTags, removeTags));
-    }
   }
-
-  protected abstract boolean tagLast();
-
-  protected abstract boolean tagFirst();
-
-  protected abstract ROList<FrontSymbol> getElementPrefix();
-
-  protected abstract ROList<FrontSymbol> getSeparator();
-
-  protected abstract ROList<FrontSymbol> getElementSuffix();
 
   private Brick createEmpty(final Context context) {
     if (empty != null) return null;
     empty =
-        new BrickSpace(
+        front.empty.createBrick(
             context,
             new BrickInterface() {
               @Override
@@ -231,20 +193,11 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
               }
 
               @Override
-              public Alignment findAlignment(final Style style) {
-                return parent.atomVisual().findAlignment(style.alignment);
-              }
-
-              @Override
-              public TSSet<String> getTags(final Context context) {
-                return VisualFrontArray.this.getTags(context).add(Tags.TAG_PART_EMPTY);
+              public Alignment findAlignment(String alignment) {
+                return parent.atomVisual().findAlignment(alignment);
               }
             });
     return empty;
-  }
-
-  private TSSet<String> getTags(Context context) {
-    return atomVisual().getTags(context);
   }
 
   private boolean ellipsize(final Context context) {
@@ -253,7 +206,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
   }
 
   private int visualIndex(final int valueIndex) {
-    if (getSeparator().isEmpty()) return valueIndex;
+    if (front.separator.isEmpty()) return valueIndex;
     else return valueIndex * 2;
   }
 
@@ -342,44 +295,36 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
   private Brick createEllipsis(final Context context) {
     if (ellipsis != null) return null;
     ellipsis =
-        ellipsis()
-            .createBrick(
-                context,
-                new BrickInterface() {
-                  @Override
-                  public VisualLeaf getVisual() {
-                    return VisualFrontArray.this;
-                  }
+        front.ellipsis.createBrick(
+            context,
+            new BrickInterface() {
+              @Override
+              public VisualLeaf getVisual() {
+                return VisualFrontArray.this;
+              }
 
-                  @Override
-                  public Brick createPrevious(final Context context) {
-                    return parent.createPreviousBrick(context);
-                  }
+              @Override
+              public Brick createPrevious(final Context context) {
+                return parent.createPreviousBrick(context);
+              }
 
-                  @Override
-                  public Brick createNext(final Context context) {
-                    return parent.createNextBrick(context);
-                  }
+              @Override
+              public Brick createNext(final Context context) {
+                return parent.createNextBrick(context);
+              }
 
-                  @Override
-                  public void brickDestroyed(final Context context) {
-                    ellipsis = null;
-                  }
+              @Override
+              public void brickDestroyed(final Context context) {
+                ellipsis = null;
+              }
 
-                  @Override
-                  public Alignment findAlignment(final Style style) {
-                    return parent.atomVisual().findAlignment(style.alignment);
-                  }
-
-                  @Override
-                  public TSSet<String> getTags(final Context context) {
-                    return VisualFrontArray.this.getTags(context).add(Tags.TAG_PART_ELLIPSIS);
-                  }
-                });
+              @Override
+              public Alignment findAlignment(String alignment) {
+                return parent.atomVisual().findAlignment(alignment);
+              }
+            });
     return ellipsis;
   }
-
-  protected abstract Symbol ellipsis();
 
   @Override
   public void uproot(final Context context, final Visual root) {
@@ -395,14 +340,6 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     value.visual = null;
     super.uproot(context, root);
     children.clear();
-  }
-
-  public void tagsChanged(final Context context) {
-    super.tagsChanged(context);
-    if (ellipsis != null) ellipsis.tagsChanged(context);
-    if (empty != null) empty.tagsChanged(context);
-    if (selection != null) selection.tagsChanged(context);
-    if (hoverable != null) hoverable.tagsChanged(context);
   }
 
   @Override
@@ -431,7 +368,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
         final int start,
         final int end) {
       this.self = self;
-      border = new BorderAttachment(context, getBorderStyle(context).obbox);
+      border = new BorderAttachment(context, context.cursorStyle.obbox);
       this.leadFirst = leadFirst;
       setRange(context, start, end);
       context.addActions(
@@ -527,17 +464,6 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     @Override
     public Path getSyntaxPath() {
       return self.value.getSyntaxPath().add(String.valueOf(beginIndex));
-    }
-
-    @Override
-    public void tagsChanged(final Context context) {
-      border.setStyle(context, getBorderStyle(context).obbox);
-      super.tagsChanged(context);
-    }
-
-    @Override
-    public ROSet<String> getTags(final Context context) {
-      return self.getTags(context).add("selection").ro();
     }
 
     @Override
@@ -727,7 +653,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     final BorderAttachment border;
 
     ArrayHoverable(final Context context) {
-      border = new BorderAttachment(context, getBorderStyle(context, getTags(context)).obbox);
+      border = new BorderAttachment(context, context.hoverStyle.obbox);
     }
 
     @Override
@@ -739,11 +665,6 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     @Override
     public Visual visual() {
       return VisualFrontArray.this;
-    }
-
-    @Override
-    public void tagsChanged(final Context context) {
-      border.setStyle(context, getBorderStyle(context, getTags(context)).obbox);
     }
 
     public abstract void notifyRangeAdjusted(Context context, int index, int removed, int added);
@@ -811,11 +732,6 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     }
 
     @Override
-    public void tagsChanged(final Context context) {
-      border.setStyle(context, getBorderStyle(context, getTags(context)).obbox);
-    }
-
-    @Override
     public void notifyRangeAdjusted(
         final Context context, final int index, final int removed, final int added) {
       throw new DeadCode();
@@ -853,7 +769,7 @@ public abstract class VisualFrontArray extends VisualGroup implements VisualLeaf
     }
 
     private int valueIndex() {
-      if (getSeparator().isEmpty()) return index;
+      if (front.separator.isEmpty()) return index;
       return index / 2;
     }
 

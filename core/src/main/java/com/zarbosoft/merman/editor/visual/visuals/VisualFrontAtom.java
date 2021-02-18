@@ -7,8 +7,9 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
+import com.zarbosoft.merman.syntax.symbol.Symbol;
 
-public abstract class VisualFrontAtom extends VisualFrontAtomBase {
+public class VisualFrontAtom extends VisualFrontAtomBase {
   public final ValueAtom value;
   private final ValueAtom.Listener dataListener;
 
@@ -22,8 +23,8 @@ public abstract class VisualFrontAtom extends VisualFrontAtomBase {
           final VisualParent parent,
           final ValueAtom value,
           final int visualDepth,
-          final int depthScore) {
-    super(visualDepth);
+          final int depthScore, Symbol ellipsis) {
+    super(visualDepth, ellipsis);
     this.value = value;
     dataListener =
         new ValueAtom.Listener() {
@@ -63,7 +64,4 @@ public abstract class VisualFrontAtom extends VisualFrontAtomBase {
     value.visual = null;
     super.uproot(context, root);
   }
-
-  @Override
-  public void tagsChanged(final Context context) {}
 }

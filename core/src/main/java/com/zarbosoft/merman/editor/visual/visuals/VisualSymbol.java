@@ -6,14 +6,12 @@ import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.condition.ConditionAttachment;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSSet;
 
 public class VisualSymbol extends Visual
     implements VisualLeaf, ConditionAttachment.Listener, BrickInterface {
@@ -85,24 +83,23 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public void compact(Context context) {}
-
-  @Override
-  public void expand(Context context) {}
-
-  public void tagsChanged(final Context context) {
-    if (brick != null) {
-      brick.tagsChanged(context);
-    }
+  public void compact(Context context) {
+    if (brick != null)
+    brick.changed(context);
   }
 
   @Override
-  public void getLeafPropertiesForTagsChange(
-      final Context context,
-      TSList<ROPair<Brick, Brick.Properties>> brickProperties,
-      final TagsChange change) {
+  public void expand(Context context) {
+    if (brick != null)
+    brick.changed(context);
+  }
+
+  @Override
+  public void getLeafBricks(
+          final Context context,
+          TSList<Brick> bricks) {
     if (brick == null) return;
-    brickProperties.add(new ROPair<>(brick, brick.getPropertiesForTagsChange(context, change)));
+    bricks.add(brick);
   }
 
   @Override
@@ -142,12 +139,7 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public Alignment findAlignment(final Style style) {
-    return parent.atomVisual().findAlignment(style.alignment);
-  }
-
-  @Override
-  public TSSet<String> getTags(final Context context) {
-    return atomVisual().getTags(context).addAll(frontSymbol.tags).add(frontSymbol.type.partTag());
+  public Alignment findAlignment(String alignment) {
+    return parent.atomVisual().findAlignment(alignment);
   }
 }

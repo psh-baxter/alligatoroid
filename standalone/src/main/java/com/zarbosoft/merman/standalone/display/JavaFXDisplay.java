@@ -5,7 +5,7 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.*;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.merman.extensions.hotkeys.Key;
+import com.zarbosoft.merman.editor.hid.Key;
 import com.zarbosoft.merman.syntax.Direction;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.style.ModelColor;
@@ -26,7 +26,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static com.zarbosoft.merman.extensions.hotkeys.Key.*;
+import static com.zarbosoft.merman.editor.hid.Key.*;
 
 public class JavaFXDisplay extends Display {
   public final Pane node = new Pane();
