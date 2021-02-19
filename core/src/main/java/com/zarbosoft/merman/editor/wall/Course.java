@@ -439,8 +439,10 @@ public class Course {
         for (Brick brick : bricks) {
           if (brick.parent.index == index) continue;
           for (Brick otherCourseBrick : parent.children.get(brick.parent.index).children) {
-            if (otherCourseBrick.getVisual().atomVisual() == top) continue;
-            if (isOrdered(expandComparator, top, otherCourseBrick.getVisual().atomVisual()))
+            VisualAtom otherAtom = otherCourseBrick.getVisual().atomVisual();
+            if (otherAtom == top) continue;
+            if (!otherAtom.compact) continue;
+            if (isOrdered(expandComparator, top, otherAtom))
               return false;
           }
         }

@@ -14,7 +14,11 @@ public class BrickText extends Brick {
   public Text text;
 
   public BrickText(
-      final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style, int hackAvoidChanged) {
+      final Context context,
+      final BrickInterface inter,
+      Style.SplitMode splitMode,
+      Style style,
+      int hackAvoidChanged) {
     super(inter, style, splitMode);
     text = context.display.text();
     text.setColor(context, style.color);
@@ -23,20 +27,21 @@ public class BrickText extends Brick {
     this.ascent = font.getAscent();
     this.descent = font.getDescent();
   }
+
   public BrickText(
-          final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
-  this(context,inter,splitMode,style,0);
+      final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
+    this(context, inter, splitMode, style, 0);
     changed(context);
   }
 
   @Override
   public int converseEdge() {
-    return text.converseEdge();
+    return text.converse() + converseSpan;
   }
 
   @Override
   public int converseSpan() {
-    return text.converseSpan();
+    return converseSpan;
   }
 
   @Override

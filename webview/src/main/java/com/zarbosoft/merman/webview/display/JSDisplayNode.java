@@ -42,7 +42,7 @@ public abstract class JSDisplayNode implements DisplayNode {
   @Override
   public final void setConverse(int converse, boolean animate) {
     this.converse = converse;
-    setPosition(
+    setPositionInternal(
         display.convert.unconvertConverse(
             converse, js().clientWidth, js().clientHeight, display.width(), display.height()),
         animate);
@@ -51,7 +51,7 @@ public abstract class JSDisplayNode implements DisplayNode {
   @Override
   public final void setTransverse(int transverse, boolean animate) {
     this.transverse = transverse;
-    setPosition(
+    setPositionInternal(
         display.convert.unconvertTransverse(
             transverse, js().clientWidth, js().clientHeight, display.width(), display.height()),
         animate);
@@ -84,11 +84,13 @@ public abstract class JSDisplayNode implements DisplayNode {
       js().classList.add(CSS_ANIMATE_LEFT);
       js().classList.add(CSS_ANIMATE_TOP);
     }
+    this.converse = vector.converse;
+    this.transverse = vector.transverse;
     js().style.left = Format.format("%spx", vector1.x);
     js().style.top = Format.format("%spx", vector1.y);
   }
 
-  private void setPosition(Display.UnconvertAxis v, boolean animate) {
+  private void setPositionInternal(Display.UnconvertAxis v, boolean animate) {
     if (v.x) {
       if (animate) js().classList.add(CSS_ANIMATE_LEFT);
       else js().classList.remove(CSS_ANIMATE_LEFT);

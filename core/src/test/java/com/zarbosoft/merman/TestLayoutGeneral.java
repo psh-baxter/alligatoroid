@@ -41,7 +41,7 @@ public class TestLayoutGeneral {
                             new Style.Config()
                                 .
                                 /* only in first syntax */ spaceTransverseAfter(60)
-                                )))))
+                                .create())))))
             .build();
     text =
         new TypeBuilder("text")

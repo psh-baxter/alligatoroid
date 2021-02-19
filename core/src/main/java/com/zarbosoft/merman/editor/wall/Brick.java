@@ -20,6 +20,7 @@ public abstract class Brick {
   public Alignment alignment;
   public int ascent;
   public int descent;
+  public int converse;
   public int converseSpan;
   /** Used to recalc alignment min when a brick is removed from alignment */
   protected int preAlignConverse;

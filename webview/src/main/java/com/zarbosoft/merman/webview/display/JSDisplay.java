@@ -9,7 +9,7 @@ import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.display.Image;
 import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.extensions.hotkeys.Key;
+import com.zarbosoft.merman.editor.hid.Key;
 import com.zarbosoft.merman.syntax.Direction;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.webview.compat.ResizeObserver;

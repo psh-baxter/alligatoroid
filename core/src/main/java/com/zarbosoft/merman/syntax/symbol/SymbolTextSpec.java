@@ -16,7 +16,7 @@ public class SymbolTextSpec extends Symbol {
   public static class Config {
     public final String text;
     public Style.SplitMode splitMode = Style.SplitMode.NEVER;
-    public Style.Config style = new Style.Config();
+    public Style style = new Style.Config().create();
 
     public Config(String text) {
       this.text = text;
@@ -26,12 +26,14 @@ public class SymbolTextSpec extends Symbol {
       this.splitMode = mode;
       return this;
     }
+
+    public Config style(Style style) {this.style = style; return this;}
   }
 
   public SymbolTextSpec(Config config) {
     this.text = config.text;
     this.splitMode = config.splitMode;
-    this.style = config.style.create();
+    this.style = config.style;
   }
 
   @Override

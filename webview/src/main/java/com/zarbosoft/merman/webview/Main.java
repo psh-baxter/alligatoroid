@@ -45,7 +45,6 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.rendaw.common.TSSet;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLStyleElement;
 import jsinterop.annotations.JsMethod;
@@ -464,26 +463,13 @@ public class Main {
   public static final String addEqualOperatorType = "add_equal";
   public static final String tripleEqualOperatorType = "triple_equal";
 
-  public static final String tagCompactIndent = "es_compact_indent";
   public static final FrontSymbol prefixCompactIndent =
       new FrontSymbol(
-          new FrontSymbol.Config(new SymbolSpaceSpec(style), TSSet.of(tagCompactIndent).ro(), style));
-  public static final Style.Config styleCompactIndent =
-      new Style.Config()
-          .with(tagCompactIndent)
-          .with(Tags.TAG_COMPACT)
-          .split()
-          .align(indentAlign)
-          .build();
-
-  public static final String tagCompactBase = "es_compact_base";
-  public static final Style.Config styleCompactBase =
-      new Style.Config()
-          .with(tagCompactBase)
-          .with(Tags.TAG_COMPACT)
-          .split()
-          .align(baseAlign)
-          .build();
+          new FrontSymbol.Config(
+              new SymbolSpaceSpec(
+                  new SymbolSpaceSpec.Config()
+                      .splitMode(Style.SplitMode.COMPACT)
+                      .style(new Style.Config().splitAlignment(indentAlign).create()))));
 
   public static final FrontSymbol space = text(" ");
 
@@ -497,11 +483,8 @@ public class Main {
               .prefix(
                   new FrontSymbol(
                       new FrontSymbol.Config(
-                          new SymbolSpaceSpec(style), TSSet.of("statement_start").ro(), style)))
-              .separator(
-                  new FrontSymbol(
-                      new FrontSymbol.Config(
-                          new SymbolSpaceSpec(style), TSSet.of("break").ro(), style)))
+                          new SymbolSpaceSpec(
+                              new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
               .build();
       BackArraySpec statementBackArray =
           new BackArraySpec(
@@ -531,7 +514,7 @@ public class Main {
                           .prefix(prefixCompactIndent)
                           .suffix(text("; "))
                           .build())
-                  .front(text("}", tagCompactBase))
+                  .front(textCompactBase("}"))
                   .precedence(0)
                   .build(),
               //
@@ -588,10 +571,8 @@ public class Main {
                           .field("optional", new BackFixedJSONSpecialPrimitiveSpec("false"))
                           .build())
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("object")))
-                  .front(text(".", tagCompactIndent))
-                  .front(
-                      new FrontPrimitiveSpec(
-                          new FrontPrimitiveSpec.Config("property")))
+                  .front(textCompactIndent("."))
+                  .front(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config("property")))
                   .precedence(200)
                   .build(),
               //
@@ -613,8 +594,7 @@ public class Main {
                                               new PatternString("null"),
                                               new JsonDecimal())))))
                           .build())
-                  .front(
-                      new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config("value")))
+                  .front(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config("value")))
                   .build(),
               estreeTypeBuilder(stringLiteralType, "String literal")
                   .back(
@@ -626,8 +606,7 @@ public class Main {
                                   i18n, new BaseBackPrimitiveSpec.Config("value", new Any())))
                           .build())
                   .front(text("\""))
-                  .front(
-                      new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config("value")))
+                  .front(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config("value")))
                   .front(text("\""))
                   .build(),
               //
@@ -662,7 +641,7 @@ public class Main {
                   .front(text("; "))
                   .front(prefixCompactIndent)
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("update")))
-                  .front(text(") ", tagCompactBase))
+                  .front(textCompactBase(") "))
                   .front(prefixCompactIndent)
                   .front(new FrontAtomSpec(new FrontAtomSpec.Config("body")))
                   .build(),
@@ -749,7 +728,7 @@ public class Main {
                           .prefix(prefixCompactIndent)
                           .separator(text(", "))
                           .build())
-                  .front(text(")", tagCompactBase))
+                  .front(textCompactBase(")"))
                   .precedence(0)
                   .build());
       TSMap<String, ROList<String>> groups =
@@ -792,7 +771,6 @@ public class Main {
                   .front(statementsFront)
                   .build());
       syntaxConfig.backType = BackType.JSON;
-      syntaxConfig.styles = TSList.of(styleCompactBase, styleCompactIndent);
 
       HTMLStyleElement style = (HTMLStyleElement) DomGlobal.document.createElement("style");
       style.textContent = Main.style;
@@ -858,7 +836,10 @@ public class Main {
         .front(
             new FrontSymbol(
                 new FrontSymbol.Config(
-                    new SymbolTextSpec(symbol + " ", style), TSSet.of(tagCompactIndent).ro(), style)))
+                    new SymbolTextSpec(
+                        new SymbolTextSpec.Config(symbol + " ")
+                            .splitMode(Style.SplitMode.COMPACT)
+                            .style(new Style.Config().splitAlignment(indentAlign).create())))))
         .front(new FrontAtomSpec(new FrontAtomSpec.Config("right")))
         .build();
   }
@@ -910,9 +891,27 @@ public class Main {
         .build();
   }
 
-  private static FrontSymbol text(String text, String... tags) {
+  private static FrontSymbol text(String text) {
     return new FrontSymbol(
-        new FrontSymbol.Config(new SymbolTextSpec(text, style), TSSet.of(tags).ro(), style));
+        new FrontSymbol.Config(new SymbolTextSpec(new SymbolTextSpec.Config(text))));
+  }
+
+  private static FrontSymbol textCompactBase(String text) {
+    return new FrontSymbol(
+        new FrontSymbol.Config(
+            new SymbolTextSpec(
+                new SymbolTextSpec.Config(text)
+                    .splitMode(Style.SplitMode.COMPACT)
+                    .style(new Style.Config().splitAlignment(baseAlign).create()))));
+  }
+
+  private static FrontSymbol textCompactIndent(String text) {
+    return new FrontSymbol(
+        new FrontSymbol.Config(
+            new SymbolTextSpec(
+                new SymbolTextSpec.Config(text)
+                    .splitMode(Style.SplitMode.COMPACT)
+                    .style(new Style.Config().splitAlignment(indentAlign).create()))));
   }
 
   private static BackFixedRecordSpecBuilder estreeBackBuilder() {

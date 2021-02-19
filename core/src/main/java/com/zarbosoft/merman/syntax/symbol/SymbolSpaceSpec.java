@@ -14,9 +14,9 @@ public class SymbolSpaceSpec extends Symbol {
 
   public static class Config {
     public Style.SplitMode splitMode = Style.SplitMode.NEVER;
-    public Style.Config style = new Style.Config();
+    public Style style = new Style.Config().create();
 
-    public Config style(Style.Config style) {
+    public Config style(Style style) {
       this.style = style;
       return this;
     }
@@ -28,7 +28,7 @@ public class SymbolSpaceSpec extends Symbol {
   }
 
   public SymbolSpaceSpec(Config config) {
-    this.style = config.style.create();
+    this.style = config.style;
     this.splitMode = config.splitMode;
   }
 

@@ -28,12 +28,12 @@ public class BrickImage extends Brick {
 
   @Override
   public int converseEdge() {
-    return image.converseEdge();
+    return image.converse() + converseSpan;
   }
 
   @Override
   public int converseSpan() {
-    return image.converseSpan();
+    return converseSpan;
   }
 
   @Override

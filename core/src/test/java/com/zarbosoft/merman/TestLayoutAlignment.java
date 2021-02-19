@@ -348,7 +348,7 @@ public class TestLayoutAlignment {
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config()
                                 .splitMode(Style.SplitMode.COMPACT)
-                                .style(new Style.Config().alignment("concensus1"))))))
+                                .style(new Style.Config().alignment("concensus1").create())))))
             .frontDataNode("second")
             .build();
     final Syntax syntax =
