@@ -230,7 +230,7 @@ public class Helper {
             },
             null,
             startWindowed,
-            i18n);
+            i18n, true);
     return context;
   }
 }

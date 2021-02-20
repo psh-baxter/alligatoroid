@@ -4,11 +4,9 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
-import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.webview.display.JSDisplay;
 import com.zarbosoft.rendaw.common.ROList;
-import elemental2.dom.CSSProperties;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLDivElement;
 
@@ -37,7 +35,8 @@ public class JSSourceViewBlock {
         new JSClipboardEngine(syntax.backType),
         serializer,
         false,
-        i18n);
+        i18n,
+        false);
   }
 
   private void flushIteration(final int limit) {

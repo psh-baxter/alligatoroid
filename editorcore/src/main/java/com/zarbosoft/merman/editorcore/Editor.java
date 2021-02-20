@@ -41,7 +41,7 @@ public class Editor {
       final History history,
       final ClipboardEngine clipboardEngine) {
     context =
-        new Context(syntax, doc, display, addIteration, flushIteration, history, clipboardEngine);
+        new Context(syntax, doc, display, addIteration, flushIteration, history, clipboardEngine, true);
     context.history.clear();
     context.addActions(
         this, ImmutableList.of(new ActionUndo(), new ActionRedo(), new ActionClickHovered()));

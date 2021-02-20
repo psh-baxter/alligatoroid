@@ -598,7 +598,7 @@ public class TestWindowing {
               },
               null,
               startWindowed,
-              Helper.i18n);
+              Helper.i18n, true);
       runner.flush();
     }
 

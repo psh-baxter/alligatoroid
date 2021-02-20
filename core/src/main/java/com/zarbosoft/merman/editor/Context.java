@@ -108,7 +108,8 @@ public class Context {
       ClipboardEngine clipboardEngine,
       Serializer serializer,
       boolean startWindowed,
-      I18nEngine i18n) {
+      I18nEngine i18n,
+      boolean select) {
     this.serializer = serializer;
     this.i18n = i18n;
     actions.addVar(
@@ -254,7 +255,11 @@ public class Context {
         event -> {
           clearHover();
         });
-    document.root.visual.selectAnyChild(this);
+    if (select) document.root.visual.selectAnyChild(this);
+    else {
+      foreground.setCornerstone(
+          this, document.root.visual.createOrGetFirstBrick(this), () -> null, () -> null);
+    }
     triggerIdleLayBricksOutward();
   }
 
