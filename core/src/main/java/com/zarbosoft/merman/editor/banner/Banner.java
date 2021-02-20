@@ -80,7 +80,7 @@ public class Banner {
     if (text == null) return;
     final int calculatedTransverse =
         transverse - text.font().getDescent() - context.syntax.bannerPad.transverseEnd - scroll;
-    text.setPosition(
+    text.setBaselinePosition(
         new Vector(context.syntax.bannerPad.converseStart, calculatedTransverse), animate);
     if (background != null)
       background.setPosition(

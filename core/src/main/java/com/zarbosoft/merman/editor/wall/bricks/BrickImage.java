@@ -15,15 +15,23 @@ public class BrickImage extends Brick {
     image = context.display.image();
     image.setImage(context, style.image);
     image.rotate(context, style.rotate);
-    ascent = (int) image.transverseSpan();
-    descent = (int) 0;
     converseSpan = (int) image.converseSpan();
     changed(context);
   }
 
   @Override
   public void allocateTransverse(final Context context, final int ascent, final int descent) {
-    image.setTransverse(ascent, false);
+    image.setBaselineTransverse(ascent, false);
+  }
+
+  @Override
+  public int descent() {
+    return image.descent();
+  }
+
+  @Override
+  public int ascent() {
+    return image.ascent();
   }
 
   @Override

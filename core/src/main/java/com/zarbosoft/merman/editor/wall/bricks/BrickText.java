@@ -24,8 +24,16 @@ public class BrickText extends Brick {
     text.setColor(context, style.color);
     text.setFont(context, Context.getFont(style, context));
     font = Context.getFont(style, context);
-    this.ascent = font.getAscent();
-    this.descent = font.getDescent();
+  }
+
+  @Override
+  public int descent() {
+    return text.descent();
+  }
+
+  @Override
+  public int ascent() {
+    return text.ascent();
   }
 
   public BrickText(
@@ -57,7 +65,7 @@ public class BrickText extends Brick {
 
   @Override
   public void allocateTransverse(final Context context, final int ascent, final int descent) {
-    text.setTransverse(ascent);
+    text.setBaselineTransverse(ascent);
   }
 
   public void setText(final Context context, final String text) {

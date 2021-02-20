@@ -10,6 +10,8 @@ import com.zarbosoft.merman.syntax.style.Style;
 
 public class BrickSpace extends Brick {
   private final Blank visual;
+  private final int ascent;
+  private final int descent;
   private int converse = 0;
 
   public BrickSpace(
@@ -41,11 +43,21 @@ public class BrickSpace extends Brick {
   public void setConverse(final Context context, final int minConverse, final int converse) {
     this.preAlignConverse = minConverse;
     this.converse = converse;
-    visual.setPosition(new Vector(converse, 0), false);
+    visual.setBaselinePosition(new Vector(converse, 0), false);
   }
 
   @Override
   public void allocateTransverse(final Context context, final int ascent, final int descent) {}
+
+  @Override
+  public int descent() {
+    return descent;
+  }
+
+  @Override
+  public int ascent() {
+    return ascent;
+  }
 
   @Override
   public int getConverse() {

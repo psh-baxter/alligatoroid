@@ -14,7 +14,7 @@ public abstract class MockeryDisplayNode implements DisplayNode {
 	}
 
 	@Override
-	public int transverse() {
+	public int baselineTransverse() {
 		return transverse;
 	}
 
@@ -24,7 +24,7 @@ public abstract class MockeryDisplayNode implements DisplayNode {
 	}
 
 	@Override
-	public void setTransverse(final int transverse, final boolean animate) {
+	public void setBaselineTransverse(final int transverse, final boolean animate) {
 		this.transverse = transverse;
 	}
 }

@@ -96,7 +96,7 @@ public class IndicatorsExtension {
           descent = node.transverseSpan();
         }
         transverse += ascent;
-        node.setTransverse(transverse);
+        node.setBaselineTransverse(transverse);
         transverse += descent;
         if (!converseStart) {
           node.setConverse(-node.converseSpan());
@@ -112,7 +112,7 @@ public class IndicatorsExtension {
   }
 
   public void updatePosition(final Context context) {
-    group.setPosition(
+    group.setBaselinePosition(
             new Vector(
             converseStart
                 ? conversePadding

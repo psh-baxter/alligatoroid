@@ -12,14 +12,12 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public abstract class Brick {
-  private Style style;
   public final Style.SplitMode splitMode;
   public final BrickInterface inter;
+  private final Style style;
   public Course parent;
   public int index;
   public Alignment alignment;
-  public int ascent;
-  public int descent;
   public int converse;
   public int converseSpan;
   /** Used to recalc alignment min when a brick is removed from alignment */
@@ -185,4 +183,8 @@ public abstract class Brick {
     parent.removeFromSystem(context, index);
     destroyed(context);
   }
+
+  public abstract int descent();
+
+  public abstract int ascent();
 }

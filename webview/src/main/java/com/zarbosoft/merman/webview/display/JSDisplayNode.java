@@ -10,23 +10,23 @@ public abstract class JSDisplayNode implements DisplayNode {
   public static final String CSS_ANIMATE_LEFT = "animate-left";
   public static final String CSS_ANIMATE_TOP = "animate-top";
   protected final JSDisplay display;
-  private int converse;
-  private int transverse;
+  public HTMLElement element;
+  protected int converse;
+  protected int transverse;
 
-  protected JSDisplayNode(JSDisplay display) {
+  protected JSDisplayNode(JSDisplay display, HTMLElement element) {
     this.display = display;
+    this.element = element;
+    element.style.pointerEvents = "none";
   }
 
-  public abstract HTMLElement js();
+  public final HTMLElement js() {
+    return element;
+  }
 
   @Override
   public int converse() {
     return converse;
-  }
-
-  @Override
-  public int transverse() {
-    return transverse;
   }
 
   @Override
@@ -35,23 +35,17 @@ public abstract class JSDisplayNode implements DisplayNode {
   }
 
   @Override
-  public final int transverseSpan() {
-    return display.halfConvert.convert(js().clientWidth, js().clientHeight).transverse;
-  }
-
-  @Override
   public final void setConverse(int converse, boolean animate) {
     this.converse = converse;
-    setPositionInternal(
+    setJSPositionInternal(
         display.convert.unconvertConverse(
             converse, js().clientWidth, js().clientHeight, display.width(), display.height()),
         animate);
   }
 
-  @Override
   public final void setTransverse(int transverse, boolean animate) {
     this.transverse = transverse;
-    setPositionInternal(
+    setJSPositionInternal(
         display.convert.unconvertTransverse(
             transverse, js().clientWidth, js().clientHeight, display.width(), display.height()),
         animate);
@@ -70,7 +64,6 @@ public abstract class JSDisplayNode implements DisplayNode {
     js().style.top = v.y + "px";
   }
 
-  @Override
   public void setPosition(Vector vector, boolean animate) {
     Display.UnconvertVector vector1 =
         display.convert.unconvert(
@@ -90,7 +83,7 @@ public abstract class JSDisplayNode implements DisplayNode {
     js().style.top = Format.format("%spx", vector1.y);
   }
 
-  private void setPositionInternal(Display.UnconvertAxis v, boolean animate) {
+  protected void setJSPositionInternal(Display.UnconvertAxis v, boolean animate) {
     if (v.x) {
       if (animate) js().classList.add(CSS_ANIMATE_LEFT);
       else js().classList.remove(CSS_ANIMATE_LEFT);
@@ -100,5 +93,10 @@ public abstract class JSDisplayNode implements DisplayNode {
       else js().classList.remove(CSS_ANIMATE_TOP);
       js().style.top = Format.format("%spx", v.amount);
     }
+  }
+
+  @Override
+  public int transverse() {
+    return transverse;
   }
 }

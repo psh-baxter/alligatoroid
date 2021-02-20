@@ -77,7 +77,7 @@ public class JavaFXText extends JavaFXNode implements Text {
 	}
 
 	@Override
-	public void setPosition(final Vector vector, final boolean animate) {
+	public void setBaselinePosition(final Vector vector, final boolean animate) {
 		int x = 0;
 		int y = 0;
 		switch (context.syntax.converseDirection) {

@@ -3,19 +3,17 @@ package com.zarbosoft.merman.webview.display;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.editor.display.Text;
+import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import elemental2.dom.CSSProperties;
 import elemental2.dom.DomGlobal;
-import elemental2.dom.HTMLDivElement;
 import elemental2.dom.HTMLElement;
 
-public class JSText extends JSDisplayNode implements Text {
-  private final HTMLDivElement element;
+public class JSText extends JSCourseDisplayNode implements Text {
   private JSFont font;
 
   protected JSText(JSDisplay display) {
-    super(display);
-    element = (HTMLDivElement) DomGlobal.document.createElement("div");
+    super(display, (HTMLElement) DomGlobal.document.createElement("div"));
     element.classList.add("merman-display-text", "merman-display");
   }
 
@@ -45,6 +43,8 @@ public class JSText extends JSDisplayNode implements Text {
     this.font = (JSFont) font;
     element.style.fontFamily = this.font.name;
     element.style.fontSize = CSSProperties.FontSizeUnionType.of(this.font.size + "px");
+    ascent = font.getAscent();
+    descent = font.getDescent();
     fixPosition();
   }
 
@@ -58,10 +58,5 @@ public class JSText extends JSDisplayNode implements Text {
   @Override
   public int getConverseAtIndex(int index) {
     return (int) font.measure(text()).width;
-  }
-
-  @Override
-  public HTMLElement js() {
-    return element;
   }
 }

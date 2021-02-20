@@ -45,11 +45,6 @@ public class MockeryGroup extends MockeryDisplayNode implements Group {
 		return nodes.stream().mapToInt(n -> n.converseEdge(context)).max().orElse(0);
 	}
 
-	@Override
-	public int transverseSpan() {
-		return nodes.stream().mapToInt(n -> n.transverseEdge()).max().orElse(0);
-	}
-
 	public int count() {
 		return nodes.size();
 	}

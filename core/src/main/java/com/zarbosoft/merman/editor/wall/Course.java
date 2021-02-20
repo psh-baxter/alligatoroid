@@ -45,7 +45,7 @@ public class Course {
   Course(final Context context, final int transverseStart) {
     visual = context.display.group();
     this.transverseStart = transverseStart;
-    visual.setTransverse(transverseStart);
+    visual.setTransverse(transverseStart, false);
   }
 
   /**
@@ -78,9 +78,7 @@ public class Course {
 
   void setTransverse(final Context context, final int transverse) {
     transverseStart = transverse;
-    visual.setPosition(
-        new com.zarbosoft.merman.editor.visual.Vector(0, transverseStart),
-        context.animateCoursePlacement);
+    visual.setTransverse(transverseStart, context.animateCoursePlacement);
     for (Brick child : children.mut()) {
       for (Attachment a : child.attachments.mut()) {
         a.setTransverse(context, transverseStart);
@@ -120,8 +118,8 @@ public class Course {
       ROList<Brick> transportAdd = transplantRemove.mut();
       getIdlePlace(context);
       for (final Brick brick : transportAdd) {
-        idlePlace.removeMaxAscent = Math.max(idlePlace.removeMaxAscent, brick.ascent);
-        idlePlace.removeMaxDescent = Math.max(idlePlace.removeMaxDescent, brick.descent);
+        idlePlace.removeMaxAscent = Math.max(idlePlace.removeMaxAscent, brick.ascent());
+        idlePlace.removeMaxDescent = Math.max(idlePlace.removeMaxDescent, brick.descent());
         idlePlace.changed.remove(brick);
         if (brick == parent.cornerstone) resetCornerstone = true;
       }
@@ -179,8 +177,8 @@ public class Course {
         visual.remove(at);
         renumber(at);
         getIdlePlace(context);
-        idlePlace.removeMaxAscent = Math.max(idlePlace.removeMaxAscent, brick.ascent);
-        idlePlace.removeMaxDescent = Math.max(idlePlace.removeMaxDescent, brick.descent);
+        idlePlace.removeMaxAscent = Math.max(idlePlace.removeMaxAscent, brick.ascent());
+        idlePlace.removeMaxDescent = Math.max(idlePlace.removeMaxDescent, brick.descent());
         idlePlace.changed.remove(brick);
       }
     }
@@ -260,12 +258,12 @@ public class Course {
       /// Update transverse space
       boolean newAscent = false, newDescent = false;
       for (final Brick brick : changed) {
-        if (brick.ascent > ascent) {
-          ascent = brick.ascent;
+        if (brick.ascent() > ascent) {
+          ascent = brick.ascent();
           newAscent = true;
         }
-        if (brick.descent > descent) {
-          descent = brick.descent;
+        if (brick.descent() > descent) {
+          descent = brick.descent();
           newDescent = true;
         }
       }
@@ -274,8 +272,8 @@ public class Course {
         descent = 0;
         {
           for (final Brick brick : children) {
-            ascent = Math.max(ascent, brick.ascent);
-            descent = Math.max(descent, brick.descent);
+            ascent = Math.max(ascent, brick.ascent());
+            descent = Math.max(descent, brick.descent());
           }
         }
         newAscent = true;
@@ -442,8 +440,7 @@ public class Course {
             VisualAtom otherAtom = otherCourseBrick.getVisual().atomVisual();
             if (otherAtom == top) continue;
             if (!otherAtom.compact) continue;
-            if (isOrdered(expandComparator, top, otherAtom))
-              return false;
+            if (isOrdered(expandComparator, top, otherAtom)) return false;
           }
         }
       }

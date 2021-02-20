@@ -30,18 +30,4 @@ public class JavaFXBlank extends JavaFXNode implements Blank {
 				break;
 		}
 	}
-
-	@Override
-	public void setTransverseSpan(final Context context, final int transverse) {
-		switch (context.syntax.transverseDirection) {
-			case UP:
-			case DOWN:
-				node.setMinHeight(transverse);
-				break;
-			case LEFT:
-			case RIGHT:
-				node.setMinWidth(transverse);
-				break;
-		}
-	}
 }

@@ -3,7 +3,7 @@ package com.zarbosoft.merman.editor.display;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 
-public interface Text extends DisplayNode {
+public interface Text extends CourseDisplayNode {
 	String text();
 
 	void setText(Context context, String text);
@@ -19,9 +19,4 @@ public interface Text extends DisplayNode {
 	}
 
 	int getConverseAtIndex(final int index);
-
-	@Override
-	default int transverseEdge() {
-		return transverse() + font().getDescent();
-	}
 }

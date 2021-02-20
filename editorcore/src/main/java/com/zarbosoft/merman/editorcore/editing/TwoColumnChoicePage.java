@@ -4,11 +4,11 @@ import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.details.DetailsPage;
+import com.zarbosoft.merman.editor.display.CourseDisplayNode;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Group;
 import com.zarbosoft.merman.editor.display.derived.Box;
 import com.zarbosoft.merman.editor.display.derived.ColumnarTableLayout;
-import com.zarbosoft.merman.editor.gap.TwoColumnChoice;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.tags.PartTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
@@ -23,7 +23,7 @@ public class TwoColumnChoicePage extends DetailsPage {
   private final Box highlight;
   private final Group tableGroup;
   private final Context.ContextIntListener edgeListener;
-  List<Pair<DisplayNode, DisplayNode>> rows = new ArrayList<>();
+  List<Pair<CourseDisplayNode, CourseDisplayNode>> rows = new ArrayList<>();
   private int index = 0;
   private int scroll = 0;
 
@@ -71,7 +71,7 @@ public class TwoColumnChoicePage extends DetailsPage {
   }
 
   public void updateScroll(final Context context) {
-    final Pair<DisplayNode, DisplayNode> row = rows.get(index);
+    final Pair<CourseDisplayNode, CourseDisplayNode> row = rows.get(index);
     final DisplayNode preview = row.first;
     final DisplayNode text = row.second;
     final int converse = preview.converse();
@@ -82,11 +82,11 @@ public class TwoColumnChoicePage extends DetailsPage {
 
   private void changeChoice(final Context context, final int index) {
     this.index = index;
-    final Pair<DisplayNode, DisplayNode> row = rows.get(index);
-    final DisplayNode preview = row.first;
-    final DisplayNode text = row.second;
+    final Pair<CourseDisplayNode, CourseDisplayNode> row = rows.get(index);
+    final CourseDisplayNode preview = row.first;
+    final CourseDisplayNode text = row.second;
     final int converse = preview.converse();
-    final int transverse = Math.min(preview.transverse(), text.transverse());
+    final int transverse = Math.min(preview.baselineTransverse(), text.baselineTransverse());
     final int converseEdge = text.converseEdge();
     final int transverseEdge =
         Math.max(preview.transverseEdge(), text.transverseEdge());

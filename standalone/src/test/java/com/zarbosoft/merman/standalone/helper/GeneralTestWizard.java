@@ -58,14 +58,6 @@ public class GeneralTestWizard {
     return this;
   }
 
-  private void checkNode(
-      final DisplayNode node, final int c, final int t, final int ce, final int te) {
-    assertThat(node.converse(), equalTo(c));
-    assertThat(node.transverse(), equalTo(t));
-    assertThat(node.converseEdge(), equalTo(ce));
-    assertThat(node.transverseEdge(), equalTo(te));
-  }
-
   private void checkNode(final DisplayNode node, final int t, final int te) {
     assertThat(node.transverse(), equalTo(t));
     assertThat(node.transverseEdge(), equalTo(te));

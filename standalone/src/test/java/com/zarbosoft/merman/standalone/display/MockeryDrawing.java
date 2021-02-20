@@ -15,11 +15,6 @@ public class MockeryDrawing extends MockeryDisplayNode implements Drawing {
 	}
 
 	@Override
-	public int transverseSpan() {
-		return size.transverse;
-	}
-
-	@Override
 	public void clear() {
 
 	}

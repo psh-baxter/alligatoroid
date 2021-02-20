@@ -6,34 +6,33 @@ import com.zarbosoft.merman.editor.display.Drawing;
 import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.ModelColor;
-import elemental2.core.JsObject;
 import elemental2.dom.BaseRenderingContext2D;
 import elemental2.dom.CSSProperties;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLCanvasElement;
 import elemental2.dom.HTMLElement;
-import jsinterop.annotations.JsType;
 
 public class JSDrawing extends JSDisplayNode implements Drawing {
-  private final HTMLCanvasElement element;
-
   protected JSDrawing(JSDisplay display) {
-    super(display);
-    element = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
+    super(display, (HTMLElement) DomGlobal.document.createElement("canvas"));
     element.classList.add("merman-display-drawing", "merman-display");
   }
 
   @Override
   public void clear() {
-    CanvasRenderingContext2D ctx = (CanvasRenderingContext2D)(Object)element.getContext("2d");
+    HTMLCanvasElement element = (HTMLCanvasElement) this.element;
+    CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) element.getContext("2d");
     ctx.clearRect(0, 0, element.width, element.height);
   }
 
   @Override
   public void resize(Context context, Vector vector) {
+    HTMLCanvasElement element = (HTMLCanvasElement) this.element;
     Display.UnconvertVector v =
         display.halfConvert.unconvertSpan(vector.converse, vector.transverse);
+    element.width = (int) v.x;
+    element.height = (int) v.y;
     element.style.width = CSSProperties.WidthUnionType.of(v.x + "px");
     element.style.height = CSSProperties.HeightUnionType.of(v.y + "px");
     fixPosition();
@@ -41,7 +40,8 @@ public class JSDrawing extends JSDisplayNode implements Drawing {
 
   @Override
   public DrawingContext begin(Context context) {
-    CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object)element.getContext("2d");
+    HTMLCanvasElement element = (HTMLCanvasElement) this.element;
+    CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) element.getContext("2d");
     return new DrawingContext() {
       private boolean stroke = true;
 
@@ -141,7 +141,7 @@ public class JSDrawing extends JSDisplayNode implements Drawing {
   }
 
   @Override
-  public HTMLElement js() {
-    return element;
+  public int transverseSpan() {
+    return element.clientHeight;
   }
 }

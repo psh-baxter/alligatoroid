@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editor.display.derived;
 
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.display.CourseDisplayNode;
 import com.zarbosoft.merman.editor.display.Display;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Group;
@@ -30,14 +31,14 @@ public class RowLayout {
 		int converse = 0;
 		int maxAscent = 0;
 		for (final DisplayNode node : nodes) {
-			if (node instanceof Text)
+			if (node instanceof CourseDisplayNode)
 				maxAscent = Math.max(maxAscent, ((Text) node).font().getAscent());
 			else
 				maxAscent = Math.max(maxAscent, node.transverseSpan());
 		}
 		for (final DisplayNode node : nodes) {
-			if (node instanceof Text) {
-				node.setTransverse(maxAscent);
+			if (node instanceof CourseDisplayNode) {
+				((CourseDisplayNode) node).setBaselineTransverse(maxAscent);
 			}
 			node.setConverse(converse, false);
 			converse += node.converseSpan();

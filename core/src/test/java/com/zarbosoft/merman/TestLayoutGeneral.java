@@ -37,19 +37,21 @@ public class TestLayoutGeneral {
             .front(
                 new FrontSymbol(
                     new FrontSymbol.Config(
-                        new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS).style(
-                            new Style.Config()
-                                .
-                                /* only in first syntax */ spaceTransverseAfter(60)
-                                .create())))))
+                        new SymbolSpaceSpec(
+                            new SymbolSpaceSpec.Config()
+                                .splitMode(Style.SplitMode.ALWAYS)
+                                .style(
+                                    new Style.Config()
+                                        .
+                                        /* only in first syntax */ spaceTransverseAfter(60)
+                                        .create())))))
             .build();
     text =
         new TypeBuilder("text")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(
                 new FrontPrimitiveSpec(
-                    new FrontPrimitiveSpec.Config("value").splitMode(Style.SplitMode.ALWAYS)
-                        ))
+                    new FrontPrimitiveSpec.Config("value").splitMode(Style.SplitMode.ALWAYS)))
             .build();
     array =
         new TypeBuilder("array")
@@ -97,7 +99,7 @@ public class TestLayoutGeneral {
         .checkScroll(-10)
         .checkCourse(0, 0, 10)
         .checkCourse(1, 17, 27)
-        .checkBanner(8, 10)
+        .checkBanner(0, 10)
         .checkDetails(20, 27);
   }
 
@@ -113,7 +115,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(one).build())
         .displayHeight(40)
         .checkScroll(-10)
-        .checkBanner(8, 10)
+        .checkBanner(0, 10)
         .checkDetails(20, 27);
   }
 
@@ -136,7 +138,7 @@ public class TestLayoutGeneral {
         .checkScroll(24)
         .checkCourse(3, 27, 37)
         .checkCourse(5, 64, 74)
-        .checkBanner(21, 23)
+        .checkBanner(13, 23)
         .checkDetails(33, 40);
   }
 
@@ -183,7 +185,7 @@ public class TestLayoutGeneral {
         .checkScroll(23)
         .checkCourse(3, 27, 37)
         .checkCourse(5, 64, 74)
-        .checkBanner(22, 24)
+        .checkBanner(14, 24)
         .checkDetails(34, 41);
   }
 
@@ -230,7 +232,7 @@ public class TestLayoutGeneral {
         .checkScroll(37)
         .checkCourse(3, 27, 37)
         .checkCourse(5, 114, 124)
-        .checkBanner(8, 10)
+        .checkBanner(0, 10)
         .checkDetails(33, 40);
   }
 

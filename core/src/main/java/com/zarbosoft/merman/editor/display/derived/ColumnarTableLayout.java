@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editor.display.derived;
 
 import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.display.CourseDisplayNode;
 import com.zarbosoft.merman.editor.display.Display;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Group;
@@ -17,7 +18,7 @@ public class ColumnarTableLayout {
 	public final Group group;
 	private final int maxTransverse;
 	int columns;
-	TSList<ROList<DisplayNode>> rows = new TSList<>();
+	TSList<ROList<CourseDisplayNode>> rows = new TSList<>();
 
 	public ColumnarTableLayout(final Display display, final int maxTransverse) {
 		this.group = display.group();
@@ -28,7 +29,7 @@ public class ColumnarTableLayout {
 		this(context.display, maxTransverse);
 	}
 
-	public void add(final ROList<DisplayNode> row) {
+	public void add(final ROList<CourseDisplayNode> row) {
 		columns = Math.max(columns, row.size());
 		rows.add(row);
 		for (final DisplayNode node : row)
@@ -50,7 +51,7 @@ public class ColumnarTableLayout {
 				for (int y = start; y < rows.size(); ++y) {
 					int ascent = 0;
 					int descent = 0;
-					final ROList<DisplayNode> row = rows.get(y);
+					final ROList<CourseDisplayNode> row = rows.get(y);
 					for (int x = 0; x < columns; ++x) {
 						final DisplayNode cell = row.get(x);
 						if (cell instanceof Text) {
@@ -75,15 +76,14 @@ public class ColumnarTableLayout {
 
 			// Place everything
 			for (int y = start; y < end; ++y) {
-				final ROList<DisplayNode> row = rows.get(y);
+				final ROList<CourseDisplayNode> row = rows.get(y);
 				int converse = columnEdge;
 				for (int x = 0; x < columns; ++x) {
-					final DisplayNode cell = row.get(x);
+					final CourseDisplayNode cell = row.get(x);
 					final Pair<Integer, Integer> rowTransverse = rowStarts.get(y - start);
 					int transverse = rowTransverse.first;
-					if (cell instanceof Text)
 						transverse += rowTransverse.second;
-					cell.setPosition(new Vector(converse, transverse), false);
+					cell.setBaselinePosition(new Vector(converse, transverse), false);
 					converse += columnSpans[x];
 				}
 				newColumnEdge = Math.max(newColumnEdge, converse);

@@ -2,12 +2,19 @@ package com.zarbosoft.merman.editor.display;
 
 import com.zarbosoft.rendaw.common.ROList;
 
-public interface Group extends DisplayNode {
+/**
+ * doubles as loose collection and box
+ * span, edge based on max of all children
+ * negative positions ignored
+ */
+public interface Group extends FreeDisplayNode {
 	void add(int index, DisplayNode node);
 
 	default void add(final DisplayNode node) {
 		add(size(), node);
 	}
+
+	void setTransverse(int transverse, boolean animate);
 
 	void addAll(int index, ROList<? extends DisplayNode> nodes);
 

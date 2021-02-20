@@ -27,19 +27,12 @@ public abstract class JavaFXNode implements DisplayNode {
   }
 
   @Override
-  public final int transverseSpan() {
-    Bounds layoutBounds = node().getLayoutBounds();
-    return display.halfConvert.convert(layoutBounds.getWidth(), layoutBounds.getHeight())
-        .transverse;
-  }
-
-  @Override
   public final int converse() {
     return converse;
   }
 
   @Override
-  public final int transverse() {
+  public final int baselineTransverse() {
     return transverse;
   }
 
@@ -67,7 +60,7 @@ public abstract class JavaFXNode implements DisplayNode {
   }
 
   @Override
-  public final void setTransverse(final int transverse, final boolean animate) {
+  public final void setBaselineTransverse(final int transverse, final boolean animate) {
     Bounds layoutBounds = node().getLayoutBounds();
     this.transverse = transverse;
     setPosition(
@@ -110,7 +103,7 @@ public abstract class JavaFXNode implements DisplayNode {
   }
 
   @Override
-  public void setPosition(Vector vector, boolean animate) {
+  public void setBaselinePosition(Vector vector, boolean animate) {
     Bounds layoutBounds = node().getLayoutBounds();
     Display.UnconvertVector vector1 = display.convert.unconvert(vector.converse, vector.transverse,
             layoutBounds.getWidth(),

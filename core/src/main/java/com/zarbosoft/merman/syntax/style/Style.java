@@ -5,23 +5,23 @@ import com.zarbosoft.rendaw.common.TSList;
 public class Style {
   public final String alignment;
   public final String splitAlignment;
-  public final Integer spaceBefore;
-  public final Integer spaceAfter;
-  public final Integer spaceTransverseBefore;
-  public final Integer spaceTransverseAfter;
+  public final int spaceBefore;
+  public final int spaceAfter;
+  public final int spaceTransverseBefore;
+  public final int spaceTransverseAfter;
   public final ModelColor color;
 
   // Text/image/shape only
   public final String font;
 
   // Text only
-  public final Integer fontSize;
+  public final int fontSize;
   public final String image;
 
   // Image only
   /** Degrees */
-  public final Integer rotate;
-  public final Integer space;
+  public final int rotate;
+  public final int space;
 
   // Space only
   public final BoxStyle box;
