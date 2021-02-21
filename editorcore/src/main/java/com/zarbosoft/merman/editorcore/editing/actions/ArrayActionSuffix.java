@@ -26,11 +26,11 @@ public class ArrayActionSuffix extends EditAction {
   public void run1(final Context context) {
     final Atom gap = edit.suffixGap.create();
     TSList<Atom> transplant =
-        cursor.self.value.data.sublist(cursor.beginIndex, cursor.endIndex).mut();
+        cursor.visual.value.data.sublist(cursor.beginIndex, cursor.endIndex).mut();
     edit.history.apply(
         context,
         new ChangeArray(
-            cursor.self.value,
+            cursor.visual.value,
             cursor.beginIndex,
             cursor.endIndex - cursor.beginIndex,
             ImmutableList.of(gap)));

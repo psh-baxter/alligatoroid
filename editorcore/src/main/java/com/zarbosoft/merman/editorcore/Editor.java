@@ -84,7 +84,7 @@ public class Editor {
     @Override
     public void run(final Context context) {
       if (context.hover == null) return false;
-      context.hover.click(context);
+      context.hover.select(context);
 
       return true;
     }

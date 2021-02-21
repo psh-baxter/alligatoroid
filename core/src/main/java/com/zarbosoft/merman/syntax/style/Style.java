@@ -1,7 +1,5 @@
 package com.zarbosoft.merman.syntax.style;
 
-import com.zarbosoft.rendaw.common.TSList;
-
 public class Style {
   public final String alignment;
   public final String splitAlignment;
@@ -10,23 +8,14 @@ public class Style {
   public final int spaceTransverseBefore;
   public final int spaceTransverseAfter;
   public final ModelColor color;
-
-  // Text/image/shape only
   public final String font;
-
-  // Text only
   public final int fontSize;
   public final String image;
-
-  // Image only
   /** Degrees */
   public final int rotate;
+
   public final int space;
-
-  // Space only
   public final BoxStyle box;
-
-  // Other
   public final ObboxStyle obbox;
 
   private Style(
@@ -83,8 +72,8 @@ public class Style {
     // Space only
     public Integer space;
     // Other
-    public BoxStyle.Spec box;
-    public ObboxStyle.Spec obbox;
+    public final BoxStyle.Config box = new BoxStyle.Config();
+    public final ObboxStyle.Config obbox = new ObboxStyle.Config();
     private String splitAlignment;
 
     public Config() {}
@@ -137,8 +126,6 @@ public class Style {
       String image = null;
       int rotate = 0;
       int space = 0;
-      TSList<BoxStyle.Spec> boxToMerge = new TSList<BoxStyle.Spec>();
-      TSList<ObboxStyle.Spec> obboxToMerge = new TSList<ObboxStyle.Spec>();
       if (this.alignment != null) alignment = this.alignment;
       if (this.splitAlignment != null) splitAlignment = this.splitAlignment;
       if (this.spaceBefore != null) spaceBefore = this.spaceBefore;
@@ -151,8 +138,6 @@ public class Style {
       if (this.image != null) image = this.image;
       if (this.rotate != null) rotate = this.rotate;
       if (this.space != null) space = this.space;
-      if (this.box != null) boxToMerge.add(this.box);
-      if (this.obbox != null) obboxToMerge.add(this.obbox);
       return new Style(
           alignment,
           splitAlignment,
@@ -166,8 +151,23 @@ public class Style {
           image,
           rotate,
           space,
-          BoxStyle.create(boxToMerge),
-          ObboxStyle.create(obboxToMerge));
+          new BoxStyle(this.box),
+          new ObboxStyle(this.obbox));
+    }
+
+    public Config color(ModelColor.RGB color) {
+      this.color = color;
+      return this;
+    }
+
+    public Config fontSize(int size) {
+      this.fontSize = size;
+      return this;
+    }
+
+    public Config font(String name) {
+      this.font = name;
+      return this;
     }
   }
 }

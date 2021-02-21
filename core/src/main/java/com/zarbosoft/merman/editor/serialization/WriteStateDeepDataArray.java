@@ -13,23 +13,22 @@ public class WriteStateDeepDataArray extends WriteState {
     private final Iterator<Atom> iterator;
     private final ROMap<String, BackSpec> boilerplate;
 
-    public WriteStateDeepDataArray(final List<Atom> values, final ROMap<String, BackSpec> boilerplate) {
+    public WriteStateDeepDataArray(final TSList<Atom> values, final ROMap<String, BackSpec> boilerplate) {
         this.iterator = values.iterator();
         this.boilerplate = boilerplate;
     }
 
     @Override
     public void run(final TSList<WriteState> stack, final EventConsumer writer) {
-        if (!iterator.hasNext()) {
-            stack.removeLast();
-            return;
-        }
         final Atom next = iterator.next();
         BackSpec nextPlate = boilerplate.get(next.type.id());
         if (nextPlate != null) {
             nextPlate.write(stack, new TSMap<String, Object>().putNull(null, next), writer);
         } else {
             next.write(stack);
+        }
+        if (iterator.hasNext()) {
+            stack.add(this);
         }
     }
 }

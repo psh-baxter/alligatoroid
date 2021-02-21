@@ -17,11 +17,10 @@ public class WriteStateBack extends WriteState {
 
     @Override
     public void run(final TSList<WriteState> stack, final EventConsumer writer) {
-        if (!iterator.hasNext()) {
-            stack.removeLast();
-            return;
+        BackSpec next = iterator.next();
+        if (iterator.hasNext()) {
+            stack.add(this);
         }
-        BackSpec part = iterator.next();
-        part.write(stack, data, writer);
+        next.write(stack, data, writer);
     }
 }

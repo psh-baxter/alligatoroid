@@ -17,11 +17,10 @@ public class TestWizard {
     this.runner = new IterationRunner();
     this.context =
         buildDoc(
-            new Context.InitialConfig(),
+            new Context.InitialConfig().startWindowed(startWindowed),
             runner::addIteration,
             runner::flushIteration,
             syntax,
-            startWindowed,
             initial);
     this.display = (MockeryDisplay) context.display;
     runner.flush();

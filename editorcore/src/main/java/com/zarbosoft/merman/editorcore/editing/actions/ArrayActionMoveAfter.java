@@ -23,14 +23,14 @@ public class ArrayActionMoveAfter extends EditAction {
 
   @Override
   public void run1(final Context context) {
-    if (cursor.endIndex == cursor.self.value.data.size() - 1) return false;
+    if (cursor.endIndex == cursor.visual.value.data.size() - 1) return false;
     int index = cursor.beginIndex;
     final List<Atom> atoms =
-        ImmutableList.copyOf(cursor.self.value.data.subList(index, cursor.endIndex + 1));
+        ImmutableList.copyOf(cursor.visual.value.data.subList(index, cursor.endIndex + 1));
     edit.history.apply(
-        context, new ChangeArray(cursor.self.value, index, atoms.size(), ImmutableList.of()));
+        context, new ChangeArray(cursor.visual.value, index, atoms.size(), ImmutableList.of()));
     cursor.setPosition(context, ++index);
-    edit.history.apply(context, new ChangeArray(cursor.self.value, index, 0, atoms));
+    edit.history.apply(context, new ChangeArray(cursor.visual.value, index, 0, atoms));
     cursor.leadFirst = false;
     cursor.setRange(context, index, index + atoms.size() - 1);
     return true;

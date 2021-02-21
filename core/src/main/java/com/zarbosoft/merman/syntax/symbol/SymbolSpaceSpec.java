@@ -5,7 +5,7 @@ import com.zarbosoft.merman.editor.display.Blank;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
-import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
+import com.zarbosoft.merman.editor.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.syntax.style.Style;
 
 public class SymbolSpaceSpec extends Symbol {
@@ -41,6 +41,6 @@ public class SymbolSpaceSpec extends Symbol {
 
   @Override
   public Brick createBrick(final Context context, final BrickInterface inter) {
-    return new BrickSpace(context, inter, splitMode, style);
+    return new BrickEmpty(context, inter, splitMode, style);
   }
 }

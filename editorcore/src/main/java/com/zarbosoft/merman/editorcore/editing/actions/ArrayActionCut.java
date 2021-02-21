@@ -20,11 +20,11 @@ public class ArrayActionCut extends EditAction {
 
   @Override
   public void run1(final Context context) {
-    context.copy(cursor.self.value.data.subList(cursor.beginIndex, cursor.endIndex + 1));
+    context.copy(cursor.visual.value.data.subList(cursor.beginIndex, cursor.endIndex + 1));
     edit.history.apply(
         context,
         new ChangeArray(
-            cursor.self.value,
+            cursor.visual.value,
             cursor.beginIndex,
             cursor.endIndex - cursor.beginIndex + 1,
             ImmutableList.of()));

@@ -36,7 +36,7 @@ public class SelectionTypeExtension {
               part = "array";
               final VisualFrontArray.ArrayCursor selection1 = (VisualFrontArray.ArrayCursor) cursor;
               final Atom child =
-                  selection1.self.value.data.get(
+                  selection1.visual.value.data.get(
                       selection1.leadFirst ? selection1.beginIndex : selection1.endIndex);
               innerId = child.type.id();
               innerName = child.type.name();

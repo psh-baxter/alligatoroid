@@ -8,13 +8,13 @@ import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.style.Style;
 
-public class BrickSpace extends Brick {
+public class BrickEmpty extends Brick {
   private final Blank visual;
   private final int ascent;
   private final int descent;
   private int converse = 0;
 
-  public BrickSpace(
+  public BrickEmpty(
       final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
     super(inter, style, splitMode);
     visual = context.display.blank();

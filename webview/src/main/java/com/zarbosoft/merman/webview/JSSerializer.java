@@ -63,7 +63,7 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
   }
 
   @Override
-  public byte[] write(Atom atom) {
+  public String write(Atom atom) {
     return uncheck(
         () -> {
           final JSEventConsumer writer;
@@ -84,7 +84,7 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
         });
   }
 
-  public byte[] write(ROList<Atom> atoms) {
+  public String write(ROList<Atom> atoms) {
     return uncheck(
         () -> {
           final JSEventConsumer writer;

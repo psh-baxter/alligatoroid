@@ -44,7 +44,7 @@ public class JavaSerializer implements com.zarbosoft.merman.editor.serialization
   }
 
   @Override
-  public byte[] write(Atom atom) {
+  public Object write(Atom atom) {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     uncheck(
         () -> {
@@ -72,7 +72,7 @@ public class JavaSerializer implements com.zarbosoft.merman.editor.serialization
     return stream.toByteArray();
   }
 
-  public byte[] write(ROList<Atom> atoms) {
+  public Object write(ROList<Atom> atoms) {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     uncheck(
         () -> {

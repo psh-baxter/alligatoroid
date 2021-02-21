@@ -4,56 +4,45 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
 import com.zarbosoft.merman.editor.display.Group;
-import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.PriorityQueue;
 import java.util.function.Supplier;
 
 public class Wall {
   public final Group visual;
   public TSList<Course> children = new TSList<>();
-  private IterationAdjustTask idleAdjust;
-  private IterationCompactTask idleCompact;
-  private IterationExpandTask idleExpand;
   /** Cornerstone may be null. Cornerstone course is only null in transition. */
   public Brick cornerstone;
 
   public Course cornerstoneCourse;
-  TSSet<Bedding> bedding = new TSSet<>();
   public int beddingBefore = 0;
+  TSSet<Bedding> bedding = new TSSet<>();
   int beddingAfter = 0;
   TSSet<BeddingListener> beddingListeners = new TSSet<>();
   TSSet<CornerstoneListener> cornerstoneListeners = new TSSet<>();
-
-  public abstract static class CornerstoneListener {
-    public abstract void cornerstoneChanged(Context context, Brick brick);
-  }
-
-  public abstract static class BeddingListener {
-
-    public abstract void beddingChanged(Context context, int beddingBefore, int beddingAfter);
-  }
+  private IterationAdjustTask idleAdjust;
+  private IterationCompactTask idleCompact;
+  private IterationExpandTask idleExpand;
 
   public Wall(final Context context) {
     visual = context.display.group();
     context.addConverseEdgeListener(
-            new Context.ContextIntListener() {
-              int modOldValue = Integer.MAX_VALUE;
-              @Override
-              public void changed(Context context1, int oldValue, int newValue) {
-                if (newValue < modOldValue) {
-                  Wall.this.idleCompact(context1);
-                  modOldValue = newValue;
-                } else if (newValue > modOldValue * context.retryExpandFactor) {
-                  Wall.this.idleExpand(context1);
-                  modOldValue = newValue;
-                }
-              }
-            });
+        new Context.ContextIntListener() {
+          int modOldValue = Integer.MAX_VALUE;
+
+          @Override
+          public void changed(Context context1, int oldValue, int newValue) {
+            if (newValue < modOldValue) {
+              Wall.this.idleCompact(context1);
+              modOldValue = newValue;
+            } else if (newValue > modOldValue * context.retryExpandFactor) {
+              Wall.this.idleExpand(context1);
+              modOldValue = newValue;
+            }
+          }
+        });
   }
 
   public void clear(final Context context) {
@@ -206,6 +195,20 @@ public class Wall {
     }
   }
 
+  void adjust(final Context context, final int at) {
+    getIdle(context);
+    idleAdjust.at(at);
+  }
+
+  public abstract static class CornerstoneListener {
+    public abstract void cornerstoneChanged(Context context, Brick brick);
+  }
+
+  public abstract static class BeddingListener {
+
+    public abstract void beddingChanged(Context context, int beddingBefore, int beddingAfter);
+  }
+
   class IterationCompactTask extends IterationTask {
     private final Context context;
     Course.IterationCompactTask compactTask;
@@ -282,6 +285,8 @@ public class Wall {
     private final Context context;
     int forward = Integer.MAX_VALUE;
     int backward = Integer.MIN_VALUE;
+    int minTransverse = Integer.MAX_VALUE;
+    int maxTransverse = Integer.MIN_VALUE;
 
     IterationAdjustTask(final Context context) {
       this.context = context;
@@ -317,6 +322,14 @@ public class Wall {
         forward += 1;
         modified = true;
       }
+      if (!modified) {
+        int min = children.get(0).transverseStart;
+        int max = children.last().transverseEdge();
+        if (context.wallUsageListener != null)
+          context.wallUsageListener.usageChanged(
+              context.display.halfConvert.unconvertTransverseSpan(min),
+              context.display.halfConvert.unconvertTransverseSpan(max));
+      }
       return modified;
     }
 
@@ -332,10 +345,5 @@ public class Wall {
       if (at >= cornerstoneCourse.index && at < forward)
         forward = Math.max(cornerstoneCourse.index + 1, at);
     }
-  }
-
-  void adjust(final Context context, final int at) {
-    getIdle(context);
-    idleAdjust.at(at);
   }
 }

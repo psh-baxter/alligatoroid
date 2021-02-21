@@ -474,7 +474,7 @@ public abstract class Display {
 
               @Override
               public UnconvertAxis unconvertTransverseSpan(int span) {
-                return new UnconvertAxis(true, span);
+                return new UnconvertAxis(false, span);
               }
             };
         break;

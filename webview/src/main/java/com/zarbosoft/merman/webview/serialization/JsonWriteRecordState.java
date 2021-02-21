@@ -1,15 +1,17 @@
 package com.zarbosoft.merman.webview.serialization;
 
+import elemental2.core.JsObject;
+import jsinterop.base.JsPropertyMap;
+
 import java.util.HashMap;
-import java.util.Map;
 
 public class JsonWriteRecordState implements com.zarbosoft.merman.webview.serialization.JsonWriteState {
-    public final Map value = new HashMap();
+    public final JsPropertyMap value = (JsPropertyMap) new JsObject();
     private String key;
 
     @Override
     public void value(Object value) {
-        this.value.put(key, value);
+        this.value.set(key, value);
     }
 
     @Override

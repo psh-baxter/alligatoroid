@@ -6,6 +6,5 @@ public class WriteStateArrayEnd extends WriteState {
     @Override
     public void run(final TSList<WriteState> stack, final EventConsumer writer) {
         writer.arrayEnd();
-        stack.removeLast();
     }
 }

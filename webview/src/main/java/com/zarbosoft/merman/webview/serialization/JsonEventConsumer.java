@@ -4,8 +4,6 @@ import com.zarbosoft.rendaw.common.TSList;
 import elemental2.core.JSONType;
 import elemental2.core.JsNumber;
 
-import java.nio.charset.StandardCharsets;
-
 import static elemental2.core.Global.JSON;
 
 public class JsonEventConsumer implements JSEventConsumer {
@@ -16,19 +14,17 @@ public class JsonEventConsumer implements JSEventConsumer {
   }
 
   @Override
-  public byte[] resultOne() {
+  public String resultOne() {
     return JSON.stringify(
-            ((JsonWriteArrayState) stack.last()).value.get(0),
-            (JSONType.StringifyReplacerFn) null,
-            "    ")
-        .getBytes(StandardCharsets.UTF_8);
+        ((JsonWriteArrayState) stack.last()).value.getAt(0),
+        (JSONType.StringifyReplacerFn) null,
+        "    ");
   }
 
   @Override
-  public byte[] resultMany() {
+  public String resultMany() {
     return JSON.stringify(
-            ((JsonWriteArrayState) stack.last()).value, (JSONType.StringifyReplacerFn) null, "    ")
-        .getBytes(StandardCharsets.UTF_8);
+        ((JsonWriteArrayState) stack.last()).value, (JSONType.StringifyReplacerFn) null, "    ");
   }
 
   @Override

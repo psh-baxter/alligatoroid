@@ -16,7 +16,7 @@ import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Course;
 import com.zarbosoft.merman.editor.wall.bricks.BrickImage;
 import com.zarbosoft.merman.editor.wall.bricks.BrickLine;
-import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
+import com.zarbosoft.merman.editor.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.helper.BackRecordBuilder;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
@@ -32,7 +32,6 @@ import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
@@ -102,9 +101,7 @@ public class TestWindowing {
                 TSList.of(
                     new FrontSymbol(
                         new FrontSymbol.Config(
-                            new SymbolTextSpec(
-                                new SymbolTextSpec.Config(name)
-                                    )))))));
+                            new SymbolTextSpec(new SymbolTextSpec.Config(name))))))));
   }
 
   @Test
@@ -552,7 +549,8 @@ public class TestWindowing {
                           new ValueArray(
                               (BaseBackArraySpec) syntax.root.fields.get("value"),
                               TSList.of(atoms)))));
-      Context.InitialConfig initialConfig = new Context.InitialConfig();
+      Context.InitialConfig initialConfig =
+          new Context.InitialConfig().startWindowed(startWindowed);
       initialConfig.ellipsizeThreshold = 3;
       context =
           new Context(
@@ -597,8 +595,7 @@ public class TestWindowing {
                 }
               },
               null,
-              startWindowed,
-              Helper.i18n, true);
+              Helper.i18n);
       runner.flush();
     }
 
@@ -667,7 +664,7 @@ public class TestWindowing {
             System.out.printf("\\i ");
           } else if (brick instanceof BrickLine) {
             System.out.printf("\\l ");
-          } else if (brick instanceof BrickSpace) {
+          } else if (brick instanceof BrickEmpty) {
             System.out.printf("\\w ");
           } else throw new Assertion();
         }

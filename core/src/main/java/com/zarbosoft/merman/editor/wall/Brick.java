@@ -14,7 +14,7 @@ import com.zarbosoft.rendaw.common.TSSet;
 public abstract class Brick {
   public final Style.SplitMode splitMode;
   public final BrickInterface inter;
-  private final Style style;
+  public final Style style;
   public Course parent;
   public int index;
   public Alignment alignment;

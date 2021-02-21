@@ -165,7 +165,7 @@ public class Helper {
   }
 
   public static Context buildDoc(final Syntax syntax, final Atom... root) {
-    return buildDoc(new Context.InitialConfig(), idleTask -> {}, limit -> {}, syntax, false, root);
+    return buildDoc(new Context.InitialConfig(), idleTask -> {}, limit -> {}, syntax, root);
   }
 
   public static Context buildDoc(
@@ -173,7 +173,6 @@ public class Helper {
       final Consumer<IterationTask> addIteration,
       final Consumer<Integer> flushIteration,
       final Syntax syntax,
-      boolean startWindowed,
       final Atom... root) {
     final Document doc =
         new Document(
@@ -229,8 +228,7 @@ public class Helper {
               }
             },
             null,
-            startWindowed,
-            i18n, true);
+            i18n);
     return context;
   }
 }

@@ -26,27 +26,27 @@ public class BrickImage extends Brick {
 
   @Override
   public int descent() {
-    return image.descent();
+    return image.descent() + style.spaceTransverseAfter;
   }
 
   @Override
   public int ascent() {
-    return image.ascent();
+    return image.ascent() + style.spaceTransverseBefore;
   }
 
   @Override
   public int converseEdge() {
-    return image.converse() + converseSpan;
+    return getConverse() + converseSpan;
   }
 
   @Override
   public int converseSpan() {
-    return converseSpan;
+    return converseSpan + style.spaceBefore + style.spaceAfter;
   }
 
   @Override
   public int getConverse() {
-    return image.converse();
+    return image.converse() - style.spaceBefore;
   }
 
   @Override
@@ -57,6 +57,6 @@ public class BrickImage extends Brick {
   @Override
   public void setConverse(final Context context, final int minConverse, final int converse) {
     this.preAlignConverse = minConverse;
-    image.setConverse(converse, false);
+    image.setConverse(converse + style.spaceBefore, false);
   }
 }

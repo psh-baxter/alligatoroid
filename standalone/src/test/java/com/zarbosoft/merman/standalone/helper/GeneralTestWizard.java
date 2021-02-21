@@ -14,7 +14,7 @@ import com.zarbosoft.merman.editor.visual.tags.StateTag;
 import com.zarbosoft.merman.editor.visual.tags.Tag;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Course;
-import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
+import com.zarbosoft.merman.editor.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.syntax.Syntax;
 
@@ -94,7 +94,7 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard checkSpaceBrick(final int courseIndex, final int brickIndex) {
-    assertThat(getBrick(courseIndex, brickIndex), instanceOf(BrickSpace.class));
+    assertThat(getBrick(courseIndex, brickIndex), instanceOf(BrickEmpty.class));
     return this;
   }
 

@@ -26,11 +26,11 @@ public class ArrayActionMoveBefore extends EditAction {
     if (cursor.beginIndex == 0) return false;
     int index = cursor.beginIndex;
     final List<Atom> atoms =
-        ImmutableList.copyOf(cursor.self.value.data.subList(index, cursor.endIndex + 1));
+        ImmutableList.copyOf(cursor.visual.value.data.subList(index, cursor.endIndex + 1));
     edit.history.apply(
-        context, new ChangeArray(cursor.self.value, index, atoms.size(), ImmutableList.of()));
+        context, new ChangeArray(cursor.visual.value, index, atoms.size(), ImmutableList.of()));
     cursor.setBegin(context, --index);
-    edit.history.apply(context, new ChangeArray(cursor.self.value, index, 0, atoms));
+    edit.history.apply(context, new ChangeArray(cursor.visual.value, index, 0, atoms));
     cursor.leadFirst = true;
     cursor.setRange(context, index, index + atoms.size() - 1);
     return true;

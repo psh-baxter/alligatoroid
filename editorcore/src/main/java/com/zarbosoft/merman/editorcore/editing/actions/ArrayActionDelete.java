@@ -23,7 +23,7 @@ public class ArrayActionDelete extends EditAction {
     edit.history.apply(
         context,
         new ChangeArray(
-            cursor.self.value,
+            cursor.visual.value,
             cursor.beginIndex,
             cursor.endIndex - cursor.beginIndex + 1,
             ImmutableList.of()));

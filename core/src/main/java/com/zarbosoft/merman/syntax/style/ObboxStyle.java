@@ -1,152 +1,101 @@
 package com.zarbosoft.merman.syntax.style;
 
-import com.zarbosoft.rendaw.common.ROList;
-
 public class ObboxStyle {
-
   public final Integer padding;
-
   public final Boolean roundStart;
-
   public final Boolean roundEnd;
-
   public final Boolean roundOuterEdges;
-
   public final Boolean roundInnerEdges;
-
   public final Boolean roundConcave;
-
   public final Integer roundRadius;
-
   public final Boolean line;
-
   public final ModelColor lineColor;
-
   public final Double lineThickness;
-
   public final Boolean fill;
-
   public final ModelColor fillColor;
 
-  public ObboxStyle(
-      Integer padding,
-      Boolean roundStart,
-      Boolean roundEnd,
-      Boolean roundOuterEdges,
-      Boolean roundInnerEdges,
-      Boolean roundConcave,
-      Integer roundRadius,
-      Boolean line,
-      ModelColor lineColor,
-      Double lineThickness,
-      Boolean fill,
-      ModelColor fillColor) {
-    this.padding = padding;
-    this.roundStart = roundStart;
-    this.roundEnd = roundEnd;
-    this.roundOuterEdges = roundOuterEdges;
-    this.roundInnerEdges = roundInnerEdges;
-    this.roundConcave = roundConcave;
-    this.roundRadius = roundRadius;
-    this.line = line;
-    this.lineColor = lineColor;
-    this.lineThickness = lineThickness;
-    this.fill = fill;
-    this.fillColor = fillColor;
+  public ObboxStyle(Config config) {
+    this.padding = config.padding == null ? 4 : config.padding;
+    this.roundStart = config.roundStart == null ? false : config.roundStart;
+    this.roundEnd = config.roundEnd == null ? false : config.roundEnd;
+    this.roundOuterEdges = config.roundOuterEdges == null ? false : config.roundOuterEdges;
+    this.roundInnerEdges = config.roundInnerEdges == null ? false : config.roundInnerEdges;
+    this.roundConcave = config.roundConcave == null ? false : config.roundConcave;
+    this.roundRadius = config.roundRadius == null ? 0 : config.roundRadius;
+    this.line = config.line == null ? true : config.line;
+    this.lineColor = config.lineColor == null ? ModelColor.RGB.black : config.lineColor;
+    this.lineThickness = config.lineThickness == null ? 1 : config.lineThickness;
+    this.fill = config.fill == null ? false : config.fill;
+    this.fillColor = config.fillColor == null ? ModelColor.RGB.white : config.fillColor;
   }
 
-  public static class Spec {
-    public final Integer padding;
+  public static class Config {
+    public Integer padding;
+    public Boolean roundStart;
+    public Boolean roundEnd;
+    public Boolean roundOuterEdges;
+    public Boolean roundInnerEdges;
+    public Boolean roundConcave;
+    public Integer roundRadius;
+    public Boolean line;
+    public ModelColor lineColor;
+    public Double lineThickness;
+    public Boolean fill;
+    public ModelColor fillColor;
 
-    public final Boolean roundStart;
-
-    public final Boolean roundEnd;
-
-    public final Boolean roundOuterEdges;
-
-    public final Boolean roundInnerEdges;
-
-    public final Boolean roundConcave;
-
-    public final Integer roundRadius;
-
-    public final Boolean line;
-
-    public final ModelColor lineColor;
-
-    public final Double lineThickness;
-
-    public final Boolean fill;
-
-    public final ModelColor fillColor;
-
-    public Spec(
-        Integer padding,
-        Boolean roundStart,
-        Boolean roundEnd,
-        Boolean roundOuterEdges,
-        Boolean roundInnerEdges,
-        Boolean roundConcave,
-        Integer roundRadius,
-        Boolean line,
-        ModelColor lineColor,
-        Double lineThickness,
-        Boolean fill,
-        ModelColor fillColor) {
-      this.padding = padding;
-      this.roundStart = roundStart;
-      this.roundEnd = roundEnd;
-      this.roundOuterEdges = roundOuterEdges;
-      this.roundInnerEdges = roundInnerEdges;
-      this.roundConcave = roundConcave;
-      this.roundRadius = roundRadius;
-      this.line = line;
-      this.lineColor = lineColor;
-      this.lineThickness = lineThickness;
-      this.fill = fill;
-      this.fillColor = fillColor;
+    public Config roundStart(boolean b) {
+      this.roundStart = b;
+      return this;
     }
-  }
 
-  public static ObboxStyle create(ROList<Spec> toMerge) {
-    int padding = 4;
-    boolean roundStart = false;
-    boolean roundEnd = false;
-    boolean roundOuterEdges = false;
-    boolean roundInnerEdges = false;
-    boolean roundConcave = false;
-    int roundRadius = 0;
-    boolean line = true;
-    ModelColor lineColor = new ModelColor.RGB(0,0,0);
-    double lineThickness = 1;
-    boolean fill = false;
-    ModelColor fillColor = ModelColor.RGB.white;
-    for (Spec spec : toMerge) {
-      if (spec.padding != null) padding = spec.padding;
-      if (spec.roundStart != null) roundStart = spec.roundStart;
-      if (spec.roundEnd != null) roundEnd = spec.roundEnd;
-      if (spec.roundOuterEdges != null) roundOuterEdges = spec.roundOuterEdges;
-      if (spec.roundInnerEdges != null) roundInnerEdges = spec.roundInnerEdges;
-      if (spec.roundConcave != null) roundConcave = spec.roundConcave;
-      if (spec.roundRadius != null) roundRadius = spec.roundRadius;
-      if (spec.line != null) line = spec.line;
-      if (spec.lineColor != null) lineColor = spec.lineColor;
-      if (spec.lineThickness != null) lineThickness = spec.lineThickness;
-      if (spec.fill != null) fill = spec.fill;
-      if (spec.fillColor != null) fillColor = spec.fillColor;
+    public Config roundEnd(boolean b) {
+      this.roundEnd = b;
+      return this;
     }
-    return new ObboxStyle(
-        padding,
-        roundStart,
-        roundEnd,
-        roundOuterEdges,
-        roundInnerEdges,
-        roundConcave,
-        roundRadius,
-        line,
-        lineColor,
-        lineThickness,
-        fill,
-        fillColor);
+
+    public Config roundConcave(boolean b) {
+      this.roundConcave = b;
+      return this;
+    }
+
+    public Config roundOuterEdges(boolean b) {
+      this.roundOuterEdges = b;
+      return this;
+    }
+
+    public Config roundInnerEdges(boolean b) {
+      this.roundInnerEdges = b;
+      return this;
+    }
+
+    public Config lineThickness(double d) {
+      this.lineThickness = d;
+      return this;
+    }
+
+    public Config roundRadius(int d) {
+      this.roundRadius = d;
+      return this;
+    }
+
+    public Config line(boolean b) {
+      this.line = b;
+      return this;
+    }
+
+    public Config fill(boolean b) {
+      this.fill = b;
+      return this;
+    }
+
+    public Config lineColor(ModelColor c) {
+      this.lineColor = c;
+      return this;
+    }
+
+    public Config fillColor(ModelColor c) {
+      this.fillColor = c;
+      return this;
+    }
   }
 }

@@ -131,6 +131,7 @@ public class PlanGoal extends AbstractMojo {
                     + "    name = \"entry\",\n"
                     + "    entry_points = [\"com.zarbosoft.merman.webview.entry\"],\n"
                     + "    deps = [\"//com/zarbosoft/merman:editor\"],\n"
+                    + "    extra_dev_resources = [\":main_dev.html\"],\n"
                     + ")\n")
                 .getBytes(StandardCharsets.UTF_8));
       }

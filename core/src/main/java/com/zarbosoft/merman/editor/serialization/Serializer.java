@@ -5,9 +5,19 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.rendaw.common.ROList;
 
 public interface Serializer {
-  byte[] write(Atom atom);
+  /**
+   * byte[] in java, string in js
+   * @param atom
+   * @return
+   */
+  Object write(Atom atom);
 
-  byte[] write(ROList<Atom> atom);
+  /**
+   * byte[] in java, string in js
+   * @param atom
+   * @return
+   */
+  Object write(ROList<Atom> atom);
 
   /**
    * Per clipboard, data is bytes or string depending on execution environment (js vs java)

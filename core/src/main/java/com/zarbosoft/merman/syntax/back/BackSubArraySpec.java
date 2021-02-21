@@ -44,7 +44,7 @@ public class BackSubArraySpec extends BaseBackSimpleArraySpec {
 
   @Override
   public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
-    stack.add(new WriteStateDeepDataArray(((List<Atom>) data.get(id)), splayedBoilerplate));
+    stack.add(new WriteStateDeepDataArray(((TSList<Atom>) data.get(id)), splayedBoilerplate));
   }
 
   @Override

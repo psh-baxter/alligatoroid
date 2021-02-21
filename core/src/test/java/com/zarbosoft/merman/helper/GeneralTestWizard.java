@@ -17,7 +17,7 @@ import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.Course;
 import com.zarbosoft.merman.editor.wall.bricks.BrickImage;
 import com.zarbosoft.merman.editor.wall.bricks.BrickLine;
-import com.zarbosoft.merman.editor.wall.bricks.BrickSpace;
+import com.zarbosoft.merman.editor.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -108,7 +108,7 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard checkSpaceBrick(final int courseIndex, final int brickIndex) {
-    assertThat(getBrick(courseIndex, brickIndex), instanceOf(BrickSpace.class));
+    assertThat(getBrick(courseIndex, brickIndex), instanceOf(BrickEmpty.class));
     return this;
   }
 
@@ -126,7 +126,7 @@ public class GeneralTestWizard {
           System.out.printf("\\i ");
         } else if (brick instanceof BrickLine) {
           System.out.printf("\\l ");
-        } else if (brick instanceof BrickSpace) {
+        } else if (brick instanceof BrickEmpty) {
           System.out.printf("\\w ");
         } else throw new Assertion();
       }

@@ -17,13 +17,13 @@ public class ArrayActionPaste extends EditAction {
   @Override
   public void run1(final Context context) {
     context.uncopy(
-        cursor.self.value.back().elementAtomType(),
+        cursor.visual.value.back().elementAtomType(),
         atoms -> {
           if (atoms.isEmpty()) return;
           edit.history.apply(
               context,
               new ChangeArray(
-                  cursor.self.value,
+                  cursor.visual.value,
                   cursor.beginIndex,
                   cursor.endIndex - cursor.beginIndex + 1,
                   atoms));

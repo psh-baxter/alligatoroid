@@ -28,12 +28,12 @@ public class BrickText extends Brick {
 
   @Override
   public int descent() {
-    return text.descent();
+    return text.descent() + style.spaceTransverseAfter;
   }
 
   @Override
   public int ascent() {
-    return text.ascent();
+    return text.ascent() + style.spaceTransverseBefore;
   }
 
   public BrickText(
@@ -44,7 +44,7 @@ public class BrickText extends Brick {
 
   @Override
   public int converseEdge() {
-    return text.converse() + converseSpan;
+    return getConverse() + converseSpan;
   }
 
   @Override
@@ -60,7 +60,7 @@ public class BrickText extends Brick {
   @Override
   public void setConverse(final Context context, final int minConverse, final int converse) {
     this.preAlignConverse = minConverse;
-    text.setConverse(converse);
+    text.setConverse(style.spaceBefore + converse);
   }
 
   @Override
@@ -70,13 +70,13 @@ public class BrickText extends Brick {
 
   public void setText(final Context context, final String text) {
     this.text.setText(context, text.replaceAll("\\p{Cntrl}", context.syntax.unprintable));
-    this.converseSpan = font.getWidth(this.text.text());
+    this.converseSpan = font.getWidth(this.text.text()) + style.spaceBefore + style.spaceAfter;
     changed(context);
   }
 
   @Override
   public int getConverse() {
-    return text.converse();
+    return text.converse() - style.spaceBefore;
   }
 
   public Font getFont() {

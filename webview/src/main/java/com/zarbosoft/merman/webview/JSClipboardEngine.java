@@ -2,15 +2,10 @@ package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.syntax.BackType;
-import com.zarbosoft.merman.webview.compat.Clipboard;
-import com.zarbosoft.merman.webview.compat.ClipboardItem;
-import com.zarbosoft.merman.webview.compat.Navigator;
-import elemental2.core.JsArray;
+import com.zarbosoft.merman.webview.compat.CompatOverlay;
 import elemental2.dom.DataTransfer;
 import elemental2.dom.DataTransferItem;
-import elemental2.dom.DomGlobal;
 import elemental2.promise.IThenable;
-import jsinterop.base.JsPropertyMap;
 
 import java.util.function.Consumer;
 
@@ -23,14 +18,12 @@ public class JSClipboardEngine extends ClipboardEngine {
 
   @Override
   public void set(Object bytes) {
-    ((Navigator) DomGlobal.navigator).clipboard
-        .write(JsArray.of(new ClipboardItem(JsPropertyMap.of(mime, bytes))));
+    CompatOverlay.mmCopy(mime, (String)bytes);
   }
 
   @Override
   public void get(Consumer<Object> cb) {
-    ((Navigator) DomGlobal.navigator).clipboard
-        .read()
+    CompatOverlay.mmUncopy()
         .then(
             new IThenable.ThenOnFulfilledCallbackFn<DataTransfer, Object>() {
               @Override
@@ -66,8 +59,7 @@ public class JSClipboardEngine extends ClipboardEngine {
 
   @Override
   public void getString(Consumer<String> cb) {
-    ((Navigator) DomGlobal.navigator).clipboard
-        .readText()
+    CompatOverlay.mmUncopyText()
         .then(
             new IThenable.ThenOnFulfilledCallbackFn<String, Object>() {
               @Override
@@ -80,6 +72,6 @@ public class JSClipboardEngine extends ClipboardEngine {
 
   @Override
   public void setString(String string) {
-    ((Navigator) DomGlobal.navigator).clipboard.writeText(string);
+    CompatOverlay.mmCopyText(string);
   }
 }

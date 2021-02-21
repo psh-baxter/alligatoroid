@@ -22,7 +22,7 @@ public class ArrayActionInsertBefore extends EditAction {
   public void run1(final Context context) {
     final Atom created =
         EditingExtension.arrayInsertNewDefault(
-            context, history, cursor.self.value, cursor.beginIndex);
+            context, history, cursor.visual.value, cursor.beginIndex);
     if (!created.visual.selectAnyChild(context)) cursor.setPosition(context, cursor.beginIndex);
     return true;
   }

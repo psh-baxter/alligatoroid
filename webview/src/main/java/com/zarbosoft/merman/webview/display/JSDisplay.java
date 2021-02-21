@@ -18,6 +18,7 @@ import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
+import elemental2.dom.DomGlobal;
 import elemental2.dom.Event;
 import elemental2.dom.EventListener;
 import elemental2.dom.HTMLDivElement;
@@ -211,7 +212,7 @@ public class JSDisplay extends Display {
           }
         },
         true);
-    this.base.addEventListener(
+    DomGlobal.document.addEventListener(
         "keydown",
         new EventListener() {
           @Override
@@ -221,7 +222,7 @@ public class JSDisplay extends Display {
           }
         },
         true);
-    this.base.addEventListener(
+    DomGlobal.document.addEventListener(
         "keyup",
         new EventListener() {
           @Override
@@ -236,16 +237,16 @@ public class JSDisplay extends Display {
   public static String cssColor(ModelColor color) {
     if (color instanceof ModelColor.RGB) {
       return Format.format(
-          "rgb(%s, %s, %s)",
-          (int) ((ModelColor.RGB) color).r * 255,
-          (int) ((ModelColor.RGB) color).g * 255,
-          (int) ((ModelColor.RGB) color).b * 255);
+          "rgb(%s %s %s)",
+          (int) (((ModelColor.RGB) color).r * 255),
+          (int) (((ModelColor.RGB) color).g * 255),
+          (int) (((ModelColor.RGB) color).b * 255));
     } else if (color instanceof ModelColor.RGBA) {
       return Format.format(
-          "rgba(%s, %s, %d, %s)",
-          (int) ((ModelColor.RGBA) color).r * 255,
-          (int) ((ModelColor.RGBA) color).g * 255,
-          (int) ((ModelColor.RGBA) color).b * 255,
+          "rgba(%s %s %s %s)",
+          (int) (((ModelColor.RGBA) color).r * 255),
+          (int) (((ModelColor.RGBA) color).g * 255),
+          (int) (((ModelColor.RGBA) color).b * 255),
           ((ModelColor.RGBA) color).a);
     } else throw new Assertion();
   }
@@ -297,7 +298,7 @@ public class JSDisplay extends Display {
     boolean isText = false;
     String text = null;
     Key key = null;
-    switch (event.key) {
+    switch (event.code) {
       case "Again":
         {
           key = Key.AGAIN;

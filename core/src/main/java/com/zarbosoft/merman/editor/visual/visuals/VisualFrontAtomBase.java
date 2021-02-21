@@ -431,7 +431,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public void click(final Context context) {
+    public void select(final Context context) {
       selectAnyChild(context);
     }
 

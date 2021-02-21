@@ -83,7 +83,7 @@ public class BackRecordSpec extends BaseBackArraySpec {
           TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
     stack.add(new WriteStateRecordEnd());
-    stack.add(new WriteStateDataArray(((List<Atom>) data.get(id))));
+    stack.add(new WriteStateDataArray(((TSList<Atom>) data.get(id))));
   }
 
   @Override

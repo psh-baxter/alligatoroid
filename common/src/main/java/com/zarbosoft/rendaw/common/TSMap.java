@@ -33,8 +33,9 @@ public class TSMap<K, V> implements ROMap<K, V> {
 
   @Override
   public V get(K k) {
-    if (k == null) throw new Assertion();
-    return inner.get(k);
+    Object val = ((Map)inner).getOrDefault(k, missing);
+    if (val == missing) throw new Assertion();
+    return (V) val;
   }
 
   @Override

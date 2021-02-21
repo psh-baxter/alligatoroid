@@ -18,7 +18,6 @@ import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -354,7 +353,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   }
 
   public static class ArrayCursor extends Cursor {
-    public final VisualFrontArray self;
+    public final VisualFrontArray visual;
     private final ROList<Action> actions;
     public int beginIndex;
     public int endIndex;
@@ -363,11 +362,11 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
 
     public ArrayCursor(
         final Context context,
-        final VisualFrontArray self,
+        final VisualFrontArray visual,
         final boolean leadFirst,
         final int start,
         final int end) {
-      this.self = self;
+      this.visual = visual;
       border = new BorderAttachment(context, context.cursorStyle.obbox);
       this.leadFirst = leadFirst;
       setRange(context, start, end);
@@ -391,8 +390,8 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     public void setRange(final Context context, final int begin, final int end) {
       setBeginInternal(context, begin);
       setEndInternal(context, end);
-      border.setFirst(context, self.children.get(self.visualIndex(begin)).getFirstBrick(context));
-      border.setLast(context, self.children.get(self.visualIndex(end)).getLastBrick(context));
+      border.setFirst(context, visual.children.get(visual.visualIndex(begin)).getFirstBrick(context));
+      border.setLast(context, visual.children.get(visual.visualIndex(end)).getLastBrick(context));
     }
 
     private void setBeginInternal(final Context context, final int index) {
@@ -403,20 +402,20 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     private void setCornerstone(final Context context, final int index) {
       context.foreground.setCornerstone(
           context,
-          self.children.get(self.visualIndex(index)).createOrGetFirstBrick(context),
+          visual.children.get(visual.visualIndex(index)).createOrGetFirstBrick(context),
           () -> {
-            for (int at = self.visualIndex(index) - 1; at >= 0; --at) {
-              final Brick found = self.children.get(at).getLastBrick(context);
+            for (int at = visual.visualIndex(index) - 1; at >= 0; --at) {
+              final Brick found = visual.children.get(at).getLastBrick(context);
               if (found != null) return found;
             }
-            return self.parent.getPreviousBrick(context);
+            return visual.parent.getPreviousBrick(context);
           },
           () -> {
-            for (int at = self.visualIndex(index) + 1; at < self.children.size(); ++at) {
-              final Brick found = self.children.get(at).getFirstBrick(context);
+            for (int at = visual.visualIndex(index) + 1; at < visual.children.size(); ++at) {
+              final Brick found = visual.children.get(at).getFirstBrick(context);
               if (found != null) return found;
             }
-            return self.parent.getNextBrick(context);
+            return visual.parent.getNextBrick(context);
           });
     }
 
@@ -428,42 +427,42 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     public void setBegin(final Context context, final int index) {
       leadFirst = true;
       setBeginInternal(context, index);
-      border.setFirst(context, self.children.get(self.visualIndex(index)).getFirstBrick(context));
+      border.setFirst(context, visual.children.get(visual.visualIndex(index)).getFirstBrick(context));
     }
 
     private void setEnd(final Context context, final int index) {
       leadFirst = false;
       setEndInternal(context, index);
-      border.setLast(context, self.children.get(self.visualIndex(index)).getLastBrick(context));
+      border.setLast(context, visual.children.get(visual.visualIndex(index)).getLastBrick(context));
     }
 
     public void setPosition(final Context context, final int index) {
       setEndInternal(context, index);
       setBeginInternal(context, index);
-      border.setFirst(context, self.children.get(self.visualIndex(index)).getFirstBrick(context));
-      border.setLast(context, self.children.get(self.visualIndex(index)).getLastBrick(context));
+      border.setFirst(context, visual.children.get(visual.visualIndex(index)).getFirstBrick(context));
+      border.setLast(context, visual.children.get(visual.visualIndex(index)).getLastBrick(context));
     }
 
     @Override
     public void clear(final Context context) {
       border.destroy(context);
-      self.selection = null;
+      visual.selection = null;
       context.removeActions(actions);
     }
 
     @Override
     public Visual getVisual() {
-      return self.children.get(beginIndex);
+      return visual.children.get(beginIndex);
     }
 
     @Override
     public SelectionState saveState() {
-      return new ArraySelectionState(self.value, leadFirst, beginIndex, endIndex);
+      return new ArraySelectionState(visual.value, leadFirst, beginIndex, endIndex);
     }
 
     @Override
     public Path getSyntaxPath() {
-      return self.value.getSyntaxPath().add(String.valueOf(beginIndex));
+      return visual.value.getSyntaxPath().add(String.valueOf(beginIndex));
     }
 
     @Override
@@ -478,7 +477,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
 
       @Override
       public void run(final Context context) {
-        self.value.data.get(beginIndex).visual.selectAnyChild(context);
+        visual.value.data.get(beginIndex).visual.selectAnyChild(context);
       }
     }
 
@@ -489,7 +488,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
 
       @Override
       public void run(final Context context) {
-        self.value.atomParentRef.selectAtomParent(context);
+        visual.value.atomParentRef.selectAtomParent(context);
       }
     }
 
@@ -500,7 +499,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
 
       @Override
       public void run(final Context context) {
-        self.parent.selectNext(context);
+        visual.parent.selectNext(context);
       }
     }
 
@@ -511,7 +510,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
 
       @Override
       public void run(final Context context) {
-        self.parent.selectPrevious(context);
+        visual.parent.selectPrevious(context);
       }
     }
 
@@ -524,7 +523,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       public void run(final Context context) {
 
         ArrayCursor.this.leadFirst = true;
-        final int newIndex = Math.min(self.value.data.size() - 1, endIndex + 1);
+        final int newIndex = Math.min(visual.value.data.size() - 1, endIndex + 1);
         if (newIndex == beginIndex && newIndex == endIndex) return;
         setPosition(context, newIndex);
       }
@@ -552,7 +551,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
 
       @Override
       public void run(final Context context) {
-        context.copy(self.value.data.sublist(beginIndex, endIndex + 1));
+        context.copy(visual.value.data.sublist(beginIndex, endIndex + 1));
       }
     }
 
@@ -564,7 +563,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       @Override
       public void run(final Context context) {
 
-        final int newIndex = Math.min(self.value.data.size() - 1, endIndex + 1);
+        final int newIndex = Math.min(visual.value.data.size() - 1, endIndex + 1);
         if (endIndex == newIndex) return;
         setEnd(context, newIndex);
       }
@@ -619,7 +618,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
 
       @Override
       public void run(final Context context) {
-        final Atom root = self.value.data.get(beginIndex);
+        final Atom root = visual.value.data.get(beginIndex);
         if (root.visual.selectAnyChild(context)) {
           context.windowExact(root);
           context.triggerIdleLayBricksOutward();
@@ -680,8 +679,8 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     }
 
     @Override
-    public void click(final Context context) {
-      select(context, true, index, index);
+    public void select(final Context context) {
+      VisualFrontArray.this.select(context, true, index, index);
     }
 
     @Override
@@ -722,8 +721,8 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     }
 
     @Override
-    public void click(final Context context) {
-      select(context, true, 0, 0);
+    public void select(final Context context) {
+      VisualFrontArray.this.select(context, true, 0, 0);
     }
 
     @Override

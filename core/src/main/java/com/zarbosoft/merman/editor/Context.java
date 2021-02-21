@@ -53,8 +53,7 @@ public class Context {
   public final DelayEngine delayEngine;
   public final Style cursorStyle;
   public final Style hoverStyle;
-  private final TSSet<TagsListener> selectionTagsChangeListeners = new TSSet<>();
-  private final TSSet<TagsListener> globalTagsChangeListeners = new TSSet<>();
+  public final WallUsageListener wallUsageListener;
   private final TSSet<ActionChangeListener> actionChangeListeners = new TSSet<>();
   private final TSList<Action> actions = new TSList<>();
   private final Consumer<IterationTask> addIteration;
@@ -107,9 +106,7 @@ public class Context {
       DelayEngine delayEngine,
       ClipboardEngine clipboardEngine,
       Serializer serializer,
-      boolean startWindowed,
-      I18nEngine i18n,
-      boolean select) {
+      I18nEngine i18n) {
     this.serializer = serializer;
     this.i18n = i18n;
     actions.addVar(
@@ -175,6 +172,7 @@ public class Context {
             keyHandlingInProgress = true;
             flushIteration(100);
           }
+          clearHover();
         });
     display.addTypingListener(
         text -> {
@@ -183,8 +181,10 @@ public class Context {
             return;
           }
           if (text.isEmpty()) return;
-          textListener.handleText(this, text);
-          flushIteration(100);
+          if (textListener != null) {
+            textListener.handleText(this, text);
+            flushIteration(100);
+          }
         });
     display.addMouseExitListener(
         () -> {
@@ -249,13 +249,10 @@ public class Context {
             scrollVisible();
           }
         });
-    if (!startWindowed) windowClear();
+    wallUsageListener = config.wallUsageListener;
+    if (!config.startWindowed) windowClear();
     else windowToSupertree(document.root);
-    display.addHIDEventListener(
-        event -> {
-          clearHover();
-        });
-    if (select) document.root.visual.selectAnyChild(this);
+    if (config.startSelected) document.root.visual.selectAnyChild(this);
     else {
       foreground.setCornerstone(
           this, document.root.visual.createOrGetFirstBrick(this), () -> null, () -> null);
@@ -417,22 +414,6 @@ public class Context {
     this.hoverListeners.remove(listener);
   }
 
-  public void addSelectionTagsChangeListener(final TagsListener listener) {
-    this.selectionTagsChangeListeners.add(listener);
-  }
-
-  public void removeSelectionTagsChangeListener(final TagsListener listener) {
-    this.selectionTagsChangeListeners.remove(listener);
-  }
-
-  public void addGlobalTagsChangeListener(final TagsListener listener) {
-    this.globalTagsChangeListeners.add(listener);
-  }
-
-  public void removeGlobalTagsChangeListener(final TagsListener listener) {
-    this.globalTagsChangeListeners.remove(listener);
-  }
-
   public void triggerIdleLayBricks(
       final VisualParent parent,
       final int index,
@@ -582,6 +563,7 @@ public class Context {
   }
 
   public void clearSelection() {
+    if (cursor == null) return;
     cursor.clear(this);
     cursor = null;
   }
@@ -628,6 +610,16 @@ public class Context {
     public abstract void cursorChanged(Context context, Cursor cursor);
   }
 
+  public interface WallUsageListener {
+    /**
+     * Min and max will always have the same axis
+     *
+     * @param min
+     * @param max
+     */
+    public void usageChanged(Display.UnconvertAxis min, Display.UnconvertAxis max);
+  }
+
   public static class InitialConfig {
     public final Style.Config cursorStyle = new Style.Config();
     public final Style.Config hoverStyle = new Style.Config();
@@ -640,6 +632,34 @@ public class Context {
     public double retryExpandFactor = 1.25;
     public double scrollFactor = 0.1;
     public double scrollAlotFactor = 0.8;
+    public boolean startSelected = true;
+    public boolean startWindowed = false;
+    public WallUsageListener wallUsageListener = null;
+
+    public InitialConfig startSelected(boolean b) {
+      startSelected = b;
+      return this;
+    }
+
+    public InitialConfig startWindowed(boolean b) {
+      startWindowed = b;
+      return this;
+    }
+
+    public InitialConfig wallUsageListener(WallUsageListener l) {
+      this.wallUsageListener = l;
+      return this;
+    }
+
+    public InitialConfig hoverStyle(Consumer<Style.Config> c) {
+      c.accept(this.hoverStyle);
+      return this;
+    }
+
+    public InitialConfig cursorStyle(Consumer<Style.Config> c) {
+      c.accept(this.cursorStyle);
+      return this;
+    }
   }
 
   public abstract static class HoverListener {

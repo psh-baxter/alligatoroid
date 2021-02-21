@@ -1513,7 +1513,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
-    public void click(final Context context) {
+    public void select(final Context context) {
       visualFrontPrimitive.select(context, true, range.beginOffset, range.endOffset);
     }
 
