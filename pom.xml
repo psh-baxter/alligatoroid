@@ -14,6 +14,7 @@
         -->
         <module>zarboj2cl</module>
         <module>webview</module>
+        <module>webviewsyntaxexamples</module>
         <module>pidgoon</module>
         <module>common</module>
     </modules>

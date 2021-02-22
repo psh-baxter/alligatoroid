@@ -2,7 +2,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.zarbosoft.merman</groupId>
-    <artifactId>webview</artifactId>
+    <artifactId>webviewsyntaxexamples</artifactId>
     <version>0.0.0</version>
     <parent>
         <artifactId>agg</artifactId>
@@ -12,30 +12,16 @@
     <dependencies>
         <dependency>
             <groupId>com.zarbosoft.merman</groupId>
-            <artifactId>core</artifactId>
+            <artifactId>webview</artifactId>
             <version>0.0.0</version>
         </dependency>
-        <dependency>
-            <groupId>com.google.jsinterop</groupId>
-            <artifactId>jsinterop-annotations</artifactId>
-            <version>1.0.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.elemental2</groupId>
-            <artifactId>elemental2-core</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.elemental2</groupId>
-            <artifactId>elemental2-dom</artifactId>
-            <version>1.1.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.elemental2</groupId>
-            <artifactId>elemental2-promise</artifactId>
-            <version>1.1.0</version>
-        </dependency>
     </dependencies>
+    <repositories>
+        <repository>
+            <id>vertispan</id>
+            <url>https://repo.vertispan.com/j2cl/</url>
+        </repository>
+    </repositories>
     <build>
         <plugins>
             <plugin>
@@ -54,13 +40,15 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
+                <groupId>com.vertispan.j2cl</groupId>
+                <artifactId>j2cl-maven-plugin</artifactId>
+                <version>0.17-SNAPSHOT</version>
                 <executions>
                     <execution>
-                        <id>Build source jar</id>
+                        <id>build js</id>
+                        <phase>install</phase>
                         <goals>
-                            <goal>jar</goal>
+                            <goal>build</goal>
                         </goals>
                     </execution>
                 </executions>

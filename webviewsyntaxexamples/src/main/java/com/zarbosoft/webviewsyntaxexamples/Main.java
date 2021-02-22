@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.webview;
+package com.zarbosoft.webviewsyntaxexamples;
 
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.AtomType;
@@ -36,6 +36,8 @@ import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
+import com.zarbosoft.merman.webview.JSI18nEngine;
+import com.zarbosoft.merman.webview.WebView;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.Position;

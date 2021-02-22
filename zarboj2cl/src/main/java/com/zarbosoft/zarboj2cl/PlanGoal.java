@@ -45,8 +45,9 @@ public class PlanGoal extends AbstractMojo {
   @SuppressWarnings("unused")
   @Parameter(property = "sourcePath", required = true)
   private String sourcePath;
+    private String entry;
 
-  public void execute() throws MojoExecutionException, MojoFailureException {
+    public void execute() throws MojoExecutionException, MojoFailureException {
     try {
         Path sourcePath = Paths.get(this.sourcePath);
 
@@ -124,12 +125,13 @@ public class PlanGoal extends AbstractMojo {
       }
 
       try (OutputStream os = Files.newOutputStream(sourcePath.resolve("BUILD"))) {
-        os.write(
+          entry = "com.zarbosoft.merman.webview.entry";
+          os.write(
             ("load(\"@com_google_j2cl//build_defs:rules.bzl\", \"j2cl_application\")\n"
                     + "\n"
                     + "j2cl_application(\n"
                     + "    name = \"entry\",\n"
-                    + "    entry_points = [\"com.zarbosoft.merman.webview.entry\"],\n"
+                    + "    entry_points = [\""+ entry +"\"],\n"
                     + "    deps = [\"//com/zarbosoft/merman:editor\"],\n"
                     + "    extra_dev_resources = [\":main_dev.html\"],\n"
                     + ")\n")
