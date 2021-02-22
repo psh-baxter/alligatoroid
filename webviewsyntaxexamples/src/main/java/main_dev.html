@@ -76,13 +76,15 @@ div.merman-block-view-container {
 <h1>Merman Webview/Configurable Syntax</h1>
 <p>This is an example of the Block Webview widget for using Merman to embed snippets of code in a website.</p>
 <p>Merman is an AST viewing/editing solution. It uses a syntax definition to provide a traditional source-like representation of an AST, but maintaining all of the structure under-the-hood. This is a shift from most editors which operate on linear text, and where the syntax is built into the compiler which uses it to translate the text into an AST internally.</p>
-<p>One of the benefits of shifting the responsibility of syntax definition to the client is that users can modify the syntax to their liking and stay source-compatible with all other users. This example shows this feature off by casting a single ESTree (Javascript) snippet in Javascript clothes (looks nearly the same), Python clothes, and Lisp clothes. As a note, syntax customization would probably be mostly done in IDEs - for maximum readability people embedding code in websites with the webview should stick to official syntaxes.</p>
+<p>One of the benefits of shifting the responsibility of syntax definition to the client is that users can modify the syntax to their liking and stay source-compatible with all other users. This example shows this feature off by casting a single ESTree (Javascript) snippet in Javascript clothes (looks nearly the same), Python clothes, and a couple others.</p>
+<p>Some final notes before the demo:</p>
 <ul>
+	<li>As a note, syntax customization would probably be mostly done in IDEs - for maximum readability people embedding code in websites with the webview should stick to official syntaxes.</li>
 	<li>I only implemented the portion of ESTree that was necessary for this example</li>
 	<li>Some things, like parentheses around broken expressions in Python, are there to make the parser easier to write/support the repl. This isn't necessary when working with an AST, so (again) there are some details where the syntax flavor diverges from the inspiration.</li>
 </ul>
 <h2>Original Source</h2>
-<p>The way I did this was I used <a href="https://github.com/acornjs/acorn">Acorn</a> to translate a small Javascript program into a JSON ESTree AST.  The program I used is:</p>
+<p>I used <a href="https://github.com/acornjs/acorn">Acorn</a> to translate a small Javascript program into a JSON ESTree AST.  The program I used as input is:</p>
 <code class="block">for (let i = 1; i <= 100; ++i) {
     let out = ""
     if (i % 3 === 0) {
@@ -96,27 +98,27 @@ div.merman-block-view-container {
     }
     console.log(out + " ")
 }</code>
-<p>(this is plain text :P)</p>
-<p>The ESTree AST output is included at the end because it's on the huge side of things.</p>
+<p>(this is plain text)</p>
+<p>The ESTree AST output is listed at the end of this page because it's huge.</p>
 
 <h2>Javascript-like</h2>
-<p>I fed the AST directly into the Webview widget along with the Javascript-like syntax - Merman operates on ASTs directly.  As you can see it produced a representation similar to the input source above. Highlighting defined in the syntax and are based on the structure (no regexes).</p>
+<p>The AST gets fed directly into the Webview widget along with the syntax.  Here I used the Javascript-like syntax.  As you can see it produced a representation similar to the input source above. Highlighting is defined in the syntax and is based on the AST structure (no regexes).</p>
 <div id="replace-javascript"></div>
 
 <h2>Python-like</h2>
-<p>This is mostly a demonstration of bracket-less syntax, rather than trying to make it look exactly like Python.</p>
-<p>Python doesn't have any c-style for loop. I could have introduced a sugar to make "c-style for loops with integer bounds, 1-unit increment, less than condition" look like "enumerate(x)" but I thought that would be a bit awkward... it's not Python after all.</p>
+<p>This is mostly a demonstration of an indentation-based syntax, rather than an attempt to make it look exactly like Python.</p>
+<p>Python doesn't have any c-style for loop. I could have introduced a sugar to make "c-style for loops with integer bounds, 1-unit increment, less than condition" look like "enumerate(x)" but I thought that would be a bit awkward...</p>
 <div id="replace-python"></div>
 
 <h2>Lisp-like</h2>
 <div id="replace-lisp"></div>
 
 <h2>Prodel-like</h2>
-<p><a href="https://rdr.utopiat.net/">Prodel</a> is a Japanese literate programming language. This is unfortunately a poor immitation of the syntax described there. The for loop keywords don't make a ton of sense, also the mixture of full-width characters and space-less ascii is pretty ugly. I wanted to try vertical text but hit a number of browser/w3c spec issues - no way to get vertical text metrics, 「」 and ー don't get rotated 90 degrees.</p>
+<p><a href="https://rdr.utopiat.net/">Prodel</a> is a Japanese literate programming language. This is unfortunately a poor immitation of Prodel's syntax. The for loop keywords don't make a ton of sense, also the mixture of full-width characters and space-less ascii identifiers is pretty ugly so I added some unnecessary spaces. I wanted to try vertical text but hit a number of browser/w3c spec issues - no way to get vertical text metrics, 「」 and ー don't get rotated 90 degrees, etc. so I gave up on that.</p>
 <div id="replace-prodel"></div>
 
 <h2>ESTree AST</h2>
-<p>This is the source input to the Webview elements.  It's the full AST translation of the original source.</p>
+<p>Finally, this is the AST used as input to the Webview code widgets. It's the full AST translation of the original source, and you'll get chunks of this in your clipboard if you try to copy parts of the above snippets.</p>
 <div id="replace-javascript-ast"></div>
 
 <!-- -->
