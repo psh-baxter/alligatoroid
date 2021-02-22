@@ -13,7 +13,7 @@ public class MockeryGroup extends MockFreeDisplayNode implements Group {
   }
 
   @Override
-  public void setTransverse(int transverse, boolean animate) {
+  public void setTransverse(double transverse, boolean animate) {
     setPosition(new Vector(converse(), transverse), animate);
   }
 
@@ -43,20 +43,20 @@ public class MockeryGroup extends MockFreeDisplayNode implements Group {
   }
 
   @Override
-  public int converseSpan() {
-    int max = 0;
+  public double converseSpan() {
+    double max = 0;
     for (MockeryDisplayNode node : nodes) {
-      int got = node.converseEdge();
+      double got = node.converseEdge();
       if (got > max) max = got;
     }
     return max;
   }
 
   @Override
-  public int transverseSpan() {
-    int max = 0;
+  public double transverseSpan() {
+    double max = 0;
     for (MockeryDisplayNode node : nodes) {
-      int got = node.transverseEdge();
+      double got = node.transverseEdge();
       if (got > max) max = got;
     }
     return max;

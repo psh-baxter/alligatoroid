@@ -6,11 +6,11 @@ import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.rendaw.common.TSList;
 
 public abstract class Alignment {
-  public int converse = 0;
+  public double converse = 0;
   protected TSList<Brick> bricks = new TSList<>();
   protected TSList<Alignment> derived = new TSList<>();
 
-  public abstract void feedback(Context context, int converse);
+  public abstract void feedback(Context context, double converse);
 
   public void changed(final Context context) {
     for (Brick brick : bricks) {

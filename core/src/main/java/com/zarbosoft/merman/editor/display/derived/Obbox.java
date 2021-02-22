@@ -21,7 +21,7 @@ public class Obbox {
 
   int radius = 0;
 
-  public void setSize(final Context context, int sc, int st, int ste, int ec, int et, int ete) {
+  public void setSize(final Context context, double sc, double st, double ste, double ec, double et, double ete) {
     final boolean oneLine = st == et;
     drawing.clear();
     sc -= style.padding;
@@ -61,14 +61,14 @@ public class Obbox {
   private void path(
       final DrawingContext gc,
       final boolean oneLine,
-      final int converseZero,
-      final int converseEdge,
-      final int startConverse,
-      final int startTransverse,
-      final int startTransverseEdge,
-      final int endConverse,
-      final int endTransverse,
-      final int endTransverseEdge) {
+      final double converseZero,
+      final double converseEdge,
+      final double startConverse,
+      final double startTransverse,
+      final double startTransverseEdge,
+      final double endConverse,
+      final double endTransverse,
+      final double endTransverseEdge) {
     if (oneLine) {
       moveTo(gc, startConverse, (startTransverse + startTransverseEdge) / 2);
       cornerTo(
@@ -180,17 +180,17 @@ public class Obbox {
     }
   }
 
-  private void moveTo(final DrawingContext gc, final int c, final int t) {
+  private void moveTo(final DrawingContext gc, final double c, final double t) {
     gc.moveTo(c, t);
   }
 
   private void cornerTo(
       final DrawingContext gc,
       final boolean round,
-      final int c,
-      final int t,
-      final int c2,
-      final int t2) {
+      final double c,
+      final double t,
+      final double c2,
+      final double t2) {
     if (round) {
       gc.arcTo(c, t, c2, t2, radius);
     } else {

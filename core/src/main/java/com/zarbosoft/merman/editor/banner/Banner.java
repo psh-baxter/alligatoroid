@@ -34,8 +34,8 @@ public class Banner {
   private DelayEngine.Handle timer = null;
   private BannerMessage current;
   private Brick brick;
-  private int transverse;
-  private int scroll;
+  private double transverse;
+  private double scroll;
   private Bedding bedding;
   private IterationPlace idle;
 
@@ -54,9 +54,9 @@ public class Banner {
           }
         });
     context.addConverseEdgeListener(
-        new Context.ContextIntListener() {
+        new Context.ContextDoubleListener() {
           @Override
-          public void changed(final Context context, final int oldValue, final int newValue) {
+          public void changed(final Context context, final double oldValue, final double newValue) {
             resizeBackground(context);
           }
         });
@@ -71,14 +71,14 @@ public class Banner {
     idle.animate = idle.animate && animate;
   }
 
-  public void setScroll(final Context context, final int scroll) {
+  public void setScroll(final Context context, final double scroll) {
     this.scroll = scroll;
     idlePlace(context, true);
   }
 
   private void place(final Context context, final boolean animate) {
     if (text == null) return;
-    final int calculatedTransverse =
+    final double calculatedTransverse =
         transverse - text.font().getDescent() - context.syntax.bannerPad.transverseEnd - scroll;
     text.setBaselinePosition(
         new Vector(context.syntax.bannerPad.converseStart, calculatedTransverse), animate);
@@ -197,7 +197,7 @@ public class Banner {
     }
 
     @Override
-    public void setTransverse(final Context context, final int transverse) {
+    public void setTransverse(final Context context, final double transverse) {
       banner.transverse = transverse;
       banner.idlePlace(context, false);
     }

@@ -52,7 +52,7 @@ public class JavaFXText extends JavaFXNode implements Text {
 		return text;
 	}
 
-	public int getIndexAtConverse(final Context context, final int converse) {
+	public int getIndexAtConverse(final Context context, final double converse) {
 		switch (context.syntax.converseDirection) {
 			case UP:
 			case DOWN:
@@ -64,7 +64,7 @@ public class JavaFXText extends JavaFXNode implements Text {
 		throw new DeadCode();
 	}
 
-	public int getConverseAtIndex(final int index) {
+	public double getConverseAtIndex(final int index) {
 		if (index == 0)
 			return 0;
 		text.getText().substring(0, 0);

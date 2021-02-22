@@ -15,7 +15,7 @@ public class MockeryImage extends MockeryDisplayNode implements Image {
 	}
 
 	@Override
-	public int converseSpan() {
+	public double converseSpan() {
 		return 25;
 	}
 }

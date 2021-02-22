@@ -181,7 +181,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     for (int i = lines.size() - 1; i >= 0; --i) {
       final Line line = lines.get(i);
       if (line.brick == null) continue;
-      final int edge = line.brick.converseEdge();
+      final double edge = line.brick.converseEdge();
       if (!anyOver && edge > context.edge) {
         anyOver = true;
       }
@@ -284,7 +284,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       final Line line = lines.get(j);
       if (!build.hasText() && j > i) break;
       final Font font;
-      final int converse;
+      final double converse;
       if (line.brick == null) {
         final Style style = j == 0 ? spec.firstStyle : j == i ? spec.hardStyle : spec.softStyle;
         font = Context.getFont(style, context);
@@ -309,7 +309,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         final Style style = spec.softStyle;
         final Font font = Context.getFont(style, context);
         final Alignment alignment = atom.findAlignment(style.alignment);
-        final int converse;
+        final double converse;
         if (alignment == null) converse = 0;
         else converse = alignment.converse;
         build.build(line, font, converse);
@@ -366,14 +366,14 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       return !text.isEmpty();
     }
 
-    public ResplitResult build(final Line line, final Font font, final int converse) {
+    public ResplitResult build(final Line line, final Font font, final double converse) {
       final ResplitResult result = new ResplitResult();
-      final int width = font.getWidth(text);
-      final int edge = converse + width;
+      final double width = font.getWidth(text);
+      final double edge = converse + width;
       int split;
       if (converse < context.edge && edge > context.edge) {
         final I18nEngine.Walker lineIter = context.i18n.lineWalker(text);
-        final int edgeOffset = context.edge - converse;
+        final double edgeOffset = context.edge - converse;
         final int under = font.getIndexAtConverse(text, edgeOffset);
         if (under == text.length()) split = under;
         else {

@@ -7,25 +7,31 @@ import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.syntax.style.ObboxStyle;
 
 public class BorderAttachment {
+  private final Obbox border;
   Brick first;
   Brick last;
-  private final Obbox border;
+  private double startConverse;
+  private double startTransverse;
+  private double startTransverseSpan;
+  private double endTransverse;
+  private double endTransverseSpan;
   private final Attachment firstAttachment =
       new Attachment() {
         @Override
-        public void setTransverse(final Context context, final int transverse) {
+        public void setTransverse(final Context context, final double transverse) {
           startTransverse = transverse;
           redraw(context);
         }
 
         @Override
-        public void setConverse(final Context context, final int converse) {
+        public void setConverse(final Context context, final double converse) {
           startConverse = converse;
           redraw(context);
         }
 
         @Override
-        public void setTransverseSpan(final Context context, final int ascent, final int descent) {
+        public void setTransverseSpan(
+            final Context context, final double ascent, final double descent) {
           startTransverseSpan = ascent + descent;
           redraw(context);
         }
@@ -38,18 +44,19 @@ public class BorderAttachment {
   private final Attachment lastAttachment =
       new Attachment() {
         @Override
-        public void setTransverse(final Context context, final int transverse) {
+        public void setTransverse(final Context context, final double transverse) {
           endTransverse = transverse;
           redraw(context);
         }
 
         @Override
-        public void setConverse(final Context context, final int converse) {
+        public void setConverse(final Context context, final double converse) {
           redraw(context);
         }
 
         @Override
-        public void setTransverseSpan(final Context context, final int ascent, final int descent) {
+        public void setTransverseSpan(
+            final Context context, final double ascent, final double descent) {
           endTransverseSpan = ascent + descent;
           redraw(context);
         }
@@ -60,11 +67,6 @@ public class BorderAttachment {
           // or used with another attachment that resets the brick when destroyed
         }
       };
-  private int startConverse;
-  private int startTransverse;
-  private int startTransverseSpan;
-  private int endTransverse;
-  private int endTransverseSpan;
 
   public BorderAttachment(final Context context, final ObboxStyle style) {
     border = new Obbox(context);

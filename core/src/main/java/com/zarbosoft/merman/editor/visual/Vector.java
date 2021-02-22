@@ -3,10 +3,10 @@ package com.zarbosoft.merman.editor.visual;
 import com.zarbosoft.rendaw.common.Format;
 
 public class Vector {
-	public final int converse;
-	public final int transverse;
+	public final double converse;
+	public final double transverse;
 
-	public Vector(final int converse, final int transverse) {
+	public Vector(final double converse, final double transverse) {
 		this.converse = converse;
 		this.transverse = transverse;
 	}
@@ -15,19 +15,19 @@ public class Vector {
 		return new Vector(converse + other.converse, transverse + other.transverse);
 	}
 
-	public Vector setTransverse(final int transverse) {
+	public Vector setTransverse(final double transverse) {
 		return new Vector(converse, transverse);
 	}
 
-	public Vector addTransverse(final int transverse) {
+	public Vector addTransverse(final double transverse) {
 		return new Vector(converse, this.transverse + transverse);
 	}
 
-	public Vector setConverse(final int converse) {
+	public Vector setConverse(final double converse) {
 		return new Vector(converse, transverse);
 	}
 
-	public Vector addConverse(final int converse) {
+	public Vector addConverse(final double converse) {
 		return new Vector(this.converse + converse, transverse);
 	}
 

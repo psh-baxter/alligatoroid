@@ -10,61 +10,16 @@ import com.zarbosoft.rendaw.common.TSList;
 import java.util.function.Consumer;
 
 public abstract class Display {
-  private final TSList<Consumer<Vector>> mouseMoveListeners = new TSList<>();
-  private final TSList<Runnable> mouseLeaveListeners = new TSList<>();
-
-  public interface DisplayAbsoluteConvert {
-    public Vector convert(
-        double left, double right, double rightEdge, double top, double bottom, double bottomEdge);
-
-    public UnconvertVector unconvert(
-        int converse, int transverse, double xSpan, double ySpan, double xEdge, double yEdge);
-
-    public UnconvertAxis unconvertConverse(
-        int converse, double xSpan, double ySpan, double xEdge, double yEdge);
-
-    public UnconvertAxis unconvertTransverse(
-        int transverse, double xSpan, double ySpan, double xEdge, double yEdge);
-  }
-
-  public interface DisplayHalfConvert {
-    public Vector convert(double width, double height);
-
-    public UnconvertVector unconvertSpan(int converse, int transverse);
-
-    public UnconvertAxis unconvertConverseSpan(int span);
-
-    public UnconvertAxis unconvertTransverseSpan(int span);
-  }
-
-  public static class UnconvertAxis {
-    public final boolean x;
-    public final double amount;
-
-    public UnconvertAxis(boolean x, double amount) {
-      this.x = x;
-      this.amount = amount;
-    }
-  }
-
-  public static class UnconvertVector {
-    public final double x;
-    public final double y;
-
-    public UnconvertVector(double x, double y) {
-      this.x = x;
-      this.y = y;
-    }
-  }
-
   public final DisplayAbsoluteConvert convert;
   public final DisplayHalfConvert halfConvert;
-  private final TSList<IntListener> converseEdgeListeners = new TSList<>();
-  private final TSList<IntListener> transverseEdgeListeners = new TSList<>();
+  private final TSList<Consumer<Vector>> mouseMoveListeners = new TSList<>();
+  private final TSList<Runnable> mouseLeaveListeners = new TSList<>();
+  private final TSList<DoubleListener> converseEdgeListeners = new TSList<>();
+  private final TSList<DoubleListener> transverseEdgeListeners = new TSList<>();
   private double width;
   private double height;
-  private int converseEdge = Integer.MAX_VALUE;
-  private int transverseEdge = Integer.MAX_VALUE;
+  private double converseEdge = Integer.MAX_VALUE;
+  private double transverseEdge = Integer.MAX_VALUE;
 
   protected Display(Direction converseDirection, Direction transverseDirection) {
     switch (converseDirection) {
@@ -76,40 +31,26 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
-                      public Vector convert(
-                          double left,
-                          double right,
-                          double rightEdge,
-                          double top,
-                          double bottom,
-                          double bottomEdge) {
-                        return new Vector(
-                            (int) (double) (bottomEdge - bottom),
-                            (int) (double) (rightEdge - right));
+                      public Vector convert(double left, double right, double top, double bottom) {
+                        return new Vector((-bottom), (-right));
                       }
 
                       @Override
                       public UnconvertVector unconvert(
-                          int converse,
-                          int transverse,
-                          double xSpan,
-                          double ySpan,
-                          double xEdge,
-                          double yEdge) {
-                        return new UnconvertVector(
-                            yEdge - (double) converse - ySpan, xEdge - (double) transverse - xSpan);
+                          double converse, double transverse, double xSpan, double ySpan) {
+                        return new UnconvertVector(-converse - ySpan, -transverse - xSpan);
                       }
 
                       @Override
                       public UnconvertAxis unconvertConverse(
-                          int converse, double xSpan, double ySpan, double xEdge, double yEdge) {
-                        return new UnconvertAxis(false, yEdge - (double) converse - ySpan);
+                          double converse, double xSpan, double ySpan) {
+                        return new UnconvertAxis(false, -converse - ySpan);
                       }
 
                       @Override
                       public UnconvertAxis unconvertTransverse(
-                          int transverse, double xSpan, double ySpan, double xEdge, double yEdge) {
-                        return new UnconvertAxis(true, xEdge - (double) transverse - xSpan);
+                          double transverse, double xSpan, double ySpan) {
+                        return new UnconvertAxis(true, -transverse - xSpan);
                       }
                     };
                 break;
@@ -119,37 +60,26 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
-                      public Vector convert(
-                          double left,
-                          double right,
-                          double rightEdge,
-                          double top,
-                          double bottom,
-                          double bottomEdge) {
-                        return new Vector((int) (double) (bottomEdge - bottom), (int) left);
+                      public Vector convert(double left, double right, double top, double bottom) {
+                        return new Vector((-bottom), left);
                       }
 
                       @Override
                       public UnconvertVector unconvert(
-                          int converse,
-                          int transverse,
-                          double xSpan,
-                          double ySpan,
-                          double xEdge,
-                          double yEdge) {
-                        return new UnconvertVector(xEdge - (double) transverse - xSpan, converse);
+                          double converse, double transverse, double xSpan, double ySpan) {
+                        return new UnconvertVector(-transverse - xSpan, converse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertConverse(
-                          int converse, double xSpan, double ySpan, double xEdge, double yEdge) {
+                          double converse, double xSpan, double ySpan) {
                         return new UnconvertAxis(false, converse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertTransverse(
-                          int transverse, double xSpan, double ySpan, double xEdge, double yEdge) {
-                        return new UnconvertAxis(true, xEdge - (double) transverse - xSpan);
+                          double transverse, double xSpan, double ySpan) {
+                        return new UnconvertAxis(true, -transverse - xSpan);
                       }
                     };
                 break;
@@ -167,37 +97,26 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
-                      public Vector convert(
-                          double left,
-                          double right,
-                          double rightEdge,
-                          double top,
-                          double bottom,
-                          double bottomEdge) {
-                        return new Vector((int) top, (int) (double) (rightEdge - right));
+                      public Vector convert(double left, double right, double top, double bottom) {
+                        return new Vector(top, (-right));
                       }
 
                       @Override
                       public UnconvertVector unconvert(
-                          int converse,
-                          int transverse,
-                          double xSpan,
-                          double ySpan,
-                          double xEdge,
-                          double yEdge) {
-                        return new UnconvertVector(transverse, yEdge - (double) converse - ySpan);
+                          double converse, double transverse, double xSpan, double ySpan) {
+                        return new UnconvertVector(-transverse - xSpan, converse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertConverse(
-                          int converse, double xSpan, double ySpan, double xEdge, double yEdge) {
-                        return new UnconvertAxis(false, yEdge - (double) converse - ySpan);
+                          double converse, double xSpan, double ySpan) {
+                        return new UnconvertAxis(false, converse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertTransverse(
-                          int transverse, double xSpan, double ySpan, double xEdge, double yEdge) {
-                        return new UnconvertAxis(true, transverse);
+                          double transverse, double xSpan, double ySpan) {
+                        return new UnconvertAxis(true, -transverse - xSpan);
                       }
                     };
                 break;
@@ -207,36 +126,25 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
-                      public Vector convert(
-                          double left,
-                          double right,
-                          double rightEdge,
-                          double top,
-                          double bottom,
-                          double bottomEdge) {
-                        return new Vector((int) top, (int) left);
+                      public Vector convert(double left, double right, double top, double bottom) {
+                        return new Vector(top, left);
                       }
 
                       @Override
                       public UnconvertVector unconvert(
-                          int converse,
-                          int transverse,
-                          double xSpan,
-                          double ySpan,
-                          double xEdge,
-                          double yEdge) {
+                          double converse, double transverse, double xSpan, double ySpan) {
                         return new UnconvertVector(transverse, converse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertConverse(
-                          int converse, double xSpan, double ySpan, double xEdge, double yEdge) {
+                          double converse, double xSpan, double ySpan) {
                         return new UnconvertAxis(false, converse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertTransverse(
-                          int transverse, double xSpan, double ySpan, double xEdge, double yEdge) {
+                          double transverse, double xSpan, double ySpan) {
                         return new UnconvertAxis(true, transverse);
                       }
                     };
@@ -255,38 +163,26 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
-                      public Vector convert(
-                          double left,
-                          double right,
-                          double rightEdge,
-                          double top,
-                          double bottom,
-                          double bottomEdge) {
-                        return new Vector((int) (rightEdge - right), (int) (bottomEdge - bottom));
+                      public Vector convert(double left, double right, double top, double bottom) {
+                        return new Vector((-right), (-bottom));
                       }
 
                       @Override
                       public UnconvertVector unconvert(
-                          int converse,
-                          int transverse,
-                          double xSpan,
-                          double ySpan,
-                          double xEdge,
-                          double yEdge) {
-                        return new UnconvertVector(
-                            xEdge - converse - xSpan, yEdge - transverse - ySpan);
+                          double converse, double transverse, double xSpan, double ySpan) {
+                        return new UnconvertVector(-converse - xSpan, -transverse - ySpan);
                       }
 
                       @Override
                       public UnconvertAxis unconvertConverse(
-                          int converse, double xSpan, double ySpan, double xEdge, double yEdge) {
-                        return new UnconvertAxis(true, xEdge - converse - xSpan);
+                          double converse, double xSpan, double ySpan) {
+                        return new UnconvertAxis(true, -converse - xSpan);
                       }
 
                       @Override
                       public UnconvertAxis unconvertTransverse(
-                          int transverse, double xSpan, double ySpan, double xEdge, double yEdge) {
-                        return new UnconvertAxis(false, yEdge - transverse - ySpan);
+                          double transverse, double xSpan, double ySpan) {
+                        return new UnconvertAxis(false, -transverse - ySpan);
                       }
                     };
                 break;
@@ -296,36 +192,25 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
-                      public Vector convert(
-                          double left,
-                          double right,
-                          double rightEdge,
-                          double top,
-                          double bottom,
-                          double bottomEdge) {
-                        return new Vector((int) (rightEdge - right), (int) top);
+                      public Vector convert(double left, double right, double top, double bottom) {
+                        return new Vector((-right), top);
                       }
 
                       @Override
                       public UnconvertVector unconvert(
-                          int converse,
-                          int transverse,
-                          double xSpan,
-                          double ySpan,
-                          double xEdge,
-                          double yEdge) {
-                        return new UnconvertVector(xEdge - converse - xSpan, transverse);
+                          double converse, double transverse, double xSpan, double ySpan) {
+                        return new UnconvertVector(-converse - xSpan, transverse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertConverse(
-                          int converse, double xSpan, double ySpan, double xEdge, double yEdge) {
-                        return new UnconvertAxis(true, xEdge - converse - xSpan);
+                          double converse, double xSpan, double ySpan) {
+                        return new UnconvertAxis(true, -converse - xSpan);
                       }
 
                       @Override
                       public UnconvertAxis unconvertTransverse(
-                          int transverse, double xSpan, double ySpan, double xEdge, double yEdge) {
+                          double transverse, double xSpan, double ySpan) {
                         return new UnconvertAxis(false, transverse);
                       }
                     };
@@ -344,37 +229,26 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
-                      public Vector convert(
-                          double left,
-                          double right,
-                          double rightEdge,
-                          double top,
-                          double bottom,
-                          double bottomEdge) {
-                        return new Vector((int) left, (int) (bottomEdge - bottom));
+                      public Vector convert(double left, double right, double top, double bottom) {
+                        return new Vector(left, (-bottom));
                       }
 
                       @Override
                       public UnconvertVector unconvert(
-                          int converse,
-                          int transverse,
-                          double xSpan,
-                          double ySpan,
-                          double xEdge,
-                          double yEdge) {
-                        return new UnconvertVector(converse, yEdge - transverse - ySpan);
+                          double converse, double transverse, double xSpan, double ySpan) {
+                        return new UnconvertVector(converse, -transverse - ySpan);
                       }
 
                       @Override
                       public UnconvertAxis unconvertConverse(
-                          int converse, double xSpan, double ySpan, double xEdge, double yEdge) {
+                          double converse, double xSpan, double ySpan) {
                         return new UnconvertAxis(true, converse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertTransverse(
-                          int transverse, double xSpan, double ySpan, double xEdge, double yEdge) {
-                        return new UnconvertAxis(false, yEdge - transverse - ySpan);
+                          double transverse, double xSpan, double ySpan) {
+                        return new UnconvertAxis(false, -transverse - ySpan);
                       }
                     };
                 break;
@@ -384,36 +258,25 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
-                      public Vector convert(
-                          double left,
-                          double right,
-                          double rightEdge,
-                          double top,
-                          double bottom,
-                          double bottomEdge) {
-                        return new Vector((int) left, (int) top);
+                      public Vector convert(double left, double right, double top, double bottom) {
+                        return new Vector(left, top);
                       }
 
                       @Override
                       public UnconvertVector unconvert(
-                          int converse,
-                          int transverse,
-                          double xSpan,
-                          double ySpan,
-                          double xEdge,
-                          double yEdge) {
+                          double converse, double transverse, double xSpan, double ySpan) {
                         return new UnconvertVector(converse, transverse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertConverse(
-                          int converse, double xSpan, double ySpan, double xEdge, double yEdge) {
+                          double converse, double xSpan, double ySpan) {
                         return new UnconvertAxis(true, converse);
                       }
 
                       @Override
                       public UnconvertAxis unconvertTransverse(
-                          int transverse, double xSpan, double ySpan, double xEdge, double yEdge) {
+                          double transverse, double xSpan, double ySpan) {
                         return new UnconvertAxis(false, transverse);
                       }
                     };
@@ -434,21 +297,21 @@ public abstract class Display {
             new DisplayHalfConvert() {
               @Override
               public Vector convert(double width, double height) {
-                return new Vector((int) (double) height, (int) (double) width);
+                return new Vector(height, width);
               }
 
               @Override
-              public UnconvertVector unconvertSpan(int converse, int transverse) {
+              public UnconvertVector unconvertSpan(double converse, double transverse) {
                 return new UnconvertVector(transverse, converse);
               }
 
               @Override
-              public UnconvertAxis unconvertConverseSpan(int span) {
+              public UnconvertAxis unconvertConverseSpan(double span) {
                 return new UnconvertAxis(false, span);
               }
 
               @Override
-              public UnconvertAxis unconvertTransverseSpan(int span) {
+              public UnconvertAxis unconvertTransverseSpan(double span) {
                 return new UnconvertAxis(true, span);
               }
             };
@@ -459,21 +322,21 @@ public abstract class Display {
             new DisplayHalfConvert() {
               @Override
               public Vector convert(double width, double height) {
-                return new Vector((int) width, (int) height);
+                return new Vector(width, height);
               }
 
               @Override
-              public UnconvertVector unconvertSpan(int converse, int transverse) {
+              public UnconvertVector unconvertSpan(double converse, double transverse) {
                 return new UnconvertVector(converse, transverse);
               }
 
               @Override
-              public UnconvertAxis unconvertConverseSpan(int span) {
+              public UnconvertAxis unconvertConverseSpan(double span) {
                 return new UnconvertAxis(true, span);
               }
 
               @Override
-              public UnconvertAxis unconvertTransverseSpan(int span) {
+              public UnconvertAxis unconvertTransverseSpan(double span) {
                 return new UnconvertAxis(false, span);
               }
             };
@@ -505,8 +368,8 @@ public abstract class Display {
     }
   }
 
-  protected void mouseMoved(double x, double y, double re, double be) {
-    Vector vector = convert.convert(x, x, re, y, y, be);
+  protected void mouseMoved(double x, double y) {
+    Vector vector = convert.convert(x, x, y, y);
     for (Consumer<Vector> l : mouseMoveListeners.mut()) {
       l.accept(vector);
     }
@@ -520,16 +383,11 @@ public abstract class Display {
 
   public abstract void addTypingListener(Consumer<String> listener);
 
-  @FunctionalInterface
-  public interface IntListener {
-    void changed(int oldValue, int newValue);
-  }
-
   public abstract double width();
 
   public abstract double height();
 
-  public final int edge() {
+  public final double edge() {
     return halfConvert.convert(width(), height()).converse;
   }
 
@@ -545,25 +403,25 @@ public abstract class Display {
     width = newWidth;
     height = newHeight;
     Vector converted = halfConvert.convert(newWidth, newHeight);
-    int oldConverseEdge = converseEdge;
-    int oldTransverseEdge = transverseEdge;
+    double oldConverseEdge = converseEdge;
+    double oldTransverseEdge = transverseEdge;
     converseEdge = converted.converse;
     transverseEdge = converted.transverse;
     if (converseEdge != oldConverseEdge)
-      for (IntListener l : converseEdgeListeners) l.changed(oldConverseEdge, converseEdge);
+      for (DoubleListener l : converseEdgeListeners) l.changed(oldConverseEdge, converseEdge);
     if (transverseEdge != oldTransverseEdge)
-      for (IntListener l : transverseEdgeListeners) l.changed(oldTransverseEdge, transverseEdge);
+      for (DoubleListener l : transverseEdgeListeners) l.changed(oldTransverseEdge, transverseEdge);
   }
 
-  public final void addConverseEdgeListener(IntListener listener) {
+  public final void addConverseEdgeListener(DoubleListener listener) {
     converseEdgeListeners.add(listener);
   }
 
-  public final int transverseEdge() {
+  public final double transverseEdge() {
     return halfConvert.convert(width(), height()).transverse;
   }
 
-  public final void addTransverseEdgeListener(IntListener listener) {
+  public final void addTransverseEdgeListener(DoubleListener listener) {
     transverseEdgeListeners.add(listener);
   }
 
@@ -578,4 +436,50 @@ public abstract class Display {
   public abstract void remove(DisplayNode node);
 
   public abstract void setBackgroundColor(ModelColor color);
+
+  public interface DisplayAbsoluteConvert {
+    public Vector convert(double left, double right, double top, double bottom);
+
+    public UnconvertVector unconvert(
+        double converse, double transverse, double xSpan, double ySpan);
+
+    public UnconvertAxis unconvertConverse(double converse, double xSpan, double ySpan);
+
+    public UnconvertAxis unconvertTransverse(double transverse, double xSpan, double ySpan);
+  }
+
+  public interface DisplayHalfConvert {
+    public Vector convert(double width, double height);
+
+    public UnconvertVector unconvertSpan(double converse, double transverse);
+
+    public UnconvertAxis unconvertConverseSpan(double span);
+
+    public UnconvertAxis unconvertTransverseSpan(double span);
+  }
+
+  @FunctionalInterface
+  public interface DoubleListener {
+    void changed(double oldValue, double newValue);
+  }
+
+  public static class UnconvertAxis {
+    public final boolean x;
+    public final double amount;
+
+    public UnconvertAxis(boolean x, double amount) {
+      this.x = x;
+      this.amount = amount;
+    }
+  }
+
+  public static class UnconvertVector {
+    public final double x;
+    public final double y;
+
+    public UnconvertVector(double x, double y) {
+      this.x = x;
+      this.y = y;
+    }
+  }
 }

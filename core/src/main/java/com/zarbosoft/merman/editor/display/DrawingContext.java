@@ -17,13 +17,13 @@ public interface DrawingContext {
 
     void beginFillPath();
 
-    void moveTo(int c, int t);
+    void moveTo(double c, double t);
 
-    void lineTo(int c, int t);
+    void lineTo(double c, double t);
 
     void closePath();
 
-    void arcTo(int c, int t, int c2, int t2, int radius);
+    void arcTo(double c, double t, double c2, double t2, double radius);
 
-    void translate(int c, int t);
+    void translate(double c, double t);
 }

@@ -7,27 +7,35 @@ import com.zarbosoft.merman.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.syntax.style.ObboxStyle;
 
 public class TextBorderAttachment {
+  private final Obbox border;
   BrickText first;
   int firstIndex;
   BrickText last;
   int lastIndex;
-  private final Obbox border;
+  private double startConverse;
+  private double startTransverse;
+  private double startTransverseSpan;
+  private double endConverse;
+  private double endTransverse;
+  private double endTransverseSpan;
+  private boolean blockRedraw = false;
   private final Attachment firstAttachment =
       new Attachment() {
         @Override
-        public void setTransverse(final Context context, final int transverse) {
+        public void setTransverse(final Context context, final double transverse) {
           startTransverse = transverse;
           redraw(context);
         }
 
         @Override
-        public void setConverse(final Context context, final int converse) {
+        public void setConverse(final Context context, final double converse) {
           startConverse = converse;
           redraw(context);
         }
 
         @Override
-        public void setTransverseSpan(final Context context, final int ascent, final int descent) {
+        public void setTransverseSpan(
+            final Context context, final double ascent, final double descent) {
           startTransverseSpan = ascent + descent;
           redraw(context);
         }
@@ -40,19 +48,20 @@ public class TextBorderAttachment {
   private final Attachment lastAttachment =
       new Attachment() {
         @Override
-        public void setTransverse(final Context context, final int transverse) {
+        public void setTransverse(final Context context, final double transverse) {
           endTransverse = transverse;
           redraw(context);
         }
 
         @Override
-        public void setConverse(final Context context, final int converse) {
+        public void setConverse(final Context context, final double converse) {
           endConverse = converse;
           redraw(context);
         }
 
         @Override
-        public void setTransverseSpan(final Context context, final int ascent, final int descent) {
+        public void setTransverseSpan(
+            final Context context, final double ascent, final double descent) {
           endTransverseSpan = ascent + descent;
           redraw(context);
         }
@@ -62,13 +71,6 @@ public class TextBorderAttachment {
           last = null;
         }
       };
-  private int startConverse;
-  private int startTransverse;
-  private int startTransverseSpan;
-  private int endConverse;
-  private int endTransverse;
-  private int endTransverseSpan;
-  private boolean blockRedraw = false;
 
   public TextBorderAttachment(final Context context) {
     border = new Obbox(context);
@@ -83,8 +85,7 @@ public class TextBorderAttachment {
       final int lastIndex) {
     if (this.first != null && this.first != first)
       this.first.removeAttachment(this.firstAttachment);
-    if (this.last != null && this.last != last)
-      this.last.removeAttachment(this.lastAttachment);
+    if (this.last != null && this.last != last) this.last.removeAttachment(this.lastAttachment);
     this.first = first;
     this.last = last;
     if (firstIndex < 0) throw new AssertionError();

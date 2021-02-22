@@ -29,11 +29,11 @@ public class Wall {
   public Wall(final Context context) {
     visual = context.display.group();
     context.addConverseEdgeListener(
-        new Context.ContextIntListener() {
-          int modOldValue = Integer.MAX_VALUE;
+        new Context.ContextDoubleListener() {
+          double modOldValue = Double.MAX_VALUE;
 
           @Override
-          public void changed(Context context1, int oldValue, int newValue) {
+          public void changed(Context context1, double oldValue, double newValue) {
             if (newValue < modOldValue) {
               Wall.this.idleCompact(context1);
               modOldValue = newValue;
@@ -308,7 +308,7 @@ public class Wall {
         // Always < children size because of cornerstone
         final Course child = children.get(backward);
         final Course preceding = children.get(backward + 1);
-        int transverse = preceding.transverseStart - child.transverseSpan();
+        double transverse = preceding.transverseStart - child.transverseSpan();
         if (preceding == cornerstoneCourse) transverse -= beddingBefore;
         child.setTransverse(context, transverse);
         backward -= 1;
@@ -316,15 +316,15 @@ public class Wall {
       }
       if (forward < children.size()) {
         // Always > 0 because of cornerstone
-        int transverse = children.get(forward - 1).transverseEdge();
+        double transverse = children.get(forward - 1).transverseEdge();
         if (forward - 1 == cornerstoneCourse.index) transverse += beddingAfter;
         children.get(forward).setTransverse(context, transverse);
         forward += 1;
         modified = true;
       }
       if (!modified) {
-        int min = children.get(0).transverseStart;
-        int max = children.last().transverseEdge();
+        double min = children.get(0).transverseStart;
+        double max = children.last().transverseEdge();
         if (context.wallUsageListener != null)
           context.wallUsageListener.usageChanged(
               context.display.halfConvert.unconvertTransverseSpan(min),

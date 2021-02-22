@@ -7,13 +7,14 @@ import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import elemental2.dom.BaseRenderingContext2D;
-import elemental2.dom.CSSProperties;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLCanvasElement;
 import elemental2.dom.HTMLElement;
 
-public class JSDrawing extends JSDisplayNode implements Drawing {
+public class JSDrawing extends JSFreeDisplayNode implements Drawing {
+  private Vector size;
+
   protected JSDrawing(JSDisplay display) {
     super(display, (HTMLElement) DomGlobal.document.createElement("canvas"));
     element.classList.add("merman-display-drawing", "merman-display");
@@ -29,12 +30,11 @@ public class JSDrawing extends JSDisplayNode implements Drawing {
   @Override
   public void resize(Context context, Vector vector) {
     HTMLCanvasElement element = (HTMLCanvasElement) this.element;
+    this.size = vector;
     Display.UnconvertVector v =
         display.halfConvert.unconvertSpan(vector.converse, vector.transverse);
-    element.width = (int) v.x;
-    element.height = (int) v.y;
-    element.style.width = CSSProperties.WidthUnionType.of(v.x + "px");
-    element.style.height = CSSProperties.HeightUnionType.of(v.y + "px");
+    element.width = (int) v.x + 1;
+    element.height = (int) v.y + 1;
     fixPosition();
   }
 
@@ -83,27 +83,23 @@ public class JSDrawing extends JSDisplayNode implements Drawing {
       }
 
       @Override
-      public void moveTo(int c, int t) {
+      public void moveTo(double c, double t) {
         if (stroke) {
-          Display.UnconvertVector v =
-              display.convert.unconvert(c, t, 1, 1, element.width, element.height);
+          Display.UnconvertVector v = display.convert.unconvert(c, t, 1, 1);
           ctx.moveTo(v.x + 0.5, v.y + 0.5);
         } else {
-          Display.UnconvertVector v =
-              display.convert.unconvert(c, t, 0, 0, element.width, element.height);
+          Display.UnconvertVector v = display.convert.unconvert(c, t, 0, 0);
           ctx.moveTo(v.x, v.y);
         }
       }
 
       @Override
-      public void lineTo(int c, int t) {
+      public void lineTo(double c, double t) {
         if (stroke) {
-          Display.UnconvertVector v =
-              display.convert.unconvert(c, t, 1, 1, element.width, element.height);
+          Display.UnconvertVector v = display.convert.unconvert(c, t, 1, 1);
           ctx.lineTo(v.x + 0.5, v.y + 0.5);
         } else {
-          Display.UnconvertVector v =
-              display.convert.unconvert(c, t, 0, 0, element.width, element.height);
+          Display.UnconvertVector v = display.convert.unconvert(c, t, 0, 0);
           ctx.lineTo(v.x, v.y);
         }
       }
@@ -115,33 +111,33 @@ public class JSDrawing extends JSDisplayNode implements Drawing {
       }
 
       @Override
-      public void arcTo(int c, int t, int c2, int t2, int radius) {
+      public void arcTo(double c, double t, double c2, double t2, double radius) {
         if (stroke) {
-          Display.UnconvertVector v1 =
-              display.convert.unconvert(c, t, 1, 1, element.width, element.height);
-          Display.UnconvertVector v2 =
-              display.convert.unconvert(c2, t2, 1, 1, element.width, element.height);
+          Display.UnconvertVector v1 = display.convert.unconvert(c, t, 1, 1);
+          Display.UnconvertVector v2 = display.convert.unconvert(c2, t2, 1, 1);
           ctx.arcTo(v1.x + 0.5, v1.y, v2.x + 0.5, v2.y + 0.5 + 0.5, radius);
         } else {
-          Display.UnconvertVector v =
-              display.convert.unconvert(c, t, 0, 0, element.width, element.height);
-          Display.UnconvertVector v2 =
-              display.convert.unconvert(c2, t2, 0, 0, element.width, element.height);
+          Display.UnconvertVector v = display.convert.unconvert(c, t, 0, 0);
+          Display.UnconvertVector v2 = display.convert.unconvert(c2, t2, 0, 0);
           ctx.arcTo(v.x, v.y, v2.x, v2.y, radius);
         }
       }
 
       @Override
-      public void translate(int c, int t) {
-        Display.UnconvertVector v =
-            display.convert.unconvert(c, t, 0, 0, element.width, element.height);
+      public void translate(double c, double t) {
+        Display.UnconvertVector v = display.convert.unconvert(c, t, 0, 0);
         ctx.translate(v.x, v.y);
       }
     };
   }
 
   @Override
-  public int transverseSpan() {
-    return element.clientHeight;
+  public double transverseSpan() {
+    return size.transverse;
+  }
+
+  @Override
+  public double converseSpan() {
+    return size.converse;
   }
 }

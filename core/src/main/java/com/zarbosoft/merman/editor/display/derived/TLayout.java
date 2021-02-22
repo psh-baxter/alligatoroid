@@ -20,7 +20,7 @@ public class TLayout {
 	}
 
 	public void layout() {
-		int transverse = 0;
+		double transverse = 0;
 		for (final CourseDisplayNode node : nodes) {
 			node.setBaselineTransverse(transverse, false);
 			transverse += node.transverseSpan();

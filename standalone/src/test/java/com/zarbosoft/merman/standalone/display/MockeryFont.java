@@ -9,22 +9,22 @@ public class MockeryFont implements Font {
 	}
 
 	@Override
-	public int getAscent() {
+	public double getAscent() {
 		return (size * 8) / 10;
 	}
 
 	@Override
-	public int getDescent() {
+	public double getDescent() {
 		return (size * 2) / 10;
 	}
 
 	@Override
-	public int getWidth(final String text) {
+	public double getWidth(final String text) {
 		return size * text.length();
 	}
 
 	@Override
-	public int getIndexAtConverse(final String text, final int converse) {
+	public int getIndexAtConverse(final String text, final double converse) {
 		return Math.min(text.length(), converse / size);
 	}
 }

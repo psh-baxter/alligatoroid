@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.editor.display;
 
 public interface Font {
-	int getAscent();
+	double getAscent();
 
-	int getDescent();
+	double getDescent();
 
-	int getWidth(String text);
+	double getWidth(String text);
 
 	/**
 	 * Index of first character that starts at or before converse (relative to start of text)
@@ -13,5 +13,5 @@ public interface Font {
 	 * @param converse
 	 * @return
 	 */
-	int getIndexAtConverse(String text, int converse);
+	int getIndexAtConverse(String text, double converse);
 }

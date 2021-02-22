@@ -18,7 +18,7 @@ public class JavaFXBlank extends JavaFXNode implements Blank {
 	}
 
 	@Override
-	public void setConverseSpan(final Context context, final int converse) {
+	public void setConverseSpan(final Context context, final double converse) {
 		switch (context.syntax.converseDirection) {
 			case UP:
 			case DOWN:

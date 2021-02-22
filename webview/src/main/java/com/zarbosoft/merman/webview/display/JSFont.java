@@ -26,32 +26,30 @@ public class JSFont implements Font {
   }
 
   public TextMetrics measure(String text) {
-    CanvasRenderingContext2D context =
-        (CanvasRenderingContext2D)
-            (Object)
-                ((HTMLCanvasElement) DomGlobal.document.createElement("canvas")).getContext("2d");
+    HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
+    CanvasRenderingContext2D context = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
     context.setFont(cssString());
     TextMetrics out = (TextMetrics) context.measureText(text);
     return out;
   }
 
   @Override
-  public int getAscent() {
-    return (int) ascent;
+  public double getAscent() {
+    return ascent;
   }
 
   @Override
-  public int getDescent() {
-    return (int) descent;
+  public double getDescent() {
+    return descent;
   }
 
   @Override
-  public int getWidth(String text) {
+  public double getWidth(String text) {
     return (int) measure(text).width;
   }
 
   @Override
-  public int getIndexAtConverse(String text, int converse) {
+  public int getIndexAtConverse(String text, double converse) {
     double last = 0;
     for (int i = 0; i < text.length(); ++i) {
       double next = measure(text.substring(0, i)).width;

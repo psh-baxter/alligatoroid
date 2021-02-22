@@ -29,7 +29,7 @@ public class JavaFXFont implements Font {
 	}
 
 	@Override
-	public int getAscent() {
+	public double getAscent() {
 		helper.setFont(font);
 		helper.setBoundsType(DEFAULT_BOUNDS_TYPE);
 		final double ascent = helper.getBaselineOffset();
@@ -39,7 +39,7 @@ public class JavaFXFont implements Font {
 	}
 
 	@Override
-	public int getDescent() {
+	public double getDescent() {
 		helper.setFont(font);
 		helper.setBoundsType(DEFAULT_BOUNDS_TYPE);
 		final double ascent = helper.getBaselineOffset();
@@ -51,7 +51,7 @@ public class JavaFXFont implements Font {
 	}
 
 	@Override
-	public int getWidth(final String text) {
+	public double getWidth(final String text) {
 		helper.setText(text);
 		helper.setFont(font);
 		// Note that the wrapping width needs to be set to zero before
@@ -69,7 +69,7 @@ public class JavaFXFont implements Font {
 	}
 
 	@Override
-	public int getIndexAtConverse(final String text, final int converse) {
+	public int getIndexAtConverse(final String text, final double converse) {
 		helper.setText(text);
 		helper.setFont(font);
 		// Note that the wrapping width needs to be set to zero before

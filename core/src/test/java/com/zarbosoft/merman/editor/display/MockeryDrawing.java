@@ -8,12 +8,12 @@ public class MockeryDrawing extends MockFreeDisplayNode implements Drawing {
   private Vector size = new Vector(0, 0);
 
   @Override
-  public int transverseSpan() {
+  public double transverseSpan() {
     return size.transverse;
   }
 
   @Override
-  public int converseSpan() {
+  public double converseSpan() {
     return size.converse;
   }
 
@@ -50,19 +50,19 @@ public class MockeryDrawing extends MockFreeDisplayNode implements Drawing {
       public void beginFillPath() {}
 
       @Override
-      public void moveTo(final int halfBuffer, final int halfBuffer1) {}
+      public void moveTo(final double halfBuffer, final double halfBuffer1) {}
 
       @Override
-      public void lineTo(final int i, final int i1) {}
+      public void lineTo(final double i, final double i1) {}
 
       @Override
       public void closePath() {}
 
       @Override
-      public void arcTo(final int c, final int t, final int c2, final int t2, final int radius) {}
+      public void arcTo(final double c, final double t, final double c2, final double t2, final double radius) {}
 
       @Override
-      public void translate(final int c, final int t) {}
+      public void translate(final double c, final double t) {}
     };
   }
 

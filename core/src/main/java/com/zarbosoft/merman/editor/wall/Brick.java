@@ -18,10 +18,10 @@ public abstract class Brick {
   public Course parent;
   public int index;
   public Alignment alignment;
-  public int converse;
-  public int converseSpan;
+  public double converse;
+  public double converseSpan;
   /** Used to recalc alignment min when a brick is removed from alignment */
-  protected int preAlignConverse;
+  protected double preAlignConverse;
 
   TSSet<Attachment> attachments = Context.createSet.get();
 
@@ -48,17 +48,17 @@ public abstract class Brick {
     return isSplit(inter.getVisual().atomVisual().compact);
   }
 
-  public abstract int getConverse();
+  public abstract double getConverse();
 
-  public abstract int converseEdge();
+  public abstract double converseEdge();
 
-  public abstract int converseSpan();
+  public abstract double converseSpan();
 
   public abstract DisplayNode getDisplayNode();
 
-  public abstract void setConverse(Context context, int minConverse, int converse);
+  public abstract void setConverse(Context context, double minConverse, double converse);
 
-  public final int getPreAlignConverse() {
+  public final double getPreAlignConverse() {
     return preAlignConverse;
   }
 
@@ -91,7 +91,7 @@ public abstract class Brick {
     this.index = index;
   }
 
-  public abstract void allocateTransverse(Context context, int ascent, int descent);
+  public abstract void allocateTransverse(Context context, double ascent, double descent);
 
   public void addAfter(final Context context, final Brick brick) {
     if (brick.isSplit()) {
@@ -184,7 +184,7 @@ public abstract class Brick {
     destroyed(context);
   }
 
-  public abstract int descent();
+  public abstract double descent();
 
-  public abstract int ascent();
+  public abstract double ascent();
 }

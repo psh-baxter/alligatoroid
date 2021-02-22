@@ -2,7 +2,6 @@ package com.zarbosoft.merman.webview.display;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Image;
-import com.zarbosoft.merman.editor.visual.Vector;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.HTMLImageElement;
@@ -24,5 +23,20 @@ public class JSImage extends JSCourseDisplayNode implements Image {
   public void rotate(Context context, double rotate) {
     element.style.transform = "rotate(" + rotate + "deg)";
     fixPosition();
+  }
+
+  @Override
+  public double converseSpan() {
+    return element.clientWidth;
+  }
+
+  @Override
+  protected double converseCorner() {
+    return converse;
+  }
+
+  @Override
+  protected double transverseCorner() {
+    return transverseBaseline - ascent;
   }
 }

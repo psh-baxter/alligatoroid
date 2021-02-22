@@ -3,6 +3,7 @@ package com.zarbosoft.merman.webview;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.BackType;
+import com.zarbosoft.merman.syntax.Direction;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
@@ -423,17 +424,6 @@ public class Main {
   public static final String baseAlign = "base";
   public static final String indentAlign = "indent";
 
-  /*
-  public static final ModelColor.RGB stringColor = ModelColor.RGB.hex("C25E8C");
-  public static final ModelColor.RGB stringQuoteColor = ModelColor.RGB.hex("E76F82");
-  public static final ModelColor.RGB nonstringColor = ModelColor.RGB.hex("FFAB66");
-  public static final ModelColor.RGB identifierColor = ModelColor.RGB.hex("9F66B3");
-  public static final ModelColor.RGB keywordColor = ModelColor.RGB.hex("4C0027");
-  public static final ModelColor.RGB declareColor = ModelColor.RGB.hex("5175CE");
-  public static final ModelColor.RGB blockColor = ModelColor.RGB.hex("00857A");
-  public static final ModelColor.RGB operatorColor = ModelColor.RGB.hex("0087B0");
-  public static final ModelColor.RGB callColor = ModelColor.RGB.hex("554149");
-   */
   public static final double bright = 0.7;
   public static final double dark = 0.25;
   public static final double semidark = 0.35;
@@ -546,16 +536,14 @@ public class Main {
           new ROPair[] {
             new ROPair<>("javascript", new JavascriptSyntaxFrontFactory()),
             new ROPair<>("python", new PythonSyntaxFrontFactory()),
-            new ROPair<>("lisp", new LispSyntaxFrontFactory())
+            new ROPair<>("lisp", new LispSyntaxFrontFactory()),
+            new ROPair<>("prodel", new ProdelSyntaxFrontFactory())
           }) {
-        DomGlobal.document
-            .getElementById("replace-" + p.first)
-            .replaceWith(
-                webView.block(
-                    buildSyntax(i18n, p.second),
-                    i18n,
-                    rawDoc,
-                    TSList.of("type", "operator", "kind")));
+        Element e = DomGlobal.document.getElementById("replace-" + p.first);
+        if (e == null) continue;
+        e.replaceWith(
+            webView.block(
+                buildSyntax(i18n, p.second), i18n, rawDoc, TSList.of("type", "operator", "kind")));
       }
     } catch (GrammarTooUncertain e) {
       StringBuilder message = new StringBuilder();
@@ -697,20 +685,18 @@ public class Main {
                     new FrontPrimitiveSpec(
                         new FrontPrimitiveSpec.Config("value").style(c -> styleNonstring(c))))
                 .build(),
-            estreeTypeBuilder(stringLiteralType, "String literal")
-                .back(
-                    estreeBackBuilder()
-                        .field("type", new BackFixedPrimitiveSpec("Literal"))
-                        .field(
-                            "value",
-                            new BackPrimitiveSpec(
-                                i18n, new BaseBackPrimitiveSpec.Config("value", new Any())))
-                        .build())
-                .front(text("\"", Main::styleStringQuote))
-                .front(
-                    new FrontPrimitiveSpec(
-                        new FrontPrimitiveSpec.Config("value").style(c -> styleString(c))))
-                .front(text("\"", Main::styleStringQuote))
+            frontFactory
+                .stringLit(
+                    estreeTypeBuilder(stringLiteralType, "String literal")
+                        .back(
+                            estreeBackBuilder()
+                                .field("type", new BackFixedPrimitiveSpec("Literal"))
+                                .field(
+                                    "value",
+                                    new BackPrimitiveSpec(
+                                        i18n, new BaseBackPrimitiveSpec.Config("value", new Any())))
+                                .build()),
+                    "value")
                 .build(),
             //
             /// Control
@@ -873,6 +859,8 @@ public class Main {
                         .build())
                 .front(statementsFront)
                 .build());
+    syntaxConfig.converseDirection = frontFactory.converseDirection();
+    syntaxConfig.transverseDirection = frontFactory.transverseDirection();
     syntaxConfig.backType = BackType.JSON;
     return new Syntax(syntaxConfig);
   }
@@ -978,6 +966,15 @@ public class Main {
                 new SymbolTextSpec.Config(text).style(styler.apply(new Style.Config()).create()))));
   }
 
+  private static FrontSymbol textBase(String text, Function<Style.Config, Style.Config> styler) {
+    return new FrontSymbol(
+        new FrontSymbol.Config(
+            new SymbolTextSpec(
+                new SymbolTextSpec.Config(text)
+                    .splitMode(Style.SplitMode.ALWAYS)
+                    .style(styler.apply(new Style.Config()).splitAlignment(baseAlign).create()))));
+  }
+
   private static FrontSymbol textCompactBase(
       String text, Function<Style.Config, Style.Config> styler) {
     return new FrontSymbol(
@@ -1025,9 +1022,36 @@ public class Main {
     TypeBuilder declareInner(TypeBuilder type, String idKey, String initKey);
 
     TypeBuilder declareOuter(TypeBuilder type, String declarationsKey);
+
+    TypeBuilder stringLit(TypeBuilder type, String valueKey);
+
+    Direction converseDirection();
+
+    Direction transverseDirection();
   }
 
-  public abstract static class NonLispSyntaxFrontFactory implements SyntaxFrontFactory {
+  public abstract static class EnglishBaseFrontFactory implements SyntaxFrontFactory {
+    @Override
+    public Direction converseDirection() {
+      return Direction.RIGHT;
+    }
+
+    @Override
+    public Direction transverseDirection() {
+      return Direction.DOWN;
+    }
+
+    @Override
+    public TypeBuilder stringLit(TypeBuilder type, String valueKey) {
+      return type.front(text("\"", Main::styleStringQuote))
+          .front(
+              new FrontPrimitiveSpec(
+                  new FrontPrimitiveSpec.Config("value").style(c -> styleString(c))))
+          .front(text("\"", Main::styleStringQuote));
+    }
+  }
+
+  public abstract static class NonLispSyntaxFrontFactory extends EnglishBaseFrontFactory {
     @Override
     public TypeBuilder callExpr(TypeBuilder type, String calleeKey, String argumentsKey) {
       return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(calleeKey)))
@@ -1092,7 +1116,131 @@ public class Main {
     }
   }
 
-  public static class LispSyntaxFrontFactory implements SyntaxFrontFactory {
+  public static class ProdelSyntaxFrontFactory implements SyntaxFrontFactory {
+    @Override
+    public Direction converseDirection() {
+      return Direction.RIGHT;
+    }
+
+    @Override
+    public Direction transverseDirection() {
+      return Direction.DOWN;
+    }
+    /*
+    @Override
+    public Direction converseDirection() {
+      return Direction.DOWN;
+    }
+
+    @Override
+    public Direction transverseDirection() {
+      return Direction.LEFT;
+    }
+    */
+
+    @Override
+    public TypeBuilder stringLit(TypeBuilder type, String valueKey) {
+      return type.front(text("「", Main::styleStringQuote))
+          .front(
+              new FrontPrimitiveSpec(
+                  new FrontPrimitiveSpec.Config("value").style(c -> styleString(c))))
+          .front(text("」", Main::styleStringQuote));
+    }
+
+    @Override
+    public TypeBuilder binaryOp(TypeBuilder type, String symbol, String leftKey, String rightKey) {
+      return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(leftKey)))
+          .front(space)
+          .front(prefixCompactIndent)
+          .front(text(symbol, Main::styleOperator))
+          .front(prefixCompactIndent)
+          .front(space)
+          .front(new FrontAtomSpec(new FrontAtomSpec.Config(rightKey)));
+    }
+
+    @Override
+    public TypeBuilder prefixOp(TypeBuilder type, String symbol, String argumentKey) {
+      return type.front(text(symbol, Main::styleOperator))
+          .front(prefixCompactIndent)
+          .front(new FrontAtomSpec(new FrontAtomSpec.Config("argument")));
+    }
+
+    @Override
+    public TypeBuilder callExpr(TypeBuilder type, String calleeKey, String argumentsKey) {
+      return type.front(text("（", Main::styleCall))
+          .front(
+              new FrontArraySpecBuilder(argumentsKey)
+                  .prefix(prefixCompactIndent)
+                  .separator(text(",", Main::styleCall))
+                  .build())
+          .front(textCompactBase("）を", Main::styleCall))
+          .front(new FrontAtomSpec(new FrontAtomSpec.Config(calleeKey)))
+          .front(textCompactIndent("する", Main::styleCall));
+    }
+
+    @Override
+    public TypeBuilder memberExpr(TypeBuilder type, String objectKey, String propertyKey) {
+      return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(objectKey)))
+          .front(textCompactIndent("の", Main::styleOperator))
+          .front(
+              new FrontPrimitiveSpec(
+                  new FrontPrimitiveSpec.Config(propertyKey).style(c -> styleIdentifier(c))));
+    }
+
+    @Override
+    public TypeBuilder block(TypeBuilder type, String statementsKey) {
+      return type.front(new FrontArraySpecBuilder("statements").prefix(prefixIndent).build())
+          .front(textBase("終わり", Main::styleKeyword));
+    }
+
+    @Override
+    public TypeBuilder forStatement(
+        TypeBuilder type, String initKey, String testKey, String updateKey, String bodyKey) {
+      return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(initKey)))
+          .front(textCompactIndent("から", Main::styleKeyword))
+          .front(prefixCompactIndent)
+          .front(new FrontAtomSpec(new FrontAtomSpec.Config(testKey)))
+          .front(textCompactIndent("まで", Main::styleKeyword))
+          .front(prefixCompactIndent)
+          .front(new FrontAtomSpec(new FrontAtomSpec.Config(updateKey)))
+          .front(textCompactBase("しながら", Main::styleKeyword))
+          .front(prefixCompactIndent)
+          .front(new FrontAtomSpec(new FrontAtomSpec.Config(bodyKey)));
+    }
+
+    @Override
+    public TypeBuilder ifStatement(TypeBuilder type, String testKey, String consequentKey) {
+      return type.front(text("もし", Main::styleKeyword))
+          .front(prefixCompactIndent)
+          .front(new FrontAtomSpec(new FrontAtomSpec.Config(testKey)))
+          .front(textCompactBase("なら", Main::styleKeyword))
+          .front(prefixCompactIndent)
+          .front(new FrontAtomSpec(new FrontAtomSpec.Config(consequentKey)));
+    }
+
+    @Override
+    public TypeBuilder declareInner(TypeBuilder type, String idKey, String initKey) {
+      return type.front(prefixCompactIndent)
+          .front(
+              new FrontPrimitiveSpec(
+                  new FrontPrimitiveSpec.Config("id").style(c -> c.color(identifierColor))))
+          .front(text("を", Function.identity()))
+          .front(prefixCompactIndent)
+          .front(new FrontAtomSpec(new FrontAtomSpec.Config("init")));
+    }
+
+    @Override
+    public TypeBuilder declareOuter(TypeBuilder type, String declarationsKey) {
+      return type.front(
+              new FrontArraySpecBuilder("declarations")
+                  .prefix(prefixCompactIndent)
+                  .separator(text("、", Main::styleDeclare))
+                  .build())
+          .front(text("とする", Main::styleDeclare));
+    }
+  }
+
+  public static class LispSyntaxFrontFactory extends EnglishBaseFrontFactory {
     @Override
     public TypeBuilder binaryOp(TypeBuilder type, String symbol, String leftKey, String rightKey) {
       String lispSymbol;

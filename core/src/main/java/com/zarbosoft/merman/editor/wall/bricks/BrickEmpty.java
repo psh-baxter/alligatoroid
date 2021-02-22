@@ -10,9 +10,9 @@ import com.zarbosoft.merman.syntax.style.Style;
 
 public class BrickEmpty extends Brick {
   private final Blank visual;
-  private final int ascent;
-  private final int descent;
-  private int converse = 0;
+  private final double ascent;
+  private final double descent;
+  private double converse = 0;
 
   public BrickEmpty(
       final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
@@ -25,12 +25,12 @@ public class BrickEmpty extends Brick {
   }
 
   @Override
-  public int converseEdge() {
+  public double converseEdge() {
     return converse + converseSpan;
   }
 
   @Override
-  public int converseSpan() {
+  public double converseSpan() {
     return converseSpan;
   }
 
@@ -40,27 +40,27 @@ public class BrickEmpty extends Brick {
   }
 
   @Override
-  public void setConverse(final Context context, final int minConverse, final int converse) {
+  public void setConverse(final Context context, final double minConverse, final double converse) {
     this.preAlignConverse = minConverse;
     this.converse = converse;
     visual.setBaselinePosition(new Vector(converse, 0), false);
   }
 
   @Override
-  public void allocateTransverse(final Context context, final int ascent, final int descent) {}
+  public void allocateTransverse(final Context context, final double ascent, final double descent) {}
 
   @Override
-  public int descent() {
+  public double descent() {
     return descent;
   }
 
   @Override
-  public int ascent() {
+  public double ascent() {
     return ascent;
   }
 
   @Override
-  public int getConverse() {
+  public double getConverse() {
     return converse;
   }
 }

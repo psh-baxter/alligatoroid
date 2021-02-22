@@ -14,7 +14,7 @@ public interface Group extends FreeDisplayNode {
 		add(size(), node);
 	}
 
-	void setTransverse(int transverse, boolean animate);
+	void setTransverse(double transverse, boolean animate);
 
 	void addAll(int index, ROList<? extends DisplayNode> nodes);
 

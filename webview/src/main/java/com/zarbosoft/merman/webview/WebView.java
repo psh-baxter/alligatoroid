@@ -10,7 +10,10 @@ import com.zarbosoft.merman.editor.hid.Key;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.syntax.Direction;
 import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.syntax.error.UnsupportedDirections;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.webview.display.JSDisplay;
 import com.zarbosoft.rendaw.common.ROList;
@@ -30,8 +33,6 @@ import java.util.PriorityQueue;
 public class WebView {
   private static final String style =
       ".merman-block-view-container-inner {\n"
-          + "    margin: 0;\n"
-          + "    padding: 0;\n"
           + "    position: relative;\n"
           + "    width: 100%;\n"
           + "    height: 100%;\n"
@@ -40,13 +41,24 @@ public class WebView {
           + "    border: none;\n"
           + "    outline: none;\n"
           + "}\n"
+          + ".merman-block-view-container-origin {\n"
+          + "    position: absolute;\n"
+          + "}\n"
+          + ".merman-block-view-container * {\n"
+          + "    margin: 0;\n"
+          + "    padding: 0;\n"
+          + "}\n"
           + ".merman-block-view-container {\n"
           + "    width: 100%;\n"
           + "    min-width: 1em;\n"
           + "    min-height: 1em;\n"
+          // + "    overflow-x: auto;\n"
+          // + "    overflow-y: visible;\n"
+          // + "    display: flex;\n"
           + "}\n"
           + ".merman-display {\n"
           + "    position: absolute;\n"
+          + "    pointer-events: none;\n"
           + "}\n"
           + ".merman-display-blank {}\n"
           + ".merman-display-img {}\n"
@@ -54,6 +66,12 @@ public class WebView {
           + ".merman-display-group {}\n"
           + ".merman-display-text {\n"
           + "    white-space: pre;\n"
+          + "}\n"
+          + ".merman-dir-dl .merman-display-text {\n"
+          + "    writing-mode: vertical-rl;\n"
+          + "}\n"
+          + ".merman-dir-dr .merman-display-text {\n"
+          + "    writing-mode: vertical-lr;\n"
           + "}\n";
   private final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
   private boolean iterationPending = false;
@@ -69,43 +87,73 @@ public class WebView {
   @JsMethod
   public HTMLElement block(
       Syntax syntax, I18nEngine i18n, String rawDoc, ROList<String> prioritizeKeys) {
+    /** Shifts origin for negative */
+    HTMLDivElement elementOrigin = (HTMLDivElement) DomGlobal.document.createElement("div");
+    elementOrigin.classList.add("merman-block-view-container-origin");
+
+    /** Establishes size + overflow, roots event handling */
     HTMLDivElement elementInner = (HTMLDivElement) DomGlobal.document.createElement("div");
     elementInner.classList.add("merman-block-view-container-inner");
     elementInner.tabIndex = 0;
+    if (syntax.converseDirection == Direction.RIGHT || syntax.converseDirection == Direction.LEFT) {
+      // nop
+    } /*else if (syntax.converseDirection == Direction.DOWN) {
+        elementInner.style.minHeight = CSSProperties.MinHeightUnionType.of("20em");
+        if (syntax.transverseDirection == Direction.LEFT) {
+          elementInner.classList.add("merman-dir-dl");
+          elementInner.style.flexDirection = "column-reverse";
+        } else if (syntax.transverseDirection == Direction.RIGHT) {
+          elementInner.classList.add("merman-dir-dr");
+        }
+      }*/ else
+      new MultiError()
+          .add(new UnsupportedDirections(syntax.converseDirection, syntax.transverseDirection))
+          .raise();
+    elementInner.appendChild(elementOrigin);
+
+    /** The block element that joins the html doc flow */
     HTMLDivElement element = (HTMLDivElement) DomGlobal.document.createElement("div");
     element.classList.add("merman-block-view-container");
     element.appendChild(elementInner);
+
     JSSerializer serializer = new JSSerializer(syntax.backType, prioritizeKeys);
     JSDisplay display =
-        new JSDisplay(syntax.converseDirection, syntax.transverseDirection, 15, elementInner);
+        new JSDisplay(
+            syntax.converseDirection, syntax.transverseDirection, 15, elementInner, elementOrigin);
     Context context =
         new Context(
             new Context.InitialConfig()
                 .startSelected(false)
-                .wallUsageListener(
+                .wallTransverseUsageListener(
                     (min, max) -> {
                       if (max.x) {
                         elementInner.style.width =
                             CSSProperties.WidthUnionType.of(max.amount + "px");
+                        if (syntax.transverseDirection == Direction.LEFT)
+                          elementOrigin.style.left = max.amount + "px";
                       } else {
                         elementInner.style.height =
                             CSSProperties.HeightUnionType.of(max.amount + "px");
+                        if (syntax.transverseDirection == Direction.UP)
+                          elementOrigin.style.top = max.amount + "px";
                       }
                     })
                 .hoverStyle(
                     c ->
                         c.obbox
                             .roundEnd(true)
+                            .roundStart(true)
                             .roundRadius(8)
                             .lineThickness(1.5)
-                            .lineColor(ModelColor.RGBA.polarOKLab(0.4, 0, 0, 0.5)))
+                            .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0, 0, 0.4)))
                 .cursorStyle(
                     c ->
                         c.obbox
+                            .roundStart(true)
                             .roundEnd(true)
                             .lineThickness(1.5)
                             .roundRadius(8)
-                            .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0.5, 180, 0.5))),
+                            .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0.5, 180, 0.8))),
             syntax,
             serializer.loadDocument(syntax, rawDoc),
             display,

@@ -25,7 +25,7 @@ public class CLayout {
 	}
 
 	public void layout() {
-		int converse = 0;
+		double converse = 0;
 		for (final DisplayNode node : nodes) {
 			node.setConverse(converse, false);
 			converse += node.converseSpan();

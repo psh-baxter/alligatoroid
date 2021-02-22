@@ -20,8 +20,8 @@ import java.util.function.Consumer;
 public class MockeryDisplay extends Display {
 	int edge = 10000;
 	int transverseEdge = 10000;
-	List<IntListener> converseEdgeListeners = new ArrayList<>();
-	List<IntListener> transverseEdgeListeners = new ArrayList<>();
+	List<DoubleListener> converseEdgeListeners = new ArrayList<>();
+	List<DoubleListener> transverseEdgeListeners = new ArrayList<>();
 	List<Consumer<HIDEvent>> hidEventListeners = new ArrayList<>();
 	List<DisplayNode> nodes = new ArrayList<>();
 
@@ -85,12 +85,12 @@ public class MockeryDisplay extends Display {
 	}
 
 	@Override
-	public void addConverseEdgeListener(final IntListener listener) {
+	public void addConverseEdgeListener(final DoubleListener listener) {
 		converseEdgeListeners.add(listener);
 	}
 
 	@Override
-	public void removeConverseEdgeListener(final IntListener listener) {
+	public void removeConverseEdgeListener(final DoubleListener listener) {
 		converseEdgeListeners.remove(listener);
 	}
 
@@ -100,12 +100,12 @@ public class MockeryDisplay extends Display {
 	}
 
 	@Override
-	public void addTransverseEdgeListener(final IntListener listener) {
+	public void addTransverseEdgeListener(final DoubleListener listener) {
 		transverseEdgeListeners.add(listener);
 	}
 
 	@Override
-	public void removeTransverseEdgeListener(final IntListener listener) {
+	public void removeTransverseEdgeListener(final DoubleListener listener) {
 		transverseEdgeListeners.remove(listener);
 	}
 

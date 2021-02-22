@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.editor.display;
 
 public abstract class MockFreeDisplayNode extends MockeryDisplayNode {
-    public int transverse;
+    public double transverse;
     @Override
-    public int transverse() {
+    public double transverse() {
         return transverse;
     }
 }

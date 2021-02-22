@@ -20,32 +20,32 @@ public class BrickImage extends Brick {
   }
 
   @Override
-  public void allocateTransverse(final Context context, final int ascent, final int descent) {
+  public void allocateTransverse(final Context context, final double ascent, final double descent) {
     image.setBaselineTransverse(ascent, false);
   }
 
   @Override
-  public int descent() {
+  public double descent() {
     return image.descent() + style.spaceTransverseAfter;
   }
 
   @Override
-  public int ascent() {
+  public double ascent() {
     return image.ascent() + style.spaceTransverseBefore;
   }
 
   @Override
-  public int converseEdge() {
+  public double converseEdge() {
     return getConverse() + converseSpan;
   }
 
   @Override
-  public int converseSpan() {
+  public double converseSpan() {
     return converseSpan + style.spaceBefore + style.spaceAfter;
   }
 
   @Override
-  public int getConverse() {
+  public double getConverse() {
     return image.converse() - style.spaceBefore;
   }
 
@@ -55,7 +55,7 @@ public class BrickImage extends Brick {
   }
 
   @Override
-  public void setConverse(final Context context, final int minConverse, final int converse) {
+  public void setConverse(final Context context, final double minConverse, final double converse) {
     this.preAlignConverse = minConverse;
     image.setConverse(converse + style.spaceBefore, false);
   }

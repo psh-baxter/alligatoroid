@@ -67,8 +67,8 @@ public class GeneralTestWizard {
   }
 
   private void checkNode(final DisplayNode node, final int t, final int te) {
-    assertThat(node.transverse(), equalTo(t));
-    assertThat(node.transverseEdge(), equalTo(te));
+    assertThat((int)node.transverse(), equalTo(t));
+    assertThat((int)node.transverseEdge(), equalTo(te));
   }
 
   public GeneralTestWizard checkBanner(final int transverse, final int transverseEdge) {
@@ -82,14 +82,14 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard checkScroll(final int scroll) {
-    assertThat(inner.context.scroll, equalTo(scroll));
+    assertThat((int)inner.context.scroll, equalTo(scroll));
     return this;
   }
 
   public GeneralTestWizard checkCourse(final int index, final int t, final int te) {
     final Course course = getCourse(index);
-    assertThat(course.transverseStart, equalTo(t));
-    assertThat(course.transverseStart + course.ascent + course.descent, equalTo(te));
+    assertThat((int)course.transverseStart, equalTo(t));
+    assertThat((int)(course.transverseStart + course.ascent + course.descent), equalTo(te));
     return this;
   }
 
@@ -159,7 +159,7 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard checkBrick(
       final int courseIndex, final int brickIndex, final int converse) {
-    assertThat(getBrick(courseIndex, brickIndex).getConverse(), equalTo(converse));
+    assertThat((int)getBrick(courseIndex, brickIndex).getConverse(), equalTo(converse));
     return this;
   }
 

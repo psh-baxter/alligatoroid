@@ -36,19 +36,19 @@ public class MockeryText extends MockeryDisplayNode implements Text {
 	}
 
 	@Override
-	public int getIndexAtConverse(final Context context, final int converse) {
+	public int getIndexAtConverse(final Context context, final double converse) {
 		throw new DeadCode();
 	}
 
 	@Override
-	public int getConverseAtIndex(final int index) {
+	public double getConverseAtIndex(final int index) {
 		if (index > text.length())
 			throw new AssertionError();
 		return font.getWidth(text.substring(0, index));
 	}
 
 	@Override
-	public int converseSpan() {
+	public double converseSpan() {
 		return font.getWidth(text);
 	}
 }

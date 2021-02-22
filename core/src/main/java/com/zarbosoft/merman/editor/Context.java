@@ -76,21 +76,21 @@ public class Context {
 
   public Banner banner;
   public Details details;
-  public int scroll = 0;
-  public int peek = 0;
+  public double scroll = 0;
+  public double peek = 0;
   public IterationLayBricks idleLayBricks = null;
-  public int edge;
-  public int transverseEdge;
+  public double edge;
+  public double transverseEdge;
   public Brick hoverBrick;
   public Hoverable hover;
   public HoverIteration hoverIdle;
   public Cursor cursor;
-  List<ContextIntListener> converseEdgeListeners = new ArrayList<>();
-  List<ContextIntListener> transverseEdgeListeners = new ArrayList<>();
-  int scrollStart;
-  int scrollEnd;
-  int scrollStartBeddingBefore;
-  int scrollStartBeddingAfter;
+  List<ContextDoubleListener> converseEdgeListeners = new ArrayList<>();
+  List<ContextDoubleListener> transverseEdgeListeners = new ArrayList<>();
+  double scrollStart;
+  double scrollEnd;
+  double scrollStartBeddingBefore;
+  double scrollStartBeddingAfter;
   int selectToken = 0;
   boolean keyHandlingInProgress = false;
   boolean debugInHover = false;
@@ -153,7 +153,7 @@ public class Context {
               Math.max(
                   0,
                   newValue - document.syntax.pad.converseStart - document.syntax.pad.converseEnd);
-          for (ContextIntListener l : converseEdgeListeners) {
+          for (ContextDoubleListener l : converseEdgeListeners) {
             l.changed(this, oldValue, newValue);
           }
         });
@@ -161,7 +161,7 @@ public class Context {
         ((oldValue, newValue) -> {
           transverseEdge = newValue;
           scrollVisible();
-          for (ContextIntListener l : transverseEdgeListeners) {
+          for (ContextDoubleListener l : transverseEdgeListeners) {
             l.changed(this, oldValue, newValue);
           }
         }));
@@ -209,8 +209,8 @@ public class Context {
           private final Attachment selectionBrickAttachment =
               new Attachment() {
                 @Override
-                public void setTransverse(final Context context, final int transverse) {
-                  final int oldScrollStart = scrollStart;
+                public void setTransverse(final Context context, final double transverse) {
+                  final double oldScrollStart = scrollStart;
                   scrollStart = transverse;
                   scrollEnd += scrollStart - oldScrollStart;
                   scrollVisible();
@@ -218,7 +218,7 @@ public class Context {
 
                 @Override
                 public void setTransverseSpan(
-                    final Context context, final int ascent, final int descent) {
+                        final Context context, final double ascent, final double descent) {
                   scrollEnd = scrollStart + ascent + descent;
                   scrollVisible();
                 }
@@ -278,13 +278,13 @@ public class Context {
   }
 
   private void scrollVisible() {
-    final int minimum = scrollStart - scrollStartBeddingBefore - syntax.pad.transverseStart;
-    final int maximum = scrollEnd + scrollStartBeddingAfter + syntax.pad.transverseEnd;
+    final double minimum = scrollStart - scrollStartBeddingBefore - syntax.pad.transverseStart;
+    final double maximum = scrollEnd + scrollStartBeddingAfter + syntax.pad.transverseEnd;
 
     // Change to scroll required to make it match the start of the window that ends at the max
-    final int maxDiff = maximum - transverseEdge - scroll;
+    final double maxDiff = maximum - transverseEdge - scroll;
 
-    Integer newScroll = null;
+    Double newScroll = null;
     if (minimum < scroll) {
       // Minimum is above scroll
       newScroll = minimum;
@@ -299,7 +299,7 @@ public class Context {
   }
 
   public void applyScroll() {
-    final int newScroll = scroll + peek;
+    final double newScroll = scroll + peek;
     foreground.visual.setPosition(
         new Vector(syntax.pad.converseStart, -newScroll), animateCoursePlacement);
     background.setPosition(
@@ -339,19 +339,19 @@ public class Context {
     return actions;
   }
 
-  public void addConverseEdgeListener(final ContextIntListener listener) {
+  public void addConverseEdgeListener(final ContextDoubleListener listener) {
     converseEdgeListeners.add(listener);
   }
 
-  public void removeConverseEdgeListener(final ContextIntListener listener) {
+  public void removeConverseEdgeListener(final ContextDoubleListener listener) {
     converseEdgeListeners.remove(listener);
   }
 
-  public void addTransverseEdgeListener(final ContextIntListener listener) {
+  public void addTransverseEdgeListener(final ContextDoubleListener listener) {
     transverseEdgeListeners.add(listener);
   }
 
-  public void removeTransverseEdgeListener(final ContextIntListener listener) {
+  public void removeTransverseEdgeListener(final ContextDoubleListener listener) {
     transverseEdgeListeners.remove(listener);
   }
 
@@ -586,8 +586,8 @@ public class Context {
     return windowAtom;
   }
 
-  public static interface ContextIntListener {
-    void changed(Context context, int oldValue, int newValue);
+  public static interface ContextDoubleListener {
+    void changed(Context context, double oldValue, double newValue);
   }
 
   public static interface ActionChangeListener {
@@ -646,7 +646,7 @@ public class Context {
       return this;
     }
 
-    public InitialConfig wallUsageListener(WallUsageListener l) {
+    public InitialConfig wallTransverseUsageListener(WallUsageListener l) {
       this.wallUsageListener = l;
       return this;
     }

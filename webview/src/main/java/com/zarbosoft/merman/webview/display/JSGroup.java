@@ -2,14 +2,12 @@ package com.zarbosoft.merman.webview.display;
 
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.display.Group;
-import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.Node;
 
-public class JSGroup extends JSDisplayNode implements Group {
+public class JSGroup extends JSFreeDisplayNode implements Group {
   protected JSGroup(JSDisplay display) {
     super(display, (HTMLElement) DomGlobal.document.createElement("div"));
     element.classList.add("merman-display-group", "merman-display");
@@ -21,6 +19,12 @@ public class JSGroup extends JSDisplayNode implements Group {
       element.insertBefore(((JSDisplayNode) node).js(), element.childNodes.getAt(index));
     else element.appendChild(((JSDisplayNode) node).js());
     fixPosition();
+  }
+
+  @Override
+  public void setTransverse(double transverse, boolean animate) {
+    this.transverse = transverse;
+    fixPosition(animate);
   }
 
   @Override
@@ -64,7 +68,12 @@ public class JSGroup extends JSDisplayNode implements Group {
   }
 
   @Override
-  public int transverseSpan() {
-    return 0;
+  public double transverseSpan() {
+    return  this.element.getBoundingClientRect().height;
+  }
+
+  @Override
+  public double converseSpan() {
+    return  this.element.getBoundingClientRect().width;
   }
 }

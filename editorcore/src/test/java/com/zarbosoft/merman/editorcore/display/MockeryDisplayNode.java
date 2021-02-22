@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.editorcore.display;
 
-import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 
 public abstract class MockeryDisplayNode implements DisplayNode {
@@ -9,22 +8,22 @@ public abstract class MockeryDisplayNode implements DisplayNode {
 	private int transverse;
 
 	@Override
-	public int converse() {
+	public double converse() {
 		return converse;
 	}
 
 	@Override
-	public int baselineTransverse() {
+	public double baselineTransverse() {
 		return transverse;
 	}
 
 	@Override
-	public void setConverse(final int converse, final boolean animate) {
+	public void setConverse(final double converse, final boolean animate) {
 		this.converse = converse;
 	}
 
 	@Override
-	public void setBaselineTransverse(final int transverse, final boolean animate) {
+	public void setBaselineTransverse(final double transverse, final boolean animate) {
 		this.transverse = transverse;
 	}
 }

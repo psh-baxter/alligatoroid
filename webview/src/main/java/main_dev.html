@@ -1,0 +1,135 @@
+<!doctype html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Merman Webview/Configurable Syntax</title>
+    <style>
+* {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+body {
+    color: black;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    align-items: center;
+    padding: 0 1em;
+	padding-bottom: 2em;
+}
+
+body > * {
+    width: 100%;
+    max-width: 20cm;
+    box-sizing: border-box;
+}
+
+h1 {
+    margin: 0.5em 0;
+}
+
+h2 {
+    border-bottom: 1px solid lightgrey;
+    padding: 0.3em;
+    margin: 1em 0;
+}
+
+p {
+    text-indent: 2em;
+    margin: 0.5em 0;
+    line-height: 1.4em;
+}
+
+li {
+    line-height: 1.4em;
+	margin: 1em 0;
+	margin-left: 2em;
+}
+
+code {
+    white-space: pre;
+    border-left: 2px solid #a4a4f7;
+    font: 14px monospace;
+    color: #080817;
+    padding-left: 1em;
+    margin: 0.5em 0;
+}
+
+code.block {
+    display: block;
+}
+
+div.merman-block-view-container {
+    border-left: 2px solid #97b599;
+    padding-left: 1em;
+    margin: 0.5em 0;
+}
+    </style>
+</head>
+<body>
+<!-- -->
+
+<h1>Merman Webview/Configurable Syntax</h1>
+<p>This is an example of the Block Webview widget for using Merman to embed snippets of code in a website.</p>
+<p>Merman is an AST viewing/editing solution. It uses a syntax definition to provide a traditional source-like representation of an AST, but maintaining all of the structure under-the-hood. This is a shift from most editors which operate on linear text, and where the syntax is built into the compiler which uses it to translate the text into an AST internally.</p>
+<p>One of the benefits of shifting the responsibility of syntax definition to the client is that users can modify the syntax to their liking and stay source-compatible with all other users. This example shows this feature off by casting a single ESTree (Javascript) snippet in Javascript clothes (looks nearly the same), Python clothes, and Lisp clothes. As a note, syntax customization would probably be mostly done in IDEs - for maximum readability people embedding code in websites with the webview should stick to official syntaxes.</p>
+<ul>
+	<li>I only implemented the portion of ESTree that was necessary for this example</li>
+	<li>Some things, like parentheses around broken expressions in Python, are there to make the parser easier to write/support the repl. This isn't necessary when working with an AST, so (again) there are some details where the syntax flavor diverges from the inspiration.</li>
+</ul>
+<h2>Original Source</h2>
+<p>The way I did this was I used <a href="https://github.com/acornjs/acorn">Acorn</a> to translate a small Javascript program into a JSON ESTree AST.  The program I used is:</p>
+<code class="block">for (let i = 1; i <= 100; ++i) {
+    let out = ""
+    if (i % 3 === 0) {
+        out += "Fizz"
+    }
+    if (i % 5 === 0) {
+        out += "Buzz"
+    }
+    if (out.length === 0) {
+        out += i
+    }
+    console.log(out + " ")
+}</code>
+<p>(this is plain text :P)</p>
+<p>The ESTree AST output is included at the end because it's on the huge side of things.</p>
+
+<h2>Javascript-like</h2>
+<p>I fed the AST directly into the Webview widget along with the Javascript-like syntax - Merman operates on ASTs directly.  As you can see it produced a representation similar to the input source above. Highlighting defined in the syntax and are based on the structure (no regexes).</p>
+<div id="replace-javascript"></div>
+
+<h2>Python-like</h2>
+<p>This is mostly a demonstration of bracket-less syntax, rather than trying to make it look exactly like Python.</p>
+<p>Python doesn't have any c-style for loop. I could have introduced a sugar to make "c-style for loops with integer bounds, 1-unit increment, less than condition" look like "enumerate(x)" but I thought that would be a bit awkward... it's not Python after all.</p>
+<div id="replace-python"></div>
+
+<h2>Lisp-like</h2>
+<div id="replace-lisp"></div>
+
+<h2>Prodel-like</h2>
+<p><a href="https://rdr.utopiat.net/">Prodel</a> is a Japanese literate programming language. This is unfortunately a poor immitation of the syntax described there. The for loop keywords don't make a ton of sense, also the mixture of full-width characters and space-less ascii is pretty ugly. I wanted to try vertical text but hit a number of browser/w3c spec issues - no way to get vertical text metrics, 「」 and ー don't get rotated 90 degrees.</p>
+<div id="replace-prodel"></div>
+
+<h2>ESTree AST</h2>
+<p>This is the source input to the Webview elements.  It's the full AST translation of the original source.</p>
+<div id="replace-javascript-ast"></div>
+
+<!-- -->
+<script>
+const appName = "entry";
+function loadScript(url) {
+  const scriptElement = document.createElement("script");
+  scriptElement.setAttribute("src", url);
+  document.head.appendChild(scriptElement);
+}
+loadScript(`${appName}_dev_config.js`);
+loadScript(`${appName}_dev.js`);
+loadScript(`entry.js`);
+</script>
+</body>
+</html>

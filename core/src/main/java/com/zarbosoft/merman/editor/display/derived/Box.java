@@ -25,7 +25,7 @@ public class Box {
     drawing.setPosition(offset.add(vector), animate);
   }
 
-  public void setSize(final Context context, int converseSpan, int transverseSpan) {
+  public void setSize(final Context context, double converseSpan, double transverseSpan) {
     drawing.clear();
     converseSpan += style.padding * 2;
     transverseSpan += style.padding * 2;
@@ -51,7 +51,7 @@ public class Box {
   }
 
   private void path(
-          final DrawingContext gc, final int converseSpan, final int transverseSpan) {
+          final DrawingContext gc, final double converseSpan, final double transverseSpan) {
     moveTo(gc, 0, transverseSpan / 2);
     cornerTo(gc, style.roundStart, 0, 0, converseSpan / 2, 0);
     cornerTo(gc, style.roundOuterEdges, converseSpan, 0, converseSpan, transverseSpan / 2);
@@ -59,17 +59,17 @@ public class Box {
     cornerTo(gc, style.roundOuterEdges, 0, transverseSpan, 0, transverseSpan / 2);
   }
 
-  private void moveTo(final DrawingContext gc, final int c, final int t) {
+  private void moveTo(final DrawingContext gc, final double c, final double t) {
     gc.moveTo(c, t);
   }
 
   private void cornerTo(
       final DrawingContext gc,
       final boolean round,
-      final int c,
-      final int t,
-      final int c2,
-      final int t2) {
+      final double c,
+      final double t,
+      final double c2,
+      final double t2) {
     if (round) {
       gc.arcTo(c, t, c2, t2, radius);
     } else {

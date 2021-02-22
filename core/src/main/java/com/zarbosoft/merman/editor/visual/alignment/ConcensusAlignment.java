@@ -18,8 +18,8 @@ public class ConcensusAlignment extends Alignment {
 
     @Override
     protected boolean runImplementation(final IterationContext iterationContext) {
-      final int oldConverse = converse;
-      int max = 0;
+      final double oldConverse = converse;
+      double max = 0;
       for (Brick brick : bricks) {
         max = Math.max(max, brick.getPreAlignConverse());
       }
@@ -55,7 +55,7 @@ public class ConcensusAlignment extends Alignment {
   }
 
   @Override
-  public void feedback(final Context context, final int gotConverse) {
+  public void feedback(final Context context, final double gotConverse) {
     if (gotConverse > converse) iterationAlign(context);
   }
 

@@ -20,3 +20,7 @@ Clipboard.prototype.read = function() {};
 TextMetrics.prototype.fontBoundingBoxAscent;
 /** @type {!number} */
 TextMetrics.prototype.fontBoundingBoxDescent;
+/** @type {!number} */
+TextMetrics.prototype.actualBoundingBoxAscent;
+/** @type {!number} */
+TextMetrics.prototype.actualBoundingBoxDescent;

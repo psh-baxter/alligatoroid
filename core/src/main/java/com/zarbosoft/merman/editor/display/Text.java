@@ -14,9 +14,9 @@ public interface Text extends CourseDisplayNode {
 
 	void setFont(Context context, Font font);
 
-	default int getIndexAtConverse(final Context context, final int converse) {
+	default int getIndexAtConverse(final Context context, final double converse) {
 		return font().getIndexAtConverse(text(), converse);
 	}
 
-	int getConverseAtIndex(final int index);
+	double getConverseAtIndex(final int index);
 }

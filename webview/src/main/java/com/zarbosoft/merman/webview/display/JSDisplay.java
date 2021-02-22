@@ -30,6 +30,9 @@ import java.util.function.Consumer;
 
 public class JSDisplay extends Display {
   private final HTMLDivElement base;
+  private final HTMLDivElement origin;
+  private final Direction converseDirection;
+  private final Direction transverseDirection;
   int width = -1;
   int height = -1;
   double wheelXPixels = 0;
@@ -42,9 +45,13 @@ public class JSDisplay extends Display {
       Direction converseDirection,
       Direction transverseDirection,
       double wheelPixelThreshold,
-      HTMLDivElement base) {
+      HTMLDivElement base,
+      HTMLDivElement origin) {
     super(converseDirection, transverseDirection);
+    this.converseDirection = converseDirection;
+    this.transverseDirection = transverseDirection;
     this.base = base;
+    this.origin = origin;
     new ResizeObserver(
             new ResizeObserver.ResizeCallbackFn() {
               @Override
@@ -59,7 +66,7 @@ public class JSDisplay extends Display {
           @Override
           public void handleEvent(Event evt) {
             MouseEvent mouseEvent = (MouseEvent) evt;
-            mouseMoved(mouseEvent.offsetX, mouseEvent.offsetY, width(), height());
+            mouseMoved(mouseEvent.offsetX, mouseEvent.offsetY);
           }
         },
         true);
@@ -243,7 +250,7 @@ public class JSDisplay extends Display {
           (int) (((ModelColor.RGB) color).b * 255));
     } else if (color instanceof ModelColor.RGBA) {
       return Format.format(
-          "rgba(%s %s %s %s)",
+          "rgba(%s, %s, %s, %s)",
           (int) (((ModelColor.RGBA) color).r * 255),
           (int) (((ModelColor.RGBA) color).g * 255),
           (int) (((ModelColor.RGBA) color).b * 255),
@@ -1279,14 +1286,14 @@ public class JSDisplay extends Display {
 
   @Override
   public void add(int index, DisplayNode node) {
-    if (index < base.childNodes.length)
-      base.insertBefore(((JSDisplayNode) node).js(), base.childNodes.getAt(index));
-    else base.appendChild(((JSDisplayNode) node).js());
+    if (index < origin.childNodes.length)
+      origin.insertBefore(((JSDisplayNode) node).js(), origin.childNodes.getAt(index));
+    else origin.appendChild(((JSDisplayNode) node).js());
   }
 
   @Override
   public int childCount() {
-    return base.childNodes.length;
+    return origin.childNodes.length;
   }
 
   @Override

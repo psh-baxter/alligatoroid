@@ -121,13 +121,13 @@ public class JavaFXDrawing extends JavaFXNode implements Drawing {
 			}
 
 			@Override
-			public void moveTo(final int converse, final int transverse) {
+			public void moveTo(final double converse, final double transverse) {
 				final Point2D point = toScreen(context, new Vector(converse, transverse), stroke);
 				gc.moveTo(point.getX(), point.getY());
 			}
 
 			@Override
-			public void lineTo(final int converse, final int transverse) {
+			public void lineTo(final double converse, final double transverse) {
 				final Point2D point = toScreen(context, new Vector(converse, transverse), stroke);
 				gc.lineTo(point.getX(), point.getY());
 			}
@@ -157,14 +157,14 @@ public class JavaFXDrawing extends JavaFXNode implements Drawing {
 			}
 
 			@Override
-			public void arcTo(final int c, final int t, final int c2, final int t2, final int radius) {
+			public void arcTo(final double c, final double t, final double c2, final double t2, final double radius) {
 				final Point2D point1 = toScreen(context, new Vector(c, t), stroke);
 				final Point2D point2 = toScreen(context, new Vector(c2, t2), stroke);
 				gc.arcTo(point1.getX(), point1.getY(), point2.getX(), point2.getY(), radius);
 			}
 
 			@Override
-			public void translate(final int c, final int t) {
+			public void translate(final double c, final double t) {
 				final Point2D point = toScreen(context, new Vector(c, t), false);
 				gc.translate(point.getX(), point.getY());
 			}

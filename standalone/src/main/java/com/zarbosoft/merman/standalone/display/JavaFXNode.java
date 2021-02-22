@@ -1,10 +1,8 @@
 package com.zarbosoft.merman.standalone.display;
 
-import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.display.Display;
 import com.zarbosoft.merman.editor.display.DisplayNode;
 import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.rendaw.common.DeadCode;
 import javafx.animation.Transition;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
@@ -21,18 +19,18 @@ public abstract class JavaFXNode implements DisplayNode {
   protected abstract Node node();
 
   @Override
-  public final int converseSpan() {
+  public final double converseSpan() {
     Bounds layoutBounds = node().getLayoutBounds();
     return display.halfConvert.convert(layoutBounds.getWidth(), layoutBounds.getHeight()).converse;
   }
 
   @Override
-  public final int converse() {
+  public final double converse() {
     return converse;
   }
 
   @Override
-  public final int baselineTransverse() {
+  public final double baselineTransverse() {
     return transverse;
   }
 
@@ -60,21 +58,19 @@ public abstract class JavaFXNode implements DisplayNode {
   }
 
   @Override
-  public final void setBaselineTransverse(final int transverse, final boolean animate) {
+  public final void setBaselineTransverse(final double transverse, final boolean animate) {
     Bounds layoutBounds = node().getLayoutBounds();
     this.transverse = transverse;
     setPosition(
         display.convert.unconvertTransverse(
             transverse,
             layoutBounds.getWidth(),
-            layoutBounds.getHeight(),
-            display.width(),
-            display.height()),
+            layoutBounds.getHeight()),
         animate);
   }
 
   @Override
-  public final void setConverse(final int converse, final boolean animate) {
+  public final void setConverse(final double converse, final boolean animate) {
     Bounds layoutBounds = node().getLayoutBounds();
     this.transverse = transverse;
     this.converse = converse;
@@ -82,9 +78,8 @@ public abstract class JavaFXNode implements DisplayNode {
         display.convert.unconvertConverse(
             converse,
             layoutBounds.getWidth(),
-            layoutBounds.getHeight(),
-            display.width(),
-            display.height()),
+            layoutBounds.getHeight()
+            ),
         animate);
   }
 
@@ -95,9 +90,8 @@ public abstract class JavaFXNode implements DisplayNode {
             converse,
             transverse,
             layoutBounds.getWidth(),
-            layoutBounds.getHeight(),
-            display.width(),
-            display.height());
+            layoutBounds.getHeight()
+            );
     node().setLayoutX(v.x);
     node().setLayoutY(v.y);
   }
@@ -107,7 +101,7 @@ public abstract class JavaFXNode implements DisplayNode {
     Bounds layoutBounds = node().getLayoutBounds();
     Display.UnconvertVector vector1 = display.convert.unconvert(vector.converse, vector.transverse,
             layoutBounds.getWidth(),
-            layoutBounds.getHeight(), display.width(), display.height()
+            layoutBounds.getHeight()
     );
     if (animate) new TransitionSmoothOut(node(), vector1.x - node().getLayoutX(), vector1.y - node().getLayoutY()).play();
     node().setLayoutX(vector1.x);

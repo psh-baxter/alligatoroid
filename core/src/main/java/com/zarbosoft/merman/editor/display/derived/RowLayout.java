@@ -28,8 +28,8 @@ public class RowLayout {
 	}
 
 	public void layout() {
-		int converse = 0;
-		int maxAscent = 0;
+		double converse = 0;
+		double maxAscent = 0;
 		for (final DisplayNode node : nodes) {
 			if (node instanceof CourseDisplayNode)
 				maxAscent = Math.max(maxAscent, ((Text) node).font().getAscent());

@@ -37,8 +37,8 @@ public class JavaFXDisplay extends Display {
   List<Consumer<Vector>> mouseMoveListeners = new ArrayList<>();
   List<Consumer<HIDEvent>> hidEventListeners = new ArrayList<>();
   List<Consumer<String>> typingListeners = new ArrayList<>();
-  List<IntListener> converseEdgeListeners = new ArrayList<>();
-  List<IntListener> transverseEdgeListeners = new ArrayList<>();
+  List<DoubleListener> converseEdgeListeners = new ArrayList<>();
+  List<DoubleListener> transverseEdgeListeners = new ArrayList<>();
   int oldConverseEdge = Integer.MAX_VALUE;
   int oldTransverseEdge = Integer.MAX_VALUE;
 
@@ -199,12 +199,12 @@ public class JavaFXDisplay extends Display {
     throw new DeadCode();
   }
 
-  public void addConverseEdgeListener(final IntListener listener) {
+  public void addConverseEdgeListener(final DoubleListener listener) {
     converseEdgeListeners.add(listener);
   }
 
   @Override
-  public void removeConverseEdgeListener(final IntListener listener) {
+  public void removeConverseEdgeListener(final DoubleListener listener) {
     converseEdgeListeners.remove(listener);
   }
 
@@ -221,12 +221,12 @@ public class JavaFXDisplay extends Display {
     throw new DeadCode();
   }
 
-  public void addTransverseEdgeListener(final IntListener listener) {
+  public void addTransverseEdgeListener(final DoubleListener listener) {
     transverseEdgeListeners.add(listener);
   }
 
   @Override
-  public void removeTransverseEdgeListener(final IntListener listener) {
+  public void removeTransverseEdgeListener(final DoubleListener listener) {
     transverseEdgeListeners.remove(listener);
   }
 

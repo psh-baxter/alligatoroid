@@ -19,18 +19,18 @@ public abstract class ModelColor {
 
     public static RGB polarOKLab(
         /** Lightness, 0-1 */
-        double lIn,
-        /** Chroma, 0-1 */
-        double cIn,
+        double lightness,
+        /** Saturation roughly, 0-1 */
+        double chroma,
         /** Hue, 0-360 */
-        double hIn) {
+        double hue) {
       // https://bottosson.github.io/posts/oklab/
-      double hInRad = hIn / 360.0 * Math.PI * 2;
-      double a = cIn * Math.cos(hInRad);
-      double b = cIn * Math.sin(hInRad);
-      double l_ = lIn + 0.3963377774f * a + 0.2158037573f * b;
-      double m_ = lIn - 0.1055613458f * a - 0.0638541728f * b;
-      double s_ = lIn - 0.0894841775f * a - 1.2914855480f * b;
+      double hInRad = hue / 360.0 * Math.PI * 2;
+      double a = chroma * Math.cos(hInRad);
+      double b = chroma * Math.sin(hInRad);
+      double l_ = lightness + 0.3963377774f * a + 0.2158037573f * b;
+      double m_ = lightness - 0.1055613458f * a - 0.0638541728f * b;
+      double s_ = lightness - 0.0894841775f * a - 1.2914855480f * b;
       double l = l_ * l_ * l_;
       double m = m_ * m_ * m_;
       double s = s_ * s_ * s_;
@@ -67,13 +67,13 @@ public abstract class ModelColor {
 
     public static RGBA polarOKLab(
         /** Lightness, 0-1 */
-        double lIn,
-        /** Chroma, 0-1 */
-        double cIn,
+        double lightness,
+        /** Saturation roughly, 0-1 */
+        double chroma,
         /** Hue, 0-360 */
-        double hIn,
+        double hue,
         double alpha) {
-      RGB temp = RGB.polarOKLab(lIn, cIn, hIn);
+      RGB temp = RGB.polarOKLab(lightness, chroma, hue);
       return new RGBA(temp.r, temp.g, temp.b, alpha);
     }
   }

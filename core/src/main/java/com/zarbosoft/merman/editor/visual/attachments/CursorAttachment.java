@@ -11,23 +11,30 @@ import com.zarbosoft.merman.syntax.style.ObboxStyle;
 
 public class CursorAttachment {
   public Drawing drawing;
+  Vector offset;
   private ObboxStyle style;
+  private int index;
+  private double startConverse;
+  private double startTransverse;
+  private double transverseAscent;
+  private BrickText brick;
   private final Attachment attachment =
       new Attachment() {
         @Override
-        public void setTransverse(final Context context, final int transverse) {
+        public void setTransverse(final Context context, final double transverse) {
           startTransverse = transverse;
           place();
         }
 
         @Override
-        public void setConverse(final Context context, final int converse) {
+        public void setConverse(final Context context, final double converse) {
           startConverse = converse;
           place();
         }
 
         @Override
-        public void setTransverseSpan(final Context context, final int ascent, final int descent) {
+        public void setTransverseSpan(
+            final Context context, final double ascent, final double descent) {
           transverseAscent = ascent;
           place();
         }
@@ -38,26 +45,18 @@ public class CursorAttachment {
           offset = null;
         }
       };
-  private int index;
+  public CursorAttachment(final Context context) {
+    drawing = context.display.drawing();
+    context.overlay.add(drawing);
+  }
 
   private void place() {
     if (offset == null) return;
     drawing.setPosition(
-            new Vector(
+        new Vector(
                 startConverse + brick.getConverseOffset(index), startTransverse + transverseAscent)
             .add(offset),
         false);
-  }
-
-  Vector offset;
-  private int startConverse;
-  private int startTransverse;
-  private int transverseAscent;
-  private BrickText brick;
-
-  public CursorAttachment(final Context context) {
-    drawing = context.display.drawing();
-    context.overlay.add(drawing);
   }
 
   public void setPosition(final Context context, final BrickText brick, final int index) {

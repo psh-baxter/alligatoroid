@@ -4,29 +4,29 @@ import com.zarbosoft.merman.editor.visual.Vector;
 
 public interface CourseDisplayNode extends FreeDisplayNode {
 
-  void setBaselineTransverse(int transverse, boolean animate);
+  void setBaselineTransverse(double transverse, boolean animate);
 
-  default void setBaselineTransverse(final int transverse) {
+  default void setBaselineTransverse(final double transverse) {
     setBaselineTransverse(transverse, false);
   }
 
   void setBaselinePosition(final Vector vector, final boolean animate);
 
-  int baselineTransverse();
+  double baselineTransverse();
 
-  int ascent();
+  double ascent();
 
-  int descent();
+  double descent();
 
-  default int transverseEdge() {
+  default double transverseEdge() {
     return baselineTransverse() + descent();
   }
 
-  default int transverse() {
+  default double transverse() {
     return baselineTransverse() - ascent();
   }
 
-  default int transverseSpan() {
+  default double transverseSpan() {
     return ascent() + descent();
   }
 

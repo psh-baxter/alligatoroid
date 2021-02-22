@@ -4,15 +4,15 @@ import com.zarbosoft.merman.editor.visual.Vector;
 
 public abstract class MockeryCourseDisplayNode extends MockeryDisplayNode
     implements CourseDisplayNode {
-  public int baselineTransverse;
+  public double baselineTransverse;
 
   @Override
-  public int transverse() {
+  public double transverse() {
     return baselineTransverse - ascent();
   }
 
   @Override
-  public int baselineTransverse() {
+  public double baselineTransverse() {
     return baselineTransverse;
   }
 
@@ -23,7 +23,7 @@ public abstract class MockeryCourseDisplayNode extends MockeryDisplayNode
   }
 
   @Override
-  public void setBaselineTransverse(final int baseline, final boolean animate) {
+  public void setBaselineTransverse(final double baseline, final boolean animate) {
     this.baselineTransverse = baseline;
   }
 }

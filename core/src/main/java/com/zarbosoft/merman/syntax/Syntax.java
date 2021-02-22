@@ -59,11 +59,6 @@ public class Syntax {
 
   public Syntax(Config config) {
     MultiError errors = new MultiError();
-    // jfx, qt, and swing don't support vertical languages
-    if (!TSSet.of(Direction.LEFT, Direction.RIGHT).contains(config.converseDirection)
-        || (config.transverseDirection != Direction.DOWN)) {
-      errors.add(new UnsupportedDirections());
-    }
     switch (config.converseDirection) {
       case LEFT:
       case RIGHT:

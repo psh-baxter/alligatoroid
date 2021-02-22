@@ -6,8 +6,9 @@ import java.util.List;
 public class MultiError {
   public final List errors = new ArrayList();
 
-  public void add(Object e) {
+  public MultiError add(Object e) {
     errors.add(e);
+    return this;
   }
 
   public void raise() {

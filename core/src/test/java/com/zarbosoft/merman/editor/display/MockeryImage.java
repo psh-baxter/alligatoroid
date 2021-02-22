@@ -10,17 +10,17 @@ public class MockeryImage extends MockeryCourseDisplayNode implements Image {
   public void rotate(final Context context, final double rotate) {}
 
   @Override
-  public int converseSpan() {
+  public double converseSpan() {
     return 25;
   }
 
   @Override
-  public int ascent() {
+  public double ascent() {
     return 25;
   }
 
   @Override
-  public int descent() {
+  public double descent() {
     return 0;
   }
 }

@@ -1,25 +1,25 @@
 package com.zarbosoft.merman.editor.display;
 
 public interface DisplayNode {
-  int converse();
+  double converse();
 
-  int transverse();
+  double transverse();
 
-  int transverseSpan();
+  double transverseSpan();
 
-  default int transverseEdge() {
+  default double transverseEdge() {
     return transverse() + transverseSpan();
   }
 
-  int converseSpan();
+  double converseSpan();
 
-  void setConverse(int converse, boolean animate);
+  void setConverse(double converse, boolean animate);
 
-  default void setConverse(final int converse) {
+  default void setConverse(final double converse) {
     setConverse(converse, false);
   }
 
-  default int converseEdge() {
+  default double converseEdge() {
     return converse() + converseSpan();
   }
 }

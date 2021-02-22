@@ -31,18 +31,18 @@ public class Course {
   final Group visual;
   public int index;
   public Wall parent;
-  public int transverseStart;
-  public int ascent = 0;
-  public int descent = 0;
+  public double transverseStart;
+  public double ascent = 0;
+  public double descent = 0;
   public TSList<Brick> children = new TSList<>();
   public Alignment alignment;
   public Brick alignmentBrick;
-  int lastExpandCheckConverse = 0;
+  double lastExpandCheckConverse = 0;
   private IterationPlaceTask idlePlace;
   private IterationCompactTask idleCompact;
   private IterationExpandTask idleExpand;
 
-  Course(final Context context, final int transverseStart) {
+  Course(final Context context, final double transverseStart) {
     visual = context.display.group();
     this.transverseStart = transverseStart;
     visual.setTransverse(transverseStart, false);
@@ -58,10 +58,10 @@ public class Course {
    * @param properties
    * @return converse, minConverse (without alignment)
    */
-  private static ROPair<Integer, Integer> calculateNextBrickAdvance(
+  private static ROPair<Double, Double> calculateNextBrickAdvance(
       CalculateCourseConverseContext calcContext, Brick brick) {
-    int out = calcContext.converse;
-    int out1 = calcContext.preAlignConverse;
+    double out = calcContext.converse;
+    double out1 = calcContext.preAlignConverse;
     if (calcContext.alignment == null && brick.alignment != null) {
       calcContext.alignment = brick.alignment;
       calcContext.alignedBrick = brick;
@@ -72,11 +72,11 @@ public class Course {
     return new ROPair<>(out, out1);
   }
 
-  public int transverseEdge() {
+  public double transverseEdge() {
     return transverseStart + ascent + descent;
   }
 
-  void setTransverse(final Context context, final int transverse) {
+  void setTransverse(final Context context, final double transverse) {
     transverseStart = transverse;
     visual.setTransverse(transverseStart, context.animateCoursePlacement);
     for (Brick child : children.mut()) {
@@ -222,27 +222,27 @@ public class Course {
     }
   }
 
-  public int transverseSpan() {
+  public double transverseSpan() {
     return ascent + descent;
   }
 
   /** State of layout on a single course */
   private static class CalculateCourseConverseContext {
     /** Current converse offset */
-    public int converse;
+    public double converse;
     /** The alignment for this course, if encountered */
     public Alignment alignment;
     /** The brick from which the alignment hails */
     public Brick alignedBrick;
 
-    public int preAlignConverse;
+    public double preAlignConverse;
   }
 
   class IterationPlaceTask extends IterationTask {
     private final Context context;
     TSSet<Brick> changed = new TSSet<>();
-    int removeMaxAscent = 0;
-    int removeMaxDescent = 0;
+    double removeMaxAscent = 0;
+    double removeMaxDescent = 0;
 
     public IterationPlaceTask(final Context context) {
       this.context = context;
@@ -305,7 +305,7 @@ public class Course {
           alignment.addBrick(context, alignmentBrick);
           alignment.feedback(context, calcContext.converse);
         }
-        ROPair<Integer, Integer> brickPlacement = calculateNextBrickAdvance(calcContext, brick);
+        ROPair<Double, Double> brickPlacement = calculateNextBrickAdvance(calcContext, brick);
         brick.setConverse(context, brickPlacement.second, brickPlacement.first);
         for (final Attachment attachment : brick.getAttachments())
           attachment.setConverse(context, brickPlacement.first);
@@ -350,7 +350,7 @@ public class Course {
       // Find higest priority brick in this course
       final PriorityQueue<VisualAtom> priorities = new PriorityQueue<>(11, compactComparator);
       VisualFrontPrimitive lastPrimitive = null;
-      int converse = 0;
+      double converse = 0;
       for (int index = 0; index < children.size(); ++index) {
         final Brick brick = children.get(index);
         final VisualLeaf visual = brick.getVisual();

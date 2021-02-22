@@ -27,7 +27,7 @@ public class RelativeAlignment extends Alignment {
   }
 
   @Override
-  public void feedback(final Context context, final int position) {}
+  public void feedback(final Context context, final double position) {}
 
   @Override
   public void root(final Context context, final VisualAtom atom) {
@@ -59,9 +59,5 @@ public class RelativeAlignment extends Alignment {
   public void changed(Context context) {
     converse = (base == null ? 0 : base.converse) + (collapse && bricks.isEmpty() ? 0 : offset);
     super.changed(context);
-  }
-
-  public int getPreAlignConverse() {
-    return converse;
   }
 }

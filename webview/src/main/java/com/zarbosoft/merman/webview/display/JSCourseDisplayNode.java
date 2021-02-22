@@ -4,41 +4,67 @@ import com.zarbosoft.merman.editor.display.CourseDisplayNode;
 import com.zarbosoft.merman.editor.visual.Vector;
 import elemental2.dom.HTMLElement;
 
-public class JSCourseDisplayNode extends JSDisplayNode implements CourseDisplayNode {
-  protected int ascent;
-  protected int descent;
+public abstract class JSCourseDisplayNode extends JSDisplayNode implements CourseDisplayNode {
+  protected double ascent;
+  protected double descent;
+  protected double converse;
+  protected double transverseBaseline;
 
   protected JSCourseDisplayNode(JSDisplay display, HTMLElement element) {
     super(display, element);
   }
 
   @Override
-  public final int ascent() {
+  public final double ascent() {
     return ascent;
   }
 
   @Override
-  public final int descent() {
+  public final double descent() {
     return descent;
   }
 
   @Override
-  public int baselineTransverse() {
-    return transverse + ascent;
+  public double baselineTransverse() {
+    return transverseBaseline;
   }
 
   @Override
-  public final void setBaselineTransverse(int baseline, boolean animate) {
-    setTransverse(baseline - ascent, animate);
+  public final void setBaselineTransverse(double baseline, boolean animate) {
+    this.transverseBaseline = baseline;
+    setJSPositionInternal(
+        display.convert.unconvertTransverse(
+            transverseCorner(),
+            js().clientWidth,
+            js().clientHeight),
+        animate);
   }
 
   @Override
   public void setBaselinePosition(Vector vector, boolean animate) {
-    setPosition(new Vector(vector.converse, vector.transverse - ascent), animate);
+    this.converse = vector.converse;
+    this.transverseBaseline = vector.transverse;
+    fixPosition(animate);
   }
 
   @Override
-  public int transverseSpan() {
+  public double converse() {
+    return converse;
+  }
+
+  @Override
+  public double transverseSpan() {
     return ascent + descent;
+  }
+
+  @Override
+  public final void setConverse(double converse, boolean animate) {
+    this.converse = converse;
+    setJSPositionInternal(
+        display.convert.unconvertConverse(
+            converseCorner(),
+            js().clientWidth,
+            js().clientHeight),
+        animate);
   }
 }

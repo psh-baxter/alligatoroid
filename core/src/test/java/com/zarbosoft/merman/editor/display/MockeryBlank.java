@@ -3,25 +3,25 @@ package com.zarbosoft.merman.editor.display;
 import com.zarbosoft.merman.editor.Context;
 
 public class MockeryBlank extends MockeryCourseDisplayNode implements Blank {
-	private int converseSpan;
+	private double converseSpan;
 
 	@Override
-	public int converseSpan() {
+	public double converseSpan() {
 		return converseSpan;
 	}
 
 	@Override
-	public int ascent() {
+	public double ascent() {
 		return 0;
 	}
 
 	@Override
-	public int descent() {
+	public double descent() {
 		return 0;
 	}
 
 	@Override
-	public void setConverseSpan(final Context context, final int span) {
+	public void setConverseSpan(final Context context, final double span) {
 		this.converseSpan = span;
 	}
 }

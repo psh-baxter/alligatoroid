@@ -73,11 +73,11 @@ public class TestDisplayDerived {
       final int index2 = index++;
       assertThat(
           Format.format("for index %s, converse", index2),
-          ((MockeryGroup) layout.group).get(index2).converse(),
+              (int)((MockeryGroup) layout.group).get(index2).converse(),
           equalTo(pair.first));
       assertThat(
           Format.format("for index %s, transverse", index2),
-          ((MockeryGroup) layout.group).get(index2).transverse(),
+              (int)((MockeryGroup) layout.group).get(index2).transverse(),
           equalTo(pair.second));
     }
   }
@@ -118,7 +118,7 @@ public class TestDisplayDerived {
       final int index2 = index++;
       assertThat(
           Format.format("for index %s, converse", index2),
-          ((MockeryGroup) layout.group).get(index2).converse(),
+              (int)((MockeryGroup) layout.group).get(index2).converse(),
           equalTo(converse));
     }
   }
@@ -160,11 +160,11 @@ public class TestDisplayDerived {
       final int index2 = index++;
       assertThat(
           Format.format("for index %s, converse", index2),
-          ((MockeryGroup) layout.group).get(index2).converse(),
+              (int) ((MockeryGroup) layout.group).get(index2).converse(),
           equalTo(pair.first));
       assertThat(
           Format.format("for index %s, transverse", index2),
-          ((MockeryGroup) layout.group).get(index2).transverse(),
+              (int)((MockeryGroup) layout.group).get(index2).transverse(),
           equalTo(pair.second));
     }
   }

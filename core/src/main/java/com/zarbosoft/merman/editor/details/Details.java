@@ -22,15 +22,15 @@ public class Details {
   public DetailsPage current;
   public Box background;
   private Brick brick;
-  private int transverse;
-  private int transverseSpan;
-  private int documentScroll;
+  private double transverse;
+  private double transverseSpan;
+  private double documentScroll;
   private Bedding bedding;
   private IterationPlace idle;
   private final Attachment attachment =
       new Attachment() {
         @Override
-        public void setTransverse(final Context context, final int transverse) {
+        public void setTransverse(final Context context, final double transverse) {
           Details.this.transverse = transverse;
           iterationPlace(context, false);
         }
@@ -41,7 +41,7 @@ public class Details {
         }
 
         @Override
-        public void setTransverseSpan(final Context context, final int ascent, final int descent) {
+        public void setTransverseSpan(final Context context, final double ascent, final double descent) {
           Details.this.transverseSpan = ascent + descent;
           iterationPlace(context, false);
         }
@@ -56,7 +56,7 @@ public class Details {
     idle.animate = idle.animate && animate;
   }
 
-  public void setScroll(final Context context, final int scroll) {
+  public void setScroll(final Context context, final double scroll) {
     this.documentScroll = scroll;
     iterationPlace(context, true);
   }
@@ -107,7 +107,7 @@ public class Details {
     }
   }
 
-  private int pageTransverse(final Context context) {
+  private double pageTransverse(final Context context) {
     final int padStart = context.syntax.detailPad.transverseStart;
     final int padEnd = context.syntax.detailPad.transverseEnd;
     return Math.min(
@@ -116,7 +116,7 @@ public class Details {
   }
 
   private void place(final Context context, final boolean animate) {
-    final int transverse = pageTransverse(context);
+    final double transverse = pageTransverse(context);
     current.node.setPosition(
             new Vector(context.syntax.detailPad.converseStart, transverse), animate);
     if (background != null) background.setPosition(new Vector(0, transverse), animate);
@@ -142,9 +142,9 @@ public class Details {
           }
         });
     context.addConverseEdgeListener(
-        new Context.ContextIntListener() {
+        new Context.ContextDoubleListener() {
           @Override
-          public void changed(final Context context, final int oldValue, final int newValue) {
+          public void changed(final Context context, final double oldValue, final double newValue) {
             resizeBackground(context);
           }
         });

@@ -1,8 +1,15 @@
 package com.zarbosoft.merman.syntax.error;
 
-public class UnsupportedDirections {
+import com.zarbosoft.merman.syntax.Direction;
+
+public class UnsupportedDirections extends BaseKVError {
+  public UnsupportedDirections(Direction converseDirection, Direction transverseDirection) {
+    this.put("converse", converseDirection);
+    this.put("transverse", transverseDirection);
+  }
+
   @Override
-  public String toString() {
-    return "Currently only converse directions left/right and transverse down are supported.";
+  protected String description() {
+    return "Unsupported direction combination";
   }
 }
