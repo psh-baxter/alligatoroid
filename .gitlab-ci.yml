@@ -6,7 +6,8 @@ cache:
 pages:
   image: debian:10.8
   stage: build
-  only: master
+  only:
+    - master
   script:
     - apt-get update && apt-get install maven2 openjdk-11-jdk
     - mvn install
