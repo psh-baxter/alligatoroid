@@ -9,7 +9,7 @@ pages:
   only:
     - master
   script:
-    - apt-get update && apt-get install maven2 openjdk-11-jdk
+    - apt-get update && apt-get install maven openjdk-11-jdk
     - mvn install
     - mkdir public
     - cp webviewsyntaxexamples/target/webviewsyntaxexamples-0.0.0/webviewsyntaxexamples/webviewsyntaxexamples.js public/entry.js
