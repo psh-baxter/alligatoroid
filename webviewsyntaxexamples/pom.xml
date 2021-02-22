@@ -16,9 +16,15 @@
             <version>0.0.0</version>
         </dependency>
     </dependencies>
+    <repositories>
+        <repository>
+            <id>vertispan</id>
+            <url>https://repo.vertispan.com/j2cl/</url>
+        </repository>
+    </repositories>
     <pluginRepositories>
         <pluginRepository>
-            <id>vertispan</id>
+            <id>vertispan plug</id>
             <url>https://repo.vertispan.com/j2cl/</url>
         </pluginRepository>
     </pluginRepositories>
