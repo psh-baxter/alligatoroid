@@ -18,6 +18,7 @@ import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
+import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Event;
 import elemental2.dom.EventListener;
@@ -25,14 +26,13 @@ import elemental2.dom.HTMLDivElement;
 import elemental2.dom.KeyboardEvent;
 import elemental2.dom.MouseEvent;
 import elemental2.dom.WheelEvent;
+import jsinterop.base.JsPropertyMap;
 
 import java.util.function.Consumer;
 
 public class JSDisplay extends Display {
   private final HTMLDivElement base;
   private final HTMLDivElement origin;
-  private final Direction converseDirection;
-  private final Direction transverseDirection;
   int width = -1;
   int height = -1;
   double wheelXPixels = 0;
@@ -48,8 +48,6 @@ public class JSDisplay extends Display {
       HTMLDivElement base,
       HTMLDivElement origin) {
     super(converseDirection, transverseDirection);
-    this.converseDirection = converseDirection;
-    this.transverseDirection = transverseDirection;
     this.base = base;
     this.origin = origin;
     new ResizeObserver(
@@ -256,6 +254,17 @@ public class JSDisplay extends Display {
           (int) (((ModelColor.RGBA) color).b * 255),
           ((ModelColor.RGBA) color).a);
     } else throw new Assertion();
+  }
+
+  public static double canvasPixelRatio(CanvasRenderingContext2D ctx) {
+    try {
+      double pixelRatio = DomGlobal.window.devicePixelRatio;
+      Object backingPixelRatio = ((JsPropertyMap) ctx).get("backingStorePixelRatio");
+      if (backingPixelRatio != null) pixelRatio = pixelRatio / (double) backingPixelRatio;
+      return pixelRatio;
+    } catch (Exception e) {
+      return 1;
+    }
   }
 
   private Object mouseHandler(MouseEvent event, boolean press) {

@@ -6,11 +6,15 @@ import com.zarbosoft.merman.editor.display.Text;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.webview.compat.TextMetrics;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.Format;
 import elemental2.dom.BaseRenderingContext2D;
+import elemental2.dom.CSSProperties;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
+import elemental2.dom.Element;
 import elemental2.dom.HTMLCanvasElement;
 import elemental2.dom.HTMLElement;
+import jsinterop.base.JsPropertyMap;
 
 public class JSText extends JSCourseDisplayNode implements Text {
   private JSFont font;
@@ -42,6 +46,7 @@ public class JSText extends JSCourseDisplayNode implements Text {
     if (this.color == null) throw new Assertion();
     HTMLCanvasElement element = (HTMLCanvasElement) this.element;
     CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) element.getContext("2d");
+    ctx.clearRect(0, 0, element.width, element.height);
 
     ctx.setFont(this.font.cssString());
     TextMetrics out = (TextMetrics) ctx.measureText(text);
@@ -62,8 +67,14 @@ public class JSText extends JSCourseDisplayNode implements Text {
       padTransverseHalf = padTransverse / 2;
     }
 
-    element.width = (int) Math.ceil(converseSpan + padConverseHalf * 2);
-    element.height = (int) Math.ceil(ascent + descent + padTransverseHalf * 2);
+    double pixelRatio = JSDisplay.canvasPixelRatio(ctx);
+    int width = (int) Math.ceil(converseSpan + padConverseHalf * 2);
+    int height = (int) Math.ceil(ascent + descent + padTransverseHalf * 2);
+    element.width = (int) (width * pixelRatio);
+    element.height = (int) (height * pixelRatio);
+    element.style.width = CSSProperties.WidthUnionType.of(Format.format("%spx", width));
+    element.style.height = CSSProperties.HeightUnionType.of(Format.format("%spx", height));
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
 
     ctx.font = this.font.cssString();
     ctx.fillStyle = BaseRenderingContext2D.FillStyleUnionType.of(this.color);

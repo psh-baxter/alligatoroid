@@ -6,7 +6,9 @@ import com.zarbosoft.merman.editor.display.Drawing;
 import com.zarbosoft.merman.editor.display.DrawingContext;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.syntax.style.ModelColor;
+import com.zarbosoft.rendaw.common.Format;
 import elemental2.dom.BaseRenderingContext2D;
+import elemental2.dom.CSSProperties;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLCanvasElement;
@@ -33,8 +35,17 @@ public class JSDrawing extends JSFreeDisplayNode implements Drawing {
     this.size = vector;
     Display.UnconvertVector v =
         display.halfConvert.unconvertSpan(vector.converse, vector.transverse);
-    element.width = (int) v.x + 1;
-    element.height = (int) v.y + 1;
+
+    int width = (int) v.x + 1;
+    int height = (int) v.y + 1;
+
+    CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) element.getContext("2d");
+    double pixelRatio = JSDisplay.canvasPixelRatio(ctx);
+    element.width = (int) (width * pixelRatio);
+    element.height = (int) (height * pixelRatio);
+    element.style.width = CSSProperties.WidthUnionType.of(Format.format("%spx", width));
+    element.style.height = CSSProperties.HeightUnionType.of(Format.format("%spx", height));
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
     fixPosition();
   }
 
