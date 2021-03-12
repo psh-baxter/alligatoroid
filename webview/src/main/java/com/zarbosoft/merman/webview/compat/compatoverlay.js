@@ -35,24 +35,24 @@ if (Intl.Segmenter === undefined) {
         segment(text) {
             const out = new Array();
             if (this.mode == "word") {
-                out.push(0);
+                out.push({"index": 0});
                 for (let i = 0; i < text.length; ++i) {
                     if (text[i] == ' ' || text[i] == '\t') {
-                        if (out[out.length - 1] != i) {
-                            out.push(i);
+                        if (out[out.length - 1]["index"] != i) {
+                            out.push({"index": i});
                         }
-                        out.push(i + 1);
+                        out.push({"index": i + 1});
                     }
                 }
             } else if (this.mode == "grapheme") {
                 let off = 0;
                 for (let g of Array.from(text)) {
-                    out.push(off);
+                    out.push({"index": off});
                     off += g.length;
                 }
             }
-            if (out[out.length - 1] != text.length) {
-                out.push(text.length);
+            if (out[out.length - 1]["index"] != text.length) {
+                out.push({"index": text.length});
             }
             return out
         }
