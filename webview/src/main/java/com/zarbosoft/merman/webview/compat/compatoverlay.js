@@ -29,11 +29,10 @@ function mmUncopyText() {
 
 if (Intl.Segmenter === undefined) {
     Intl.Segmenter = class {
-        constructor(/** !string */ lang, /** !Object.<string, *> */ opts) {
-            this.mode = opts.granularity;
+        constructor(lang, opts) {
+            this.mode = opts["granularity"];
         }
-        /** @return {*} */
-        segment(/** string */ text) {
+        segment(text) {
             const out = new Array();
             if (this.mode == "word") {
                 out.push(0);
