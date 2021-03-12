@@ -26,3 +26,36 @@ function mmUncopy() {
 function mmUncopyText() {
     return navigator.clipboard.readText();
 }
+
+if (Intl.Segmenter === undefined) {
+    Intl.Segmenter = class {
+        constructor(/** !string */ lang, /** !Object.<string, *> */ opts) {
+            this.mode = opts.granularity;
+        }
+        /** @return {*} */
+        segment(/** string */ text) {
+            const out = new Array();
+            if (this.mode == "word") {
+                out.push(0);
+                for (let i = 0; i < text.length; ++i) {
+                    if (text[i] == ' ' || text[i] == '\t') {
+                        if (out[out.length - 1] != i) {
+                            out.push(i);
+                        }
+                        out.push(i + 1);
+                    }
+                }
+            } else if (this.mode == "grapheme") {
+                let off = 0;
+                for (let g of Array.from(text)) {
+                    out.push(off);
+                    off += g.length;
+                }
+            }
+            if (out[out.length - 1] != text.length) {
+                out.push(text.length);
+            }
+            return out
+        }
+    }
+}
