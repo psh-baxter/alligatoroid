@@ -34,7 +34,7 @@ public class FieldPrimitive extends Field {
 
   @Override
   public Object syntaxLocateStep(String segment) {
-    return null;
+    return this;
   }
 
   public void addListener(final Listener listener) {

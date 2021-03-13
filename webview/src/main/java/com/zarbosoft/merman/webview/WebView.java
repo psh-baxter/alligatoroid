@@ -182,8 +182,6 @@ public class WebView {
                 ROList<String> endPathList = endPath.toList();
                 ROList<String> startPathList = dragSelect.start.toList();
                 int longestMatch = startPathList.longestMatch(endPathList);
-                if (longestMatch == startPathList.size() && longestMatch == endPathList.size())
-                  longestMatch -= 1;
                 // If hover paths diverge, it's either
                 // - at two depths in a single tree (parent and child): both paths are for an atom,
                 // so longest match == parent == atom
@@ -199,6 +197,10 @@ public class WebView {
                     ((FieldArray) base).selectInto(context, false, startIndex, endIndex);
                   }
                 } else if (base instanceof FieldPrimitive) {
+                  // If end/start paths are the same then the longest match includes the index
+                  // vs if they're different, then it includes the primitive but not index
+                  // Adjust so the index is the next element in both cases
+                  if (longestMatch == startPathList.size()) longestMatch -= 1;
                   int startIndex = Integer.parseInt(startPathList.get(longestMatch));
                   int endIndex = Integer.parseInt(endPathList.get(longestMatch));
                   if (endIndex < startIndex) {
