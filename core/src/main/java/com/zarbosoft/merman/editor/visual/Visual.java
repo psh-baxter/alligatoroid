@@ -5,6 +5,7 @@ import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public abstract class Visual {
@@ -58,7 +59,7 @@ public abstract class Visual {
 
   public abstract boolean selectAnyChild(final Context context);
 
-  public Hoverable hover(final Context context, final Vector point) {
+  public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
     return parent().hover(context, point);
   }
 }

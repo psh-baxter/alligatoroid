@@ -14,8 +14,14 @@ public interface Text extends CourseDisplayNode {
 
 	void setFont(Context context, Font font);
 
+	/**
+	 * Get the nearest index to the converse - so halfway through 1 = 0, halfway through last = last
+	 * @param context
+	 * @param converse
+	 * @return
+	 */
 	default int getIndexAtConverse(final Context context, final double converse) {
-		return font().getIndexAtConverse(text(), converse);
+		return font().measurer().getIndexAtConverse(context, text(), converse);
 	}
 
 	double getConverseAtIndex(final int index);

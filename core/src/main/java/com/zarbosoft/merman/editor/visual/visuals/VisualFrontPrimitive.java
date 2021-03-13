@@ -24,6 +24,7 @@ import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -248,11 +249,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   }
 
   @Override
-  public Hoverable hover(final Context context, final Vector point) {
-    if (parent != null) {
-      return parent.hover(context, point);
-    }
-    return null;
+  public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
+    if (parent == null)
+      return null;
+    return parent.hover(context, point);
   }
 
   private ResplitResult resplitOne(final Context context, final int i) {
@@ -368,13 +368,14 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     public ResplitResult build(final Line line, final Font font, final double converse) {
       final ResplitResult result = new ResplitResult();
-      final double width = font.getWidth(text);
+      Font.Measurer measurer = font.measurer();
+      final double width = measurer.getWidth(text);
       final double edge = converse + width;
       int split;
       if (converse < context.edge && edge > context.edge) {
         final I18nEngine.Walker lineIter = context.i18n.lineWalker(text);
         final double edgeOffset = context.edge - converse;
-        final int under = font.getIndexAtConverse(text, edgeOffset);
+        final int under = measurer.getIndexAtConverse(context, text, edgeOffset);
         if (under == text.length()) split = under;
         else {
           split = lineIter.preceding(under + 1);
@@ -580,7 +581,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public Path getSyntaxPath() {
-      return visualPrimitive.value.getSyntaxPath().add(String.valueOf(range.beginOffset));
+      return visualPrimitive.value.getSyntaxPath().add(String.valueOf(range.leadIndex()));
     }
 
     @Override
@@ -1490,6 +1491,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       if (border != null) border.setStyle(context, style);
       if (cursor != null) cursor.setStyle(context, style);
     }
+
+    public int leadIndex() {
+      return leadFirst ? beginOffset : endOffset;
+    }
   }
 
   public static class PrimitiveHoverable extends Hoverable {
@@ -1508,7 +1513,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public Path getSyntaxPath() {
-      return visual.value.getSyntaxPath().add(String.valueOf(range.beginOffset));
+      return visual.value.getSyntaxPath().add(String.valueOf(range.leadIndex()));
     }
 
     @Override
@@ -1562,16 +1567,20 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       this.index = index;
     }
 
-    public Hoverable hover(final Context context, final Vector point) {
+    public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
       if (visual.selection == null) {
-        final Hoverable out = visual.hover(context, point);
+        final ROPair<Hoverable, Boolean> out = visual.hover(context, point);
         if (out != null) return out;
       }
+      boolean changed = false;
       if (visual.hoverable == null) {
         visual.hoverable = new VisualFrontPrimitive.PrimitiveHoverable(visual, context);
+        changed = true;
       }
-      visual.hoverable.setPosition(context, offset + brick.getUnder(context, point));
-      return visual.hoverable;
+      int newIndex = offset + brick.getUnder(context, point);
+      if (visual.hoverable.range.leadIndex() != newIndex) changed = true;
+      visual.hoverable.setPosition(context, newIndex);
+      return new ROPair<>(visual.hoverable, changed);
     }
 
     @Override

@@ -9,6 +9,7 @@ import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
 import com.zarbosoft.pidgoon.events.nodes.Terminal;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +38,18 @@ public abstract class Pattern {
 
   public static List<? extends Event> splitGlyphs(I18nEngine i18n, String text) {
     I18nEngine.Walker walker = i18n.glyphWalker(text);
-    List<CharacterEvent> glyphs = new ArrayList<>();
+    TSList<String> glyphs1 = TSList.of();
     int end = 0;
     while (true) {
       int start = end;
       end = walker.following(end);
       if (end == I18nEngine.DONE) break;
-      glyphs.add(new CharacterEvent(text.substring(start, end)));
+      glyphs1.add(text.substring(start, end));
+    }
+    TSList<String> pre = glyphs1;
+    List<CharacterEvent> glyphs = new ArrayList<>();
+    for (String s : pre) {
+      glyphs.add(new CharacterEvent(s));
     }
     return glyphs;
   }

@@ -2,13 +2,19 @@ package com.zarbosoft.merman.editor.visual.visuals;
 
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
+import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class VisualGroup extends Visual {
+
+  public VisualParent parent = null;
+  // State
+  public TSList<Visual> children = new TSList<>();
 
   public VisualGroup(
       final Context context,
@@ -61,11 +67,6 @@ public class VisualGroup extends Visual {
     if (children.isEmpty()) return null;
     return children.last().createLastBrick(context);
   }
-
-  public VisualParent parent = null;
-
-  // State
-  public TSList<Visual> children = new TSList<>();
 
   @Override
   public VisualParent parent() {
@@ -144,8 +145,7 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public void getLeafBricks(
-          final Context context, TSList<Brick> bricks) {
+  public void getLeafBricks(final Context context, TSList<Brick> bricks) {
     for (Visual child : children) {
       child.getLeafBricks(context, bricks);
     }
@@ -153,10 +153,7 @@ public class VisualGroup extends Visual {
 
   @Override
   public void root(
-          final Context context,
-          final VisualParent parent,
-          final int depth,
-          final int depthScore) {
+      final Context context, final VisualParent parent, final int depth, final int depthScore) {
     super.root(context, parent, depth, depthScore);
     this.parent = parent;
     for (int index = 0; index < children.size(); ++index) {
@@ -236,8 +233,7 @@ public class VisualGroup extends Visual {
     }
 
     @Override
-    public Hoverable hover(
-        final Context context, final com.zarbosoft.merman.editor.visual.Vector point) {
+    public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
       return target.hover(context, point);
     }
 

@@ -1,5 +1,11 @@
 package com.zarbosoft.merman.editor;
 
+import com.zarbosoft.merman.syntax.primitivepattern.CharacterEvent;
+import com.zarbosoft.rendaw.common.TSList;
+
+import java.util.ArrayList;
+import java.util.List;
+
 public interface I18nEngine {
   public static final int DONE = -1;
 

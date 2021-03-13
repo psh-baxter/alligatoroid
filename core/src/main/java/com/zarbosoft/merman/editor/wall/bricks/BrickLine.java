@@ -5,6 +5,7 @@ import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.visual.Vector;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.rendaw.common.ROPair;
 
 public class BrickLine extends BrickText {
   private final VisualFrontPrimitive.Line line;
@@ -26,7 +27,7 @@ public class BrickLine extends BrickText {
   }
 
   @Override
-  public Hoverable hover(final Context context, final Vector point) {
+  public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
     return line.hover(context, point);
   }
 }

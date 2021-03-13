@@ -4,8 +4,7 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.editor.wall.Brick;
-
-import java.util.ArrayList;
+import com.zarbosoft.rendaw.common.ROPair;
 
 public abstract class VisualParent {
 	public abstract Visual visual();
@@ -24,7 +23,7 @@ public abstract class VisualParent {
 
 	public abstract Brick findNextBrick(final Context context);
 
-	public abstract Hoverable hover(Context context, Vector point);
+	public abstract ROPair<Hoverable, Boolean> hover(Context context, Vector point);
 
 	public abstract boolean selectPrevious(Context context);
 

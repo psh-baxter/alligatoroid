@@ -11,14 +11,11 @@ import elemental2.dom.BaseRenderingContext2D;
 import elemental2.dom.CSSProperties;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
-import elemental2.dom.Element;
 import elemental2.dom.HTMLCanvasElement;
 import elemental2.dom.HTMLElement;
-import jsinterop.base.JsPropertyMap;
 
 public class JSText extends JSCourseDisplayNode implements Text {
   private JSFont font;
-  private String text;
   private String color = "black";
   private double padConverseHalf;
   private double padTransverseHalf;
@@ -31,25 +28,24 @@ public class JSText extends JSCourseDisplayNode implements Text {
 
   @Override
   public String text() {
-    return text;
+    return element.textContent;
   }
 
   @Override
   public void setText(Context context, String text) {
-    this.text = text;
+    element.textContent = text;
     render();
   }
 
   private void render() {
     if (this.font == null) return;
-    if (this.text == null) return;
     if (this.color == null) throw new Assertion();
     HTMLCanvasElement element = (HTMLCanvasElement) this.element;
     CanvasRenderingContext2D ctx = (CanvasRenderingContext2D) (Object) element.getContext("2d");
     ctx.clearRect(0, 0, element.width, element.height);
 
     ctx.setFont(this.font.cssString());
-    TextMetrics out = (TextMetrics) ctx.measureText(text);
+    TextMetrics out = (TextMetrics) ctx.measureText(element.textContent);
 
     converseSpan = out.width;
     {
@@ -78,7 +74,7 @@ public class JSText extends JSCourseDisplayNode implements Text {
 
     ctx.font = this.font.cssString();
     ctx.fillStyle = BaseRenderingContext2D.FillStyleUnionType.of(this.color);
-    ctx.fillText(text, padConverseHalf, padTransverseHalf + ascent);
+    ctx.fillText(element.textContent, padConverseHalf, padTransverseHalf + ascent);
 
     fixPosition();
   }
@@ -102,14 +98,13 @@ public class JSText extends JSCourseDisplayNode implements Text {
 
   @Override
   public int getIndexAtConverse(Context context, double converse) {
-    for (int i = 0; i < element.textContent.length(); ++i) {}
-
-    return 0;
+    return font.measurer()
+        .getIndexAtConverse(context, element.textContent, converse - this.converse);
   }
 
   @Override
   public double getConverseAtIndex(int index) {
-    return (int) font.measure(text()).width;
+    return (int) font.measurer().measure(text().substring(0, index)).width - font.getAscent() * 0.2;
   }
 
   @Override

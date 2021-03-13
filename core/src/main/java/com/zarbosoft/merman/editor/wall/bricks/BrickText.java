@@ -70,7 +70,7 @@ public class BrickText extends Brick {
 
   public void setText(final Context context, final String text) {
     this.text.setText(context, text.replaceAll("\\p{Cntrl}", context.syntax.unprintable));
-    this.converseSpan = font.getWidth(this.text.text()) + style.spaceBefore + style.spaceAfter;
+    this.converseSpan = font.measurer().getWidth(this.text.text()) + style.spaceBefore + style.spaceAfter;
     changed(context);
   }
 

@@ -9,10 +9,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class FieldPrimitive extends Field {
-  public VisualFrontPrimitive visual;
   public final BaseBackPrimitiveSpec middle;
-  public StringBuilder data;
   public final Set<Listener> listeners = new HashSet<>();
+  public VisualFrontPrimitive visual;
+  public StringBuilder data;
 
   public FieldPrimitive(final BaseBackPrimitiveSpec middle, final String data) {
     this.middle = middle;
@@ -23,6 +23,12 @@ public class FieldPrimitive extends Field {
   public boolean selectInto(final Context context) {
     if (context.window) context.windowAdjustMinimalTo(this);
     visual.select(context, true, data.length(), data.length());
+    return true;
+  }
+
+  public boolean selectInto(final Context context, boolean leadFirst, int start, int end) {
+    if (context.window) context.windowAdjustMinimalTo(this);
+    visual.select(context, leadFirst, start, end);
     return true;
   }
 

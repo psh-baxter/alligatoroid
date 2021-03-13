@@ -8,6 +8,7 @@ import com.zarbosoft.merman.editor.visual.VisualLeaf;
 import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -78,7 +79,7 @@ public abstract class Brick {
     return inter.createNext(context);
   }
 
-  public Hoverable hover(final Context context, final Vector point) {
+  public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
     return inter.getVisual().hover(context, point);
   }
 

@@ -1,17 +1,23 @@
 package com.zarbosoft.merman.editor.display;
 
+import com.zarbosoft.merman.editor.Context;
+
 public interface Font {
-	double getAscent();
+  double getAscent();
 
-	double getDescent();
+  double getDescent();
 
-	double getWidth(String text);
+  public Measurer measurer();
 
-	/**
-	 * Index of first character that starts at or before converse (relative to start of text)
-	 * @param text
-	 * @param converse
-	 * @return
-	 */
-	int getIndexAtConverse(String text, double converse);
+  public interface Measurer {
+    public double getWidth(String text);
+
+    /**
+     * Get the nearest index to the converse - so halfway through 1 = 0, halfway through last = last
+     * @param context
+     * @param converse
+     * @return
+     */
+    public int getIndexAtConverse(Context context, String text, double converse);
+  }
 }

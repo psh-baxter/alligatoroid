@@ -1,5 +1,7 @@
 package com.zarbosoft.merman.webview.display;
 
+import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.display.Font;
 import com.zarbosoft.merman.webview.compat.TextMetrics;
 import com.zarbosoft.rendaw.common.Format;
@@ -16,7 +18,7 @@ public class JSFont implements Font {
   public JSFont(String name, int size) {
     this.name = name == null ? "monospace" : name;
     this.size = size;
-    TextMetrics basis = measure("W");
+    TextMetrics basis = measurer().measure("W");
     ascent = basis.fontBoundingBoxAscent;
     descent = basis.fontBoundingBoxDescent;
   }
@@ -25,12 +27,9 @@ public class JSFont implements Font {
     return Format.format("%spx %s", size, name);
   }
 
-  public TextMetrics measure(String text) {
-    HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
-    CanvasRenderingContext2D context = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
-    context.setFont(cssString());
-    TextMetrics out = (TextMetrics) context.measureText(text);
-    return out;
+  @Override
+  public JSMeasurer measurer() {
+    return new JSMeasurer();
   }
 
   @Override
@@ -43,19 +42,39 @@ public class JSFont implements Font {
     return descent;
   }
 
-  @Override
-  public double getWidth(String text) {
-    return (int) measure(text).width;
-  }
+  public class JSMeasurer implements Measurer {
+    private CanvasRenderingContext2D context;
 
-  @Override
-  public int getIndexAtConverse(String text, double converse) {
-    double last = 0;
-    for (int i = 0; i < text.length(); ++i) {
-      double next = measure(text.substring(0, i)).width;
-      if (next > converse) return (int) last;
-      last = next;
+    {
+      HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");
+      context = (CanvasRenderingContext2D) (Object) canvas.getContext("2d");
+      context.setFont(cssString());
     }
-    return (int) last;
+
+    public TextMetrics measure(String text) {
+      return (TextMetrics) context.measureText(text);
+    }
+
+    @Override
+    public double getWidth(String text) {
+      return measure(text).width;
+    }
+
+    @Override
+    public int getIndexAtConverse(Context context, String text, double converse) {
+      I18nEngine.Walker walker = context.i18n.glyphWalker(text);
+      double lastTextConverse = 0;
+      int lastIndex = 0;
+      int index = 0;
+      while (true) {
+        index = walker.following(index);
+        if (index == I18nEngine.DONE) break;
+        double textConverse = measure(text.substring(0, index)).width;
+        if ((converse - lastTextConverse) / (textConverse - lastTextConverse) < 0.5) break;
+        lastTextConverse = textConverse;
+        lastIndex = index;
+      }
+      return lastIndex;
+    }
   }
 }

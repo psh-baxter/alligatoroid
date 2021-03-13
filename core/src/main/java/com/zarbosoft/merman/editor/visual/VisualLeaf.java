@@ -9,7 +9,13 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public interface VisualLeaf {
-	Hoverable hover(final Context context, final Vector point); // Should map to method in Visual
+	/**
+	 *
+	 * @param context
+	 * @param point
+	 * @return hoverable, if it's a mutable hoverable whether the relevant state changed
+	 */
+	ROPair<Hoverable, Boolean> hover(final Context context, final Vector point); // Should map to method in Visual
 
 	VisualParent parent(); // Should map to method in Visual
 

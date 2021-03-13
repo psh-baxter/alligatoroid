@@ -759,13 +759,21 @@ public class Context {
           at = at.parent.children.get(at.index + 1);
         }
         final Hoverable old = hover;
-        hover = at.hover(context, point);
-        if (hover != old) {
+        ROPair<Hoverable, Boolean> hover0 = at.hover(context, point);
+        boolean hoverChanged;
+        if (hover0 == null) {
+          hoverChanged = old != null;
+          Context.this.hover = null;
+        } else {
+          hoverChanged = hover0.second;
+          Context.this.hover = hover0.first;
+        }
+        if (hoverChanged) {
           if (old != null) old.clear(context);
         }
         hoverBrick = at;
         hoverIdle = null;
-        return new ROPair<>(false, hover != old);
+        return new ROPair<>(false, hoverChanged);
       }
       return new ROPair<>(true, false);
     }

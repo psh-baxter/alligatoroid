@@ -20,6 +20,7 @@ import com.zarbosoft.merman.editor.wall.BrickInterface;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
@@ -106,17 +107,19 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   @Override
-  public Hoverable hover(final Context context, final Vector point) {
+  public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
     if (selection != null) return null;
     if (hoverable != null) {
+      return new ROPair<>(hoverable, false);
     } else if (ellipsis != null) {
-      hoverable = new NestedHoverable(this, context, ellipsis, ellipsis);
+      return new ROPair<>(hoverable = new NestedHoverable(this, context, ellipsis, ellipsis), true);
     } else {
-      hoverable =
-          new NestedHoverable(
-              this, context, body.getFirstBrick(context), body.getLastBrick(context));
+      return new ROPair<>(
+          hoverable =
+              new NestedHoverable(
+                  this, context, body.getFirstBrick(context), body.getLastBrick(context)),
+          true);
     }
-    return hoverable;
   }
 
   @Override
@@ -508,7 +511,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public Hoverable hover(final Context context, final Vector point) {
+    public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
       return VisualFrontAtomBase.this.hover(context, point);
     }
 

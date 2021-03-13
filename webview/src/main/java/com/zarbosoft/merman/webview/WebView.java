@@ -2,6 +2,7 @@ package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.Hoverable;
@@ -21,6 +22,7 @@ import com.zarbosoft.merman.syntax.error.UnsupportedDirections;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.webview.display.JSDisplay;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import elemental2.dom.CSSProperties;
@@ -176,14 +178,17 @@ public class WebView {
             if (hover != null && dragSelect != null) {
               Path endPath = hover.getSyntaxPath();
               if (!endPath.equals(dragSelect.end)) {
+                dragSelect.end = endPath;
                 ROList<String> endPathList = endPath.toList();
                 ROList<String> startPathList = dragSelect.start.toList();
                 int longestMatch = startPathList.longestMatch(endPathList);
+                if (longestMatch == startPathList.size() && longestMatch == endPathList.size())
+                  longestMatch -= 1;
                 // If hover paths diverge, it's either
                 // - at two depths in a single tree (parent and child): both paths are for an atom,
                 // so longest match == parent == atom
-                // - at two subtrees of an array: longest submatch == array == field, next segment
-                // == int
+                // - at two subtrees of an array/primitives: longest submatch == array/primitive ==
+                // field, next segment == int
                 Object base = context.syntaxLocate(new Path(endPathList.subUntil(longestMatch)));
                 if (base instanceof FieldArray) {
                   int startIndex = Integer.parseInt(startPathList.get(longestMatch));
@@ -192,6 +197,14 @@ public class WebView {
                     ((FieldArray) base).selectInto(context, true, endIndex, startIndex);
                   } else {
                     ((FieldArray) base).selectInto(context, false, startIndex, endIndex);
+                  }
+                } else if (base instanceof FieldPrimitive) {
+                  int startIndex = Integer.parseInt(startPathList.get(longestMatch));
+                  int endIndex = Integer.parseInt(endPathList.get(longestMatch));
+                  if (endIndex < startIndex) {
+                    ((FieldPrimitive) base).selectInto(context, true, endIndex, startIndex);
+                  } else {
+                    ((FieldPrimitive) base).selectInto(context, false, startIndex, endIndex);
                   }
                 } else if (base instanceof Atom) {
                   ((Atom) base).valueParentRef.selectValue(context);

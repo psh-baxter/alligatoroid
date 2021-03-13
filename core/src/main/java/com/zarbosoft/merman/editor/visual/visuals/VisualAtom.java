@@ -12,6 +12,7 @@ import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.syntax.front.FrontSpec;
 import com.zarbosoft.rendaw.common.DeadCode;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -264,7 +265,7 @@ public class VisualAtom extends Visual {
     }
 
     @Override
-    public Hoverable hover(final Context context, final Vector point) {
+    public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
       if (parent == null) return null;
       return parent.hover(context, point);
     }

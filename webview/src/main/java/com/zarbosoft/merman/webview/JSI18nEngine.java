@@ -40,19 +40,15 @@ public class JSI18nEngine implements I18nEngine {
 
     private Walker(Segmenter segmenter, String text) {
       JsObject segments0 = segmenter.segment(text);
-      JsPropertyMap last = null;
       JsIteratorIterable<JsPropertyMap> iter =
           (JsIteratorIterable<JsPropertyMap>) CompatOverlay.getSymbol(segments0, Symbol.iterator);
       JsIIterableResult<JsPropertyMap> at = iter.next();
       while (!at.isDone()) {
         JsPropertyMap segment = at.getValue();
-        segments.add((int)(double)segment.get("index"));
-        last = segment;
+        segments.add((int) (double) segment.get("index"));
         at = iter.next();
       }
-      if (last != null) {
-        segments.add(text.length());
-      }
+      segments.add(text.length());
     }
 
     @Override

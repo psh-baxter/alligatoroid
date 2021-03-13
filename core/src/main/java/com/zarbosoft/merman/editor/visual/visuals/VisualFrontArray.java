@@ -20,6 +20,7 @@ import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.syntax.front.FrontSymbol;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.function.Consumer;
@@ -348,13 +349,13 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   }
 
   @Override
-  public Hoverable hover(final Context context, final Vector point) {
+  public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
     if (empty != null) {
       hoverable = new PlaceholderHoverable(context, empty, this);
-      return hoverable;
+      return new ROPair<>(hoverable, true);
     } else if (ellipsis != null) {
       hoverable = new PlaceholderHoverable(context, ellipsis, this);
-      return hoverable;
+      return new ROPair<>(hoverable, true);
     } else return super.hover(context, point);
   }
 
@@ -731,19 +732,24 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     }
 
     @Override
-    public Hoverable hover(final Context context, final Vector point) {
+    public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
       if (!selectable) {
         if (visual.parent != null) return visual.parent.hover(context, point);
         return null;
       }
+      boolean changed = false;
+      int newIndex = valueIndex();
       if (visual.selection != null
           && visual.selection.beginIndex == visual.selection.endIndex
-          && visual.selection.beginIndex == valueIndex()) return null;
+          && visual.selection.beginIndex == newIndex) return null;
       if (visual.hoverable == null) {
         visual.hoverable = visual.new ElementHoverable(context, visual);
+        changed = true;
       }
-      ((ElementHoverable) visual.hoverable).setIndex(context, valueIndex());
-      return visual.hoverable;
+      ElementHoverable elementHoverable = (ElementHoverable) visual.hoverable;
+      if (elementHoverable.index != newIndex) changed = true;
+      elementHoverable.setIndex(context, newIndex);
+      return new ROPair<>(visual.hoverable, changed);
     }
 
     private int valueIndex() {
