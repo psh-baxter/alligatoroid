@@ -1,7 +1,7 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
@@ -149,7 +149,7 @@ public class TestAttachments {
   @Test
   public void testPrimitiveExpandAttachments() {
     final Atom textAtom = new TreeBuilder(text).add("value", "higgs dogoid").build();
-    final ValuePrimitive value = (ValuePrimitive) textAtom.fields.getOpt("value");
+    final FieldPrimitive value = (FieldPrimitive) textAtom.fields.getOpt("value");
     final Brick[] lastBrick = {null};
     final Attachment listener =
         new Attachment() {

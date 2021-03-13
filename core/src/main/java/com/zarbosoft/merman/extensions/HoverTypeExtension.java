@@ -17,20 +17,20 @@ public class HoverTypeExtension {
         new Context.HoverListener() {
 
           @Override
-          public void hoverChanged(final Context context, final Hoverable hoverable) {
+          public void hoverChanged(final Context context, final Hoverable hover) {
             BannerMessage oldMessage = message;
             message = null;
-            if (hoverable != null) {
+            if (hover != null) {
               message = new BannerMessage();
               message.priority = 100;
               final StringBuilder text = new StringBuilder();
               if (node) {
-                final VisualAtom nodeType = hoverable.atom();
+                final VisualAtom nodeType = hover.atom();
                 if (nodeType == null) text.append("Root Element");
-                else text.append((hoverable.atom()).type().name());
+                else text.append((hover.atom()).type().name());
               }
               if (part) {
-                final Visual part = hoverable.visual();
+                final Visual part = hover.visual();
                 final String temp;
                 if (part instanceof VisualFrontArray) {
                   temp = "array";

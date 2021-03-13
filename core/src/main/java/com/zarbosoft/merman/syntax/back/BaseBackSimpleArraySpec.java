@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.syntax.back;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldAtom;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.AtomType;
@@ -81,7 +81,7 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
             store = store.<Atom>popVarSingle(v -> temp.add(v));
             temp.reverse();
             return store.stackVarDoubleElement(
-                id, new ValueArray(BaseBackSimpleArraySpec.this, temp));
+                id, new FieldArray(BaseBackSimpleArraySpec.this, temp));
           }
         });
   }
@@ -118,7 +118,7 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
                                                         int counter = store.stackTop();
                                                         store = store.popStack(); // counter
                                                         store = store.popStack(); // key
-                                                        ValueAtom inner = store.stackTop();
+                                                        FieldAtom inner = store.stackTop();
                                                         store = store.popStack();
                                                         // Reset to pre-var-push state, with atom on top
                                                         return store.pushStack(counter - 1).pushStack(inner.data);

@@ -1,15 +1,15 @@
 package com.zarbosoft.merman.editorcore.history.changes;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.FieldAtom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editorcore.history.Change;
 
 public class ChangeNodeSet extends Change {
-	private final ValueAtom value;
+	private final FieldAtom value;
 	private Atom atom;
 
-	public ChangeNodeSet(final ValueAtom value, final Atom newValue) {
+	public ChangeNodeSet(final FieldAtom value, final Atom newValue) {
 		this.value = value;
 		atom = newValue;
 	}
@@ -33,7 +33,7 @@ public class ChangeNodeSet extends Change {
 		value.data.setValueParentRef(null);
 		value.data = atom;
 		atom.setValueParentRef(value.new NodeParent());
-		for (final ValueAtom.Listener listener : value.listeners)
+		for (final FieldAtom.Listener listener : value.listeners)
 			listener.set(context, atom);
 		return reverse;
 	}

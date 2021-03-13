@@ -3,10 +3,10 @@ package com.zarbosoft.merman.helper;
 import com.zarbosoft.merman.JavaI18nEngine;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldAtom;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.editor.Context;
@@ -122,10 +122,10 @@ public class Helper {
     }
   }
 
-  public static void assertTreeEqual(final Value expected, final Value got) {
-    if (expected.getClass() == ValueArray.class) {
-      final ValueArray expectedValue = (ValueArray) expected;
-      final ValueArray gotValue = (ValueArray) got;
+  public static void assertTreeEqual(final Field expected, final Field got) {
+    if (expected.getClass() == FieldArray.class) {
+      final FieldArray expectedValue = (FieldArray) expected;
+      final FieldArray gotValue = (FieldArray) got;
       if (expectedValue.data.size() != gotValue.data.size())
         throw new AssertionError(
             Format.format(
@@ -134,13 +134,13 @@ public class Helper {
       for (int i = 0; i < expectedValue.data.size(); ++i) {
         assertTreeEqual(expectedValue.data.get(i), gotValue.data.get(i));
       }
-    } else if (expected.getClass() == ValueAtom.class) {
-      final ValueAtom expectedValue = (ValueAtom) expected;
-      final ValueAtom gotValue = (ValueAtom) got;
+    } else if (expected.getClass() == FieldAtom.class) {
+      final FieldAtom expectedValue = (FieldAtom) expected;
+      final FieldAtom gotValue = (FieldAtom) got;
       assertTreeEqual(expectedValue.get(), gotValue.get());
-    } else if (expected.getClass() == ValuePrimitive.class) {
-      final ValuePrimitive expectedValue = (ValuePrimitive) expected;
-      final ValuePrimitive gotValue = (ValuePrimitive) got;
+    } else if (expected.getClass() == FieldPrimitive.class) {
+      final FieldPrimitive expectedValue = (FieldPrimitive) expected;
+      final FieldPrimitive gotValue = (FieldPrimitive) got;
       if (!expectedValue.get().equals(gotValue.get()))
         throw new ComparisonFailure(
             Format.format("Array length mismatch.\nAt: %s", got.getSyntaxPath()),
@@ -153,15 +153,15 @@ public class Helper {
               expected.getClass(), got.getClass(), got.getSyntaxPath()));
   }
 
-  public static void assertTreeEqual(final Context context, final Atom expected, final Value got) {
+  public static void assertTreeEqual(final Context context, final Atom expected, final Field got) {
     assertTreeEqual(
-        new ValueArray(
+        new FieldArray(
             (BaseBackArraySpec) context.syntax.root.fields.get("value"), TSList.of(expected)),
         got);
   }
 
-  public static ValueArray rootArray(final Document doc) {
-    return (ValueArray) doc.root.fields.getOpt("value");
+  public static FieldArray rootArray(final Document doc) {
+    return (FieldArray) doc.root.fields.getOpt("value");
   }
 
   public static Context buildDoc(final Syntax syntax, final Atom... root) {
@@ -179,10 +179,10 @@ public class Helper {
             syntax,
             new Atom(
                 syntax.root,
-                new TSMap<String, Value>()
+                new TSMap<String, Field>()
                     .put(
                         "value",
-                        new ValueArray(
+                        new FieldArray(
                             (BaseBackArraySpec) syntax.root.fields.get("value"),
                             TSList.of(root)))));
     final Context context =

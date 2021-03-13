@@ -5,7 +5,7 @@ import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.syntax.back.BackSpecData;
 
-public abstract class Value {
+public abstract class Field {
   public Atom.Parent atomParentRef = null;
 
   public void setAtomParentRef(final Atom.Parent atomParentRef) {
@@ -23,7 +23,13 @@ public abstract class Value {
 
   public abstract Object syntaxLocateStep(String segment);
 
-  public abstract static class Parent<T extends Value> {
+  public interface ParentDispatcher {
+    void handle(FieldArray.ArrayParent parent);
+
+    void handle(FieldAtom.NodeParent parent);
+  }
+
+  public abstract static class Parent<T extends Field> {
     public final T value;
 
     protected Parent(T value) {
@@ -43,11 +49,5 @@ public abstract class Value {
     public abstract Path getSyntaxPath();
 
     public abstract void dispatch(ParentDispatcher dispatcher);
-  }
-
-  public interface ParentDispatcher {
-    void handle(ValueArray.ArrayParent parent);
-
-    void handle(ValueAtom.NodeParent parent);
   }
 }

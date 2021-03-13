@@ -9,14 +9,14 @@ import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ValueAtom extends Value {
+public class FieldAtom extends Field {
   public static final String SYNTAX_PATH_KEY = "atom";
   public final Set<Listener> listeners = new HashSet<>();
   private final BaseBackAtomSpec back;
   public VisualFrontAtom visual;
   public Atom data; // INVARIANT: Never null when in tree
 
-  public ValueAtom(final BaseBackAtomSpec back, final Atom data) {
+  public FieldAtom(final BaseBackAtomSpec back, final Atom data) {
     this.back = back;
     this.data = data;
     if (data != null) data.setValueParentRef(new NodeParent(this));
@@ -52,16 +52,16 @@ public class ValueAtom extends Value {
   }
 
   public void select(final Context context) {
-    if (context.window)  context.windowAdjustMinimalTo(this);
-      visual.select(context);
+    if (context.window) context.windowAdjustMinimalTo(this);
+    visual.select(context);
   }
 
   public abstract static class Listener {
     public abstract void set(Context context, Atom atom);
   }
 
-  public static class NodeParent extends Parent<ValueAtom> {
-    public NodeParent(ValueAtom child) {
+  public static class NodeParent extends Parent<FieldAtom> {
+    public NodeParent(FieldAtom child) {
       super(child);
     }
 

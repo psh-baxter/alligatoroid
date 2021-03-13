@@ -14,13 +14,13 @@ import com.zarbosoft.rendaw.common.TSList;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ValueArray extends Value {
+public class FieldArray extends Field {
   public final TSList<Atom> data = new TSList<>();
   public final Set<Listener> listeners = new HashSet<>();
   private final BaseBackArraySpec back;
   public Visual visual = null;
 
-  public ValueArray(final BaseBackArraySpec back, final TSList<Atom> data) {
+  public FieldArray(final BaseBackArraySpec back, final TSList<Atom> data) {
     this.back = back;
     this.data.addAll(data);
     for (Atom v : data) {
@@ -47,7 +47,7 @@ public class ValueArray extends Value {
     }
   }
 
-  public ValueArray(final BaseBackArraySpec back) {
+  public FieldArray(final BaseBackArraySpec back) {
     this.back = back;
   }
 
@@ -107,11 +107,11 @@ public class ValueArray extends Value {
     void changed(Context context, int index, int remove, ROList<Atom> add);
   }
 
-  public static class ArrayParent extends Parent<ValueArray> {
+  public static class ArrayParent extends Parent<FieldArray> {
     public int index = 0;
     public int actualIndex = 0;
 
-    public ArrayParent(ValueArray value) {
+    public ArrayParent(FieldArray value) {
       super(value);
     }
 

@@ -8,13 +8,13 @@ import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
 import java.util.HashSet;
 import java.util.Set;
 
-public class ValuePrimitive extends Value {
+public class FieldPrimitive extends Field {
   public VisualFrontPrimitive visual;
   public final BaseBackPrimitiveSpec middle;
   public StringBuilder data;
   public final Set<Listener> listeners = new HashSet<>();
 
-  public ValuePrimitive(final BaseBackPrimitiveSpec middle, final String data) {
+  public FieldPrimitive(final BaseBackPrimitiveSpec middle, final String data) {
     this.middle = middle;
     this.data = new StringBuilder(data);
   }

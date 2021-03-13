@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.visual.tags.FreeTag;
 import com.zarbosoft.merman.editor.visual.tags.TypeTag;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
@@ -108,7 +108,7 @@ public class TestLayoutGeneral {
   @Test
   public void testDynamicUnwrapLayout() {
     final Atom text = new TreeBuilder(this.text).add("value", "123456").build();
-    final ValuePrimitive primitive = (ValuePrimitive) text.fields.getOpt("value");
+    final FieldPrimitive primitive = (FieldPrimitive) text.fields.getOpt("value");
     new GeneralTestWizard(syntax, text)
         .run(context -> text.fields.getOpt("value").selectInto(context))
         .resize(40)

@@ -32,4 +32,12 @@ public interface ROList<T> extends Iterable<T> {
   default void forEach(Consumer<? super T> action) {
     throw new Assertion();
   }
+
+  /**
+   * @param other
+   * @return number of elements that match; 0 = no match, size() == all match
+   */
+  int longestMatch(ROList<T> other);
+
+  ROList<T> subUntil(int end);
 }

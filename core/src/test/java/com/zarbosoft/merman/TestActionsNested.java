@@ -27,10 +27,11 @@ public class TestActionsNested {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom"))).valueParentRef.selectValue(context);
+    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom")))
+        .valueParentRef.selectValue(context);
     Helper.act(context, "enter");
     assertThat(
-        context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "atom", "value")));
+        context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "atom", "value", "atom")));
   }
 
   @Test
@@ -45,7 +46,8 @@ public class TestActionsNested {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom"))).valueParentRef.selectValue(context);
+    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom")))
+        .valueParentRef.selectValue(context);
     Helper.act(context, "exit");
     assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0")));
   }
@@ -55,7 +57,7 @@ public class TestActionsNested {
     final Atom target = new TreeBuilder(MiscSyntax.one).build();
     new GeneralTestWizard(
             MiscSyntax.syntax,
-             new TreeBuilder(MiscSyntax.plus)
+            new TreeBuilder(MiscSyntax.plus)
                 .add("first", target)
                 .add("second", new TreeBuilder(MiscSyntax.one).build())
                 .build())
@@ -64,7 +66,7 @@ public class TestActionsNested {
         .run(
             context ->
                 assertThat(
-                    context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "second"))));
+                    context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "second", "atom"))));
   }
 
   @Test
@@ -72,7 +74,7 @@ public class TestActionsNested {
     final Atom target = new TreeBuilder(MiscSyntax.one).build();
     new GeneralTestWizard(
             MiscSyntax.syntax,
-             new TreeBuilder(MiscSyntax.plus)
+            new TreeBuilder(MiscSyntax.plus)
                 .add("first", new TreeBuilder(MiscSyntax.one).build())
                 .add("second", target)
                 .build())
@@ -81,6 +83,6 @@ public class TestActionsNested {
         .run(
             context ->
                 assertThat(
-                    context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "first"))));
+                    context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "first", "atom"))));
   }
 }

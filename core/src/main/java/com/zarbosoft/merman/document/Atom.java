@@ -1,41 +1,37 @@
 package com.zarbosoft.merman.document;
 
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldAtom;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.editor.serialization.WriteStateBack;
 import com.zarbosoft.merman.editor.visual.Visual;
 import com.zarbosoft.merman.editor.visual.VisualParent;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
 import com.zarbosoft.merman.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.syntax.AtomType;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.Deque;
 import java.util.Map;
 
 public class Atom {
-  public final TSMap<String, Value> fields;
+  public final TSMap<String, Field> fields;
   /**
    * Null if root
    */
-  public Value.Parent<?> valueParentRef;
+  public Field.Parent<?> valueParentRef;
   public final AtomType type;
   public VisualAtom visual;
 
-  public Atom(final AtomType type, final TSMap<String, Value> fields) {
+  public Atom(final AtomType type, final TSMap<String, Field> fields) {
     this.type = type;
     this.fields = fields;
-    for (Map.Entry<String, Value> entry : fields.entries()) {
-      Value v = entry.getValue();
+    for (Map.Entry<String, Field> entry : fields.entries()) {
+      Field v = entry.getValue();
       v.setAtomParentRef(
           new Parent() {
             @Override
@@ -78,7 +74,7 @@ public class Atom {
     return visual;
   }
 
-  public void setValueParentRef(final Value.Parent<?> valueParentRef) {
+  public void setValueParentRef(final Field.Parent<?> valueParentRef) {
     this.valueParentRef = valueParentRef;
   }
 
@@ -88,13 +84,13 @@ public class Atom {
 
   public void write(TSList<WriteState> stack) {
     TSMap<String, Object> childData = new TSMap<>();
-    for (Map.Entry<String, Value> entry : fields.entries()) {
-      if (entry.getValue() instanceof ValueAtom) {
-        childData.put(entry.getKey(), ((ValueAtom) entry.getValue()).data);
-      } else if (entry.getValue() instanceof ValueArray) {
-        childData.put(entry.getKey(), ((ValueArray) entry.getValue()).data);
-      } else if (entry.getValue() instanceof ValuePrimitive) {
-        childData.put(entry.getKey(), ((ValuePrimitive) entry.getValue()).data);
+    for (Map.Entry<String, Field> entry : fields.entries()) {
+      if (entry.getValue() instanceof FieldAtom) {
+        childData.put(entry.getKey(), ((FieldAtom) entry.getValue()).data);
+      } else if (entry.getValue() instanceof FieldArray) {
+        childData.put(entry.getKey(), ((FieldArray) entry.getValue()).data);
+      } else if (entry.getValue() instanceof FieldPrimitive) {
+        childData.put(entry.getKey(), ((FieldPrimitive) entry.getValue()).data);
       } else throw new Assertion();
     }
     stack.add(new WriteStateBack(childData, type.back().iterator()));

@@ -1,9 +1,9 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldAtom;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
@@ -30,15 +30,15 @@ public class TestDocumentPaths {
             new TreeBuilder(MiscSyntax.quoted).add("value", "").build(),
             new TreeBuilder(MiscSyntax.multiback).add("a", "").add("b", "").build(),
             new TreeBuilder(MiscSyntax.quoted).add("value", "").build());
-    final Value value1 = Helper.rootArray(context.document).data.get(0).fields.get("value");
-    assertThat(value1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "value")));
-    assertThat(context.syntaxLocate(value1.getSyntaxPath()), equalTo(value1));
-    final Value value2 = Helper.rootArray(context.document).data.get(1).fields.get("b");
-    assertThat(value2.getSyntaxPath().toList(), equalTo(TSList.of("value", "1", "b")));
-    assertThat(context.syntaxLocate(value2.getSyntaxPath()), equalTo(value2));
-    final Value value3 = Helper.rootArray(context.document).data.get(2).fields.get("value");
-    assertThat(value3.getSyntaxPath().toList(), equalTo(TSList.of("value", "2", "value")));
-    assertThat(context.syntaxLocate(value3.getSyntaxPath()), equalTo(value3));
+    final Field field1 = Helper.rootArray(context.document).data.get(0).fields.get("value");
+    assertThat(field1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "value")));
+    assertThat(context.syntaxLocate(field1.getSyntaxPath()), equalTo(field1));
+    final Field field2 = Helper.rootArray(context.document).data.get(1).fields.get("b");
+    assertThat(field2.getSyntaxPath().toList(), equalTo(TSList.of("value", "1", "b")));
+    assertThat(context.syntaxLocate(field2.getSyntaxPath()), equalTo(field2));
+    final Field field3 = Helper.rootArray(context.document).data.get(2).fields.get("value");
+    assertThat(field3.getSyntaxPath().toList(), equalTo(TSList.of("value", "2", "value")));
+    assertThat(context.syntaxLocate(field3.getSyntaxPath()), equalTo(field3));
   }
 
   @Test
@@ -56,9 +56,9 @@ public class TestDocumentPaths {
             .group("any", TSList.of("base"))
             .build();
     final Context context = buildDoc(syntax, new TreeBuilder(syntax, "base").add("a", "").build());
-    final Value value1 = Helper.rootArray(context.document).data.get(0).fields.get("a");
-    assertThat(value1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a")));
-    assertThat(context.syntaxLocate(value1.getSyntaxPath()), equalTo(value1));
+    final Field field1 = Helper.rootArray(context.document).data.get(0).fields.get("a");
+    assertThat(field1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a")));
+    assertThat(context.syntaxLocate(field1.getSyntaxPath()), equalTo(field1));
   }
 
   @Test
@@ -73,9 +73,9 @@ public class TestDocumentPaths {
             .group("any", TSList.of("base"))
             .build();
     final Context context = buildDoc(syntax, new TreeBuilder(syntax, "base").add("a", "").build());
-    final Value value1 = Helper.rootArray(context.document).data.get(0).fields.get("a");
-    assertThat(value1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a")));
-    assertThat(context.syntaxLocate(value1.getSyntaxPath()), equalTo(value1));
+    final Field field1 = Helper.rootArray(context.document).data.get(0).fields.get("a");
+    assertThat(field1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a")));
+    assertThat(context.syntaxLocate(field1.getSyntaxPath()), equalTo(field1));
   }
 
   @Test
@@ -100,11 +100,11 @@ public class TestDocumentPaths {
             new TreeBuilder(syntax, "base")
                 .add("a", new TreeBuilder(syntax, "child").add("b", ""))
                 .build());
-    final Value value1 =
-        ((ValueAtom) Helper.rootArray(context.document).data.get(0).fields.get("a"))
+    final Field field1 =
+        ((FieldAtom) Helper.rootArray(context.document).data.get(0).fields.get("a"))
             .data.fields.get("b");
-    assertThat(value1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a", "atom", "b")));
-    assertThat(context.syntaxLocate(value1.getSyntaxPath()), equalTo(value1));
+    assertThat(field1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a", "atom", "b")));
+    assertThat(context.syntaxLocate(field1.getSyntaxPath()), equalTo(field1));
   }
 
   @Test
@@ -129,14 +129,14 @@ public class TestDocumentPaths {
             new TreeBuilder(syntax, "base")
                 .addArray("a", new TreeBuilder(syntax, "child").add("b", "").build())
                 .build());
-    final Value value1 =
-        ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.get("a"))
+    final Field field1 =
+        ((FieldArray) Helper.rootArray(context.document).data.get(0).fields.get("a"))
             .data
             .get(0)
             .fields
             .get("b");
-    assertThat(value1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a", "0", "b")));
-    assertThat(context.syntaxLocate(value1.getSyntaxPath()), equalTo(value1));
+    assertThat(field1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a", "0", "b")));
+    assertThat(context.syntaxLocate(field1.getSyntaxPath()), equalTo(field1));
   }
 
   @Test
@@ -164,14 +164,14 @@ public class TestDocumentPaths {
                 .addRecord(
                     "a", new TreeBuilder(syntax, "element").add("k", "K").add("v", "V").build())
                 .build());
-    final Value value1 =
-        ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.get("a"))
+    final Field field1 =
+        ((FieldArray) Helper.rootArray(context.document).data.get(0).fields.get("a"))
             .data
             .get(0)
             .fields
             .get("v");
-    assertThat(value1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a", "0", "v")));
-    assertThat(context.syntaxLocate(value1.getSyntaxPath()), equalTo(value1));
+    assertThat(field1.getSyntaxPath().toList(), equalTo(TSList.of("value", "0", "a", "0", "v")));
+    assertThat(context.syntaxLocate(field1.getSyntaxPath()), equalTo(field1));
   }
 
   @Test
@@ -269,11 +269,11 @@ public class TestDocumentPaths {
     assertThat(
         context.syntaxLocate(new Path("value", "0", "first", "atom")),
         equalTo(
-            ((ValueAtom) Helper.rootArray(context.document).data.get(0).fields.get("first")).data));
+            ((FieldAtom) Helper.rootArray(context.document).data.get(0).fields.get("first")).data));
     assertThat(
         context.syntaxLocate(new Path("value", "0", "second", "atom")),
         equalTo(
-            ((ValueAtom) Helper.rootArray(context.document).data.get(0).fields.get("second"))
+            ((FieldAtom) Helper.rootArray(context.document).data.get(0).fields.get("second"))
                 .data));
   }
 
@@ -303,11 +303,11 @@ public class TestDocumentPaths {
     assertThat(
         context.syntaxLocate(new Path("value", "0", "first", "atom")),
         equalTo(
-            ((ValueAtom) Helper.rootArray(context.document).data.get(0).fields.get("first")).data));
+            ((FieldAtom) Helper.rootArray(context.document).data.get(0).fields.get("first")).data));
     assertThat(
         context.syntaxLocate(new Path("value", "0", "second", "atom")),
         equalTo(
-            ((ValueAtom) Helper.rootArray(context.document).data.get(0).fields.get("second"))
+            ((FieldAtom) Helper.rootArray(context.document).data.get(0).fields.get("second"))
                 .data));
   }
 
@@ -331,8 +331,8 @@ public class TestDocumentPaths {
     assertThat(
         context.syntaxLocate(new Path("value", "0", "value", "0", "value", "atom")),
         equalTo(
-            ((ValueAtom)
-                    ((ValueArray)
+            ((FieldAtom)
+                    ((FieldArray)
                             Helper.rootArray(context.document).data.get(0).fields.get("value"))
                         .data
                         .get(0)
@@ -342,8 +342,8 @@ public class TestDocumentPaths {
     assertThat(
         context.syntaxLocate(new Path("value", "0", "value", "1", "value", "atom")),
         equalTo(
-            ((ValueAtom)
-                    ((ValueArray)
+            ((FieldAtom)
+                    ((FieldArray)
                             Helper.rootArray(context.document).data.get(0).fields.get("value"))
                         .data
                         .get(1)
@@ -366,12 +366,12 @@ public class TestDocumentPaths {
     assertThat(
         context.syntaxLocate(new Path("value", "0", "value", "0")),
         equalTo(
-            ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.get("value"))
+            ((FieldArray) Helper.rootArray(context.document).data.get(0).fields.get("value"))
                 .data.get(0)));
     assertThat(
         context.syntaxLocate(new Path("value", "0", "value", "1")),
         equalTo(
-            ((ValueArray) Helper.rootArray(context.document).data.get(0).fields.get("value"))
+            ((FieldArray) Helper.rootArray(context.document).data.get(0).fields.get("value"))
                 .data.get(1)));
   }
 }

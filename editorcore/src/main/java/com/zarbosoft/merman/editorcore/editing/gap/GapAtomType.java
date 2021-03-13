@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.editorcore.editing.gap;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editorcore.editing.BaseGapAtomType;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
@@ -47,9 +47,9 @@ public class GapAtomType extends BaseGapAtomType {
               public void deselect(final Context context, final Atom self, final String string) {
                 if (!string.isEmpty()) return;
                 if (self.valueParentRef == null) return;
-                final Value parentValue = self.valueParentRef.value;
-                if (parentValue instanceof ValueArray) {
-                  edit.arrayParentDelete((ValueArray.ArrayParent) self.valueParentRef);
+                final Field parentField = self.valueParentRef.value;
+                if (parentField instanceof FieldArray) {
+                  edit.arrayParentDelete((FieldArray.ArrayParent) self.valueParentRef);
                 }
               }
             };
@@ -66,7 +66,7 @@ public class GapAtomType extends BaseGapAtomType {
 
   public Atom create() {
     return new Atom(
-        this, new TSMap<String, Value>().putChain("gap", new ValuePrimitive(gapBack, "")));
+        this, new TSMap<String, Field>().putChain("gap", new FieldPrimitive(gapBack, "")));
   }
 
   @Override

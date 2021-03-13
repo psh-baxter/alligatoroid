@@ -2,9 +2,9 @@ package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldAtom;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.editor.Context;
@@ -272,7 +272,7 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((ValueAtom) context.syntaxLocate(new Path("value", "0", "value")))
+                ((FieldAtom) context.syntaxLocate(new Path("value", "0", "value")))
                     .selectInto(context))
         .act("window")
         .checkTextBrick(0, i++, "0_0");
@@ -284,7 +284,7 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((ValueAtom) context.syntaxLocate(new Path("value", "0", "value", "atom", "value")))
+                ((FieldAtom) context.syntaxLocate(new Path("value", "0", "value", "atom", "value")))
                     .selectInto(context))
         .act("window")
         .checkTextBrick(0, i++, "0_0")
@@ -377,7 +377,7 @@ public class TestWindowing {
     start(true)
         .run(
             context ->
-                ((ValueArray) context.syntaxLocate(new Path("value")))
+                ((FieldArray) context.syntaxLocate(new Path("value")))
                     .selectInto(context, true, 1, 1))
         .act("window")
         .checkTextBrick(0, 0, "1_0")
@@ -543,10 +543,10 @@ public class TestWindowing {
               syntax,
               new Atom(
                   syntax.root,
-                  new TSMap<String, Value>()
+                  new TSMap<String, Field>()
                       .put(
                           "value",
-                          new ValueArray(
+                          new FieldArray(
                               (BaseBackArraySpec) syntax.root.fields.get("value"),
                               TSList.of(atoms)))));
       Context.InitialConfig initialConfig =

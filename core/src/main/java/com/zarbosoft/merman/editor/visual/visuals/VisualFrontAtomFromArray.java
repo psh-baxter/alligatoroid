@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Visual;
@@ -11,20 +11,20 @@ import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class VisualFrontAtomFromArray extends VisualFrontAtomBase {
-  public final ValueArray value;
-  private final ValueArray.Listener dataListener;
+  public final FieldArray value;
+  private final FieldArray.Listener dataListener;
 
   public VisualFrontAtomFromArray(
       final Context context,
       final VisualParent parent,
-      final ValueArray value,
+      final FieldArray value,
       final int visualDepth,
       final int depthScore,
       Symbol ellipsis) {
     super(visualDepth, ellipsis);
     this.value = value;
     dataListener =
-        new ValueArray.Listener() {
+        new FieldArray.Listener() {
           @Override
           public void changed(
               final Context context, final int index, final int remove, final ROList<Atom> add) {
@@ -53,7 +53,7 @@ public class VisualFrontAtomFromArray extends VisualFrontAtomBase {
   }
 
   @Override
-  protected Value value() {
+  protected Field value() {
     return value;
   }
 

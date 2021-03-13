@@ -1,7 +1,8 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldAtom;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Cursor;
@@ -16,7 +17,6 @@ import com.zarbosoft.merman.editor.visual.alignment.Alignment;
 import com.zarbosoft.merman.editor.visual.attachments.BorderAttachment;
 import com.zarbosoft.merman.editor.wall.Brick;
 import com.zarbosoft.merman.editor.wall.BrickInterface;
-import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
@@ -47,7 +47,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
   public abstract String nodeType();
 
-  protected abstract Value value();
+  protected abstract Field value();
 
   protected abstract Path getBackPath();
 
@@ -110,17 +110,17 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     if (selection != null) return null;
     if (hoverable != null) {
     } else if (ellipsis != null) {
-      hoverable = new NestedHoverable(context, ellipsis, ellipsis);
+      hoverable = new NestedHoverable(this, context, ellipsis, ellipsis);
     } else {
       hoverable =
-          new NestedHoverable(context, body.getFirstBrick(context), body.getLastBrick(context));
+          new NestedHoverable(
+              this, context, body.getFirstBrick(context), body.getLastBrick(context));
     }
     return hoverable;
   }
 
   @Override
-  public void getLeafBricks(
-          final Context context, TSList<Brick> bricks) {
+  public void getLeafBricks(final Context context, TSList<Brick> bricks) {
     body.getLeafBricks(context, bricks);
   }
 
@@ -293,7 +293,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
     @Override
     public Path getSyntaxPath() {
-      return base.getBackPath();
+      return base.getBackPath().add(FieldAtom.SYNTAX_PATH_KEY);
     }
 
     @Override
@@ -313,15 +313,15 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   private static class VisualNodeSelectionState implements SelectionState {
-    private final Value value;
+    private final Field field;
 
-    private VisualNodeSelectionState(final Value value) {
-      this.value = value;
+    private VisualNodeSelectionState(final Field field) {
+      this.field = field;
     }
 
     @Override
     public void select(final Context context) {
-      value.selectInto(context);
+      field.selectInto(context);
     }
   }
 
@@ -415,34 +415,42 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
   }
 
-  private class NestedHoverable extends Hoverable {
+  private static class NestedHoverable extends Hoverable {
     public final BorderAttachment border;
+    private final VisualFrontAtomBase visual;
 
-    private NestedHoverable(final Context context, final Brick first, final Brick last) {
+    private NestedHoverable(
+        VisualFrontAtomBase visual, final Context context, final Brick first, final Brick last) {
       border = new BorderAttachment(context, context.hoverStyle.obbox);
       border.setFirst(context, first);
       border.setLast(context, last);
+      this.visual = visual;
+    }
+
+    @Override
+    public Path getSyntaxPath() {
+      return visual.getBackPath().add(FieldAtom.SYNTAX_PATH_KEY);
     }
 
     @Override
     protected void clear(final Context context) {
       border.destroy(context);
-      hoverable = null;
+      visual.hoverable = null;
     }
 
     @Override
     public void select(final Context context) {
-      selectAnyChild(context);
+      visual.selectAnyChild(context);
     }
 
     @Override
     public VisualAtom atom() {
-      return VisualFrontAtomBase.this.parent.atomVisual();
+      return visual.parent.atomVisual();
     }
 
     @Override
     public Visual visual() {
-      return VisualFrontAtomBase.this;
+      return visual;
     }
   }
 

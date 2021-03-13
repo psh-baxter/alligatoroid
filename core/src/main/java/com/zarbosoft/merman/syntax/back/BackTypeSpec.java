@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.syntax.back;
 
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.backevents.ETypeEvent;
@@ -58,7 +58,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
               @Override
               protected StackStore process(StackStore store) {
                 return store.stackVarDoubleElement(
-                    id, new ValuePrimitive(BackTypeSpec.this, ((ETypeEvent) store.top()).value));
+                    id, new FieldPrimitive(BackTypeSpec.this, ((ETypeEvent) store.top()).value));
               }
             })
         .add(value.buildBackRule(syntax));

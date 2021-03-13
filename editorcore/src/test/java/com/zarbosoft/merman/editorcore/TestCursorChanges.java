@@ -2,9 +2,9 @@ package com.zarbosoft.merman.editorcore;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldAtom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
@@ -84,7 +84,7 @@ public class TestCursorChanges {
         (context, selected) -> {
             context.history.apply(
               context,
-              new ChangeArray((ValueArray) selected.valueParentRef.value, 0, 1, ImmutableList.of()));
+              new ChangeArray((FieldArray) selected.valueParentRef.value, 0, 1, ImmutableList.of()));
         },
         new TreeBuilder(MiscSyntax.array).addArray("value").build(),
         new Path("value", "0"));
@@ -103,7 +103,7 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "0"),
             (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
+                new ChangeArray((FieldArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
@@ -123,7 +123,7 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "1"),
             (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.valueParentRef.value, 0, 1, ImmutableList.of())),
+                new ChangeArray((FieldArray) selected.valueParentRef.value, 0, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
@@ -144,7 +144,7 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "1"),
             (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
+                new ChangeArray((FieldArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray(
                 "value",
@@ -167,7 +167,7 @@ public class TestCursorChanges {
         new Path("value", "0", "value", "1"),
             (context, selected) -> context.history.apply(
                 context,
-                new ChangeArray((ValueArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
+                new ChangeArray((FieldArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
         new TreeBuilder(MiscSyntax.array)
             .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
             .build(),
@@ -189,7 +189,7 @@ public class TestCursorChanges {
             .build(),
         new Path("value", "0", "value", "1", "value", "0"),
         (context, selected) -> {
-          ((Value) context.syntaxLocate(new Path("value", "0", "value", "1", "value")))
+          ((Field) context.syntaxLocate(new Path("value", "0", "value", "1", "value")))
               .atomParentRef
               .atom()
               .valueParentRef
@@ -218,7 +218,7 @@ public class TestCursorChanges {
             (context, selected) -> context.history.apply(
                 context,
                 new ChangeArray(
-                    (ValueArray) selected.valueParentRef.value,
+                    (FieldArray) selected.valueParentRef.value,
                     0,
                     0,
                     ImmutableList.of(new TreeBuilder(MiscSyntax.infinity).build()))),
@@ -246,7 +246,7 @@ public class TestCursorChanges {
             (context, selected) -> context.history.apply(
                 context,
                 new ChangeArray(
-                    (ValueArray) selected.valueParentRef.value,
+                    (FieldArray) selected.valueParentRef.value,
                     1,
                     0,
                     ImmutableList.of(new TreeBuilder(MiscSyntax.infinity).build()))),
@@ -275,7 +275,7 @@ public class TestCursorChanges {
   private void innerArrayTestTransform(
       final int beginSelectBegin,
       final int beginSelectEnd,
-      final Pair.Consumer<Context, ValueArray> transform,
+      final Pair.Consumer<Context, FieldArray> transform,
       final int endSelectBegin,
       final int endSelectEnd) {
     final Context context =
@@ -291,8 +291,8 @@ public class TestCursorChanges {
                     new TreeBuilder(MiscSyntax.five).build())
                 .build());
 
-    final ValueArray value =
-        (ValueArray) Helper.rootArray(context.document).data.get(0).fields.getOpt("value");
+    final FieldArray value =
+        (FieldArray) Helper.rootArray(context.document).data.get(0).fields.getOpt("value");
     final VisualFrontArray visual = (VisualFrontArray) value.visual;
     visual.select(context, true, beginSelectBegin, beginSelectEnd);
     final VisualFrontArray.ArrayCursor selection = visual.selection;
@@ -497,7 +497,7 @@ public class TestCursorChanges {
             context.history.apply(
               context,
               new ChangeNodeSet(
-                  (ValueAtom) selected.valueParentRef.value, MiscSyntax.syntax.gap.create()));
+                  (FieldAtom) selected.valueParentRef.value, MiscSyntax.syntax.gap.create()));
         },
         new TreeBuilder(MiscSyntax.snooze).add("value", MiscSyntax.syntax.gap.create()).build(),
         new Path("value", "0", "value"));
@@ -516,7 +516,7 @@ public class TestCursorChanges {
             .build(),
         new Path("value", "0", "value", "atom","value","0"),
         (context, selected) -> {
-          ((ValueArray) context.syntaxLocate(new Path("value", "0", "value","atom", "value")))
+          ((FieldArray) context.syntaxLocate(new Path("value", "0", "value","atom", "value")))
               .atomParentRef
               .atom()
               .valueParentRef

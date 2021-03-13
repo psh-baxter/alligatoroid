@@ -4,10 +4,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Iterables;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldAtom;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editorcore.editing.BaseGapAtomType;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
@@ -95,9 +95,9 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                 public void deselect(final Context context, final Atom self, final String string) {
                   if (!string.isEmpty()) return;
                   if (self.valueParentRef == null) return;
-                  final Value parentValue = self.valueParentRef.value;
-                  if (parentValue instanceof ValueArray) {
-                    edit.arrayParentDelete((ValueArray.ArrayParent) self.valueParentRef);
+                  final Field parentField = self.valueParentRef.value;
+                  if (parentField instanceof FieldArray) {
+                    edit.arrayParentDelete((FieldArray.ArrayParent) self.valueParentRef);
                   }
                 }
               };
@@ -137,24 +137,24 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
                 public void choose(final Context context, final String string) {
                   Atom root;
-                  Value.Parent rootPlacement;
+                  Field.Parent rootPlacement;
                   Atom child;
-                  final Value childPlacement;
+                  final Field childPlacement;
                   Atom child2 = null;
-                  Value.Parent child2Placement = null;
+                  Field.Parent child2Placement = null;
 
                   // Parse text into atom as possible
                   final GapKey.ParseResult parsed = key.parse(context, type, string);
                   final Atom atom = parsed.atom;
                   final String remainder = parsed.remainder;
                   root = atom;
-                  child = ((ValueArray) suffixSelf.fields.getOpt("value")).data.get(0);
+                  child = ((FieldArray) suffixSelf.fields.getOpt("value")).data.get(0);
                   childPlacement = atom.fields.getOpt(atom.type.front().get(key.indexBefore).field());
 
                   // Find the new atom placement point
                   rootPlacement = suffixSelf.valueParentRef;
                   if (suffixSelf.raise) {
-                    final Pair<Value.Parent, Atom> found =
+                    final Pair<Field.Parent, Atom> found =
                         findReplacementPoint(
                             context, rootPlacement, (FreeAtomType) parsed.atom.type);
                     if (found.first != rootPlacement) {
@@ -167,13 +167,13 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                   }
 
                   // Find the selection/remainder entry point
-                  Value selectNext = null;
+                  Field selectNext = null;
                   FrontSpec nextWhatever = null;
                   if (parsed.nextPrimitive == null) {
                     if (key.indexAfter == -1) {
                       // No such place exists - wrap the placement atom in a suffix gap
                       root = context.syntax.suffixGap.create(true, atom);
-                      selectNext = (ValuePrimitive) root.fields.getOpt("gap");
+                      selectNext = (FieldPrimitive) root.fields.getOpt("gap");
                     } else {
                       nextWhatever = type.front.get(key.indexAfter);
                     }
@@ -189,20 +189,20 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
                   // Place everything starting from the bottom
                   rootPlacement.replace(context, root);
-                  if (childPlacement instanceof ValueAtom)
+                  if (childPlacement instanceof FieldAtom)
                     context.history.apply(
-                        context, new ChangeNodeSet((ValueAtom) childPlacement, child));
-                  else if (childPlacement instanceof ValueArray)
+                        context, new ChangeNodeSet((FieldAtom) childPlacement, child));
+                  else if (childPlacement instanceof FieldArray)
                     context.history.apply(
                         context,
                         new ChangeArray(
-                            (ValueArray) childPlacement, 0, 0, ImmutableList.of(child)));
+                            (FieldArray) childPlacement, 0, 0, ImmutableList.of(child)));
                   else throw new DeadCode();
                   if (child2Placement != null) child2Placement.replace(context, child2);
 
                   // Select and dump remainder
-                  if (selectNext instanceof ValueAtom
-                      && ((ValueAtom) selectNext).data.visual.selectAnyChild(context)) {
+                  if (selectNext instanceof FieldAtom
+                      && ((FieldAtom) selectNext).data.visual.selectAnyChild(context)) {
                   } else selectNext.selectInto(context);
                   if (!remainder.isEmpty()) context.cursor.receiveText(context, remainder);
                 }
@@ -225,13 +225,13 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
               // Get or build gap grammar
               final AtomType childType =
-                  ((ValueArray) suffixSelf.fields.getOpt("value")).data.get(0).type;
+                  ((FieldArray) suffixSelf.fields.getOpt("value")).data.get(0).type;
               final Grammar grammar =
                   store.get(
                       () -> {
                         final Union union = new Union();
                         for (final FreeAtomType type : context.syntax.types.values()) {
-                          final Pair<Value.Parent, Atom> replacementPoint =
+                          final Pair<Field.Parent, Atom> replacementPoint =
                               findReplacementPoint(context, self.valueParentRef, type);
                           if (replacementPoint.first == null) continue;
                           for (final GapKey key : gapKeys(syntax, type, childType)) {
@@ -283,11 +283,11 @@ public class SuffixGapAtomType extends BaseGapAtomType {
               return ImmutableList.of();
             }
 
-            private Pair<Value.Parent, Atom> findReplacementPoint(
-                final Context context, final Value.Parent start, final FreeAtomType type) {
-              Value.Parent parent = null;
+            private Pair<Field.Parent, Atom> findReplacementPoint(
+                    final Context context, final Field.Parent start, final FreeAtomType type) {
+              Field.Parent parent = null;
               Atom child = null;
-              Value.Parent test = start;
+              Field.Parent test = start;
               // Atom testAtom = test.value().parent().atom();
               Atom testAtom = null;
               while (test != null) {
@@ -319,7 +319,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
               final Context context, final Atom self, final String string, final Common.UserData userData
             ) {
               if (self.visual != null && string.isEmpty()) {
-                self.valueParentRef.replace(context, ((ValueArray) self.fields.getOpt("value")).data.get(0));
+                self.valueParentRef.replace(context, ((FieldArray) self.fields.getOpt("value")).data.get(0));
               }
             }
           };
@@ -351,9 +351,9 @@ public class SuffixGapAtomType extends BaseGapAtomType {
         new TSMap<>(
             ImmutableMap.of(
                 "value",
-                new ValueArray(dataValue, ImmutableList.of(value)),
+                new FieldArray(dataValue, ImmutableList.of(value)),
                 "gap",
-                new ValuePrimitive(dataGap, ""))),
+                new FieldPrimitive(dataGap, ""))),
         raise);
   }
 
@@ -361,7 +361,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
     private final boolean raise;
 
     public SuffixGapAtom(
-        final AtomType type, final TSMap<String, Value> data, final boolean raise) {
+            final AtomType type, final TSMap<String, Field> data, final boolean raise) {
       super(type, data);
       this.raise = raise;
     }

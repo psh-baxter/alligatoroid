@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.syntax.back;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.FieldAtom;
 import com.zarbosoft.merman.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.editor.serialization.WriteState;
 import com.zarbosoft.merman.syntax.Syntax;
@@ -30,7 +30,7 @@ public class BackAtomSpec extends BaseBackAtomSpec {
       protected StackStore process(StackStore store) {
         final Atom value = store.stackTop();
         store = store.popStack();
-        return store.stackVarDoubleElement(id, new ValueAtom(BackAtomSpec.this, value));
+        return store.stackVarDoubleElement(id, new FieldAtom(BackAtomSpec.this, value));
       }
     };
   }

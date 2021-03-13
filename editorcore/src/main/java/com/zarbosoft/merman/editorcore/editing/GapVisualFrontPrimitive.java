@@ -2,8 +2,8 @@ package com.zarbosoft.merman.editorcore.editing;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.editor.visual.tags.FreeTag;
@@ -16,7 +16,7 @@ import org.pcollections.PSet;
 import java.util.stream.Collectors;
 
 public class GapVisualFrontPrimitive extends VisualFrontPrimitive {
-  private final TSMap<String, Value> data;
+  private final TSMap<String, Field> data;
   private final FrontGapBase spec;
 
   public GapVisualFrontPrimitive(
@@ -44,7 +44,7 @@ public class GapVisualFrontPrimitive extends VisualFrontPrimitive {
   }
 
   public class GapCursor extends PrimitiveCursor {
-    private final ValuePrimitive self;
+    private final FieldPrimitive self;
     private final GapCompletionEngine.State engineState;
     private TwoColumnChoicePage choicePage;
 

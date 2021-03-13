@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.syntax.back;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.editor.backevents.EObjectOpenEvent;
@@ -26,7 +26,6 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Iterator;
-import java.util.List;
 
 public class BackRecordSpec extends BaseBackArraySpec {
   /** Type/group name or null; null means any type */
@@ -72,7 +71,7 @@ public class BackRecordSpec extends BaseBackArraySpec {
         final TSList<Atom> temp = new TSList<>();
         store = store.popVarSingleList(temp);
         temp.reverse();
-        final ValueArray value = new ValueArray(BackRecordSpec.this, temp);
+        final FieldArray value = new FieldArray(BackRecordSpec.this, temp);
         return store.stackVarDoubleElement(id, value);
       }
     };

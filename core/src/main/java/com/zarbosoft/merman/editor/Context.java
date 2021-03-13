@@ -3,7 +3,7 @@ package com.zarbosoft.merman.editor;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.document.InvalidDocument;
-import com.zarbosoft.merman.document.values.Value;
+import com.zarbosoft.merman.document.values.Field;
 import com.zarbosoft.merman.editor.banner.Banner;
 import com.zarbosoft.merman.editor.details.Details;
 import com.zarbosoft.merman.editor.display.Display;
@@ -22,6 +22,7 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -218,7 +219,7 @@ public class Context {
 
                 @Override
                 public void setTransverseSpan(
-                        final Context context, final double ascent, final double descent) {
+                    final Context context, final double ascent, final double descent) {
                   scrollEnd = scrollStart + ascent + descent;
                   scrollVisible();
                 }
@@ -383,6 +384,10 @@ public class Context {
     clipboardEngine.getString(cb);
   }
 
+  /**
+   * @param path
+   * @return an atom or field
+   */
   public Object syntaxLocate(final Path path) {
     Object at = document.root;
     for (int i = 0; i < path.segments.size(); ++i) {
@@ -390,8 +395,8 @@ public class Context {
       if (at instanceof Atom) {
         at = ((Atom) at).syntaxLocateStep(segment);
         if (at == null) throw new InvalidPath(path.segments.sublist(0, i), path.segments);
-      } else if (at instanceof Value) {
-        at = ((Value) at).syntaxLocateStep(segment);
+      } else if (at instanceof Field) {
+        at = ((Field) at).syntaxLocateStep(segment);
         if (at == null) throw new InvalidPath(path.segments.sublist(0, i), path.segments);
       } else throw new Assertion();
     }
@@ -486,16 +491,16 @@ public class Context {
     idleLayBricks.starts.add(start);
   }
 
-  public void windowAdjustMinimalTo(final Value value) {
+  public void windowAdjustMinimalTo(final Field field) {
     // Check if the selection is a supertree of the current window
-    if (isSubtree(windowAtom, value.atomParentRef.atom())) {
-      windowToSupertree(value.atomParentRef.atom());
+    if (isSubtree(windowAtom, field.atomParentRef.atom())) {
+      windowToSupertree(field.atomParentRef.atom());
       return;
     }
 
     // Otherwise from the selection go towards the root to find the last parent where the selection
     // is still visible
-    Atom nextWindow = value.atomParentRef.atom();
+    Atom nextWindow = field.atomParentRef.atom();
     int depth = 0;
     while (true) {
       if (nextWindow == windowAtom) return;
@@ -663,7 +668,7 @@ public class Context {
   }
 
   public abstract static class HoverListener {
-    public abstract void hoverChanged(Context context, Hoverable selection);
+    public abstract void hoverChanged(Context context, Hoverable hover);
   }
 
   public abstract static class TagsListener {
@@ -732,17 +737,14 @@ public class Context {
       return 500;
     }
 
-    @Override
-    public boolean runImplementation(final IterationContext iterationContext) {
-      debugInHover = true;
+    /** @return nothing left to do, hover changed */
+    public ROPair<Boolean, Boolean> inner() {
       if (at == null || at.parent == null) {
-        debugInHover = false;
-        return false;
+        return new ROPair<>(false, false);
       }
       if (point == null) {
         hoverBrick = null;
-        debugInHover = false;
-        return false;
+        return new ROPair<>(false, false);
       }
       if (point.transverse < at.parent.transverseStart && at.parent.index > 0) {
         at = context.foreground.children.get(at.parent.index - 1).children.get(0);
@@ -760,17 +762,25 @@ public class Context {
         hover = at.hover(context, point);
         if (hover != old) {
           if (old != null) old.clear(context);
-          for (HoverListener l : hoverListeners.copy()) {
-            l.hoverChanged(context, hover);
-          }
         }
         hoverBrick = at;
         hoverIdle = null;
-        debugInHover = false;
-        return false;
+        return new ROPair<>(false, hover != old);
       }
+      return new ROPair<>(true, false);
+    }
+
+    @Override
+    public boolean runImplementation(final IterationContext iterationContext) {
+      debugInHover = true;
+      ROPair<Boolean, Boolean> res = inner();
       debugInHover = false;
-      return true;
+      if (res.second) {
+        for (HoverListener l : hoverListeners.copy()) {
+          l.hoverChanged(context, hover);
+        }
+      }
+      return res.first;
     }
 
     @Override

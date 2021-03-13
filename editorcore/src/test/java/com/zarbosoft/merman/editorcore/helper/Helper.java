@@ -6,10 +6,10 @@ import com.google.common.collect.Sets;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.document.Document;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldAtom;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.ClipboardEngine;
 import com.zarbosoft.merman.editor.Context;
@@ -46,17 +46,17 @@ import static com.zarbosoft.rendaw.common.Common.iterable;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Helper {
-  public static void dump(final Value value, final Writer writer) {
+  public static void dump(final Field field, final Writer writer) {
     uncheck(
         () -> {
-          if (value.getClass() == ValueArray.class) {
+          if (field.getClass() == FieldArray.class) {
             writer.arrayBegin();
-            ((ValueArray) value).data.stream().forEach(element -> dump(element, writer));
+            ((FieldArray) field).data.stream().forEach(element -> dump(element, writer));
             writer.arrayEnd();
-          } else if (value.getClass() == ValueAtom.class) {
-            dump(((ValueAtom) value).get(), writer);
-          } else if (value.getClass() == ValuePrimitive.class) {
-            writer.quotedPrimitive(((ValuePrimitive) value).get().getBytes(StandardCharsets.UTF_8));
+          } else if (field.getClass() == FieldAtom.class) {
+            dump(((FieldAtom) field).get(), writer);
+          } else if (field.getClass() == FieldPrimitive.class) {
+            writer.quotedPrimitive(((FieldPrimitive) field).get().getBytes(StandardCharsets.UTF_8));
           } else throw new DeadCode();
         });
   }
@@ -78,8 +78,8 @@ public class Helper {
         });
   }
 
-  public static void dump(final Value value) {
-    dump(value, new Writer(System.out, (byte) ' ', 4));
+  public static void dump(final Field field) {
+    dump(field, new Writer(System.out, (byte) ' ', 4));
     System.out.write('\n');
     System.out.flush();
   }
@@ -163,10 +163,10 @@ public class Helper {
     }
   }
 
-  public static void assertTreeEqual(final Value expected, final Value got) {
-    if (expected.getClass() == ValueArray.class) {
-      final ValueArray expectedValue = (ValueArray) expected;
-      final ValueArray gotValue = (ValueArray) got;
+  public static void assertTreeEqual(final Field expected, final Field got) {
+    if (expected.getClass() == FieldArray.class) {
+      final FieldArray expectedValue = (FieldArray) expected;
+      final FieldArray gotValue = (FieldArray) got;
       if (expectedValue.data.size() != gotValue.data.size())
         throw new AssertionError(
             String.format(
@@ -177,13 +177,13 @@ public class Helper {
         Atom second = gotValue.data.get(i);
         assertTreeEqual(first, second);
       }
-    } else if (expected.getClass() == ValueAtom.class) {
-      final ValueAtom expectedValue = (ValueAtom) expected;
-      final ValueAtom gotValue = (ValueAtom) got;
+    } else if (expected.getClass() == FieldAtom.class) {
+      final FieldAtom expectedValue = (FieldAtom) expected;
+      final FieldAtom gotValue = (FieldAtom) got;
       assertTreeEqual(expectedValue.get(), gotValue.get());
-    } else if (expected.getClass() == ValuePrimitive.class) {
-      final ValuePrimitive expectedValue = (ValuePrimitive) expected;
-      final ValuePrimitive gotValue = (ValuePrimitive) got;
+    } else if (expected.getClass() == FieldPrimitive.class) {
+      final FieldPrimitive expectedValue = (FieldPrimitive) expected;
+      final FieldPrimitive gotValue = (FieldPrimitive) got;
       if (!expectedValue.get().equals(gotValue.get()))
         throw new ComparisonFailure(
             String.format("Array length mismatch.\nAt: %s", got.getSyntaxPath()),
@@ -196,16 +196,16 @@ public class Helper {
               expected.getClass(), got.getClass(), got.getSyntaxPath()));
   }
 
-  public static void assertTreeEqual(final Context context, final Atom expected, final Value got) {
+  public static void assertTreeEqual(final Context context, final Atom expected, final Field got) {
     assertTreeEqual(
-        new ValueArray(
+        new FieldArray(
             (BaseBackArraySpec) context.syntax.root.fields.get("value"),
             ImmutableList.of(expected)),
         got);
   }
 
-  public static ValueArray rootArray(final Document doc) {
-    return (ValueArray) doc.root.fields.getOpt("value");
+  public static FieldArray rootArray(final Document doc) {
+    return (FieldArray) doc.root.fields.getOpt("value");
   }
 
   public static Context buildDoc(final Syntax syntax, final Atom... root) {
@@ -225,7 +225,7 @@ public class Helper {
                 new TSMap<>(
                     ImmutableMap.of(
                         "value",
-                        new ValueArray(
+                        new FieldArray(
                             (BaseBackArraySpec) syntax.root.fields.get("value"),
                             Arrays.asList(root))))));
     final Context context =

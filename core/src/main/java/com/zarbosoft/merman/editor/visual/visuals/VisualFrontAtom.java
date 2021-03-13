@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldAtom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.Visual;
@@ -10,8 +10,8 @@ import com.zarbosoft.merman.editor.visual.VisualParent;
 import com.zarbosoft.merman.syntax.symbol.Symbol;
 
 public class VisualFrontAtom extends VisualFrontAtomBase {
-  public final ValueAtom value;
-  private final ValueAtom.Listener dataListener;
+  public final FieldAtom value;
+  private final FieldAtom.Listener dataListener;
 
   @Override
   public void dispatch(VisualNestedDispatcher dispatcher) {
@@ -21,13 +21,13 @@ public class VisualFrontAtom extends VisualFrontAtomBase {
   public VisualFrontAtom(
           final Context context,
           final VisualParent parent,
-          final ValueAtom value,
+          final FieldAtom value,
           final int visualDepth,
           final int depthScore, Symbol ellipsis) {
     super(visualDepth, ellipsis);
     this.value = value;
     dataListener =
-        new ValueAtom.Listener() {
+        new FieldAtom.Listener() {
           @Override
           public void set(final Context context, final Atom atom) {
             VisualFrontAtom.this.set(context, atom);
@@ -49,7 +49,7 @@ public class VisualFrontAtom extends VisualFrontAtomBase {
   }
 
   @Override
-  protected Value value() {
+  protected Field value() {
     return value;
   }
 

@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.editorcore.editing;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.syntax.primitivepattern.Any;
 import com.zarbosoft.pidgoon.model.Node;
@@ -140,7 +140,7 @@ public class GapKey {
 
     // Parse string into primitive parts
     final Set<String> filled = new HashSet<>(type.fields.keySet());
-    final TSMap<String, Value> data = new TSMap<>();
+    final TSMap<String, Field> data = new TSMap<>();
     int at = 0;
     for (final FrontSpec front : iterable(frontIterator)) {
       final Grammar grammar = new Grammar();
@@ -163,7 +163,7 @@ public class GapKey {
       if (front instanceof FrontPrimitiveSpec) {
         data.putNew(
             front.field(),
-            new ValuePrimitive(
+            new FieldPrimitive(
                 ((FrontPrimitiveSpec) front).dataType,
                 string.substring(at, at + (int) longest.second.absolute)));
         filled.remove(front.field());

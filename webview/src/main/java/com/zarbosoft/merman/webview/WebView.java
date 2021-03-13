@@ -1,10 +1,14 @@
 package com.zarbosoft.merman.webview;
 
+import com.zarbosoft.merman.document.Atom;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Cursor;
+import com.zarbosoft.merman.editor.Hoverable;
 import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.IterationContext;
 import com.zarbosoft.merman.editor.IterationTask;
+import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
 import com.zarbosoft.merman.editor.hid.Key;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
@@ -16,6 +20,7 @@ import com.zarbosoft.merman.syntax.Syntax;
 import com.zarbosoft.merman.syntax.error.UnsupportedDirections;
 import com.zarbosoft.merman.syntax.style.ModelColor;
 import com.zarbosoft.merman.webview.display.JSDisplay;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import elemental2.dom.CSSProperties;
@@ -74,6 +79,7 @@ public class WebView {
           + "    writing-mode: vertical-lr;\n"
           + "}\n";
   private final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
+  public DragSelectState dragSelect;
   private boolean iterationPending = false;
   private Double iterationTimer = null;
   private IterationContext iterationContext = null;
@@ -163,49 +169,99 @@ public class WebView {
             new JSClipboardEngine(syntax.backType),
             serializer,
             i18n);
+    context.addHoverListener(
+        new Context.HoverListener() {
+          @Override
+          public void hoverChanged(Context context, Hoverable hover) {
+            if (hover != null && dragSelect != null) {
+              Path endPath = hover.getSyntaxPath();
+              if (!endPath.equals(dragSelect.end)) {
+                ROList<String> endPathList = endPath.toList();
+                ROList<String> startPathList = dragSelect.start.toList();
+                int longestMatch = startPathList.longestMatch(endPathList);
+                // If hover paths diverge, it's either
+                // - at two depths in a single tree (parent and child): both paths are for an atom,
+                // so longest match == parent == atom
+                // - at two subtrees of an array: longest submatch == array == field, next segment
+                // == int
+                Object base = context.syntaxLocate(new Path(endPathList.subUntil(longestMatch)));
+                if (base instanceof FieldArray) {
+                  int startIndex = Integer.parseInt(startPathList.get(longestMatch));
+                  int endIndex = Integer.parseInt(endPathList.get(longestMatch));
+                  if (endIndex < startIndex) {
+                    ((FieldArray) base).selectInto(context, true, endIndex, startIndex);
+                  } else {
+                    ((FieldArray) base).selectInto(context, false, startIndex, endIndex);
+                  }
+                } else if (base instanceof Atom) {
+                  ((Atom) base).valueParentRef.selectValue(context);
+                } else throw new Assertion();
+              }
+            }
+          }
+        });
     context.keyListener =
         new Context.KeyListener() {
           @Override
           public boolean handleKey(Context context, HIDEvent e) {
-            if (!e.press) return false;
-            switch (e.key) {
-              case MOUSE_1:
-                {
-                  if (context.hover != null) {
-                    context.hover.select(context);
+            if (!e.press) {
+              switch (e.key) {
+                case MOUSE_1:
+                  {
+                    if (dragSelect != null) {
+                      dragSelect = null;
+                      return true;
+                    }
                   }
-                  return true;
-                }
-              case C:
-                {
-                  if (context.cursor != null
-                      && (e.modifiers.contains(Key.CONTROL)
-                          || e.modifiers.contains(Key.CONTROL_LEFT)
-                          || e.modifiers.contains(Key.CONTROL_RIGHT))) {
-                    context.cursor.dispatch(
-                        new Cursor.Dispatcher() {
-                          @Override
-                          public void handle(VisualFrontArray.ArrayCursor cursor) {
-                            context.copy(
-                                cursor.visual.value.data.sublist(
-                                    cursor.beginIndex, cursor.endIndex + 1));
-                          }
-
-                          @Override
-                          public void handle(VisualFrontAtomBase.NestedCursor cursor) {
-                            context.copy(TSList.of(cursor.base.atomGet()));
-                          }
-
-                          @Override
-                          public void handle(VisualFrontPrimitive.PrimitiveCursor cursor) {
-                            context.copy(
-                                cursor.visualPrimitive.value.data.substring(
-                                    cursor.range.beginOffset, cursor.range.endOffset));
-                          }
-                        });
+                default:
+                  return false;
+              }
+            } else {
+              switch (e.key) {
+                case MOUSE_1:
+                  {
+                    if (context.hover != null) {
+                      Path path = context.hover.getSyntaxPath();
+                      context.hover.select(context);
+                      dragSelect = new DragSelectState(path);
+                      return true;
+                    } else if (context.cursor != null) {
+                      Path path = context.cursor.getSyntaxPath();
+                      dragSelect = new DragSelectState(path);
+                      return true;
+                    }
                   }
-                  return true;
-                }
+                case C:
+                  {
+                    if (context.cursor != null
+                        && (e.modifiers.contains(Key.CONTROL)
+                            || e.modifiers.contains(Key.CONTROL_LEFT)
+                            || e.modifiers.contains(Key.CONTROL_RIGHT))) {
+                      context.cursor.dispatch(
+                          new Cursor.Dispatcher() {
+                            @Override
+                            public void handle(VisualFrontArray.ArrayCursor cursor) {
+                              context.copy(
+                                  cursor.visual.value.data.sublist(
+                                      cursor.beginIndex, cursor.endIndex + 1));
+                            }
+
+                            @Override
+                            public void handle(VisualFrontAtomBase.NestedCursor cursor) {
+                              context.copy(TSList.of(cursor.base.atomGet()));
+                            }
+
+                            @Override
+                            public void handle(VisualFrontPrimitive.PrimitiveCursor cursor) {
+                              context.copy(
+                                  cursor.visualPrimitive.value.data.substring(
+                                      cursor.range.beginOffset, cursor.range.endOffset));
+                            }
+                          });
+                    }
+                    return true;
+                  }
+              }
             }
             return false;
           }
@@ -214,6 +270,9 @@ public class WebView {
         () -> {
           if (context.hover != null) {
             context.clearHover();
+          }
+          if (dragSelect != null) {
+            dragSelect = null;
           }
         });
     DomGlobal.document.addEventListener(
@@ -278,6 +337,15 @@ public class WebView {
     } finally {
       iterationPending = false;
       iterationTimer = null;
+    }
+  }
+
+  public static class DragSelectState {
+    public final Path start;
+    public Path end;
+
+    public DragSelectState(Path start) {
+      this.start = start;
     }
   }
 }

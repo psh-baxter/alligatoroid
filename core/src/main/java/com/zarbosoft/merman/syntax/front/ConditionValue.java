@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.syntax.front;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.condition.ConditionAttachment;
 import com.zarbosoft.rendaw.common.DeadCode;
@@ -21,11 +21,11 @@ public class ConditionValue extends ConditionType {
 
   @Override
   public ConditionAttachment create(final Context context, final Atom atom) {
-    final Value value = atom.fields.getOpt(field);
-    if (value instanceof ValuePrimitive) {
-      return new PrimitiveCondition(invert, (ValuePrimitive) value);
-    } else if (value instanceof ValueArray) {
-      return new ArrayCondition(invert, (ValueArray) value);
+    final Field field = atom.fields.getOpt(this.field);
+    if (field instanceof FieldPrimitive) {
+      return new PrimitiveCondition(invert, (FieldPrimitive) field);
+    } else if (field instanceof FieldArray) {
+      return new ArrayCondition(invert, (FieldArray) field);
     } else throw new DeadCode();
   }
 
@@ -52,10 +52,10 @@ public class ConditionValue extends ConditionType {
   }
 
   private static class PrimitiveCondition extends ConditionAttachment
-      implements ValuePrimitive.Listener {
-    private final ValuePrimitive value;
+      implements FieldPrimitive.Listener {
+    private final FieldPrimitive value;
 
-    PrimitiveCondition(boolean invert, ValuePrimitive value) {
+    PrimitiveCondition(boolean invert, FieldPrimitive value) {
       super(invert);
       this.value = value;
     }
@@ -77,16 +77,16 @@ public class ConditionValue extends ConditionType {
 
     @Override
     public void removed(final Context context, final int index, final int count) {
-      if (((ValuePrimitive) value).get().isEmpty()) {
+      if (((FieldPrimitive) value).get().isEmpty()) {
         setState(context, false);
       }
     }
   }
 
-  private static class ArrayCondition extends ConditionAttachment implements ValueArray.Listener {
-    private final ValueArray value;
+  private static class ArrayCondition extends ConditionAttachment implements FieldArray.Listener {
+    private final FieldArray value;
 
-    ArrayCondition(boolean invert, ValueArray value) {
+    ArrayCondition(boolean invert, FieldArray value) {
       super(invert);
       this.value = value;
     }
@@ -97,7 +97,7 @@ public class ConditionValue extends ConditionType {
     @Override
     public void changed(
         final Context context, final int index, final int remove, final ROList<Atom> add) {
-      if (((ValueArray) value).data.isEmpty()) {
+      if (((FieldArray) value).data.isEmpty()) {
         setState(context, false);
       } else setState(context, true);
     }

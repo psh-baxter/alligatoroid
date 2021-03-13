@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.syntax.back;
 
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.syntax.primitivepattern.Pattern;
 import com.zarbosoft.rendaw.common.ROMap;
@@ -25,7 +25,7 @@ public abstract class BaseBackPrimitiveSpec extends BackSpecData {
     else matcher = null;
   }
 
-  public ValuePrimitive get(final ROMap<String, Value> data) {
-    return (ValuePrimitive) data.getOpt(id);
+  public FieldPrimitive get(final ROMap<String, Field> data) {
+    return (FieldPrimitive) data.getOpt(id);
   }
 }

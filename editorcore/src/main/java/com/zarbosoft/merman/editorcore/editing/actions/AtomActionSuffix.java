@@ -2,7 +2,7 @@ package com.zarbosoft.merman.editorcore.editing.actions;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
@@ -27,7 +27,7 @@ public class AtomActionSuffix extends EditAction {
     edit.atomSet(context, edit.history, base, gap);
     edit.history.apply(
         context,
-        new ChangeArray((ValueArray) gap.fields.getOpt("value"), 0, 0, ImmutableList.of(old)));
+        new ChangeArray((FieldArray) gap.fields.getOpt("value"), 0, 0, ImmutableList.of(old)));
     gap.fields.getOpt("gap").selectInto(context);
     return true;
   }

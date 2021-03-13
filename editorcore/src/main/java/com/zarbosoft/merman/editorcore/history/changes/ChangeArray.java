@@ -1,24 +1,23 @@
 package com.zarbosoft.merman.editorcore.history.changes;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editorcore.history.Change;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class ChangeArray extends Change {
 
-  private final ValueArray value;
+  private final FieldArray value;
   private final TSList<Atom> add = new TSList<>();
   private int index;
   private int remove;
 
   public ChangeArray(
-      final ValueArray value, final int index, final int remove, final ROList<Atom> add) {
+          final FieldArray value, final int index, final int remove, final ROList<Atom> add) {
     this.value = value;
     this.index = index;
     this.remove = remove;
@@ -56,10 +55,10 @@ public class ChangeArray extends Change {
     add.stream()
         .forEach(
             v -> {
-              v.setValueParentRef(new ValueArray.ArrayParent(value));
+              v.setValueParentRef(new FieldArray.ArrayParent(value));
             });
     value.renumber(index);
-    for (final ValueArray.Listener listener : value.listeners) {
+    for (final FieldArray.Listener listener : value.listeners) {
       listener.changed(context, index, remove, add);
     }
     return reverse;

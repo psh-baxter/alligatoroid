@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.FieldAtom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
@@ -186,9 +186,9 @@ public class TestActionsNested {
                 .add("first", new TreeBuilder(infinity).build())
                 .add("second", syntax.gap.create())
                 .build());
-    ((ValueAtom) context.syntaxLocate(new Path("value", "0", "first"))).visual.select(context);
+    ((FieldAtom) context.syntaxLocate(new Path("value", "0", "first"))).visual.select(context);
     Helper.act(context, "copy");
-    ((ValueAtom) context.syntaxLocate(new Path("value", "0", "second"))).visual.select(context);
+    ((FieldAtom) context.syntaxLocate(new Path("value", "0", "second"))).visual.select(context);
     Helper.act(context, "paste");
     assertTreeEqual(
         context,
@@ -329,7 +329,7 @@ public class TestActionsNested {
         buildDoc(
             syntax,
             new TreeBuilder(factorial).add("value", new TreeBuilder(infinity).build()).build());
-    ((ValueAtom) context.syntaxLocate(new Path("value", "0", "value"))).visual.select(context);
+    ((FieldAtom) context.syntaxLocate(new Path("value", "0", "value"))).visual.select(context);
     Helper.act(context, "cut");
     assertTreeEqual(
         context,
@@ -471,7 +471,7 @@ public class TestActionsNested {
         buildDoc(
             syntax,
             new TreeBuilder(factorial).add("value", new TreeBuilder(infinity).build()).build());
-    ((ValueAtom) context.syntaxLocate(new Path("value", "0", "value"))).visual.select(context);
+    ((FieldAtom) context.syntaxLocate(new Path("value", "0", "value"))).visual.select(context);
     Helper.act(context, "prefix");
     assertTreeEqual(
         context,
@@ -613,7 +613,7 @@ public class TestActionsNested {
         buildDoc(
             syntax,
             new TreeBuilder(factorial).add("value", new TreeBuilder(infinity).build()).build());
-    ((ValueAtom) context.syntaxLocate(new Path("value", "0", "value"))).visual.select(context);
+    ((FieldAtom) context.syntaxLocate(new Path("value", "0", "value"))).visual.select(context);
     Helper.act(context, "suffix");
     assertTreeEqual(
         context,

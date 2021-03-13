@@ -2,7 +2,7 @@ package com.zarbosoft.merman.editorcore.editing.actions;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editorcore.editing.BaseGapAtomType;
@@ -37,7 +37,7 @@ public class ArrayActionSuffix extends EditAction {
     edit.history.apply(
         context,
         new ChangeArray(
-            (ValueArray) gap.fields.get(BaseGapAtomType.GAP_PRIMITIVE_KEY), 0, 0, transplant));
+            (FieldArray) gap.fields.get(BaseGapAtomType.GAP_PRIMITIVE_KEY), 0, 0, transplant));
     gap.fields.getOpt("gap").selectInto(context);
     return true;
   }

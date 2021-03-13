@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.editorcore.editing.actions;
 
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.editing.EditingExtension;
@@ -25,7 +25,7 @@ public class PrimitiveActionPaste extends EditAction {
     context.uncopyString(
         text -> {
           if (text == null) return;
-          ValuePrimitive value = cursor.visualPrimitive.value;
+          FieldPrimitive value = cursor.visualPrimitive.value;
           if (cursor.range.beginOffset != cursor.range.endOffset)
             edit.history.apply(
                 context,

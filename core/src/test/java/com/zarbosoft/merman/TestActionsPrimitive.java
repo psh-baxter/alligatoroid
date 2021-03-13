@@ -1,7 +1,7 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
@@ -43,7 +43,7 @@ public class TestActionsPrimitive {
   public void testNext() {
     final Atom target =
         new TreeBuilder(MiscSyntax.doubleQuoted).add("first", "").add("second", "").build();
-    final ValuePrimitive value = (ValuePrimitive) target.fields.getOpt("first");
+    final FieldPrimitive value = (FieldPrimitive) target.fields.getOpt("first");
     new GeneralTestWizard(MiscSyntax.syntax,  target)
         .run(context -> value.selectInto(context))
         .act("next")
@@ -58,7 +58,7 @@ public class TestActionsPrimitive {
   public void testPrevious() {
     final Atom target =
         new TreeBuilder(MiscSyntax.doubleQuoted).add("first", "").add("second", "").build();
-    final ValuePrimitive value = (ValuePrimitive) target.fields.getOpt("second");
+    final FieldPrimitive value = (FieldPrimitive) target.fields.getOpt("second");
     new GeneralTestWizard(MiscSyntax.syntax,  target)
         .run(context -> value.selectInto(context))
         .act("previous")
@@ -326,7 +326,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
-                ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
+                ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 2, 2))
         .act("gather_next")
         .act("gather_next")
@@ -339,7 +339,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
-                ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
+                ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 2, 2))
         .act("gather_next")
         .act("gather_next")
@@ -408,7 +408,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
-                ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
+                ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 5, 5))
         .act("gather_previous_line")
         .run(context -> assertSelection(context, 1, 5));
@@ -420,7 +420,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
-                ((ValuePrimitive) primitiveAtom.fields.getOpt("value"))
+                ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 4, 4))
         .act("gather_previous_line")
         .run(context -> assertSelection(context, 0, 4));

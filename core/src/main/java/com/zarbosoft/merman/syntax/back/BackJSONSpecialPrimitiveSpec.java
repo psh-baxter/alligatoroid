@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.syntax.back;
 
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.I18nEngine;
 import com.zarbosoft.merman.editor.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.editor.serialization.EventConsumer;
@@ -33,7 +33,7 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
       protected StackStore process(StackStore store) {
         return store.stackVarDoubleElement(
             id,
-            new ValuePrimitive(
+            new FieldPrimitive(
                 BackJSONSpecialPrimitiveSpec.this, ((JSpecialPrimitiveEvent) store.top()).value));
       }
     };

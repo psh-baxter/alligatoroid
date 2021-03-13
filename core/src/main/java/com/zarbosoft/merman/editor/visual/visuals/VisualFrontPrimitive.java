@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Cursor;
@@ -32,11 +32,11 @@ import java.util.function.Function;
 import static com.zarbosoft.merman.syntax.style.Style.SplitMode.ALWAYS;
 
 public class VisualFrontPrimitive extends Visual implements VisualLeaf {
-  public final ValuePrimitive value;
+  public final FieldPrimitive value;
   // INVARIANT: Leaf nodes must always create at least one brick
   // INVARIANT: Always at least one line
   // TODO index line offsets for faster insert/remove
-  private final ValuePrimitive.Listener dataListener;
+  private final FieldPrimitive.Listener dataListener;
   private final FrontPrimitiveSpec spec;
   public VisualParent parent;
   public int brickCount = 0;
@@ -49,7 +49,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       final Context context,
       final VisualParent parent,
       FrontPrimitiveSpec frontPrimitiveSpec,
-      final ValuePrimitive value,
+      final FieldPrimitive value,
       final int visualDepth) {
     super(visualDepth);
     this.parent = parent;
@@ -410,13 +410,13 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   public static class PrimitiveSelectionState implements SelectionState {
 
-    private final ValuePrimitive value;
+    private final FieldPrimitive value;
     private final int beginOffset;
     private final int endOffset;
     private final boolean leadFirst;
 
     public PrimitiveSelectionState(
-        final ValuePrimitive value,
+        final FieldPrimitive value,
         final boolean leadFirst,
         final int beginOffset,
         final int endOffset) {
@@ -445,7 +445,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   public static class PrimitiveCursor extends Cursor {
     public final RangeAttachment range;
     public final VisualFrontPrimitive visualPrimitive;
-    private final ValuePrimitive.Listener clusterListener;
+    private final FieldPrimitive.Listener clusterListener;
     private final TSList<Action> actions;
     I18nEngine.Walker clusterIterator;
 
@@ -588,7 +588,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       dispatcher.handle(this);
     }
 
-    private static class ClusterIteratorUpdater implements ValuePrimitive.Listener {
+    private static class ClusterIteratorUpdater implements FieldPrimitive.Listener {
       private final VisualFrontPrimitive visualPrimitive;
       private final PrimitiveCursor primitiveCursor;
 
@@ -615,7 +615,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
   }
 
-  private static class DataListener implements ValuePrimitive.Listener {
+  private static class DataListener implements FieldPrimitive.Listener {
     private final VisualFrontPrimitive visualFrontPrimitive;
 
     public DataListener(VisualFrontPrimitive visualFrontPrimitive) {
@@ -1493,13 +1493,13 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   }
 
   public static class PrimitiveHoverable extends Hoverable {
-    private final VisualFrontPrimitive visualFrontPrimitive;
+    private final VisualFrontPrimitive visual;
     RangeAttachment range;
 
-    PrimitiveHoverable(VisualFrontPrimitive visualFrontPrimitive, final Context context) {
-      range = new RangeAttachment(visualFrontPrimitive, false);
+    PrimitiveHoverable(VisualFrontPrimitive visual, final Context context) {
+      range = new RangeAttachment(visual, false);
       range.setStyle(context, context.hoverStyle.obbox);
-      this.visualFrontPrimitive = visualFrontPrimitive;
+      this.visual = visual;
     }
 
     public void setPosition(final Context context, final int offset) {
@@ -1507,38 +1507,43 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
+    public Path getSyntaxPath() {
+      return visual.value.getSyntaxPath().add(String.valueOf(range.beginOffset));
+    }
+
+    @Override
     public void clear(final Context context) {
       range.destroy(context);
-      visualFrontPrimitive.hoverable = null;
+      visual.hoverable = null;
     }
 
     @Override
     public void select(final Context context) {
-      visualFrontPrimitive.select(context, true, range.beginOffset, range.endOffset);
+      visual.select(context, true, range.beginOffset, range.endOffset);
     }
 
     @Override
     public VisualAtom atom() {
-      return visualFrontPrimitive.parent.atomVisual();
+      return visual.parent.atomVisual();
     }
 
     @Override
     public Visual visual() {
-      return visualFrontPrimitive;
+      return visual;
     }
   }
 
   public static class Line implements BrickInterface {
     public final boolean hard;
-    private final VisualFrontPrimitive visualFrontPrimitive;
+    private final VisualFrontPrimitive visual;
     public int offset;
     public String text;
     public BrickLine brick;
     public int index;
 
-    private Line(VisualFrontPrimitive visualFrontPrimitive, final boolean hard) {
+    private Line(VisualFrontPrimitive visual, final boolean hard) {
       this.hard = hard;
-      this.visualFrontPrimitive = visualFrontPrimitive;
+      this.visual = visual;
     }
 
     public void destroy(final Context context) {
@@ -1558,21 +1563,20 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     public Hoverable hover(final Context context, final Vector point) {
-      if (visualFrontPrimitive.selection == null) {
-        final Hoverable out = visualFrontPrimitive.hover(context, point);
+      if (visual.selection == null) {
+        final Hoverable out = visual.hover(context, point);
         if (out != null) return out;
       }
-      if (visualFrontPrimitive.hoverable == null) {
-        visualFrontPrimitive.hoverable =
-            new VisualFrontPrimitive.PrimitiveHoverable(visualFrontPrimitive, context);
+      if (visual.hoverable == null) {
+        visual.hoverable = new VisualFrontPrimitive.PrimitiveHoverable(visual, context);
       }
-      visualFrontPrimitive.hoverable.setPosition(context, offset + brick.getUnder(context, point));
-      return visualFrontPrimitive.hoverable;
+      visual.hoverable.setPosition(context, offset + brick.getUnder(context, point));
+      return visual.hoverable;
     }
 
     @Override
     public VisualLeaf getVisual() {
-      return visualFrontPrimitive;
+      return visual;
     }
 
     @Override
@@ -1581,17 +1585,17 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     public Brick createPreviousBrick(final Context context) {
-      if (index == 0) return visualFrontPrimitive.parent.createPreviousBrick(context);
-      return visualFrontPrimitive.lines.get(index - 1).createBrick(context);
+      if (index == 0) return visual.parent.createPreviousBrick(context);
+      return visual.lines.get(index - 1).createBrick(context);
     }
 
     public Brick createBrick(final Context context) {
       if (brick != null) return null;
       createBrickInternal(context);
-      if (visualFrontPrimitive.selection != null
-          && (visualFrontPrimitive.selection.range.beginLine == Line.this
-              || visualFrontPrimitive.selection.range.endLine == Line.this))
-        visualFrontPrimitive.selection.range.nudge(context);
+      if (visual.selection != null
+          && (visual.selection.range.beginLine == Line.this
+              || visual.selection.range.endLine == Line.this))
+        visual.selection.range.nudge(context);
       return brick;
     }
 
@@ -1600,12 +1604,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
           new BrickLine(
               context,
               this,
-              index == 0 ? visualFrontPrimitive.spec.splitMode : ALWAYS,
+              index == 0 ? visual.spec.splitMode : ALWAYS,
               index == 0
-                  ? visualFrontPrimitive.spec.firstStyle
-                  : hard
-                      ? visualFrontPrimitive.spec.hardStyle
-                      : visualFrontPrimitive.spec.softStyle);
+                  ? visual.spec.firstStyle
+                  : hard ? visual.spec.hardStyle : visual.spec.softStyle);
       brick.setText(context, text);
       return brick;
     }
@@ -1616,10 +1618,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     public Brick createNextBrick(final Context context) {
-      if (index == visualFrontPrimitive.lines.size() - 1) {
-        return visualFrontPrimitive.parent.createNextBrick(context);
+      if (index == visual.lines.size() - 1) {
+        return visual.parent.createNextBrick(context);
       }
-      return visualFrontPrimitive.lines.get(index + 1).createBrick(context);
+      return visual.lines.get(index + 1).createBrick(context);
     }
 
     @Override
@@ -1629,7 +1631,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public Alignment findAlignment(String alignment) {
-      return visualFrontPrimitive.parent.atomVisual().findAlignment(alignment);
+      return visual.parent.atomVisual().findAlignment(alignment);
     }
 
     public Brick createOrGetBrick(final Context context) {

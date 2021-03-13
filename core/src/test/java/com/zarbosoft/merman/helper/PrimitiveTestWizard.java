@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontPrimitive;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -17,7 +17,7 @@ public class PrimitiveTestWizard {
                 false, new TreeBuilder(PrimitiveSyntax.primitive).add("value", string).build());
     inner.context.retryExpandFactor = 1.05;
     this.primitive =
-        ((ValuePrimitive)
+        ((FieldPrimitive)
                 Helper.rootArray(inner.context.document).data.get(0).fields.getOpt("value"))
             .visual;
   }

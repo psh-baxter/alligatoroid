@@ -1,14 +1,14 @@
 package com.zarbosoft.merman.editorcore.history.changes;
 
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editorcore.history.Change;
 
 public class ChangePrimitiveSet extends Change {
-	private final ValuePrimitive data;
+	private final FieldPrimitive data;
 	private String value;
 
-	public ChangePrimitiveSet(final ValuePrimitive data, final String value) {
+	public ChangePrimitiveSet(final FieldPrimitive data, final String value) {
 		this.data = data;
 		this.value = value;
 	}
@@ -31,7 +31,7 @@ public class ChangePrimitiveSet extends Change {
 	public Change apply(final Context context) {
 		final Change reverse = new ChangePrimitiveSet(data, data.data.toString());
 		data.data = new StringBuilder(value);
-		for (final ValuePrimitive.Listener listener : data.listeners)
+		for (final FieldPrimitive.Listener listener : data.listeners)
 			listener.set(context, value);
 		return reverse;
 	}

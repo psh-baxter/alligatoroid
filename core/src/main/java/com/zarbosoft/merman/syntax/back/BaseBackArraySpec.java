@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.syntax.back;
 
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -13,11 +13,11 @@ public abstract class BaseBackArraySpec extends BackSpecData {
 
   public abstract String elementAtomType();
 
-  public Path getPath(final ValueArray value, final int actualIndex) {
+  public Path getPath(final FieldArray value, final int actualIndex) {
     return value.getSyntaxPath().add(Integer.toString( actualIndex));
   }
 
-  public ValueArray get(final TSMap<String, Value> data) {
-    return (ValueArray) data.getOpt(id);
+  public FieldArray get(final TSMap<String, Field> data) {
+    return (FieldArray) data.getOpt(id);
   }
 }

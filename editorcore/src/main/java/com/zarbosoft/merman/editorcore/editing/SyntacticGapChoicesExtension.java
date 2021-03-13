@@ -2,10 +2,10 @@ package com.zarbosoft.merman.editorcore.editing;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldAtom;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editorcore.editing.gap.GapAtomType;
 import com.zarbosoft.merman.editorcore.editing.suffixgap.SuffixGapAtomType;
@@ -141,9 +141,9 @@ public class SyntacticGapChoicesExtension {
      *
      * @return First is root of tree to place, second is value where cursor goes after placement
      */
-    private Value findSelectNext(
+    private Field findSelectNext(
         GapKey.ParseResult parsed, GapKey key, Atom atom, FreeAtomType type) {
-      Value selectNext = null;
+      Field selectNext = null;
       FrontSpec selectNextFront = null;
       if (parsed.nextPrimitive == null) {
         if (key.indexAfter == -1) {
@@ -177,20 +177,20 @@ public class SyntacticGapChoicesExtension {
 
                   /// Find the selection/remainder entry point
                   Atom generatedRoot = parsed.atom;
-                  Value selectNext = findSelectNext(parsed, key, generatedRoot, type);
+                  Field selectNext = findSelectNext(parsed, key, generatedRoot, type);
 
                   /// Place the atom
                   if (selectNext == null) {
                     generatedRoot = context.syntax.suffixGap.create(true, generatedRoot);
-                    selectNext = (ValuePrimitive) generatedRoot.fields.getOpt("gap");
+                    selectNext = (FieldPrimitive) generatedRoot.fields.getOpt("gap");
                   } else {
                     generatedRoot = parsed.atom;
                   }
                   gap.parent.replace(context, generatedRoot);
 
                   /// Select and dump remainder
-                  if (selectNext instanceof ValueAtom
-                      && ((ValueAtom) selectNext).data.visual.selectAnyChild(context)) {
+                  if (selectNext instanceof FieldAtom
+                      && ((FieldAtom) selectNext).data.visual.selectAnyChild(context)) {
                   } else selectNext.selectInto(context);
                   if (!parsed.remainder.isEmpty())
                     context.cursor.receiveText(context, parsed.remainder);
@@ -321,9 +321,9 @@ public class SyntacticGapChoicesExtension {
               new SyntacticGapChoice(type, key) {
                 @Override
                 public void choose(Context context) {
-                  ValueArray precedingValue = (ValueArray) gap.fields.getOpt("value");
+                  FieldArray precedingValue = (FieldArray) gap.fields.getOpt("value");
 
-                  Value.Parent placeGeneratedAt = gap.parent;
+                  Field.Parent placeGeneratedAt = gap.parent;
 
                   /// Parse text into atom as able
                   final GapKey.ParseResult parsed = key.parse(context, type, state.currentText);
@@ -332,7 +332,7 @@ public class SyntacticGapChoicesExtension {
 
                   /// Find the selection/remainder entry point
                   Atom generatedRoot = parsed.atom;
-                  Value selectNext = findSelectNext(parsed, key, generatedRoot, type);
+                  Field selectNext = findSelectNext(parsed, key, generatedRoot, type);
 
                   /// Place everything starting from the bottom
                   List<Atom> unconsumed =
@@ -347,29 +347,29 @@ public class SyntacticGapChoicesExtension {
                     unconsumed.add(generatedRoot);
                     generatedRoot = context.syntax.suffixGap.create(true, unconsumed);
                     if (selectNext == null)
-                      selectNext = (ValuePrimitive) generatedRoot.fields.getOpt("gap");
+                      selectNext = (FieldPrimitive) generatedRoot.fields.getOpt("gap");
                   } else {
                     generatedRoot = parsed.atom;
                   }
                   placeGeneratedAt.replace(context, generatedRoot);
                   // Place consumed preceding atoms
                   for (Map.Entry<FrontSpec, Placement> entry : precedingPlacements.entries()) {
-                    Value dest = atom.fields.get(entry.getKey().field());
-                    if (dest instanceof ValueAtom)
+                    Field dest = atom.fields.get(entry.getKey().field());
+                    if (dest instanceof FieldAtom)
                       context.history.apply(
                           context,
-                          new ChangeNodeSet((ValueAtom) dest, ((PlaceAtom) entry.getValue()).data));
-                    else if (dest instanceof ValueArray)
+                          new ChangeNodeSet((FieldAtom) dest, ((PlaceAtom) entry.getValue()).data));
+                    else if (dest instanceof FieldArray)
                       context.history.apply(
                           context,
                           new ChangeArray(
-                              (ValueArray) dest, 0, 0, ((PlaceArray) entry.getValue()).data));
+                              (FieldArray) dest, 0, 0, ((PlaceArray) entry.getValue()).data));
                     else throw new DeadCode();
                   }
 
                   /// Select and dump remainder of the text
-                  if (selectNext instanceof ValueAtom
-                      && ((ValueAtom) selectNext).data.visual.selectAnyChild(context)) {
+                  if (selectNext instanceof FieldAtom
+                      && ((FieldAtom) selectNext).data.visual.selectAnyChild(context)) {
                   } else selectNext.selectInto(context);
                   if (!remainder.isEmpty()) context.cursor.receiveText(context, remainder);
                 }

@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.wall.Attachment;
 import com.zarbosoft.merman.editor.wall.Brick;
@@ -14,7 +14,6 @@ import com.zarbosoft.merman.editorcore.helper.TypeBuilder;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
 import com.zarbosoft.merman.syntax.FreeAtomType;
 import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.rendaw.common.Common;
 import org.junit.Test;
 
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -30,7 +29,7 @@ public class TestAttachments {
         Syntax syntax = new SyntaxBuilder("any").type(text).group("any", new GroupBuilder().type(text).build()).build();
 
         final Atom textAtom = new TreeBuilder(text).add("value", "hi\ndog").build();
-        final ValuePrimitive value = (ValuePrimitive) textAtom.fields.getOpt("value");
+        final FieldPrimitive value = (FieldPrimitive) textAtom.fields.getOpt("value");
         final Brick[] lastBrick = {null};
         final Attachment listener = new Attachment() {
             @Override

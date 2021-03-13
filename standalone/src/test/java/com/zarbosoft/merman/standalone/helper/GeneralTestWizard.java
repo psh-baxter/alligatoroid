@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.standalone.helper;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.banner.BannerMessage;
@@ -173,8 +173,8 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard checkArrayTree(final Atom... atoms) {
-    final ValueArray documentAtoms =
-        (ValueArray) inner.context.document.root.fields.getOpt("value");
+    final FieldArray documentAtoms =
+        (FieldArray) inner.context.document.root.fields.getOpt("value");
     assertThat(documentAtoms.data.size(), equalTo(atoms.length));
     for (int i = 0; i < atoms.length; ++i) {
       Atom first = atoms[i];

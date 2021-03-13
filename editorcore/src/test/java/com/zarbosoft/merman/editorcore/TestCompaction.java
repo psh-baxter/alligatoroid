@@ -2,8 +2,8 @@ package com.zarbosoft.merman.editorcore;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.visual.tags.FreeTag;
 import com.zarbosoft.merman.editor.visual.tags.StateTag;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
@@ -162,7 +162,7 @@ public class TestCompaction {
         new TreeBuilder(low)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
             .build();
-    final ValueArray array = (ValueArray) lowAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) lowAtom.fields.getOpt("value");
     new GeneralTestWizard(syntax, lowAtom)
         .resize(70)
         .checkCourseCount(1)
@@ -188,7 +188,7 @@ public class TestCompaction {
   @Test
   public void testSplitDynamicBrickChange() {
     final Atom textAtom = new TreeBuilder(text).add("value", "oran").build();
-    final ValuePrimitive text = (ValuePrimitive) textAtom.fields.getOpt("value");
+    final FieldPrimitive text = (FieldPrimitive) textAtom.fields.getOpt("value");
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(low).addArray("value", new TreeBuilder(one).build(), textAtom).build())
@@ -218,7 +218,7 @@ public class TestCompaction {
                 context.history.apply(
                     context,
                     new ChangePrimitiveAdd(
-                        (ValuePrimitive) primitive.fields.getOpt("value"), 0, "wigwam ")))
+                        (FieldPrimitive) primitive.fields.getOpt("value"), 0, "wigwam ")))
         .checkTextBrick(0, 0, "wigwam I am a ")
         .checkTextBrick(1, 0, "banana")
         .checkTextBrick(1, 1, "123");
@@ -230,7 +230,7 @@ public class TestCompaction {
         new TreeBuilder(low)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
             .build();
-    final ValueArray array = (ValueArray) lowAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) lowAtom.fields.getOpt("value");
     new GeneralTestWizard(syntax, new TreeBuilder(unary).add("value", lowAtom).build())
         .resize(70)
         .checkCourseCount(1)
@@ -259,7 +259,7 @@ public class TestCompaction {
         new TreeBuilder(high)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
             .build();
-    final ValueArray array = (ValueArray) highAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) highAtom.fields.getOpt("value");
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(mid)
@@ -308,7 +308,7 @@ public class TestCompaction {
                 new TreeBuilder(one).build(),
                 new TreeBuilder(infinity).build())
             .build();
-    final ValueArray array = (ValueArray) lowAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) lowAtom.fields.getOpt("value");
     new GeneralTestWizard(syntax, lowAtom)
         .resize(100)
         .checkTextBrick(0, 1, "one")

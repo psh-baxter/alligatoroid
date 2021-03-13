@@ -1,15 +1,15 @@
 package com.zarbosoft.merman.editorcore.history.changes;
 
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editorcore.history.Change;
 
 public class ChangePrimitiveAdd extends Change {
-	private final ValuePrimitive data;
+	private final FieldPrimitive data;
 	private final int index;
 	private final StringBuilder value;
 
-	public ChangePrimitiveAdd(final ValuePrimitive data, final int index, final String value) {
+	public ChangePrimitiveAdd(final FieldPrimitive data, final int index, final String value) {
 		this.data = data;
 		this.index = index;
 		this.value = new StringBuilder(value);
@@ -36,7 +36,7 @@ public class ChangePrimitiveAdd extends Change {
 	@Override
 	public Change apply(final Context context) {
 		data.data.insert(index, value);
-		for (final ValuePrimitive.Listener listener : data.listeners)
+		for (final FieldPrimitive.Listener listener : data.listeners)
 			listener.added(context, index, value.toString());
 		return new ChangePrimitiveRemove(data, index, value.length());
 	}

@@ -2,10 +2,10 @@ package com.zarbosoft.merman.editorcore.editing;
 
 import com.google.common.collect.ImmutableList;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValueAtom;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldAtom;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Cursor;
 import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
@@ -72,7 +72,7 @@ public class EditingExtension {
         });
   }
 
-  public Atom arrayInsertNewDefault(Context context, History history, ValueArray value, int index) {
+  public Atom arrayInsertNewDefault(Context context, History history, FieldArray value, int index) {
     final Set<AtomType> childTypes =
         context.syntax.splayedTypes.get(value.back().elementAtomType());
     final Atom element;
@@ -137,7 +137,7 @@ public class EditingExtension {
 
                                           @Override
                                           public void handleText(Context context, String text) {
-                                              ValuePrimitive value = cursor.visualPrimitive.value;
+                                              FieldPrimitive value = cursor.visualPrimitive.value;
                                               if (cursor.range.beginOffset != cursor.range.endOffset)
                                                   history.apply(
                                                           context,
@@ -155,7 +155,7 @@ public class EditingExtension {
                                               private TwoColumnChoicePage choicePage;
 
                                               public void updateGap(final Context context) {
-                                                  ValuePrimitive value = cursor.visualPrimitive.value;
+                                                  FieldPrimitive value = cursor.visualPrimitive.value;
                                                   engineState.update(context, value.data.toString());
                                                   if (choicePage != null) {
                                                       context.details.removePage(context, choicePage);
@@ -191,7 +191,7 @@ public class EditingExtension {
                                                   new BasePrimitiveTextListener() {
                                                       @Override
                                                       public void handleText(Context context, String text) {
-                                                          ValuePrimitive value = cursor.visualPrimitive.value;
+                                                          FieldPrimitive value = cursor.visualPrimitive.value;
                                                           String preview = value.get();
                                                           if (value.middle.matcher != null) {
                                                               preview =
@@ -244,37 +244,37 @@ public class EditingExtension {
       this.history = history;
   }
 
-  public void arrayParentDelete(ValueArray.ArrayParent parent) {
+  public void arrayParentDelete(FieldArray.ArrayParent parent) {
       history.apply(
               context, new ChangeArray(parent.value, parent.index, 1, ImmutableList.of()));
   }
 
-    public void parentDelete(Value.Parent<?> parent) {
+    public void parentDelete(Field.Parent<?> parent) {
     parent.dispatch(
-        new Value.ParentDispatcher() {
+        new Field.ParentDispatcher() {
           @Override
-          public void handle(ValueArray.ArrayParent parent) {
+          public void handle(FieldArray.ArrayParent parent) {
               arrayParentDelete(parent);
           }
 
           @Override
-          public void handle(ValueAtom.NodeParent parent) {
+          public void handle(FieldAtom.NodeParent parent) {
             history.apply(context, new ChangeNodeSet(parent.value, gap.create()));
           }
         });
   }
 
-  public void parentReplace(Value.Parent<?> parent, Atom atom) {
+  public void parentReplace(Field.Parent<?> parent, Atom atom) {
     parent.dispatch(
-        new Value.ParentDispatcher() {
+        new Field.ParentDispatcher() {
           @Override
-          public void handle(ValueArray.ArrayParent parent) {
+          public void handle(FieldArray.ArrayParent parent) {
             history.apply(
                     context, new ChangeArray(parent.value, parent.index, 1, ImmutableList.of(atom)));
           }
 
           @Override
-          public void handle(ValueAtom.NodeParent parent) {
+          public void handle(FieldAtom.NodeParent parent) {
             history.apply(context, new ChangeNodeSet(parent.value, atom));
           }
         });

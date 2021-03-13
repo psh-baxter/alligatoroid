@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.syntax;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
+import com.zarbosoft.merman.document.values.Field;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
@@ -39,7 +39,6 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -85,7 +84,7 @@ public abstract class AtomType {
    * @return
    */
   public static boolean isPrecedent(
-      final FreeAtomType type, final Value.Parent test, final boolean allowed) {
+          final FreeAtomType type, final Field.Parent test, final boolean allowed) {
     final Atom testAtom = test.value.atomParentRef.atom();
 
     // Can't move up if current level is bounded by any other front parts
@@ -108,7 +107,7 @@ public abstract class AtomType {
     return true;
   }
 
-  private static int getIndexOfData(final Value.Parent parent, final Atom atom) {
+  private static int getIndexOfData(final Field.Parent parent, final Atom atom) {
     for (int i = 0; i < atom.type.front.size(); ++i) {
       FrontSpec front = atom.type.front.get(i);
       String id = null;
@@ -172,7 +171,7 @@ public abstract class AtomType {
         new Operator<StackStore>(seq) {
           @Override
           protected StackStore process(StackStore store) {
-            final TSMap<String, Value> data = new TSMap<>();
+            final TSMap<String, Field> data = new TSMap<>();
             store = store.popVarMap(data.inner);
             final Atom atom = new Atom(AtomType.this, data);
             return store.pushStack(atom);

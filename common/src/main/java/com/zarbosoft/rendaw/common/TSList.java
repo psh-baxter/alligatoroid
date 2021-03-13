@@ -59,6 +59,11 @@ public class TSList<T> implements ROList<T> {
   }
 
   @Override
+  public ROList<T> subUntil(int end) {
+    return new TSList<>(values.subList(0, end));
+  }
+
+  @Override
   public List<T> inner_() {
     return values;
   }
@@ -81,6 +86,16 @@ public class TSList<T> implements ROList<T> {
   @Override
   public T getRev(int i) {
     return values.get(values.size() - i - 1);
+  }
+
+  @Override
+  public int longestMatch(ROList<T> other) {
+    int end = size();
+    if (other.size() < end) end = other.size();
+    for (int i = 0; i < end; ++i) {
+      if (!get(i).equals(other.get(i))) return i;
+    }
+    return end;
   }
 
   public TSList<T> add(T val) {

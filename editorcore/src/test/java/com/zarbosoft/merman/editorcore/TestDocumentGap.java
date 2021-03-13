@@ -3,8 +3,8 @@ package com.zarbosoft.merman.editorcore;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
-import com.zarbosoft.merman.document.values.ValuePrimitive;
+import com.zarbosoft.merman.document.values.FieldArray;
+import com.zarbosoft.merman.document.values.FieldPrimitive;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.editor.gap.GapVisualPrimitive;
@@ -2732,7 +2732,7 @@ public class TestDocumentGap {
     value's selection.
      */
     final Atom gap = syntax.gap.create();
-    final ValuePrimitive primitive = (ValuePrimitive) gap.fields.getOpt("gap");
+    final FieldPrimitive primitive = (FieldPrimitive) gap.fields.getOpt("gap");
     new GeneralTestWizard(syntax, gap)
         .run(context -> context.history.apply(context, new ChangePrimitiveSet(primitive, "\"")))
         .checkArrayTree(gap)
@@ -4155,7 +4155,7 @@ public class TestDocumentGap {
                 .addArray("value", new TreeBuilder(one).build())
                 .build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
               .selectInto(context);
           context.cursor.receiveText(context, "x");
           context.cursor.receiveText(context, "13");
@@ -4468,7 +4468,7 @@ public class TestDocumentGap {
                 .addArray("value", new TreeBuilder(one).build())
                 .build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
               .selectInto(context);
           context.cursor.receiveText(context, "#");
           context.cursor.receiveText(context, "e");
@@ -4668,7 +4668,7 @@ public class TestDocumentGap {
                 .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectInto(context);
           context.cursor.receiveText(context, "*");
         },
@@ -4816,7 +4816,7 @@ public class TestDocumentGap {
                 .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectInto(context);
           context.cursor.receiveText(context, "+");
         },
@@ -4964,7 +4964,7 @@ public class TestDocumentGap {
                 .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectInto(context);
           context.cursor.receiveText(context, "-");
         },
@@ -5112,7 +5112,7 @@ public class TestDocumentGap {
                 .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectInto(context);
           context.cursor.receiveText(context, "+");
         },
@@ -5183,7 +5183,7 @@ public class TestDocumentGap {
                 .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectInto(context);
           context.cursor.receiveText(context, "+");
         },
@@ -5331,7 +5331,7 @@ public class TestDocumentGap {
                 .add("second", syntax.suffixGap.create(true, new TreeBuilder(infinity).build()))
                 .build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "second", "atom", "gap")))
               .selectInto(context);
           context.cursor.receiveText(context, "+");
         },
@@ -5650,7 +5650,7 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(array).addArray("value", syntax.gap.create()).build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "value", "0", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "value", "0", "gap")))
               .selectInto(context);
           ((Atom) context.syntaxLocate(new Path("value", "0", "value", "0")))
               .valueParentRef.selectValue(context);
@@ -5959,10 +5959,10 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(array).addArray("value", syntax.gap.create()).build(),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "value", "0", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "value", "0", "gap")))
               .selectInto(context);
           context.cursor.receiveText(context, "urt");
-          ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
+          ((FieldArray) context.syntaxLocate(new Path("value", "0", "value")))
               .visual.selectAnyChild(context);
         },
         new TreeBuilder(array)
@@ -6584,7 +6584,7 @@ public class TestDocumentGap {
         syntax,
         () -> syntax.suffixGap.create(true, new TreeBuilder(infinity).build()),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
               .selectInto(context);
           ((Atom) context.syntaxLocate(new Path("value", "0"))).valueParentRef.selectValue(context);
         },
@@ -6892,7 +6892,7 @@ public class TestDocumentGap {
         syntax,
         () -> syntax.prefixGap.create(new TreeBuilder(infinity).build()),
         context -> {
-          ((ValuePrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
+          ((FieldPrimitive) context.syntaxLocate(new Path("value", "0", "gap")))
               .selectInto(context);
           ((Atom) context.syntaxLocate(new Path("value", "0"))).valueParentRef.selectValue(context);
         },
@@ -7203,7 +7203,7 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(array).addArray("value").build(),
         context -> {
-          ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
+          ((FieldArray) context.syntaxLocate(new Path("value", "0", "value")))
               .visual.selectAnyChild(context);
         },
         new TreeBuilder(array).addArray("value", syntax.gap.create()).build());
@@ -7510,7 +7510,7 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(restrictedArray).addArray("value").build(),
         context -> {
-          ((ValueArray) context.syntaxLocate(new Path("value", "0", "value")))
+          ((FieldArray) context.syntaxLocate(new Path("value", "0", "value")))
               .visual.selectAnyChild(context);
         },
         new TreeBuilder(restrictedArray)

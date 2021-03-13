@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editor.visual.visuals;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Cursor;
@@ -25,8 +25,8 @@ import com.zarbosoft.rendaw.common.TSList;
 import java.util.function.Consumer;
 
 public class VisualFrontArray extends VisualGroup implements VisualLeaf {
-  public final ValueArray value;
-  private final ValueArray.Listener dataListener;
+  public final FieldArray value;
+  private final FieldArray.Listener dataListener;
   private final FrontArraySpecBase front;
   public ArrayCursor selection;
   private Brick ellipsis = null;
@@ -64,7 +64,10 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
           addAt -> {
             final VisualGroup group =
                 new VisualGroup(
-                    context, new ArrayVisualParent(addAt, false), visualDepth + 1, depthScore());
+                    context,
+                    new ArrayVisualParent(this, addAt, false),
+                    visualDepth + 1,
+                    depthScore());
             for (int fixIndex = 0; fixIndex < front.separator.size(); ++fixIndex) {
               final FrontSymbol fix = front.separator.get(fixIndex);
               group.add(
@@ -79,7 +82,10 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
         if (!front.separator.isEmpty() && addIndex > 0) addSeparator.accept(addIndex++);
         final VisualGroup group =
             new VisualGroup(
-                context, new ArrayVisualParent(addIndex, true), visualDepth + 1, depthScore());
+                context,
+                new ArrayVisualParent(this, addIndex, true),
+                visualDepth + 1,
+                depthScore());
         int groupIndex = 0;
         for (final FrontSymbol fix : front.prefix)
           group.add(
@@ -344,10 +350,10 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   @Override
   public Hoverable hover(final Context context, final Vector point) {
     if (empty != null) {
-      hoverable = new PlaceholderHoverable(context, empty);
+      hoverable = new PlaceholderHoverable(context, empty, this);
       return hoverable;
     } else if (ellipsis != null) {
-      hoverable = new PlaceholderHoverable(context, ellipsis);
+      hoverable = new PlaceholderHoverable(context, ellipsis, this);
       return hoverable;
     } else return super.hover(context, point);
   }
@@ -390,7 +396,8 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     public void setRange(final Context context, final int begin, final int end) {
       setBeginInternal(context, begin);
       setEndInternal(context, end);
-      border.setFirst(context, visual.children.get(visual.visualIndex(begin)).getFirstBrick(context));
+      border.setFirst(
+          context, visual.children.get(visual.visualIndex(begin)).getFirstBrick(context));
       border.setLast(context, visual.children.get(visual.visualIndex(end)).getLastBrick(context));
     }
 
@@ -427,7 +434,8 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     public void setBegin(final Context context, final int index) {
       leadFirst = true;
       setBeginInternal(context, index);
-      border.setFirst(context, visual.children.get(visual.visualIndex(index)).getFirstBrick(context));
+      border.setFirst(
+          context, visual.children.get(visual.visualIndex(index)).getFirstBrick(context));
     }
 
     private void setEnd(final Context context, final int index) {
@@ -439,7 +447,8 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     public void setPosition(final Context context, final int index) {
       setEndInternal(context, index);
       setBeginInternal(context, index);
-      border.setFirst(context, visual.children.get(visual.visualIndex(index)).getFirstBrick(context));
+      border.setFirst(
+          context, visual.children.get(visual.visualIndex(index)).getFirstBrick(context));
       border.setLast(context, visual.children.get(visual.visualIndex(index)).getLastBrick(context));
     }
 
@@ -629,13 +638,13 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   }
 
   private static class ArraySelectionState implements SelectionState {
-    private final ValueArray value;
+    private final FieldArray value;
     private final int start;
     private final int end;
     private final boolean leadFirst;
 
     private ArraySelectionState(
-        final ValueArray value, final boolean leadFirst, final int start, final int end) {
+        final FieldArray value, final boolean leadFirst, final int start, final int end) {
       this.value = value;
       this.leadFirst = leadFirst;
       this.start = start;
@@ -648,22 +657,24 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     }
   }
 
-  private abstract class ArrayHoverable extends Hoverable {
+  private abstract static class ArrayHoverable extends Hoverable {
+    public final VisualFrontArray visual;
     final BorderAttachment border;
 
-    ArrayHoverable(final Context context) {
+    ArrayHoverable(VisualFrontArray visual, final Context context) {
+      this.visual = visual;
       border = new BorderAttachment(context, context.hoverStyle.obbox);
     }
 
     @Override
     protected void clear(final Context context) {
       border.destroy(context);
-      if (hoverable == this) hoverable = null;
+      if (visual.hoverable == this) visual.hoverable = null;
     }
 
     @Override
     public Visual visual() {
-      return VisualFrontArray.this;
+      return visual;
     }
 
     public abstract void notifyRangeAdjusted(Context context, int index, int removed, int added);
@@ -671,11 +682,102 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     public abstract void notifySelected(Context context, int start, int end);
   }
 
+  private static class PlaceholderHoverable extends ArrayHoverable {
+    public final VisualFrontArray visual;
+
+    private PlaceholderHoverable(
+        final Context context, final Brick brick, VisualFrontArray visual) {
+      super(visual, context);
+      this.visual = visual;
+      border.setFirst(context, brick);
+      border.setLast(context, brick);
+    }
+
+    @Override
+    public Path getSyntaxPath() {
+      return visual.value.getSyntaxPath().add("0");
+    }
+
+    @Override
+    public void select(final Context context) {
+      visual.select(context, true, 0, 0);
+    }
+
+    @Override
+    public VisualAtom atom() {
+      return visual.parent.atomVisual();
+    }
+
+    @Override
+    public void notifyRangeAdjusted(
+        final Context context, final int index, final int removed, final int added) {
+      throw new DeadCode();
+    }
+
+    @Override
+    public void notifySelected(final Context context, final int start, final int end) {
+      context.clearHover();
+    }
+  }
+
+  private static class ArrayVisualParent extends Parent {
+    private final boolean selectable;
+    private final VisualFrontArray visual;
+
+    public ArrayVisualParent(VisualFrontArray visual, final int index, final boolean selectable) {
+      super(visual, index);
+      this.selectable = selectable;
+      this.visual = visual;
+    }
+
+    @Override
+    public Hoverable hover(final Context context, final Vector point) {
+      if (!selectable) {
+        if (visual.parent != null) return visual.parent.hover(context, point);
+        return null;
+      }
+      if (visual.selection != null
+          && visual.selection.beginIndex == visual.selection.endIndex
+          && visual.selection.beginIndex == valueIndex()) return null;
+      if (visual.hoverable == null) {
+        visual.hoverable = visual.new ElementHoverable(context, visual);
+      }
+      ((ElementHoverable) visual.hoverable).setIndex(context, valueIndex());
+      return visual.hoverable;
+    }
+
+    private int valueIndex() {
+      if (visual.front.separator.isEmpty()) return index;
+      return index / 2;
+    }
+
+    @Override
+    public void firstBrickChanged(final Context context, final Brick firstBrick) {
+      if (visual.selection != null && valueIndex() == visual.selection.beginIndex)
+        visual.selection.border.setFirst(context, firstBrick);
+      if (visual.hoverable != null && valueIndex() == ((ElementHoverable) visual.hoverable).index)
+        ((ElementHoverable) visual.hoverable).border.setFirst(context, firstBrick);
+    }
+
+    @Override
+    public void lastBrickChanged(final Context context, final Brick lastBrick) {
+      if (visual.selection != null && valueIndex() == visual.selection.endIndex)
+        visual.selection.border.setLast(context, lastBrick);
+      if (visual.hoverable != null && valueIndex() == ((ElementHoverable) visual.hoverable).index)
+        ((ElementHoverable) visual.hoverable).border.setLast(context, lastBrick);
+    }
+  }
+
   private class ElementHoverable extends ArrayHoverable {
     private int index;
 
-    ElementHoverable(final Context context) {
-      super(context);
+    ElementHoverable(final Context context, VisualFrontArray visual) {
+      super(visual, context);
+    }
+
+    @Override
+    public Path getSyntaxPath() {
+      return visual.value.getSyntaxPath().add(String.valueOf(index));
     }
 
     @Override
@@ -712,88 +814,11 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     }
   }
 
-  private class PlaceholderHoverable extends ArrayHoverable {
-
-    private PlaceholderHoverable(final Context context, final Brick brick) {
-      super(context);
-      border.setFirst(context, brick);
-      border.setLast(context, brick);
-    }
-
-    @Override
-    public void select(final Context context) {
-      VisualFrontArray.this.select(context, true, 0, 0);
-    }
-
-    @Override
-    public VisualAtom atom() {
-      return VisualFrontArray.this.parent.atomVisual();
-    }
-
-    @Override
-    public void notifyRangeAdjusted(
-        final Context context, final int index, final int removed, final int added) {
-      throw new DeadCode();
-    }
-
-    @Override
-    public void notifySelected(final Context context, final int start, final int end) {
-      context.clearHover();
-    }
-  }
-
-  private class ArrayVisualParent extends Parent {
-
-    private final boolean selectable;
-
-    public ArrayVisualParent(final int index, final boolean selectable) {
-      super(VisualFrontArray.this, index);
-      this.selectable = selectable;
-    }
-
-    @Override
-    public Hoverable hover(final Context context, final Vector point) {
-      if (!selectable) {
-        if (parent != null) return parent.hover(context, point);
-        return null;
-      }
-      if (selection != null
-          && selection.beginIndex == selection.endIndex
-          && selection.beginIndex == valueIndex()) return null;
-      if (hoverable == null) {
-        hoverable = new ElementHoverable(context);
-      }
-      ((ElementHoverable) hoverable).setIndex(context, valueIndex());
-      return hoverable;
-    }
-
-    private int valueIndex() {
-      if (front.separator.isEmpty()) return index;
-      return index / 2;
-    }
-
-    @Override
-    public void firstBrickChanged(final Context context, final Brick firstBrick) {
-      if (selection != null && valueIndex() == selection.beginIndex)
-        selection.border.setFirst(context, firstBrick);
-      if (hoverable != null && valueIndex() == ((ElementHoverable) hoverable).index)
-        ((ElementHoverable) hoverable).border.setFirst(context, firstBrick);
-    }
-
-    @Override
-    public void lastBrickChanged(final Context context, final Brick lastBrick) {
-      if (selection != null && valueIndex() == selection.endIndex)
-        selection.border.setLast(context, lastBrick);
-      if (hoverable != null && valueIndex() == ((ElementHoverable) hoverable).index)
-        ((ElementHoverable) hoverable).border.setLast(context, lastBrick);
-    }
-  }
-
-  private class DataListener implements ValueArray.Listener {
-    private final ValueArray value;
+  private class DataListener implements FieldArray.Listener {
+    private final FieldArray value;
     private final VisualParent parent;
 
-    public DataListener(ValueArray value, VisualParent parent) {
+    public DataListener(FieldArray value, VisualParent parent) {
       this.value = value;
       this.parent = parent;
     }

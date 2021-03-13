@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.helper;
 
 import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueArray;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldArray;
 import com.zarbosoft.merman.editor.Action;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.Path;
@@ -173,7 +173,7 @@ public class GeneralTestWizard {
   public GeneralTestWizard select(String... path) {
     Object got = inner.context.syntaxLocate(new Path(path));
     if (got instanceof Atom) ((Atom) got).visual.selectAnyChild(inner.context);
-    else if (got instanceof Value) ((Value) got).selectInto(inner.context);
+    else if (got instanceof Field) ((Field) got).selectInto(inner.context);
     else throw Assertion.format("Invalid path %s", (Object) path);
     return this;
   }
@@ -214,8 +214,8 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard checkArrayTree(final Atom... atoms) {
-    final ValueArray documentAtoms =
-        (ValueArray) inner.context.document.root.fields.getOpt("value");
+    final FieldArray documentAtoms =
+        (FieldArray) inner.context.document.root.fields.getOpt("value");
     assertThat(documentAtoms.data.size(), equalTo(atoms.length));
     for (int i = 0; i < atoms.length; ++i) {
       Helper.assertTreeEqual(atoms[i], documentAtoms.data.get(i));

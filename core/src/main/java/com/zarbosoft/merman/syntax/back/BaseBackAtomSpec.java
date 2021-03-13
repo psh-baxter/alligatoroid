@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.syntax.back;
 
-import com.zarbosoft.merman.document.values.Value;
-import com.zarbosoft.merman.document.values.ValueAtom;
+import com.zarbosoft.merman.document.values.Field;
+import com.zarbosoft.merman.document.values.FieldAtom;
 import com.zarbosoft.merman.editor.Path;
 import com.zarbosoft.merman.misc.MultiError;
 import com.zarbosoft.merman.syntax.AtomType;
@@ -11,8 +11,6 @@ import com.zarbosoft.merman.syntax.error.AtomCandidateTypeNotAllowed;
 import com.zarbosoft.merman.syntax.error.AtomTypeDoesntExist;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSMap;
-
-import java.util.Set;
 
 public abstract class BaseBackAtomSpec extends BackSpecData {
   /** Type/group name or null; null means any type */
@@ -33,8 +31,8 @@ public abstract class BaseBackAtomSpec extends BackSpecData {
     this.type = config.type;
   }
 
-  public ValueAtom get(final TSMap<String, Value> data) {
-    return (ValueAtom) data.getOpt(id);
+  public FieldAtom get(final TSMap<String, Field> data) {
+    return (FieldAtom) data.getOpt(id);
   }
 
   @Override
