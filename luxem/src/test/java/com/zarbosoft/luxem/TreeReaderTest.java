@@ -1,7 +1,7 @@
 package com.zarbosoft.luxem;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 import org.junit.Test;
 
 import java.util.ArrayList;
@@ -20,26 +20,26 @@ public class TreeReaderTest {
 
   @Test
   public void testPrimitive() {
-    assertThat(Luxem.parse("dog"), equalTo(ImmutableList.of("dog")));
+    assertThat(Luxem.parse("dog"), equalTo(Arrays.asList("dog")));
   }
 
   @Test
   public void testArray() {
-    assertThat(Luxem.parse("[]"), equalTo(ImmutableList.of(new ArrayList<>())));
+    assertThat(Luxem.parse("[]"), equalTo(Arrays.asList(new ArrayList<>())));
   }
 
   @Test
   public void testArrayElement() {
-    assertThat(Luxem.parse("[a]"), equalTo(ImmutableList.of(Arrays.asList("a"))));
+    assertThat(Luxem.parse("[a]"), equalTo(Arrays.asList((Arrays.asList("a")))));
   }
 
   @Test
   public void testRecord() {
-    assertThat(Luxem.parse("{}"), equalTo(ImmutableList.of(new HashMap<>())));
+    assertThat(Luxem.parse("{}"), equalTo(Arrays.asList(new HashMap<>())));
   }
 
   @Test
   public void testRecordElement() {
-    assertThat(Luxem.parse("{a:b}"), equalTo(ImmutableList.of(ImmutableMap.of("a", "b"))));
+    assertThat(Luxem.parse("{a:b}"), equalTo(Arrays.asList(new TSMap<String, String>().put("a", "b").inner)));
   }
 }

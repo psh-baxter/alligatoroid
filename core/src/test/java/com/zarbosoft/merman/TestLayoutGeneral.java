@@ -8,13 +8,13 @@ import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Padding;
-import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.style.Style;
-import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Padding;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import org.junit.Test;
 
 public class TestLayoutGeneral {

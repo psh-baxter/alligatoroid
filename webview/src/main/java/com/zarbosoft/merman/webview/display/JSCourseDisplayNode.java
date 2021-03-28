@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.display.CourseDisplayNode;
-import com.zarbosoft.merman.editor.visual.Vector;
+import com.zarbosoft.merman.core.editor.display.CourseDisplayNode;
+import com.zarbosoft.merman.core.editor.visual.Vector;
 import elemental2.dom.HTMLElement;
 
 public abstract class JSCourseDisplayNode extends JSDisplayNode implements CourseDisplayNode {

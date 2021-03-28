@@ -24,17 +24,21 @@ public abstract class Reader {
     stack.addLast(new RootArray());
   }
 
-  public static void feed(final Reader reader, final InputStream source) {
+  public void feed(final InputStream source) {
     byte[] buff = new byte[1024];
-    int count = uncheck(() -> source.read(buff));
-    if (count == -1) {
-      reader.finish();
-    } else {
-      for (byte b :buff) reader.eat(b);
+    while (true) {
+      int count = uncheck(() -> source.read(buff));
+      if (count == -1) {
+        return;
+      } else {
+        for (int i = 0; i < count; ++i) {
+          eat(buff[i]);
+        }
+      }
     }
   }
 
-  private void finish() {
+  public void finish() {
     if (stack.size() >= 3) {
       if (stack.size() == 3 && stack.peekLast().getClass() == Primitive.class)
         stack.peekLast().finish(this);

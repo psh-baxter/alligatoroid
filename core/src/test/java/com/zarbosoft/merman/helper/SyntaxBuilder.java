@@ -1,16 +1,15 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.misc.MultiError;
-import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Padding;
-import com.zarbosoft.merman.syntax.RootAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
-import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentSpec;
-import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
-import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Padding;
+import com.zarbosoft.merman.core.syntax.RootAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
+import com.zarbosoft.merman.core.syntax.alignments.ConcensusAlignmentSpec;
+import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;

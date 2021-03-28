@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
-import com.zarbosoft.merman.syntax.back.BackSpec;
+import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
+import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSMap;
 

@@ -1,21 +1,22 @@
 package com.zarbosoft.merman.webview;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.Document;
-import com.zarbosoft.merman.editor.BackPath;
-import com.zarbosoft.merman.editor.backevents.BackEvent;
-import com.zarbosoft.merman.editor.backevents.EArrayCloseEvent;
-import com.zarbosoft.merman.editor.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.editor.backevents.EKeyEvent;
-import com.zarbosoft.merman.editor.backevents.EObjectCloseEvent;
-import com.zarbosoft.merman.editor.backevents.EObjectOpenEvent;
-import com.zarbosoft.merman.editor.backevents.EPrimitiveEvent;
-import com.zarbosoft.merman.editor.backevents.JSpecialPrimitiveEvent;
-import com.zarbosoft.merman.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.editor.serialization.WriteState;
-import com.zarbosoft.merman.syntax.BackType;
-import com.zarbosoft.merman.syntax.RootAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.Document;
+import com.zarbosoft.merman.core.editor.BackPath;
+import com.zarbosoft.merman.core.editor.backevents.BackEvent;
+import com.zarbosoft.merman.core.editor.backevents.EArrayCloseEvent;
+import com.zarbosoft.merman.core.editor.backevents.EArrayOpenEvent;
+import com.zarbosoft.merman.core.editor.backevents.EKeyEvent;
+import com.zarbosoft.merman.core.editor.backevents.EObjectCloseEvent;
+import com.zarbosoft.merman.core.editor.backevents.EObjectOpenEvent;
+import com.zarbosoft.merman.core.editor.backevents.EPrimitiveEvent;
+import com.zarbosoft.merman.core.editor.backevents.JSpecialPrimitiveEvent;
+import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
+import com.zarbosoft.merman.core.editor.serialization.Serializer;
+import com.zarbosoft.merman.core.editor.serialization.WriteState;
+import com.zarbosoft.merman.core.syntax.BackType;
+import com.zarbosoft.merman.core.syntax.RootAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.webview.serialization.JSEventConsumer;
 import com.zarbosoft.merman.webview.serialization.JsonEventConsumer;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
@@ -26,7 +27,6 @@ import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
-import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
@@ -43,7 +43,7 @@ import java.util.Map;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class JSSerializer implements com.zarbosoft.merman.editor.serialization.Serializer {
+public class JSSerializer implements Serializer {
   private final BackType backType;
   private final ROList<String> prioritizeKeys;
 
@@ -144,16 +144,16 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
   }
 
   public Document loadDocument(Syntax syntax, java.lang.String data) {
-    return new Document(syntax, load(syntax, RootAtomType.ROOT_TYPE_ID, data).get(0));
+    return new Document(syntax, load(syntax, RootAtomType.ROOT_TYPE_ID, data, false).get(0));
   }
 
   @Override
   public ROList<Atom> loadFromClipboard(
       Syntax syntax, java.lang.String type, java.lang.Object data) {
-    return load(syntax, type, (java.lang.String) data);
+    return load(syntax, type, (java.lang.String) data, true);
   }
 
-  public ROList<Atom> load(Syntax syntax, java.lang.String type, java.lang.String data) {
+  public ROList<Atom> load(Syntax syntax, String type, String data, boolean synthArrayContext) {
     switch (backType) {
       case LUXEM:
         // TODO, dead atm
@@ -165,27 +165,25 @@ public class JSSerializer implements com.zarbosoft.merman.editor.serialization.S
               Grammar.DEFAULT_ROOT_KEY,
               new Sequence()
                   .add(
-                      new Union()
-                          .add(
-                              new Sequence()
-                                  .add(new Reference(type))
-                                  .add(
-                                      new Operator<StackStore>() {
-                                        @Override
-                                        protected StackStore process(StackStore store) {
-                                          return store.pushStack(1);
-                                        }
-                                      }))
-                          .add(
-                              new Sequence()
-                                  .add(new MatchingEventTerminal(new EArrayOpenEvent()))
-                                  .add(StackStore.prepVarStack)
-                                  .add(
-                                      new Repeat(
-                                          new Sequence()
-                                              .add(new Reference(type))
-                                              .add(StackStore.pushVarStackSingle)))
-                                  .add(new MatchingEventTerminal(new EArrayCloseEvent()))))
+                      synthArrayContext
+                          ? new Sequence()
+                              .add(new MatchingEventTerminal(new EArrayOpenEvent()))
+                              .add(StackStore.prepVarStack)
+                              .add(
+                                  new Repeat(
+                                      new Sequence()
+                                          .add(new Reference(type))
+                                          .add(StackStore.pushVarStackSingle)))
+                              .add(new MatchingEventTerminal(new EArrayCloseEvent()))
+                          : new Sequence()
+                              .add(new Reference(type))
+                              .add(
+                                  new Operator<StackStore>() {
+                                    @Override
+                                    protected StackStore process(StackStore store) {
+                                      return store.pushStack(1);
+                                    }
+                                  }))
                   .add(
                       new Operator<StackStore>() {
                         @Override

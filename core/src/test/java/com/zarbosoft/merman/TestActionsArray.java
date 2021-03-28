@@ -1,10 +1,10 @@
 package com.zarbosoft.merman;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.FieldArray;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.values.FieldArray;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.BackRecordBuilder;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
@@ -16,11 +16,10 @@ import com.zarbosoft.merman.helper.MiscSyntax;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.back.BackArraySpec;
-import com.zarbosoft.merman.syntax.back.BaseBackSimpleArraySpec;
-import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
 

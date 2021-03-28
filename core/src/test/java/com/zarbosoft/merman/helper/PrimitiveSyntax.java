@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.style.Style;
-import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 
 public class PrimitiveSyntax {
   public static final FreeAtomType primitive;

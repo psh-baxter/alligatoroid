@@ -1,8 +1,8 @@
 package com.zarbosoft.merman;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.Path;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.MiscSyntax;

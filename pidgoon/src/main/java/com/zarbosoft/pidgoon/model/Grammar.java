@@ -6,7 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Grammar {
-  public static final Object DEFAULT_ROOT_KEY = new Object();
+  public static final Object DEFAULT_ROOT_KEY = new Object(){
+    @Override
+    public String toString() {
+      return "<DEFAULT_ROOT_KEY>";
+    }
+  };
   protected final Map<Object, Node> nodes;
 
   public Grammar() {

@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.display.FreeDisplayNode;
-import com.zarbosoft.merman.editor.visual.Vector;
+import com.zarbosoft.merman.core.editor.display.FreeDisplayNode;
+import com.zarbosoft.merman.core.editor.visual.Vector;
 import elemental2.dom.HTMLElement;
 
 public abstract class JSFreeDisplayNode extends JSDisplayNode implements FreeDisplayNode {

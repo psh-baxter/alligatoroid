@@ -1,18 +1,18 @@
 package com.zarbosoft.merman;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.FieldPrimitive;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.wall.Attachment;
-import com.zarbosoft.merman.editor.wall.Brick;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.values.FieldPrimitive;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.wall.Attachment;
+import com.zarbosoft.merman.core.editor.wall.Brick;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;

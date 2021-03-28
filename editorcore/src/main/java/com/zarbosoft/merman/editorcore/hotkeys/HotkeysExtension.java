@@ -155,7 +155,7 @@ public class HotkeysExtension {
                   .add(Tags.TAG_PART_DETAILS)
                   .ro());
       first.setColor(context, firstStyle.color);
-      first.setFont(context, Context.getFont(firstStyle, context));
+      first.setFont(context, Context.getFont(context, firstStyle));
       first.setText(context, hotkeysExtension.hotkeySequence);
       layout.add(first);
 
@@ -172,11 +172,11 @@ public class HotkeysExtension {
         final Action action = leaf.color();
         final Text rule = context.display.text();
         rule.setColor(context, lineStyle.color);
-        rule.setFont(context, Context.getFont(lineStyle, context));
+        rule.setFont(context, Context.getFont(context, lineStyle));
         rule.setText(context, hotkeysExtension.hotkeyGrammar.getNode(action.id()).toString());
         final Text name = context.display.text();
         name.setColor(context, lineStyle.color);
-        name.setFont(context, Context.getFont(lineStyle, context));
+        name.setFont(context, Context.getFont(context, lineStyle));
         name.setText(context, action.id());
         table.add(TSList.of(rule, name));
       }

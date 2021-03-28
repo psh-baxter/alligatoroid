@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.display.Image;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.display.Image;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.HTMLImageElement;

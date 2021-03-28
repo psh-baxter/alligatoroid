@@ -1,21 +1,12 @@
 package com.zarbosoft.merman.editor.display;
 
-import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.core.editor.display.Font;
+import com.zarbosoft.merman.core.editor.Context;
 
 public class MockeryFont implements Font {
 	int size = 10;
 
 	public MockeryFont(final int fontSize) {
-	}
-
-	@Override
-	public double getAscent() {
-		return (size * 8) / 10;
-	}
-
-	@Override
-	public double getDescent() {
-		return (size * 2) / 10;
 	}
 
 	@Override

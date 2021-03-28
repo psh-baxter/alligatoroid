@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.display.DisplayNode;
-import com.zarbosoft.merman.editor.display.Group;
+import com.zarbosoft.merman.core.editor.display.DisplayNode;
+import com.zarbosoft.merman.core.editor.display.Group;
 import com.zarbosoft.rendaw.common.ROList;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLElement;

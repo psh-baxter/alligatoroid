@@ -1,15 +1,15 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Field;
-import com.zarbosoft.merman.document.values.FieldArray;
-import com.zarbosoft.merman.document.values.FieldAtom;
-import com.zarbosoft.merman.document.values.FieldPrimitive;
-import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
-import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.values.Field;
+import com.zarbosoft.merman.core.document.values.FieldArray;
+import com.zarbosoft.merman.core.document.values.FieldAtom;
+import com.zarbosoft.merman.core.document.values.FieldPrimitive;
+import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;

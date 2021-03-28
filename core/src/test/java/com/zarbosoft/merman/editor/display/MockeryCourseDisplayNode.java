@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editor.display;
 
-import com.zarbosoft.merman.editor.visual.Vector;
+import com.zarbosoft.merman.core.editor.display.CourseDisplayNode;
+import com.zarbosoft.merman.core.editor.visual.Vector;
 
 public abstract class MockeryCourseDisplayNode extends MockeryDisplayNode
     implements CourseDisplayNode {

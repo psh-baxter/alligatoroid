@@ -1,10 +1,11 @@
 package com.zarbosoft.luxem.read;
 
 import com.zarbosoft.luxem.Luxem;
+import com.zarbosoft.pidgoon.BaseParseBuilder;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseEventSink;
-import com.zarbosoft.pidgoon.BaseParseBuilder;
 import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROPair;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -52,7 +53,7 @@ public class Parse<O> extends BaseParseBuilder<Parse<O>> {
         Luxem.streamEvents(stream, factory == null ? new Reader.DefaultEventFactory() : factory));
   }
 
-  public O parse(final List<Pair<Event, Object>> stream) {
+  public O parse(final List<ROPair<Event, Object>> stream) {
     ParseEventSink<O> stream1 =
         new com.zarbosoft.pidgoon.events.ParseBuilder<O>()
             .grammar(grammar)
@@ -62,7 +63,7 @@ public class Parse<O> extends BaseParseBuilder<Parse<O>> {
             .dumpAmbiguity(dumpAmbiguity)
             .uncertainty(eventUncertainty)
             .parse();
-    for (final Pair<Event, Object> pair : stream)
+    for (final ROPair<Event, Object> pair : stream)
       stream1 = stream1.push(pair.first, pair.second);
     return stream1.result();
   }

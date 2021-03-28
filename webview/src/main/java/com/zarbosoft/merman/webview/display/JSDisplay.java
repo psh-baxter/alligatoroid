@@ -1,22 +1,22 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.display.Blank;
-import com.zarbosoft.merman.editor.display.Display;
-import com.zarbosoft.merman.editor.display.DisplayNode;
-import com.zarbosoft.merman.editor.display.Drawing;
-import com.zarbosoft.merman.editor.display.Font;
-import com.zarbosoft.merman.editor.display.Group;
-import com.zarbosoft.merman.editor.display.Image;
-import com.zarbosoft.merman.editor.display.Text;
-import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.editor.hid.Key;
-import com.zarbosoft.merman.syntax.Direction;
-import com.zarbosoft.merman.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.editor.display.Blank;
+import com.zarbosoft.merman.core.editor.display.Display;
+import com.zarbosoft.merman.core.editor.display.DisplayNode;
+import com.zarbosoft.merman.core.editor.display.Drawing;
+import com.zarbosoft.merman.core.editor.display.Font;
+import com.zarbosoft.merman.core.editor.display.Group;
+import com.zarbosoft.merman.core.editor.display.Image;
+import com.zarbosoft.merman.core.editor.display.Text;
+import com.zarbosoft.merman.core.editor.hid.HIDEvent;
+import com.zarbosoft.merman.core.editor.hid.Key;
+import com.zarbosoft.merman.core.syntax.Direction;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.webview.compat.ResizeObserver;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROSet;
-import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
@@ -28,18 +28,12 @@ import elemental2.dom.MouseEvent;
 import elemental2.dom.WheelEvent;
 import jsinterop.base.JsPropertyMap;
 
-import java.util.function.Consumer;
-
 public class JSDisplay extends Display {
   private final HTMLDivElement base;
   private final HTMLDivElement origin;
-  int width = -1;
-  int height = -1;
   double wheelXPixels = 0;
   double wheelYPixels = 0;
   double wheelZPixels = 0;
-  TSList<Consumer<java.lang.String>> typingListeners = new TSList<>();
-  TSList<Consumer<HIDEvent>> hidEventListeners = new TSList<>();
 
   public JSDisplay(
       Direction converseDirection,
@@ -117,14 +111,14 @@ public class JSDisplay extends Display {
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_LEFT, true, modifiers);
                 while (wheelXPixels < -wheelPixelThreshold) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) l.accept(sendEvent);
+                  hidEventListener.accept(sendEvent);
                   wheelXPixels += wheelPixelThreshold;
                 }
               }
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_RIGHT, true, modifiers);
                 while (wheelXPixels > wheelPixelThreshold) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) l.accept(sendEvent);
+                  hidEventListener.accept(sendEvent);
                   wheelXPixels -= wheelPixelThreshold;
                 }
               }
@@ -136,14 +130,14 @@ public class JSDisplay extends Display {
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_UP, true, modifiers);
                 while (wheelYPixels < -wheelPixelThreshold) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) l.accept(sendEvent);
+                  hidEventListener.accept(sendEvent);
                   wheelYPixels += wheelPixelThreshold;
                 }
               }
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_DOWN, true, modifiers);
                 while (wheelYPixels > wheelPixelThreshold) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) l.accept(sendEvent);
+                  hidEventListener.accept(sendEvent);
                   wheelYPixels -= wheelPixelThreshold;
                 }
               }
@@ -155,14 +149,14 @@ public class JSDisplay extends Display {
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_IN, true, modifiers);
                 while (wheelZPixels < -wheelPixelThreshold) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) l.accept(sendEvent);
+                  hidEventListener.accept(sendEvent);
                   wheelZPixels += wheelPixelThreshold;
                 }
               }
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_OUT, true, modifiers);
                 while (wheelZPixels > wheelPixelThreshold) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) l.accept(sendEvent);
+                  hidEventListener.accept(sendEvent);
                   wheelZPixels -= wheelPixelThreshold;
                 }
               }
@@ -170,47 +164,37 @@ public class JSDisplay extends Display {
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_LEFT, true, modifiers);
                 for (int i = 0; i > event.deltaX; --i) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) l.accept(sendEvent);
+                  hidEventListener.accept(sendEvent);
                 }
               }
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_RIGHT, true, modifiers);
                 for (int i = 0; i < event.deltaX; ++i) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) {
-                    l.accept(sendEvent);
-                  }
+                  hidEventListener.accept(sendEvent);
                 }
               }
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_UP, true, modifiers);
                 for (int i = 0; i > event.deltaY; --i) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) {
-                    l.accept(sendEvent);
-                  }
+                  hidEventListener.accept(sendEvent);
                 }
               }
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_DOWN, true, modifiers);
                 for (int i = 0; i < event.deltaY; ++i) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) {
-                    l.accept(sendEvent);
-                  }
+                  hidEventListener.accept(sendEvent);
                 }
               }
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_IN, true, modifiers);
                 for (int i = 0; i > event.deltaZ; --i) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) {
-                    l.accept(sendEvent);
-                  }
+                  hidEventListener.accept(sendEvent);
                 }
               }
               {
                 HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_OUT, true, modifiers);
                 for (int i = 0; i < event.deltaZ; ++i) {
-                  for (Consumer<HIDEvent> l : hidEventListeners) {
-                    l.accept(sendEvent);
-                  }
+                  hidEventListener.accept(sendEvent);
                 }
               }
             }
@@ -303,9 +287,7 @@ public class JSDisplay extends Display {
       if (event.shiftKey) modifiers.add(Key.SHIFT);
       if (event.metaKey) modifiers.add(Key.META);
       HIDEvent sendEvent = new HIDEvent(key, press, modifiers.ro());
-      for (Consumer<HIDEvent> l : hidEventListeners) {
-        l.accept(sendEvent);
-      }
+      hidEventListener.accept(sendEvent);
     }
     return null;
   }
@@ -1230,15 +1212,11 @@ public class JSDisplay extends Display {
       if (event.shiftKey) modifiers.add(Key.SHIFT);
       if (event.metaKey) modifiers.add(Key.META);
       HIDEvent sendEvent = new HIDEvent(key, press, modifiers.ro());
-      for (Consumer<HIDEvent> l : hidEventListeners) {
-        l.accept(sendEvent);
-      }
+      hidEventListener.accept(sendEvent);
     }
     if (isText) {
       if (text == null) text = event.key;
-      for (Consumer<String> l : typingListeners) {
-        l.accept(text);
-      }
+      typingListener.accept(text);
     }
     return null;
   }
@@ -1259,7 +1237,7 @@ public class JSDisplay extends Display {
   }
 
   @Override
-  public Font font(String font, int fontSize) {
+  public Font font(String font, double fontSize) {
     return new JSFont(font, fontSize);
   }
 
@@ -1271,26 +1249,6 @@ public class JSDisplay extends Display {
   @Override
   public Blank blank() {
     return new JSBlank(this);
-  }
-
-  @Override
-  public void addHIDEventListener(Consumer<HIDEvent> listener) {
-    this.hidEventListeners.add(listener);
-  }
-
-  @Override
-  public void addTypingListener(Consumer<java.lang.String> listener) {
-    this.typingListeners.add(listener);
-  }
-
-  @Override
-  public double width() {
-    return (int) base.clientWidth;
-  }
-
-  @Override
-  public double height() {
-    return (int) base.clientHeight;
   }
 
   @Override
@@ -1313,5 +1271,17 @@ public class JSDisplay extends Display {
   @Override
   public void setBackgroundColor(ModelColor color) {
     base.style.backgroundColor = cssColor(color);
+  }
+
+  @Override
+  public double toPixels(Syntax.DisplayUnit displayUnit) {
+    switch (displayUnit) {
+      case PX:
+        return 1;
+      case MM:
+        return 96 * 2.54 / 100;
+      default:
+        throw new Assertion();
+    }
   }
 }

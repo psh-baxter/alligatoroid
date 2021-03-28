@@ -95,7 +95,8 @@ public class Luxem {
                     factory.primitive(new String(bytes, StandardCharsets.UTF_8)), state.path));
           }
         };
-    Reader.feed(reader, source);
+    reader.feed(source);
+    reader.finish();
     return new ArrayList<>(state.events);
   }
 }

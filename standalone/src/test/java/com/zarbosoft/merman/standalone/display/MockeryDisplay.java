@@ -45,7 +45,7 @@ public class MockeryDisplay extends Display {
 	}
 
 	@Override
-	public Font font(final String font, final int fontSize) {
+	public Font font(final String font, final double fontSize) {
 		return new MockeryFont(fontSize);
 	}
 

@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.style.Style;
 
 public class FrontDataPrimitiveBuilder {
   private final String field;

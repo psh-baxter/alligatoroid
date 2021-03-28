@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.webview;
 
-import com.zarbosoft.merman.editor.ClipboardEngine;
-import com.zarbosoft.merman.syntax.BackType;
+import com.zarbosoft.merman.core.editor.ClipboardEngine;
+import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.webview.compat.CompatOverlay;
 import elemental2.dom.DataTransfer;
 import elemental2.dom.DataTransferItem;

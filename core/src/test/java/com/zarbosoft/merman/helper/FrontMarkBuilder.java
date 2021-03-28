@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.style.Style;
-import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontMarkBuilder {

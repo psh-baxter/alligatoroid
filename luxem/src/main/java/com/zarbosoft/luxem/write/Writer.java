@@ -1,6 +1,5 @@
 package com.zarbosoft.luxem.write;
 
-import com.google.common.collect.ImmutableMap;
 import com.zarbosoft.luxem.events.LArrayCloseEvent;
 import com.zarbosoft.luxem.events.LArrayOpenEvent;
 import com.zarbosoft.luxem.events.LKeyEvent;
@@ -10,6 +9,8 @@ import com.zarbosoft.luxem.events.LRecordOpenEvent;
 import com.zarbosoft.luxem.events.LTypeEvent;
 import com.zarbosoft.luxem.events.LuxemEvent;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
@@ -20,27 +21,27 @@ import java.util.Map;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Writer {
-  private static final Map<Byte, Byte> quotedKeyEscapes =
+  private static final ROMap<Byte, Byte> quotedKeyEscapes =
       escapeMap()
           .put((byte) '"', (byte) '"')
           .put((byte) '\n', (byte) 'n')
           .put((byte) '\t', (byte) 't')
           .put((byte) '\r', (byte) 'r')
-          .build();
-  private static final Map<Byte, Byte> typeEscapes =
+          ;
+  private static final ROMap<Byte, Byte> typeEscapes =
       escapeMap()
           .put((byte) ')', (byte) ')')
           .put((byte) '\n', (byte) 'n')
           .put((byte) '\t', (byte) 't')
           .put((byte) '\r', (byte) 'r')
-          .build();
-  private static final Map<Byte, Byte> quotedPrimitiveEscapes =
+          ;
+  private static final ROMap<Byte, Byte> quotedPrimitiveEscapes =
       escapeMap()
           .put((byte) '"', (byte) '"')
           .put((byte) '\n', (byte) 'n')
           .put((byte) '\t', (byte) 't')
           .put((byte) '\r', (byte) 'r')
-          .build();
+          ;
   private final boolean pretty;
   private final byte indentByte;
   private final int indentMultiple;
@@ -68,17 +69,17 @@ public class Writer {
     this(stream, true, indentByte, indentMultiple);
   }
 
-  private static ImmutableMap.Builder<Byte, Byte> escapeMap() {
-    return new ImmutableMap.Builder<Byte, Byte>().put((byte) '\\', (byte) '\\');
+  private static TSMap<Byte, Byte> escapeMap() {
+    return new TSMap<Byte, Byte>().put((byte) '\\', (byte) '\\');
   }
 
   private static void escape(
-      final OutputStream stream, final byte[] bytes, final Map<Byte, Byte> escapes) {
+      final OutputStream stream, final byte[] bytes, final ROMap<Byte, Byte> escapes) {
     uncheck(
         () -> {
           int lastEscape = 0;
           for (int i = 0; i < bytes.length; ++i) {
-            final Byte key = escapes.get(bytes[i]);
+            final Byte key = escapes.getOpt(bytes[i]);
             if (key == null) continue;
             stream.write(bytes, lastEscape, i - lastEscape);
             stream.write('\\');

@@ -1,12 +1,14 @@
 package com.zarbosoft.merman.editor.display;
 
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.editor.display.Font;
+import com.zarbosoft.merman.core.editor.display.Text;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.rendaw.common.DeadCode;
 
 public class MockeryText extends MockeryCourseDisplayNode implements Text {
   String text;
-  Font font = new MockeryFont(20);
+  MockeryFont font = new MockeryFont(20);
 
   @Override
   public String text() {
@@ -28,7 +30,7 @@ public class MockeryText extends MockeryCourseDisplayNode implements Text {
 
   @Override
   public void setFont(final Context context, final Font font) {
-    this.font = font;
+    this.font = (MockeryFont) font;
   }
 
   @Override
@@ -49,11 +51,11 @@ public class MockeryText extends MockeryCourseDisplayNode implements Text {
 
   @Override
   public double ascent() {
-    return font.getAscent();
+    return (font.size * 8) / 10;
   }
 
   @Override
   public double descent() {
-    return font.getDescent();
+    return (font.size * 2) / 10;
   }
 }

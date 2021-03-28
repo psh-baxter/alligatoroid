@@ -1,22 +1,29 @@
 package com.zarbosoft.merman.editor.display;
 
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.syntax.Direction;
-import com.zarbosoft.merman.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.editor.display.Blank;
+import com.zarbosoft.merman.core.editor.display.Display;
+import com.zarbosoft.merman.core.editor.display.DisplayNode;
+import com.zarbosoft.merman.core.editor.display.Drawing;
+import com.zarbosoft.merman.core.editor.display.Font;
+import com.zarbosoft.merman.core.editor.display.Group;
+import com.zarbosoft.merman.core.editor.display.Image;
+import com.zarbosoft.merman.core.editor.display.Text;
+import com.zarbosoft.merman.core.editor.hid.HIDEvent;
+import com.zarbosoft.merman.core.syntax.Direction;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.style.ModelColor;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
 public class MockeryDisplay extends Display {
-  int width = 10000;
-  int height = 10000;
-  List<Consumer<HIDEvent>> hidEventListeners = new ArrayList<>();
   List<DisplayNode> nodes = new ArrayList<>();
 
   public MockeryDisplay(Direction converseDirection, Direction transverseDirection) {
     super(converseDirection, transverseDirection);
+    setWidth(10000);
+    setHeight(10000);
   }
 
   @Override
@@ -35,8 +42,8 @@ public class MockeryDisplay extends Display {
   }
 
   @Override
-  public Font font(final String font, final int fontSize) {
-    return new MockeryFont(fontSize);
+  public Font font(final String font, final double fontSize) {
+    return new MockeryFont((int) fontSize);
   }
 
   @Override
@@ -47,24 +54,6 @@ public class MockeryDisplay extends Display {
   @Override
   public Blank blank() {
     return new MockeryBlank();
-  }
-
-  @Override
-  public void addHIDEventListener(final Consumer<HIDEvent> listener) {
-    hidEventListeners.add(listener);
-  }
-
-  @Override
-  public void addTypingListener(final Consumer<String> listener) {}
-
-  @Override
-  public double width() {
-    return width;
-  }
-
-  @Override
-  public double height() {
-    return height;
   }
 
   @Override
@@ -85,6 +74,11 @@ public class MockeryDisplay extends Display {
   @Override
   public void setBackgroundColor(final ModelColor color) {}
 
+  @Override
+  public double toPixels(Syntax.DisplayUnit displayUnit) {
+    return 1;
+  }
+
   public void setWidth(final int width) {
     widthChanged(width);
   }
@@ -94,8 +88,6 @@ public class MockeryDisplay extends Display {
   }
 
   public void sendHIDEvent(final HIDEvent event) {
-    for (Consumer<HIDEvent> listener : hidEventListeners) {
-      listener.accept(event);
-    }
+    hidEventListener.accept(event);
   }
 }

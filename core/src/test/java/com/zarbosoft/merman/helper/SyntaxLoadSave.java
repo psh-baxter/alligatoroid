@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
 
 public class SyntaxLoadSave {
   public static final FreeAtomType primitive;

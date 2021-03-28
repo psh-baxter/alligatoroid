@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.I18nEngine;
-import com.zarbosoft.merman.editor.display.Font;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.I18nEngine;
+import com.zarbosoft.merman.core.editor.display.Font;
 import com.zarbosoft.merman.webview.compat.TextMetrics;
 import com.zarbosoft.rendaw.common.Format;
 import elemental2.dom.CanvasRenderingContext2D;
@@ -11,16 +11,11 @@ import elemental2.dom.HTMLCanvasElement;
 
 public class JSFont implements Font {
   public final String name;
-  public final int size;
-  private final double ascent;
-  private final double descent;
+  public final double size;
 
-  public JSFont(String name, int size) {
+  public JSFont(String name, double size) {
     this.name = name == null ? "monospace" : name;
     this.size = size;
-    TextMetrics basis = measurer().measure("W");
-    ascent = basis.fontBoundingBoxAscent;
-    descent = basis.fontBoundingBoxDescent;
   }
 
   public String cssString() {
@@ -32,18 +27,8 @@ public class JSFont implements Font {
     return new JSMeasurer();
   }
 
-  @Override
-  public double getAscent() {
-    return ascent;
-  }
-
-  @Override
-  public double getDescent() {
-    return descent;
-  }
-
   public class JSMeasurer implements Measurer {
-    private CanvasRenderingContext2D context;
+    private final CanvasRenderingContext2D context;
 
     {
       HTMLCanvasElement canvas = (HTMLCanvasElement) DomGlobal.document.createElement("canvas");

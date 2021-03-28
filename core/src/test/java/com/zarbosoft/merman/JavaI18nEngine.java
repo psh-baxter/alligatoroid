@@ -1,6 +1,6 @@
 package com.zarbosoft.merman;
 
-import com.zarbosoft.merman.editor.I18nEngine;
+import com.zarbosoft.merman.core.editor.I18nEngine;
 
 import java.text.BreakIterator;
 import java.util.Locale;

@@ -1,13 +1,13 @@
 package com.zarbosoft.merman;
 
-import com.zarbosoft.merman.editor.display.Group;
+import com.zarbosoft.merman.core.editor.display.Group;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.merman.editor.display.MockeryGroup;
-import com.zarbosoft.merman.editor.display.Text;
-import com.zarbosoft.merman.editor.display.derived.CLayout;
-import com.zarbosoft.merman.editor.display.derived.ColumnarTableLayout;
-import com.zarbosoft.merman.editor.display.derived.RowLayout;
-import com.zarbosoft.merman.syntax.Direction;
+import com.zarbosoft.merman.core.editor.display.Text;
+import com.zarbosoft.merman.core.editor.display.derived.CLayout;
+import com.zarbosoft.merman.core.editor.display.derived.ColumnarTableLayout;
+import com.zarbosoft.merman.core.editor.display.derived.RowLayout;
+import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.TSList;

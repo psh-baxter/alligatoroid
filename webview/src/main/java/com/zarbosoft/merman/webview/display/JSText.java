@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.display.Font;
-import com.zarbosoft.merman.editor.display.Text;
-import com.zarbosoft.merman.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.display.Font;
+import com.zarbosoft.merman.core.editor.display.Text;
+import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.webview.compat.TextMetrics;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
@@ -104,7 +104,7 @@ public class JSText extends JSCourseDisplayNode implements Text {
 
   @Override
   public double getConverseAtIndex(int index) {
-    return (int) font.measurer().measure(text().substring(0, index)).width - font.getAscent() * 0.2;
+    return (int) font.measurer().measure(text().substring(0, index)).width - ascent * 0.2;
   }
 
   @Override

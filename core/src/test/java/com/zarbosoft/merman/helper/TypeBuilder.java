@@ -1,20 +1,20 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
-import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentSpec;
-import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
-import com.zarbosoft.merman.syntax.back.BackSpec;
-import com.zarbosoft.merman.syntax.front.FrontArraySpec;
-import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
-import com.zarbosoft.merman.syntax.front.FrontAtomSpec;
-import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.syntax.front.FrontSpec;
-import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.style.Style;
-import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
-import com.zarbosoft.merman.syntax.symbol.SymbolTextSpec;
+import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
+import com.zarbosoft.merman.core.syntax.alignments.ConcensusAlignmentSpec;
+import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
+import com.zarbosoft.merman.core.syntax.back.BackSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
+import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
+import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 

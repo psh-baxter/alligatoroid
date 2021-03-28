@@ -1,6 +1,6 @@
 package com.zarbosoft.merman;
 
-import com.zarbosoft.merman.document.Atom;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.helper.GroupBuilder;
@@ -8,14 +8,14 @@ import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.symbol.SymbolSpaceSpec;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import org.junit.Test;
 
-import static com.zarbosoft.merman.syntax.style.Style.SplitMode.COMPACT;
+import static com.zarbosoft.merman.core.syntax.style.Style.SplitMode.COMPACT;
 
 public class TestCompaction {
   @Test

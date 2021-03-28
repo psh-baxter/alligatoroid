@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 

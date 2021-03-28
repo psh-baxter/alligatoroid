@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.display.Display;
-import com.zarbosoft.merman.editor.display.Drawing;
-import com.zarbosoft.merman.editor.display.DrawingContext;
-import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.merman.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.display.Display;
+import com.zarbosoft.merman.core.editor.display.Drawing;
+import com.zarbosoft.merman.core.editor.display.DrawingContext;
+import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.rendaw.common.Format;
 import elemental2.dom.BaseRenderingContext2D;
 import elemental2.dom.CSSProperties;

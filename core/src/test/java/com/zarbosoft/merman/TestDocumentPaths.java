@@ -1,11 +1,11 @@
 package com.zarbosoft.merman;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Field;
-import com.zarbosoft.merman.document.values.FieldAtom;
-import com.zarbosoft.merman.document.values.FieldArray;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.Path;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.values.Field;
+import com.zarbosoft.merman.core.document.values.FieldAtom;
+import com.zarbosoft.merman.core.document.values.FieldArray;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.BackRecordBuilder;
 import com.zarbosoft.merman.helper.Helper;
@@ -13,7 +13,7 @@ import com.zarbosoft.merman.helper.MiscSyntax;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
 

@@ -4,19 +4,14 @@
     <groupId>com.zarbosoft.merman</groupId>
     <artifactId>editorcore</artifactId>
     <version>0.0.0</version>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>${compver}</version>
-                <configuration>
-                    <source>${jver}</source>
-                    <target>${jver}</target>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+    <parent>
+        <artifactId>agg</artifactId>
+        <groupId>aggunused</groupId>
+        <version>0.0.0</version>
+    </parent>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
     <dependencies>
         <dependency>
             <groupId>com.zarbosoft.merman</groupId>
@@ -36,4 +31,17 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>${compver}</version>
+                <configuration>
+                    <source>${jver}</source>
+                    <target>${jver}</target>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

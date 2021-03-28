@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.syntax.front.FrontArraySpec;
-import com.zarbosoft.merman.syntax.front.FrontArraySpecBase;
-import com.zarbosoft.merman.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
+import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class FrontDataArrayBuilder {
