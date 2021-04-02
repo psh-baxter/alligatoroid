@@ -145,22 +145,7 @@ public class WebView {
                           elementOrigin.style.top = max.amount + "px";
                       }
                     })
-                .hoverStyle(
-                    c ->
-                        c.obbox
-                            .roundEnd(true)
-                            .roundStart(true)
-                            .roundRadius(8)
-                            .lineThickness(1.5)
-                            .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0, 0, 0.4)))
-                .cursorStyle(
-                    c ->
-                        c.obbox
-                            .roundStart(true)
-                            .roundEnd(true)
-                            .lineThickness(1.5)
-                            .roundRadius(8)
-                            .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0.5, 180, 0.8))),
+                ,
             syntax,
             serializer.loadDocument(syntax, rawDoc),
             display,

@@ -16,8 +16,11 @@ public class FieldAtom extends Field {
   public VisualFrontAtom visual;
   public Atom data; // INVARIANT: Never null when in tree
 
-  public FieldAtom(final BaseBackAtomSpec back, final Atom data) {
+  public FieldAtom(final BaseBackAtomSpec back) {
     this.back = back;
+  }
+
+  public void initialSet(Atom data) {
     this.data = data;
     if (data != null) data.setValueParentRef(new NodeParent(this));
   }

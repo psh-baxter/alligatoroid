@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.values.FieldArray;
 import com.zarbosoft.merman.core.document.values.FieldAtom;
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
@@ -20,6 +20,7 @@ import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -77,16 +78,16 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
         new Operator<StackStore>() {
           @Override
           protected StackStore process(StackStore store) {
-            final TSList<Atom> temp = new TSList<>();
-            store = store.<Atom>popVarSingle(v -> temp.add(v));
-            temp.reverse();
+            final TSList initialValue = new TSList<>();
+            store = store.popVarSingle(v -> initialValue.add(v));
+            initialValue.reverse();
             return store.stackVarDoubleElement(
-                id, new FieldArray(BaseBackSimpleArraySpec.this, temp));
+                id, new ROPair<>(new FieldArray(BaseBackSimpleArraySpec.this), initialValue));
           }
         });
   }
 
-  protected void buildBackRuleInner(Syntax syntax, Sequence s) {
+  protected void buildBackRuleInner(I18nEngine i18n, Syntax syntax, Sequence s) {
     s.add(StackStore.prepVarStack)
         .add(
             new Repeat(
@@ -108,20 +109,24 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
                                         }
                                         union.add(
                                             new Sequence()
-                                                .add(plated.getValue().buildBackRule(syntax))
+                                                .add(plated.getValue().buildBackRule(i18n, syntax))
                                                 .add(
                                                     new Operator<StackStore>() {
                                                       @Override
                                                       protected StackStore process(
                                                           StackStore store) {
-                                                        // The inner atom reuses the array counter, reduce for when it's incremented below
+                                                        // The inner atom reuses the array counter,
+                                                        // reduce for when it's incremented below
                                                         int counter = store.stackTop();
                                                         store = store.popStack(); // counter
                                                         store = store.popStack(); // key
                                                         FieldAtom inner = store.stackTop();
                                                         store = store.popStack();
-                                                        // Reset to pre-var-push state, with atom on top
-                                                        return store.pushStack(counter - 1).pushStack(inner.data);
+                                                        // Reset to pre-var-push state, with atom on
+                                                        // top
+                                                        return store
+                                                            .pushStack(counter - 1)
+                                                            .pushStack(inner.data);
                                                       }
                                                     }));
                                       }

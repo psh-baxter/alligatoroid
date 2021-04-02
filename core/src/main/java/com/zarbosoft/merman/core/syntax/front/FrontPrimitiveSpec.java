@@ -28,36 +28,36 @@ public class FrontPrimitiveSpec extends FrontSpec {
     /**
      * First line (highest priority)
      */
-    public final Style.Config firstStyle = new Style.Config();
+    public Style firstStyle;
     /**
      * Hard new line
      */
-    public final Style.Config hardStyle = new Style.Config();
+    public Style hardStyle;
     /**
      * Soft new line
      */
-    public final Style.Config softStyle = new Style.Config();
+    public Style softStyle;
 
     public Config(String field) {
       this.field = field;
     }
 
-    public Config firstStyle(Consumer<Style.Config> c) {
-      c.accept(firstStyle);
+    public Config firstStyle(Style c) {
+      firstStyle = c;
       return this;
     }
-    public Config hardStyle(Consumer<Style.Config> c) {
-      c.accept(hardStyle);
+    public Config hardStyle(Style c) {
+      hardStyle = c;
       return this;
     }
-    public Config softStyle(Consumer<Style.Config> c) {
-      c.accept(softStyle);
+    public Config softStyle(Style c) {
+      softStyle = c;
       return this;
     }
-    public Config style(Consumer<Style.Config> c) {
-      c.accept(softStyle);
-      c.accept(hardStyle);
-      c.accept(firstStyle);
+    public Config style(Style c) {
+      softStyle = c;
+      hardStyle = c;
+      firstStyle = c;
       return this;
     }
 
@@ -69,9 +69,12 @@ public class FrontPrimitiveSpec extends FrontSpec {
 
   public FrontPrimitiveSpec(Config config) {
     field = config.field;
-    firstStyle = config.firstStyle.create();
-    hardStyle = config.hardStyle.create();
-    softStyle = config.softStyle.create();
+    if (config.firstStyle == null) firstStyle = new Style.Config().create();
+    else firstStyle = config.firstStyle;
+    if (config.hardStyle == null) hardStyle = new Style.Config().create();
+    else hardStyle = config.hardStyle;
+    if (config.softStyle == null) softStyle = new Style.Config().create();
+    else softStyle = config.softStyle;
     splitMode = config.splitMode;
   }
 

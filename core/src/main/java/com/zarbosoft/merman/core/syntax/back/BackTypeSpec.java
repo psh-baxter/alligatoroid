@@ -40,7 +40,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   }
 
   protected BackTypeSpec(I18nEngine i18n,Config config) {
-    super(i18n, config.base);
+    super(config.base);
     this.type = config.type;
     this.value = config.value;
   }
@@ -51,7 +51,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     return new Sequence()
         .add(
             new Operator<StackStore>(new MatchingEventTerminal(new ETypeEvent())) {
@@ -61,7 +61,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
                     id, new FieldPrimitive(BackTypeSpec.this, ((ETypeEvent) store.top()).value));
               }
             })
-        .add(value.buildBackRule(syntax));
+        .add(value.buildBackRule(i18n, syntax));
   }
 
   @Override

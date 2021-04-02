@@ -2,7 +2,6 @@ package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.document.values.Field;
 import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Pattern;
 import com.zarbosoft.rendaw.common.ROMap;
 
@@ -19,9 +18,9 @@ public abstract class BaseBackPrimitiveSpec extends BackSpecData {
     }
   }
 
-  protected BaseBackPrimitiveSpec(I18nEngine i18n, Config config) {
+  protected BaseBackPrimitiveSpec(Config config) {
     super(config.id);
-    if (config.pattern != null) matcher = new Pattern.Matcher(config.pattern, i18n);
+    if (config.pattern != null) matcher = new Pattern.Matcher(config.pattern);
     else matcher = null;
   }
 

@@ -17,30 +17,6 @@ public class JavaFXFont implements Font {
     this.font = font;
   }
 
-  /*
-  @Override
-  public double getAscent() {
-  	helper.setFont(font);
-  	helper.setBoundsType(DEFAULT_BOUNDS_TYPE);
-  	final double ascent = helper.getBaselineOffset();
-  	// RESTORE STATE
-  	helper.setBoundsType(DEFAULT_BOUNDS_TYPE);
-  	return (int) ascent;
-  }
-
-  @Override
-  public double getDescent() {
-  	helper.setFont(font);
-  	helper.setBoundsType(DEFAULT_BOUNDS_TYPE);
-  	final double ascent = helper.getBaselineOffset();
-  	final Bounds bounds = helper.getLayoutBounds();
-  	final double height = bounds.getMaxY() - bounds.getMinY();
-  	// RESTORE STATE
-  	helper.setBoundsType(DEFAULT_BOUNDS_TYPE);
-  	return (int) (height - ascent);
-  }
-   */
-
   @Override
   public Measurer measurer() {
     final Text helper = new Text();
@@ -53,6 +29,7 @@ public class JavaFXFont implements Font {
         helper.setFont(font);
         // Note that the wrapping width needs to be set to zero before
         // getting the text's real preferred width.
+        helper.setWrappingWidth(0);
         double w = helper.prefWidth(-1);
         helper.setWrappingWidth((int) Math.ceil(w));
         w = Math.ceil(helper.getLayoutBounds().getWidth());

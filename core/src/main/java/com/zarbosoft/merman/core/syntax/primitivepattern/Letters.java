@@ -6,7 +6,7 @@ import com.zarbosoft.pidgoon.nodes.Union;
 
 public class Letters extends Pattern {
   @Override
-  public Node build(I18nEngine i18n) {
+  public Node build() {
     return new Union()
         .add(new CharacterRangeTerminal("a", "z"))
         .add(new CharacterRangeTerminal("A", "Z"));

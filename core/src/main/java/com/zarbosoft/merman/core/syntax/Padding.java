@@ -2,15 +2,20 @@ package com.zarbosoft.merman.core.syntax;
 
 public class Padding {
   public static final Padding empty = new Padding(0, 0, 0, 0);
-  public final int converseStart;
-  public final int converseEnd;
-  public final int transverseStart;
-  public final int transverseEnd;
+  public final double converseStart;
+  public final double converseEnd;
+  public final double transverseStart;
+  public final double transverseEnd;
 
-  public Padding(int converseStart, int converseEnd, int transverseStart, int transverseEnd) {
+  public Padding(
+      double converseStart, double converseEnd, double transverseStart, double transverseEnd) {
     this.converseStart = converseStart;
     this.converseEnd = converseEnd;
     this.transverseStart = transverseStart;
     this.transverseEnd = transverseEnd;
+  }
+
+  public static Padding same(double amount) {
+    return new Padding(amount, amount, amount, amount);
   }
 }

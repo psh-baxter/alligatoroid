@@ -21,17 +21,17 @@ public class BrickText extends Brick {
       Style style,
       int hackAvoidChanged) {
     super(inter, style, splitMode);
+    toPixels = context.toPixels;
     text = context.display.text();
     text.setColor(context, style.color);
-    text.setFont(context, Context.getFont(context, style));
-    font = Context.getFont(context, style);
+    this.font = Context.getFont(context, style);
+    text.setFont(context, font);
   }
 
   public BrickText(
       final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
     this(context, inter, splitMode, style, 0);
     changed(context);
-    toPixels = context.toPixels;
   }
 
   @Override

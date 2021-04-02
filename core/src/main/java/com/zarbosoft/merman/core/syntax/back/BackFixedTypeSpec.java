@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.core.editor.backevents.ETypeEvent;
 import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
@@ -37,10 +38,10 @@ public class BackFixedTypeSpec extends BackSpec {
   }
 
   @Override
-  public Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     return new Sequence()
         .add(new MatchingEventTerminal(new ETypeEvent(type)))
-        .add(value.buildBackRule(syntax));
+        .add(value.buildBackRule(i18n, syntax));
   }
 
   @Override

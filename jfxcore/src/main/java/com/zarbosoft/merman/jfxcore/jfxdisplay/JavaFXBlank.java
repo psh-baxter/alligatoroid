@@ -4,17 +4,21 @@ import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.display.Blank;
 import com.zarbosoft.merman.core.editor.visual.Vector;
 import javafx.scene.Node;
+import javafx.scene.layout.Region;
 
 public class JavaFXBlank implements Blank, JavaFXNode {
+  private final Region node;
   private double converseSpan;
   private double converse;
   private double transverse;
 
-  protected JavaFXBlank() {}
+  protected JavaFXBlank() {
+    this.node = new Region();
+  }
 
   @Override
   public Node node() {
-    return null;
+    return node;
   }
 
   @Override

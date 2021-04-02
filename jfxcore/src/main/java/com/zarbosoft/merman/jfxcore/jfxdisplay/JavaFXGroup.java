@@ -15,8 +15,7 @@ public class JavaFXGroup extends JavaFXFreeDisplayNode implements Group {
 
   @Override
   public void add(final int index, final DisplayNode node) {
-    Node node1 = ((JavaFXNode) node).node();
-    if (node1 != null) ((javafx.scene.Group) this.node).getChildren().add(index, node1);
+    ((javafx.scene.Group) this.node).getChildren().add(index, ((JavaFXNode) node).node());
   }
 
   @Override
@@ -31,8 +30,7 @@ public class JavaFXGroup extends JavaFXFreeDisplayNode implements Group {
 
   @Override
   public void remove(final DisplayNode node) {
-    Node node1 = ((JavaFXNode) node).node();
-    if (node1 != null) ((javafx.scene.Group) this.node).getChildren().remove(node1);
+    ((javafx.scene.Group) this.node).getChildren().remove(((JavaFXNode) node).node());
   }
 
   @Override

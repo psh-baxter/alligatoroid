@@ -5,6 +5,7 @@ import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Padding;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
@@ -33,6 +34,7 @@ import com.zarbosoft.merman.core.syntax.primitivepattern.PatternString;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternUnion;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
@@ -483,44 +485,47 @@ public class Main {
                       .style(new Style.Config().splitAlignment(indentAlign).create()))));
   public static final FrontSymbol space = text(" ", Function.identity());
 
-  private static Style.Config styleBase(Style.Config c) {
-    return c.spaceTransverseBefore(lineSpace).spaceTransverseAfter(lineSpace).fontSize(fontSize);
+  private static Style.Config styleBase() {
+    return new Style.Config()
+        .spaceTransverseBefore(lineSpace)
+        .spaceTransverseAfter(lineSpace)
+        .fontSize(fontSize);
   }
 
-  private static Style.Config styleString(Style.Config c) {
-    return styleBase(c).color(stringColor);
+  private static Style.Config styleString() {
+    return styleBase().color(stringColor);
   }
 
-  private static Style.Config styleNonstring(Style.Config c) {
-    return styleBase(c).color(nonstringColor);
+  private static Style.Config styleNonstring() {
+    return styleBase().color(nonstringColor);
   }
 
-  private static Style.Config styleStringQuote(Style.Config c) {
-    return styleBase(c).color(stringQuoteColor);
+  private static Style.Config styleStringQuote() {
+    return styleBase().color(stringQuoteColor);
   }
 
-  private static Style.Config styleIdentifier(Style.Config c) {
-    return styleBase(c).color(identifierColor);
+  private static Style.Config styleIdentifier() {
+    return styleBase().color(identifierColor);
   }
 
-  private static Style.Config styleOperator(Style.Config c) {
-    return styleBase(c).color(operatorColor);
+  private static Style.Config styleOperator() {
+    return styleBase().color(operatorColor);
   }
 
-  private static Style.Config styleCall(Style.Config c) {
-    return styleBase(c).color(callColor);
+  private static Style.Config styleCall() {
+    return styleBase().color(callColor);
   }
 
-  private static Style.Config styleKeyword(Style.Config c) {
-    return styleBase(c).color(keywordColor);
+  private static Style.Config styleKeyword() {
+    return styleBase().color(keywordColor);
   }
 
-  private static Style.Config styleDeclare(Style.Config c) {
-    return styleBase(c).color(declareColor);
+  private static Style.Config styleDeclare() {
+    return styleBase().color(declareColor);
   }
 
-  private static Style.Config styleBlock(Style.Config c) {
-    return styleBase(c).color(blockColor);
+  private static Style.Config styleBlock() {
+    return styleBase().color(blockColor);
   }
 
   @JsMethod
@@ -629,7 +634,7 @@ public class Main {
                         .back(
                             estreeBackBuilder()
                                 .field("type", new BackFixedPrimitiveSpec("VariableDeclarator"))
-                                .field("id", identifierBack(i18n, "id"))
+                                .field("id", identifierBack("id"))
                                 .field(
                                     "init",
                                     new BackAtomSpec(
@@ -641,10 +646,10 @@ public class Main {
             //
             /// Access
             estreeTypeBuilder(identifierType, "Identifier")
-                .back(identifierBack(i18n, "name"))
+                .back(identifierBack("name"))
                 .front(
                     new FrontPrimitiveSpec(
-                        new FrontPrimitiveSpec.Config("name").style(c -> styleIdentifier(c))))
+                        new FrontPrimitiveSpec.Config("name").style(styleIdentifier().create())))
                 .build(),
             frontFactory
                 .memberExpr(
@@ -656,7 +661,7 @@ public class Main {
                                     "object",
                                     new BackAtomSpec(
                                         new BaseBackAtomSpec.Config("object", expresisonGroupType)))
-                                .field("property", identifierBack(i18n, "property"))
+                                .field("property", identifierBack("property"))
                                 .field("computed", new BackFixedJSONSpecialPrimitiveSpec("false"))
                                 .field("optional", new BackFixedJSONSpecialPrimitiveSpec("false"))
                                 .build()),
@@ -673,19 +678,18 @@ public class Main {
                         .field(
                             "value",
                             new BackJSONSpecialPrimitiveSpec(
-                                i18n,
                                 new BaseBackPrimitiveSpec.Config(
                                     "value",
                                     new PatternUnion(
                                         TSList.of(
-                                            new PatternString("true"),
-                                            new PatternString("false"),
-                                            new PatternString("null"),
+                                            new PatternString(i18n, "true"),
+                                            new PatternString(i18n, "false"),
+                                            new PatternString(i18n, "null"),
                                             new JsonDecimal())))))
                         .build())
                 .front(
                     new FrontPrimitiveSpec(
-                        new FrontPrimitiveSpec.Config("value").style(c -> styleNonstring(c))))
+                        new FrontPrimitiveSpec.Config("value").style(styleNonstring().create())))
                 .build(),
             frontFactory
                 .stringLit(
@@ -696,7 +700,7 @@ public class Main {
                                 .field(
                                     "value",
                                     new BackPrimitiveSpec(
-                                        i18n, new BaseBackPrimitiveSpec.Config("value", new Any())))
+                                        new BaseBackPrimitiveSpec.Config("value", new Any())))
                                 .build()),
                     "value")
                 .build(),
@@ -849,22 +853,53 @@ public class Main {
     errors.raise();
     Syntax.Config syntaxConfig =
         new Syntax.Config(
-            i18n,
-            types,
-            splayedTypes,
-            new RootTypeBuilder()
-                .back(
-                    estreeBackBuilder()
-                        .field("type", new BackFixedPrimitiveSpec("Program"))
-                        .field("sourceType", new BackFixedPrimitiveSpec("script"))
-                        .field("body", statementBackArray)
-                        .build())
-                .front(statementsFront)
-                .build());
+                types,
+                splayedTypes,
+                new RootTypeBuilder()
+                    .back(
+                        estreeBackBuilder()
+                            .field("type", new BackFixedPrimitiveSpec("Program"))
+                            .field("sourceType", new BackFixedPrimitiveSpec("script"))
+                            .field("body", statementBackArray)
+                            .build())
+                    .front(statementsFront)
+                    .build())
+            .hoverStyle(hoverStyle(false))
+            .primitiveHoverStyle(hoverStyle(true))
+            .cursorStyle(cursorStyle(false))
+            .primitiveCursorStyle(cursorStyle(true));
     syntaxConfig.converseDirection = frontFactory.converseDirection();
     syntaxConfig.transverseDirection = frontFactory.transverseDirection();
     syntaxConfig.backType = BackType.JSON;
-    return new Syntax(syntaxConfig);
+    return new Syntax(i18n, syntaxConfig);
+  }
+
+  private static Style cursorStyle(boolean primitive) {
+    return new Style.Config()
+        .obbox(
+            new ObboxStyle(
+                new ObboxStyle.Config()
+                    .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                    .roundStart(true)
+                    .roundEnd(true)
+                    .lineThickness(1.5)
+                    .roundRadius(8)
+                    .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0.5, 180, 0.8))))
+        .create();
+  }
+
+  private static Style hoverStyle(boolean primitive) {
+    return new Style.Config()
+        .obbox(
+            new ObboxStyle(
+                new ObboxStyle.Config()
+                    .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                    .roundEnd(true)
+                    .roundStart(true)
+                    .roundRadius(8)
+                    .lineThickness(1.5)
+                    .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0, 0, 0.4))))
+        .create();
   }
 
   public static TypeBuilder estreeTypeBuilder(String callType, String call) {
@@ -933,13 +968,12 @@ public class Main {
         .build();
   }
 
-  private static BackSpec identifierBack(JSI18nEngine i18n, String id) {
+  private static BackSpec identifierBack(String id) {
     return estreeBackBuilder()
         .field("type", new BackFixedPrimitiveSpec("Identifier"))
         .field(
             "name",
             new BackPrimitiveSpec(
-                i18n,
                 new BaseBackPrimitiveSpec.Config(
                     id,
                     new PatternSequence(
@@ -1045,11 +1079,11 @@ public class Main {
 
     @Override
     public TypeBuilder stringLit(TypeBuilder type, String valueKey) {
-      return type.front(text("\"", Main::styleStringQuote))
+      return type.front(text("\"", c1 -> styleStringQuote()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config("value").style(c -> styleString(c))))
-          .front(text("\"", Main::styleStringQuote));
+                  new FrontPrimitiveSpec.Config("value").style(styleString().create())))
+          .front(text("\"", c2 -> styleStringQuote()));
     }
   }
 
@@ -1057,22 +1091,22 @@ public class Main {
     @Override
     public TypeBuilder callExpr(TypeBuilder type, String calleeKey, String argumentsKey) {
       return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(calleeKey)))
-          .front(text("(", Main::styleCall))
+          .front(text("(", c1 -> styleCall()))
           .front(
               new FrontArraySpecBuilder(argumentsKey)
                   .prefix(prefixCompactIndent)
-                  .separator(text(", ", Main::styleCall))
+                  .separator(text(", ", c2 -> styleCall()))
                   .build())
-          .front(textCompactBase(")", Main::styleCall));
+          .front(textCompactBase(")", c -> styleCall()));
     }
 
     @Override
     public TypeBuilder memberExpr(TypeBuilder type, String objectKey, String propertyKey) {
       return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(objectKey)))
-          .front(textCompactIndent(".", Main::styleOperator))
+          .front(textCompactIndent(".", c1 -> styleOperator()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config(propertyKey).style(c -> styleIdentifier(c))));
+                  new FrontPrimitiveSpec.Config(propertyKey).style(styleIdentifier().create())));
     }
 
     @Override
@@ -1085,16 +1119,13 @@ public class Main {
                       new SymbolTextSpec(
                           new SymbolTextSpec.Config(symbol + " ")
                               .splitMode(Style.SplitMode.COMPACT)
-                              .style(
-                                  styleOperator(new Style.Config())
-                                      .splitAlignment(indentAlign)
-                                      .create())))))
+                              .style(styleOperator().splitAlignment(indentAlign).create())))))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(rightKey)));
     }
 
     @Override
     public TypeBuilder prefixOp(TypeBuilder type, String symbol, String argumentKey) {
-      return type.front(text(symbol, Main::styleOperator))
+      return type.front(text(symbol, c -> styleOperator()))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config("argument")));
     }
 
@@ -1102,18 +1133,19 @@ public class Main {
     public TypeBuilder declareInner(TypeBuilder type, String idKey, String initKey) {
       return type.front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config("id").style(c -> c.color(identifierColor))))
-          .front(text(" = ", Main::styleKeyword))
+                  new FrontPrimitiveSpec.Config("id")
+                      .style(new Style.Config().color(identifierColor).create())))
+          .front(text(" = ", c1 -> styleKeyword()))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config("init")));
     }
 
     @Override
     public TypeBuilder declareOuter(TypeBuilder type, String declarationsKey) {
-      return type.front(text("let ", Main::styleDeclare))
+      return type.front(text("let ", c -> styleDeclare()))
           .front(
               new FrontArraySpecBuilder("declarations")
                   .prefix(prefixCompactIndent)
-                  .separator(text(", ", Main::styleDeclare))
+                  .separator(text(", ", c1 -> styleDeclare()))
                   .build());
     }
   }
@@ -1142,11 +1174,11 @@ public class Main {
 
     @Override
     public TypeBuilder stringLit(TypeBuilder type, String valueKey) {
-      return type.front(text("「", Main::styleStringQuote))
+      return type.front(text("「", c1 -> styleStringQuote()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config("value").style(c -> styleString(c))))
-          .front(text("」", Main::styleStringQuote));
+                  new FrontPrimitiveSpec.Config("value").style(styleString().create())))
+          .front(text("」", c2 -> styleStringQuote()));
     }
 
     @Override
@@ -1154,7 +1186,7 @@ public class Main {
       return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(leftKey)))
           .front(space)
           .front(prefixCompactIndent)
-          .front(text(symbol, Main::styleOperator))
+          .front(text(symbol, c -> styleOperator()))
           .front(prefixCompactIndent)
           .front(space)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(rightKey)));
@@ -1162,60 +1194,60 @@ public class Main {
 
     @Override
     public TypeBuilder prefixOp(TypeBuilder type, String symbol, String argumentKey) {
-      return type.front(text(symbol, Main::styleOperator))
+      return type.front(text(symbol, c -> styleOperator()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config("argument")));
     }
 
     @Override
     public TypeBuilder callExpr(TypeBuilder type, String calleeKey, String argumentsKey) {
-      return type.front(text("（", Main::styleCall))
+      return type.front(text("（", c -> styleCall()))
           .front(
               new FrontArraySpecBuilder(argumentsKey)
                   .prefix(prefixCompactIndent)
-                  .separator(text(",", Main::styleCall))
+                  .separator(text(",", c2 -> styleCall()))
                   .build())
-          .front(textCompactBase("）を", Main::styleCall))
+          .front(textCompactBase("）を", c3 -> styleCall()))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(calleeKey)))
-          .front(textCompactIndent("する", Main::styleCall));
+          .front(textCompactIndent("する", c1 -> styleCall()));
     }
 
     @Override
     public TypeBuilder memberExpr(TypeBuilder type, String objectKey, String propertyKey) {
       return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(objectKey)))
-          .front(textCompactIndent("の", Main::styleOperator))
+          .front(textCompactIndent("の", c1 -> styleOperator()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config(propertyKey).style(c -> styleIdentifier(c))));
+                  new FrontPrimitiveSpec.Config(propertyKey).style(styleIdentifier().create())));
     }
 
     @Override
     public TypeBuilder block(TypeBuilder type, String statementsKey) {
       return type.front(new FrontArraySpecBuilder("statements").prefix(prefixIndent).build())
-          .front(textBase("終わり", Main::styleKeyword));
+          .front(textBase("終わり", c -> styleKeyword()));
     }
 
     @Override
     public TypeBuilder forStatement(
         TypeBuilder type, String initKey, String testKey, String updateKey, String bodyKey) {
       return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(initKey)))
-          .front(textCompactIndent("から", Main::styleKeyword))
+          .front(textCompactIndent("から", c1 -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(testKey)))
-          .front(textCompactIndent("まで", Main::styleKeyword))
+          .front(textCompactIndent("まで", c -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(updateKey)))
-          .front(textCompactBase("しながら", Main::styleKeyword))
+          .front(textCompactBase("しながら", c2 -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(bodyKey)));
     }
 
     @Override
     public TypeBuilder ifStatement(TypeBuilder type, String testKey, String consequentKey) {
-      return type.front(text("もし", Main::styleKeyword))
+      return type.front(text("もし", c -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(testKey)))
-          .front(textCompactBase("なら", Main::styleKeyword))
+          .front(textCompactBase("なら", c1 -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(consequentKey)));
     }
@@ -1225,7 +1257,8 @@ public class Main {
       return type.front(prefixCompactIndent)
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config("id").style(c -> c.color(identifierColor))))
+                  new FrontPrimitiveSpec.Config("id")
+                      .style(new Style.Config().color(identifierColor).create())))
           .front(text("を", Function.identity()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config("init")));
@@ -1236,9 +1269,9 @@ public class Main {
       return type.front(
               new FrontArraySpecBuilder("declarations")
                   .prefix(prefixCompactIndent)
-                  .separator(text("、", Main::styleDeclare))
+                  .separator(text("、", c1 -> styleDeclare()))
                   .build())
-          .front(text("とする", Main::styleDeclare));
+          .front(text("とする", c -> styleDeclare()));
     }
   }
 
@@ -1263,14 +1296,14 @@ public class Main {
             break;
           }
       }
-      return type.front(text("(" + lispSymbol, Main::styleOperator))
+      return type.front(text("(" + lispSymbol, c1 -> styleOperator()))
           .front(space)
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(leftKey)))
           .front(space)
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(rightKey)))
-          .front(text(")", Main::styleOperator));
+          .front(text(")", c -> styleOperator()));
     }
 
     @Override
@@ -1288,16 +1321,16 @@ public class Main {
             break;
           }
       }
-      return type.front(text("(" + lispSymbol, Main::styleOperator))
+      return type.front(text("(" + lispSymbol, c1 -> styleOperator()))
           .front(space)
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config("argument")))
-          .front(text(")", Main::styleOperator));
+          .front(text(")", c -> styleOperator()));
     }
 
     @Override
     public TypeBuilder callExpr(TypeBuilder type, String calleeKey, String argumentsKey) {
-      return type.front(text("(", Main::styleCall))
+      return type.front(text("(", c -> styleCall()))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(calleeKey)))
           .front(space)
           .front(
@@ -1305,33 +1338,33 @@ public class Main {
                   .prefix(prefixCompactIndent)
                   .separator(text(" ", Function.identity()))
                   .build())
-          .front(text(")", Main::styleCall));
+          .front(text(")", c1 -> styleCall()));
     }
 
     @Override
     public TypeBuilder memberExpr(TypeBuilder type, String objectKey, String propertyKey) {
       return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(objectKey)))
-          .front(textCompactIndent(".", Main::styleOperator))
+          .front(textCompactIndent(".", c1 -> styleOperator()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config(propertyKey).style(c -> styleIdentifier(c))));
+                  new FrontPrimitiveSpec.Config(propertyKey).style(styleIdentifier().create())));
     }
 
     @Override
     public TypeBuilder block(TypeBuilder type, String statementsKey) {
-      return type.front(text("(block ", Main::styleKeyword))
+      return type.front(text("(block ", c1 -> styleKeyword()))
           .front(
               new FrontArraySpecBuilder("statements")
                   .prefix(prefixCompactIndent)
                   .separator(space)
                   .build())
-          .front(text(")", Main::styleKeyword));
+          .front(text(")", c -> styleKeyword()));
     }
 
     @Override
     public TypeBuilder forStatement(
         TypeBuilder type, String initKey, String testKey, String updateKey, String bodyKey) {
-      return type.front(text("(for ", Main::styleKeyword))
+      return type.front(text("(for ", c -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(initKey)))
           .front(space)
@@ -1343,18 +1376,18 @@ public class Main {
           .front(space)
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(bodyKey)))
-          .front(text(")", Main::styleKeyword));
+          .front(text(")", c1 -> styleKeyword()));
     }
 
     @Override
     public TypeBuilder ifStatement(TypeBuilder type, String testKey, String consequentKey) {
-      return type.front(text("(if ", Main::styleKeyword))
+      return type.front(text("(if ", c1 -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(testKey)))
           .front(space)
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(consequentKey)))
-          .front(text(")", Main::styleKeyword));
+          .front(text(")", c -> styleKeyword()));
     }
 
     @Override
@@ -1362,7 +1395,8 @@ public class Main {
       return type.front(prefixCompactIndent)
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config("id").style(c -> c.color(identifierColor))))
+                  new FrontPrimitiveSpec.Config("id")
+                      .style(new Style.Config().color(identifierColor).create())))
           .front(text(" ", Function.identity()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config("init")));
@@ -1370,49 +1404,49 @@ public class Main {
 
     @Override
     public TypeBuilder declareOuter(TypeBuilder type, String declarationsKey) {
-      return type.front(text("(let ", Main::styleDeclare))
+      return type.front(text("(let ", c1 -> styleDeclare()))
           .front(
               new FrontArraySpecBuilder("declarations")
                   .prefix(prefixCompactIndent)
                   .separator(space)
                   .build())
-          .front(text(")", Main::styleDeclare));
+          .front(text(")", c -> styleDeclare()));
     }
   }
 
   public static class JavascriptSyntaxFrontFactory extends NonLispSyntaxFrontFactory {
     @Override
     public TypeBuilder block(TypeBuilder type, String statementsKey) {
-      return type.front(text("{ ", Main::styleBlock))
+      return type.front(text("{ ", c2 -> styleBlock()))
           .front(
               new FrontArraySpecBuilder("statements")
                   .prefix(prefixCompactIndent)
-                  .suffix(text("; ", Main::styleBlock))
+                  .suffix(text("; ", c1 -> styleBlock()))
                   .build())
-          .front(textCompactBase("}", Main::styleBlock));
+          .front(textCompactBase("}", c -> styleBlock()));
     }
 
     @Override
     public TypeBuilder forStatement(
         TypeBuilder type, String initKey, String testKey, String updateKey, String bodyKey) {
-      return type.front(text("for (", Main::styleKeyword))
+      return type.front(text("for (", c2 -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(initKey)))
-          .front(text("; ", Main::styleKeyword))
+          .front(text("; ", c -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(testKey)))
-          .front(text("; ", Main::styleKeyword))
+          .front(text("; ", c3 -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(updateKey)))
-          .front(textCompactBase(") ", Main::styleKeyword))
+          .front(textCompactBase(") ", c1 -> styleKeyword()))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(bodyKey)));
     }
 
     @Override
     public TypeBuilder ifStatement(TypeBuilder type, String testKey, String consequentKey) {
-      return type.front(text("if (", Main::styleKeyword))
+      return type.front(text("if (", c -> styleKeyword()))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(testKey)))
-          .front(text(") ", Main::styleKeyword))
+          .front(text(") ", c1 -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(consequentKey)));
     }
@@ -1421,20 +1455,20 @@ public class Main {
   public static class PythonSyntaxFrontFactory extends NonLispSyntaxFrontFactory {
     @Override
     public TypeBuilder block(TypeBuilder type, String statementsKey) {
-      return type.front(text(":", Main::styleBlock))
+      return type.front(text(":", c -> styleBlock()))
           .front(new FrontArraySpecBuilder("statements").prefix(prefixIndent).build());
     }
 
     @Override
     public TypeBuilder forStatement(
         TypeBuilder type, String initKey, String testKey, String updateKey, String bodyKey) {
-      return type.front(text("for ", Main::styleKeyword))
+      return type.front(text("for ", c1 -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(initKey)))
-          .front(text("; ", Main::styleKeyword))
+          .front(text("; ", c -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(testKey)))
-          .front(text("; ", Main::styleKeyword))
+          .front(text("; ", c2 -> styleKeyword()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(updateKey)))
           .front(prefixCompactIndent)
@@ -1443,7 +1477,7 @@ public class Main {
 
     @Override
     public TypeBuilder ifStatement(TypeBuilder type, String testKey, String consequentKey) {
-      return type.front(text("if ", Main::styleKeyword))
+      return type.front(text("if ", c -> styleKeyword()))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(testKey)))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(consequentKey)));

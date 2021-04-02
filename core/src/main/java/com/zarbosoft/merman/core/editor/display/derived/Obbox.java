@@ -5,12 +5,17 @@ import com.zarbosoft.merman.core.editor.display.Drawing;
 import com.zarbosoft.merman.core.editor.display.DrawingContext;
 import com.zarbosoft.merman.core.editor.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class Obbox {
   public final Drawing drawing;
   private final double toPixels;
   ObboxStyle style;
-  private double stylePadding;
+  private double stylePaddingConverse;
+  private double stylePaddingConverseEnd;
+  private double stylePaddingTransverse;
+  private double stylePaddingTransverseEnd;
   private double styleLineThickness;
   private double styleRoundRadius;
 
@@ -19,45 +24,91 @@ public class Obbox {
     toPixels = context.toPixels;
   }
 
+  private static double simpleNorm(double v) {
+    if (aeq(v, 0, 0.1)) return 0;
+    if (v < 0) return -1;
+    return 1;
+  }
+
+  private static boolean aeq(double a, double b, double t) {
+    return (a - b) * (a - b) < t * t;
+  }
+
   public void setStyle(final ObboxStyle style) {
     this.style = style;
-    stylePadding = style.padding * toPixels;
+    stylePaddingConverse = style.padding.converseStart * toPixels;
+    stylePaddingConverseEnd = style.padding.converseEnd * toPixels;
+    stylePaddingTransverse = style.padding.transverseStart * toPixels;
+    stylePaddingTransverseEnd = style.padding.transverseEnd * toPixels;
     styleLineThickness = style.lineThickness * toPixels;
     styleRoundRadius = style.roundRadius * toPixels;
   }
 
   public void setSize(
-      final Context context, double sc, double st, double ste, double ec, double et, double ete) {
-    final boolean oneLine = st == et;
+      final Context context,
+      double firstLineConverse,
+      double firstLineTransverse,
+      double firstLineTransverseEnd,
+      double lastLineConverseEnd,
+      double lastLineTransverse,
+      double lastLineTransverseEnd) {
+    final boolean oneLine = firstLineTransverse == lastLineTransverse;
     drawing.clear();
-    sc -= stylePadding;
-    st -= stylePadding;
-    ste = oneLine ? ste + stylePadding : ste - stylePadding;
-    ec += stylePadding;
-    et += stylePadding;
-    ete += stylePadding;
+    firstLineConverse -= stylePaddingConverse;
+    firstLineTransverse -= stylePaddingTransverse;
+    firstLineTransverseEnd =
+        oneLine
+            ? firstLineTransverseEnd + stylePaddingTransverseEnd
+            : firstLineTransverseEnd - stylePaddingTransverse;
+    lastLineConverseEnd += stylePaddingConverseEnd;
+    lastLineTransverse += stylePaddingTransverseEnd;
+    lastLineTransverseEnd += stylePaddingTransverseEnd;
     final int buffer = (int) (styleLineThickness + 1);
     final Vector wh =
-        new Vector(context.edge + stylePadding * 2 + buffer * 2, ete - st + buffer * 2);
+        new Vector(
+            context.edge + stylePaddingConverse + stylePaddingConverseEnd + buffer * 2,
+            lastLineTransverseEnd - firstLineTransverse + buffer * 2);
     drawing.resize(context, wh);
-    drawing.setPosition(new Vector(-(buffer + stylePadding), st - buffer), false);
+    drawing.setPosition(
+        new Vector(-(buffer + stylePaddingConverse), firstLineTransverse - buffer), false);
     final DrawingContext gc = drawing.begin(context);
-    gc.translate(buffer + stylePadding, buffer);
-    ste -= st;
-    et -= st;
-    ete -= st;
-    st = 0;
+    gc.translate(buffer + stylePaddingConverse, buffer);
+    firstLineTransverseEnd -= firstLineTransverse;
+    lastLineTransverse -= firstLineTransverse;
+    lastLineTransverseEnd -= firstLineTransverse;
+    firstLineTransverse = 0;
+
     if (style.fill) {
       gc.beginFillPath();
       gc.setFillColor(style.fillColor);
-      path(gc, oneLine, -stylePadding, context.edge + stylePadding, sc, st, ste, ec, et, ete);
+      path(
+          gc,
+          oneLine,
+          -stylePaddingConverse,
+          context.edge + stylePaddingConverseEnd,
+          firstLineConverse,
+          firstLineTransverse,
+          firstLineTransverseEnd,
+          lastLineConverseEnd,
+          lastLineTransverse,
+          lastLineTransverseEnd);
       gc.closePath();
     }
     if (style.line) {
       gc.beginStrokePath();
       gc.setLineColor(style.lineColor);
       gc.setLineThickness(styleLineThickness);
-      path(gc, oneLine, -stylePadding, context.edge + stylePadding, sc, st, ste, ec, et, ete);
+      path(
+          gc,
+          oneLine,
+          -stylePaddingConverse,
+          context.edge + stylePaddingConverseEnd,
+          firstLineConverse,
+          firstLineTransverse,
+          firstLineTransverseEnd,
+          lastLineConverseEnd,
+          lastLineTransverse,
+          lastLineTransverseEnd);
       gc.closePath();
     }
   }
@@ -67,139 +118,87 @@ public class Obbox {
       final boolean oneLine,
       final double converseZero,
       final double converseEdge,
-      final double startConverse,
-      final double startTransverse,
-      final double startTransverseEdge,
-      final double endConverse,
-      final double endTransverse,
-      final double endTransverseEdge) {
+      final double firstLineConverse,
+      final double firstLineTransverse,
+      final double firstLineTransverseEnd,
+      final double lastLineConverseEnd,
+      final double lastLineTransverse,
+      final double lastLineTransverseEnd) {
+    TSList<ROPair<Vector, Boolean>> points;
     if (oneLine) {
-      moveTo(gc, startConverse, (startTransverse + startTransverseEdge) / 2);
-      cornerTo(
-          gc,
-          style.roundStart,
-          startConverse,
-          startTransverse,
-          (startConverse + endConverse) / 2,
-          startTransverse);
-      cornerTo(
-          gc,
-          style.roundOuterEdges,
-          endConverse,
-          startTransverse,
-          endConverse,
-          (startTransverse + startTransverseEdge) / 2);
-      cornerTo(
-          gc,
-          style.roundEnd,
-          endConverse,
-          startTransverseEdge,
-          (startConverse + endConverse) / 2,
-          startTransverseEdge);
-      cornerTo(
-          gc,
-          style.roundOuterEdges,
-          startConverse,
-          startTransverseEdge,
-          startConverse,
-          (startTransverse + startTransverseEdge) / 2);
+      points =
+          TSList.of(
+              new ROPair<>(new Vector(firstLineConverse, firstLineTransverse), style.roundStart),
+              new ROPair<>(
+                  new Vector(lastLineConverseEnd, firstLineTransverse), style.roundOuterCorners),
+              new ROPair<>(new Vector(lastLineConverseEnd, firstLineTransverseEnd), style.roundEnd),
+              new ROPair<>(
+                  new Vector(firstLineConverse, firstLineTransverseEnd), style.roundOuterCorners));
     } else {
-      moveTo(gc, startConverse, (startTransverse + startTransverseEdge) / 2);
-      cornerTo(
-          gc,
-          style.roundStart,
-          startConverse,
-          startTransverse,
-          (startConverse + converseEdge) / 2,
-          startTransverse);
-      cornerTo(
-          gc,
-          style.roundOuterEdges,
-          converseEdge,
-          startTransverse,
-          converseEdge,
-          (startTransverse + endTransverse) / 2);
-      if (endConverse == converseEdge) {
-        cornerTo(
-            gc,
-            style.roundInnerEdges,
-            converseEdge,
-            endTransverseEdge,
-            (converseZero + converseEdge) / 2,
-            endTransverseEdge);
-      } else {
-        cornerTo(
-            gc,
-            style.roundInnerEdges,
-            converseEdge,
-            endTransverse,
-            (endConverse + converseEdge) / 2,
-            endTransverse);
-        cornerTo(
-            gc,
-            style.roundConcave,
-            endConverse,
-            endTransverse,
-            endConverse,
-            (endTransverse + endTransverseEdge) / 2);
-        cornerTo(
-            gc,
-            style.roundEnd,
-            endConverse,
-            endTransverseEdge,
-            (converseZero + endConverse) / 2,
-            endTransverseEdge);
+      points = TSList.of();
+      points.add(
+          new ROPair<>(new Vector(firstLineConverse, firstLineTransverse), style.roundStart));
+      points.add(
+          new ROPair<>(new Vector(converseEdge, firstLineTransverse), style.roundOuterCorners));
+      if (!aeq(lastLineConverseEnd, converseEdge, 5)) {
+        points.add(
+            new ROPair<>(new Vector(converseEdge, lastLineTransverse), style.roundInnerCorners));
+        points.add(
+            new ROPair<>(new Vector(lastLineConverseEnd, lastLineTransverse), style.roundConcave));
       }
-      if (startConverse == converseZero) {
-        cornerTo(
-            gc,
-            style.roundOuterEdges,
-            converseZero,
-            endTransverseEdge,
-            converseZero,
-            (startTransverse + startTransverseEdge) / 2);
-      } else {
-        cornerTo(
-            gc,
-            style.roundOuterEdges,
-            converseZero,
-            endTransverseEdge,
-            converseZero,
-            (startTransverseEdge + endTransverseEdge) / 2);
-        cornerTo(
-            gc,
-            style.roundInnerEdges,
-            converseZero,
-            startTransverseEdge,
-            startConverse / 2,
-            startTransverseEdge);
-        cornerTo(
-            gc,
-            style.roundConcave,
-            startConverse,
-            startTransverseEdge,
-            startConverse,
-            (startTransverse + startTransverseEdge) / 2);
+      points.add(
+          new ROPair<>(new Vector(lastLineConverseEnd, lastLineTransverseEnd), style.roundEnd));
+      points.add(
+          new ROPair<>(new Vector(converseZero, lastLineTransverseEnd), style.roundOuterCorners));
+      if (!aeq(firstLineConverse, converseZero, 5)) {
+        points.add(
+            new ROPair<>(
+                new Vector(converseZero, firstLineTransverseEnd), style.roundInnerCorners));
+        points.add(
+            new ROPair<>(
+                new Vector(firstLineConverse, firstLineTransverseEnd), style.roundConcave));
       }
     }
-  }
-
-  private void moveTo(final DrawingContext gc, final double c, final double t) {
-    gc.moveTo(c, t);
-  }
-
-  private void cornerTo(
-      final DrawingContext gc,
-      final boolean round,
-      final double c,
-      final double t,
-      final double c2,
-      final double t2) {
-    if (round) {
-      gc.arcTo(c, t, c2, t2, styleRoundRadius);
-    } else {
-      gc.lineTo(c, t);
-      gc.lineTo(c2, t2);
+    System.out.format("start drawing...\n");
+    for (int i = 0; i < points.size(); ++i) {
+      final ROPair<Vector, Boolean> mid = points.get(i);
+      if (mid.second) {
+        final ROPair<Vector, Boolean> pre = points.get((i + points.size() - 1) % points.size());
+        final ROPair<Vector, Boolean> post = points.get((i + 1) % points.size());
+        final Vector toPre =
+            new Vector(
+                pre.first.converse - mid.first.converse,
+                pre.first.transverse - mid.first.transverse);
+        final Vector toPost =
+            new Vector(
+                post.first.converse - mid.first.converse,
+                post.first.transverse - mid.first.transverse);
+         double radius = styleRoundRadius;
+        if (pre.second)
+          radius =
+              Math.min(radius, Math.min(Math.abs(toPre.converse), Math.abs(toPre.transverse)) / 2);
+        if (post.second)
+          radius =
+              Math.min(
+                  radius, Math.min(Math.abs(toPost.converse), Math.abs(toPost.transverse)) / 2);
+        if (i == 0) {
+          gc.moveTo(
+              mid.first.converse + simpleNorm(toPre.converse) * radius,
+              mid.first.transverse + simpleNorm(toPre.transverse) * radius);
+        }
+        gc.arcTo(
+            mid.first.converse,
+            mid.first.transverse,
+            mid.first.converse + simpleNorm(toPost.converse) * radius,
+            mid.first.transverse + simpleNorm(toPost.transverse) * radius,
+            radius);
+      } else {
+        if (i == 0) {
+          gc.moveTo(mid.first.converse, mid.first.transverse);
+        } else {
+          gc.lineTo(mid.first.converse, mid.first.transverse);
+        }
+      }
     }
   }
 }

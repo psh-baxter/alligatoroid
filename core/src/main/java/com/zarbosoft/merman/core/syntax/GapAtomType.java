@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.core.syntax;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
@@ -32,7 +31,7 @@ public class GapAtomType extends BaseGapAtomType {
     }
   }
 
-  public GapAtomType(I18nEngine i18n,Config config) {
+  public GapAtomType(Config config) {
     super(
         new AtomType.Config(
             config.id,
@@ -40,8 +39,8 @@ public class GapAtomType extends BaseGapAtomType {
                 new BackFixedTypeSpec(
                     new BackFixedTypeSpec.Config(
                         config.backType,
-                        new BackPrimitiveSpec(i18n,
-                            new BaseBackPrimitiveSpec.Config(GAP_PRIMITIVE_KEY, null))))),
+                        new BackPrimitiveSpec(
+                                new BaseBackPrimitiveSpec.Config(GAP_PRIMITIVE_KEY, null))))),
             new TSList<FrontSpec>()
                 .addAll(config.frontPrefix)
                 .add(

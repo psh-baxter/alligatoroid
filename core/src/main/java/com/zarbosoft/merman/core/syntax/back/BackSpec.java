@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.core.editor.serialization.WriteState;
@@ -37,7 +38,7 @@ public abstract class BackSpec {
 
   protected abstract Iterator<BackSpec> walkStep();
 
-  public abstract Node buildBackRule(Syntax syntax);
+  public abstract Node buildBackRule(I18nEngine i18n, Syntax syntax);
 
   public void finish(
           MultiError errors,

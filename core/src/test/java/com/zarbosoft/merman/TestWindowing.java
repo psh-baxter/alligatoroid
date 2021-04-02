@@ -10,14 +10,21 @@ import com.zarbosoft.merman.core.editor.ClipboardEngine;
 import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.DelayEngine;
 import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.editor.display.MockeryDisplay;
-import com.zarbosoft.merman.editor.display.MockeryText;
 import com.zarbosoft.merman.core.editor.wall.Brick;
 import com.zarbosoft.merman.core.editor.wall.Course;
+import com.zarbosoft.merman.core.editor.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.core.editor.wall.bricks.BrickImage;
 import com.zarbosoft.merman.core.editor.wall.bricks.BrickLine;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.core.editor.wall.bricks.BrickText;
+import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.Direction;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
+import com.zarbosoft.merman.editor.display.MockeryDisplay;
+import com.zarbosoft.merman.editor.display.MockeryText;
 import com.zarbosoft.merman.helper.BackRecordBuilder;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.GroupBuilder;
@@ -26,13 +33,6 @@ import com.zarbosoft.merman.helper.IterationRunner;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.core.syntax.AtomType;
-import com.zarbosoft.merman.core.syntax.Direction;
-import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
@@ -538,17 +538,12 @@ public class TestWindowing {
 
     public GeneralTestWizard(final Syntax syntax, boolean startWindowed, final Atom... atoms) {
       this.runner = new IterationRunner();
-      final Document doc =
-          new Document(
-              syntax,
-              new Atom(
-                  syntax.root,
-                  new TSMap<String, Field>()
-                      .put(
-                          "value",
-                          new FieldArray(
-                              (BaseBackArraySpec) syntax.root.fields.get("value"),
-                              TSList.of(atoms)))));
+      FieldArray rootArrayValue =
+          new FieldArray((BaseBackArraySpec) syntax.root.fields.get("value"));
+      rootArrayValue.initialSet(TSList.of(atoms));
+      Atom rootAtom = new Atom(syntax.root);
+      rootAtom.initialSet(new TSMap<String, Field>().put("value", rootArrayValue));
+      final Document doc = new Document(syntax, rootAtom);
       Context.InitialConfig initialConfig =
           new Context.InitialConfig().startWindowed(startWindowed);
       initialConfig.ellipsizeThreshold = 3;

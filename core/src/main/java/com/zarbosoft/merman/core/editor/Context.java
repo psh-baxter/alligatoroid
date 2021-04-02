@@ -52,14 +52,13 @@ public class Context {
   public final TSSet<HoverListener> hoverListeners = new TSSet<>();
   // Settings
   public final DelayEngine delayEngine;
-  public final Style cursorStyle;
-  public final Style hoverStyle;
   public final WallUsageListener wallUsageListener;
+  public final double toPixels;
+  public final double fromPixelsToMM;
   private final TSSet<ActionChangeListener> actionChangeListeners = new TSSet<>();
   private final TSList<Action> actions = new TSList<>();
   private final Consumer<IterationTask> addIteration;
   private final Consumer<Integer> flushIteration;
-  public final double toPixels;
   public boolean animateCoursePlacement;
   public boolean animateDetails;
   public int ellipsizeThreshold;
@@ -131,8 +130,6 @@ public class Context {
     this.scrollFactor = config.scrollFactor;
     this.scrollAlotFactor = config.scrollAlotFactor;
     this.delayEngine = delayEngine;
-    this.cursorStyle = config.cursorStyle.create();
-    this.hoverStyle = config.hoverStyle.create();
     display.setBackgroundColor(syntax.background);
     edge = display.edge();
     transverseEdge = display.transverseEdge();
@@ -150,6 +147,7 @@ public class Context {
     details = new Details(this, config.detailsStyle.create());
     this.clipboardEngine = clipboardEngine;
     toPixels = display.toPixels(syntax.displayUnit);
+    fromPixelsToMM = 1.0 / display.toPixels(Syntax.DisplayUnit.MM);
     display.addConverseEdgeListener(
         (oldValue, newValue) -> {
           edge =
@@ -267,8 +265,9 @@ public class Context {
   }
 
   public static Font getFont(final Context context, Style style) {
-    if (style.font == null) return context.display.font(null, style.fontSize * context.toPixels);
-    return context.display.font(style.font, style.fontSize * context.toPixels);
+    double toPt = context.toPixels * context.fromPixelsToMM * 72.0 / 25.4;
+    if (style.font == null) return context.display.font(null, style.fontSize * toPt);
+    return context.display.font(style.font, style.fontSize * toPt);
   }
 
   public void clearHover() {
@@ -308,12 +307,10 @@ public class Context {
 
   public void applyScroll() {
     final double newScroll = scroll + peek;
-    foreground.visual.setPosition(
-        new Vector(syntax.pad.converseStart * toPixels, -newScroll), animateCoursePlacement);
-    background.setPosition(
-        new Vector(syntax.pad.converseStart * toPixels, -newScroll), animateCoursePlacement);
-    overlay.setPosition(
-        new Vector(syntax.pad.converseStart * toPixels, -newScroll), animateCoursePlacement);
+    double conversePad = syntax.pad.converseStart * toPixels;
+    foreground.visual.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
+    background.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
+    overlay.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
     banner.setScroll(this, newScroll);
     details.setScroll(this, newScroll);
   }
@@ -634,8 +631,6 @@ public class Context {
   }
 
   public static class InitialConfig {
-    public final Style.Config cursorStyle = new Style.Config();
-    public final Style.Config hoverStyle = new Style.Config();
     public final Style.Config bannerStyle = new Style.Config();
     public final Style.Config detailsStyle = new Style.Config();
     public boolean animateCoursePlacement = false;
@@ -661,16 +656,6 @@ public class Context {
 
     public InitialConfig wallTransverseUsageListener(WallUsageListener l) {
       this.wallUsageListener = l;
-      return this;
-    }
-
-    public InitialConfig hoverStyle(Consumer<Style.Config> c) {
-      c.accept(this.hoverStyle);
-      return this;
-    }
-
-    public InitialConfig cursorStyle(Consumer<Style.Config> c) {
-      c.accept(this.cursorStyle);
       return this;
     }
   }

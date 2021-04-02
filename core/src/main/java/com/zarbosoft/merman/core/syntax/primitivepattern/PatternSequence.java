@@ -12,9 +12,9 @@ public class PatternSequence extends Pattern {
   }
 
   @Override
-  public Node build(I18nEngine i18n) {
+  public Node build() {
     final com.zarbosoft.pidgoon.nodes.Sequence out = new com.zarbosoft.pidgoon.nodes.Sequence();
-    for (final Pattern child : children) out.add(child.build(i18n));
+    for (final Pattern child : children) out.add(child.build());
     return out;
   }
 }

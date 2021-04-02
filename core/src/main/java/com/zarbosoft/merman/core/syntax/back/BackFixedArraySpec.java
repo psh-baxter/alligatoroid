@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.core.editor.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.editor.backevents.EArrayOpenEvent;
@@ -28,12 +29,12 @@ public class BackFixedArraySpec extends BackSpec {
   }
 
   @Override
-  public Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     final Sequence sequence;
     sequence = new Sequence();
     sequence.add(new MatchingEventTerminal(new EArrayOpenEvent()));
     for (final BackSpec element : elements) {
-      sequence.add(element.buildBackRule(syntax));
+      sequence.add(element.buildBackRule(i18n, syntax));
     }
     sequence.add(new MatchingEventTerminal(new EArrayCloseEvent()));
     return sequence;

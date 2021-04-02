@@ -14,7 +14,7 @@ public class PatternCharacterClass extends Pattern {
   }
 
   @Override
-  public Node build(I18nEngine i18n) {
+  public Node build() {
     Union union = new Union();
     for (ROPair<String, String> range : ranges) {
       union.add(new CharacterRangeTerminal(range.first, range.second));

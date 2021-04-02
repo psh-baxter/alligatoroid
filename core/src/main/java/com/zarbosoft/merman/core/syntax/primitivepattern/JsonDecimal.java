@@ -8,7 +8,7 @@ import com.zarbosoft.pidgoon.nodes.Union;
 
 public class JsonDecimal extends Pattern {
   @Override
-  public Node build(I18nEngine i18n) {
+  public Node build() {
     CharacterRangeTerminal digits = new CharacterRangeTerminal("0", "9");
     return new Sequence()
         .add(new Repeat(new CharacterRangeTerminal("-", "-")).max(1))

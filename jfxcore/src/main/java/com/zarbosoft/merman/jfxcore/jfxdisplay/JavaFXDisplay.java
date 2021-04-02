@@ -281,6 +281,10 @@ public class JavaFXDisplay extends Display {
         event -> {
           mouseMoved(event.getX(), event.getY());
         });
+    node.setOnMouseDragged(
+        event -> {
+          mouseMoved(event.getX(), event.getY());
+        });
     node.setOnMousePressed(
         e -> {
           node.requestFocus();
@@ -322,8 +326,10 @@ public class JavaFXDisplay extends Display {
             new ChangeListener<Number>() {
               @Override
               public void changed(
-                  ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                heightChanged(number.doubleValue());
+                  ObservableValue<? extends Number> observableValue,
+                  Number number,
+                  Number newValue) {
+                heightChanged(node.getHeight());
               }
             });
     node.widthProperty()
@@ -331,8 +337,10 @@ public class JavaFXDisplay extends Display {
             new ChangeListener<Number>() {
               @Override
               public void changed(
-                  ObservableValue<? extends Number> observableValue, Number number, Number t1) {
-                widthChanged(number.doubleValue());
+                  ObservableValue<? extends Number> observableValue,
+                  Number number,
+                  Number newValue) {
+                widthChanged(node.getWidth());
               }
             });
     final ChangeListener<Number> clipListener =
@@ -903,14 +911,14 @@ public class JavaFXDisplay extends Display {
     double dpi = screen.getDpi();
     switch (displayUnit) {
       case MM:
-        return dpi / 2.54 / 100;
+        return dpi / 2.54 / 10;
       default:
         throw new Assertion();
     }
   }
 
   public HIDEvent buildHIDEvent(final Key key, final boolean press) {
-    final HIDEvent out = new HIDEvent(key, press, modifiers.ro());
+    final HIDEvent out = new HIDEvent(key, press, modifiers.roCopy());
     switch (key) {
       case MOUSE_SCROLL_DOWN:
       case MOUSE_SCROLL_UP:

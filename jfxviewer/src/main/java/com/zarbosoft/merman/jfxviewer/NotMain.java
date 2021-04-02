@@ -1,13 +1,24 @@
 package com.zarbosoft.merman.jfxviewer;
 
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
+import com.zarbosoft.merman.core.document.values.FieldArray;
+import com.zarbosoft.merman.core.document.values.FieldPrimitive;
 import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.Cursor;
+import com.zarbosoft.merman.core.editor.Hoverable;
 import com.zarbosoft.merman.core.editor.IterationContext;
 import com.zarbosoft.merman.core.editor.IterationTask;
+import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.editor.hid.HIDEvent;
+import com.zarbosoft.merman.core.editor.hid.Key;
+import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.core.example.JsonSyntax;
 import com.zarbosoft.merman.core.syntax.BackType;
+import com.zarbosoft.merman.core.syntax.Padding;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.jfxcore.JavaI18nEngine;
 import com.zarbosoft.merman.jfxcore.JfxDelayEngine;
 import com.zarbosoft.merman.jfxcore.SimpleClipboardEngine;
@@ -19,7 +30,10 @@ import com.zarbosoft.pidgoon.errors.NoResults;
 import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.TSList;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -45,6 +59,7 @@ import java.util.concurrent.TimeUnit;
 public class NotMain extends Application {
   private final ScheduledThreadPoolExecutor worker = new ScheduledThreadPoolExecutor(1);
   private final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
+  public DragSelectState dragSelect;
   private boolean iterationPending = false;
   private ScheduledFuture<?> iterationTimer = null;
   private IterationContext iterationContext = null;
@@ -63,7 +78,7 @@ public class NotMain extends Application {
         throw new RuntimeException("need to specify one file to open on the command line");
       String path = args.get(0);
       JavaI18nEngine i18n = new JavaI18nEngine(Locale.getDefault());
-      Syntax syntax = JsonSyntax.create(i18n, 40);
+      Syntax syntax = JsonSyntax.create(i18n, new Padding(5, 5, 5, 5));
       JavaSerializer serializer;
       Document document;
       if (path.endsWith(".json")) {
@@ -73,36 +88,137 @@ public class NotMain extends Application {
         throw new RuntimeException("unknown file type (using file extension)");
       }
       JavaFXDisplay display = new JavaFXDisplay(syntax);
-      new Context(
-          new Context.InitialConfig()
-              .startSelected(false)
-              .hoverStyle(
-                  c ->
-                      c.obbox
-                          .roundEnd(true)
-                          .roundStart(true)
-                          .roundRadius(8)
-                          .lineThickness(1.5)
-                          .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0, 0, 0.4)))
-              .cursorStyle(
-                  c ->
-                      c.obbox
-                          .roundStart(true)
-                          .roundEnd(true)
-                          .lineThickness(1.5)
-                          .roundRadius(8)
-                          .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0.5, 180, 0.8))),
-          syntax,
-          document,
-          display,
-          this::addIteration,
-          this::flushIteration,
-          new JfxDelayEngine(),
-          new SimpleClipboardEngine(syntax.backType),
-          serializer,
-          i18n);
+      Context context =
+          new Context(
+              new Context.InitialConfig().startSelected(false),
+              syntax,
+              document,
+              display,
+              this::addIteration,
+              this::flushIteration,
+              new JfxDelayEngine(),
+              new SimpleClipboardEngine(syntax.backType),
+              serializer,
+              i18n);
+      context.addHoverListener(
+          new Context.HoverListener() {
+            @Override
+            public void hoverChanged(Context context, Hoverable hover) {
+              if (hover != null && dragSelect != null) {
+                Path endPath = hover.getSyntaxPath();
+                if (!endPath.equals(dragSelect.end)) {
+                  dragSelect.end = endPath;
+                  ROList<String> endPathList = endPath.toList();
+                  ROList<String> startPathList = dragSelect.start.toList();
+                  int longestMatch = startPathList.longestMatch(endPathList);
+                  // If hover paths diverge, it's either
+                  // - at two depths in a single tree (parent and child): both paths are for an
+                  // atom,
+                  // so longest match == parent == atom
+                  // - at two subtrees of an array/primitives: longest submatch == array/primitive
+                  // ==
+                  // field, next segment == int
+                  Object base = context.syntaxLocate(new Path(endPathList.subUntil(longestMatch)));
+                  if (base instanceof FieldArray) {
+                    int startIndex = Integer.parseInt(startPathList.get(longestMatch));
+                    int endIndex = Integer.parseInt(endPathList.get(longestMatch));
+                    if (endIndex < startIndex) {
+                      ((FieldArray) base).selectInto(context, true, endIndex, startIndex);
+                    } else {
+                      ((FieldArray) base).selectInto(context, false, startIndex, endIndex);
+                    }
+                  } else if (base instanceof FieldPrimitive) {
+                    // If end/start paths are the same then the longest match includes the index
+                    // vs if they're different, then it includes the primitive but not index
+                    // Adjust so the index is the next element in both cases
+                    if (longestMatch == startPathList.size()) longestMatch -= 1;
+                    int startIndex = Integer.parseInt(startPathList.get(longestMatch));
+                    int endIndex = Integer.parseInt(endPathList.get(longestMatch));
+                    if (endIndex < startIndex) {
+                      ((FieldPrimitive) base).selectInto(context, true, endIndex, startIndex);
+                    } else {
+                      ((FieldPrimitive) base).selectInto(context, false, startIndex, endIndex);
+                    }
+                  } else if (base instanceof Atom) {
+                    ((Atom) base).valueParentRef.selectValue(context);
+                  } else throw new Assertion();
+                }
+              }
+            }
+          });
+      context.keyListener =
+          new Context.KeyListener() {
+            @Override
+            public boolean handleKey(Context context, HIDEvent e) {
+              if (!e.press) {
+                switch (e.key) {
+                  case MOUSE_1:
+                    {
+                      if (dragSelect != null) {
+                        dragSelect = null;
+                        return true;
+                      }
+                    }
+                  default:
+                    return false;
+                }
+              } else {
+                switch (e.key) {
+                  case MOUSE_1:
+                    {
+                      if (context.hover != null) {
+                        Path path = context.hover.getSyntaxPath();
+                        context.hover.select(context);
+                        dragSelect = new DragSelectState(path);
+                        return true;
+                      } else if (context.cursor != null) {
+                        System.out.format("in cursor\n");
+                        Path path = context.cursor.getSyntaxPath();
+                        dragSelect = new DragSelectState(path);
+                        return true;
+                      }
+                    }
+                  case C:
+                    {
+                      if (context.cursor != null
+                          && (e.modifiers.contains(Key.CONTROL)
+                              || e.modifiers.contains(Key.CONTROL_LEFT)
+                              || e.modifiers.contains(Key.CONTROL_RIGHT))) {
+                        context.cursor.dispatch(
+                            new Cursor.Dispatcher() {
+                              @Override
+                              public void handle(VisualFrontArray.ArrayCursor cursor) {
+                                context.copy(
+                                    cursor.visual.value.data.sublist(
+                                        cursor.beginIndex, cursor.endIndex + 1));
+                              }
+
+                              @Override
+                              public void handle(VisualFrontAtomBase.NestedCursor cursor) {
+                                context.copy(TSList.of(cursor.base.atomGet()));
+                              }
+
+                              @Override
+                              public void handle(VisualFrontPrimitive.PrimitiveCursor cursor) {
+                                context.copy(
+                                    cursor.visualPrimitive.value.data.substring(
+                                        cursor.range.beginOffset, cursor.range.endOffset));
+                              }
+                            });
+                      }
+                      return true;
+                    }
+                }
+              }
+              return false;
+            }
+          };
       primaryStage.setScene(new Scene(display.node, 800, 600));
       primaryStage.show();
+      primaryStage.setOnCloseRequest(
+          windowEvent -> {
+            worker.shutdown();
+          });
     } catch (GrammarTooUncertain e) {
       StringBuilder message = new StringBuilder();
       for (Parse.State leaf : e.context.leaves) {
@@ -196,7 +312,9 @@ public class NotMain extends Application {
     try {
       runnable.run();
     } catch (final Exception e) {
-      System.out.format("Exception passed sieve: %s\n", e);
+      StringWriter writer = new StringWriter();
+      e.printStackTrace(new PrintWriter(writer));
+      System.out.format("Exception passed sieve: %s\n%s\n", e, writer.toString());
       final Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
       alert.initModality(Modality.APPLICATION_MODAL);
       alert.initOwner(top);
@@ -211,5 +329,14 @@ public class NotMain extends Application {
   @FunctionalInterface
   private interface Wrappable {
     void run() throws Exception;
+  }
+
+  public static class DragSelectState {
+    public final Path start;
+    public Path end;
+
+    public DragSelectState(Path start) {
+      this.start = start;
+    }
   }
 }

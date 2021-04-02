@@ -108,8 +108,8 @@ public class Details {
   }
 
   private double pageTransverse(final Context context) {
-    final int padStart = context.syntax.detailPad.transverseStart;
-    final int padEnd = context.syntax.detailPad.transverseEnd;
+    final double padStart = context.syntax.detailPad.transverseStart;
+    final double padEnd = context.syntax.detailPad.transverseEnd;
     return Math.min(
         context.transverseEdge - padStart - current.node.transverseSpan() - padEnd,
         -documentScroll + transverse + transverseSpan + padStart);

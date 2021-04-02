@@ -2,6 +2,7 @@ package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
+import com.zarbosoft.merman.core.document.values.Field;
 import com.zarbosoft.merman.core.editor.BackPath;
 import com.zarbosoft.merman.core.editor.backevents.BackEvent;
 import com.zarbosoft.merman.core.editor.backevents.EArrayCloseEvent;
@@ -30,6 +31,7 @@ import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -188,7 +190,8 @@ public class JSSerializer implements Serializer {
                       new Operator<StackStore>() {
                         @Override
                         protected StackStore process(StackStore store) {
-                          final TSList<Atom> temp = TSList.of();
+                          final TSList<ROPair<Atom, ROList<ROPair<Field, Object>>>> temp =
+                              TSList.of();
                           store = store.popVarSingleList(temp);
                           Collections.reverse(temp.inner_());
                           return store.pushStack(temp);
@@ -196,7 +199,15 @@ public class JSSerializer implements Serializer {
                       }));
           TSList<ROPair<BackEvent, BackPath>> events = new TSList<>();
           walkJSJson(events, Global.JSON.parse(data), BackPath.root);
-          return new ParseBuilder<ROList<Atom>>().grammar(grammar).parsePosition(events.inner_());
+          ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>> result =
+              new ParseBuilder<ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>>>()
+                  .grammar(grammar)
+                  .parsePosition(events.inner_());
+          TSList<Atom> finalOut = new TSList<>();
+          for (ROPair<Atom, ROMap<String, ROPair<Field, Object>>> e : result) {
+            finalOut.add(Serializer.initialSet(e));
+          }
+          return finalOut;
           /*
           {
             ParseEventSink<ROList<Atom>> eventStream =

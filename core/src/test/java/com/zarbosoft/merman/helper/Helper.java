@@ -13,7 +13,6 @@ import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.DelayEngine;
 import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.IterationTask;
-import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
@@ -32,6 +31,7 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
+import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -68,17 +68,17 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataPrimitive(final String id) {
-    return new BackPrimitiveSpec(i18n, new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, null));
   }
 
   public static BackSpec buildBackDataPrimitiveLetters(final String id) {
     return new BackPrimitiveSpec(
-        i18n, new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Letters())));
+            new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Letters())));
   }
 
   public static BackSpec buildBackDataPrimitiveDigits(final String id) {
     return new BackPrimitiveSpec(
-        i18n, new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Digits())));
+            new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Digits())));
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
@@ -86,7 +86,7 @@ public class Helper {
   }
 
   public static BackKeySpec buildBackDataKey(final String id) {
-    return new BackKeySpec(i18n, new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackKeySpec(new BaseBackPrimitiveSpec.Config(id, null));
   }
 
   public static BackArraySpec buildBackDataArray(final String id, String type) {
@@ -154,10 +154,9 @@ public class Helper {
   }
 
   public static void assertTreeEqual(final Context context, final Atom expected, final Field got) {
-    assertTreeEqual(
-        new FieldArray(
-            (BaseBackArraySpec) context.syntax.root.fields.get("value"), TSList.of(expected)),
-        got);
+    FieldArray value = new FieldArray((BaseBackArraySpec) context.syntax.root.fields.get("value"));
+    value.initialSet(TSList.of(expected)); // TODO this shouldn't really be setting the value
+    assertTreeEqual(value, got);
   }
 
   public static FieldArray rootArray(final Document doc) {
@@ -174,17 +173,13 @@ public class Helper {
       final Consumer<Integer> flushIteration,
       final Syntax syntax,
       final Atom... root) {
+    FieldArray rootArray = new FieldArray((BaseBackArraySpec) syntax.root.fields.get("value"));
+    rootArray.initialSet(TSList.of(root));
+    Atom rootAtom = new Atom(syntax.root);
+    rootAtom.initialSet(new TSMap<String, Field>().put("value", rootArray));
     final Document doc =
         new Document(
-            syntax,
-            new Atom(
-                syntax.root,
-                new TSMap<String, Field>()
-                    .put(
-                        "value",
-                        new FieldArray(
-                            (BaseBackArraySpec) syntax.root.fields.get("value"),
-                            TSList.of(root)))));
+            syntax, rootAtom);
     final Context context =
         new Context(
             contextConfig,
@@ -193,16 +188,16 @@ public class Helper {
             new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
             addIteration,
             flushIteration,
-                new DelayEngine() {
+            new DelayEngine() {
+              @Override
+              public Handle delay(long ms, Runnable r) {
+                r.run();
+                return new Handle() {
                   @Override
-                  public Handle delay(long ms, Runnable r) {
-                    r.run();
-                    return new Handle() {
-                      @Override
-                      public void cancel() {}
-                    };
-                  }
-                },
+                  public void cancel() {}
+                };
+              }
+            },
             new ClipboardEngine() {
               byte[] data = null;
               String string = null;

@@ -18,16 +18,14 @@ public class FrontDataPrimitiveBuilder {
     if (splitMode != null)  {
       config.splitMode(splitMode);
     }
+    Style.Config style = new Style.Config();
     if (alignment != null) {
-      config.firstStyle(c -> c.alignment(alignment));
-      config.softStyle(c -> c.alignment(alignment));
-      config.hardStyle(c -> c.alignment(alignment));
+      style.alignment(alignment);
     }
     if (compactAlignment != null) {
-      config.firstStyle(c -> c.splitAlignment(compactAlignment));
-      config.softStyle(c -> c.splitAlignment(compactAlignment));
-      config.hardStyle(c -> c.splitAlignment(compactAlignment));
+      style.splitAlignment(compactAlignment);
     }
+    config.style(style.create());
     return new FrontPrimitiveSpec(config);
   }
 

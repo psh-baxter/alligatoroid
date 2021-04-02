@@ -8,6 +8,7 @@ import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
+import com.zarbosoft.merman.core.document.values.Field;
 import com.zarbosoft.merman.core.editor.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.editor.backevents.EArrayOpenEvent;
 import com.zarbosoft.merman.core.editor.backevents.EKeyEvent;
@@ -31,6 +32,8 @@ import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.io.ByteArrayInputStream;
@@ -263,7 +266,7 @@ public class JavaSerializer implements Serializer {
         {
           final Grammar grammar = new Grammar(syntax.getGrammar());
           grammar.add(
-              data,
+              Grammar.DEFAULT_ROOT_KEY,
               new Sequence()
                   .add(StackStore.prepVarStack)
                   .add(
@@ -281,10 +284,16 @@ public class JavaSerializer implements Serializer {
                           return store.pushStack(temp);
                         }
                       }));
-          return new Parse<ROList<Atom>>()
-              .grammar(grammar)
-              .eventFactory(luxemEventFactory())
-              .parse(new ByteArrayInputStream((byte[]) data));
+          ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>> result =
+              new Parse<ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>>>()
+                  .grammar(grammar)
+                  .eventFactory(luxemEventFactory())
+                  .parse(new ByteArrayInputStream((byte[]) data));
+          TSList<Atom> finalOut = new TSList<>();
+          for (ROPair<Atom, ROMap<String, ROPair<Field, Object>>> e : result) {
+            finalOut.add(Serializer.initialSet(e));
+          }
+          return finalOut;
         }
       case JSON:
         {
@@ -322,9 +331,15 @@ public class JavaSerializer implements Serializer {
                           return store.pushStack(temp);
                         }
                       }));
-          return new JSONParse<ROList<Atom>>()
-              .grammar(grammar)
-              .parse(new ByteArrayInputStream((byte[]) data));
+          ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>> result =
+              new JSONParse<ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>>>()
+                  .grammar(grammar)
+                  .parse(new ByteArrayInputStream((byte[]) data));
+          TSList<Atom> finalOut = new TSList<>();
+          for (ROPair<Atom, ROMap<String, ROPair<Field, Object>>> e : result) {
+            finalOut.add(Serializer.initialSet(e));
+          }
+          return finalOut;
         }
       default:
         throw new DeadCode();

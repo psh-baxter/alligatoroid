@@ -458,7 +458,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         final int endOffset) {
       this.visualPrimitive = visualPrimitive;
       range = new RangeAttachment(visualPrimitive, true);
-      range.setStyle(context, context.cursorStyle.obbox);
+      range.setStyle(context, context.syntax.cursorStyle.obbox);
       range.leadFirst = leadFirst;
       range.setOffsets(context, beginOffset, endOffset);
       clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
@@ -1503,7 +1503,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     PrimitiveHoverable(VisualFrontPrimitive visual, final Context context) {
       range = new RangeAttachment(visual, false);
-      range.setStyle(context, context.hoverStyle.obbox);
+      range.setStyle(context, context.syntax.hoverStyle.obbox);
       this.visual = visual;
     }
 

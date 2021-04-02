@@ -36,5 +36,10 @@ public class BoxStyle {
     public Double lineThickness;
     public Boolean fill;
     public ModelColor fillColor;
+
+    public Config lineColor(ModelColor color) {
+      this.lineColor = color;
+      return this;
+    }
   }
 }

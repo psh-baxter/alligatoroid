@@ -2,13 +2,15 @@ package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.values.FieldAtom;
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.core.editor.serialization.WriteState;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.events.StackStore;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -24,13 +26,13 @@ public class BackAtomSpec extends BaseBackAtomSpec {
     return null;
   }
 
-  public Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     return new Operator<StackStore>(new Reference(type)) {
       @Override
       protected StackStore process(StackStore store) {
-        final Atom value = store.stackTop();
+        final Object initialValue = store.stackTop();
         store = store.popStack();
-        return store.stackVarDoubleElement(id, new FieldAtom(BackAtomSpec.this, value));
+        return store.stackVarDoubleElement(id, new ROPair<>(new FieldAtom(BackAtomSpec.this), initialValue));
       }
     };
   }

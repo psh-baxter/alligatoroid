@@ -8,7 +8,7 @@ import com.zarbosoft.pidgoon.events.nodes.Terminal;
 
 public class Digits extends Pattern {
   @Override
-  public Node build(I18nEngine i18n) {
+  public Node build() {
     return new Terminal() {
       @Override
       protected boolean matches(Event event0, Store store) {

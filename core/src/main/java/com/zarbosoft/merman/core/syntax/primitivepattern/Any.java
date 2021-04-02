@@ -8,7 +8,7 @@ public class Any extends Pattern {
   public static Pattern repeatedAny = new Repeat0(new Any());
 
   @Override
-  public Node build(I18nEngine i18n) {
+  public Node build() {
     return new Wildcard();
   }
 }

@@ -1,25 +1,28 @@
 package com.zarbosoft.merman.core.syntax.style;
 
+import com.zarbosoft.merman.core.syntax.Padding;
+
+/** Used for obboxes (cursor, hover) including 0-selection text cursors (vertical line) */
 public class ObboxStyle {
-  public final Integer padding;
-  public final Boolean roundStart;
-  public final Boolean roundEnd;
-  public final Boolean roundOuterEdges;
-  public final Boolean roundInnerEdges;
-  public final Boolean roundConcave;
-  public final Integer roundRadius;
-  public final Boolean line;
+  public final Padding padding;
+  public final boolean roundStart;
+  public final boolean roundEnd;
+  public final boolean roundOuterCorners;
+  public final boolean roundInnerCorners;
+  public final boolean roundConcave;
+  public final double roundRadius;
+  public final boolean line;
   public final ModelColor lineColor;
-  public final Double lineThickness;
-  public final Boolean fill;
+  public final double lineThickness;
+  public final boolean fill;
   public final ModelColor fillColor;
 
   public ObboxStyle(Config config) {
-    this.padding = config.padding == null ? 4 : config.padding;
+    this.padding = config.padding == null ? Padding.empty : config.padding;
     this.roundStart = config.roundStart == null ? false : config.roundStart;
     this.roundEnd = config.roundEnd == null ? false : config.roundEnd;
-    this.roundOuterEdges = config.roundOuterEdges == null ? false : config.roundOuterEdges;
-    this.roundInnerEdges = config.roundInnerEdges == null ? false : config.roundInnerEdges;
+    this.roundOuterCorners = config.roundOuterEdges == null ? false : config.roundOuterEdges;
+    this.roundInnerCorners = config.roundInnerEdges == null ? false : config.roundInnerEdges;
     this.roundConcave = config.roundConcave == null ? false : config.roundConcave;
     this.roundRadius = config.roundRadius == null ? 0 : config.roundRadius;
     this.line = config.line == null ? true : config.line;
@@ -30,13 +33,13 @@ public class ObboxStyle {
   }
 
   public static class Config {
-    public Integer padding;
+    public Padding padding;
     public Boolean roundStart;
     public Boolean roundEnd;
     public Boolean roundOuterEdges;
     public Boolean roundInnerEdges;
     public Boolean roundConcave;
-    public Integer roundRadius;
+    public Double roundRadius;
     public Boolean line;
     public ModelColor lineColor;
     public Double lineThickness;
@@ -73,7 +76,7 @@ public class ObboxStyle {
       return this;
     }
 
-    public Config roundRadius(int d) {
+    public Config roundRadius(double d) {
       this.roundRadius = d;
       return this;
     }
@@ -95,6 +98,11 @@ public class ObboxStyle {
 
     public Config fillColor(ModelColor c) {
       this.fillColor = c;
+      return this;
+    }
+
+    public Config padding(Padding v) {
+      this.padding = v;
       return this;
     }
   }

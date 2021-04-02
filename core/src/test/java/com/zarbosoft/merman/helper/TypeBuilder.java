@@ -74,7 +74,10 @@ public class TypeBuilder {
   }
 
   public TypeBuilder alignedFrontDataPrimitive(final String middle, String alignment) {
-    this.front.add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(middle).style(c -> c.alignment(alignment))));
+    this.front.add(
+        new FrontPrimitiveSpec(
+            new FrontPrimitiveSpec.Config(middle)
+                .style(new Style.Config().alignment(alignment).create())));
     return this;
   }
 
@@ -82,15 +85,15 @@ public class TypeBuilder {
     this.front.add(
         new FrontSymbol(
             new FrontSymbol.Config(
-                new SymbolTextSpec(new SymbolTextSpec.Config(value).splitMode(Style.SplitMode.ALWAYS)))));
+                new SymbolTextSpec(
+                    new SymbolTextSpec.Config(value).splitMode(Style.SplitMode.ALWAYS)))));
     return this;
   }
 
   public TypeBuilder frontMark(final String value) {
     this.front.add(
         new FrontSymbol(
-            new FrontSymbol.Config(
-                new SymbolTextSpec(new SymbolTextSpec.Config(value)))));
+            new FrontSymbol.Config(new SymbolTextSpec(new SymbolTextSpec.Config(value)))));
     return this;
   }
 

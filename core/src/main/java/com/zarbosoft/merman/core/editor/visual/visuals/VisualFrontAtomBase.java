@@ -261,7 +261,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
     public NestedCursor(VisualFrontAtomBase base, final Context context) {
       this.base = base;
-      border = new BorderAttachment(context, context.cursorStyle.obbox);
+      border = new BorderAttachment(context, context.syntax.cursorStyle.obbox);
       final Brick first = nudge(context);
       border.setFirst(context, first);
       border.setLast(context, base.body.getLastBrick(context));
@@ -424,7 +424,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
     private NestedHoverable(
         VisualFrontAtomBase visual, final Context context, final Brick first, final Brick last) {
-      border = new BorderAttachment(context, context.hoverStyle.obbox);
+      border = new BorderAttachment(context, context.syntax.hoverStyle.obbox);
       border.setFirst(context, first);
       border.setLast(context, last);
       this.visual = visual;

@@ -20,8 +20,11 @@ public class FieldArray extends Field {
   private final BaseBackArraySpec back;
   public Visual visual = null;
 
-  public FieldArray(final BaseBackArraySpec back, final TSList<Atom> data) {
+  public FieldArray(final BaseBackArraySpec back) {
     this.back = back;
+  }
+
+  public void initialSet(TSList<Atom> data) {
     this.data.addAll(data);
     for (Atom v : data) {
       v.setValueParentRef(new ArrayParent(this));
@@ -45,10 +48,6 @@ public class FieldArray extends Field {
       parent.actualIndex = sum;
       sum += atom.type.back().size();
     }
-  }
-
-  public FieldArray(final BaseBackArraySpec back) {
-    this.back = back;
   }
 
   public BaseBackArraySpec back() {
@@ -92,14 +91,6 @@ public class FieldArray extends Field {
 
   public void removeListener(final Listener listener) {
     listeners.remove(listener);
-  }
-
-  public void sideload(final Atom value) {
-    if (!data.isEmpty()) throw new AssertionError();
-    if (atomParentRef.atom().valueParentRef != null) throw new AssertionError();
-    data.add(value);
-    value.setValueParentRef(new ArrayParent(this));
-    renumber(0);
   }
 
   public interface Listener {

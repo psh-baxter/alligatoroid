@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
-import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.I18nEngine;
+import com.zarbosoft.pidgoon.errors.NoResults;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Store;
@@ -17,7 +17,7 @@ import java.util.List;
 import static com.zarbosoft.rendaw.common.Common.isOrdered;
 
 public abstract class Pattern {
-  public abstract Node build(I18nEngine i18n);
+  public abstract Node build();
 
   protected static class CharacterRangeTerminal extends Terminal {
     final String low;
@@ -57,17 +57,19 @@ public abstract class Pattern {
   public static class Matcher {
     private final Grammar grammar;
 
-    public Matcher(Pattern pattern, I18nEngine i18n) {
+    public Matcher(Pattern pattern) {
       grammar = new Grammar();
-      grammar.add("root", pattern.build(i18n));
+      grammar.add(Grammar.DEFAULT_ROOT_KEY, pattern.build());
     }
 
-    public boolean match(Context context, final String value) {
+    public boolean match(I18nEngine i18n, final String value) {
       try {
-        new ParseBuilder<Void>().grammar(grammar).parse(splitGlyphs(context.i18n, value));
+        new ParseBuilder<Void>().grammar(grammar).parse(splitGlyphs(i18n, value));
         return true;
       } catch (final InvalidStream e) {
         return false;
+      } catch (NoResults e) {
+        return true;
       }
     }
   }

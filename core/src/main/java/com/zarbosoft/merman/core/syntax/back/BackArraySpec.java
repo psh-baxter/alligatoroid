@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.editor.backevents.EArrayOpenEvent;
 import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
@@ -20,10 +21,10 @@ public class BackArraySpec extends BaseBackSimpleArraySpec {
   }
 
   @Override
-  public Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     return new Sequence()
         .add(new MatchingEventTerminal(new EArrayOpenEvent()))
-        .visit(s -> buildBackRuleInner(syntax, s))
+        .visit(s -> buildBackRuleInner(i18n, syntax, s))
         .add(new MatchingEventTerminal(new EArrayCloseEvent()))
         .visit(s -> buildBackRuleInnerEnd(s));
   }

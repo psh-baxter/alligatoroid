@@ -1,6 +1,13 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontDataPrimitiveBuilder;
@@ -10,13 +17,6 @@ import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.core.syntax.style.Style;
-import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
-import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -283,7 +283,7 @@ public class TestLayoutAlignment {
                 new FrontPrimitiveSpec(
                     new FrontPrimitiveSpec.Config("second")
                         .splitMode(Style.SplitMode.COMPACT)
-                        .style(c -> c.alignment("concensus1"))))
+                        .style(new Style.Config().alignment("concensus1").create())))
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
@@ -329,7 +329,8 @@ public class TestLayoutAlignment {
             .front(new FrontDataPrimitiveBuilder("first").build())
             .front(
                 new FrontPrimitiveSpec(
-                    new FrontPrimitiveSpec.Config("second").style(c -> c.alignment("concensus1"))))
+                    new FrontPrimitiveSpec.Config("second")
+                        .style(new Style.Config().alignment("concensus1").create())))
             .build();
     final FreeAtomType atomPair =
         new TypeBuilder("atomPair")

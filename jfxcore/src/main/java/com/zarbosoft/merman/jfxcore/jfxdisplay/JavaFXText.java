@@ -11,6 +11,7 @@ import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
 import javafx.scene.Node;
+import javafx.scene.paint.Paint;
 
 public class JavaFXText implements Text, JavaFXNode {
   private final javafx.scene.text.Text text;
@@ -52,7 +53,8 @@ public class JavaFXText implements Text, JavaFXNode {
 
   @Override
   public void setColor(final Context context, final ModelColor color) {
-    ((javafx.scene.text.Text) text).setFill(Helper.convert(color));
+    Paint convert = Helper.convert(color);
+    ((javafx.scene.text.Text) text).setFill(convert);
   }
 
   @Override
@@ -80,15 +82,14 @@ public class JavaFXText implements Text, JavaFXNode {
 
   public double getConverseAtIndex(final int index) {
     if (index == 0) return 0;
-    text.getText().substring(0, 0);
-    final Font font = font();
-    Font.Measurer measurer = font.measurer();
+    Font.Measurer measurer = font().measurer();
     final double precedingLength = measurer.getWidth(text.getText().substring(0, index));
-    final double charLength =
-        measurer.getWidth(
-            text.getText()
-                .substring(
-                    Math.max(0, index - 1), Math.min(text.getText().length(), Math.max(1, index))));
+    int charStart = Math.max(0, index - 1);
+    int charEnd = Math.min(text.getText().length(), Math.max(1, index));
+    String charSubstr = text.getText()
+            .substring(
+                    charStart, charEnd);
+    final double charLength = measurer.getWidth(charSubstr);
     return (int) (precedingLength - charLength * 0.2);
   }
 

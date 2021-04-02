@@ -374,7 +374,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
         final int start,
         final int end) {
       this.visual = visual;
-      border = new BorderAttachment(context, context.cursorStyle.obbox);
+      border = new BorderAttachment(context, context.syntax.cursorStyle.obbox);
       this.leadFirst = leadFirst;
       setRange(context, start, end);
       context.addActions(
@@ -664,7 +664,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
 
     ArrayHoverable(VisualFrontArray visual, final Context context) {
       this.visual = visual;
-      border = new BorderAttachment(context, context.hoverStyle.obbox);
+      border = new BorderAttachment(context, context.syntax.hoverStyle.obbox);
     }
 
     @Override

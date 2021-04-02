@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
 import com.zarbosoft.merman.core.editor.serialization.WriteState;
@@ -33,9 +34,9 @@ public class BackSubArraySpec extends BaseBackSimpleArraySpec {
   }
 
   @Override
-  public Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     final Sequence sequence = new Sequence();
-    buildBackRuleInner(syntax, sequence);
+    buildBackRuleInner(i18n, syntax, sequence);
     buildBackRuleInnerEnd(sequence);
     return sequence;
   }

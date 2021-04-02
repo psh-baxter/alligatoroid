@@ -44,9 +44,9 @@ public class SyntaxBuilder {
                 TSList.of(front.build()),
                 alignments));
 
-    Syntax.Config config = new Syntax.Config(Helper.i18n,types, splayed, root);
+    Syntax.Config config = new Syntax.Config(types, splayed, root);
     config.pad = this.padding;
-    Syntax syntax = new Syntax(config);
+    Syntax syntax = new Syntax(Helper.i18n, config);
 
     return syntax;
   }

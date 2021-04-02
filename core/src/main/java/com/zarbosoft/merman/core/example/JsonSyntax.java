@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Padding;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
@@ -25,6 +26,8 @@ import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Any;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Integer;
 import com.zarbosoft.merman.core.syntax.primitivepattern.JsonDecimal;
+import com.zarbosoft.merman.core.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
@@ -49,7 +52,22 @@ public class JsonSyntax {
   private static final String ALIGNMENT_INDENT = "indent";
   private static final String ALIGNMENT_BASE = "base";
 
-  public static Syntax create(I18nEngine i18n, int indentPx) {
+  public static Syntax create(I18nEngine i18n, Padding pad) {
+    double fontSize = 5;
+    final Style stringStyle =
+        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("F79578")).create();
+    final Style numberStyle =
+        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("95FA94")).create();
+    final Style specialStyle =
+        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("7DD4FB")).create();
+    final Style symbolStyle =
+        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA")).create();
+    final Style baseAlignSymbolStyle =
+        new Style.Config()
+            .fontSize(fontSize)
+            .color(ModelColor.RGB.hex("CACACA"))
+            .splitAlignment(ALIGNMENT_BASE)
+            .create();
     TSMap<String, AlignmentSpec> containerAlignments =
         new TSMap<String, AlignmentSpec>()
             .put(
@@ -59,14 +77,14 @@ public class JsonSyntax {
             .put(
                 ALIGNMENT_INDENT,
                 new RelativeAlignmentSpec(
-                    new RelativeAlignmentSpec.Config(ALIGNMENT_INDENT, indentPx, true)));
+                    new RelativeAlignmentSpec.Config(ALIGNMENT_INDENT, 20, true)));
     FrontSymbol breakIndent =
         new FrontSymbol(
             new FrontSymbol.Config(
                 new SymbolSpaceSpec(
                     new SymbolSpaceSpec.Config()
                         .splitMode(Style.SplitMode.COMPACT)
-                        .style(new Style.Config().splitAlignment(ALIGNMENT_BASE).create()))));
+                        .style(new Style.Config().splitAlignment(ALIGNMENT_INDENT).create()))));
     TSList<AtomType> types =
         TSList.of(
             new FreeAtomType(
@@ -75,21 +93,21 @@ public class JsonSyntax {
                     new AtomType.Config(
                         TYPE_NULL,
                         TSList.of(new BackFixedJSONSpecialPrimitiveSpec("null")),
-                        TSList.of(textSym("null"))))),
+                        TSList.of(textSym("null", specialStyle))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                     "true",
                     new AtomType.Config(
                         TYPE_TRUE,
                         TSList.of(new BackFixedJSONSpecialPrimitiveSpec("true")),
-                        TSList.of(textSym("true"))))),
+                        TSList.of(textSym("true", specialStyle))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                     "false",
                     new AtomType.Config(
                         TYPE_FALSE,
                         TSList.of(new BackFixedJSONSpecialPrimitiveSpec("false")),
-                        TSList.of(textSym("false"))))),
+                        TSList.of(textSym("false", specialStyle))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                     "string",
@@ -97,12 +115,12 @@ public class JsonSyntax {
                         TYPE_STRING,
                         TSList.of(
                             new BackPrimitiveSpec(
-                                i18n,
                                 new BaseBackPrimitiveSpec.Config(DEFAULT_ID, Any.repeatedAny))),
                         TSList.of(
-                            textSym("\""),
-                            new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(DEFAULT_ID)),
-                            textSym("\""))))),
+                            textSym("\"", stringStyle),
+                            new FrontPrimitiveSpec(
+                                new FrontPrimitiveSpec.Config(DEFAULT_ID).style(stringStyle)),
+                            textSym("\"", stringStyle))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                     "int",
@@ -110,9 +128,10 @@ public class JsonSyntax {
                         TYPE_INT,
                         TSList.of(
                             new BackJSONSpecialPrimitiveSpec(
-                                i18n, new BaseBackPrimitiveSpec.Config(DEFAULT_ID, new Integer()))),
+                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID, new Integer()))),
                         TSList.of(
-                            new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(DEFAULT_ID)))))),
+                            new FrontPrimitiveSpec(
+                                new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                     "decimal",
@@ -120,39 +139,40 @@ public class JsonSyntax {
                         TYPE_DECIMAL,
                         TSList.of(
                             new BackJSONSpecialPrimitiveSpec(
-                                i18n,
                                 new BaseBackPrimitiveSpec.Config(DEFAULT_ID, new JsonDecimal()))),
                         TSList.of(
-                            new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(DEFAULT_ID)))))),
+                            new FrontPrimitiveSpec(
+                                new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
-                    "record",
-                    new AtomType.Config(
-                        TYPE_RECORD,
-                        TSList.of(
-                            new BackRecordSpec(
-                                new BackRecordSpec.Config(DEFAULT_ID, TYPE_RECORD_PAIR))),
-                        TSList.of(
-                            textSym("{"),
-                            new FrontArraySpecBuilder(DEFAULT_ID)
-                                .prefix(breakIndent)
-                                .separator(textSym(", "))
-                                .build(),
-                            baseAlignTextSym("}"))))),
-            new FreeAtomType(
-                new FreeAtomType.Config(
-                        "record element",
+                        "record",
                         new AtomType.Config(
-                            TYPE_RECORD_PAIR,
+                            TYPE_RECORD,
                             TSList.of(
-                                new BackKeySpec(
-                                    i18n, new BaseBackPrimitiveSpec.Config("key", Any.repeatedAny)),
-                                new BackAtomSpec(new BaseBackAtomSpec.Config("value", GROUP_ANY))),
+                                new BackRecordSpec(
+                                    new BackRecordSpec.Config(DEFAULT_ID, TYPE_RECORD_PAIR))),
                             TSList.of(
-                                new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config("key")),
-                                textSym(": "),
-                                new FrontAtomSpec(new FrontAtomSpec.Config("value")))))
+                                textSym("{", symbolStyle),
+                                new FrontArraySpecBuilder(DEFAULT_ID)
+                                    .prefix(breakIndent)
+                                    .separator(textSym(", ", symbolStyle))
+                                    .build(),
+                                baseAlignTextSym("}", baseAlignSymbolStyle))))
                     .alignments(containerAlignments)),
+            new FreeAtomType(
+                new FreeAtomType.Config(
+                    "record element",
+                    new AtomType.Config(
+                        TYPE_RECORD_PAIR,
+                        TSList.of(
+                            new BackKeySpec(
+                                new BaseBackPrimitiveSpec.Config("key", Any.repeatedAny)),
+                            new BackAtomSpec(new BaseBackAtomSpec.Config("value", GROUP_ANY))),
+                        TSList.of(
+                            new FrontPrimitiveSpec(
+                                new FrontPrimitiveSpec.Config("key").style(symbolStyle)),
+                            textSym(": ", symbolStyle),
+                            new FrontAtomSpec(new FrontAtomSpec.Config("value")))))),
             new FreeAtomType(
                 new FreeAtomType.Config(
                         "array",
@@ -163,12 +183,12 @@ public class JsonSyntax {
                                     new BaseBackSimpleArraySpec.Config(
                                         DEFAULT_ID, GROUP_ANY, TSList.of()))),
                             TSList.of(
-                                textSym("["),
+                                textSym("[", symbolStyle),
                                 new FrontArraySpecBuilder(DEFAULT_ID)
                                     .prefix(breakIndent)
-                                    .separator(textSym(", "))
+                                    .separator(textSym(", ", symbolStyle))
                                     .build(),
-                                baseAlignTextSym("]"))))
+                                baseAlignTextSym("]", baseAlignSymbolStyle))))
                     .alignments(containerAlignments)));
     TSMap<String, ROSet<AtomType>> splayedTypes;
     {
@@ -192,28 +212,62 @@ public class JsonSyntax {
       errors.raise();
     }
     return new Syntax(
+        i18n,
         new Syntax.Config(
-            i18n,
-            types,
-            splayedTypes,
-            new RootAtomType(
-                new RootAtomType.Config(
-                    TSList.of(new BackAtomSpec(new BaseBackAtomSpec.Config(DEFAULT_ID, GROUP_ANY))),
-                    TSList.of(new FrontAtomSpec(new FrontAtomSpec.Config(DEFAULT_ID))),
-                    ROMap.empty))));
+                types,
+                splayedTypes,
+                new RootAtomType(
+                    new RootAtomType.Config(
+                        TSList.of(
+                            new BackAtomSpec(new BaseBackAtomSpec.Config(DEFAULT_ID, GROUP_ANY))),
+                        TSList.of(new FrontAtomSpec(new FrontAtomSpec.Config(DEFAULT_ID))),
+                        ROMap.empty)))
+            .displayUnit(Syntax.DisplayUnit.MM)
+            .background(ModelColor.RGB.hex("333333"))
+            .hoverStyle(hoverStyle(false))
+            .primitiveHoverStyle(hoverStyle(true))
+            .cursorStyle(cursorStyle(false))
+            .primitiveCursorStyle(cursorStyle(true))
+            .pad(pad));
   }
 
-  public static FrontSymbol textSym(String s) {
+  private static Style cursorStyle(boolean primitive) {
+    return new Style.Config()
+        .obbox(
+            new ObboxStyle(
+                new ObboxStyle.Config()
+                    .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                    .roundStart(true)
+                    .roundEnd(true)
+                    .lineThickness(0.3)
+                    .roundRadius(3)
+                    .lineColor(ModelColor.RGB.white)))
+        .create();
+  }
+
+  private static Style hoverStyle(boolean primitive) {
+    return new Style.Config()
+        .obbox(
+            new ObboxStyle(
+                new ObboxStyle.Config()
+                    .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                    .roundEnd(true)
+                    .roundStart(true)
+                    .lineThickness(0.3)
+                    .roundRadius(3)
+                    .lineColor(ModelColor.RGB.hex("888888"))))
+        .create();
+  }
+
+  public static FrontSymbol textSym(String s, Style style) {
     return new FrontSymbol(
-        new FrontSymbol.Config(new SymbolTextSpec(new SymbolTextSpec.Config(s))));
+        new FrontSymbol.Config(new SymbolTextSpec(new SymbolTextSpec.Config(s).style(style))));
   }
 
-  public static FrontSymbol baseAlignTextSym(String s) {
+  public static FrontSymbol baseAlignTextSym(String s, Style style) {
     return new FrontSymbol(
         new FrontSymbol.Config(
             new SymbolTextSpec(
-                new SymbolTextSpec.Config(s)
-                    .splitMode(Style.SplitMode.COMPACT)
-                    .style(new Style.Config().splitAlignment(ALIGNMENT_BASE).create()))));
+                new SymbolTextSpec.Config(s).splitMode(Style.SplitMode.COMPACT).style(style))));
   }
 }

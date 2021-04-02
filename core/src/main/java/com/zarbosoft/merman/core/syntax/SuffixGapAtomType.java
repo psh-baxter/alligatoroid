@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.core.syntax;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
@@ -20,7 +19,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
   public static final String GAP_ARRAY_KEY = "value";
   public final String backType;
 
-  public SuffixGapAtomType(I18nEngine i18n, Config config) {
+  public SuffixGapAtomType(Config config) {
     super(
         new AtomType.Config(
             config.id,
@@ -40,8 +39,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                                             .put(
                                                 "gap",
                                                 new BackPrimitiveSpec(
-                                                    i18n,
-                                                    new BaseBackPrimitiveSpec.Config(
+                                                        new BaseBackPrimitiveSpec.Config(
                                                         GAP_PRIMITIVE_KEY, null)))),
                                 ROSet.empty))))),
             TSList.of(

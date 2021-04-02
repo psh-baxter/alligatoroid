@@ -16,6 +16,7 @@ import com.zarbosoft.merman.core.syntax.error.GroupChildDoesntExist;
 import com.zarbosoft.merman.core.syntax.error.NotTransverse;
 import com.zarbosoft.merman.core.syntax.error.TypeCircularReference;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.Node;
@@ -37,11 +38,6 @@ import java.util.Map;
 
 public class Syntax {
 
-  public static enum DisplayUnit {
-    PX,
-    MM
-  }
-
   public static final Object GRAMMAR_WILDCARD_KEY = new Object();
   public static final Object GRAMMAR_WILDCARD_KEY_UNTYPED = new Object();
   public static final Object GRAMMAR_ROOT = new Object();
@@ -60,9 +56,12 @@ public class Syntax {
   public final Direction converseDirection;
   public final Direction transverseDirection;
   public final DisplayUnit displayUnit;
+  public final Style cursorStyle;
+  public final Style primitiveCursorStyle;
+  public final Style hoverStyle;
+  public final Style primitiveHoverStyle;
   private final Grammar grammar;
-
-  public Syntax(Config config) {
+  public Syntax(I18nEngine i18n, Config config) {
     MultiError errors = new MultiError();
     switch (config.converseDirection) {
       case LEFT:
@@ -93,10 +92,16 @@ public class Syntax {
     this.types = config.types;
     this.splayedTypes = config.splayedTypes;
     this.root = config.root;
-    this.gap = config.gap;
-    this.suffixGap = config.suffixGap;
+    if (config.gap == null) gap = new GapAtomType(new GapAtomType.Config());
+    else this.gap = config.gap;
+    if (config.suffixGap == null) suffixGap = new SuffixGapAtomType(new SuffixGapAtomType.Config());
+    else this.suffixGap = config.suffixGap;
     this.converseDirection = config.converseDirection;
     this.transverseDirection = config.transverseDirection;
+    this.cursorStyle = config.cursorStyle;
+    this.primitiveCursorStyle = config.primitiveCursorStyle;
+    this.hoverStyle = config.hoverStyle;
+    this.primitiveHoverStyle = config.primitiveHoverStyle;
 
     TSSet<AtomType> seen = new TSSet<>();
     for (Map.Entry<String, ROSet<AtomType>> splayedType : splayedTypes) {
@@ -143,7 +148,7 @@ public class Syntax {
       AtomType firstType = types.iterator().next();
       if (types.size() == 1 && key.equals(firstType.id())) {
         AtomType type = firstType;
-        grammar.add(type.id(), type.buildBackRule(this));
+        grammar.add(type.id(), type.buildBackRule(i18n, this));
       } else {
         final Union group = new Union();
         for (AtomType type : types) {
@@ -152,7 +157,7 @@ public class Syntax {
         grammar.add(key, group);
       }
     }
-    grammar.add(RootAtomType.ROOT_TYPE_ID, root.buildBackRule(this));
+    grammar.add(RootAtomType.ROOT_TYPE_ID, root.buildBackRule(i18n, this));
 
     errors.raise();
   }
@@ -242,6 +247,11 @@ public class Syntax {
     return grammar;
   }
 
+  public static enum DisplayUnit {
+    PX,
+    MM
+  }
+
   public static class Config {
     public final ROList<AtomType> types;
     public final ROMap<String, ROSet<AtomType>> splayedTypes;
@@ -258,17 +268,51 @@ public class Syntax {
     public Direction converseDirection = Direction.RIGHT;
     public Direction transverseDirection = Direction.DOWN;
     public DisplayUnit displayUnit = DisplayUnit.MM;
+    public Style cursorStyle;
+    public Style primitiveCursorStyle;
+    public Style hoverStyle;
+    public Style primitiveHoverStyle;
 
     public Config(
-        I18nEngine i18n,
-        ROList<AtomType> types,
-        ROMap<String, ROSet<AtomType>> splayedTypes,
-        RootAtomType root) {
+        ROList<AtomType> types, ROMap<String, ROSet<AtomType>> splayedTypes, RootAtomType root) {
       this.types = types;
       this.splayedTypes = splayedTypes;
       this.root = root;
-      gap = new GapAtomType(i18n, new GapAtomType.Config());
-      suffixGap = new SuffixGapAtomType(i18n, new SuffixGapAtomType.Config());
+    }
+
+    public Config displayUnit(DisplayUnit unit) {
+      this.displayUnit = unit;
+      return this;
+    }
+
+    public Config background(ModelColor color) {
+      this.background = color;
+      return this;
+    }
+
+    public Config cursorStyle(Style style) {
+      this.cursorStyle = style;
+      return this;
+    }
+
+    public Config primitiveCursorStyle(Style style) {
+      this.primitiveCursorStyle = style;
+      return this;
+    }
+
+    public Config hoverStyle(Style style) {
+      this.hoverStyle = style;
+      return this;
+    }
+
+    public Config primitiveHoverStyle(Style style) {
+      this.primitiveHoverStyle = style;
+      return this;
+    }
+
+    public Config pad(Padding padding) {
+      this.pad = padding;
+      return this;
     }
   }
 }

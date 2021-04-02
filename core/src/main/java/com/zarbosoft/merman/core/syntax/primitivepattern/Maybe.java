@@ -12,7 +12,7 @@ public class Maybe extends Pattern {
   }
 
   @Override
-  public Node build(I18nEngine i18n) {
-    return new Repeat(pattern.build(i18n)).min(0).max(1);
+  public Node build() {
+    return new Repeat(pattern.build()).min(0).max(1);
   }
 }

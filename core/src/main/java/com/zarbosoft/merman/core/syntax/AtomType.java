@@ -2,6 +2,7 @@ package com.zarbosoft.merman.core.syntax;
 
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.values.Field;
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
@@ -39,6 +40,7 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -84,7 +86,7 @@ public abstract class AtomType {
    * @return
    */
   public static boolean isPrecedent(
-          final FreeAtomType type, final Field.Parent test, final boolean allowed) {
+      final FreeAtomType type, final Field.Parent test, final boolean allowed) {
     final Atom testAtom = test.value.atomParentRef.atom();
 
     // Can't move up if current level is bounded by any other front parts
@@ -160,21 +162,20 @@ public abstract class AtomType {
     return back;
   }
 
-  public Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     final Sequence seq = new Sequence();
     seq.add(StackStore.prepVarStack);
     for (BackSpec p : back()) {
-      seq.add(p.buildBackRule(syntax));
+      seq.add(p.buildBackRule(i18n, syntax));
     }
     return new Color(
         "atom " + id,
         new Operator<StackStore>(seq) {
           @Override
           protected StackStore process(StackStore store) {
-            final TSMap<String, Field> data = new TSMap<>();
-            store = store.popVarMap(data.inner);
-            final Atom atom = new Atom(AtomType.this, data);
-            return store.pushStack(atom);
+            final TSMap<String, ROPair<Field, Object>> initialValue = new TSMap<>();
+            store = store.popVarMap(initialValue.inner);
+            return store.pushStack(new ROPair<>(new Atom(AtomType.this), initialValue));
           }
         });
   }

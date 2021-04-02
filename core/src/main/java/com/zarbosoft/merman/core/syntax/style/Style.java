@@ -56,6 +56,9 @@ public class Style {
   }
 
   public static final class Config {
+    // Other
+    public BoxStyle box;
+    public ObboxStyle obbox;
     public String alignment;
     public Double spaceBefore;
     public Double spaceAfter;
@@ -71,9 +74,6 @@ public class Style {
     public Double rotate;
     // Space only
     public Double space;
-    // Other
-    public final BoxStyle.Config box = new BoxStyle.Config();
-    public final ObboxStyle.Config obbox = new ObboxStyle.Config();
     private String splitAlignment;
 
     public Config() {}
@@ -151,8 +151,8 @@ public class Style {
           image,
           rotate,
           space,
-          new BoxStyle(this.box),
-          new ObboxStyle(this.obbox));
+          this.box == null ? new BoxStyle(new BoxStyle.Config()) : this.box,
+          this.obbox == null ? new ObboxStyle(new ObboxStyle.Config()) : this.obbox);
     }
 
     public Config color(ModelColor.RGB color) {
@@ -167,6 +167,16 @@ public class Style {
 
     public Config font(String name) {
       this.font = name;
+      return this;
+    }
+
+    public Config box(BoxStyle box) {
+      this.box = box;
+      return this;
+    }
+
+    public Config obbox(ObboxStyle obbox) {
+      this.obbox = obbox;
       return this;
     }
   }

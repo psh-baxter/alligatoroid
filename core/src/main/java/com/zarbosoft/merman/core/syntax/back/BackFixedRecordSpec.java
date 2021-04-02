@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.core.editor.backevents.EKeyEvent;
 import com.zarbosoft.merman.core.editor.backevents.EObjectCloseEvent;
@@ -39,7 +40,7 @@ public class BackFixedRecordSpec extends BackSpec {
   }
 
   @Override
-  public Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     final Sequence sequence;
     sequence = new Sequence();
     sequence.add(new MatchingEventTerminal(new EObjectOpenEvent()));
@@ -48,7 +49,7 @@ public class BackFixedRecordSpec extends BackSpec {
       set.add(
           new Sequence()
               .add(new MatchingEventTerminal(new EKeyEvent(pair.getKey())))
-              .add(pair.getValue().buildBackRule(syntax)),
+              .add(pair.getValue().buildBackRule(i18n, syntax)),
           true);
     }
     for (String key : discard) {

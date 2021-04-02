@@ -2,6 +2,7 @@ package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.values.FieldArray;
+import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.merman.core.editor.Path;
 import com.zarbosoft.merman.core.editor.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.editor.backevents.EObjectOpenEvent;
@@ -15,13 +16,14 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.RecordChildMissingValue;
 import com.zarbosoft.merman.core.syntax.error.RecordChildNotKeyAt;
 import com.zarbosoft.merman.core.syntax.error.RecordChildNotValueAt;
-import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.events.StackStore;
+import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -30,16 +32,6 @@ import java.util.Iterator;
 public class BackRecordSpec extends BaseBackArraySpec {
   /** Type/group name or null; null means any type */
   public final String element;
-
-  public static class Config {
-    public final String id;
-    public final String element;
-
-    public Config(String id, String element) {
-      this.id = id;
-      this.element = element;
-    }
-  }
 
   public BackRecordSpec(Config config) {
     super(config.id);
@@ -57,7 +49,7 @@ public class BackRecordSpec extends BaseBackArraySpec {
   }
 
   @Override
-  public Node buildBackRule(final Syntax syntax) {
+  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     final Sequence sequence;
     sequence = new Sequence();
     sequence.add(new MatchingEventTerminal(new EObjectOpenEvent()));
@@ -68,18 +60,17 @@ public class BackRecordSpec extends BaseBackArraySpec {
     return new Operator<StackStore>(sequence) {
       @Override
       protected StackStore process(StackStore store) {
-        final TSList<Atom> temp = new TSList<>();
-        store = store.popVarSingleList(temp);
-        temp.reverse();
-        final FieldArray value = new FieldArray(BackRecordSpec.this, temp);
-        return store.stackVarDoubleElement(id, value);
+        final TSList initialValue = new TSList<>();
+        store = store.popVarSingleList(initialValue);
+        initialValue.reverse();
+        return store.stackVarDoubleElement(
+            id, new ROPair<>(new FieldArray(BackRecordSpec.this), initialValue));
       }
     };
   }
 
   @Override
-  public void write(
-          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
     stack.add(new WriteStateRecordEnd());
     stack.add(new WriteStateDataArray(((TSList<Atom>) data.get(id))));
@@ -138,5 +129,15 @@ public class BackRecordSpec extends BaseBackArraySpec {
   public static enum CheckBackState {
     KEY,
     TYPEVALUE,
+  }
+
+  public static class Config {
+    public final String id;
+    public final String element;
+
+    public Config(String id, String element) {
+      this.id = id;
+      this.element = element;
+    }
   }
 }

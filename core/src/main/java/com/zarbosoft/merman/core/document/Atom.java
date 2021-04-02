@@ -19,7 +19,7 @@ import com.zarbosoft.rendaw.common.TSMap;
 import java.util.Map;
 
 public class Atom {
-  public final TSMap<String, Field> fields;
+  public TSMap<String, Field> fields;
   /**
    * Null if root
    */
@@ -27,32 +27,34 @@ public class Atom {
   public final AtomType type;
   public VisualAtom visual;
 
-  public Atom(final AtomType type, final TSMap<String, Field> fields) {
+  public Atom(final AtomType type) {
     this.type = type;
+  }
+
+  public void initialSet(final TSMap<String, Field> fields) {
     this.fields = fields;
     for (Map.Entry<String, Field> entry : fields.entries()) {
-      Field v = entry.getValue();
-      v.setAtomParentRef(
-          new Parent() {
-            @Override
-            public Atom atom() {
-              return Atom.this;
-            }
+      entry.getValue().setAtomParentRef(
+              new Parent() {
+                @Override
+                public Atom atom() {
+                  return Atom.this;
+                }
 
-            @Override
-            public boolean selectAtomParent(final Context context) {
-              if (valueParentRef == null) return false;
-              return Atom.this.valueParentRef.selectValue(context);
-            }
+                @Override
+                public boolean selectAtomParent(final Context context) {
+                  if (valueParentRef == null) return false;
+                  return Atom.this.valueParentRef.selectValue(context);
+                }
 
-            @Override
-            public Path getSyntaxPath() {
-              Path out;
-              if (Atom.this.valueParentRef == null) out = new Path();
-              else out = Atom.this.valueParentRef.getSyntaxPath();
-              return out.add(entry.getKey());
-            }
-          });
+                @Override
+                public Path getSyntaxPath() {
+                  Path out;
+                  if (Atom.this.valueParentRef == null) out = new Path();
+                  else out = Atom.this.valueParentRef.getSyntaxPath();
+                  return out.add(entry.getKey());
+                }
+              });
     }
   }
 

@@ -30,16 +30,22 @@ public class TreeBuilder {
   }
 
   public TreeBuilder add(final String key, final TreeBuilder builder) {
-    data.putNew(key, new FieldAtom((BaseBackAtomSpec) type.fields.get(key), builder.build()));
+    FieldAtom v = new FieldAtom((BaseBackAtomSpec) type.fields.get(key));
+    v.initialSet(builder.build());
+    data.putNew(key, v);
     return this;
   }
 
   public Atom build() {
-    return new Atom(type, data);
+    Atom atom = new Atom(type);
+    atom.initialSet(data);
+    return atom;
   }
 
   public TreeBuilder add(final String key, final Atom atom) {
-    data.putNew(key, new FieldAtom((BaseBackAtomSpec) type.fields.get(key), atom));
+    FieldAtom v = new FieldAtom((BaseBackAtomSpec) type.fields.get(key));
+    v.initialSet(atom);
+    data.putNew(key, v);
     return this;
   }
 
@@ -49,18 +55,24 @@ public class TreeBuilder {
   }
 
   public TreeBuilder addArray(final String key, final Atom... values) {
-    data.putNew(
-        key, new FieldArray((BaseBackArraySpec) type.fields.get(key), TSList.of(values)));
+    FieldArray v = new FieldArray((BaseBackArraySpec) type.fields.get(key));
+    v.initialSet(TSList.of(values));
+    data.putNew(key, v);
     return this;
   }
 
   public TreeBuilder addRecord(final String key, final Atom... values) {
-    data.putNew(
-        key, new FieldArray((BaseBackArraySpec) type.fields.get(key), TSList.of(values)));
+    FieldArray v = new FieldArray((BaseBackArraySpec) type.fields.get(key));
+    v.initialSet(TSList.of(values));
+    data.putNew(key, v);
     return this;
   }
 
   public Field buildArray() {
-    return new FieldArray(null, TSList.of(new Atom(type, data)));
+    FieldArray fieldArray = new FieldArray(null);
+    Atom atom = new Atom(type);
+    atom.initialSet(data);
+    fieldArray.initialSet(TSList.of(atom));
+    return fieldArray;
   }
 }

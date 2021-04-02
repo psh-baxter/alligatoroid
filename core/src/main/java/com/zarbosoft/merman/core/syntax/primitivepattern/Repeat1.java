@@ -12,7 +12,7 @@ public class Repeat1 extends Pattern {
   }
 
   @Override
-  public Node build(I18nEngine i18n) {
-    return new Repeat(pattern.build(i18n)).min(1);
+  public Node build() {
+    return new Repeat(pattern.build()).min(1);
   }
 }
