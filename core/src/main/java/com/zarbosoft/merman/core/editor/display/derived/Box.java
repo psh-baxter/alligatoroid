@@ -5,6 +5,8 @@ import com.zarbosoft.merman.core.editor.display.Drawing;
 import com.zarbosoft.merman.core.editor.display.DrawingContext;
 import com.zarbosoft.merman.core.editor.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.BoxStyle;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class Box {
   public final Drawing drawing;
@@ -57,29 +59,13 @@ public class Box {
 
   private void path(
       final DrawingContext gc, final double converseSpan, final double transverseSpan) {
-    moveTo(gc, 0, transverseSpan / 2);
-    cornerTo(gc, style.roundStart, 0, 0, converseSpan / 2, 0);
-    cornerTo(gc, style.roundOuterEdges, converseSpan, 0, converseSpan, transverseSpan / 2);
-    cornerTo(gc, style.roundEnd, converseSpan, transverseSpan, converseSpan / 2, transverseSpan);
-    cornerTo(gc, style.roundOuterEdges, 0, transverseSpan, 0, transverseSpan / 2);
-  }
-
-  private void moveTo(final DrawingContext gc, final double c, final double t) {
-    gc.moveTo(c, t);
-  }
-
-  private void cornerTo(
-      final DrawingContext gc,
-      final boolean round,
-      final double c,
-      final double t,
-      final double c2,
-      final double t2) {
-    if (round) {
-      gc.arcTo(c, t, c2, t2, styleRoundRadius);
-    } else {
-      gc.lineTo(c, t);
-      gc.lineTo(c2, t2);
-    }
+    Obbox.drawRounded(
+        gc,
+        TSList.of(
+            new ROPair<>(new Vector(0, 0), style.roundStart),
+            new ROPair<>(new Vector(converseSpan, 0), style.roundOuterEdges),
+            new ROPair<>(new Vector(converseSpan, transverseSpan), style.roundEnd),
+            new ROPair<>(new Vector(0, transverseSpan), style.roundOuterEdges)),
+        styleRoundRadius);
   }
 }

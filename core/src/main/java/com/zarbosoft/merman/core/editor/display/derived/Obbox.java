@@ -159,7 +159,10 @@ public class Obbox {
                 new Vector(firstLineConverse, firstLineTransverseEnd), style.roundConcave));
       }
     }
-    System.out.format("start drawing...\n");
+    drawRounded(gc, points, styleRoundRadius);
+  }
+
+  public static void drawRounded(DrawingContext gc, TSList<ROPair<Vector, Boolean>> points, double baseRadius) {
     for (int i = 0; i < points.size(); ++i) {
       final ROPair<Vector, Boolean> mid = points.get(i);
       if (mid.second) {
@@ -173,7 +176,7 @@ public class Obbox {
             new Vector(
                 post.first.converse - mid.first.converse,
                 post.first.transverse - mid.first.transverse);
-         double radius = styleRoundRadius;
+         double radius = baseRadius;
         if (pre.second)
           radius =
               Math.min(radius, Math.min(Math.abs(toPre.converse), Math.abs(toPre.transverse)) / 2);
