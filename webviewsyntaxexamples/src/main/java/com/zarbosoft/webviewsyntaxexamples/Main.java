@@ -1,6 +1,6 @@
 package com.zarbosoft.webviewsyntaxexamples;
 
-import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Direction;

@@ -4,7 +4,7 @@ import com.zarbosoft.merman.core.I18nEngine;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.backevents.ETypeEvent;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
-import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateBack;

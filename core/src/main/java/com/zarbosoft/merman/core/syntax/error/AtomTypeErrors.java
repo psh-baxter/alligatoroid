@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.core.syntax.error;
 
-import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 
 public class AtomTypeErrors extends BaseKVError {

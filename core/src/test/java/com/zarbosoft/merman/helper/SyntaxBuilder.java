@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.style.Padding;

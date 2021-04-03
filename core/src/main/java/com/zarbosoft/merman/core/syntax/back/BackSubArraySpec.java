@@ -6,7 +6,7 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateDeepDataArray;
-import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.PluralInvalidAtLocation;
 import com.zarbosoft.pidgoon.model.Node;

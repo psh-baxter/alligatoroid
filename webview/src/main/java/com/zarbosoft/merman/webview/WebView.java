@@ -15,7 +15,7 @@ import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.UnsupportedDirections;

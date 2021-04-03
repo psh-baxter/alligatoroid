@@ -9,7 +9,7 @@ import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.core.backevents.ETypeEvent;
 import com.zarbosoft.merman.core.backevents.JSpecialPrimitiveEvent;
-import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.error.DuplicateAtomTypeIds;
 import com.zarbosoft.merman.core.syntax.error.DuplicateAtomTypeIdsInGroup;
 import com.zarbosoft.merman.core.syntax.error.GroupChildDoesntExist;

@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.core.misc;
+package com.zarbosoft.merman.core;
 
 import java.util.ArrayList;
 import java.util.List;

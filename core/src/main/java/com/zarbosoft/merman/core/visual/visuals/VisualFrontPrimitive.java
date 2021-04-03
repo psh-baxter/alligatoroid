@@ -1,14 +1,17 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
-import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.Action;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Cursor;
 import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.I18nEngine;
-import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.SelectionState;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.Font;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
@@ -20,9 +23,6 @@ import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.merman.core.wall.bricks.BrickLine;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
-import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -250,8 +250,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   @Override
   public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
-    if (parent == null)
-      return null;
+    if (parent == null) return null;
     return parent.hover(context, point);
   }
 
@@ -410,7 +409,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   }
 
   public static class PrimitiveSelectionState implements SelectionState {
-
     private final FieldPrimitive value;
     private final int beginOffset;
     private final int endOffset;
@@ -965,7 +963,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex = primitiveCursor.following();
       if (primitiveCursor.range.endOffset == newIndex) return;
       primitiveCursor.range.setEndOffset(context, newIndex);
@@ -1024,7 +1021,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex =
           primitiveCursor.nextLine(primitiveCursor.range.endLine, primitiveCursor.range.endOffset);
       if (primitiveCursor.range.endOffset == newIndex) return;
@@ -1068,7 +1064,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex =
           Math.max(
               primitiveCursor.range.beginOffset,
@@ -1091,7 +1086,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex =
           Math.max(
               primitiveCursor.range.beginOffset,
@@ -1114,7 +1108,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex =
           Math.max(
               primitiveCursor.range.beginOffset,
@@ -1158,7 +1151,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex = primitiveCursor.previousWord(context, primitiveCursor.range.beginOffset);
       if (primitiveCursor.range.beginOffset == newIndex) return;
       primitiveCursor.range.setBeginOffset(context, newIndex);
@@ -1218,7 +1210,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex =
           Math.min(
               primitiveCursor.range.endOffset,
@@ -1241,7 +1232,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex =
           Math.min(
               primitiveCursor.range.endOffset,
@@ -1264,7 +1254,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex =
           Math.min(
               primitiveCursor.range.endOffset,
@@ -1289,7 +1278,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     @Override
     public void run(final Context context) {
-
       final int newIndex =
           Math.min(
               primitiveCursor.range.endOffset,

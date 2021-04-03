@@ -9,7 +9,7 @@ import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateRecord;
 import com.zarbosoft.merman.core.serialization.WriteStateRecordEnd;
-import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.RecordDiscardDuplicateKey;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
