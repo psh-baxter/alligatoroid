@@ -31,7 +31,8 @@ public class TestLayoutGeneral {
         new TypeBuilder("one").back(Helper.buildBackPrimitive("one")).frontSplitMark("one").build();
     two =
         new TypeBuilder("two").back(Helper.buildBackPrimitive("two")).frontSplitMark("two").build();
-    big =
+      /* only in first syntax */
+      big =
         new TypeBuilder("big")
             .back(Helper.buildBackPrimitive("big"))
             .front(
@@ -41,10 +42,9 @@ public class TestLayoutGeneral {
                             new SymbolSpaceSpec.Config()
                                 .splitMode(Style.SplitMode.ALWAYS)
                                 .style(
-                                    new Style.Config()
-                                        .
-                                        /* only in first syntax */ spaceTransverseAfter(60)
-                                        .create())))))
+                                        new Style(new Style.Config()
+                                                .
+                                                /* only in first syntax */ spaceTransverseAfter(60)))))))
             .build();
     text =
         new TypeBuilder("text")

@@ -22,11 +22,11 @@ public class FrontPrimitiveSpec extends FrontSpec {
 
   public FrontPrimitiveSpec(Config config) {
     fieldId = config.fieldId;
-    if (config.firstStyle == null) firstStyle = new Style.Config().create();
+    if (config.firstStyle == null) firstStyle = new Style(new Style.Config());
     else firstStyle = config.firstStyle;
-    if (config.hardStyle == null) hardStyle = new Style.Config().create();
+    if (config.hardStyle == null) hardStyle = new Style(new Style.Config());
     else hardStyle = config.hardStyle;
-    if (config.softStyle == null) softStyle = new Style.Config().create();
+    if (config.softStyle == null) softStyle = new Style(new Style.Config());
     else softStyle = config.softStyle;
     splitMode = config.splitMode;
   }

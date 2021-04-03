@@ -25,7 +25,7 @@ public class FrontDataPrimitiveBuilder {
     if (compactAlignment != null) {
       style.splitAlignment(compactAlignment);
     }
-    config.style(style.create());
+      config.style(new Style(style));
     return new FrontPrimitiveSpec(config);
   }
 

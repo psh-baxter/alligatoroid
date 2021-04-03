@@ -23,7 +23,7 @@ public class SymbolImageSpec extends Symbol {
   }
 
   public SymbolImageSpec(Config config) {
-    this.style = config.style.create();
+      this.style = new Style(config.style);
     splitMode = config.splitMode;
   }
 

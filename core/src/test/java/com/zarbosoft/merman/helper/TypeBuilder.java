@@ -74,10 +74,10 @@ public class TypeBuilder {
   }
 
   public TypeBuilder alignedFrontDataPrimitive(final String middle, String alignment) {
-    this.front.add(
+      this.front.add(
         new FrontPrimitiveSpec(
             new FrontPrimitiveSpec.Config(middle)
-                .style(new Style.Config().alignment(alignment).create())));
+                .style(new Style(new Style.Config().alignment(alignment)))));
     return this;
   }
 

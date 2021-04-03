@@ -34,6 +34,7 @@ public class BrickImage extends Brick {
 
   @Override
   public double ascent() {
+    if (style.ascent != null) return style.ascent * toPixels;
     return image.ascent() + style.spaceTransverseBefore * toPixels;
   }
 

@@ -23,7 +23,6 @@ import com.zarbosoft.merman.core.syntax.builder.FrontArraySpecBuilder;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.core.syntax.primitivepattern.Any;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Integer;
 import com.zarbosoft.merman.core.syntax.primitivepattern.JsonDecimal;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
@@ -55,19 +54,18 @@ public class JsonSyntax {
   public static Syntax create(I18nEngine i18n, Padding pad) {
     double fontSize = 5;
     final Style stringStyle =
-        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("F79578")).create();
+            new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("F79578")));
     final Style numberStyle =
-        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("95FA94")).create();
+            new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("95FA94")));
     final Style specialStyle =
-        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("7DD4FB")).create();
+            new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("7DD4FB")));
     final Style symbolStyle =
-        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA")).create();
+            new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA")));
     final Style baseAlignSymbolStyle =
-        new Style.Config()
-            .fontSize(fontSize)
-            .color(ModelColor.RGB.hex("CACACA"))
-            .splitAlignment(ALIGNMENT_BASE)
-            .create();
+            new Style(new Style.Config()
+                    .fontSize(fontSize)
+                    .color(ModelColor.RGB.hex("CACACA"))
+                    .splitAlignment(ALIGNMENT_BASE));
     TSMap<String, AlignmentSpec> containerAlignments =
         new TSMap<String, AlignmentSpec>()
             .put(
@@ -84,7 +82,7 @@ public class JsonSyntax {
                 new SymbolSpaceSpec(
                     new SymbolSpaceSpec.Config()
                         .splitMode(Style.SplitMode.COMPACT)
-                        .style(new Style.Config().splitAlignment(ALIGNMENT_INDENT).create()))));
+                        .style(new Style(new Style.Config().splitAlignment(ALIGNMENT_INDENT))))));
     TSList<AtomType> types =
         TSList.of(
             new FreeAtomType(
@@ -232,31 +230,29 @@ public class JsonSyntax {
   }
 
   private static Style cursorStyle(boolean primitive) {
-    return new Style.Config()
-        .obbox(
-            new ObboxStyle(
-                new ObboxStyle.Config()
-                    .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                    .roundStart(true)
-                    .roundEnd(true)
-                    .lineThickness(0.3)
-                    .roundRadius(3)
-                    .lineColor(ModelColor.RGB.white)))
-        .create();
+    return new Style(new Style.Config()
+      .obbox(
+          new ObboxStyle(
+              new ObboxStyle.Config()
+                  .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                  .roundStart(true)
+                  .roundEnd(true)
+                  .lineThickness(0.3)
+                  .roundRadius(3)
+                  .lineColor(ModelColor.RGB.white))));
   }
 
   private static Style hoverStyle(boolean primitive) {
-    return new Style.Config()
-        .obbox(
-            new ObboxStyle(
-                new ObboxStyle.Config()
-                    .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                    .roundEnd(true)
-                    .roundStart(true)
-                    .lineThickness(0.3)
-                    .roundRadius(3)
-                    .lineColor(ModelColor.RGB.hex("888888"))))
-        .create();
+    return new Style(new Style.Config()
+      .obbox(
+          new ObboxStyle(
+              new ObboxStyle.Config()
+                  .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                  .roundEnd(true)
+                  .roundStart(true)
+                  .lineThickness(0.3)
+                  .roundRadius(3)
+                  .lineColor(ModelColor.RGB.hex("888888")))));
   }
 
   public static FrontSymbol textSym(String s, Style style) {

@@ -271,7 +271,7 @@ public class TestLayoutAlignment {
             .frontDataPrimitive("first")
             .alignedFrontDataPrimitive("second", "concensus1")
             .build();
-    final FreeAtomType splitPair =
+      final FreeAtomType splitPair =
         new TypeBuilder("splitPair")
             .back(
                 new BackArrayBuilder()
@@ -283,7 +283,7 @@ public class TestLayoutAlignment {
                 new FrontPrimitiveSpec(
                     new FrontPrimitiveSpec.Config("second")
                         .splitMode(Style.SplitMode.COMPACT)
-                        .style(new Style.Config().alignment("concensus1").create())))
+                        .style(new Style(new Style.Config().alignment("concensus1")))))
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
@@ -319,7 +319,7 @@ public class TestLayoutAlignment {
             .back(Helper.buildBackDataPrimitive("value"))
             .frontDataPrimitive("value")
             .build();
-    final FreeAtomType pair =
+      final FreeAtomType pair =
         new TypeBuilder("pair")
             .back(
                 new BackArrayBuilder()
@@ -330,9 +330,9 @@ public class TestLayoutAlignment {
             .front(
                 new FrontPrimitiveSpec(
                     new FrontPrimitiveSpec.Config("second")
-                        .style(new Style.Config().alignment("concensus1").create())))
+                        .style(new Style(new Style.Config().alignment("concensus1")))))
             .build();
-    final FreeAtomType atomPair =
+      final FreeAtomType atomPair =
         new TypeBuilder("atomPair")
             .back(
                 new BackArrayBuilder()
@@ -349,7 +349,7 @@ public class TestLayoutAlignment {
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config()
                                 .splitMode(Style.SplitMode.COMPACT)
-                                .style(new Style.Config().alignment("concensus1").create())))))
+                                .style(new Style(new Style.Config().alignment("concensus1")))))))
             .frontDataNode("second")
             .build();
     final Syntax syntax =

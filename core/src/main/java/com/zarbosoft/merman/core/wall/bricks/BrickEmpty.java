@@ -19,7 +19,8 @@ public class BrickEmpty extends Brick {
     super(inter, style, splitMode);
     visual = context.display.blank();
     double toPixels = context.toPixels;
-    ascent = style.spaceTransverseBefore * toPixels;
+    if (style.ascent != null) ascent = style.ascent * toPixels;
+    else ascent = style.spaceTransverseBefore * toPixels;
     descent = style.spaceTransverseAfter * toPixels;
     converseSpan = style.space * toPixels + style.spaceBefore * toPixels + style.spaceAfter * toPixels;
     changed(context);

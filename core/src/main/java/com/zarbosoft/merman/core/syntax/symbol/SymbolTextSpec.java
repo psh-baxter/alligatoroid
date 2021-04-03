@@ -38,9 +38,9 @@ public class SymbolTextSpec extends Symbol {
   public static class Config {
     public final String text;
     public Style.SplitMode splitMode = Style.SplitMode.NEVER;
-    public Style style = new Style.Config().create();
+    public Style style = new Style(new Style.Config());
 
-    public Config(String text) {
+      public Config(String text) {
       this.text = text;
     }
 

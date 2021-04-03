@@ -4,15 +4,15 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
-import com.zarbosoft.merman.core.syntax.style.Style;
 
 public class BrickText extends Brick {
   private final Font font;
+  private final double toPixels;
   public Text text;
-  private double toPixels;
 
   public BrickText(
       final Context context,
@@ -41,6 +41,7 @@ public class BrickText extends Brick {
 
   @Override
   public double ascent() {
+    if (style.ascent != null) return style.ascent * toPixels;
     return text.ascent() + style.spaceTransverseBefore * toPixels;
   }
 

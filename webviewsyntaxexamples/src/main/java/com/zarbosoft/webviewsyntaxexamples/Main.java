@@ -469,19 +469,19 @@ public class Main {
   public static final String addEqualOperatorType = "add_equal";
   public static final String tripleEqualOperatorType = "triple_equal";
   public static final FrontSymbol prefixCompactIndent =
-      new FrontSymbol(
-          new FrontSymbol.Config(
-              new SymbolSpaceSpec(
-                  new SymbolSpaceSpec.Config()
-                      .splitMode(Style.SplitMode.COMPACT)
-                      .style(new Style.Config().splitAlignment(indentAlign).create()))));
+          new FrontSymbol(
+              new FrontSymbol.Config(
+                  new SymbolSpaceSpec(
+                      new SymbolSpaceSpec.Config()
+                          .splitMode(Style.SplitMode.COMPACT)
+                          .style(new Style(new Style.Config().splitAlignment(indentAlign))))));
   public static final FrontSymbol prefixIndent =
-      new FrontSymbol(
-          new FrontSymbol.Config(
-              new SymbolSpaceSpec(
-                  new SymbolSpaceSpec.Config()
-                      .splitMode(Style.SplitMode.ALWAYS)
-                      .style(new Style.Config().splitAlignment(indentAlign).create()))));
+          new FrontSymbol(
+              new FrontSymbol.Config(
+                  new SymbolSpaceSpec(
+                      new SymbolSpaceSpec.Config()
+                          .splitMode(Style.SplitMode.ALWAYS)
+                          .style(new Style(new Style.Config().splitAlignment(indentAlign))))));
   public static final FrontSymbol space = text(" ", Function.identity());
 
   private static Style.Config styleBase() {
@@ -648,7 +648,7 @@ public class Main {
                 .back(identifierBack("name"))
                 .front(
                     new FrontPrimitiveSpec(
-                        new FrontPrimitiveSpec.Config("name").style(styleIdentifier().create())))
+                        new FrontPrimitiveSpec.Config("name").style(new Style(styleIdentifier()))))
                 .build(),
             frontFactory
                 .memberExpr(
@@ -689,7 +689,7 @@ public class Main {
                         .build())
                 .front(
                     new FrontPrimitiveSpec(
-                        new FrontPrimitiveSpec.Config("value").style(styleNonstring().create())))
+                        new FrontPrimitiveSpec.Config("value").style(new Style(styleNonstring()))))
                 .build(),
             frontFactory
                 .stringLit(
@@ -875,31 +875,29 @@ public class Main {
   }
 
   private static Style cursorStyle(boolean primitive) {
-    return new Style.Config()
-        .obbox(
-            new ObboxStyle(
-                new ObboxStyle.Config()
-                    .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                    .roundStart(true)
-                    .roundEnd(true)
-                    .lineThickness(1.5)
-                    .roundRadius(8)
-                    .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0.5, 180, 0.8))))
-        .create();
+    return new Style(new Style.Config()
+      .obbox(
+          new ObboxStyle(
+              new ObboxStyle.Config()
+                  .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                  .roundStart(true)
+                  .roundEnd(true)
+                  .lineThickness(1.5)
+                  .roundRadius(8)
+                  .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0.5, 180, 0.8)))));
   }
 
   private static Style hoverStyle(boolean primitive) {
-    return new Style.Config()
-        .obbox(
-            new ObboxStyle(
-                new ObboxStyle.Config()
-                    .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                    .roundEnd(true)
-                    .roundStart(true)
-                    .roundRadius(8)
-                    .lineThickness(1.5)
-                    .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0, 0, 0.4))))
-        .create();
+    return new Style(new Style.Config()
+      .obbox(
+          new ObboxStyle(
+              new ObboxStyle.Config()
+                  .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                  .roundEnd(true)
+                  .roundStart(true)
+                  .roundRadius(8)
+                  .lineThickness(1.5)
+                  .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0, 0, 0.4)))));
   }
 
   public static TypeBuilder estreeTypeBuilder(String callType, String call) {
@@ -1000,7 +998,7 @@ public class Main {
     return new FrontSymbol(
         new FrontSymbol.Config(
             new SymbolTextSpec(
-                new SymbolTextSpec.Config(text).style(styler.apply(new Style.Config()).create()))));
+                new SymbolTextSpec.Config(text).style(new Style(styler.apply(new Style.Config()))))));
   }
 
   private static FrontSymbol textBase(String text, Function<Style.Config, Style.Config> styler) {
@@ -1009,7 +1007,7 @@ public class Main {
             new SymbolTextSpec(
                 new SymbolTextSpec.Config(text)
                     .splitMode(Style.SplitMode.ALWAYS)
-                    .style(styler.apply(new Style.Config()).splitAlignment(baseAlign).create()))));
+                    .style(new Style(styler.apply(new Style.Config()).splitAlignment(baseAlign))))));
   }
 
   private static FrontSymbol textCompactBase(
@@ -1019,7 +1017,7 @@ public class Main {
             new SymbolTextSpec(
                 new SymbolTextSpec.Config(text)
                     .splitMode(Style.SplitMode.COMPACT)
-                    .style(styler.apply(new Style.Config()).splitAlignment(baseAlign).create()))));
+                    .style(new Style(styler.apply(new Style.Config()).splitAlignment(baseAlign))))));
   }
 
   private static FrontSymbol textCompactIndent(
@@ -1030,7 +1028,7 @@ public class Main {
                 new SymbolTextSpec.Config(text)
                     .splitMode(Style.SplitMode.COMPACT)
                     .style(
-                        styler.apply(new Style.Config()).splitAlignment(indentAlign).create()))));
+                            new Style(styler.apply(new Style.Config()).splitAlignment(indentAlign))))));
   }
 
   private static BackFixedRecordSpecBuilder estreeBackBuilder() {
@@ -1083,7 +1081,7 @@ public class Main {
       return type.front(text("\"", c1 -> styleStringQuote()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config("value").style(styleString().create())))
+                  new FrontPrimitiveSpec.Config("value").style(new Style(styleString()))))
           .front(text("\"", c2 -> styleStringQuote()));
     }
   }
@@ -1107,7 +1105,7 @@ public class Main {
           .front(textCompactIndent(".", c1 -> styleOperator()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config(propertyKey).style(styleIdentifier().create())));
+                  new FrontPrimitiveSpec.Config(propertyKey).style(new Style(styleIdentifier()))));
     }
 
     @Override
@@ -1120,7 +1118,7 @@ public class Main {
                       new SymbolTextSpec(
                           new SymbolTextSpec.Config(symbol + " ")
                               .splitMode(Style.SplitMode.COMPACT)
-                              .style(styleOperator().splitAlignment(indentAlign).create())))))
+                              .style(new Style(styleOperator().splitAlignment(indentAlign)))))))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config(rightKey)));
     }
 
@@ -1135,7 +1133,7 @@ public class Main {
       return type.front(
               new FrontPrimitiveSpec(
                   new FrontPrimitiveSpec.Config("id")
-                      .style(new Style.Config().color(identifierColor).create())))
+                      .style(new Style(new Style.Config().color(identifierColor)))))
           .front(text(" = ", c1 -> styleKeyword()))
           .front(new FrontAtomSpec(new FrontAtomSpec.Config("init")));
     }
@@ -1178,7 +1176,7 @@ public class Main {
       return type.front(text("「", c1 -> styleStringQuote()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config("value").style(styleString().create())))
+                  new FrontPrimitiveSpec.Config("value").style(new Style(styleString()))))
           .front(text("」", c2 -> styleStringQuote()));
     }
 
@@ -1219,7 +1217,7 @@ public class Main {
           .front(textCompactIndent("の", c1 -> styleOperator()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config(propertyKey).style(styleIdentifier().create())));
+                  new FrontPrimitiveSpec.Config(propertyKey).style(new Style(styleIdentifier()))));
     }
 
     @Override
@@ -1259,7 +1257,7 @@ public class Main {
           .front(
               new FrontPrimitiveSpec(
                   new FrontPrimitiveSpec.Config("id")
-                      .style(new Style.Config().color(identifierColor).create())))
+                      .style(new Style(new Style.Config().color(identifierColor)))))
           .front(text("を", Function.identity()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config("init")));
@@ -1348,7 +1346,7 @@ public class Main {
           .front(textCompactIndent(".", c1 -> styleOperator()))
           .front(
               new FrontPrimitiveSpec(
-                  new FrontPrimitiveSpec.Config(propertyKey).style(styleIdentifier().create())));
+                  new FrontPrimitiveSpec.Config(propertyKey).style(new Style(styleIdentifier()))));
     }
 
     @Override
@@ -1397,7 +1395,7 @@ public class Main {
           .front(
               new FrontPrimitiveSpec(
                   new FrontPrimitiveSpec.Config("id")
-                      .style(new Style.Config().color(identifierColor).create())))
+                      .style(new Style(new Style.Config().color(identifierColor)))))
           .front(text(" ", Function.identity()))
           .front(prefixCompactIndent)
           .front(new FrontAtomSpec(new FrontAtomSpec.Config("init")));

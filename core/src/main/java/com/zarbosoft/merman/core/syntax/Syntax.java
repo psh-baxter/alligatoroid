@@ -101,15 +101,15 @@ public class Syntax {
     this.converseDirection = config.converseDirection;
     this.transverseDirection = config.transverseDirection;
     this.cursorStyle =
-        config.cursorStyle == null ? new Style.Config().create() : config.cursorStyle;
+        config.cursorStyle == null ? new Style(new Style.Config()) : config.cursorStyle;
     this.primitiveCursorStyle =
         config.primitiveCursorStyle == null
-            ? new Style.Config().create()
+            ? new Style(new Style.Config())
             : config.primitiveCursorStyle;
-    this.hoverStyle = config.hoverStyle == null ? new Style.Config().create() : config.hoverStyle;
+    this.hoverStyle = config.hoverStyle == null ? new Style(new Style.Config()) : config.hoverStyle;
     this.primitiveHoverStyle =
         config.primitiveHoverStyle == null
-            ? new Style.Config().create()
+            ? new Style(new Style.Config())
             : config.primitiveHoverStyle;
 
     TSSet<AtomType> seen = new TSSet<>();

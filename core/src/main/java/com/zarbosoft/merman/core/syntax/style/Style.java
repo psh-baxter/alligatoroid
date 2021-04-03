@@ -16,36 +16,41 @@ public class Style {
 
   public final double space;
   public final ObboxStyle obbox;
+  /** Override automatic ascent */
+  public final Double ascent;
 
-  private Style(
-      String alignment,
-      String splitAlignment,
-      Double spaceBefore,
-      Double spaceAfter,
-      Double spaceTransverseBefore,
-      Double spaceTransverseAfter,
-      ModelColor color,
-      String font,
-      Double fontSize,
-      String image,
-      Double rotate,
-      Double space,
-      ObboxStyle obbox) {
-    this.alignment = alignment;
-    this.splitAlignment = splitAlignment;
-    this.spaceBefore = spaceBefore;
-    this.spaceAfter = spaceAfter;
-    this.spaceTransverseBefore = spaceTransverseBefore;
-    this.spaceTransverseAfter = spaceTransverseAfter;
-    this.color = color;
-    this.font = font;
-    this.fontSize = fontSize;
-    this.image = image;
-    this.rotate = rotate;
-    this.space = space;
-    this.obbox = obbox;
+  public Style(Config config) {
+    if (config.alignment != null) alignment = config.alignment;
+    else alignment = null;
+    if (config.splitAlignment != null) splitAlignment = config.splitAlignment;
+    else splitAlignment = null;
+    if (config.spaceBefore != null) spaceBefore = config.spaceBefore;
+    else spaceBefore = 0;
+    if (config.spaceAfter != null) spaceAfter = config.spaceAfter;
+    else spaceAfter = 0;
+    if (config.spaceTransverseBefore != null) spaceTransverseBefore = config.spaceTransverseBefore;
+    else spaceTransverseBefore = 0;
+    if (config.spaceTransverseAfter != null) spaceTransverseAfter = config.spaceTransverseAfter;
+    else spaceTransverseAfter = 0;
+    if (config.color != null) color = config.color;
+    else color = new ModelColor.RGB(0, 0, 0);
+    if (config.font != null) font = config.font;
+    else font = null;
+    if (config.fontSize != null) fontSize = config.fontSize;
+    else fontSize = 14;
+    if (config.image != null) image = config.image;
+    else image = null;
+    if (config.rotate != null) rotate = config.rotate;
+    else rotate = 0;
+    if (config.space != null) space = config.space;
+    else space = 0;
+    if (config.ascent == null) {
+      ascent = null;
+    } else {
+      ascent = config.ascent;
+    }
+    obbox = config.obbox == null ? new ObboxStyle(new ObboxStyle.Config()) : config.obbox;
   }
-
   public static enum SplitMode {
     NEVER,
     COMPACT,
@@ -53,22 +58,18 @@ public class Style {
   }
 
   public static final class Config {
-    // Other
+    public Double ascent;
     public ObboxStyle obbox;
     public String alignment;
     public Double spaceBefore;
     public Double spaceAfter;
     public Double spaceTransverseBefore;
     public Double spaceTransverseAfter;
-    // Text/image/shape only
     public ModelColor color;
-    // Text only
     public String font;
     public Double fontSize;
-    // Image only
     public String image;
     public Double rotate;
-    // Space only
     public Double space;
     private String splitAlignment;
 
@@ -107,47 +108,6 @@ public class Style {
     public Config splitAlignment(final String name) {
       splitAlignment = name;
       return this;
-    }
-
-    public Style create() {
-      String alignment = null;
-      String splitAlignment = null;
-      double spaceBefore = 0;
-      double spaceAfter = 0;
-      double spaceTransverseBefore = 0;
-      double spaceTransverseAfter = 0;
-      ModelColor color = new ModelColor.RGB(0, 0, 0);
-      String font = null;
-      double fontSize = 14;
-      String image = null;
-      double rotate = 0;
-      double space = 0;
-      if (this.alignment != null) alignment = this.alignment;
-      if (this.splitAlignment != null) splitAlignment = this.splitAlignment;
-      if (this.spaceBefore != null) spaceBefore = this.spaceBefore;
-      if (this.spaceAfter != null) spaceAfter = this.spaceAfter;
-      if (this.spaceTransverseBefore != null) spaceTransverseBefore = this.spaceTransverseBefore;
-      if (this.spaceTransverseAfter != null) spaceTransverseAfter = this.spaceTransverseAfter;
-      if (this.color != null) color = this.color;
-      if (this.font != null) font = this.font;
-      if (this.fontSize != null) fontSize = this.fontSize;
-      if (this.image != null) image = this.image;
-      if (this.rotate != null) rotate = this.rotate;
-      if (this.space != null) space = this.space;
-      return new Style(
-          alignment,
-          splitAlignment,
-          spaceBefore,
-          spaceAfter,
-          spaceTransverseBefore,
-          spaceTransverseAfter,
-          color,
-          font,
-          fontSize,
-          image,
-          rotate,
-          space,
-          this.obbox == null ? new ObboxStyle(new ObboxStyle.Config()) : this.obbox);
     }
 
     public Config color(ModelColor.RGB color) {
