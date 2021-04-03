@@ -5,7 +5,7 @@ import com.zarbosoft.merman.core.editor.display.Drawing;
 import com.zarbosoft.merman.core.editor.display.DrawingContext;
 import com.zarbosoft.merman.core.editor.display.derived.Obbox;
 import com.zarbosoft.merman.core.editor.visual.Vector;
-import com.zarbosoft.merman.core.syntax.style.BoxStyle;
+import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -13,8 +13,11 @@ public class Box {
   public final Drawing drawing;
   private final double toPixels;
   private Vector offset;
-  private BoxStyle style;
-  private double stylePadding;
+  private ObboxStyle style;
+  private double stylePaddingConverse;
+  private double stylePaddingConverseEnd;
+  private double stylePaddingTransverse;
+  private double stylePaddingTransverseEnd;
   private double styleLineThickness;
   private double styleRoundRadius;
 
@@ -23,9 +26,12 @@ public class Box {
     toPixels = context.toPixels;
   }
 
-  public void setStyle(final BoxStyle style) {
+  public void setStyle(final ObboxStyle style) {
     this.style = style;
-    stylePadding = style.padding * toPixels;
+    stylePaddingConverse = style.padding.converseStart * toPixels;
+    stylePaddingConverseEnd = style.padding.converseEnd * toPixels;
+    stylePaddingTransverse = style.padding.transverseStart * toPixels;
+    stylePaddingTransverseEnd = style.padding.transverseEnd * toPixels;
     styleLineThickness = style.lineThickness * toPixels;
     styleRoundRadius = style.roundRadius * toPixels;
   }
@@ -36,11 +42,11 @@ public class Box {
 
   public void setSize(final Context context, double converseSpan, double transverseSpan) {
     drawing.clear();
-    converseSpan += stylePadding * 2;
-    transverseSpan += stylePadding * 2;
+    converseSpan += stylePaddingConverse + stylePaddingConverseEnd;
+    transverseSpan += stylePaddingTransverse + stylePaddingTransverseEnd;
     final int buffer = (int) (styleLineThickness + 1);
     drawing.resize(context, new Vector(converseSpan + buffer * 2, transverseSpan + buffer * 2));
-    offset = new Vector(-(buffer + stylePadding), -(buffer + stylePadding));
+    offset = new Vector(-(buffer + stylePaddingConverse), -(buffer + stylePaddingTransverse));
     final DrawingContext gc = drawing.begin(context);
     gc.translate(buffer, buffer);
     if (style.fill) {
@@ -64,9 +70,9 @@ public class Box {
         gc,
         TSList.of(
             new ROPair<>(new Vector(0, 0), style.roundStart),
-            new ROPair<>(new Vector(converseSpan, 0), style.roundOuterEdges),
+            new ROPair<>(new Vector(converseSpan, 0), style.roundOuterCorners),
             new ROPair<>(new Vector(converseSpan, transverseSpan), style.roundEnd),
-            new ROPair<>(new Vector(0, transverseSpan), style.roundOuterEdges)),
+            new ROPair<>(new Vector(0, transverseSpan), style.roundOuterCorners)),
         styleRoundRadius);
   }
 }

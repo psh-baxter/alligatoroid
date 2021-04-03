@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.core.syntax.format;
+package com.zarbosoft.merman.editorcore.format;
 
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;

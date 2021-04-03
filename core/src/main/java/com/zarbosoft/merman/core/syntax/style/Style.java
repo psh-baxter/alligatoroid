@@ -15,7 +15,6 @@ public class Style {
   public final double rotate;
 
   public final double space;
-  public final BoxStyle box;
   public final ObboxStyle obbox;
 
   private Style(
@@ -31,7 +30,6 @@ public class Style {
       String image,
       Double rotate,
       Double space,
-      BoxStyle box,
       ObboxStyle obbox) {
     this.alignment = alignment;
     this.splitAlignment = splitAlignment;
@@ -45,7 +43,6 @@ public class Style {
     this.image = image;
     this.rotate = rotate;
     this.space = space;
-    this.box = box;
     this.obbox = obbox;
   }
 
@@ -57,7 +54,6 @@ public class Style {
 
   public static final class Config {
     // Other
-    public BoxStyle box;
     public ObboxStyle obbox;
     public String alignment;
     public Double spaceBefore;
@@ -151,7 +147,6 @@ public class Style {
           image,
           rotate,
           space,
-          this.box == null ? new BoxStyle(new BoxStyle.Config()) : this.box,
           this.obbox == null ? new ObboxStyle(new ObboxStyle.Config()) : this.obbox);
     }
 
@@ -167,11 +162,6 @@ public class Style {
 
     public Config font(String name) {
       this.font = name;
-      return this;
-    }
-
-    public Config box(BoxStyle box) {
-      this.box = box;
       return this;
     }
 

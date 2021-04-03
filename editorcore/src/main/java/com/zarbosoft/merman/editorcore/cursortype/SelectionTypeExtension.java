@@ -8,7 +8,7 @@ import com.zarbosoft.merman.core.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.merman.core.syntax.format.Format;
+import com.zarbosoft.merman.editorcore.format.Format;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class SelectionTypeExtension {
