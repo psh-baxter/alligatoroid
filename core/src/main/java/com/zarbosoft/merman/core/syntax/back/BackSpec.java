@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.serialization.EventConsumer;
+import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.model.Node;
@@ -43,7 +43,7 @@ public abstract class BackSpec {
   public void finish(
           MultiError errors,
           final Syntax syntax,
-          final Path typePath,
+          final SyntaxPath typePath,
           /** Null if this is nested under an array and thus will only be consumed by that array */
           /** If immediate child is an atom, all candidates must be singular values */
           boolean singularRestriction,

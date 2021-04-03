@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.document.values.FieldArray;
-import com.zarbosoft.merman.core.document.values.FieldAtom;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
@@ -155,7 +155,7 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
   public void finish(
       MultiError errors,
       final Syntax syntax,
-      final Path typePath,
+      final SyntaxPath typePath,
       boolean singularRestriction,
       boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);

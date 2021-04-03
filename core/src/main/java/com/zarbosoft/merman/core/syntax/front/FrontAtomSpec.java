@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.core.syntax.front;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.visual.Visual;
-import com.zarbosoft.merman.core.editor.visual.VisualParent;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontAtom;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.visual.Visual;
+import com.zarbosoft.merman.core.visual.VisualParent;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtom;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
@@ -16,17 +16,17 @@ import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontAtomSpec extends FrontSpec {
-  private final String back;
+  private final String fieldId;
   private final Symbol ellipsis;
-  private BaseBackAtomSpec dataType;
+  private BaseBackAtomSpec field;
 
   public FrontAtomSpec(Config config) {
-    back = config.back;
+    fieldId = config.fieldId;
     ellipsis = config.ellipsis;
   }
 
-  public BaseBackAtomSpec getDataType() {
-    return dataType;
+  public BaseBackAtomSpec field() {
+    return field;
   }
 
   @Override
@@ -37,19 +37,19 @@ public class FrontAtomSpec extends FrontSpec {
       final int visualDepth,
       final int depthScore) {
     return new VisualFrontAtom(
-        context, parent, dataType.get(atom.fields), visualDepth, depthScore, ellipsis);
+        context, parent, field.get(atom.fields), visualDepth, depthScore, ellipsis);
   }
 
   @Override
   public void finish(
-      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
-    middleUsed.add(back);
-    dataType = atomType.getDataAtom(errors, typePath, back);
+          MultiError errors, SyntaxPath typePath, final AtomType atomType, final TSSet<String> middleUsed) {
+    middleUsed.add(fieldId);
+    field = atomType.getDataAtom(errors, typePath, fieldId);
   }
 
   @Override
-  public String field() {
-    return back;
+  public String fieldId() {
+    return fieldId;
   }
 
   @Override
@@ -58,13 +58,13 @@ public class FrontAtomSpec extends FrontSpec {
   }
 
   public static class Config {
-    public final String back;
+    public final String fieldId;
     public final Style.Config ellipsisStyle = new Style.Config();
     public Symbol ellipsis = new SymbolTextSpec(new SymbolTextSpec.Config("..."));
     public ROSet<String> tags = ROSet.empty;
 
-    public Config(String back) {
-      this.back = back;
+    public Config(String fieldId) {
+      this.fieldId = fieldId;
     }
   }
 }

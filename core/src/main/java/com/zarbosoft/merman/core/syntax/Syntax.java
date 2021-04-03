@@ -1,14 +1,14 @@
 package com.zarbosoft.merman.core.syntax;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.backevents.EArrayCloseEvent;
-import com.zarbosoft.merman.core.editor.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.core.editor.backevents.EKeyEvent;
-import com.zarbosoft.merman.core.editor.backevents.EObjectCloseEvent;
-import com.zarbosoft.merman.core.editor.backevents.EObjectOpenEvent;
-import com.zarbosoft.merman.core.editor.backevents.EPrimitiveEvent;
-import com.zarbosoft.merman.core.editor.backevents.ETypeEvent;
-import com.zarbosoft.merman.core.editor.backevents.JSpecialPrimitiveEvent;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
+import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
+import com.zarbosoft.merman.core.backevents.EKeyEvent;
+import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
+import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
+import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
+import com.zarbosoft.merman.core.backevents.ETypeEvent;
+import com.zarbosoft.merman.core.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.error.DuplicateAtomTypeIds;
 import com.zarbosoft.merman.core.syntax.error.DuplicateAtomTypeIdsInGroup;

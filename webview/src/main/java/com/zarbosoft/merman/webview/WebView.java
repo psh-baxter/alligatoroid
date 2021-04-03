@@ -1,25 +1,24 @@
 package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.values.FieldArray;
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Cursor;
-import com.zarbosoft.merman.core.editor.Hoverable;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.IterationContext;
-import com.zarbosoft.merman.core.editor.IterationTask;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.hid.HIDEvent;
-import com.zarbosoft.merman.core.editor.hid.Key;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontAtomBase;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Cursor;
+import com.zarbosoft.merman.core.Hoverable;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.IterationContext;
+import com.zarbosoft.merman.core.IterationTask;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.Key;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.UnsupportedDirections;
-import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.webview.display.JSDisplay;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -160,7 +159,7 @@ public class WebView {
           @Override
           public void hoverChanged(Context context, Hoverable hover) {
             if (hover != null && dragSelect != null) {
-              Path endPath = hover.getSyntaxPath();
+              SyntaxPath endPath = hover.getSyntaxPath();
               if (!endPath.equals(dragSelect.end)) {
                 dragSelect.end = endPath;
                 ROList<String> endPathList = endPath.toList();
@@ -171,7 +170,7 @@ public class WebView {
                 // so longest match == parent == atom
                 // - at two subtrees of an array/primitives: longest submatch == array/primitive ==
                 // field, next segment == int
-                Object base = context.syntaxLocate(new Path(endPathList.subUntil(longestMatch)));
+                Object base = context.syntaxLocate(new SyntaxPath(endPathList.subUntil(longestMatch)));
                 if (base instanceof FieldArray) {
                   int startIndex = Integer.parseInt(startPathList.get(longestMatch));
                   int endIndex = Integer.parseInt(endPathList.get(longestMatch));
@@ -220,12 +219,12 @@ public class WebView {
                 case MOUSE_1:
                   {
                     if (context.hover != null) {
-                      Path path = context.hover.getSyntaxPath();
+                      SyntaxPath path = context.hover.getSyntaxPath();
                       context.hover.select(context);
                       dragSelect = new DragSelectState(path);
                       return true;
                     } else if (context.cursor != null) {
-                      Path path = context.cursor.getSyntaxPath();
+                      SyntaxPath path = context.cursor.getSyntaxPath();
                       dragSelect = new DragSelectState(path);
                       return true;
                     }
@@ -340,10 +339,10 @@ public class WebView {
   }
 
   public static class DragSelectState {
-    public final Path start;
-    public Path end;
+    public final SyntaxPath start;
+    public SyntaxPath end;
 
-    public DragSelectState(Path start) {
+    public DragSelectState(SyntaxPath start) {
       this.start = start;
     }
   }

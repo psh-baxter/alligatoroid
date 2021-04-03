@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.core.syntax.error;
 
-import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.SyntaxPath;
 
 public class TypeInvalidAtLocation extends BaseKVError{
-  public TypeInvalidAtLocation(Path typePath) {
+  public TypeInvalidAtLocation(SyntaxPath typePath) {
         put("backPath", typePath);
   }
 

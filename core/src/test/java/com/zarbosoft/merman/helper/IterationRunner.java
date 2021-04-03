@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.core.editor.IterationContext;
-import com.zarbosoft.merman.core.editor.IterationTask;
+import com.zarbosoft.merman.core.IterationContext;
+import com.zarbosoft.merman.core.IterationTask;
 
 import java.util.PriorityQueue;
 

@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.jfxcore;
 
-import com.zarbosoft.merman.core.editor.DelayEngine;
+import com.zarbosoft.merman.core.DelayEngine;
 import javafx.application.Platform;
 
 import java.util.Timer;

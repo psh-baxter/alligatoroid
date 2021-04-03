@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.document.values.Field;
-import com.zarbosoft.merman.core.document.values.FieldAtom;
-import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
@@ -39,7 +39,7 @@ public abstract class BaseBackAtomSpec extends BackSpecData {
   public void finish(
       MultiError errors,
       Syntax syntax,
-      Path typePath,
+      SyntaxPath typePath,
       boolean singularRestriction,
       boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);

@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.core.syntax.symbol;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.Blank;
-import com.zarbosoft.merman.core.editor.display.DisplayNode;
-import com.zarbosoft.merman.core.editor.wall.Brick;
-import com.zarbosoft.merman.core.editor.wall.BrickInterface;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickEmpty;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Blank;
+import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.wall.Brick;
+import com.zarbosoft.merman.core.wall.BrickInterface;
+import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.core.syntax.style.Style;
 
 public class SymbolSpaceSpec extends Symbol {

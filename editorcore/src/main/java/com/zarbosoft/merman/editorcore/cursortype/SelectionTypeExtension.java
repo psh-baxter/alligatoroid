@@ -1,13 +1,13 @@
 package com.zarbosoft.merman.editorcore.cursortype;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Cursor;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Cursor;
 import com.zarbosoft.merman.editorcore.banner.BannerMessage;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualAtom;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontAtomBase;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.format.Format;
 import com.zarbosoft.rendaw.common.TSMap;
 

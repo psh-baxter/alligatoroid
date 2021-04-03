@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.core.syntax.front;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.visual.Visual;
-import com.zarbosoft.merman.core.editor.visual.VisualParent;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.visual.Visual;
+import com.zarbosoft.merman.core.visual.VisualParent;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
@@ -22,7 +22,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
   public final ROList<FrontSymbol> separator;
   public final Symbol ellipsis;
   public final Symbol empty;
-  public BaseBackArraySpec dataType;
+  public BaseBackArraySpec field;
 
   public FrontArraySpecBase(Config config) {
     this.prefix = config.prefix;
@@ -32,8 +32,8 @@ public abstract class FrontArraySpecBase extends FrontSpec {
     empty = config.empty;
   }
 
-  public BaseBackArraySpec dataType() {
-    return dataType;
+  public BaseBackArraySpec field() {
+    return field;
   }
 
   @Override
@@ -50,12 +50,12 @@ public abstract class FrontArraySpecBase extends FrontSpec {
 
   @Override
   public void finish(
-      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
-    middleUsed.add(field());
-    dataType = atomType.getDataArray(errors, typePath, field());
+          MultiError errors, SyntaxPath typePath, final AtomType atomType, final TSSet<String> middleUsed) {
+    middleUsed.add(fieldId());
+    field = atomType.getDataArray(errors, typePath, fieldId());
   }
 
-  public abstract String field();
+  public abstract String fieldId();
 
   @Override
   public void dispatch(final DispatchHandler handler) {

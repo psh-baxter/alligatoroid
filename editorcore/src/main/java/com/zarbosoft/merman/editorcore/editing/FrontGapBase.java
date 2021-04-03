@@ -39,12 +39,11 @@ public abstract class FrontGapBase extends FrontSpec {
   @Override
   public void finish(
           MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {
-    middleUsed.add(field());
-    this.dataType = atomType.getDataPrimitive(errors, typePath, field());
+    middleUsed.add(fieldId());
+    this.dataType = atomType.getDataPrimitive(errors, typePath, fieldId());
   }
 
-  @Override
-  public String field() {
+  public String fieldId() {
     return "gap";
   }
 

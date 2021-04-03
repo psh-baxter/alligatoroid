@@ -40,7 +40,7 @@ public class GapAtomType extends BaseGapAtomType {
                     new BackFixedTypeSpec.Config(
                         config.backType,
                         new BackPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(GAP_PRIMITIVE_KEY, null))))),
+                                new BaseBackPrimitiveSpec.Config(GAP_PRIMITIVE_KEY))))),
             new TSList<FrontSpec>()
                 .addAll(config.frontPrefix)
                 .add(

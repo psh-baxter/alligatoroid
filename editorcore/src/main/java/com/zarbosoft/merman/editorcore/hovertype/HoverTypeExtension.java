@@ -1,13 +1,13 @@
 package com.zarbosoft.merman.editorcore.hovertype;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Hoverable;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.editorcore.banner.BannerMessage;
-import com.zarbosoft.merman.core.editor.visual.Visual;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualAtom;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontAtomBase;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.Visual;
+import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 
 public class HoverTypeExtension {
   private BannerMessage message;

@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.display.Font;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.webview.compat.TextMetrics;
 import com.zarbosoft.rendaw.common.Format;
 import elemental2.dom.CanvasRenderingContext2D;

@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.editor.display;
 
-import com.zarbosoft.merman.core.editor.display.DisplayNode;
-import com.zarbosoft.merman.core.editor.display.Group;
-import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.Group;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 

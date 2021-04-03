@@ -2,7 +2,6 @@ package com.zarbosoft.luxem;
 
 import com.zarbosoft.luxem.read.BufferedReader;
 import com.zarbosoft.luxem.read.Reader;
-import com.zarbosoft.luxem.read.TreeReader;
 import com.zarbosoft.luxem.read.path.LuxemArrayPath;
 import com.zarbosoft.luxem.read.path.LuxemObjectPath;
 import com.zarbosoft.luxem.read.path.LuxemPath;
@@ -19,26 +18,6 @@ import java.util.List;
 
 /** Methods for common use cases. */
 public class Luxem {
-  /**
-   * Read a luxem document as a tree of Lists, String Maps, Strings, and Typeds.
-   *
-   * @param data luxem
-   * @return list of top level objects
-   */
-  public static List parse(final String data) {
-    return new TreeReader().read(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8)));
-  }
-
-  /**
-   * Read a luxem document as a tree of Lists, String Maps, Strings, and Typeds.
-   *
-   * @param data luxem
-   * @return list of top level objects
-   */
-  public static List parse(final InputStream data) {
-    return new TreeReader().read(data);
-  }
-
   public static List<ROPair<Event, Object>> streamEvents(
       final InputStream source, final Reader.EventFactory factory) {
     class State {

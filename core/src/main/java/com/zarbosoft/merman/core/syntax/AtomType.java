@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.core.syntax;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.values.Field;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
@@ -113,8 +113,8 @@ public abstract class AtomType {
     for (int i = 0; i < atom.type.front.size(); ++i) {
       FrontSpec front = atom.type.front.get(i);
       String id = null;
-      if (front instanceof FrontAtomSpec) id = ((FrontAtomSpec) front).field();
-      else if (front instanceof FrontArraySpec) id = ((FrontArraySpec) front).field();
+      if (front instanceof FrontAtomSpec) id = ((FrontAtomSpec) front).fieldId();
+      else if (front instanceof FrontArraySpec) id = ((FrontArraySpec) front).fieldId();
       if (parent.id().equals(id)) return i;
     }
     throw new Assertion();
@@ -135,14 +135,14 @@ public abstract class AtomType {
     }
     for (int i = 0; i < back().size(); ++i) {
       BackSpec e = back().get(i);
-      e.finish(subErrors, syntax, new Path("back").add(Integer.toString(i)), false, false);
+      e.finish(subErrors, syntax, new SyntaxPath("back").add(Integer.toString(i)), false, false);
       e.parent = new NodeBackParent(i);
     }
     {
       final TSSet<String> fieldsUsedFront = new TSSet<>();
       for (int i = 0; i < front().size(); ++i) {
         FrontSpec e = front().get(i);
-        e.finish(subErrors, new Path("front").add(Integer.toString(i)), this, fieldsUsedFront);
+        e.finish(subErrors, new SyntaxPath("front").add(Integer.toString(i)), this, fieldsUsedFront);
       }
       final TSSet<String> missing = fields.keys().difference(fieldsUsedFront);
       if (!missing.isEmpty()) {
@@ -218,7 +218,7 @@ public abstract class AtomType {
   }
 
   public BaseBackPrimitiveSpec getDataPrimitive(
-      MultiError errors, Path typePath, final String key) {
+          MultiError errors, SyntaxPath typePath, final String key) {
     BackSpecData found = getBack(errors, typePath, key);
     try {
       return (BaseBackPrimitiveSpec) found;
@@ -228,7 +228,7 @@ public abstract class AtomType {
     }
   }
 
-  private BackSpecData getBack(MultiError errors, Path typePath, final String id) {
+  private BackSpecData getBack(MultiError errors, SyntaxPath typePath, final String id) {
     final BackSpecData found = fields.getOpt(id);
     if (found == null) {
       errors.add(new MissingBack(typePath, id));
@@ -237,7 +237,7 @@ public abstract class AtomType {
     return found;
   }
 
-  public BaseBackAtomSpec getDataAtom(MultiError errors, Path typePath, final String key) {
+  public BaseBackAtomSpec getDataAtom(MultiError errors, SyntaxPath typePath, final String key) {
     BackSpecData found = getBack(errors, typePath, key);
     try {
       return (BaseBackAtomSpec) found;
@@ -247,7 +247,7 @@ public abstract class AtomType {
     }
   }
 
-  public BaseBackArraySpec getDataArray(MultiError errors, Path typePath, final String key) {
+  public BaseBackArraySpec getDataArray(MultiError errors, SyntaxPath typePath, final String key) {
     BackSpecData found = getBack(errors, typePath, key);
     try {
       return (BaseBackArraySpec) found;

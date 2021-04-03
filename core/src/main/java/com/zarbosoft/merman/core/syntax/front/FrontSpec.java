@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.core.syntax.front;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.visual.Visual;
-import com.zarbosoft.merman.core.editor.visual.VisualParent;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.visual.Visual;
+import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -18,9 +18,9 @@ public abstract class FrontSpec {
           int depthScore);
 
   public void finish(
-      MultiError errors, Path typePath, final AtomType atomType, final TSSet<String> middleUsed) {}
+          MultiError errors, SyntaxPath typePath, final AtomType atomType, final TSSet<String> middleUsed) {}
 
-  public abstract String field();
+  public abstract String fieldId();
 
   public abstract void dispatch(DispatchHandler handler);
 

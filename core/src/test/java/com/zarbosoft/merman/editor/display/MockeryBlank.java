@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editor.display;
 
-import com.zarbosoft.merman.core.editor.display.Blank;
-import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.display.Blank;
+import com.zarbosoft.merman.core.Context;
 
 public class MockeryBlank extends MockeryCourseDisplayNode implements Blank {
 	private double converseSpan;

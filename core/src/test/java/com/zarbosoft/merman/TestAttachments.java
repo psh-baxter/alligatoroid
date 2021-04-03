@@ -1,10 +1,10 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.wall.Attachment;
-import com.zarbosoft.merman.core.editor.wall.Brick;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.wall.Attachment;
+import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;

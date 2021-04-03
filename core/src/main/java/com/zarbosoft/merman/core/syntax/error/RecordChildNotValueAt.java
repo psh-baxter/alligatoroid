@@ -1,13 +1,13 @@
 package com.zarbosoft.merman.core.syntax.error;
 
-import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 
 public class RecordChildNotValueAt extends BaseKVError{
 
   public RecordChildNotValueAt(
-          Path typePath,
+          SyntaxPath typePath,
           AtomType candidate,
           int childIndex,
           BackSpec child

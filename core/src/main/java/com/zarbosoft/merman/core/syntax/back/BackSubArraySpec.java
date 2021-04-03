@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateDeepDataArray;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.serialization.EventConsumer;
+import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.serialization.WriteStateDeepDataArray;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.PluralInvalidAtLocation;
@@ -24,7 +24,7 @@ public class BackSubArraySpec extends BaseBackSimpleArraySpec {
   public void finish(
       MultiError errors,
       Syntax syntax,
-      Path typePath,
+      SyntaxPath typePath,
       boolean singularRestriction,
       boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);

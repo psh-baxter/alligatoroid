@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;

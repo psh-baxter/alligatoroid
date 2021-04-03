@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.jfxcore.jfxdisplay;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.Display;
-import com.zarbosoft.merman.core.editor.display.Font;
-import com.zarbosoft.merman.core.editor.display.Text;
-import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Display;
+import com.zarbosoft.merman.core.display.Font;
+import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.rendaw.common.DeadCode;
 import javafx.geometry.Bounds;

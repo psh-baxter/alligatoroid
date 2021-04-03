@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.core.syntax.error;
 
-import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.SyntaxPath;
 
 public class ArrayBoilerplateNotInBaseSet extends BaseKVError{
-    public ArrayBoilerplateNotInBaseSet(Path typePath, String boilerplate, String splayedType) {
+    public ArrayBoilerplateNotInBaseSet(SyntaxPath typePath, String boilerplate, String splayedType) {
         put("typePath", typePath);
         put("boilerplate", boilerplate);
         put("splayedType", splayedType);

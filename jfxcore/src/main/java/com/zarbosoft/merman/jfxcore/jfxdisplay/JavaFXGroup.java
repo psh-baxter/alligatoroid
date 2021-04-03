@@ -1,10 +1,9 @@
 package com.zarbosoft.merman.jfxcore.jfxdisplay;
 
-import com.zarbosoft.merman.core.editor.display.DisplayNode;
-import com.zarbosoft.merman.core.editor.display.Group;
+import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.rendaw.common.ROList;
 import javafx.geometry.Bounds;
-import javafx.scene.Node;
 
 import java.util.List;
 

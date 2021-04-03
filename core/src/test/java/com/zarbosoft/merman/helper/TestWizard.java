@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.helper;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
-import com.zarbosoft.merman.core.editor.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.HIDEvent;
 import com.zarbosoft.merman.core.syntax.Syntax;
 
 import static com.zarbosoft.merman.helper.Helper.buildDoc;

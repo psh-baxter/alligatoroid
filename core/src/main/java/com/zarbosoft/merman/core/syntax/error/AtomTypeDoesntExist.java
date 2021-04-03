@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.core.syntax.error;
 
-import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.SyntaxPath;
 
 public class AtomTypeDoesntExist extends BaseKVError{
 
-  public AtomTypeDoesntExist(Path typePath, String type) {
+  public AtomTypeDoesntExist(SyntaxPath typePath, String type) {
       put("typePath", typePath);
       put("candidateType", type);
   }

@@ -1,14 +1,14 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.backevents.EKeyEvent;
-import com.zarbosoft.merman.core.editor.backevents.EObjectCloseEvent;
-import com.zarbosoft.merman.core.editor.backevents.EObjectOpenEvent;
-import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateRecord;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateRecordEnd;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.backevents.EKeyEvent;
+import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
+import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
+import com.zarbosoft.merman.core.serialization.EventConsumer;
+import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.serialization.WriteStateRecord;
+import com.zarbosoft.merman.core.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.RecordDiscardDuplicateKey;
@@ -68,7 +68,7 @@ public class BackFixedRecordSpec extends BackSpec {
   public void finish(
       MultiError errors,
       final Syntax syntax,
-      final Path typePath,
+      final SyntaxPath typePath,
       boolean singularRestriction,
       boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);

@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.jfxcore.jfxdisplay;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.CourseDisplayNode;
-import com.zarbosoft.merman.core.editor.display.Image;
-import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
+import com.zarbosoft.merman.core.display.Image;
+import com.zarbosoft.merman.core.visual.Vector;
 import javafx.geometry.Bounds;
 import javafx.scene.image.ImageView;
 

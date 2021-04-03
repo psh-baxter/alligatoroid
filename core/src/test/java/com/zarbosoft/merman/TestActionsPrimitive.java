@@ -1,11 +1,11 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.MiscSyntax;
@@ -51,7 +51,7 @@ public class TestActionsPrimitive {
             context ->
                 assertThat(
                     context.cursor.getSyntaxPath(),
-                    equalTo(new Path("value", "0", "second", "0"))));
+                    equalTo(new SyntaxPath("value", "0", "second", "0"))));
   }
 
   @Test
@@ -66,7 +66,7 @@ public class TestActionsPrimitive {
             context ->
                 assertThat(
                     context.cursor.getSyntaxPath(),
-                    equalTo(new Path("value", "0", "first", "0"))));
+                    equalTo(new SyntaxPath("value", "0", "first", "0"))));
   }
 
   @Test

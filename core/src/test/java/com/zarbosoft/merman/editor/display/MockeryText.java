@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.editor.display;
 
-import com.zarbosoft.merman.core.editor.display.Font;
-import com.zarbosoft.merman.core.editor.display.Text;
-import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.display.Font;
+import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.rendaw.common.DeadCode;
 

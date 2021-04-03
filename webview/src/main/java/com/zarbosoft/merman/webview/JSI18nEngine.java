@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.webview;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
+import com.zarbosoft.merman.core.I18nEngine;
 import com.zarbosoft.merman.webview.compat.CompatOverlay;
 import com.zarbosoft.merman.webview.compat.Segmenter;
 import com.zarbosoft.rendaw.common.TSList;

@@ -1,14 +1,14 @@
 package com.zarbosoft.merman.editorcore.details;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.IterationContext;
-import com.zarbosoft.merman.core.editor.IterationTask;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.IterationContext;
+import com.zarbosoft.merman.core.IterationTask;
 import com.zarbosoft.merman.editorcore.displayderived.Box;
-import com.zarbosoft.merman.core.editor.visual.Vector;
-import com.zarbosoft.merman.core.editor.wall.Attachment;
-import com.zarbosoft.merman.core.editor.wall.Bedding;
-import com.zarbosoft.merman.core.editor.wall.Brick;
-import com.zarbosoft.merman.core.editor.wall.Wall;
+import com.zarbosoft.merman.core.visual.Vector;
+import com.zarbosoft.merman.core.wall.Attachment;
+import com.zarbosoft.merman.core.wall.Bedding;
+import com.zarbosoft.merman.core.wall.Brick;
+import com.zarbosoft.merman.core.wall.Wall;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.rendaw.common.ChainComparator;
 

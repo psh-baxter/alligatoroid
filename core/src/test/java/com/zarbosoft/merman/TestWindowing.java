@@ -2,20 +2,20 @@ package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
-import com.zarbosoft.merman.core.document.values.Field;
-import com.zarbosoft.merman.core.document.values.FieldArray;
-import com.zarbosoft.merman.core.document.values.FieldAtom;
-import com.zarbosoft.merman.core.editor.Action;
-import com.zarbosoft.merman.core.editor.ClipboardEngine;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.DelayEngine;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.wall.Brick;
-import com.zarbosoft.merman.core.editor.wall.Course;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickEmpty;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickImage;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickLine;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickText;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.Action;
+import com.zarbosoft.merman.core.ClipboardEngine;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.DelayEngine;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.wall.Brick;
+import com.zarbosoft.merman.core.wall.Course;
+import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
+import com.zarbosoft.merman.core.wall.bricks.BrickImage;
+import com.zarbosoft.merman.core.wall.bricks.BrickLine;
+import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
@@ -209,7 +209,7 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .checkTextBrick(0, i++, "1_0")
@@ -228,7 +228,7 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "2")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "2")))
                     .valueParentRef.selectValue(context))
         .checkTextBrick(0, 0, "0_0")
         .act("window")
@@ -250,12 +250,12 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .checkTextBrick(0, i++, "2_0")
@@ -272,7 +272,7 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((FieldAtom) context.syntaxLocate(new Path("value", "0", "value")))
+                ((FieldAtom) context.syntaxLocate(new SyntaxPath("value", "0", "value")))
                     .selectInto(context))
         .act("window")
         .checkTextBrick(0, i++, "0_0");
@@ -284,7 +284,7 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((FieldAtom) context.syntaxLocate(new Path("value", "0", "value", "atom", "value")))
+                ((FieldAtom) context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom", "value")))
                     .selectInto(context))
         .act("window")
         .checkTextBrick(0, i++, "0_0")
@@ -307,7 +307,7 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                            new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .checkTextBrick(0, i++, "4");
@@ -319,12 +319,12 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1", "value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window_down")
         .checkTextBrick(0, i++, "2_0")
@@ -343,7 +343,7 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                            new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .act("window_down")
@@ -358,7 +358,7 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                            new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .checkCourseCount(1)
@@ -377,7 +377,7 @@ public class TestWindowing {
     start(true)
         .run(
             context ->
-                ((FieldArray) context.syntaxLocate(new Path("value")))
+                ((FieldArray) context.syntaxLocate(new SyntaxPath("value")))
                     .selectInto(context, true, 1, 1))
         .act("window")
         .checkTextBrick(0, 0, "1_0")
@@ -397,7 +397,7 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .act("window_clear")
@@ -419,13 +419,13 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .checkTextBrick(0, 0, "1_0")
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
@@ -443,12 +443,12 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1", "value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("enter")
         .checkTextBrick(0, i++, "1_0")
@@ -467,7 +467,7 @@ public class TestWindowing {
     start(true)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "0")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "0")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .checkTextBrick(0, 0, "0_0")
@@ -476,7 +476,7 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                            new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
@@ -494,14 +494,14 @@ public class TestWindowing {
     start(true)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "0")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "0")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .checkTextBrick(0, 0, "0_0")
         .checkCourseCount(1)
         .run(
             context ->
-                ((Atom) context.syntaxLocate(new Path("value", "1", "value", "1")))
+                ((Atom) context.syntaxLocate(new SyntaxPath("value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .checkTextBrick(0, i++, "0_0")
         .checkTextBrick(0, i++, "1_0")
@@ -520,7 +520,7 @@ public class TestWindowing {
             context ->
                 ((Atom)
                         context.syntaxLocate(
-                            new Path("value", "1", "value", "1", "value", "1", "value", "1")))
+                            new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
                     .valueParentRef.selectValue(context))
         .act("window")
         .checkTextBrick(0, 0, "4")

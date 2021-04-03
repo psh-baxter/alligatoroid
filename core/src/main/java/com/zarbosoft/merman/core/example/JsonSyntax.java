@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.core.example;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
+import com.zarbosoft.merman.core.I18nEngine;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
@@ -115,7 +115,7 @@ public class JsonSyntax {
                         TYPE_STRING,
                         TSList.of(
                             new BackPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID, Any.repeatedAny))),
+                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID))),
                         TSList.of(
                             textSym("\"", stringStyle),
                             new FrontPrimitiveSpec(
@@ -128,7 +128,7 @@ public class JsonSyntax {
                         TYPE_INT,
                         TSList.of(
                             new BackJSONSpecialPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID, new Integer()))),
+                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID).pattern(new Integer(), "integer"))),
                         TSList.of(
                             new FrontPrimitiveSpec(
                                 new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),
@@ -139,7 +139,7 @@ public class JsonSyntax {
                         TYPE_DECIMAL,
                         TSList.of(
                             new BackJSONSpecialPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID, new JsonDecimal()))),
+                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID).pattern(new JsonDecimal(), "json decimal"))),
                         TSList.of(
                             new FrontPrimitiveSpec(
                                 new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),
@@ -166,7 +166,7 @@ public class JsonSyntax {
                         TYPE_RECORD_PAIR,
                         TSList.of(
                             new BackKeySpec(
-                                new BaseBackPrimitiveSpec.Config("key", Any.repeatedAny)),
+                                new BaseBackPrimitiveSpec.Config("key")),
                             new BackAtomSpec(new BaseBackAtomSpec.Config("value", GROUP_ANY))),
                         TSList.of(
                             new FrontPrimitiveSpec(

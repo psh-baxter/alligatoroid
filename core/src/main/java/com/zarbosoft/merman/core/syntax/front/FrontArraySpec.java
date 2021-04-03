@@ -1,25 +1,25 @@
 package com.zarbosoft.merman.core.syntax.front;
 
 public class FrontArraySpec extends FrontArraySpecBase {
-  private final String back;
+  private final String fieldId;
 
   public static class Config {
-    public final String back;
+    public final String fieldId;
     public final FrontArraySpecBase.Config base;
 
-    public Config(String back, FrontArraySpecBase.Config base) {
-      this.back = back;
+    public Config(String fieldId, FrontArraySpecBase.Config base) {
+      this.fieldId = fieldId;
       this.base = base;
     }
   }
 
   public FrontArraySpec(Config config) {
     super(config.base);
-    this.back = config.back;
+    this.fieldId = config.fieldId;
   }
 
   @Override
-  public String field() {
-    return back;
+  public String fieldId() {
+    return fieldId;
   }
 }

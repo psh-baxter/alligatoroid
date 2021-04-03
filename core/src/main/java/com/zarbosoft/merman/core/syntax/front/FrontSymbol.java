@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.core.syntax.front;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.DisplayNode;
-import com.zarbosoft.merman.core.editor.visual.Visual;
-import com.zarbosoft.merman.core.editor.visual.VisualParent;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualSymbol;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.visual.Visual;
+import com.zarbosoft.merman.core.visual.VisualParent;
+import com.zarbosoft.merman.core.visual.visuals.VisualSymbol;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 
 public class FrontSymbol extends FrontSpec {
@@ -49,7 +49,7 @@ public class FrontSymbol extends FrontSpec {
   }
 
   @Override
-  public String field() {
+  public String fieldId() {
     return null;
   }
 

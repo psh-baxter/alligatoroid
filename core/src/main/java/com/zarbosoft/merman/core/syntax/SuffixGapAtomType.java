@@ -39,15 +39,13 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                                             .put(
                                                 "gap",
                                                 new BackPrimitiveSpec(
-                                                        new BaseBackPrimitiveSpec.Config(
-                                                        GAP_PRIMITIVE_KEY, null)))),
+                                                    new BaseBackPrimitiveSpec.Config(
+                                                        GAP_PRIMITIVE_KEY)))),
                                 ROSet.empty))))),
             TSList.of(
                     new FrontArraySpec(
                         new FrontArraySpec.Config(GAP_ARRAY_KEY, config.frontArrayConfig)),
-                    new FrontPrimitiveSpec(
-                        new FrontPrimitiveSpec.Config(
-                            GAP_PRIMITIVE_KEY)))
+                    new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(GAP_PRIMITIVE_KEY)))
                 .addAll(config.frontSuffix)));
     backType = config.backType;
   }

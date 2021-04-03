@@ -1,6 +1,5 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Union;
 

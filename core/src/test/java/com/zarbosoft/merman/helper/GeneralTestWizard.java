@@ -1,19 +1,19 @@
 package com.zarbosoft.merman.helper;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.values.Field;
-import com.zarbosoft.merman.core.document.values.FieldArray;
-import com.zarbosoft.merman.core.editor.Action;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.hid.HIDEvent;
-import com.zarbosoft.merman.core.editor.wall.Bedding;
-import com.zarbosoft.merman.core.editor.wall.Brick;
-import com.zarbosoft.merman.core.editor.wall.Course;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickEmpty;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickImage;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickLine;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickText;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.Action;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.wall.Bedding;
+import com.zarbosoft.merman.core.wall.Brick;
+import com.zarbosoft.merman.core.wall.Course;
+import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
+import com.zarbosoft.merman.core.wall.bricks.BrickImage;
+import com.zarbosoft.merman.core.wall.bricks.BrickLine;
+import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.editor.display.MockeryText;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -142,7 +142,7 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard select(String... path) {
-    Object got = inner.context.syntaxLocate(new Path(path));
+    Object got = inner.context.syntaxLocate(new SyntaxPath(path));
     if (got instanceof Atom) ((Atom) got).visual.selectAnyChild(inner.context);
     else if (got instanceof Field) ((Field) got).selectInto(inner.context);
     else throw Assertion.format("Invalid path %s", (Object) path);
@@ -195,7 +195,7 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard checkCursorPath(String... segments) {
-    assertThat(inner.context.cursor.getSyntaxPath(), equalTo(new Path(segments)));
+    assertThat(inner.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath(segments)));
     return this;
   }
 

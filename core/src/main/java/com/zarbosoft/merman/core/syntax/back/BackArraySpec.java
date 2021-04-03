@@ -1,13 +1,13 @@
 package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.backevents.EArrayCloseEvent;
-import com.zarbosoft.merman.core.editor.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateArrayEnd;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateDeepDataArray;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
+import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
+import com.zarbosoft.merman.core.serialization.EventConsumer;
+import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.serialization.WriteStateArrayEnd;
+import com.zarbosoft.merman.core.serialization.WriteStateDeepDataArray;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;

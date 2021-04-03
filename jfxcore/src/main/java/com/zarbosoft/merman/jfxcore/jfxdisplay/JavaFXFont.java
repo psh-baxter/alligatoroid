@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.jfxcore.jfxdisplay;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.Font;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Font;
 import javafx.geometry.Point2D;
 import javafx.scene.text.Text;
 

@@ -1,14 +1,14 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.pidgoon.errors.NoResults;
-import com.zarbosoft.pidgoon.model.Grammar;
-import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.model.Store;
+import com.zarbosoft.merman.core.I18nEngine;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
+import com.zarbosoft.pidgoon.errors.NoResults;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
 import com.zarbosoft.pidgoon.events.nodes.Terminal;
+import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.ArrayList;
@@ -17,6 +17,24 @@ import java.util.List;
 import static com.zarbosoft.rendaw.common.Common.isOrdered;
 
 public abstract class Pattern {
+  public static List<? extends Event> splitGlyphs(I18nEngine i18n, String text) {
+    I18nEngine.Walker walker = i18n.glyphWalker(text);
+    TSList<String> glyphs1 = TSList.of();
+    int end = 0;
+    while (true) {
+      int start = end;
+      end = walker.following(end);
+      if (end == I18nEngine.DONE) break;
+      glyphs1.add(text.substring(start, end));
+    }
+    TSList<String> pre = glyphs1;
+    List<CharacterEvent> glyphs = new ArrayList<>();
+    for (String s : pre) {
+      glyphs.add(new CharacterEvent(s));
+    }
+    return glyphs;
+  }
+
   public abstract Node build();
 
   protected static class CharacterRangeTerminal extends Terminal {
@@ -34,24 +52,6 @@ public abstract class Pattern {
       if (v.length() != 1) return false;
       return isOrdered(low, v) && isOrdered(v, high);
     }
-  }
-
-  public static List<? extends Event> splitGlyphs(I18nEngine i18n, String text) {
-    I18nEngine.Walker walker = i18n.glyphWalker(text);
-    TSList<String> glyphs1 = TSList.of();
-    int end = 0;
-    while (true) {
-      int start = end;
-      end = walker.following(end);
-      if (end == I18nEngine.DONE) break;
-      glyphs1.add(text.substring(start, end));
-    }
-    TSList<String> pre = glyphs1;
-    List<CharacterEvent> glyphs = new ArrayList<>();
-    for (String s : pre) {
-      glyphs.add(new CharacterEvent(s));
-    }
-    return glyphs;
   }
 
   public static class Matcher {

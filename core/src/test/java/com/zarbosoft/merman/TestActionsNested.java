@@ -1,8 +1,8 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.MiscSyntax;
@@ -27,11 +27,11 @@ public class TestActionsNested {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom")))
+    ((Atom) context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom")))
         .valueParentRef.selectValue(context);
     Helper.act(context, "enter");
     assertThat(
-        context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "value", "atom", "value", "atom")));
+        context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "atom", "value", "atom")));
   }
 
   @Test
@@ -46,10 +46,10 @@ public class TestActionsNested {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((Atom) context.syntaxLocate(new Path("value", "0", "value", "atom")))
+    ((Atom) context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom")))
         .valueParentRef.selectValue(context);
     Helper.act(context, "exit");
-    assertThat(context.cursor.getSyntaxPath(), equalTo(new Path("value", "0")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0")));
   }
 
   @Test
@@ -66,7 +66,7 @@ public class TestActionsNested {
         .run(
             context ->
                 assertThat(
-                    context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "second", "atom"))));
+                    context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "second", "atom"))));
   }
 
   @Test
@@ -83,6 +83,6 @@ public class TestActionsNested {
         .run(
             context ->
                 assertThat(
-                    context.cursor.getSyntaxPath(), equalTo(new Path("value", "0", "first", "atom"))));
+                    context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "first", "atom"))));
   }
 }

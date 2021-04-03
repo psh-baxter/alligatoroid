@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editorcore.displayderived;
 
-import com.zarbosoft.merman.core.editor.display.CourseDisplayNode;
-import com.zarbosoft.merman.core.editor.display.Group;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
+import com.zarbosoft.merman.core.display.Group;
 
 import java.util.ArrayList;
 import java.util.List;

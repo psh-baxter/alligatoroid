@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.core.syntax.front;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.values.Field;
-import com.zarbosoft.merman.core.document.values.FieldArray;
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.visual.condition.ConditionAttachment;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.visual.condition.ConditionAttachment;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 

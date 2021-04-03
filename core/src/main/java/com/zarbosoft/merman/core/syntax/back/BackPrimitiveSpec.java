@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.backevents.EPrimitiveEvent;
-import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.serialization.EventConsumer;
+import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.StackStore;
@@ -20,7 +20,6 @@ import com.zarbosoft.rendaw.common.TSMap;
 import java.util.Iterator;
 
 public class BackPrimitiveSpec extends BaseBackPrimitiveSpec {
-
   public BackPrimitiveSpec(Config config) {
     super(config);
   }
@@ -44,7 +43,7 @@ public class BackPrimitiveSpec extends BaseBackPrimitiveSpec {
 
               @Override
               public String toString() {
-                return matcher == null ? "ANY PRIMITIVE" : "PRIMITIVE MATCHING PATTERN";
+                return matcher == null ? "ANY PRIMITIVE" : ("PRIMITIVE - " + patternDescription);
               }
             })
         .add(

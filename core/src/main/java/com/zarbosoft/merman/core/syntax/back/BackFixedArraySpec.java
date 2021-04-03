@@ -1,13 +1,13 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.backevents.EArrayCloseEvent;
-import com.zarbosoft.merman.core.editor.backevents.EArrayOpenEvent;
-import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateArrayEnd;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateBack;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
+import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
+import com.zarbosoft.merman.core.serialization.EventConsumer;
+import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.serialization.WriteStateArrayEnd;
+import com.zarbosoft.merman.core.serialization.WriteStateBack;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.model.Node;
@@ -44,7 +44,7 @@ public class BackFixedArraySpec extends BackSpec {
   public void finish(
           MultiError errors,
           final Syntax syntax,
-          final Path typePath,
+          final SyntaxPath typePath,
           boolean singularRestriction,
           boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);

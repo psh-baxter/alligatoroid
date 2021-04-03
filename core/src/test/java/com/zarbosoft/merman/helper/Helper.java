@@ -3,16 +3,16 @@ package com.zarbosoft.merman.helper;
 import com.zarbosoft.merman.JavaI18nEngine;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
-import com.zarbosoft.merman.core.document.values.Field;
-import com.zarbosoft.merman.core.document.values.FieldArray;
-import com.zarbosoft.merman.core.document.values.FieldAtom;
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.Action;
-import com.zarbosoft.merman.core.editor.ClipboardEngine;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.DelayEngine;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.IterationTask;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.Action;
+import com.zarbosoft.merman.core.ClipboardEngine;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.DelayEngine;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.IterationTask;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
@@ -68,17 +68,17 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataPrimitive(final String id) {
-    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id));
   }
 
   public static BackSpec buildBackDataPrimitiveLetters(final String id) {
     return new BackPrimitiveSpec(
-            new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Letters())));
+            new BaseBackPrimitiveSpec.Config(id).pattern(new Repeat1(new Letters()), "1+ letters"));
   }
 
   public static BackSpec buildBackDataPrimitiveDigits(final String id) {
     return new BackPrimitiveSpec(
-            new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Digits())));
+            new BaseBackPrimitiveSpec.Config(id).pattern(new Repeat1(new Digits()), "1+ digits"));
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
@@ -86,7 +86,7 @@ public class Helper {
   }
 
   public static BackKeySpec buildBackDataKey(final String id) {
-    return new BackKeySpec(new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackKeySpec(new BaseBackPrimitiveSpec.Config(id));
   }
 
   public static BackArraySpec buildBackDataArray(final String id, String type) {

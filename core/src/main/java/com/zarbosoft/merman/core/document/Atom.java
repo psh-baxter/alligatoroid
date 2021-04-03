@@ -1,16 +1,16 @@
 package com.zarbosoft.merman.core.document;
 
-import com.zarbosoft.merman.core.document.values.Field;
-import com.zarbosoft.merman.core.document.values.FieldArray;
-import com.zarbosoft.merman.core.document.values.FieldAtom;
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateBack;
-import com.zarbosoft.merman.core.editor.visual.Visual;
-import com.zarbosoft.merman.core.editor.visual.VisualParent;
-import com.zarbosoft.merman.core.editor.visual.visuals.VisualAtom;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.serialization.WriteStateBack;
+import com.zarbosoft.merman.core.visual.Visual;
+import com.zarbosoft.merman.core.visual.VisualParent;
+import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
@@ -48,9 +48,9 @@ public class Atom {
                 }
 
                 @Override
-                public Path getSyntaxPath() {
-                  Path out;
-                  if (Atom.this.valueParentRef == null) out = new Path();
+                public SyntaxPath getSyntaxPath() {
+                  SyntaxPath out;
+                  if (Atom.this.valueParentRef == null) out = new SyntaxPath();
                   else out = Atom.this.valueParentRef.getSyntaxPath();
                   return out.add(entry.getKey());
                 }
@@ -58,8 +58,8 @@ public class Atom {
     }
   }
 
-  public Path getSyntaxPath() {
-    if (valueParentRef == null) return new Path();
+  public SyntaxPath getSyntaxPath() {
+    if (valueParentRef == null) return new SyntaxPath();
     else return valueParentRef.path();
   }
 
@@ -108,6 +108,6 @@ public class Atom {
      *
      * @return
      */
-    public abstract Path getSyntaxPath();
+    public abstract SyntaxPath getSyntaxPath();
   }
 }

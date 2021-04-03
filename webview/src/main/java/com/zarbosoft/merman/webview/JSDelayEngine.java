@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.webview;
 
-import com.zarbosoft.merman.core.editor.DelayEngine;
+import com.zarbosoft.merman.core.DelayEngine;
 import elemental2.dom.DomGlobal;
 
 public class JSDelayEngine implements DelayEngine {

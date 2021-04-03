@@ -1,15 +1,15 @@
 package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.values.FieldArray;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.backevents.EObjectCloseEvent;
-import com.zarbosoft.merman.core.editor.backevents.EObjectOpenEvent;
-import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateDataArray;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateRecordEnd;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
+import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
+import com.zarbosoft.merman.core.serialization.EventConsumer;
+import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.serialization.WriteStateDataArray;
+import com.zarbosoft.merman.core.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.core.misc.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
@@ -90,7 +90,7 @@ public class BackRecordSpec extends BaseBackArraySpec {
   public void finish(
       MultiError errors,
       final Syntax syntax,
-      Path typePath,
+      SyntaxPath typePath,
       boolean singularRestriction,
       boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);

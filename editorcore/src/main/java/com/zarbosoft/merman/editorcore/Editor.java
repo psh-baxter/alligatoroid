@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.editorcore;
 
-import com.zarbosoft.merman.core.editor.ClipboardEngine;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.IterationTask;
-import com.zarbosoft.merman.core.editor.display.Display;
+import com.zarbosoft.merman.core.ClipboardEngine;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.IterationTask;
+import com.zarbosoft.merman.core.display.Display;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.document.Document;
 import com.zarbosoft.merman.editor.history.History;

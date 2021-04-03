@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.editor.display;
 
-import com.zarbosoft.merman.core.editor.display.DisplayNode;
+import com.zarbosoft.merman.core.display.DisplayNode;
 
 public abstract class MockeryDisplayNode implements DisplayNode {
   public double converse;

@@ -1,18 +1,20 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.backevents.ETypeEvent;
-import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
-import com.zarbosoft.merman.core.editor.serialization.WriteStateBack;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.backevents.ETypeEvent;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.misc.MultiError;
+import com.zarbosoft.merman.core.serialization.EventConsumer;
+import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.serialization.WriteStateBack;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.TypeInvalidAtLocation;
-import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
+import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.StackStore;
+import com.zarbosoft.pidgoon.events.nodes.Terminal;
+import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.TSList;
@@ -26,20 +28,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
 
   public final BackSpec value;
 
-  public static class Config {
-    public final BaseBackPrimitiveSpec.Config base;
-    public final String type;
-
-    public final BackSpec value;
-
-    public Config(BaseBackPrimitiveSpec.Config base, String type, BackSpec value) {
-      this.base = base;
-      this.type = type;
-      this.value = value;
-    }
-  }
-
-  protected BackTypeSpec(I18nEngine i18n,Config config) {
+  protected BackTypeSpec(Config config) {
     super(config.base);
     this.type = config.type;
     this.value = config.value;
@@ -54,7 +43,21 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
     return new Sequence()
         .add(
-            new Operator<StackStore>(new MatchingEventTerminal(new ETypeEvent())) {
+            new Terminal() {
+              @Override
+              protected boolean matches(Event event, Store store) {
+                if (!(event instanceof ETypeEvent)) return false;
+                if (matcher == null) return true;
+                return matcher.match(i18n, ((ETypeEvent) event).value);
+              }
+
+              @Override
+              public String toString() {
+                return matcher == null ? "ANY TYPE" : ("TYPE - " + patternDescription);
+              }
+            })
+        .add(
+            new Operator<StackStore>() {
               @Override
               protected StackStore process(StackStore store) {
                 return store.stackVarDoubleElement(
@@ -65,8 +68,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public void write(
-          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.type(((StringBuilder) data.get(type)).toString());
     stack.add(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }
@@ -84,7 +86,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   public void finish(
       MultiError errors,
       final Syntax syntax,
-      Path typePath,
+      SyntaxPath typePath,
       boolean singularRestriction,
       boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
@@ -104,5 +106,18 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
             return null;
           }
         };
+  }
+
+  public static class Config {
+    public final BaseBackPrimitiveSpec.Config base;
+    public final String type;
+
+    public final BackSpec value;
+
+    public Config(BaseBackPrimitiveSpec.Config base, String type, BackSpec value) {
+      this.base = base;
+      this.type = type;
+      this.value = value;
+    }
   }
 }

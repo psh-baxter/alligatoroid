@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.jfxcore.jfxdisplay;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.Blank;
-import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Blank;
+import com.zarbosoft.merman.core.visual.Vector;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 

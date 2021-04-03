@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.core.syntax.error;
 
-import com.zarbosoft.merman.core.editor.Path;
+import com.zarbosoft.merman.core.SyntaxPath;
 
 public class MissingBack extends BaseKVError{
 
-  public MissingBack(Path typePath, String field) {
+  public MissingBack(SyntaxPath typePath, String field) {
         put("typePath", typePath);
         put("field", field);
   }

@@ -1,15 +1,15 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.core.editor.display.Blank;
-import com.zarbosoft.merman.core.editor.display.Display;
-import com.zarbosoft.merman.core.editor.display.DisplayNode;
-import com.zarbosoft.merman.core.editor.display.Drawing;
-import com.zarbosoft.merman.core.editor.display.Font;
-import com.zarbosoft.merman.core.editor.display.Group;
-import com.zarbosoft.merman.core.editor.display.Image;
-import com.zarbosoft.merman.core.editor.display.Text;
-import com.zarbosoft.merman.core.editor.hid.HIDEvent;
-import com.zarbosoft.merman.core.editor.hid.Key;
+import com.zarbosoft.merman.core.display.Blank;
+import com.zarbosoft.merman.core.display.Display;
+import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.Drawing;
+import com.zarbosoft.merman.core.display.Font;
+import com.zarbosoft.merman.core.display.Group;
+import com.zarbosoft.merman.core.display.Image;
+import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;

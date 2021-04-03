@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.core.syntax.alignments;
 
-import com.zarbosoft.merman.core.editor.visual.alignment.Alignment;
-import com.zarbosoft.merman.core.editor.visual.alignment.RelativeAlignment;
+import com.zarbosoft.merman.core.visual.alignment.Alignment;
+import com.zarbosoft.merman.core.visual.alignment.RelativeAlignment;
 
 public class RelativeAlignmentSpec implements AlignmentSpec {
   public final String base;

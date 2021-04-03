@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.document.values.FieldPrimitive;
-import com.zarbosoft.merman.core.editor.I18nEngine;
-import com.zarbosoft.merman.core.editor.backevents.EKeyEvent;
-import com.zarbosoft.merman.core.editor.serialization.EventConsumer;
-import com.zarbosoft.merman.core.editor.serialization.WriteState;
+import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.backevents.EKeyEvent;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.serialization.EventConsumer;
+import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.StackStore;
@@ -43,7 +43,7 @@ public class BackKeySpec extends BaseBackPrimitiveSpec {
 
               @Override
               public String toString() {
-                return matcher == null ? "ANY KEY" : "KEY MATCHING PATTERN";
+                return matcher == null ? "ANY KEY" : ("KEY - " + patternDescription);
               }
             })
         .add(

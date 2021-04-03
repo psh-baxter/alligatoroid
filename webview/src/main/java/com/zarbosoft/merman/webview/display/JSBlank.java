@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.webview.display;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.Blank;
-import com.zarbosoft.merman.core.editor.display.Display;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Blank;
+import com.zarbosoft.merman.core.display.Display;
 import elemental2.dom.CSSProperties;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLElement;

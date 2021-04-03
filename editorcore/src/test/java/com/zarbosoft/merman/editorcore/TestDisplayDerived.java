@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editorcore;
 
-import com.zarbosoft.merman.core.editor.display.Group;
-import com.zarbosoft.merman.core.editor.display.Text;
+import com.zarbosoft.merman.core.display.Group;
+import com.zarbosoft.merman.core.display.Text;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.merman.editor.display.MockeryGroup;

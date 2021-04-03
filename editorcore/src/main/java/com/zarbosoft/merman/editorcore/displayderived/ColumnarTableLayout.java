@@ -1,12 +1,12 @@
 package com.zarbosoft.merman.editorcore.displayderived;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.CourseDisplayNode;
-import com.zarbosoft.merman.core.editor.display.Display;
-import com.zarbosoft.merman.core.editor.display.DisplayNode;
-import com.zarbosoft.merman.core.editor.display.Group;
-import com.zarbosoft.merman.core.editor.display.Text;
-import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
+import com.zarbosoft.merman.core.display.Display;
+import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.Group;
+import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;

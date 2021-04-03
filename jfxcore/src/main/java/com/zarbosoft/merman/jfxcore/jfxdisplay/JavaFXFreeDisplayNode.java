@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.jfxcore.jfxdisplay;
 
-import com.zarbosoft.merman.core.editor.display.FreeDisplayNode;
-import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.display.FreeDisplayNode;
+import com.zarbosoft.merman.core.visual.Vector;
 import javafx.scene.Node;
 
 public abstract class JavaFXFreeDisplayNode extends JavaFXCommonBaseNode implements FreeDisplayNode {

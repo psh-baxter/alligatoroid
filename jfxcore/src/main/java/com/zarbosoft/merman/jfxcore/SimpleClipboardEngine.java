@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.jfxcore;
 
-import com.zarbosoft.merman.core.editor.ClipboardEngine;
+import com.zarbosoft.merman.core.ClipboardEngine;
 import com.zarbosoft.merman.core.syntax.BackType;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;

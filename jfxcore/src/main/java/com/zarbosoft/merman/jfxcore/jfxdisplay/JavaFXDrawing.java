@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.jfxcore.jfxdisplay;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.Display;
-import com.zarbosoft.merman.core.editor.display.Drawing;
-import com.zarbosoft.merman.core.editor.display.DrawingContext;
-import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Display;
+import com.zarbosoft.merman.core.display.Drawing;
+import com.zarbosoft.merman.core.display.DrawingContext;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;

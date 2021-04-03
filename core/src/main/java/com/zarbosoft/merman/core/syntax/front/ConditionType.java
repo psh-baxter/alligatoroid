@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.core.syntax.front;
 
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.visual.condition.ConditionAttachment;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.visual.condition.ConditionAttachment;
 
 public abstract class ConditionType {
   public final boolean invert;

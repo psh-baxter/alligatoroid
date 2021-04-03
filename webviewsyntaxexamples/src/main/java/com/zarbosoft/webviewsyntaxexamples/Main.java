@@ -5,7 +5,6 @@ import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
@@ -26,7 +25,6 @@ import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.core.syntax.primitivepattern.Any;
 import com.zarbosoft.merman.core.syntax.primitivepattern.JsonDecimal;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternCharacterClass;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternSequence;
@@ -35,6 +33,7 @@ import com.zarbosoft.merman.core.syntax.primitivepattern.PatternUnion;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
@@ -678,14 +677,15 @@ public class Main {
                         .field(
                             "value",
                             new BackJSONSpecialPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(
-                                    "value",
-                                    new PatternUnion(
-                                        TSList.of(
-                                            new PatternString(i18n, "true"),
-                                            new PatternString(i18n, "false"),
-                                            new PatternString(i18n, "null"),
-                                            new JsonDecimal())))))
+                                new BaseBackPrimitiveSpec.Config("value")
+                                    .pattern(
+                                        new PatternUnion(
+                                            TSList.of(
+                                                new PatternString(i18n, "true"),
+                                                new PatternString(i18n, "false"),
+                                                new PatternString(i18n, "null"),
+                                                new JsonDecimal())),
+                                        "json keywords")))
                         .build())
                 .front(
                     new FrontPrimitiveSpec(
@@ -700,7 +700,7 @@ public class Main {
                                 .field(
                                     "value",
                                     new BackPrimitiveSpec(
-                                        new BaseBackPrimitiveSpec.Config("value", new Any())))
+                                        new BaseBackPrimitiveSpec.Config("value")))
                                 .build()),
                     "value")
                 .build(),
@@ -974,24 +974,25 @@ public class Main {
         .field(
             "name",
             new BackPrimitiveSpec(
-                new BaseBackPrimitiveSpec.Config(
-                    id,
-                    new PatternSequence(
-                        TSList.of(
-                            new PatternCharacterClass(
-                                TSList.of(
-                                    new ROPair<>("$", "$"),
-                                    new ROPair<>("_", "_"),
-                                    new ROPair<>("a", "z"),
-                                    new ROPair<>("A", "Z"))),
-                            new Repeat1(
+                new BaseBackPrimitiveSpec.Config(id)
+                    .pattern(
+                        new PatternSequence(
+                            TSList.of(
                                 new PatternCharacterClass(
                                     TSList.of(
                                         new ROPair<>("$", "$"),
                                         new ROPair<>("_", "_"),
                                         new ROPair<>("a", "z"),
-                                        new ROPair<>("A", "Z"),
-                                        new ROPair<>("0", "9")))))))))
+                                        new ROPair<>("A", "Z"))),
+                                new Repeat1(
+                                    new PatternCharacterClass(
+                                        TSList.of(
+                                            new ROPair<>("$", "$"),
+                                            new ROPair<>("_", "_"),
+                                            new ROPair<>("a", "z"),
+                                            new ROPair<>("A", "Z"),
+                                            new ROPair<>("0", "9")))))),
+                        "valid identifiers")))
         .build();
   }
 

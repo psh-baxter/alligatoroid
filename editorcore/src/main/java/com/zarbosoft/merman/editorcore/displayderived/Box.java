@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.editorcore.displayderived;
 
-import com.zarbosoft.merman.core.editor.Context;
-import com.zarbosoft.merman.core.editor.display.Drawing;
-import com.zarbosoft.merman.core.editor.display.DrawingContext;
-import com.zarbosoft.merman.core.editor.display.derived.Obbox;
-import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Drawing;
+import com.zarbosoft.merman.core.display.DrawingContext;
+import com.zarbosoft.merman.core.display.derived.Obbox;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
