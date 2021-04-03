@@ -1,14 +1,15 @@
 package com.zarbosoft.merman.core.display;
 
 import com.zarbosoft.merman.core.hid.HIDEvent;
-import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class Display {
   public final DisplayAbsoluteConvert convert;
@@ -17,14 +18,14 @@ public abstract class Display {
   private final TSList<Runnable> mouseLeaveListeners = new TSList<>();
   private final TSList<DoubleListener> converseEdgeListeners = new TSList<>();
   private final TSList<DoubleListener> transverseEdgeListeners = new TSList<>();
+  protected Function<HIDEvent, Boolean> hidEventListener;
+  protected Function<String, Boolean> typingListener;
   private double width;
   private double height;
   private double converseEdge = Integer.MAX_VALUE;
   private double transverseEdge = Integer.MAX_VALUE;
-    protected Consumer<HIDEvent> hidEventListener;
-    protected Consumer<String> typingListener;
 
-    protected Display(Direction converseDirection, Direction transverseDirection) {
+  protected Display(Direction converseDirection, Direction transverseDirection) {
     switch (converseDirection) {
       case UP:
         {
@@ -382,22 +383,22 @@ public abstract class Display {
     this.mouseMoveListeners.add(listener);
   }
 
-  public final void setHIDEventListener(Consumer<HIDEvent> listener) {
-      if (hidEventListener != null) throw new Assertion("hid event listener already set");
-      this.hidEventListener = listener;
+  public final void setHIDEventListener(Function<HIDEvent, Boolean> listener) {
+    if (hidEventListener != null) throw new Assertion("hid event listener already set");
+    this.hidEventListener = listener;
   }
 
-  public final void setTypingListener(Consumer<String> listener) {
-      if (this.typingListener != null) throw new Assertion("typing listener already set");
-      this.typingListener = listener;
+  public final void setTypingListener(Function<String, Boolean> listener) {
+    if (this.typingListener != null) throw new Assertion("typing listener already set");
+    this.typingListener = listener;
   }
 
   public final double width() {
-      return width;
+    return width;
   }
 
   public final double height() {
-      return height;
+    return height;
   }
 
   public final double edge() {
@@ -450,9 +451,9 @@ public abstract class Display {
 
   public abstract void setBackgroundColor(ModelColor color);
 
-    public abstract double toPixels(Syntax.DisplayUnit displayUnit);
+  public abstract double toPixels(Syntax.DisplayUnit displayUnit);
 
-    public interface DisplayAbsoluteConvert {
+  public interface DisplayAbsoluteConvert {
     public Vector convert(double left, double right, double top, double bottom);
 
     public UnconvertVector unconvert(

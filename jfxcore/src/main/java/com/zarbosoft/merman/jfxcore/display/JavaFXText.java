@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.jfxcore.jfxdisplay;
+package com.zarbosoft.merman.jfxcore.display;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Display;
@@ -29,6 +29,7 @@ public class JavaFXText implements Text, JavaFXNode {
   protected JavaFXText(JavaFXDisplay display) {
     this.display = display;
     this.text = new javafx.scene.text.Text();
+    this.text.setMouseTransparent(true);
     ((javafx.scene.text.Text) text).setTextOrigin(VPos.BASELINE);
   }
 

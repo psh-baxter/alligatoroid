@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.jfxcore.jfxserialization;
+package com.zarbosoft.merman.jfxcore.serialization;
 
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonParser;

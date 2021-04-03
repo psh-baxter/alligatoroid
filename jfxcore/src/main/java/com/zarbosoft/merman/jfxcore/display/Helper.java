@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.jfxcore.jfxdisplay;
+package com.zarbosoft.merman.jfxcore.display;
 
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.rendaw.common.DeadCode;

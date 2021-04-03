@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.jfxcore.jfxdisplay;
+package com.zarbosoft.merman.jfxcore.display;
 
 import javafx.scene.Node;
 

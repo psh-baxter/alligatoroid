@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.jfxcore.jfxdisplay;
+package com.zarbosoft.merman.jfxcore.display;
 
 import com.zarbosoft.merman.core.display.Blank;
 import com.zarbosoft.merman.core.display.Display;
@@ -21,6 +21,7 @@ import javafx.beans.value.ObservableValue;
 import javafx.scene.Node;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.Pane;
@@ -277,49 +278,62 @@ public class JavaFXDisplay extends Display {
         event -> {
           mouseExited();
         });
-    node.setOnMouseMoved(
+    node.addEventFilter(
+        MouseEvent.MOUSE_MOVED,
         event -> {
           mouseMoved(event.getX(), event.getY());
         });
-    node.setOnMouseDragged(
+    node.addEventFilter(
+        MouseEvent.MOUSE_DRAGGED,
         event -> {
           mouseMoved(event.getX(), event.getY());
         });
-    node.setOnMousePressed(
+    node.addEventFilter(
+        MouseEvent.MOUSE_PRESSED,
         e -> {
           node.requestFocus();
-          final HIDEvent event = buildHIDEvent(convertButton(e.getButton()), true);
-          this.hidEventListener.accept(event);
+          if (this.hidEventListener.apply(buildHIDEvent(convertButton(e.getButton()), true))) {
+            e.consume();
+          }
         });
-    node.setOnMouseReleased(
+    node.addEventFilter(
+        MouseEvent.MOUSE_RELEASED,
         e -> {
           node.requestFocus();
-          this.hidEventListener.accept(buildHIDEvent(convertButton(e.getButton()), false));
+          if (this.hidEventListener.apply(buildHIDEvent(convertButton(e.getButton()), false))) {
+            e.consume();
+          }
         });
     node.setOnScroll(
         e -> {
           node.requestFocus();
-          this.hidEventListener.accept(
-              buildHIDEvent(e.getDeltaY() > 0 ? Key.MOUSE_SCROLL_UP : Key.MOUSE_SCROLL_DOWN, true));
+          if (this.hidEventListener.apply(
+              buildHIDEvent(
+                  e.getDeltaY() > 0 ? Key.MOUSE_SCROLL_UP : Key.MOUSE_SCROLL_DOWN, true))) {
+            e.consume();
+          }
         });
     node.setOnKeyPressed(
         e -> {
-          this.hidEventListener.accept(buildHIDEvent(convertButton(e.getCode()), true));
-          if (e.getCode() == KeyCode.ENTER) {
-            this.typingListener.accept("\n");
+          if (this.hidEventListener.apply(buildHIDEvent(convertButton(e.getCode()), true))) {
+            e.consume();
+          } else if (e.getCode() == KeyCode.ENTER) {
+            if (this.typingListener.apply("\n")) {
+              e.consume();
+            }
           }
-          e.consume();
         });
     node.setOnKeyReleased(
         e -> {
-          this.hidEventListener.accept(buildHIDEvent(convertButton(e.getCode()), false));
-          e.consume();
+          if (this.hidEventListener.apply(buildHIDEvent(convertButton(e.getCode()), false))) {
+            e.consume();
+          }
         });
     node.setOnKeyTyped(
         e -> {
-          final String text = e.getCharacter();
-          this.typingListener.accept(text);
-          e.consume();
+          if (this.typingListener.apply(e.getCharacter())) {
+            e.consume();
+          }
         });
     node.heightProperty()
         .addListener(

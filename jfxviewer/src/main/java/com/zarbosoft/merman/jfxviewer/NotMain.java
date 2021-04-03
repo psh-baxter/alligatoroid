@@ -20,10 +20,10 @@ import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.jfxcore.JavaI18nEngine;
-import com.zarbosoft.merman.jfxcore.JfxDelayEngine;
+import com.zarbosoft.merman.jfxcore.JavaFXDelayEngine;
 import com.zarbosoft.merman.jfxcore.SimpleClipboardEngine;
-import com.zarbosoft.merman.jfxcore.jfxdisplay.JavaFXDisplay;
-import com.zarbosoft.merman.jfxcore.jfxserialization.JavaSerializer;
+import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
+import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.errors.NoResults;
@@ -39,6 +39,7 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -96,7 +97,7 @@ public class NotMain extends Application {
               display,
               this::addIteration,
               this::flushIteration,
-              new JfxDelayEngine(),
+              new JavaFXDelayEngine(),
               new SimpleClipboardEngine(syntax.backType),
               serializer,
               i18n);
@@ -172,7 +173,6 @@ public class NotMain extends Application {
                         dragSelect = new DragSelectState(path);
                         return true;
                       } else if (context.cursor != null) {
-                        System.out.format("in cursor\n");
                         SyntaxPath path = context.cursor.getSyntaxPath();
                         dragSelect = new DragSelectState(path);
                         return true;

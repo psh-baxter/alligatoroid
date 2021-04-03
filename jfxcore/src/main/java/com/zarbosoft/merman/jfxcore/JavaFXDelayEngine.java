@@ -6,7 +6,7 @@ import javafx.application.Platform;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class JfxDelayEngine implements DelayEngine {
+public class JavaFXDelayEngine implements DelayEngine {
   @Override
   public Handle delay(long ms, Runnable r) {
     Timer t = new Timer();

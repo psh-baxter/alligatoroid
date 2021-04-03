@@ -87,6 +87,6 @@ public class MockeryDisplay extends Display {
   }
 
   public void sendHIDEvent(final HIDEvent event) {
-    hidEventListener.accept(event);
+    hidEventListener.apply(event);
   }
 }

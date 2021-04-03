@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.jfxcore.jfxdisplay;
+package com.zarbosoft.merman.jfxcore.display;
 
 import com.zarbosoft.merman.core.display.Display;
 import com.zarbosoft.merman.core.display.DisplayNode;
@@ -17,6 +17,7 @@ public abstract class JavaFXCommonBaseNode implements DisplayNode, JavaFXNode {
   protected JavaFXCommonBaseNode(JavaFXDisplay display, Node node) {
     this.display = display;
     this.node = node;
+    this.node.setMouseTransparent(true);
   }
 
   @Override

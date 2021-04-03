@@ -170,18 +170,20 @@ public class Context {
             flushIteration(100);
           }
           clearHover();
+          return true;
         });
     display.setTypingListener(
         text -> {
           if (keyHandlingInProgress) {
             keyHandlingInProgress = false;
-            return;
+            return false;
           }
-          if (text.isEmpty()) return;
+          if (text.isEmpty()) return false;
           if (textListener != null) {
             textListener.handleText(this, text);
             flushIteration(100);
           }
+          return true;
         });
     display.addMouseExitListener(
         () -> {

@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.jfxcore.jfxdisplay;
+package com.zarbosoft.merman.jfxcore.display;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Blank;
@@ -14,6 +14,7 @@ public class JavaFXBlank implements Blank, JavaFXNode {
 
   protected JavaFXBlank() {
     this.node = new Region();
+    this.node.setMouseTransparent(true);
   }
 
   @Override
