@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.core.syntax;
+package com.zarbosoft.merman.core.syntax.style;
 
 public class Padding {
   public static final Padding empty = new Padding(0, 0, 0, 0);

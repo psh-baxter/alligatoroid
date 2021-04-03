@@ -1,7 +1,5 @@
 package com.zarbosoft.merman.core.syntax.style;
 
-import com.zarbosoft.merman.core.syntax.Padding;
-
 /** Used for obboxes (cursor, hover) including 0-selection text cursors (vertical line) */
 public class ObboxStyle {
   public final Padding padding;

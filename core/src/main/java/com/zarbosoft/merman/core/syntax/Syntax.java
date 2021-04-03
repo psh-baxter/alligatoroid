@@ -16,6 +16,7 @@ import com.zarbosoft.merman.core.syntax.error.GroupChildDoesntExist;
 import com.zarbosoft.merman.core.syntax.error.NotTransverse;
 import com.zarbosoft.merman.core.syntax.error.TypeCircularReference;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;

@@ -17,7 +17,7 @@ import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.core.example.JsonSyntax;
 import com.zarbosoft.merman.core.syntax.BackType;
-import com.zarbosoft.merman.core.syntax.Padding;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.jfxcore.JavaI18nEngine;
 import com.zarbosoft.merman.jfxcore.JfxDelayEngine;
