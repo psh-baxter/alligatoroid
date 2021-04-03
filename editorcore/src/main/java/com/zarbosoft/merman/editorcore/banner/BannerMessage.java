@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.core.editor.banner;
+package com.zarbosoft.merman.editorcore.banner;
 
 public class BannerMessage {
   /** ms */

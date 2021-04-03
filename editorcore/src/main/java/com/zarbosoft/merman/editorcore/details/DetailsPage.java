@@ -1,4 +1,4 @@
-package com.zarbosoft.merman.core.editor.details;
+package com.zarbosoft.merman.editorcore.details;
 
 import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.display.FreeDisplayNode;

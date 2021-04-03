@@ -1433,7 +1433,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
     private void setCornerstone(final Context context, final int index) {
       if (!forSelection) return;
-      context.foreground.setCornerstone(
+      context.wall.setCornerstone(
           context,
           visualFrontPrimitive.lines.get(index).createOrGetBrick(context),
           () -> {

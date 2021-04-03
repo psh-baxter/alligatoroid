@@ -306,7 +306,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
     public Brick nudge(final Context context) {
       final Brick first = base.body.createOrGetFirstBrick(context);
-      context.foreground.setCornerstone(
+      context.wall.setCornerstone(
           context,
           first,
           () -> base.parent.getPreviousBrick(context),

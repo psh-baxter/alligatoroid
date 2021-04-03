@@ -1,9 +1,9 @@
-package com.zarbosoft.merman.core.extension;
+package com.zarbosoft.merman.editorcore.cursortype;
 
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.Cursor;
-import com.zarbosoft.merman.core.editor.banner.BannerMessage;
+import com.zarbosoft.merman.editorcore.banner.BannerMessage;
 import com.zarbosoft.merman.core.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontAtomBase;

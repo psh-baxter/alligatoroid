@@ -61,6 +61,7 @@ public class Syntax {
   public final Style hoverStyle;
   public final Style primitiveHoverStyle;
   private final Grammar grammar;
+
   public Syntax(I18nEngine i18n, Config config) {
     MultiError errors = new MultiError();
     switch (config.converseDirection) {
@@ -98,10 +99,17 @@ public class Syntax {
     else this.suffixGap = config.suffixGap;
     this.converseDirection = config.converseDirection;
     this.transverseDirection = config.transverseDirection;
-    this.cursorStyle = config.cursorStyle;
-    this.primitiveCursorStyle = config.primitiveCursorStyle;
-    this.hoverStyle = config.hoverStyle;
-    this.primitiveHoverStyle = config.primitiveHoverStyle;
+    this.cursorStyle =
+        config.cursorStyle == null ? new Style.Config().create() : config.cursorStyle;
+    this.primitiveCursorStyle =
+        config.primitiveCursorStyle == null
+            ? new Style.Config().create()
+            : config.primitiveCursorStyle;
+    this.hoverStyle = config.hoverStyle == null ? new Style.Config().create() : config.hoverStyle;
+    this.primitiveHoverStyle =
+        config.primitiveHoverStyle == null
+            ? new Style.Config().create()
+            : config.primitiveHoverStyle;
 
     TSSet<AtomType> seen = new TSSet<>();
     for (Map.Entry<String, ROSet<AtomType>> splayedType : splayedTypes) {

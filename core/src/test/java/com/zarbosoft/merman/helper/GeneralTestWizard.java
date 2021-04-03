@@ -6,20 +6,16 @@ import com.zarbosoft.merman.core.document.values.FieldArray;
 import com.zarbosoft.merman.core.editor.Action;
 import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.Path;
-import com.zarbosoft.merman.core.editor.banner.BannerMessage;
-import com.zarbosoft.merman.core.editor.details.DetailsPage;
-import com.zarbosoft.merman.core.editor.display.DisplayNode;
-import com.zarbosoft.merman.core.editor.display.Drawing;
-import com.zarbosoft.merman.editor.display.MockeryText;
 import com.zarbosoft.merman.core.editor.hid.HIDEvent;
-import com.zarbosoft.merman.core.editor.visual.Vector;
+import com.zarbosoft.merman.core.editor.wall.Bedding;
 import com.zarbosoft.merman.core.editor.wall.Brick;
 import com.zarbosoft.merman.core.editor.wall.Course;
+import com.zarbosoft.merman.core.editor.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.core.editor.wall.bricks.BrickImage;
 import com.zarbosoft.merman.core.editor.wall.bricks.BrickLine;
-import com.zarbosoft.merman.core.editor.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.core.editor.wall.bricks.BrickText;
 import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.editor.display.MockeryText;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
@@ -42,17 +38,7 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard(final Syntax syntax, boolean startWindowed, final Atom... atoms) {
     inner = new TestWizard(syntax, startWindowed, atoms);
-    inner.context.banner.addMessage(inner.context, new BannerMessage() {});
-
-    final Drawing drawing = inner.context.display.drawing();
-    drawing.resize(inner.context, new Vector(500, 7));
-    final DetailsPage page =
-        new DetailsPage() {
-          @Override
-          public void tagsChanged(final Context context) {}
-        };
-    page.node = drawing;
-    inner.context.details.addPage(inner.context, page);
+    inner.context.wall.addBedding(inner.context, new Bedding(10, 7));
     inner.runner.flush();
   }
 
@@ -66,30 +52,15 @@ public class GeneralTestWizard {
     return this;
   }
 
-  private void checkNode(final DisplayNode node, final int t, final int te) {
-    assertThat((int)node.transverse(), equalTo(t));
-    assertThat((int)node.transverseEdge(), equalTo(te));
-  }
-
-  public GeneralTestWizard checkBanner(final int transverse, final int transverseEdge) {
-    checkNode(inner.context.banner.text, transverse, transverseEdge);
-    return this;
-  }
-
-  public GeneralTestWizard checkDetails(final int t, final int te) {
-    checkNode(inner.context.details.current.node, t, te);
-    return this;
-  }
-
   public GeneralTestWizard checkScroll(final int scroll) {
-    assertThat((int)inner.context.scroll, equalTo(scroll));
+    assertThat((int) inner.context.scroll, equalTo(scroll));
     return this;
   }
 
   public GeneralTestWizard checkCourse(final int index, final int t, final int te) {
     final Course course = getCourse(index);
-    assertThat((int)course.transverseStart, equalTo(t));
-    assertThat((int)(course.transverseStart + course.ascent + course.descent), equalTo(te));
+    assertThat((int) course.transverseStart, equalTo(t));
+    assertThat((int) (course.transverseStart + course.ascent + course.descent), equalTo(te));
     return this;
   }
 
@@ -113,13 +84,13 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard dumpCourses() {
-    ROList<Course> courses = inner.context.foreground.children;
+    ROList<Course> courses = inner.context.wall.children;
     for (int i = 0; i < courses.size(); ++i) {
       Course course = courses.get(i);
       System.out.printf(" %02d  ", i);
       for (int j = 0; j < course.children.size(); ++j) {
         Brick brick = course.children.get(j);
-        if (inner.context.foreground.cornerstone == brick) System.out.format("*");
+        if (inner.context.wall.cornerstone == brick) System.out.format("*");
         if (brick instanceof BrickText) {
           System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
         } else if (brick instanceof BrickImage) {
@@ -130,7 +101,7 @@ public class GeneralTestWizard {
           System.out.printf("\\w ");
         } else throw new Assertion();
       }
-      if (inner.context.foreground.cornerstoneCourse == course) {
+      if (inner.context.wall.cornerstoneCourse == course) {
         System.out.format(" **");
       }
       System.out.printf("\n");
@@ -140,7 +111,7 @@ public class GeneralTestWizard {
   }
 
   private Course getCourse(final int courseIndex) {
-    ROList<Course> courses = inner.context.foreground.children;
+    ROList<Course> courses = inner.context.wall.children;
     if (courseIndex >= courses.size()) {
       dumpCourses();
       assertThat(courses.size(), greaterThan(courseIndex));
@@ -159,7 +130,7 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard checkBrick(
       final int courseIndex, final int brickIndex, final int converse) {
-    assertThat((int)getBrick(courseIndex, brickIndex).getConverse(), equalTo(converse));
+    assertThat((int) getBrick(courseIndex, brickIndex).getConverse(), equalTo(converse));
     return this;
   }
 
@@ -191,16 +162,16 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard checkCourseCount(final int i) {
-    if (inner.context.foreground.children.size() != i) {
+    if (inner.context.wall.children.size() != i) {
       dumpCourses();
-      assertThat(inner.context.foreground.children.size(), equalTo(i));
+      assertThat(inner.context.wall.children.size(), equalTo(i));
     }
     return this;
   }
 
   public GeneralTestWizard checkTotalBrickCount(final int i) {
     int got = 0;
-    for (Course course : inner.context.foreground.children) {
+    for (Course course : inner.context.wall.children) {
       got += course.children.size();
     }
     assertThat(got, equalTo(i));

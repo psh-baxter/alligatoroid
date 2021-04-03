@@ -1,8 +1,9 @@
-package com.zarbosoft.merman.core.editor.display.derived;
+package com.zarbosoft.merman.editorcore.displayderived;
 
 import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.display.Drawing;
 import com.zarbosoft.merman.core.editor.display.DrawingContext;
+import com.zarbosoft.merman.core.editor.display.derived.Obbox;
 import com.zarbosoft.merman.core.editor.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.BoxStyle;
 import com.zarbosoft.rendaw.common.ROPair;

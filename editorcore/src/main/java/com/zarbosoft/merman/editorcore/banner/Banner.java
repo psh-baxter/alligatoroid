@@ -1,11 +1,11 @@
-package com.zarbosoft.merman.core.editor.banner;
+package com.zarbosoft.merman.editorcore.banner;
 
 import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.DelayEngine;
 import com.zarbosoft.merman.core.editor.IterationContext;
 import com.zarbosoft.merman.core.editor.IterationTask;
 import com.zarbosoft.merman.core.editor.display.Text;
-import com.zarbosoft.merman.core.editor.display.derived.Box;
+import com.zarbosoft.merman.editorcore.displayderived.Box;
 import com.zarbosoft.merman.core.editor.visual.Vector;
 import com.zarbosoft.merman.core.editor.wall.Attachment;
 import com.zarbosoft.merman.core.editor.wall.Bedding;
@@ -40,7 +40,7 @@ public class Banner {
 
   public Banner(final Context context, Style style) {
     this.style = style;
-    context.foreground.addCornerstoneListener(
+    context.wall.addCornerstoneListener(
         context,
         new Wall.CornerstoneListener() {
           @Override
@@ -111,14 +111,14 @@ public class Banner {
     background.setStyle(style.box);
     text.setFont(context, Context.getFont(context, style));
     text.setColor(context, style.color);
-    if (bedding != null) context.foreground.removeBedding(context, bedding);
+    if (bedding != null) context.wall.removeBedding(context, bedding);
     bedding =
         new Bedding(
             text.transverseSpan()
                 + context.syntax.bannerPad.transverseStart
                 + context.syntax.bannerPad.transverseEnd,
             0);
-    context.foreground.addBedding(context, bedding);
+    context.wall.addBedding(context, bedding);
     idlePlace(context, true);
   }
 
@@ -131,7 +131,7 @@ public class Banner {
           context.midground.remove(background.drawing);
           background = null;
         }
-        context.foreground.removeBedding(context, bedding);
+        context.wall.removeBedding(context, bedding);
         bedding = null;
       }
     } else if (queue.peek() != current) {

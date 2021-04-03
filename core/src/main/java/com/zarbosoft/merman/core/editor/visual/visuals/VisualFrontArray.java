@@ -408,7 +408,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     }
 
     private void setCornerstone(final Context context, final int index) {
-      context.foreground.setCornerstone(
+      context.wall.setCornerstone(
           context,
           visual.children.get(visual.visualIndex(index)).createOrGetFirstBrick(context),
           () -> {

@@ -1,9 +1,9 @@
-package com.zarbosoft.merman.core.editor.details;
+package com.zarbosoft.merman.editorcore.details;
 
 import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.IterationContext;
 import com.zarbosoft.merman.core.editor.IterationTask;
-import com.zarbosoft.merman.core.editor.display.derived.Box;
+import com.zarbosoft.merman.editorcore.displayderived.Box;
 import com.zarbosoft.merman.core.editor.visual.Vector;
 import com.zarbosoft.merman.core.editor.wall.Attachment;
 import com.zarbosoft.merman.core.editor.wall.Bedding;
@@ -129,7 +129,7 @@ public class Details {
 
   public Details(final Context context, Style style) {
     this.style = style;
-    context.foreground.addCornerstoneListener(
+    context.wall.addCornerstoneListener(
         context,
         new Wall.CornerstoneListener() {
           @Override
@@ -158,7 +158,7 @@ public class Details {
   private void update(final Context context) {
     if (queue.isEmpty()) {
       if (current != null) {
-        context.foreground.removeBedding(context, bedding);
+        context.wall.removeBedding(context, bedding);
         bedding = null;
         context.midground.remove(current.node);
         current = null;
@@ -170,7 +170,7 @@ public class Details {
     } else if (queue.peek() != current) {
       if (current != null) {
         context.midground.remove(current.node);
-        context.foreground.removeBedding(context, bedding);
+        context.wall.removeBedding(context, bedding);
       } else {
 
       }
@@ -184,7 +184,7 @@ public class Details {
               context.syntax.detailPad.transverseStart
                   + current.node.transverseSpan()
                   + context.syntax.detailPad.transverseEnd);
-      context.foreground.addBedding(context, bedding);
+      context.wall.addBedding(context, bedding);
     }
   }
 

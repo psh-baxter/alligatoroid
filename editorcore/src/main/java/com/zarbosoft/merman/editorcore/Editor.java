@@ -1,14 +1,14 @@
 package com.zarbosoft.merman.editorcore;
 
-import com.google.common.collect.ImmutableList;
+import com.zarbosoft.merman.core.editor.ClipboardEngine;
+import com.zarbosoft.merman.core.editor.Context;
+import com.zarbosoft.merman.core.editor.IterationTask;
+import com.zarbosoft.merman.core.editor.display.Display;
+import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.document.Document;
-import com.zarbosoft.merman.editor.Action;
-import com.zarbosoft.merman.editor.ClipboardEngine;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.IterationTask;
-import com.zarbosoft.merman.editor.display.Display;
 import com.zarbosoft.merman.editor.history.History;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.editorcore.banner.Banner;
+import com.zarbosoft.merman.editorcore.details.Details;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -31,6 +31,8 @@ import java.util.function.Consumer;
 public class Editor {
 
   private final Context context;
+  public Banner banner;
+  public Details details;
 
   public Editor(
       final Syntax syntax,
@@ -45,13 +47,19 @@ public class Editor {
     context.history.clear();
     context.addActions(
         this, ImmutableList.of(new ActionUndo(), new ActionRedo(), new ActionClickHovered()));
+    context.addApplyScrollListener(() -> {
+      banner.setScroll(this, newScroll);
+      details.setScroll(this, newScroll);
+    });
   }
 
   public void destroy() {
     context.modules.forEach(p -> p.destroy(context));
     context.banner.destroy();
-    context.foreground.clear(context);
+    context.wall.clear(context);
   }
+
+
 
   public void addActions(final Object key, final List<Action> actions) {
     context.addActions(key, actions);

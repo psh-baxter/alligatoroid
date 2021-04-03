@@ -595,7 +595,7 @@ public class TestWindowing {
     }
 
     private Course getCourse(final int courseIndex) {
-      ROList<Course> courses = context.foreground.children;
+      ROList<Course> courses = context.wall.children;
       if (courseIndex >= courses.size()) {
         dumpWall();
         assertThat(courses.size(), greaterThan(courseIndex));
@@ -646,13 +646,13 @@ public class TestWindowing {
     }
 
     public GeneralTestWizard dumpWall() {
-      ROList<Course> courses = context.foreground.children;
+      ROList<Course> courses = context.wall.children;
       for (int i = 0; i < courses.size(); ++i) {
         Course course = courses.get(i);
         System.out.printf(" %02d  ", i);
         for (int j = 0; j < course.children.size(); ++j) {
           Brick brick = course.children.get(j);
-          if (context.foreground.cornerstone == brick) System.out.format("*");
+          if (context.wall.cornerstone == brick) System.out.format("*");
           if (brick instanceof BrickText) {
             System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
           } else if (brick instanceof BrickImage) {
@@ -663,7 +663,7 @@ public class TestWindowing {
             System.out.printf("\\w ");
           } else throw new Assertion();
         }
-        if (context.foreground.cornerstoneCourse == course) {
+        if (context.wall.cornerstoneCourse == course) {
           System.out.format(" **");
         }
         System.out.printf("\n");
@@ -673,9 +673,9 @@ public class TestWindowing {
     }
 
     public GeneralTestWizard checkCourseCount(final int i) {
-      if (context.foreground.children.size() != i) {
+      if (context.wall.children.size() != i) {
         dumpWall();
-        assertThat(context.foreground.children.size(), equalTo(i));
+        assertThat(context.wall.children.size(), equalTo(i));
       }
       return this;
     }

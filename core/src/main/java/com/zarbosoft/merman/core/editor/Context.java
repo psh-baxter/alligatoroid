@@ -4,8 +4,6 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
 import com.zarbosoft.merman.core.document.InvalidDocument;
 import com.zarbosoft.merman.core.document.values.Field;
-import com.zarbosoft.merman.core.editor.banner.Banner;
-import com.zarbosoft.merman.core.editor.details.Details;
 import com.zarbosoft.merman.core.editor.display.Display;
 import com.zarbosoft.merman.core.editor.display.Font;
 import com.zarbosoft.merman.core.editor.display.Group;
@@ -39,7 +37,7 @@ public class Context {
   /** Contains the cursor and other marks. Scrolls. */
   public final Group overlay;
   /** Contains the source code. Scrolls. */
-  public final Wall foreground;
+  public final Wall wall;
 
   public final Display display;
   public final Syntax syntax;
@@ -75,8 +73,6 @@ public class Context {
   /** Contains source borders. Scrolls. */
   public Group background;
 
-  public Banner banner;
-  public Details details;
   public double scroll = 0;
   public double peek = 0;
   public IterationLayBricks idleLayBricks = null;
@@ -135,16 +131,14 @@ public class Context {
     transverseEdge = display.transverseEdge();
     background = display.group();
     midground = display.group();
-    this.foreground = new Wall(this);
+    this.wall = new Wall(this);
     this.overlay = display.group();
     display.add(background);
     display.add(midground);
-    display.add(foreground.visual);
+    display.add(wall.visual);
     display.add(overlay);
     this.addIteration = addIteration;
     this.flushIteration = flushIteration;
-    banner = new Banner(this, config.bannerStyle.create());
-    details = new Details(this, config.detailsStyle.create());
     this.clipboardEngine = clipboardEngine;
     toPixels = display.toPixels(syntax.displayUnit);
     fromPixelsToMM = 1.0 / display.toPixels(Syntax.DisplayUnit.MM);
@@ -206,7 +200,7 @@ public class Context {
           hoverIdle.point =
               vector.add(new Vector(-syntax.pad.converseStart * toPixels, scroll + peek));
         });
-    foreground.addCornerstoneListener(
+    wall.addCornerstoneListener(
         this,
         new Wall.CornerstoneListener() {
           Brick cornerstone = null;
@@ -242,7 +236,7 @@ public class Context {
             cornerstone.addAttachment(context, selectionBrickAttachment);
           }
         });
-    foreground.addBeddingListener(
+    wall.addBeddingListener(
         this,
         new Wall.BeddingListener() {
           @Override
@@ -258,7 +252,7 @@ public class Context {
     else windowToSupertree(document.root);
     if (config.startSelected) document.root.visual.selectAnyChild(this);
     else {
-      foreground.setCornerstone(
+      wall.setCornerstone(
           this, document.root.visual.createOrGetFirstBrick(this), () -> null, () -> null);
     }
     triggerIdleLayBricksOutward();
@@ -308,11 +302,9 @@ public class Context {
   public void applyScroll() {
     final double newScroll = scroll + peek;
     double conversePad = syntax.pad.converseStart * toPixels;
-    foreground.visual.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
+    wall.visual.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
     background.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
     overlay.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
-    banner.setScroll(this, newScroll);
-    details.setScroll(this, newScroll);
   }
 
   public void flushIteration(final int limit) {
@@ -568,8 +560,8 @@ public class Context {
   }
 
   public void triggerIdleLayBricksOutward() {
-    triggerIdleLayBricksBeforeStart(foreground.children.get(0).children.get(0));
-    triggerIdleLayBricksAfterEnd(foreground.children.last().children.last());
+    triggerIdleLayBricksBeforeStart(wall.children.get(0).children.get(0));
+    triggerIdleLayBricksAfterEnd(wall.children.last().children.last());
   }
 
   public void clearSelection() {
@@ -631,8 +623,6 @@ public class Context {
   }
 
   public static class InitialConfig {
-    public final Style.Config bannerStyle = new Style.Config();
-    public final Style.Config detailsStyle = new Style.Config();
     public boolean animateCoursePlacement = false;
     public boolean animateDetails = false;
     public int ellipsizeThreshold = Integer.MAX_VALUE;
@@ -722,7 +712,7 @@ public class Context {
 
     public HoverIteration(final Context context) {
       this.context = context;
-      at = hoverBrick == null ? context.foreground.children.get(0).children.get(0) : hoverBrick;
+      at = hoverBrick == null ? context.wall.children.get(0).children.get(0) : hoverBrick;
     }
 
     @Override
@@ -740,10 +730,10 @@ public class Context {
         return new ROPair<>(false, false);
       }
       if (point.transverse < at.parent.transverseStart && at.parent.index > 0) {
-        at = context.foreground.children.get(at.parent.index - 1).children.get(0);
+        at = context.wall.children.get(at.parent.index - 1).children.get(0);
       } else if (point.transverse > at.parent.transverseEdge()
-          && at.parent.index < foreground.children.size() - 1) {
-        at = context.foreground.children.get(at.parent.index + 1).children.get(0);
+          && at.parent.index < wall.children.size() - 1) {
+        at = context.wall.children.get(at.parent.index + 1).children.get(0);
       } else {
         while (point.converse < at.getConverse() && at.index > 0) {
           at = at.parent.children.get(at.index - 1);

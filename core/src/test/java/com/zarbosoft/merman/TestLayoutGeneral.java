@@ -1,5 +1,12 @@
 package com.zarbosoft.merman;
 
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Padding;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
@@ -8,13 +15,6 @@ import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.Padding;
-import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.core.syntax.style.Style;
-import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import org.junit.Test;
 
 public class TestLayoutGeneral {
@@ -98,9 +98,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(one).build())
         .checkScroll(-10)
         .checkCourse(0, 0, 10)
-        .checkCourse(1, 17, 27)
-        .checkBanner(0, 10)
-        .checkDetails(20, 27);
+        .checkCourse(1, 17, 27);
   }
 
   @Test
@@ -114,9 +112,7 @@ public class TestLayoutGeneral {
             new TreeBuilder(one).build(),
             new TreeBuilder(one).build())
         .displayHeight(40)
-        .checkScroll(-10)
-        .checkBanner(0, 10)
-        .checkDetails(20, 27);
+        .checkScroll(-10);
   }
 
   @Test
@@ -137,9 +133,7 @@ public class TestLayoutGeneral {
         .checkCourse(4, 47, 57)
         .checkScroll(24)
         .checkCourse(3, 27, 37)
-        .checkCourse(5, 64, 74)
-        .checkBanner(13, 23)
-        .checkDetails(33, 40);
+        .checkCourse(5, 64, 74);
   }
 
   @Test
@@ -184,9 +178,7 @@ public class TestLayoutGeneral {
         .checkCourse(4, 47, 57)
         .checkScroll(23)
         .checkCourse(3, 27, 37)
-        .checkCourse(5, 64, 74)
-        .checkBanner(14, 24)
-        .checkDetails(34, 41);
+        .checkCourse(5, 64, 74);
   }
 
   @Test
@@ -231,9 +223,7 @@ public class TestLayoutGeneral {
         .checkCourse(4, 47, 107)
         .checkScroll(37)
         .checkCourse(3, 27, 37)
-        .checkCourse(5, 114, 124)
-        .checkBanner(0, 10)
-        .checkDetails(33, 40);
+        .checkCourse(5, 114, 124);
   }
 
   @Test

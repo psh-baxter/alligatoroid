@@ -1,8 +1,8 @@
-package com.zarbosoft.merman.core.extension;
+package com.zarbosoft.merman.editorcore.hovertype;
 
 import com.zarbosoft.merman.core.editor.Context;
 import com.zarbosoft.merman.core.editor.Hoverable;
-import com.zarbosoft.merman.core.editor.banner.BannerMessage;
+import com.zarbosoft.merman.editorcore.banner.BannerMessage;
 import com.zarbosoft.merman.core.editor.visual.Visual;
 import com.zarbosoft.merman.core.editor.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.editor.visual.visuals.VisualFrontArray;
