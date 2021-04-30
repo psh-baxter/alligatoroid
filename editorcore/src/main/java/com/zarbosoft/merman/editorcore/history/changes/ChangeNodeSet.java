@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.editorcore.history.changes;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.FieldAtom;
-import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.editorcore.history.Change;
 
 public class ChangeNodeSet extends Change {
@@ -28,11 +28,12 @@ public class ChangeNodeSet extends Change {
 		return true;
 	}
 
+	@Override
 	public Change apply(final Context context) {
 		final Change reverse = new ChangeNodeSet(value, value.data);
 		value.data.setValueParentRef(null);
 		value.data = atom;
-		atom.setValueParentRef(value.new NodeParent());
+		atom.setValueParentRef(new FieldAtom.Parent(value));
 		for (final FieldAtom.Listener listener : value.listeners)
 			listener.set(context, atom);
 		return reverse;

@@ -9,6 +9,10 @@ public interface ROList<T> extends Iterable<T> {
 
   public boolean isEmpty();
 
+  public boolean some();
+
+  public boolean none();
+
   public int size();
 
   public T get(int i);

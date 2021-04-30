@@ -1,12 +1,12 @@
 package com.zarbosoft.merman.core.syntax.symbol;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Image;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.merman.core.wall.bricks.BrickImage;
-import com.zarbosoft.merman.core.syntax.style.Style;
 
 public class SymbolImageSpec extends Symbol {
   public final Style style;
@@ -28,7 +28,7 @@ public class SymbolImageSpec extends Symbol {
   }
 
   @Override
-  public DisplayNode createDisplay(final Context context) {
+  public CourseDisplayNode createDisplay(final Context context) {
     Image image = context.display.image();
     image.setImage(context, style.image);
     image.rotate(context, style.rotate);

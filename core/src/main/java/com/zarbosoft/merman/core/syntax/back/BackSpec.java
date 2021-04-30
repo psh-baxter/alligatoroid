@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
-import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.TSList;
@@ -38,16 +38,16 @@ public abstract class BackSpec {
 
   protected abstract Iterator<BackSpec> walkStep();
 
-  public abstract Node buildBackRule(I18nEngine i18n, Syntax syntax);
+  public abstract Node buildBackRule(Environment env, Syntax syntax);
 
   public void finish(
-          MultiError errors,
-          final Syntax syntax,
-          final SyntaxPath typePath,
-          /** Null if this is nested under an array and thus will only be consumed by that array */
-          /** If immediate child is an atom, all candidates must be singular values */
-          boolean singularRestriction,
-          boolean typeRestriction) {}
+      MultiError errors,
+      final Syntax syntax,
+      final SyntaxPath typePath,
+      /** Null if this is nested under an array and thus will only be consumed by that array */
+      /** If immediate child is an atom, all candidates must be singular values */
+      boolean singularRestriction,
+      boolean typeRestriction) {}
 
   /**
    * @param stack
@@ -55,7 +55,7 @@ public abstract class BackSpec {
    * @param writer
    */
   public abstract void write(
-          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer);
+      TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer);
 
   /**
    * Can this represent a single value (non key/type) field in back type Subarrays can represent a

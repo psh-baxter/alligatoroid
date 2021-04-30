@@ -1,18 +1,19 @@
 package com.zarbosoft.merman.editorcore.helper;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Field;
-import com.zarbosoft.merman.document.values.FieldArray;
-import com.zarbosoft.merman.document.values.FieldAtom;
-import com.zarbosoft.merman.document.values.FieldPrimitive;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
-import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class TreeBuilder {
   private final AtomType type;
@@ -22,17 +23,29 @@ public class TreeBuilder {
     this.type = type;
   }
 
+  public TreeBuilder(Syntax syntax, String type) {
+    ROSet<AtomType> t = syntax.splayedTypes.get(type);
+    if (t.size() != 1) throw new Assertion();
+    this.type = t.iterator().next();
+  }
+
   public TreeBuilder add(final String key, final TreeBuilder builder) {
-    data.putNew(key, new FieldAtom((BaseBackAtomSpec) type.fields.get(key), builder.build()));
+    FieldAtom v = new FieldAtom((BaseBackAtomSpec) type.fields.get(key));
+    v.initialSet(builder.build());
+    data.putNew(key, v);
     return this;
   }
 
   public Atom build() {
-    return new Atom(type, data);
+    Atom atom = new Atom(type);
+    atom.initialSet(data);
+    return atom;
   }
 
   public TreeBuilder add(final String key, final Atom atom) {
-    data.putNew(key, new FieldAtom((BaseBackAtomSpec) type.fields.get(key), atom));
+    FieldAtom v = new FieldAtom((BaseBackAtomSpec) type.fields.get(key));
+    v.initialSet(atom);
+    data.putNew(key, v);
     return this;
   }
 
@@ -41,22 +54,31 @@ public class TreeBuilder {
     return this;
   }
 
-  public TreeBuilder addArray(final String key, final List<Atom> values) {
-    data.putNew(key, new FieldArray((BaseBackArraySpec) type.fields.get(key), values));
+  public TreeBuilder addArray(final String key, final Atom... values) {
+    FieldArray v = new FieldArray((BaseBackArraySpec) type.fields.get(key));
+    v.initialSet(TSList.of(values));
+    data.putNew(key, v);
     return this;
   }
-
-  public TreeBuilder addArray(final String key, final Atom... values) {
-    data.putNew(key, new FieldArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
+  public TreeBuilder addArray(final String key, final TSList<Atom> values) {
+    FieldArray v = new FieldArray((BaseBackArraySpec) type.fields.get(key));
+    v.initialSet(values);
+    data.putNew(key, v);
     return this;
   }
 
   public TreeBuilder addRecord(final String key, final Atom... values) {
-    data.putNew(key, new FieldArray((BaseBackArraySpec) type.fields.get(key), Arrays.asList(values)));
+    FieldArray v = new FieldArray((BaseBackArraySpec) type.fields.get(key));
+    v.initialSet(TSList.of(values));
+    data.putNew(key, v);
     return this;
   }
 
   public Field buildArray() {
-    return new FieldArray(null, Arrays.asList(new Atom(type, data)));
+    FieldArray fieldArray = new FieldArray(null);
+    Atom atom = new Atom(type);
+    atom.initialSet(data);
+    fieldArray.initialSet(TSList.of(atom));
+    return fieldArray;
   }
 }

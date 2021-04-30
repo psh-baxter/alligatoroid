@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.editorcore.display;
 
-import com.zarbosoft.merman.editor.display.Font;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Font;
 
 public class MockeryFont implements Font {
 	int size = 10;
@@ -9,22 +10,17 @@ public class MockeryFont implements Font {
 	}
 
 	@Override
-	public double getAscent() {
-		return (size * 8) / 10;
-	}
+	public Measurer measurer() {
+		return new Measurer() {
+			@Override
+			public double getWidth(String text) {
+				return size * text.length();
+			}
 
-	@Override
-	public double getDescent() {
-		return (size * 2) / 10;
-	}
-
-	@Override
-	public double getWidth(final String text) {
-		return size * text.length();
-	}
-
-	@Override
-	public int getIndexAtConverse(final String text, final double converse) {
-		return Math.min(text.length(), converse / size);
+			@Override
+			public int getIndexAtConverse(Context context, String text, double converse) {
+				return (int) Math.min(text.length(), Math.round((double)converse / size));
+			}
+		};
 	}
 }

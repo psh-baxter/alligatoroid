@@ -36,43 +36,43 @@ public class MiscSyntax {
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
             .front(new FrontMarkBuilder("infinity").build())
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     one =
         new TypeBuilder("one")
             .back(Helper.buildBackPrimitive("one"))
             .front(new FrontMarkBuilder("one").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     two =
         new TypeBuilder("two")
             .back(Helper.buildBackPrimitive("two"))
             .front(new FrontMarkBuilder("two").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     three =
         new TypeBuilder("three")
             .back(Helper.buildBackPrimitive("three"))
             .front(new FrontMarkBuilder("three").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     four =
         new TypeBuilder("four")
             .back(Helper.buildBackPrimitive("four"))
             .front(new FrontMarkBuilder("four").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     five =
         new TypeBuilder("five")
             .back(Helper.buildBackPrimitive("five"))
             .front(new FrontMarkBuilder("five").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     seven =
         new TypeBuilder("seven")
             .back(Helper.buildBackPrimitive("7"))
             .front(new FrontMarkBuilder("7").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     multiback =
         new TypeBuilder("multiback")
@@ -81,7 +81,7 @@ public class MiscSyntax {
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     quoted =
         new TypeBuilder("quoted")
@@ -89,13 +89,13 @@ public class MiscSyntax {
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
             .front(new FrontMarkBuilder("\"").build())
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     digits =
         new TypeBuilder("digits")
             .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     doubleQuoted =
         new TypeBuilder("doubleuoted")
@@ -109,7 +109,7 @@ public class MiscSyntax {
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("second")
             .front(new FrontMarkBuilder("\"").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     plus =
         new TypeBuilder("plus")
@@ -121,7 +121,7 @@ public class MiscSyntax {
             .frontDataNode("first")
             .frontMark("+")
             .frontDataNode("second")
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     plusEqual =
         new TypeBuilder("plusequal")
@@ -133,7 +133,7 @@ public class MiscSyntax {
             .frontDataNode("first")
             .frontMark("+=")
             .frontDataNode("second")
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     binaryBang =
         new TypeBuilder("bang")
@@ -145,7 +145,7 @@ public class MiscSyntax {
             .frontDataNode("first")
             .frontMark("!")
             .frontDataNode("second")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     waddle =
         new TypeBuilder("waddle")
@@ -155,7 +155,7 @@ public class MiscSyntax {
                     .build())
             .frontDataNode("first")
             .frontMark("?")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     snooze =
         new TypeBuilder("snooze")
@@ -165,7 +165,7 @@ public class MiscSyntax {
                     .build())
             .frontMark("#")
             .frontDataNode("value")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     multiplier =
         new TypeBuilder("multiplier")
@@ -177,7 +177,7 @@ public class MiscSyntax {
             .frontMark("x")
             .frontDataPrimitive("text")
             .frontDataNode("value")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     array =
         new TypeBuilder("array")
@@ -188,7 +188,7 @@ public class MiscSyntax {
                     .addSeparator(new FrontMarkBuilder(", ").build())
                     .build())
             .frontMark("]")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     doubleArray =
         new TypeBuilder("doublearray")
@@ -209,7 +209,7 @@ public class MiscSyntax {
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     recordElement =
         new TypeBuilder("record_element")
@@ -218,7 +218,7 @@ public class MiscSyntax {
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     pair =
         new TypeBuilder("pair")
@@ -232,7 +232,7 @@ public class MiscSyntax {
             .frontMark(", ")
             .frontDataNode("second")
             .frontMark(">")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     ratio =
         new TypeBuilder("ratio")
@@ -260,7 +260,7 @@ public class MiscSyntax {
             .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     syntax =
         new SyntaxBuilder("any")
@@ -333,43 +333,43 @@ public class MiscSyntax {
         new TypeBuilder("infinity")
             .back(Helper.buildBackPrimitive("infinity"))
             .front(new FrontMarkBuilder("infinity").build())
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType one =
         new TypeBuilder("one")
             .back(Helper.buildBackPrimitive("one"))
             .front(new FrontMarkBuilder("one").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType two =
         new TypeBuilder("two")
             .back(Helper.buildBackPrimitive("two"))
             .front(new FrontMarkBuilder("two").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType three =
         new TypeBuilder("three")
             .back(Helper.buildBackPrimitive("three"))
             .front(new FrontMarkBuilder("three").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType four =
         new TypeBuilder("four")
             .back(Helper.buildBackPrimitive("four"))
             .front(new FrontMarkBuilder("four").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType five =
         new TypeBuilder("five")
             .back(Helper.buildBackPrimitive("five"))
             .front(new FrontMarkBuilder("five").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType seven =
         new TypeBuilder("seven")
             .back(Helper.buildBackPrimitive("7"))
             .front(new FrontMarkBuilder("7").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType multiback =
         new TypeBuilder("multiback")
@@ -378,7 +378,7 @@ public class MiscSyntax {
             .frontDataPrimitive("a")
             .frontMark("^")
             .frontDataPrimitive("b")
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType quoted =
         new TypeBuilder("quoted")
@@ -386,13 +386,13 @@ public class MiscSyntax {
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
             .front(new FrontMarkBuilder("\"").build())
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType digits =
         new TypeBuilder("digits")
             .back(Helper.buildBackDataPrimitiveDigits("value"))
             .frontDataPrimitive("value")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType doubleQuoted =
         new TypeBuilder("doubleuoted")
@@ -406,7 +406,7 @@ public class MiscSyntax {
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("second")
             .front(new FrontMarkBuilder("\"").build())
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType plus =
         new TypeBuilder("plus")
@@ -418,7 +418,7 @@ public class MiscSyntax {
             .frontDataNode("first")
             .frontMark("+")
             .frontDataNode("second")
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType plusEqual =
         new TypeBuilder("plusequal")
@@ -430,7 +430,7 @@ public class MiscSyntax {
             .frontDataNode("first")
             .frontMark("+=")
             .frontDataNode("second")
-            .autoComplete(-1)
+            .autoComplete(false)
             .build();
     FreeAtomType binaryBang =
         new TypeBuilder("bang")
@@ -442,7 +442,7 @@ public class MiscSyntax {
             .frontDataNode("first")
             .frontMark("!")
             .frontDataNode("second")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType waddle =
         new TypeBuilder("waddle")
@@ -452,7 +452,7 @@ public class MiscSyntax {
                     .build())
             .frontDataNode("first")
             .frontMark("?")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType snooze =
         new TypeBuilder("snooze")
@@ -462,7 +462,7 @@ public class MiscSyntax {
                     .build())
             .frontMark("#")
             .frontDataNode("value")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType multiplier =
         new TypeBuilder("multiplier")
@@ -474,7 +474,7 @@ public class MiscSyntax {
             .frontMark("x")
             .frontDataPrimitive("text")
             .frontDataNode("value")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType array =
         new TypeBuilder("array")
@@ -485,7 +485,7 @@ public class MiscSyntax {
                     .addSeparator(new FrontMarkBuilder(", ").build())
                     .build())
             .frontMark("]")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType doubleArray =
         new TypeBuilder("doublearray")
@@ -506,7 +506,7 @@ public class MiscSyntax {
             .frontMark("{")
             .frontDataArray("value")
             .frontMark("}")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType recordElement =
         new TypeBuilder("record_element")
@@ -515,7 +515,7 @@ public class MiscSyntax {
             .frontDataPrimitive("key")
             .frontMark(": ")
             .frontDataNode("value")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType pair =
         new TypeBuilder("pair")
@@ -529,7 +529,7 @@ public class MiscSyntax {
             .frontMark(", ")
             .frontDataNode("second")
             .frontMark(">")
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     FreeAtomType ratio =
         new TypeBuilder("ratio")
@@ -557,7 +557,7 @@ public class MiscSyntax {
             .back(Helper.buildBackDataArray("value", "restricted_array_group"))
             .frontMark("_")
             .front(new FrontDataArrayBuilder("value").build())
-            .autoComplete(1)
+            .autoComplete(true)
             .build();
     Syntax syntax =
         new SyntaxBuilder("any")

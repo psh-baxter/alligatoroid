@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.backevents.ETypeEvent;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
@@ -40,7 +40,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
+  public Node buildBackRule(Environment env, final Syntax syntax) {
     return new Sequence()
         .add(
             new Terminal() {
@@ -48,7 +48,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
               protected boolean matches(Event event, Store store) {
                 if (!(event instanceof ETypeEvent)) return false;
                 if (matcher == null) return true;
-                return matcher.match(i18n, ((ETypeEvent) event).value);
+                return matcher.match(env, ((ETypeEvent) event).value);
               }
 
               @Override
@@ -64,7 +64,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
                     id, new FieldPrimitive(BackTypeSpec.this, ((ETypeEvent) store.top()).value));
               }
             })
-        .add(value.buildBackRule(i18n, syntax));
+        .add(value.buildBackRule(env, syntax));
   }
 
   @Override

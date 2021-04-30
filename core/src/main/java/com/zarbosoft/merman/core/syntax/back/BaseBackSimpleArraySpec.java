@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
-import com.zarbosoft.merman.core.I18nEngine;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
@@ -87,7 +87,7 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
         });
   }
 
-  protected void buildBackRuleInner(I18nEngine i18n, Syntax syntax, Sequence s) {
+  protected void buildBackRuleInner(Environment env, Syntax syntax, Sequence s) {
     s.add(StackStore.prepVarStack)
         .add(
             new Repeat(
@@ -109,7 +109,7 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
                                         }
                                         union.add(
                                             new Sequence()
-                                                .add(plated.getValue().buildBackRule(i18n, syntax))
+                                                .add(plated.getValue().buildBackRule(env, syntax))
                                                 .add(
                                                     new Operator<StackStore>() {
                                                       @Override

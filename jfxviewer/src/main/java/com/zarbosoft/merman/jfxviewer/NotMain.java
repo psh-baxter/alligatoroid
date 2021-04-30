@@ -1,27 +1,26 @@
 package com.zarbosoft.merman.jfxviewer;
 
-import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.Document;
-import com.zarbosoft.merman.core.document.fields.FieldArray;
-import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.Cursor;
+import com.zarbosoft.merman.core.CursorFactory;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.IterationContext;
 import com.zarbosoft.merman.core.IterationTask;
 import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.Document;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.example.JsonSyntax;
+import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.hid.Key;
+import com.zarbosoft.merman.core.syntax.BackType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.merman.core.example.JsonSyntax;
-import com.zarbosoft.merman.core.syntax.BackType;
-import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.jfxcore.JavaI18nEngine;
-import com.zarbosoft.merman.jfxcore.JavaFXDelayEngine;
-import com.zarbosoft.merman.jfxcore.SimpleClipboardEngine;
+import com.zarbosoft.merman.jfxcore.JFXEnvironment;
 import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
@@ -39,7 +38,6 @@ import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
-import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Region;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -78,8 +76,8 @@ public class NotMain extends Application {
       if (args.isEmpty())
         throw new RuntimeException("need to specify one file to open on the command line");
       String path = args.get(0);
-      JavaI18nEngine i18n = new JavaI18nEngine(Locale.getDefault());
-      Syntax syntax = JsonSyntax.create(i18n, new Padding(5, 5, 5, 5));
+      Environment env = new JFXEnvironment(Locale.getDefault());
+      Syntax syntax = JsonSyntax.create(env, new Padding(5, 5, 5, 5));
       JavaSerializer serializer;
       Document document;
       if (path.endsWith(".json")) {
@@ -95,12 +93,89 @@ public class NotMain extends Application {
               syntax,
               document,
               display,
-              this::addIteration,
-              this::flushIteration,
-              new JavaFXDelayEngine(),
-              new SimpleClipboardEngine(syntax.backType),
+              env,
               serializer,
-              i18n);
+              new CursorFactory() {
+                boolean handleCommon(Context context, ButtonEvent e) {
+                  if (e.press) {
+                    switch (e.key) {
+                      case C:
+                        {
+                          if (context.cursor != null
+                              && (e.modifiers.contains(Key.CONTROL)
+                                  || e.modifiers.contains(Key.CONTROL_LEFT)
+                                  || e.modifiers.contains(Key.CONTROL_RIGHT))) {
+                            context.cursor.dispatch(
+                                new com.zarbosoft.merman.core.Cursor.Dispatcher() {
+                                  @Override
+                                  public void handle(VisualFrontArray.Cursor cursor) {
+                                    context.copy(
+                                        cursor.visual.value.data.sublist(
+                                            cursor.beginIndex, cursor.endIndex + 1));
+                                  }
+
+                                  @Override
+                                  public void handle(VisualFrontAtomBase.Cursor cursor) {
+                                    context.copy(TSList.of(cursor.base.atomGet()));
+                                  }
+
+                                  @Override
+                                  public void handle(VisualFrontPrimitive.Cursor cursor) {
+                                    context.copy(
+                                        cursor.visualPrimitive.value.data.substring(
+                                            cursor.range.beginOffset, cursor.range.endOffset));
+                                  }
+                                });
+                          }
+                          return true;
+                        }
+                    }
+                  }
+                  return false;
+                }
+
+                @Override
+                public VisualFrontPrimitive.Cursor createPrimitiveCursor(
+                    Context context,
+                    VisualFrontPrimitive visualPrimitive,
+                    boolean leadFirst,
+                    int beginOffset,
+                    int endOffset) {
+                  return new VisualFrontPrimitive.Cursor(
+                      context, visualPrimitive, leadFirst, beginOffset, endOffset) {
+                    @Override
+                    public boolean handleKey(Context context, ButtonEvent hidEvent) {
+                      return handleCommon(context, hidEvent);
+                    }
+                  };
+                }
+
+                @Override
+                public VisualFrontArray.Cursor createArrayCursor(
+                    Context context,
+                    VisualFrontArray visual,
+                    boolean leadFirst,
+                    int start,
+                    int end) {
+                  return new VisualFrontArray.Cursor(context, visual, leadFirst, start, end) {
+                    @Override
+                    public boolean handleKey(Context context, ButtonEvent hidEvent) {
+                      return handleCommon(context, hidEvent);
+                    }
+                  };
+                }
+
+                @Override
+                public VisualFrontAtomBase.Cursor createAtomCursor(
+                    Context context, VisualFrontAtomBase base) {
+                  return new VisualFrontAtomBase.Cursor(context, base) {
+                    @Override
+                    public boolean handleKey(Context context, ButtonEvent hidEvent) {
+                      return handleCommon(context, hidEvent);
+                    }
+                  };
+                }
+              });
       context.addHoverListener(
           new Context.HoverListener() {
             @Override
@@ -119,7 +194,8 @@ public class NotMain extends Application {
                   // - at two subtrees of an array/primitives: longest submatch == array/primitive
                   // ==
                   // field, next segment == int
-                  Object base = context.syntaxLocate(new SyntaxPath(endPathList.subUntil(longestMatch)));
+                  Object base =
+                      context.syntaxLocate(new SyntaxPath(endPathList.subUntil(longestMatch)));
                   if (base instanceof FieldArray) {
                     int startIndex = Integer.parseInt(startPathList.get(longestMatch));
                     int endIndex = Integer.parseInt(endPathList.get(longestMatch));
@@ -147,10 +223,10 @@ public class NotMain extends Application {
               }
             }
           });
-      context.keyListener =
+      context.mouseButtonEventListener =
           new Context.KeyListener() {
             @Override
-            public boolean handleKey(Context context, HIDEvent e) {
+            public boolean handleKey(Context context, ButtonEvent e) {
               if (!e.press) {
                 switch (e.key) {
                   case MOUSE_1:
@@ -178,36 +254,6 @@ public class NotMain extends Application {
                         return true;
                       }
                     }
-                  case C:
-                    {
-                      if (context.cursor != null
-                          && (e.modifiers.contains(Key.CONTROL)
-                              || e.modifiers.contains(Key.CONTROL_LEFT)
-                              || e.modifiers.contains(Key.CONTROL_RIGHT))) {
-                        context.cursor.dispatch(
-                            new Cursor.Dispatcher() {
-                              @Override
-                              public void handle(VisualFrontArray.ArrayCursor cursor) {
-                                context.copy(
-                                    cursor.visual.value.data.sublist(
-                                        cursor.beginIndex, cursor.endIndex + 1));
-                              }
-
-                              @Override
-                              public void handle(VisualFrontAtomBase.NestedCursor cursor) {
-                                context.copy(TSList.of(cursor.base.atomGet()));
-                              }
-
-                              @Override
-                              public void handle(VisualFrontPrimitive.PrimitiveCursor cursor) {
-                                context.copy(
-                                    cursor.visualPrimitive.value.data.substring(
-                                        cursor.range.beginOffset, cursor.range.endOffset));
-                              }
-                            });
-                      }
-                      return true;
-                    }
                 }
               }
               return false;
@@ -221,7 +267,7 @@ public class NotMain extends Application {
           });
     } catch (GrammarTooUncertain e) {
       StringBuilder message = new StringBuilder();
-      for (Parse.State leaf : e.context.leaves) {
+      for (Parse.Branch leaf : e.context.branches) {
         message.append(Format.format(" * %s (%s)\n", leaf, leaf.color()));
       }
       throw new RuntimeException(

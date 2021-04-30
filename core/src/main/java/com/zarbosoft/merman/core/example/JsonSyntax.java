@@ -1,10 +1,9 @@
 package com.zarbosoft.merman.core.example;
 
-import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
@@ -27,6 +26,7 @@ import com.zarbosoft.merman.core.syntax.primitivepattern.Integer;
 import com.zarbosoft.merman.core.syntax.primitivepattern.JsonDecimal;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
@@ -51,21 +51,22 @@ public class JsonSyntax {
   private static final String ALIGNMENT_INDENT = "indent";
   private static final String ALIGNMENT_BASE = "base";
 
-  public static Syntax create(I18nEngine i18n, Padding pad) {
+  public static Syntax create(Environment env, Padding pad) {
     double fontSize = 5;
     final Style stringStyle =
-            new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("F79578")));
+        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("F79578")));
     final Style numberStyle =
-            new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("95FA94")));
+        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("95FA94")));
     final Style specialStyle =
-            new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("7DD4FB")));
+        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("7DD4FB")));
     final Style symbolStyle =
-            new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA")));
+        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA")));
     final Style baseAlignSymbolStyle =
-            new Style(new Style.Config()
-                    .fontSize(fontSize)
-                    .color(ModelColor.RGB.hex("CACACA"))
-                    .splitAlignment(ALIGNMENT_BASE));
+        new Style(
+            new Style.Config()
+                .fontSize(fontSize)
+                .color(ModelColor.RGB.hex("CACACA"))
+                .splitAlignment(ALIGNMENT_BASE));
     TSMap<String, AlignmentSpec> containerAlignments =
         new TSMap<String, AlignmentSpec>()
             .put(
@@ -112,8 +113,7 @@ public class JsonSyntax {
                     new AtomType.Config(
                         TYPE_STRING,
                         TSList.of(
-                            new BackPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID))),
+                            new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(DEFAULT_ID))),
                         TSList.of(
                             textSym("\"", stringStyle),
                             new FrontPrimitiveSpec(
@@ -126,7 +126,8 @@ public class JsonSyntax {
                         TYPE_INT,
                         TSList.of(
                             new BackJSONSpecialPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID).pattern(new Integer(), "integer"))),
+                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID)
+                                    .pattern(new Integer(), "integer"))),
                         TSList.of(
                             new FrontPrimitiveSpec(
                                 new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),
@@ -137,7 +138,8 @@ public class JsonSyntax {
                         TYPE_DECIMAL,
                         TSList.of(
                             new BackJSONSpecialPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID).pattern(new JsonDecimal(), "json decimal"))),
+                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID)
+                                    .pattern(new JsonDecimal(), "json decimal"))),
                         TSList.of(
                             new FrontPrimitiveSpec(
                                 new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),
@@ -163,8 +165,7 @@ public class JsonSyntax {
                     new AtomType.Config(
                         TYPE_RECORD_PAIR,
                         TSList.of(
-                            new BackKeySpec(
-                                new BaseBackPrimitiveSpec.Config("key")),
+                            new BackKeySpec(new BaseBackPrimitiveSpec.Config("key")),
                             new BackAtomSpec(new BaseBackAtomSpec.Config("value", GROUP_ANY))),
                         TSList.of(
                             new FrontPrimitiveSpec(
@@ -210,7 +211,7 @@ public class JsonSyntax {
       errors.raise();
     }
     return new Syntax(
-        i18n,
+        env,
         new Syntax.Config(
                 types,
                 splayedTypes,
@@ -230,29 +231,31 @@ public class JsonSyntax {
   }
 
   private static Style cursorStyle(boolean primitive) {
-    return new Style(new Style.Config()
-      .obbox(
-          new ObboxStyle(
-              new ObboxStyle.Config()
-                  .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                  .roundStart(true)
-                  .roundEnd(true)
-                  .lineThickness(0.3)
-                  .roundRadius(3)
-                  .lineColor(ModelColor.RGB.white))));
+    return new Style(
+        new Style.Config()
+            .obbox(
+                new ObboxStyle(
+                    new ObboxStyle.Config()
+                        .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                        .roundStart(true)
+                        .roundEnd(true)
+                        .lineThickness(0.3)
+                        .roundRadius(3)
+                        .lineColor(ModelColor.RGB.white))));
   }
 
   private static Style hoverStyle(boolean primitive) {
-    return new Style(new Style.Config()
-      .obbox(
-          new ObboxStyle(
-              new ObboxStyle.Config()
-                  .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                  .roundEnd(true)
-                  .roundStart(true)
-                  .lineThickness(0.3)
-                  .roundRadius(3)
-                  .lineColor(ModelColor.RGB.hex("888888")))));
+    return new Style(
+        new Style.Config()
+            .obbox(
+                new ObboxStyle(
+                    new ObboxStyle.Config()
+                        .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                        .roundEnd(true)
+                        .roundStart(true)
+                        .lineThickness(0.3)
+                        .roundRadius(3)
+                        .lineColor(ModelColor.RGB.hex("888888")))));
   }
 
   public static FrontSymbol textSym(String s, Style style) {

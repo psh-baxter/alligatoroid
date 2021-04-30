@@ -64,22 +64,10 @@ public class ConditionValue extends ConditionType {
     public void destroy(final Context context) {}
 
     @Override
-    public void set(final Context context, final String value) {
-      if (value.isEmpty()) {
+    public void changed(Context context, int index, int remove, String add) {
+      if (value.data.length() == 0) {
         setState(context, false);
       } else setState(context, true);
-    }
-
-    @Override
-    public void added(final Context context, final int index, final String value) {
-      setState(context, true);
-    }
-
-    @Override
-    public void removed(final Context context, final int index, final int count) {
-      if (((FieldPrimitive) value).get().isEmpty()) {
-        setState(context, false);
-      }
     }
   }
 

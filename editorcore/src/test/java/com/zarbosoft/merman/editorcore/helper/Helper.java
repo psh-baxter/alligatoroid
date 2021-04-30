@@ -1,97 +1,72 @@
 package com.zarbosoft.merman.editorcore.helper;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Sets;
-import com.zarbosoft.luxem.write.Writer;
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.Document;
-import com.zarbosoft.merman.document.values.Field;
-import com.zarbosoft.merman.document.values.FieldAtom;
-import com.zarbosoft.merman.document.values.FieldPrimitive;
-import com.zarbosoft.merman.document.values.FieldArray;
-import com.zarbosoft.merman.editor.Action;
-import com.zarbosoft.merman.editor.ClipboardEngine;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.DelayEngine;
-import com.zarbosoft.merman.editor.IterationTask;
-import com.zarbosoft.merman.editor.display.MockeryDisplay;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.Document;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.syntax.Direction;
+import com.zarbosoft.merman.core.syntax.GapAtomType;
+import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
+import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
+import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
+import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
+import com.zarbosoft.merman.core.syntax.back.BackSpec;
+import com.zarbosoft.merman.core.syntax.back.BackSubArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
+import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
+import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
+import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
+import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.cursors.EditArrayCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditAtomCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
+import com.zarbosoft.merman.editorcore.display.MockeryDisplay;
+import com.zarbosoft.merman.editorcore.history.History;
+import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
+import com.zarbosoft.rendaw.common.Format;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.back.BackArraySpec;
-import com.zarbosoft.merman.syntax.back.BackAtomSpec;
-import com.zarbosoft.merman.syntax.back.BackFixedPrimitiveSpec;
-import com.zarbosoft.merman.syntax.back.BackFixedTypeSpec;
-import com.zarbosoft.merman.syntax.back.BackKeySpec;
-import com.zarbosoft.merman.syntax.back.BackPrimitiveSpec;
-import com.zarbosoft.merman.syntax.back.BackRecordSpec;
-import com.zarbosoft.merman.syntax.back.BackSpec;
-import com.zarbosoft.merman.syntax.back.BackSubArraySpec;
-import com.zarbosoft.merman.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.syntax.back.BaseBackAtomSpec;
-import com.zarbosoft.merman.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.syntax.back.BaseBackSimpleArraySpec;
-import com.zarbosoft.merman.syntax.primitivepattern.Digits;
-import com.zarbosoft.merman.syntax.primitivepattern.Letters;
-import com.zarbosoft.merman.syntax.primitivepattern.Repeat1;
-import com.zarbosoft.rendaw.common.DeadCode;
+import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.ComparisonFailure;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.function.Consumer;
-
-import static com.zarbosoft.rendaw.common.Common.iterable;
-import static com.zarbosoft.rendaw.common.Common.uncheck;
-
 public class Helper {
-  public static void dump(final Field field, final Writer writer) {
-    uncheck(
-        () -> {
-          if (field.getClass() == FieldArray.class) {
-            writer.arrayBegin();
-            ((FieldArray) field).data.stream().forEach(element -> dump(element, writer));
-            writer.arrayEnd();
-          } else if (field.getClass() == FieldAtom.class) {
-            dump(((FieldAtom) field).get(), writer);
-          } else if (field.getClass() == FieldPrimitive.class) {
-            writer.quotedPrimitive(((FieldPrimitive) field).get().getBytes(StandardCharsets.UTF_8));
-          } else throw new DeadCode();
-        });
+
+  public static Environment env = new TestEnvironment();
+
+  public static Atom createGap(Syntax syntax) {
+    return new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build();
   }
 
-  private static void dump(final Atom value, final Writer writer) {
-    uncheck(
-        () -> {
-          writer.type(value.type.id().getBytes(StandardCharsets.UTF_8));
-          writer.recordBegin();
-          value
-              .fields
-              .keys()
-              .forEach(
-                  k ->
-                      dump(
-                          value.fields.getOpt(k),
-                          uncheck(() -> writer.key(k.getBytes(StandardCharsets.UTF_8)))));
-          writer.recordEnd();
-        });
+  public static Atom createSuffixGap(Syntax syntax, Atom... preceding) {
+    return new TreeBuilder(syntax.suffixGap)
+        .add(SuffixGapAtomType.GAP_PRIMITIVE_KEY, "")
+        .addArray(SuffixGapAtomType.PRECEDING_KEY, preceding)
+        .build();
   }
 
-  public static void dump(final Field field) {
-    dump(field, new Writer(System.out, (byte) ' ', 4));
-    System.out.write('\n');
-    System.out.flush();
+  public static EditAtomCursor cursorAtom(Context context) {
+    return (EditAtomCursor) context.cursor;
   }
 
-  public static void act(final Context context, final String name) {
-    for (final Action action : iterable(context.actions())) {
-      if (action.id().equals(name)) {
-        action.run(context);
-        return;
-      }
-    }
-    throw new AssertionError(String.format("No action named [%s]", name));
+  public static EditArrayCursor cursorArray(Context context) {
+    return (EditArrayCursor) context.cursor;
+  }
+
+  public static EditPrimitiveCursor cursorPrimitive(Context context) {
+    return (EditPrimitiveCursor) context.cursor;
   }
 
   public static BackSpec buildBackType(final String type, final BackSpec child) {
@@ -107,15 +82,17 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataPrimitive(final String id) {
-    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id));
   }
 
   public static BackSpec buildBackDataPrimitiveLetters(final String id) {
-    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Letters())));
+    return new BackPrimitiveSpec(
+        new BaseBackPrimitiveSpec.Config(id).pattern(new Repeat1(new Letters()), "1+ letters"));
   }
 
   public static BackSpec buildBackDataPrimitiveDigits(final String id) {
-    return new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config(id, new Repeat1(new Digits())));
+    return new BackPrimitiveSpec(
+        new BaseBackPrimitiveSpec.Config(id).pattern(new Repeat1(new Digits()), "1+ digits"));
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
@@ -123,42 +100,38 @@ public class Helper {
   }
 
   public static BackKeySpec buildBackDataKey(final String id) {
-    return new BackKeySpec(new BaseBackPrimitiveSpec.Config(id, null));
+    return new BackKeySpec(new BaseBackPrimitiveSpec.Config(id));
   }
 
   public static BackArraySpec buildBackDataArray(final String id, String type) {
-    return new BackArraySpec(
-        new BaseBackSimpleArraySpec.Config(
-            id, new BackAtomSpec(new BaseBackAtomSpec.Config(null, type))));
+    return new BackArraySpec(new BaseBackSimpleArraySpec.Config(id, type, new TSList<>()));
   }
 
   public static BackSubArraySpec buildBackDataRootArray(final String id, String type) {
-    return new BackSubArraySpec(
-        new BaseBackSimpleArraySpec.Config(
-            id, new BackAtomSpec(new BaseBackAtomSpec.Config(null, type))));
+    return new BackSubArraySpec(new BaseBackSimpleArraySpec.Config(id, type, new TSList<>()));
   }
 
   public static void assertTreeEqual(final Atom expected, final Atom got) {
     if (expected.type != got.type)
       throw new AssertionError(
-          String.format(
+          Format.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
               expected.type, got.type, got.getSyntaxPath()));
-    final Set<String> expectedKeys = expected.fields.keys();
-    final Set<String> gotKeys = got.fields.keys();
+    final ROSet<String> expectedKeys = expected.fields.keys();
+    final ROSet<String> gotKeys = got.fields.keys();
     {
-      final Set<String> missing = Sets.difference(expectedKeys, gotKeys);
+      final TSSet<String> missing = expectedKeys.difference(gotKeys);
       if (!missing.isEmpty())
         throw new AssertionError(
-            String.format("Missing fields: %s\nAt: %s", missing, got.getSyntaxPath()));
+            Format.format("Missing fields: %s\nAt: %s", missing, got.getSyntaxPath()));
     }
     {
-      final Set<String> extra = Sets.difference(gotKeys, expectedKeys);
+      final TSSet<String> extra = gotKeys.difference(expectedKeys);
       if (!extra.isEmpty())
         throw new AssertionError(
-            String.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
+            Format.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
     }
-    for (final String key : Sets.intersection(expectedKeys, gotKeys)) {
+    for (final String key : expectedKeys.intersect(gotKeys)) {
       assertTreeEqual(expected.fields.getOpt(key), got.fields.getOpt(key));
     }
   }
@@ -169,13 +142,11 @@ public class Helper {
       final FieldArray gotValue = (FieldArray) got;
       if (expectedValue.data.size() != gotValue.data.size())
         throw new AssertionError(
-            String.format(
+            Format.format(
                 "Array length mismatch.\nExpected: %s\nGot: %s\nAt: %s",
                 expectedValue.data.size(), gotValue.data.size(), got.getSyntaxPath()));
       for (int i = 0; i < expectedValue.data.size(); ++i) {
-        Atom first = expectedValue.data.get(i);
-        Atom second = gotValue.data.get(i);
-        assertTreeEqual(first, second);
+        assertTreeEqual(expectedValue.data.get(i), gotValue.data.get(i));
       }
     } else if (expected.getClass() == FieldAtom.class) {
       final FieldAtom expectedValue = (FieldAtom) expected;
@@ -186,90 +157,46 @@ public class Helper {
       final FieldPrimitive gotValue = (FieldPrimitive) got;
       if (!expectedValue.get().equals(gotValue.get()))
         throw new ComparisonFailure(
-            String.format("Array length mismatch.\nAt: %s", got.getSyntaxPath()),
+            Format.format("Array length mismatch.\nAt: %s", got.getSyntaxPath()),
             expectedValue.get(),
             gotValue.get());
     } else
       throw new AssertionError(
-          String.format(
+          Format.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
               expected.getClass(), got.getClass(), got.getSyntaxPath()));
   }
 
   public static void assertTreeEqual(final Context context, final Atom expected, final Field got) {
-    assertTreeEqual(
-        new FieldArray(
-            (BaseBackArraySpec) context.syntax.root.fields.get("value"),
-            ImmutableList.of(expected)),
-        got);
+    FieldArray value = new FieldArray((BaseBackArraySpec) context.syntax.root.fields.get("value"));
+    value.initialSet(TSList.of(expected)); // TODO this shouldn't really be setting the value
+    assertTreeEqual(value, got);
   }
 
   public static FieldArray rootArray(final Document doc) {
     return (FieldArray) doc.root.fields.getOpt("value");
   }
 
-  public static Context buildDoc(final Syntax syntax, final Atom... root) {
-    return buildDoc(idleTask -> {}, limit -> {}, syntax, root);
+  public static Editor buildDoc(final Syntax syntax, final Atom... root) {
+    return buildDoc(new Context.InitialConfig(), syntax, root);
   }
 
-  public static Context buildDoc(
-      final Consumer<IterationTask> addIteration,
-      final Consumer<Integer> flushIteration,
-      final Syntax syntax,
-      final Atom... root) {
-    final Document doc =
-        new Document(
-            syntax,
-            new Atom(
-                syntax.root,
-                new TSMap<>(
-                    ImmutableMap.of(
-                        "value",
-                        new FieldArray(
-                            (BaseBackArraySpec) syntax.root.fields.get("value"),
-                            Arrays.asList(root))))));
-    final Context context =
-        new Context(
+  public static Editor buildDoc(
+      Context.InitialConfig contextConfig, final Syntax syntax, final Atom... root) {
+    FieldArray rootArray = new FieldArray((BaseBackArraySpec) syntax.root.fields.get("value"));
+    rootArray.initialSet(TSList.of(root));
+    Atom rootAtom = new Atom(syntax.root);
+    rootAtom.initialSet(new TSMap<String, Field>().put("value", rootArray));
+    final Document doc = new Document(syntax, rootAtom);
+    final Editor editor =
+        new Editor(
             syntax,
             doc,
-            new MockeryDisplay(),
-            addIteration,
-            flushIteration,
-                new DelayEngine() {
-                  @Override
-                  public Handle delay(long ms, Runnable r) {
-                    r.run();
-                    return new Handle() {
-                      @Override
-                      public void cancel() {}
-                    };
-                  }
-                },
-            new ClipboardEngine() {
-              byte[] data = null;
-              String string = null;
-
-              @Override
-              public void set(final Object bytes) {
-                data = bytes;
-              }
-
-              @Override
-              public void setString(final String string) {
-                this.string = string;
-              }
-
-              @Override
-              public void get(Consumer<Object> cb) {
-                return data;
-              }
-
-              @Override
-              public void getString(Consumer<String> cb) {
-                return string;
-              }
-            },
-            false);
-    return context;
+            new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
+            new TestEnvironment(),
+            new History(),
+            new JavaSerializer(syntax.backType),
+            new Editor.Config(contextConfig));
+    return editor;
   }
 }

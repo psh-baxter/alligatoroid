@@ -1,13 +1,13 @@
 package com.zarbosoft.pidgoon.events.nodes;
 
-import com.zarbosoft.pidgoon.model.MismatchCause;
-import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.Position;
+import com.zarbosoft.pidgoon.model.MismatchCause;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
-import com.zarbosoft.pidgoon.model.RefParent;
 import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.RefParent;
+import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.rendaw.common.ROMap;
 
 /** Base node to match a single event. Define `matches` to use. */
@@ -21,15 +21,16 @@ public abstract class Terminal extends Node {
       final Parent parent,
       final ROMap<Object, RefParent> seen,
       final MismatchCause cause) {
-    context.leaves.add(
-        new Parse.State() {
+    context.branches.add(
+        new Parse.Branch() {
           @Override
-          public <T> T color() {
-            return (T) prestore.color;
+          public Store store() {
+            return prestore;
           }
 
           @Override
-          public void parse(final Parse step, final com.zarbosoft.pidgoon.model.Position sourcePosition) {
+          public void parse(
+              final Parse step, final com.zarbosoft.pidgoon.model.Position sourcePosition) {
             Store store = prestore;
             final Position position = (Position) sourcePosition;
             store = store.record(position);
@@ -40,10 +41,10 @@ public abstract class Terminal extends Node {
             }
           }
 
-            @Override
-            public String toString() {
-                return Terminal.this.toString();
-            }
+          @Override
+          public String toString() {
+            return Terminal.this.toString();
+          }
         });
   }
 

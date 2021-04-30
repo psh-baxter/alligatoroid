@@ -8,7 +8,7 @@ import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.display.Image;
 import com.zarbosoft.merman.core.display.Text;
-import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
@@ -86,7 +86,7 @@ public class MockeryDisplay extends Display {
     heightChanged(height);
   }
 
-  public void sendHIDEvent(final HIDEvent event) {
-    hidEventListener.apply(event);
+  public void sendHIDEvent(final ButtonEvent event) {
+    keyEventListener.apply(event);
   }
 }

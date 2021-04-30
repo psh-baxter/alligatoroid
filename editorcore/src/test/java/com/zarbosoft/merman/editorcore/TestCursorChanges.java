@@ -1,23 +1,29 @@
 package com.zarbosoft.merman.editorcore;
 
-import com.google.common.collect.ImmutableList;
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.Field;
-import com.zarbosoft.merman.document.values.FieldArray;
-import com.zarbosoft.merman.document.values.FieldAtom;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.Path;
-import com.zarbosoft.merman.editor.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.GapAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.editorcore.helper.BackRecordBuilder;
+import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
+import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
+import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
 import com.zarbosoft.merman.editorcore.helper.Helper;
+import com.zarbosoft.merman.editorcore.helper.SyntaxBuilder;
 import com.zarbosoft.merman.editorcore.helper.TreeBuilder;
+import com.zarbosoft.merman.editorcore.helper.TypeBuilder;
+import com.zarbosoft.merman.editorcore.history.Change;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeNodeSet;
-import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.TSList;
 import org.hamcrest.MatcherAssert;
 import org.junit.Test;
-
-import java.util.function.BiConsumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.IsEqual.equalTo;
@@ -25,239 +31,441 @@ import static org.hamcrest.core.IsEqual.equalTo;
 /** Test changes to the selection when a change affects the selected nodes (or nearby nodes). */
 public class TestCursorChanges {
 
+  public static void arrayParentDelete(Editor editor, FieldArray.Parent parent) {
+    editor.history.record(
+        editor.context,
+        null,
+        r -> r.apply(editor.context, new ChangeArray(parent.value, parent.index, 1, TSList.of())));
+  }
+
+  public static void parentDelete(Editor editor, Field.Parent<?> parent) {
+    parent.dispatch(
+        new Field.ParentDispatcher() {
+          @Override
+          public void handle(FieldArray.Parent parent) {
+            arrayParentDelete(editor, parent);
+          }
+
+          @Override
+          public void handle(FieldAtom.Parent parent) {
+            editor.history.record(
+                editor.context,
+                null,
+                r ->
+                    r.apply(
+                        editor.context,
+                        new ChangeNodeSet(
+                            parent.value,
+                            new TreeBuilder(editor.context.syntax.gap)
+                                .add(GapAtomType.GAP_PRIMITIVE_KEY, "")
+                                .build())));
+          }
+        });
+  }
+
+  public static AtomType t(Syntax syntax, String name) {
+    return syntax.splayedTypes.get(name).iterator().next();
+  }
+
   @Test
   public void removeRootOnly() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .group("any", new GroupBuilder().type(infinity).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.infinity).build(),
-        new Path("value", "0"),
-        (context, selected) ->
-            context.history.apply(
-                context,
-                new ChangeArray(Helper.rootArray(context.document), 0, 1, ImmutableList.of())),
-        MiscSyntax.syntax.gap.create(),
-        new Path("value", "0"));
+        syntax,
+        new TreeBuilder(infinity).build(),
+        new SyntaxPath("value", "0"),
+        (editor, selected, changer) ->
+            changer.accept(
+                new ChangeArray(Helper.rootArray(editor.context.document), 0, 1, TSList.of())),
+        new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build(),
+        new SyntaxPath("value", "0"));
   }
 
   private void innerTestTransform(
       final Syntax syntax,
       final Atom begin,
-      Path selectBegin,
-      final BiConsumer<Context, Atom> transform,
+      SyntaxPath selectBegin,
+      final TestConsumer transform,
       final Atom end,
-      final Path selectEnd) {
-    final Context context = Helper.buildDoc(syntax, begin);
+      final SyntaxPath selectEnd) {
+    final Editor editor = Helper.buildDoc(syntax, begin);
 
     // Initial selection and double checking
-    final Atom found = (Atom) context.syntaxLocate(selectBegin);
-    found.valueParentRef.selectValue(context);
-    selectBegin = context.cursor.getSyntaxPath();
-    //assertThat(context.selection.getSyntaxPath(), equalTo(selectBegin));
+    final Atom found = (Atom) editor.context.syntaxLocate(selectBegin);
+    found.valueParentRef.selectValue(editor.context);
+    selectBegin = editor.context.cursor.getSyntaxPath();
+    // assertThat(context.selection.getSyntaxPath(), equalTo(selectBegin));
 
     // Transform
-    transform.accept(context, found);
-    MatcherAssert.assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
-    Helper.assertTreeEqual(Helper.rootArray(context.document).data.get(0), end);
-    assertThat(context.cursor.getSyntaxPath(), equalTo(selectEnd));
+    transform.accept(
+        editor,
+        found,
+        c -> editor.history.record(editor.context, null, r -> r.apply(editor.context, c)));
+    MatcherAssert.assertThat(Helper.rootArray(editor.context.document).data.size(), equalTo(1));
+    Helper.assertTreeEqual(Helper.rootArray(editor.context.document).data.get(0), end);
+    assertThat(editor.context.cursor.getSyntaxPath(), equalTo(selectEnd));
 
     // Undo
-    context.history.undo(context);
-    MatcherAssert.assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
-    Helper.assertTreeEqual(Helper.rootArray(context.document).data.get(0), begin);
-    assertThat(context.cursor.getSyntaxPath(), equalTo(selectBegin));
+    editor.history.undo(editor.context);
+    MatcherAssert.assertThat(Helper.rootArray(editor.context.document).data.size(), equalTo(1));
+    Helper.assertTreeEqual(Helper.rootArray(editor.context.document).data.get(0), begin);
+    assertThat(editor.context.cursor.getSyntaxPath(), equalTo(selectBegin));
 
     // Redo
-    context.history.redo(context);
-    MatcherAssert.assertThat(Helper.rootArray(context.document).data.size(), equalTo(1));
-    Helper.assertTreeEqual(Helper.rootArray(context.document).data.get(0), end);
-    assertThat(context.cursor.getSyntaxPath(), equalTo(selectEnd));
+    editor.history.redo(editor.context);
+    MatcherAssert.assertThat(Helper.rootArray(editor.context.document).data.size(), equalTo(1));
+    Helper.assertTreeEqual(Helper.rootArray(editor.context.document).data.get(0), end);
+    assertThat(editor.context.cursor.getSyntaxPath(), equalTo(selectEnd));
   }
 
   @Test
   public void removeArrayOnly() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(array)
+            .group("any", new GroupBuilder().type(infinity).type(array).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
-            .build(),
-        new Path("value", "0", "value", "0"),
-        (context, selected) -> {
-            context.history.apply(
-              context,
-              new ChangeArray((FieldArray) selected.valueParentRef.value, 0, 1, ImmutableList.of()));
+        syntax,
+        new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
+        new SyntaxPath("value", "0", "value", "0"),
+        (context, selected, changer) -> {
+          changer.accept(
+              new ChangeArray((FieldArray) selected.valueParentRef.value, 0, 1, TSList.of()));
         },
-        new TreeBuilder(MiscSyntax.array).addArray("value").build(),
-        new Path("value", "0"));
+        new TreeBuilder(array).addArray("value").build(),
+        new SyntaxPath("value", "0"));
   }
 
   @Test
   public void removeArraySelectBefore() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(array)
+            .group("any", new GroupBuilder().type(infinity).type(array).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+        syntax,
+        new TreeBuilder(array)
+            .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "0"),
-            (context, selected) -> context.history.apply(
-                context,
-                new ChangeArray((FieldArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
-        new TreeBuilder(MiscSyntax.array)
-            .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
-            .build(),
-        new Path("value", "0", "value", "0"));
+        new SyntaxPath("value", "0", "value", "0"),
+        (context, selected, changer) ->
+            changer.accept(
+                new ChangeArray((FieldArray) selected.valueParentRef.value, 1, 1, TSList.of())),
+        new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
+        new SyntaxPath("value", "0", "value", "0"));
   }
 
   @Test
   public void removeArraySelectFollowing() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(array)
+            .group("any", new GroupBuilder().type(infinity).type(array).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+        syntax,
+        new TreeBuilder(array)
+            .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "1"),
-            (context, selected) -> context.history.apply(
-                context,
-                new ChangeArray((FieldArray) selected.valueParentRef.value, 0, 1, ImmutableList.of())),
-        new TreeBuilder(MiscSyntax.array)
-            .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
-            .build(),
-        new Path("value", "0", "value", "0"));
+        new SyntaxPath("value", "0", "value", "1"),
+        (context, selected, changer) ->
+            changer.accept(
+                new ChangeArray((FieldArray) selected.valueParentRef.value, 0, 1, TSList.of())),
+        new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
+        new SyntaxPath("value", "0", "value", "0"));
   }
 
   @Test
   public void removeArraySelectWithin() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(array)
+            .group("any", new GroupBuilder().type(infinity).type(array).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.array)
+        syntax,
+        new TreeBuilder(array)
             .addArray(
                 "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+                new TreeBuilder(infinity).build(),
+                new TreeBuilder(infinity).build(),
+                new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "1"),
-            (context, selected) -> context.history.apply(
-                context,
-                new ChangeArray((FieldArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+        new SyntaxPath("value", "0", "value", "1"),
+        (context, selected, changer) ->
+            changer.accept(
+                new ChangeArray((FieldArray) selected.valueParentRef.value, 1, 1, TSList.of())),
+        new TreeBuilder(array)
+            .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "1"));
+        new SyntaxPath("value", "0", "value", "1"));
   }
 
   @Test
   public void removeArraySelectWithinNoneAfter() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(array)
+            .group("any", new GroupBuilder().type(infinity).type(array).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+        syntax,
+        new TreeBuilder(array)
+            .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "1"),
-            (context, selected) -> context.history.apply(
-                context,
-                new ChangeArray((FieldArray) selected.valueParentRef.value, 1, 1, ImmutableList.of())),
-        new TreeBuilder(MiscSyntax.array)
-            .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
-            .build(),
-        new Path("value", "0", "value", "0"));
+        new SyntaxPath("value", "0", "value", "1"),
+        (context, selected, changer) ->
+            changer.accept(
+                new ChangeArray((FieldArray) selected.valueParentRef.value, 1, 1, TSList.of())),
+        new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
+        new SyntaxPath("value", "0", "value", "0"));
   }
 
   @Test
   public void removeArraySelectDeep() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(array)
+            .group("any", new GroupBuilder().type(infinity).type(array).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.array)
+        syntax,
+        new TreeBuilder(array)
             .addArray(
                 "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.array)
-                    .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
-                    .build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+                new TreeBuilder(infinity).build(),
+                new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
+                new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "1", "value", "0"),
-        (context, selected) -> {
-          ((Field) context.syntaxLocate(new Path("value", "0", "value", "1", "value")))
-              .atomParentRef
-              .atom()
-              .valueParentRef
-              .deleteChild(context);
+        new SyntaxPath("value", "0", "value", "1", "value", "0"),
+        (editor, selected, changer) -> {
+          parentDelete(
+              editor,
+              ((Field)
+                      editor.context.syntaxLocate(
+                          new SyntaxPath("value", "0", "value", "1", "value")))
+                  .atomParentRef.atom().valueParentRef);
         },
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+        new TreeBuilder(array)
+            .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "1"));
+        new SyntaxPath("value", "0", "value", "1"));
   }
 
   @Test
   public void addArrayAfter() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(array)
+            .group("any", new GroupBuilder().type(infinity).type(array).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+        syntax,
+        new TreeBuilder(array)
+            .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "0"),
-            (context, selected) -> context.history.apply(
-                context,
+        new SyntaxPath("value", "0", "value", "0"),
+        (context, selected, changer) ->
+            changer.accept(
                 new ChangeArray(
                     (FieldArray) selected.valueParentRef.value,
                     0,
                     0,
-                    ImmutableList.of(new TreeBuilder(MiscSyntax.infinity).build()))),
-        new TreeBuilder(MiscSyntax.array)
+                    TSList.of(new TreeBuilder(infinity).build()))),
+        new TreeBuilder(array)
             .addArray(
                 "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+                new TreeBuilder(infinity).build(),
+                new TreeBuilder(infinity).build(),
+                new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "1"));
+        new SyntaxPath("value", "0", "value", "1"));
   }
 
   @Test
   public void addArrayAfterEnd1() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(array)
+            .group("any", new GroupBuilder().type(infinity).type(array).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.array)
-            .addArray(
-                "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+        syntax,
+        new TreeBuilder(array)
+            .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "1"),
-            (context, selected) -> context.history.apply(
-                context,
+        new SyntaxPath("value", "0", "value", "1"),
+        (context, selected, changer) ->
+            changer.accept(
                 new ChangeArray(
                     (FieldArray) selected.valueParentRef.value,
                     1,
                     0,
-                    ImmutableList.of(new TreeBuilder(MiscSyntax.infinity).build()))),
-        new TreeBuilder(MiscSyntax.array)
+                    TSList.of(new TreeBuilder(infinity).build()))),
+        new TreeBuilder(array)
             .addArray(
                 "value",
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build(),
-                new TreeBuilder(MiscSyntax.infinity).build())
+                new TreeBuilder(infinity).build(),
+                new TreeBuilder(infinity).build(),
+                new TreeBuilder(infinity).build())
             .build(),
-        new Path("value", "0", "value", "2"));
+        new SyntaxPath("value", "0", "value", "2"));
   }
 
   @Test
@@ -265,8 +473,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         0,
         0,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 0, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 0, 2, TSList.of()));
         },
         0,
         0);
@@ -275,40 +483,104 @@ public class TestCursorChanges {
   private void innerArrayTestTransform(
       final int beginSelectBegin,
       final int beginSelectEnd,
-      final Pair.Consumer<Context, FieldArray> transform,
+      final ArrayTestConsumer transform,
       final int endSelectBegin,
       final int endSelectEnd) {
-    final Context context =
+    FreeAtomType one =
+        new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .autoComplete(false)
+            .build();
+    FreeAtomType two =
+        new TypeBuilder("two")
+            .back(Helper.buildBackPrimitive("two"))
+            .front(new FrontMarkBuilder("two").build())
+            .autoComplete(false)
+            .build();
+    FreeAtomType three =
+        new TypeBuilder("three")
+            .back(Helper.buildBackPrimitive("three"))
+            .front(new FrontMarkBuilder("three").build())
+            .autoComplete(false)
+            .build();
+    FreeAtomType four =
+        new TypeBuilder("four")
+            .back(Helper.buildBackPrimitive("four"))
+            .front(new FrontMarkBuilder("four").build())
+            .autoComplete(false)
+            .build();
+    FreeAtomType five =
+        new TypeBuilder("five")
+            .back(Helper.buildBackPrimitive("five"))
+            .front(new FrontMarkBuilder("five").build())
+            .autoComplete(false)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(one)
+            .type(two)
+            .type(three)
+            .type(four)
+            .type(five)
+            .type(array)
+            .group(
+                "any",
+                new GroupBuilder()
+                    .type(one)
+                    .type(two)
+                    .type(three)
+                    .type(four)
+                    .type(five)
+                    .type(array)
+                    .build())
+            .build();
+    final Editor editor =
         Helper.buildDoc(
-            MiscSyntax.syntax,
-            new TreeBuilder(MiscSyntax.array)
+            syntax,
+            new TreeBuilder(array)
                 .addArray(
                     "value",
-                    new TreeBuilder(MiscSyntax.one).build(),
-                    new TreeBuilder(MiscSyntax.two).build(),
-                    new TreeBuilder(MiscSyntax.three).build(),
-                    new TreeBuilder(MiscSyntax.four).build(),
-                    new TreeBuilder(MiscSyntax.five).build())
+                    new TreeBuilder(one).build(),
+                    new TreeBuilder(two).build(),
+                    new TreeBuilder(three).build(),
+                    new TreeBuilder(four).build(),
+                    new TreeBuilder(five).build())
                 .build());
 
     final FieldArray value =
-        (FieldArray) Helper.rootArray(context.document).data.get(0).fields.getOpt("value");
+        (FieldArray) Helper.rootArray(editor.context.document).data.get(0).fields.getOpt("value");
     final VisualFrontArray visual = (VisualFrontArray) value.visual;
-    visual.select(context, true, beginSelectBegin, beginSelectEnd);
-    final VisualFrontArray.ArrayCursor selection = visual.selection;
+    visual.select(editor.context, true, beginSelectBegin, beginSelectEnd);
+    final VisualFrontArray.Cursor selection = visual.selection;
 
     // Transform
-    transform.accept(context, value);
+    transform.accept(
+        editor,
+        value,
+        syntax,
+        c -> editor.history.record(editor.context, null, r -> r.apply(editor.context, c)));
     assertThat(selection.beginIndex, equalTo(endSelectBegin));
     assertThat(selection.endIndex, equalTo(endSelectEnd));
 
     // Undo
-    context.history.undo(context);
+    editor.history.undo(editor.context);
     assertThat(selection.beginIndex, equalTo(beginSelectBegin));
     assertThat(selection.endIndex, equalTo(beginSelectEnd));
 
     // Redo
-    context.history.redo(context);
+    editor.history.redo(editor.context);
     assertThat(selection.beginIndex, equalTo(endSelectBegin));
     assertThat(selection.endIndex, equalTo(endSelectEnd));
   }
@@ -318,8 +590,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         0,
         0,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 1, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 1, 2, TSList.of()));
         },
         0,
         0);
@@ -330,8 +602,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         0,
         0,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 2, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 2, 2, TSList.of()));
         },
         0,
         0);
@@ -342,8 +614,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         4,
         4,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 0, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 0, 2, TSList.of()));
         },
         2,
         2);
@@ -354,8 +626,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         3,
         3,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 0, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 0, 2, TSList.of()));
         },
         1,
         1);
@@ -366,8 +638,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         1,
         1,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 1, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 1, 2, TSList.of()));
         },
         1,
         1);
@@ -378,8 +650,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         2,
         2,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 1, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 1, 2, TSList.of()));
         },
         1,
         1);
@@ -390,8 +662,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         1,
         1,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 2, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 2, 2, TSList.of()));
         },
         1,
         1);
@@ -402,8 +674,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         1,
         1,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 3, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 3, 2, TSList.of()));
         },
         1,
         1);
@@ -414,8 +686,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         4,
         4,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 0, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 0, 2, TSList.of()));
         },
         2,
         2);
@@ -426,8 +698,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         4,
         4,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 3, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 3, 2, TSList.of()));
         },
         2,
         2);
@@ -438,8 +710,8 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         3,
         3,
-        (context, value) -> {
-          context.history.apply(context, new ChangeArray(value, 3, 2, ImmutableList.of()));
+        (context, value, syntax, changer) -> {
+          changer.accept(new ChangeArray(value, 3, 2, TSList.of()));
         },
         2,
         2);
@@ -450,16 +722,15 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         3,
         3,
-        (context, value) -> {
-          context.history.apply(
-              context,
+        (context, value, syntax, changer) -> {
+          changer.accept(
               new ChangeArray(
                   value,
                   3,
                   1,
-                  ImmutableList.of(
-                      new TreeBuilder(MiscSyntax.one).build(),
-                      new TreeBuilder(MiscSyntax.one).build())));
+                  TSList.of(
+                      new TreeBuilder(t(syntax, "one")).build(),
+                      new TreeBuilder(t(syntax, "one")).build())));
         },
         4,
         4);
@@ -470,16 +741,15 @@ public class TestCursorChanges {
     innerArrayTestTransform(
         4,
         4,
-        (context, value) -> {
-          context.history.apply(
-              context,
+        (context, value, syntax, changer) -> {
+          changer.accept(
               new ChangeArray(
                   value,
                   4,
                   1,
-                  ImmutableList.of(
-                      new TreeBuilder(MiscSyntax.one).build(),
-                      new TreeBuilder(MiscSyntax.one).build())));
+                  TSList.of(
+                      new TreeBuilder(t(syntax, "one")).build(),
+                      new TreeBuilder(t(syntax, "one")).build())));
         },
         5,
         5);
@@ -487,42 +757,116 @@ public class TestCursorChanges {
 
   @Test
   public void removeNode() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType snooze =
+        new TypeBuilder("snooze")
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
+            .frontMark("#")
+            .frontDataNode("value")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(snooze)
+            .group("any", new GroupBuilder().type(infinity).type(snooze).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.snooze)
-            .add("value", new TreeBuilder(MiscSyntax.infinity).build())
-            .build(),
-        new Path("value", "0", "value", "atom"),
-        (context, selected) -> {
-            context.history.apply(
-              context,
+        syntax,
+        new TreeBuilder(snooze).add("value", new TreeBuilder(infinity).build()).build(),
+        new SyntaxPath("value", "0", "value", "atom"),
+        (context, selected, changer) -> {
+          changer.accept(
               new ChangeNodeSet(
-                  (FieldAtom) selected.valueParentRef.value, MiscSyntax.syntax.gap.create()));
+                  (FieldAtom) selected.valueParentRef.value,
+                  new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build()));
         },
-        new TreeBuilder(MiscSyntax.snooze).add("value", MiscSyntax.syntax.gap.create()).build(),
-        new Path("value", "0", "value"));
+        new TreeBuilder(snooze)
+            .add(
+                "value", new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build())
+            .build(),
+        new SyntaxPath("value", "0", "value"));
   }
 
   @Test
   public void removeNodeSelectDeep() {
+    FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .autoComplete(true)
+            .build();
+    FreeAtomType snooze =
+        new TypeBuilder("snooze")
+            .back(
+                new BackRecordBuilder()
+                    .add("value", Helper.buildBackDataAtom("value", "any"))
+                    .build())
+            .frontMark("#")
+            .frontDataNode("value")
+            .autoComplete(true)
+            .build();
+    FreeAtomType array =
+        new TypeBuilder("array")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .frontMark("[")
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addSeparator(new FrontMarkBuilder(", ").build())
+                    .build())
+            .frontMark("]")
+            .autoComplete(true)
+            .build();
+    Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(infinity)
+            .type(snooze)
+            .type(array)
+            .group("any", new GroupBuilder().type(infinity).type(snooze).type(array).build())
+            .build();
     innerTestTransform(
-        MiscSyntax.syntax,
-        new TreeBuilder(MiscSyntax.snooze)
+        syntax,
+        new TreeBuilder(snooze)
             .add(
                 "value",
-                new TreeBuilder(MiscSyntax.array)
-                    .addArray("value", new TreeBuilder(MiscSyntax.infinity).build())
-                    .build())
+                new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build())
             .build(),
-        new Path("value", "0", "value", "atom","value","0"),
-        (context, selected) -> {
-          ((FieldArray) context.syntaxLocate(new Path("value", "0", "value","atom", "value")))
-              .atomParentRef
-              .atom()
-              .valueParentRef
-              .deleteChild(context);
+        new SyntaxPath("value", "0", "value", "atom", "value", "0"),
+        (editor, selected, changer) -> {
+          parentDelete(
+              editor,
+              ((FieldArray)
+                      editor.context.syntaxLocate(
+                          new SyntaxPath("value", "0", "value", "atom", "value")))
+                  .atomParentRef.atom().valueParentRef);
         },
-        new TreeBuilder(MiscSyntax.snooze).add("value", MiscSyntax.syntax.gap.create()).build(),
-        new Path("value", "0", "value"));
+        new TreeBuilder(snooze)
+            .add(
+                "value", new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build())
+            .build(),
+        new SyntaxPath("value", "0", "value"));
+  }
+
+  @FunctionalInterface
+  public static interface TestConsumer {
+    void accept(Editor editor, Atom value, Changer changer);
+  }
+
+  @FunctionalInterface
+  public static interface ArrayTestConsumer {
+    void accept(Editor editor, FieldArray array, Syntax syntax, Changer changer);
+  }
+
+  @FunctionalInterface
+  public static interface Changer {
+    void accept(Change change);
   }
 }

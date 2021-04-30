@@ -59,10 +59,6 @@ public class FieldPrimitive extends Field {
   }
 
   public interface Listener {
-    void set(Context context, String value);
-
-    void added(Context context, int index, String value);
-
-    void removed(Context context, int index, int count);
+    void changed(Context context, int index, int remove, String add);
   }
 }

@@ -44,20 +44,12 @@ public class ParseEventSink<O> implements EventSink {
   }
 
   public boolean ended() {
-    return context.leaves.isEmpty();
-  }
-
-  public boolean hasResult() {
-    return !context.results.isEmpty();
+    return context.branches.isEmpty();
   }
 
   public O result() {
-    return allResults().get(0);
-  }
-
-  public List<O> allResults() {
-    if (context.results.isEmpty()) throw new NoResults(context);
-    return (List<O>) context.results;
+    if (context.completed.isEmpty()) throw new NoResults(context);
+    return (O) context.completed.get(0).result();
   }
 
   public Parse context() {

@@ -1,15 +1,14 @@
 package com.zarbosoft.merman.core.syntax.front;
 
-import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualSymbol;
-import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 
 public class FrontSymbol extends FrontSpec {
-
   public final Symbol type;
   /** Nullable */
   public final ConditionType condition;
@@ -58,8 +57,8 @@ public class FrontSymbol extends FrontSpec {
     handler.handle(this);
   }
 
-  public DisplayNode createDisplay(final Context context) {
-    final DisplayNode out = type.createDisplay(context);
+  public CourseDisplayNode createDisplay(final Context context) {
+    final CourseDisplayNode out = type.createDisplay(context);
     return out;
   }
 

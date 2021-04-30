@@ -3,7 +3,6 @@ package com.zarbosoft.merman.standalone.helper;
 import com.zarbosoft.merman.document.Atom;
 import com.zarbosoft.merman.editor.Context;
 import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.editorcore.display.MockeryDisplay;
 import com.zarbosoft.merman.syntax.Syntax;
 
 import static com.zarbosoft.merman.editorcore.helper.Helper.buildDoc;

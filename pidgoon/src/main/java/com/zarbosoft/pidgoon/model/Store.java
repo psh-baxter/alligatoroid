@@ -42,13 +42,6 @@ public abstract class Store {
   }
 
   /**
-   * This branch has a result
-   *
-   * @return
-   */
-  public abstract boolean hasResult();
-
-  /**
    * Returns the result. Behavior undefined if no result.
    *
    * @return

@@ -22,15 +22,19 @@ import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.Event;
+import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.DeadCode;
+import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -261,6 +265,7 @@ public class JavaSerializer implements Serializer {
   }
 
   public ROList<Atom> load(Syntax syntax, String type, byte[] data, boolean synthArrayContext) {
+    try {
     switch (backType) {
       case LUXEM:
         {
@@ -343,6 +348,16 @@ public class JavaSerializer implements Serializer {
         }
       default:
         throw new DeadCode();
+    }
+    } catch (InvalidStream e) {
+      StringBuilder message = new StringBuilder();
+      for (MismatchCause error : e.state.errors) {
+        message.append(Format.format(" * %s\n", error));
+      }
+      throw new RuntimeException(
+              Format.format(
+                      "Clipboard contents conform to syntax tree\nat %s %s\nmismatches at final stream element:\n%s",
+                      ((Position) e.position).at, ((Position) e.position).event, message.toString()));
     }
   }
 }

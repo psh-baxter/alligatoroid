@@ -1,6 +1,10 @@
 <p align="center"><img src="readme/logo.png" width="95%" alt="merman logo"></p>
 <hr>
 
+merman is an editor (or rather, utilities for creating and a few editors) for ASTs.  You can define a syntax to AST mapping and edit the AST as you would any normal source code, although with AST-aware navigation, modifications, etc.
+
+For now the primary goal is to make it fluid to use with normal languages, but I'd like to move beyond just text and also offer representations AST nodes as node-graphs, tables, colors, vector art, audio, and many more.
+
 Just what _is_ merman?
 
 Traditionally, a compiler or interpreter has two main parts: the parser and backend (generator or executor).  The parser transforms human readable text (the source code) into an abstract syntax tree (AST), and the backend outputs machine code or executes the AST.

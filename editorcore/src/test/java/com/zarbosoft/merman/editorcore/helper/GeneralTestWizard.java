@@ -1,29 +1,34 @@
 package com.zarbosoft.merman.editorcore.helper;
 
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.FieldArray;
-import com.zarbosoft.merman.editor.Action;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.banner.BannerMessage;
-import com.zarbosoft.merman.editor.details.DetailsPage;
-import com.zarbosoft.merman.editor.display.DisplayNode;
-import com.zarbosoft.merman.editor.display.Drawing;
-import com.zarbosoft.merman.editor.hid.HIDEvent;
-import com.zarbosoft.merman.editor.visual.Vector;
-import com.zarbosoft.merman.editor.visual.tags.StateTag;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.editor.wall.Brick;
-import com.zarbosoft.merman.editor.wall.Course;
-import com.zarbosoft.merman.editor.wall.bricks.BrickEmpty;
-import com.zarbosoft.merman.editor.wall.bricks.BrickText;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.hid.ButtonEvent;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.wall.Bedding;
+import com.zarbosoft.merman.core.wall.Brick;
+import com.zarbosoft.merman.core.wall.Course;
+import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
+import com.zarbosoft.merman.core.wall.bricks.BrickImage;
+import com.zarbosoft.merman.core.wall.bricks.BrickLine;
+import com.zarbosoft.merman.core.wall.bricks.BrickText;
+import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.cursors.EditArrayCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditAtomCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
+import com.zarbosoft.merman.editorcore.display.MockeryText;
+import com.zarbosoft.merman.editorcore.history.Change;
+import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
+import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
 
 import java.util.function.Consumer;
 
-import static com.zarbosoft.rendaw.common.Common.iterable;
 import static org.hamcrest.CoreMatchers.instanceOf;
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.core.Is.is;
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.hamcrest.core.IsNull.notNullValue;
@@ -34,63 +39,55 @@ public class GeneralTestWizard {
   public TestWizard inner;
 
   public GeneralTestWizard(final Syntax syntax, final Atom... atoms) {
-    inner = new TestWizard(syntax, atoms);
-    inner.context.banner.addMessage(inner.context, new BannerMessage() {});
-
-    final Drawing drawing = inner.context.display.drawing();
-    drawing.resize(inner.context, new Vector(500, 7));
-    final DetailsPage page =
-        new DetailsPage() {
-          @Override
-          public void tagsChanged(final Context context) {}
-        };
-    page.node = drawing;
-    inner.context.details.addPage(inner.context, page);
-    inner.runner.flush();
+    this(syntax, false, atoms);
   }
 
-  public GeneralTestWizard resize(final int size) {
-    inner.resize(size);
+
+  public GeneralTestWizard sendText(final String text) {
+    inner.editor.context.cursor.handleTyping(inner.editor.context, text);
+    inner.flushIteration();
     return this;
   }
 
-  public GeneralTestWizard resizeTransitive(final int size) {
-    inner.resizeTransitive(size);
+  public GeneralTestWizard(final Syntax syntax, boolean startWindowed, final Atom... atoms) {
+    inner = new TestWizard(syntax, startWindowed, atoms);
+    inner.editor.context.wall.addBedding(inner.editor.context, new Bedding(10, 7));
+    inner.flushIteration();
+  }
+
+  public GeneralTestWizard displayWidth(final int size) {
+    inner.displayWidth(size);
     return this;
   }
 
-  private void checkNode(final DisplayNode node, final int t, final int te) {
-    assertThat(node.transverse(), equalTo(t));
-    assertThat(node.transverseEdge(), equalTo(te));
-  }
-
-  public GeneralTestWizard checkBanner(final int transversePlusAscent, final int transverseEdge) {
-    checkNode(inner.context.banner.text, transversePlusAscent, transverseEdge);
-    return this;
-  }
-
-  public GeneralTestWizard checkDetails(final int t, final int te) {
-    checkNode(inner.context.details.current.node, t, te);
+  public GeneralTestWizard displayHeight(final int size) {
+    inner.displayHeight(size);
     return this;
   }
 
   public GeneralTestWizard checkScroll(final int scroll) {
-    assertThat(inner.context.scroll, equalTo(scroll));
+    assertThat((int) inner.editor.context.scroll, equalTo(scroll));
     return this;
   }
 
   public GeneralTestWizard checkCourse(final int index, final int t, final int te) {
     final Course course = getCourse(index);
-    assertThat(course.transverseStart, equalTo(t));
-    assertThat(course.transverseStart + course.ascent + course.descent, equalTo(te));
+    assertThat((int) course.transverseStart, equalTo(t));
+    assertThat((int) (course.transverseStart + course.ascent + course.descent), equalTo(te));
     return this;
   }
 
   public GeneralTestWizard checkTextBrick(
       final int courseIndex, final int brickIndex, final String text) {
     final Brick brick = getBrick(courseIndex, brickIndex);
-    assertThat(brick, instanceOf(BrickText.class));
-    assertThat(((BrickText) brick).text.text(), equalTo(text));
+    if (!(brick instanceof BrickText)) {
+      dumpCourses();
+      assertThat(brick, instanceOf(BrickText.class));
+    }
+    if (!((BrickText) brick).text.text().equals(text)) {
+      dumpCourses();
+      assertThat(((BrickText) brick).text.text(), equalTo(text));
+    }
     return this;
   }
 
@@ -99,96 +96,263 @@ public class GeneralTestWizard {
     return this;
   }
 
+  public GeneralTestWizard dumpCourses() {
+    ROList<Course> courses = inner.editor.context.wall.children;
+    for (int i = 0; i < courses.size(); ++i) {
+      Course course = courses.get(i);
+      System.out.printf(" %02d  ", i);
+      for (int j = 0; j < course.children.size(); ++j) {
+        Brick brick = course.children.get(j);
+        if (inner.editor.context.wall.cornerstone == brick) System.out.format("*");
+        if (brick instanceof BrickText) {
+          System.out.printf("%s ", ((MockeryText) ((BrickText) brick).text).text());
+        } else if (brick instanceof BrickImage) {
+          System.out.printf("\\i ");
+        } else if (brick instanceof BrickLine) {
+          System.out.printf("\\l ");
+        } else if (brick instanceof BrickEmpty) {
+          System.out.printf("\\w ");
+        } else throw new Assertion();
+      }
+      if (inner.editor.context.wall.cornerstoneCourse == course) {
+        System.out.format(" **");
+      }
+      System.out.printf("\n");
+    }
+    System.out.format("\n");
+    return this;
+  }
+
   private Course getCourse(final int courseIndex) {
-    assertThat(inner.context.foreground.children.size(), greaterThan(courseIndex));
-    return inner.context.foreground.children.get(courseIndex);
+    ROList<Course> courses = inner.editor.context.wall.children;
+    if (courseIndex >= courses.size()) {
+      dumpCourses();
+      assertThat(courses.size(), greaterThan(courseIndex));
+    }
+    return courses.get(courseIndex);
   }
 
   private Brick getBrick(final int courseIndex, final int brickIndex) {
     final Course course = getCourse(courseIndex);
-    assertThat(course.children.size(), greaterThan(brickIndex));
+    if (brickIndex >= course.children.size()) {
+      dumpCourses();
+      assertThat(course.children.size(), greaterThan(brickIndex));
+    }
     return course.children.get(brickIndex);
   }
 
   public GeneralTestWizard checkBrick(
       final int courseIndex, final int brickIndex, final int converse) {
-    assertThat(getBrick(courseIndex, brickIndex).getConverse(), equalTo(converse));
+    assertThat((int) getBrick(courseIndex, brickIndex).getConverse(), equalTo(converse));
     return this;
   }
 
-  public GeneralTestWizard checkBrickNotHasTag(
-      final int courseIndex, final int brickIndex, final Tag tag) {
-    assertThat(getBrick(courseIndex, brickIndex).getTags(inner.context), not(hasItem(tag)));
+  public GeneralTestWizard run(final Consumer<Editor> r) {
+    r.accept(inner.editor);
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
     return this;
   }
 
-  public GeneralTestWizard checkBrickHasTag(
-      final int courseIndex, final int brickIndex, final Tag tag) {
-    assertThat(getBrick(courseIndex, brickIndex).getTags(inner.context), hasItem(tag));
+  public GeneralTestWizard select(String... path) {
+    Object got = inner.editor.context.syntaxLocate(new SyntaxPath(path));
+    if (got instanceof Atom) ((Atom) got).visual.selectAnyChild(inner.editor.context);
+    else if (got instanceof Field) ((Field) got).selectInto(inner.editor.context);
+    else throw Assertion.format("Invalid path %s", (Object) path);
     return this;
   }
 
-  public GeneralTestWizard checkBrickNotCompact(final int courseIndex, final int brickIndex) {
-    return checkBrickNotHasTag(courseIndex, brickIndex, new StateTag("compact"));
-  }
-
-  public GeneralTestWizard checkBrickCompact(final int courseIndex, final int brickIndex) {
-    return checkBrickHasTag(courseIndex, brickIndex, new StateTag("compact"));
-  }
-
-  public GeneralTestWizard run(final Consumer<Context> r) {
-    r.accept(inner.context);
-    assertThat(inner.context.cursor, is(notNullValue()));
-    inner.runner.flush();
+  public GeneralTestWizard actWindow() {
+    if (inner.editor.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((VisualFrontAtomBase.Cursor) inner.editor.context.cursor).actionWindow(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.editor.context.cursor).actionWindow(inner.editor.context);
+    } else throw new Assertion();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
     return this;
   }
 
-  public GeneralTestWizard act(final String name) {
-    for (final Action action : iterable(inner.context.actions())) {
-      if (action.id().equals(name)) {
-        action.run(inner.context);
-        assertThat(inner.context.cursor, is(notNullValue()));
-        inner.runner.flush();
-        return this;
-      }
-    }
-    throw new AssertionError(String.format("No action named [%s]", name));
+  public GeneralTestWizard actNext() {
+    if (inner.editor.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((VisualFrontAtomBase.Cursor) inner.editor.context.cursor).actionNext(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.editor.context.cursor).actionNext(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof VisualFrontPrimitive.Cursor) {
+      ((VisualFrontPrimitive.Cursor) inner.editor.context.cursor).actionNext(inner.editor.context);
+    } else throw new Assertion();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actGatherNext() {
+    if (inner.editor.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.editor.context.cursor)
+          .actionGatherNext(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof VisualFrontPrimitive.Cursor) {
+      ((VisualFrontPrimitive.Cursor) inner.editor.context.cursor)
+          .actionGatherNext(inner.editor.context);
+    } else throw new Assertion();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actGatherPreviousLine() {
+    ((VisualFrontPrimitive.Cursor) inner.editor.context.cursor)
+        .actionGatherPreviousLine(inner.editor.context);
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actPrevious() {
+    if (inner.editor.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((VisualFrontAtomBase.Cursor) inner.editor.context.cursor)
+          .actionPrevious(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.editor.context.cursor).actionPrevious(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof VisualFrontPrimitive.Cursor) {
+      ((VisualFrontPrimitive.Cursor) inner.editor.context.cursor)
+          .actionPrevious(inner.editor.context);
+    } else throw new Assertion();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+  public GeneralTestWizard actEnter() {
+    if (inner.editor.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((VisualFrontAtomBase.Cursor) inner.editor.context.cursor).actionEnter(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.editor.context.cursor).actionEnter(inner.editor.context);
+    } else throw new Assertion();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actExit() {
+    if (inner.editor.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((VisualFrontAtomBase.Cursor) inner.editor.context.cursor).actionExit(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.editor.context.cursor).actionExit(inner.editor.context);
+    } else throw new Assertion();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actWindowTowardsCursor() {
+    inner.editor.context.actionWindowTowardsCursor();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actWindowTowardsRoot() {
+    inner.editor.context.actionWindowTowardsRoot();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actWindowClear() {
+    inner.editor.context.actionClearWindow();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
   }
 
   public GeneralTestWizard checkCourseCount(final int i) {
-    assertThat(inner.context.foreground.children.size(), equalTo(i));
+    if (inner.editor.context.wall.children.size() != i) {
+      dumpCourses();
+      assertThat(inner.editor.context.wall.children.size(), equalTo(i));
+    }
     return this;
   }
 
-  public GeneralTestWizard checkBrickCount(final int i) {
-    assertThat(
-        inner.context.foreground.children.stream().mapToInt(course -> course.children.size()).sum(),
-        equalTo(i));
+  public GeneralTestWizard checkTotalBrickCount(final int i) {
+    int got = 0;
+    for (Course course : inner.editor.context.wall.children) {
+      got += course.children.size();
+    }
+    assertThat(got, equalTo(i));
     return this;
   }
 
-  public GeneralTestWizard sendHIDEvent(final HIDEvent event) {
+  public GeneralTestWizard sendHIDEvent(final ButtonEvent event) {
     inner.sendHIDEvent(event);
-    inner.runner.flush();
+    inner.flushIteration();
     return this;
   }
 
   public GeneralTestWizard checkArrayTree(final Atom... atoms) {
     final FieldArray documentAtoms =
-        (FieldArray) inner.context.document.root.fields.getOpt("value");
+        (FieldArray) inner.editor.context.document.root.fields.getOpt("value");
     assertThat(documentAtoms.data.size(), equalTo(atoms.length));
     for (int i = 0; i < atoms.length; ++i) {
-      Atom first = atoms[i];
-      Atom second = documentAtoms.data.get(i);
-      Helper.assertTreeEqual(first, second);
+      Helper.assertTreeEqual(atoms[i], documentAtoms.data.get(i));
     }
+    return this;
+  }
+
+  public GeneralTestWizard checkCursorPath(String... segments) {
+    assertThat(inner.editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath(segments)));
+    return this;
+  }
+
+  public GeneralTestWizard editInsertBefore() {
+    ((EditArrayCursor) inner.editor.context.cursor).editInsertBefore(inner.editor);
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard editInsertAfter() {
+    ((EditArrayCursor) inner.editor.context.cursor).editInsertAfter(inner.editor);
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard editDelete() {
+    if (inner.editor.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((EditAtomCursor) inner.editor.context.cursor)
+              .editDelete(inner.editor);
+    } else if (inner.editor.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((EditArrayCursor) inner.editor.context.cursor).editDelete(inner.editor);
+    } else throw new Assertion();
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard resize(int converse) {
+    inner.resize(converse);
+    return this;
+  }
+
+  public GeneralTestWizard change(Change change) {
+    inner.editor.history.record(inner.editor.context, null, r->r.apply(inner.editor.context, change));
+    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard checkBrickNotCompact(int courseIndex, int brickIndex) {
+    assertThat(getBrick(courseIndex, brickIndex).getVisual().atomVisual().compact, is(false));
+      return this;
+  }
+  public GeneralTestWizard checkBrickCompact(int courseIndex, int brickIndex) {
+    assertThat(getBrick(courseIndex, brickIndex).getVisual().atomVisual().compact, is(true));
     return this;
   }
 
   /*
   public GeneralTestWizard sendText(final String text) {
   	inner.context.cursor.receiveText(inner.context, text);
-  	inner.runner.flush();
+  	inner.flushIteration();
   	return this;
   }
 

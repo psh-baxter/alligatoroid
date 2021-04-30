@@ -15,7 +15,7 @@ public class VisualFrontAtom extends VisualFrontAtomBase {
 
   @Override
   public void dispatch(VisualNestedDispatcher dispatcher) {
-    dispatcher.handle(this);
+    dispatcher.handle((VisualFrontAtom)this);
   }
 
   public VisualFrontAtom(

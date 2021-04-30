@@ -7,8 +7,7 @@ import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.pidgoon.model.Store;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROPair;
-
-import java.util.List;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
   protected ParseBuilder(final ParseBuilder<O> other) {
@@ -23,7 +22,7 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
    * @param data
    * @return
    */
-  public O parse(final List<? extends Event> data) {
+  public O parse(final TSList<? extends Event> data) {
     ParseEventSink<O> eventStream = parse();
     for (int i = 0; i < data.size(); ++i) {
       eventStream = eventStream.push(data.get(i), i);
@@ -31,7 +30,7 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
     return eventStream.result();
   }
 
-  public O parsePosition(final List<? extends ROPair<? extends Event, ?>> data) {
+  public O parsePosition(final TSList<? extends ROPair<? extends Event, ?>> data) {
     ParseEventSink<O> eventStream = parse();
     for (ROPair<? extends Event, ?> pair : data) {
       eventStream = eventStream.push(pair.first, pair.second);
@@ -59,7 +58,7 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
    *     integer, offset into events (-1 if no match, 0 if matched at element 0, ...): max value is
    *     length of stream - 1
    */
-  public Pair<Parse, Position> longestMatchFromStart(final List<Event> events) {
+  public Pair<Parse, Position> longestMatchFromStart(final TSList<Event> events) {
     final Store store = initialStore == null ? new StackStore() : initialStore;
     Parse context =
         Pidgoon.prepare(grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
@@ -74,7 +73,7 @@ public class ParseBuilder<O> extends BaseParseBuilder<ParseBuilder<O>> {
       }
       if (context == null) break;
       record = new Pair<>(context, position);
-      if (context.leaves.isEmpty()) break;
+      if (context.branches.isEmpty()) break;
     }
     return record;
   }

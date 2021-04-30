@@ -1,101 +1,34 @@
 package com.zarbosoft.merman.editorcore.history;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.SelectionState;
-import com.zarbosoft.merman.editor.visual.tags.GlobalTag;
-import com.zarbosoft.merman.editor.visual.tags.Tag;
-import com.zarbosoft.merman.editor.visual.tags.TagsChange;
-import com.zarbosoft.rendaw.common.Common;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Deque;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+import java.util.function.Consumer;
 
 public class History {
-  private int levelId = 0;
+  private final Deque<ChangeLevel> past = new ArrayDeque<>();
+  private final Deque<ChangeLevel> future = new ArrayDeque<>();
+  private final TSSet<ModifiedStateListener> modifiedStateListeners = new TSSet<>();
   boolean locked = false;
-  private final Deque<Level> past = new ArrayDeque<>();
-  private final Deque<Level> future = new ArrayDeque<>();
+  private Object lastChangeUnique;
+  private Environment.Time lastChangeTime;
+  private int levelId = 0;
   private Integer clearLevel;
 
-  public History() {
-    addModifiedStateListener(
-        modified -> {
-          final Tag tag = new GlobalTag("modified");
-          if (modified) changeGlobalTags(new TagsChange(add, remove).add(tag));
-          else changeGlobalTags(new TagsChange(add, remove).remove(tag));
-        });
-    addListener(
-            new History.Listener() {
-              @Override
-              public void applied(final Context context, final Change change) {
-                if (hoverIdle != null) {
-                  hoverIdle.destroy();
-                }
-              }
-            });
-  }
-
-  private static class Level extends Change {
-    private final int id;
-    public final TSList<Change> subchanges = new TSList<>();
-    private SelectionState select;
-
-    private Level(final int id) {
-      this.id = id;
-    }
-
-    @Override
-    public boolean merge(final Change other) {
-      if (subchanges.isEmpty()) {
-        subchanges.add(other);
-      } else if (subchanges.last().merge(other)) {
-      } else subchanges.add(other);
-      return true;
-    }
-
-    @Override
-    public Change apply(final Context context) {
-      final Level out = new Level(id);
-      out.select = context.cursor.saveState();
-      for (int i = 0; i < subchanges.size(); ++i) {
-        Change change = subchanges.getRev(i);
-        out.subchanges.add(change.apply(context));
-      }
-      if (select != null) select.select(context);
-      return out;
-    }
-
-    public boolean isEmpty() {
-      return subchanges.isEmpty();
-    }
-  }
-
-  public abstract static class Listener {
-    public abstract void applied(Context context, Change change);
-  }
-
-  @FunctionalInterface
-  public interface ModifiedStateListener {
-    void changed(boolean modified);
-  }
-
-  private final Set<Listener> listeners = new HashSet<>();
-  private final Set<ModifiedStateListener> modifiedStateListeners = new HashSet<>();
+  public History() {}
 
   private Closeable lock() {
-    if (locked) throw new AssertionError("History callback is modifying history.");
+    if (locked) throw new Assertion("History callback is modifying history.");
     locked = true;
     return new Closeable() {
       @Override
@@ -105,23 +38,26 @@ public class History {
     };
   }
 
-  private Level applyLevel(final Context context, final Level group) {
-    final Level out = (Level) group.apply(context);
-    for (final Listener listener : listeners) listener.applied(context, group);
+  private ChangeLevel applyLevel(final Context context, final ChangeLevel group) {
+    final ChangeLevel out = (ChangeLevel) group.apply(context);
     return out;
   }
 
   public boolean undo(final Context context) {
     final boolean wasModified = isModified();
-    try (Closeable lock = lock()) {
+    try (Closeable ignored = lock()) {
       if (past.isEmpty()) return false;
       if (past.getLast().isEmpty()) past.removeLast();
       if (past.isEmpty()) return false;
       future.addLast(applyLevel(context, past.removeLast()));
-      past.addLast(new Level(levelId++));
-    } catch (final IOException e) {
+      past.addLast(new ChangeLevel(levelId++));
+    } catch (final IOException ignored) {
     }
-    if (isModified() != wasModified) modifiedStateListeners.forEach(l -> l.changed(false));
+    if (isModified() != wasModified) {
+      for (ModifiedStateListener l : modifiedStateListeners) {
+        l.changed(false);
+      }
+    }
     return true;
   }
 
@@ -130,46 +66,75 @@ public class History {
     try (Closeable ignored = lock()) {
       if (future.isEmpty()) return false;
       past.addLast(applyLevel(context, future.removeLast()));
-      past.addLast(new Level(levelId++));
+      past.addLast(new ChangeLevel(levelId++));
     } catch (final IOException ignored) {
     }
-    if (wasModified != isModified()) modifiedStateListeners.forEach(l -> l.changed(true));
+    if (wasModified != isModified()) {
+      for (ModifiedStateListener l : modifiedStateListeners) {
+        l.changed(true);
+      }
+    }
     return true;
   }
 
-  public void finishChange(final Context context) {
+  public void finishChange() {
     try (Closeable ignored = lock()) {
-      if (!past.isEmpty() && past.getLast().isEmpty()) return;
-      past.addLast(new Level(levelId++));
+      finishChangeInner();
     } catch (final IOException ignored) {
     }
   }
 
-  public void apply(final Context context, final Change change) {
+  private void finishChangeInner() {
+    if (!past.isEmpty() && past.getLast().isEmpty()) return;
+    past.addLast(new ChangeLevel(levelId++));
+  }
+
+  public void record(Context context, ROPair unique, Consumer<Recorder> c) {
     final boolean wasModified = isModified();
     try (Closeable ignored = lock()) {
+      /// Demarcate change level based on conditions
+      Environment.Time now = context.env.now();
+      if (lastChangeUnique == null
+          || unique == null
+          || !unique.equals(lastChangeUnique)
+          || lastChangeTime == null
+          || lastChangeTime.plusMillis(2000).isBefore(now)) {
+        lastChangeUnique = null;
+        finishChangeInner();
+      }
+      lastChangeTime = now;
+      lastChangeUnique = unique;
+
+      /// Remaining change prep
+      if (past.isEmpty()) past.add(new ChangeLevel(levelId++));
       future.clear();
-      final Level reverseLevel;
-      if (past.isEmpty()) {
-        reverseLevel = new Level(levelId++);
-        past.addLast(reverseLevel);
-      } else reverseLevel = past.getLast();
-      if (reverseLevel.select == null && context.cursor != null)
-        reverseLevel.select = context.cursor.saveState();
-      final Change reverse = change.apply(context);
-      reverseLevel.merge(reverse);
-      for (final Listener listener : ImmutableList.copyOf(listeners))
-        listener.applied(context, change);
+
+      /// Record and apply changes as they're recorded
+      ChangeLevel partialUndo = new ChangeLevel(-1);
+      partialUndo.select = past.getLast().select;
+      try {
+        c.accept(new Recorder(partialUndo));
+      } catch (RuntimeException e) {
+        /// Roll back partial changes
+        partialUndo.apply(context);
+        throw e;
+      }
+      past.getLast().subchanges.addAll(partialUndo.subchanges);
+      if (past.getLast().select == null) past.getLast().select = partialUndo.select;
     } catch (final IOException e) {
       throw new DeadCode();
     }
-    if (!wasModified) modifiedStateListeners.forEach(l -> l.changed(true));
+    if (!wasModified) {
+      for (ModifiedStateListener l : modifiedStateListeners) {
+        l.changed(true);
+      }
+    }
   }
 
   private Integer fixedTop() {
-    final Iterator<Level> iter = past.descendingIterator();
+    final Iterator<ChangeLevel> iter = past.descendingIterator();
     if (!iter.hasNext()) return null;
-    Level next = iter.next();
+    ChangeLevel next = iter.next();
     if (next.isEmpty())
       if (iter.hasNext()) next = iter.next();
       else return null;
@@ -191,23 +156,33 @@ public class History {
     clearLevel = null;
   }
 
-  public void clearModified(final Context context) {
-    finishChange(context);
+  public void clearModified() {
+    finishChange();
     final Integer oldClearLevel = clearLevel;
     clearLevel = fixedTop();
-    if (!Objects.equals(clearLevel, oldClearLevel))
-      modifiedStateListeners.forEach(l -> l.changed(false));
-  }
-
-  public void addListener(final Listener listener) {
-    listeners.add(listener);
-  }
-
-  public void removeListener(final Listener listener) {
-    listeners.remove(listener);
+    if (!Objects.equals(clearLevel, oldClearLevel)) {
+      for (ModifiedStateListener l : modifiedStateListeners) {
+        l.changed(false);
+      }
+    }
   }
 
   public void addModifiedStateListener(final ModifiedStateListener listener) {
     modifiedStateListeners.add(listener);
+  }
+
+  public static class Recorder {
+    private final ChangeLevel partial;
+
+    private Recorder(ChangeLevel partial) {
+      this.partial = partial;
+    }
+
+    public void apply(final Context context, final Change change) {
+      if (partial.select == null && context.cursor != null)
+        partial.select = context.cursor.saveState();
+      final Change reverse = change.apply(context);
+      partial.merge(reverse);
+    }
   }
 }

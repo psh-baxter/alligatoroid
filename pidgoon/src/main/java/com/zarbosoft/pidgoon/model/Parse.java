@@ -3,7 +3,8 @@ package com.zarbosoft.pidgoon.model;
 import com.zarbosoft.pidgoon.AmbiguitySample;
 import com.zarbosoft.pidgoon.BranchingStack;
 import com.zarbosoft.pidgoon.Stats;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,21 +16,22 @@ import java.util.List;
 public class Parse {
   public final Grammar grammar;
   /** An error for each branch that failed in the previous step of the parse. */
-  public final List<MismatchCause> errors = new ArrayList<>();
+  public final TSList<MismatchCause> errors = new TSList<>();
 
   public final int errorHistoryLimit;
   public final int uncertaintyLimit;
   /** This represents the tip node of each branch. */
-  public final List<State> leaves = new ArrayList<>();
+  public final TSList<Branch> branches = new TSList<>();
+  public final TSList<Store> completed = new TSList<>();
 
   public final Stats stats;
   /**
    * This represents the top value of the stack of branches that matched in the previous step of the
    * parse.
    */
-  public final List<Object> results = new ArrayList<>();
+  public final TSList<Object> results = new TSList<>();
   /** The error from steps before the previous (controlled by errorHistoryLimit). */
-  public List<Pair<Position, List<MismatchCause>>> errorHistory;
+  public List<ROPair<Position, TSList<MismatchCause>>> errorHistory;
 
   public BranchingStack<AmbiguitySample> ambiguityHistory;
 
@@ -48,16 +50,16 @@ public class Parse {
   public Parse(final Parse previous) {
     this.grammar = previous.grammar;
     this.stats = new Stats(previous.stats);
-    stats.totalLeaves += previous.leaves.size();
-    stats.maxLeaves = Math.max(stats.maxLeaves, previous.leaves.size());
+    stats.totalLeaves += previous.branches.size();
+    stats.maxLeaves = Math.max(stats.maxLeaves, previous.branches.size());
     stats.steps += 1;
     this.errorHistoryLimit = previous.errorHistoryLimit;
     this.uncertaintyLimit = previous.uncertaintyLimit;
     this.ambiguityHistory = previous.ambiguityHistory;
   }
 
-  public abstract static class State {
-    protected State() {}
+  public abstract static class Branch {
+    protected Branch() {}
 
     /**
      * The current color of this branch, as set by a Color node
@@ -65,7 +67,11 @@ public class Parse {
      * @param <T>
      * @return
      */
-    public abstract <T> T color();
+    public <T> T color() {
+      return (T) store().color;
+    }
+
+    public abstract Store store();
 
     public abstract void parse(Parse step, Position position);
   }

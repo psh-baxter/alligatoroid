@@ -18,12 +18,12 @@ public class Wildcard extends Node {
       final Parent parent,
       final ROMap<Object, RefParent> seen,
       final MismatchCause cause) {
-    context.leaves.add(
-        new Parse.State() {
-          @Override
-          public <T> T color() {
-            return (T) store.color;
-          }
+    context.branches.add(
+        new Parse.Branch() {
+            @Override
+            public Store store() {
+                return store;
+            }
 
           @Override
           public void parse(final Parse step, final Position position) {

@@ -6,17 +6,21 @@ import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
+import com.zarbosoft.merman.core.syntax.front.ConditionValue;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.symbol.Symbol;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 public class SuffixGapAtomType extends BaseGapAtomType {
-  public static final String GAP_ARRAY_KEY = "value";
+  public static final String PRECEDING_KEY = "preceding";
   public final String backType;
 
   public SuffixGapAtomType(Config config) {
@@ -32,20 +36,31 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                                 new TSMap<>(
                                     s ->
                                         s.put(
-                                                "value",
+                                                "preceding",
                                                 new BackArraySpec(
                                                     new BaseBackSimpleArraySpec.Config(
-                                                        GAP_ARRAY_KEY, null, new TSList<>())))
+                                                        PRECEDING_KEY, null, new TSList<>())))
                                             .put(
-                                                "gap",
+                                                "text",
                                                 new BackPrimitiveSpec(
                                                     new BaseBackPrimitiveSpec.Config(
                                                         GAP_PRIMITIVE_KEY)))),
                                 ROSet.empty))))),
-            TSList.of(
+            new TSList<FrontSpec>()
+                .add(
                     new FrontArraySpec(
-                        new FrontArraySpec.Config(GAP_ARRAY_KEY, config.frontArrayConfig)),
-                    new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(GAP_PRIMITIVE_KEY)))
+                        new FrontArraySpec.Config(PRECEDING_KEY, config.frontArrayConfig)))
+                .add(
+                    new FrontSymbol(
+                        new FrontSymbol.Config(
+                                config.gapPlaceholderSymbol == null
+                                    ? new SymbolTextSpec(new SymbolTextSpec.Config("•"))
+                                    : config.gapPlaceholderSymbol)
+                            .condition(
+                                new ConditionValue(
+                                    new ConditionValue.Config(
+                                        GAP_PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))))
+                .add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(GAP_PRIMITIVE_KEY)))
                 .addAll(config.frontSuffix)));
     backType = config.backType;
   }
@@ -60,6 +75,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
     public String backType = "__suffix_gap";
     public FrontArraySpecBase.Config frontArrayConfig = new FrontArraySpecBase.Config();
     public ROList<FrontSpec> frontSuffix = ROList.empty;
+    public Symbol gapPlaceholderSymbol;
 
     public Config() {}
 

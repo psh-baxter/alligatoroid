@@ -11,9 +11,9 @@ public class PatternUnion extends Pattern {
   }
 
   @Override
-  public Node build() {
+  public Node build(boolean capture) {
     final com.zarbosoft.pidgoon.nodes.Union out = new com.zarbosoft.pidgoon.nodes.Union();
-    for (final Pattern child : children) out.add(child.build());
+    for (final Pattern child : children) out.add(child.build(capture));
     return out;
   }
 }

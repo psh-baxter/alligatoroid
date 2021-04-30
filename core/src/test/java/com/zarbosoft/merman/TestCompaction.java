@@ -856,13 +856,13 @@ public class TestCompaction {
                 new TreeBuilder(one).build())
             .build();
     new GeneralTestWizard(syntax, new TreeBuilder(low).addArray("value", midAtom).build())
-        .act("window")
+        .actWindow()
         .displayWidth(70)
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "...")
         .checkTextBrick(3, 1, "one")
         .run(context -> midAtom.valueParentRef.selectValue(context))
-        .act("window")
+        .actWindow()
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 2, "one")
         .checkTextBrick(1, 4, "one")
@@ -874,6 +874,10 @@ public class TestCompaction {
     final FreeAtomType one = new TypeBuilder("one")
             .back(Helper.buildBackPrimitive("one"))
             .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType two = new TypeBuilder("two")
+            .back(Helper.buildBackPrimitive("two"))
+            .front(new FrontMarkBuilder("two").build())
             .build();
     final FreeAtomType low = new TypeBuilder("low")
             .back(Helper.buildBackDataArray("value", "any"))
@@ -916,6 +920,7 @@ public class TestCompaction {
             .build();
     final Syntax syntax = new SyntaxBuilder("any")
             .type(one)
+            .type(two)
             .type(low)
             .type(mid)
             .type(high)
@@ -923,6 +928,7 @@ public class TestCompaction {
                     "any",
                     new GroupBuilder()
                             .type(one)
+                            .type(two)
                             .type(low)
                             .type(mid)
                             .type(high)
@@ -932,26 +938,26 @@ public class TestCompaction {
         new TreeBuilder(mid)
             .addArray(
                 "value",
-                new TreeBuilder(one).build(),
+                new TreeBuilder(two).build(),
                 new TreeBuilder(low)
                     .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
                     .build(),
-                new TreeBuilder(one).build())
+                new TreeBuilder(two).build())
             .build();
     Atom highAtom = new TreeBuilder(high).addArray("value", midAtom).build();
     new GeneralTestWizard(syntax, highAtom)
         .run(context -> highAtom.valueParentRef.selectValue(context))
-        .act("window")
+        .actWindow()
         .displayWidth(70)
-        .checkTextBrick(1, 1, "one")
+        .checkTextBrick(1, 1, "two")
         .checkTextBrick(2, 1, "...")
-        .checkTextBrick(3, 1, "one")
+        .checkTextBrick(3, 1, "two")
         .run(context -> midAtom.valueParentRef.selectValue(context))
-        .act("window")
-        .checkTextBrick(0, 1, "one")
+        .actWindow()
+        .checkTextBrick(0, 1, "two")
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "one")
-        .checkTextBrick(2, 3, "one");
+        .checkTextBrick(2, 3, "two");
   }
 
   @Test

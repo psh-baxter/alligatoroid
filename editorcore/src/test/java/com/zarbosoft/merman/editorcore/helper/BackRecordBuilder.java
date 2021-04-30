@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.editorcore.helper;
 
+import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
+import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.merman.syntax.back.BackFixedRecordSpec;
-import com.zarbosoft.merman.syntax.back.BackSpec;
 
 public class BackRecordBuilder {
   private final TSMap<String, BackSpec> pairs = new TSMap<>();

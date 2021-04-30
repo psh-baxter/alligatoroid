@@ -202,7 +202,7 @@ public class JSSerializer implements Serializer {
           ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>> result =
               new ParseBuilder<ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>>>()
                   .grammar(grammar)
-                  .parsePosition(events.inner_());
+                  .parsePosition(events);
           TSList<Atom> finalOut = new TSList<>();
           for (ROPair<Atom, ROMap<String, ROPair<Field, Object>>> e : result) {
             finalOut.add(Serializer.initialSet(e));

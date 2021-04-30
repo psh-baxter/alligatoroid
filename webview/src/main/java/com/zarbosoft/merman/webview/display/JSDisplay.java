@@ -8,7 +8,7 @@ import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.display.Image;
 import com.zarbosoft.merman.core.display.Text;
-import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
@@ -109,16 +109,16 @@ public class JSDisplay extends Display {
               }
               wheelXPixels += event.deltaX;
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_LEFT, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_LEFT, true, modifiers);
                 while (wheelXPixels < -wheelPixelThreshold) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                   wheelXPixels += wheelPixelThreshold;
                 }
               }
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_RIGHT, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_RIGHT, true, modifiers);
                 while (wheelXPixels > wheelPixelThreshold) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                   wheelXPixels -= wheelPixelThreshold;
                 }
               }
@@ -128,16 +128,16 @@ public class JSDisplay extends Display {
               }
               wheelYPixels += event.deltaY;
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_UP, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_UP, true, modifiers);
                 while (wheelYPixels < -wheelPixelThreshold) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                   wheelYPixels += wheelPixelThreshold;
                 }
               }
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_DOWN, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_DOWN, true, modifiers);
                 while (wheelYPixels > wheelPixelThreshold) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                   wheelYPixels -= wheelPixelThreshold;
                 }
               }
@@ -147,54 +147,54 @@ public class JSDisplay extends Display {
               }
               wheelZPixels += event.deltaZ;
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_IN, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_IN, true, modifiers);
                 while (wheelZPixels < -wheelPixelThreshold) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                   wheelZPixels += wheelPixelThreshold;
                 }
               }
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_OUT, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_OUT, true, modifiers);
                 while (wheelZPixels > wheelPixelThreshold) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                   wheelZPixels -= wheelPixelThreshold;
                 }
               }
             } else {
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_LEFT, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_LEFT, true, modifiers);
                 for (int i = 0; i > event.deltaX; --i) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                 }
               }
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_RIGHT, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_RIGHT, true, modifiers);
                 for (int i = 0; i < event.deltaX; ++i) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                 }
               }
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_UP, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_UP, true, modifiers);
                 for (int i = 0; i > event.deltaY; --i) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                 }
               }
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_DOWN, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_DOWN, true, modifiers);
                 for (int i = 0; i < event.deltaY; ++i) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                 }
               }
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_IN, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_IN, true, modifiers);
                 for (int i = 0; i > event.deltaZ; --i) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                 }
               }
               {
-                HIDEvent sendEvent = new HIDEvent(Key.MOUSE_SCROLL_OUT, true, modifiers);
+                ButtonEvent sendEvent = new ButtonEvent(Key.MOUSE_SCROLL_OUT, true, modifiers);
                 for (int i = 0; i < event.deltaZ; ++i) {
-                  hidEventListener.accept(sendEvent);
+                  keyEventListener.apply(sendEvent);
                 }
               }
             }
@@ -286,8 +286,10 @@ public class JSDisplay extends Display {
       if (event.ctrlKey) modifiers.add(Key.CONTROL);
       if (event.shiftKey) modifiers.add(Key.SHIFT);
       if (event.metaKey) modifiers.add(Key.META);
-      HIDEvent sendEvent = new HIDEvent(key, press, modifiers.ro());
-      hidEventListener.accept(sendEvent);
+      ButtonEvent sendEvent = new ButtonEvent(key, press, modifiers.ro());
+      if (keyEventListener.apply(sendEvent)) {
+        event.stopPropagation();
+      }
     }
     return null;
   }
@@ -1211,12 +1213,16 @@ public class JSDisplay extends Display {
       if (event.ctrlKey) modifiers.add(Key.CONTROL);
       if (event.shiftKey) modifiers.add(Key.SHIFT);
       if (event.metaKey) modifiers.add(Key.META);
-      HIDEvent sendEvent = new HIDEvent(key, press, modifiers.ro());
-      hidEventListener.accept(sendEvent);
+      ButtonEvent sendEvent = new ButtonEvent(key, press, modifiers.ro());
+      if (keyEventListener.apply(sendEvent)) {
+        event.stopPropagation();
+      }
     }
     if (isText) {
       if (text == null) text = event.key;
-      typingListener.accept(text);
+      if (typingListener.apply(text)) {
+        event.stopPropagation();
+      }
     }
     return null;
   }

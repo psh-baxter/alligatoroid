@@ -1,16 +1,16 @@
 package com.zarbosoft.merman.editorcore;
 
-import com.google.common.collect.ImmutableList;
-import com.zarbosoft.merman.editor.Context;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
+import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
 import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
 import com.zarbosoft.merman.editorcore.helper.Helper;
 import com.zarbosoft.merman.editorcore.helper.SyntaxBuilder;
 import com.zarbosoft.merman.editorcore.helper.TreeBuilder;
 import com.zarbosoft.merman.editorcore.helper.TypeBuilder;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
 
 import java.util.function.Consumer;
@@ -21,40 +21,40 @@ import static org.junit.Assert.assertThat;
 public class TestHistory {
 	final public static FreeAtomType one;
 	final public static Syntax syntax;
-	final public static Consumer<Context> modify;
-	final public static Consumer<Context> undo;
-	final public static Consumer<Context> redo;
+	final public static Consumer<Editor> modify;
+	final public static Consumer<Editor> undo;
+	final public static Consumer<Editor> redo;
 
 	static {
 		one = new TypeBuilder("one")
 				.back(Helper.buildBackPrimitive("one"))
 				.front(new FrontMarkBuilder("one").build())
-				.autoComplete(-1)
+				.autoComplete(false)
 				.build();
 		syntax = new SyntaxBuilder("any").type(one).group("any", new GroupBuilder().type(one).build()).build();
-		modify = new Consumer<>() {
+		modify = new Consumer<Editor>() {
 			@Override
-			public void accept(final Context context) {
-				context.history.apply(context,
-						new ChangeArray(Helper.rootArray(context.document),
+			public void accept(final Editor editor) {
+				editor.history.record(editor.context, null, r -> r.apply(editor.context,
+						new ChangeArray(Helper.rootArray(editor.context.document),
 								0,
 								0,
-								ImmutableList.of(new TreeBuilder(one).build())
+								TSList.of(new TreeBuilder(one).build())
 						)
-				);
-				context.history.finishChange(context);
+				));
+				editor.history.finishChange();
 			}
 		};
-		undo = new Consumer<>() {
+		undo = new Consumer<Editor>() {
 			@Override
-			public void accept(final Context context) {
-				context.history.undo(context);
+			public void accept(final Editor editor) {
+				editor.history.undo(editor.context);
 			}
 		};
-		redo = new Consumer<>() {
+		redo = new Consumer<Editor>() {
 			@Override
-			public void accept(final Context context) {
-				context.history.redo(context);
+			public void accept(final Editor editor) {
+				editor.history.redo(editor.context);
 			}
 		};
 	}
@@ -98,7 +98,7 @@ public class TestHistory {
 	public void testChangeClear() {
 		initializeWithALongNameToForceChainWrapping()
 				.run(modify)
-				.run(context -> context.history.clearModified(context))
+				.run(context -> context.history.clearModified())
 				.run(context -> assertThat(context.history.isModified(), is(false)));
 	}
 
@@ -106,7 +106,7 @@ public class TestHistory {
 	public void testClearUndoChanged() {
 		initializeWithALongNameToForceChainWrapping()
 				.run(modify)
-				.run(context -> context.history.clearModified(context))
+				.run(context -> context.history.clearModified())
 				.run(undo)
 				.run(context -> assertThat(context.history.isModified(), is(true)));
 	}
@@ -115,7 +115,7 @@ public class TestHistory {
 	public void testClearRedoClear() {
 		initializeWithALongNameToForceChainWrapping()
 				.run(modify)
-				.run(context -> context.history.clearModified(context))
+				.run(context -> context.history.clearModified())
 				.run(undo)
 				.run(redo)
 				.run(context -> assertThat(context.history.isModified(), is(false)));
@@ -127,7 +127,7 @@ public class TestHistory {
 				.run(modify)
 				.run(modify)
 				.run(modify)
-				.run(context -> context.history.clearModified(context))
+				.run(context -> context.history.clearModified())
 				.run(context -> assertThat(context.history.isModified(), is(false)));
 	}
 
@@ -137,7 +137,7 @@ public class TestHistory {
 				.run(modify)
 				.run(modify)
 				.run(modify)
-				.run(context -> context.history.clearModified(context))
+				.run(context -> context.history.clearModified())
 				.run(undo)
 				.run(context -> assertThat(context.history.isModified(), is(true)));
 	}
@@ -148,7 +148,7 @@ public class TestHistory {
 				.run(modify)
 				.run(modify)
 				.run(modify)
-				.run(context -> context.history.clearModified(context))
+				.run(context -> context.history.clearModified())
 				.run(undo)
 				.run(redo)
 				.run(context -> assertThat(context.history.isModified(), is(false)));
@@ -158,7 +158,7 @@ public class TestHistory {
 	public void testChangeFinishChange() {
 		initializeWithALongNameToForceChainWrapping()
 				.run(modify)
-				.run(context -> context.history.finishChange(context))
+				.run(context -> context.history.finishChange())
 				.run(modify)
 				.run(undo)
 				.checkArrayTree(new TreeBuilder(one).build(), new TreeBuilder(one).build());
@@ -168,7 +168,7 @@ public class TestHistory {
 	public void testClearModifiedChangeUndo() {
 		initializeWithALongNameToForceChainWrapping()
 				.run(modify)
-				.run(context -> context.history.clearModified(context))
+				.run(context -> context.history.clearModified())
 				.run(modify)
 				.run(undo)
 				.run(context -> assertThat(context.history.isModified(), is(false)));
@@ -178,7 +178,7 @@ public class TestHistory {
 	public void testModifyAfterFinishUndo() {
 		initializeWithALongNameToForceChainWrapping()
 				.run(modify)
-				.run(context -> context.history.finishChange(context))
+				.run(context -> context.history.finishChange())
 				.run(modify)
 				.run(undo)
 				.run(modify)
@@ -190,7 +190,7 @@ public class TestHistory {
 	public void testModifyAfterFinishRedo() {
 		initializeWithALongNameToForceChainWrapping()
 				.run(modify)
-				.run(context -> context.history.finishChange(context))
+				.run(context -> context.history.finishChange())
 				.run(undo)
 				.run(redo)
 				.run(modify)

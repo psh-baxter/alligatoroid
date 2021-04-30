@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.editorcore.helper;
 
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.merman.syntax.FreeAtomType;
 
 public class GroupBuilder {
 	TSList<String> subtypes = new TSList<>();

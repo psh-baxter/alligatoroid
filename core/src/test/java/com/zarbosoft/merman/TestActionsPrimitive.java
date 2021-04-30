@@ -23,7 +23,7 @@ public class TestActionsPrimitive {
   public void testExit() {
     final Context context = buildFive();
     assertThat(context.cursor.getVisual(), instanceOf(VisualFrontPrimitive.class));
-    Helper.act(context, "exit");
+    Helper.cursorPrimitive(context).actionExit(context);
     assertNotNull(((VisualFrontArray) Helper.rootArray(context.document).visual).selection);
   }
 
@@ -46,7 +46,7 @@ public class TestActionsPrimitive {
     final FieldPrimitive value = (FieldPrimitive) target.fields.getOpt("first");
     new GeneralTestWizard(MiscSyntax.syntax,  target)
         .run(context -> value.selectInto(context))
-        .act("next")
+        .actNext()
         .run(
             context ->
                 assertThat(
@@ -61,7 +61,7 @@ public class TestActionsPrimitive {
     final FieldPrimitive value = (FieldPrimitive) target.fields.getOpt("second");
     new GeneralTestWizard(MiscSyntax.syntax,  target)
         .run(context -> value.selectInto(context))
-        .act("previous")
+        .actPrevious()
         .run(
             context ->
                 assertThat(
@@ -73,7 +73,7 @@ public class TestActionsPrimitive {
   public void testNextElement() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "next_element");
+    Helper.cursorPrimitive(context).actionNextElement(context);
     assertSelection(context, 3, 3);
   }
 
@@ -82,8 +82,8 @@ public class TestActionsPrimitive {
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final VisualFrontPrimitive.PrimitiveCursor selection =
-        (VisualFrontPrimitive.PrimitiveCursor) context.cursor;
+    final VisualFrontPrimitive.Cursor selection =
+        (VisualFrontPrimitive.Cursor) context.cursor;
     assertThat(selection.range.beginOffset, equalTo(begin));
     assertThat(selection.range.endOffset, equalTo(end));
   }
@@ -92,7 +92,7 @@ public class TestActionsPrimitive {
   public void testNextEOL() {
     final Context context = build("1\n2");
     visual(context).select(context, true, 1, 1);
-    Helper.act(context, "next_element");
+    Helper.cursorPrimitive(context).actionNextElement(context);
     assertSelection(context, 2, 2);
   }
 
@@ -100,7 +100,7 @@ public class TestActionsPrimitive {
   public void testNextDeselect() {
     final Context context = buildFive();
     visual(context).select(context, true, 1, 2);
-    Helper.act(context, "next_element");
+    Helper.cursorPrimitive(context).actionNextElement(context);
     assertSelection(context, 3, 3);
   }
 
@@ -108,7 +108,7 @@ public class TestActionsPrimitive {
   public void testNextEnd() {
     final Context context = buildFive();
     visual(context).select(context, true, 5, 5);
-    Helper.act(context, "next_element");
+    Helper.cursorPrimitive(context).actionNextElement(context);
     assertSelection(context, 5, 5);
   }
 
@@ -116,7 +116,7 @@ public class TestActionsPrimitive {
   public void testNextDeselectEnd() {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 5);
-    Helper.act(context, "next_element");
+    Helper.cursorPrimitive(context).actionNextElement(context);
     assertSelection(context, 5, 5);
   }
 
@@ -124,7 +124,7 @@ public class TestActionsPrimitive {
   public void testPreviousElement() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "previous_element");
+    Helper.cursorPrimitive(context).actionPreviousElement(context);
     assertSelection(context, 1, 1);
   }
 
@@ -132,7 +132,7 @@ public class TestActionsPrimitive {
   public void testPreviousBOL() {
     final Context context = build("a\n2");
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "previous_element");
+    Helper.cursorPrimitive(context).actionPreviousElement(context);
     assertSelection(context, 1, 1);
   }
 
@@ -140,7 +140,7 @@ public class TestActionsPrimitive {
   public void testPreviousDeselect() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 3);
-    Helper.act(context, "previous_element");
+    Helper.cursorPrimitive(context).actionPreviousElement(context);
     assertSelection(context, 1, 1);
   }
 
@@ -148,7 +148,7 @@ public class TestActionsPrimitive {
   public void testPreviousStart() {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
-    Helper.act(context, "previous_element");
+    Helper.cursorPrimitive(context).actionPreviousElement(context);
     assertSelection(context, 0, 0);
   }
 
@@ -156,7 +156,7 @@ public class TestActionsPrimitive {
   public void testPreviousDeselectStart() {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 1);
-    Helper.act(context, "previous_element");
+    Helper.cursorPrimitive(context).actionPreviousElement(context);
     assertSelection(context, 0, 0);
   }
 
@@ -164,7 +164,7 @@ public class TestActionsPrimitive {
   public void testNextLineLast() {
     final Context context = build("12");
     visual(context).select(context, true, 1, 1);
-    Helper.act(context, "next_line");
+    Helper.cursorPrimitive(context).actionNextLine(context);
     assertSelection(context, 2, 2);
   }
 
@@ -172,7 +172,7 @@ public class TestActionsPrimitive {
   public void testNextLineStart() {
     final Context context = build("12\n34");
     visual(context).select(context, true, 0, 0);
-    Helper.act(context, "next_line");
+    Helper.cursorPrimitive(context).actionNextLine(context);
     assertSelection(context, 3, 3);
   }
 
@@ -180,7 +180,7 @@ public class TestActionsPrimitive {
   public void testNextLineMid() {
     final Context context = build("12\n34");
     visual(context).select(context, true, 1, 1);
-    Helper.act(context, "next_line");
+    Helper.cursorPrimitive(context).actionNextLine(context);
     assertSelection(context, 4, 4);
   }
 
@@ -188,7 +188,7 @@ public class TestActionsPrimitive {
   public void testNextLineEnd() {
     final Context context = build("12\n34");
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "next_line");
+    Helper.cursorPrimitive(context).actionNextLine(context);
     assertSelection(context, 5, 5);
   }
 
@@ -196,7 +196,7 @@ public class TestActionsPrimitive {
   public void testNextLineLimit() {
     final Context context = build("12\n3");
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "next_line");
+    Helper.cursorPrimitive(context).actionNextLine(context);
     assertSelection(context, 4, 4);
   }
 
@@ -204,7 +204,7 @@ public class TestActionsPrimitive {
   public void testPreviousLineFirst() {
     final Context context = build("12");
     visual(context).select(context, true, 1, 1);
-    Helper.act(context, "previous_line");
+    Helper.cursorPrimitive(context).actionPreviousLine(context);
     assertSelection(context, 0, 0);
   }
 
@@ -212,7 +212,7 @@ public class TestActionsPrimitive {
   public void testPreviousLineStart() {
     final Context context = build("12\n34");
     visual(context).select(context, true, 3, 3);
-    Helper.act(context, "previous_line");
+    Helper.cursorPrimitive(context).actionPreviousLine(context);
     assertSelection(context, 0, 0);
   }
 
@@ -220,7 +220,7 @@ public class TestActionsPrimitive {
   public void testPreviousLineMid() {
     final Context context = build("12\n34");
     visual(context).select(context, true, 4, 4);
-    Helper.act(context, "previous_line");
+    Helper.cursorPrimitive(context).actionPreviousLine(context);
     assertSelection(context, 1, 1);
   }
 
@@ -228,7 +228,7 @@ public class TestActionsPrimitive {
   public void testPreviousLineEnd() {
     final Context context = build("12\n34");
     visual(context).select(context, true, 5, 5);
-    Helper.act(context, "previous_line");
+    Helper.cursorPrimitive(context).actionPreviousLine(context);
     assertSelection(context, 2, 2);
   }
 
@@ -236,7 +236,7 @@ public class TestActionsPrimitive {
   public void testPreviousLineLimit() {
     final Context context = build("1\n34");
     visual(context).select(context, true, 4, 4);
-    Helper.act(context, "previous_line");
+    Helper.cursorPrimitive(context).actionPreviousLine(context);
     assertSelection(context, 1, 1);
   }
 
@@ -244,7 +244,7 @@ public class TestActionsPrimitive {
   public void testLineBegin() {
     final Context context = build("01\n23\n45");
     visual(context).select(context, true, 4, 4);
-    Helper.act(context, "line_begin");
+    Helper.cursorPrimitive(context).actionLineBegin(context);
     assertSelection(context, 3, 3);
   }
 
@@ -252,7 +252,7 @@ public class TestActionsPrimitive {
   public void testLineEnd() {
     final Context context = build("01\n23\n45");
     visual(context).select(context, true, 4, 4);
-    Helper.act(context, "line_end");
+    Helper.cursorPrimitive(context).actionLineEnd(context);
     assertSelection(context, 5, 5);
   }
 
@@ -260,7 +260,7 @@ public class TestActionsPrimitive {
   public void testLastLineEnd() {
     final Context context = build("01");
     visual(context).select(context, true, 1, 1);
-    Helper.act(context, "line_end");
+    Helper.cursorPrimitive(context).actionLineEnd(context);
     assertSelection(context, 2, 2);
   }
 
@@ -268,7 +268,7 @@ public class TestActionsPrimitive {
   public void testFirstLineBegin() {
     final Context context = build("01");
     visual(context).select(context, true, 1, 1);
-    Helper.act(context, "line_begin");
+    Helper.cursorPrimitive(context).actionLineBegin(context);
     assertSelection(context, 0, 0);
   }
 
@@ -276,15 +276,15 @@ public class TestActionsPrimitive {
   public void testNextWordMid() {
     final Context context = build("the dog");
     visual(context).select(context, true, 1, 1);
-    Helper.act(context, "next_word");
-    assertSelection(context, 3, 3);
+    Helper.cursorPrimitive(context).actionNextWord(context);
+    assertSelection(context, 4, 4);
   }
 
   @Test
   public void testNextWordBoundary() {
     final Context context = build("the dog");
     visual(context).select(context, true, 3, 3);
-    Helper.act(context, "next_word");
+    Helper.cursorPrimitive(context).actionNextWord(context);
     assertSelection(context, 4, 4);
   }
 
@@ -292,7 +292,7 @@ public class TestActionsPrimitive {
   public void testPreviousWordMid() {
     final Context context = build("the dog");
     visual(context).select(context, true, 5, 5);
-    Helper.act(context, "previous_word");
+    Helper.cursorPrimitive(context).actionPreviousWord(context);
     assertSelection(context, 4, 4);
   }
 
@@ -300,15 +300,15 @@ public class TestActionsPrimitive {
   public void testPreviousWordBoundary() {
     final Context context = build("the dog");
     visual(context).select(context, true, 4, 4);
-    Helper.act(context, "previous_word");
-    assertSelection(context, 3, 3);
+    Helper.cursorPrimitive(context).actionPreviousWord(context);
+    assertSelection(context, 0, 0);
   }
 
   @Test
   public void testGatherNext() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "gather_next");
+    Helper.cursorPrimitive(context).actionGatherNext(context);
     assertSelection(context, 2, 3);
   }
 
@@ -316,7 +316,7 @@ public class TestActionsPrimitive {
   public void testGatherNextEnd() {
     final Context context = buildFive();
     visual(context).select(context, true, 5, 5);
-    Helper.act(context, "gather_next");
+    Helper.cursorPrimitive(context).actionGatherNext(context);
     assertSelection(context, 5, 5);
   }
 
@@ -328,8 +328,8 @@ public class TestActionsPrimitive {
             context ->
                 ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 2, 2))
-        .act("gather_next")
-        .act("gather_next")
+        .actGatherNext()
+        .actGatherNext()
         .run(context -> assertSelection(context, 2, 4));
   }
 
@@ -341,8 +341,8 @@ public class TestActionsPrimitive {
             context ->
                 ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 2, 2))
-        .act("gather_next")
-        .act("gather_next")
+        .actGatherNext()
+        .actGatherNext()
         .run(context -> assertSelection(context, 2, 4));
   }
 
@@ -350,7 +350,7 @@ public class TestActionsPrimitive {
   public void testGatherNextWord() {
     final Context context = build("dog hat chair");
     visual(context).select(context, true, 3, 4);
-    Helper.act(context, "gather_next_word");
+    Helper.cursorPrimitive(context).actionGatherNextWord(context);
     assertSelection(context, 3, 7);
   }
 
@@ -358,7 +358,7 @@ public class TestActionsPrimitive {
   public void testGatherNextLineEnd() {
     final Context context = build("dog hat\n chair");
     visual(context).select(context, true, 3, 3);
-    Helper.act(context, "gather_next_line_end");
+    Helper.cursorPrimitive(context).actionGatherNextLineEnd(context);
     assertSelection(context, 3, 7);
   }
 
@@ -366,7 +366,7 @@ public class TestActionsPrimitive {
   public void testGatherNextLine() {
     final Context context = build("dog hat\n chair");
     visual(context).select(context, true, 3, 3);
-    Helper.act(context, "gather_next_line");
+    Helper.cursorPrimitive(context).actionGatherNextLine(context);
     assertSelection(context, 3, 11);
   }
 
@@ -374,7 +374,7 @@ public class TestActionsPrimitive {
   public void testGatherPrevious() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "gather_previous");
+    Helper.cursorPrimitive(context).actionGatherPrevious(context);
     assertSelection(context, 1, 2);
   }
 
@@ -382,7 +382,7 @@ public class TestActionsPrimitive {
   public void testGatherPreviousWord() {
     final Context context = build("chair hat pan");
     visual(context).select(context, true, 9, 9);
-    Helper.act(context, "gather_previous_word");
+    Helper.cursorPrimitive(context).actionGatherPreviousWord(context);
     assertSelection(context, 6, 9);
   }
 
@@ -390,7 +390,7 @@ public class TestActionsPrimitive {
   public void testGatherPreviousLineStart() {
     final Context context = build("chair\nhat pan");
     visual(context).select(context, true, 9, 9);
-    Helper.act(context, "gather_previous_line_start");
+    Helper.cursorPrimitive(context).actionGatherPreviousLineStart(context);
     assertSelection(context, 6, 9);
   }
 
@@ -398,7 +398,7 @@ public class TestActionsPrimitive {
   public void testGatherPreviousNewline() {
     final Context context = build("chair\nhat pan");
     visual(context).select(context, true, 9, 9);
-    Helper.act(context, "gather_previous_line");
+    Helper.cursorPrimitive(context).actionGatherPreviousLine(context);
     assertSelection(context, 3, 9);
   }
 
@@ -410,7 +410,7 @@ public class TestActionsPrimitive {
             context ->
                 ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 5, 5))
-        .act("gather_previous_line")
+        .actGatherPreviousLine()
         .run(context -> assertSelection(context, 1, 5));
   }
 
@@ -422,7 +422,7 @@ public class TestActionsPrimitive {
             context ->
                 ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
                     .visual.select(context, false, 4, 4))
-        .act("gather_previous_line")
+        .actGatherPreviousLine()
         .run(context -> assertSelection(context, 0, 4));
   }
 
@@ -430,7 +430,7 @@ public class TestActionsPrimitive {
   public void testGatherPreviousStart() {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
-    Helper.act(context, "gather_previous");
+    Helper.cursorPrimitive(context).actionGatherPrevious(context);
     assertSelection(context, 0, 0);
   }
 
@@ -438,7 +438,7 @@ public class TestActionsPrimitive {
   public void testReleaseNext() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 3);
-    Helper.act(context, "release_next");
+    Helper.cursorPrimitive(context).actionReleaseNext(context);
     assertSelection(context, 2, 2);
   }
 
@@ -446,7 +446,7 @@ public class TestActionsPrimitive {
   public void testReleaseNextMinimum() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "release_next");
+    Helper.cursorPrimitive(context).actionReleaseNext(context);
     assertSelection(context, 2, 2);
   }
 
@@ -454,7 +454,7 @@ public class TestActionsPrimitive {
   public void testReleaseNextWord() {
     final Context context = build("kettle rubarb");
     visual(context).select(context, true, 6, 13);
-    Helper.act(context, "release_next_word");
+    Helper.cursorPrimitive(context).actionReleaseNextWord(context);
     assertSelection(context, 6, 7);
   }
 
@@ -462,7 +462,7 @@ public class TestActionsPrimitive {
   public void testReleaseNextLineEnd() {
     final Context context = build("one\ntwo three");
     visual(context).select(context, true, 1, 8);
-    Helper.act(context, "release_next_line_end");
+    Helper.cursorPrimitive(context).actionReleaseNextLineEnd(context);
     assertSelection(context, 1, 4);
   }
 
@@ -470,7 +470,7 @@ public class TestActionsPrimitive {
   public void testReleaseNextLine() {
     final Context context = build("one\ntwo three");
     visual(context).select(context, true, 1, 7);
-    Helper.act(context, "release_next_line");
+    Helper.cursorPrimitive(context).actionReleaseNextLine(context);
     assertSelection(context, 1, 3);
   }
 
@@ -478,7 +478,7 @@ public class TestActionsPrimitive {
   public void testReleaseNextLineReversed() {
     final Context context = build("one two\nthree");
     visual(context).select(context, true, 6, 9);
-    Helper.act(context, "release_next_line");
+    Helper.cursorPrimitive(context).actionReleaseNextLine(context);
     assertSelection(context, 6, 6);
   }
 
@@ -486,7 +486,7 @@ public class TestActionsPrimitive {
   public void testReleasePrevious() {
     final Context context = buildFive();
     visual(context).select(context, true, 1, 2);
-    Helper.act(context, "release_previous");
+    Helper.cursorPrimitive(context).actionReleasePrevious(context);
     assertSelection(context, 2, 2);
   }
 
@@ -494,7 +494,7 @@ public class TestActionsPrimitive {
   public void testReleasePreviousMinimum() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "release_previous");
+    Helper.cursorPrimitive(context).actionReleasePrevious(context);
     assertSelection(context, 2, 2);
   }
 
@@ -502,15 +502,15 @@ public class TestActionsPrimitive {
   public void testReleasePreviousWord() {
     final Context context = build("truck frypan");
     visual(context).select(context, true, 0, 10);
-    Helper.act(context, "release_previous_word");
-    assertSelection(context, 5, 10);
+    Helper.cursorPrimitive(context).actionReleasePreviousWord(context);
+    assertSelection(context, 6, 10);
   }
 
   @Test
   public void testReleasePreviousLineStart() {
     final Context context = build("no\nyes");
     visual(context).select(context, true, 0, 5);
-    Helper.act(context, "release_previous_line_start");
+    Helper.cursorPrimitive(context).actionReleasePreviousLineStart(context);
     assertSelection(context, 2, 5);
   }
 
@@ -518,7 +518,7 @@ public class TestActionsPrimitive {
   public void testReleasePreviousLine() {
     final Context context = build("no\nyes");
     visual(context).select(context, true, 0, 5);
-    Helper.act(context, "release_previous_line");
+    Helper.cursorPrimitive(context).actionReleasePreviousLine(context);
     assertSelection(context, 3, 5);
   }
 
@@ -526,7 +526,7 @@ public class TestActionsPrimitive {
   public void testReleasePreviousLineReversed() {
     final Context context = build("no ultimatum\nyes");
     visual(context).select(context, true, 7, 15);
-    Helper.act(context, "release_previous_line");
+    Helper.cursorPrimitive(context).actionReleasePreviousLine(context);
     assertSelection(context, 15, 15);
   }
 }

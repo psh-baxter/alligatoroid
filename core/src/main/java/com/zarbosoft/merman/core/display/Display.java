@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.core.display;
 
-import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
@@ -18,7 +18,8 @@ public abstract class Display {
   private final TSList<Runnable> mouseLeaveListeners = new TSList<>();
   private final TSList<DoubleListener> converseEdgeListeners = new TSList<>();
   private final TSList<DoubleListener> transverseEdgeListeners = new TSList<>();
-  protected Function<HIDEvent, Boolean> hidEventListener;
+  protected Function<ButtonEvent, Boolean> keyEventListener;
+  protected Function<ButtonEvent, Boolean> mouseButtonEventListener;
   protected Function<String, Boolean> typingListener;
   private double width;
   private double height;
@@ -383,9 +384,15 @@ public abstract class Display {
     this.mouseMoveListeners.add(listener);
   }
 
-  public final void setHIDEventListener(Function<HIDEvent, Boolean> listener) {
-    if (hidEventListener != null) throw new Assertion("hid event listener already set");
-    this.hidEventListener = listener;
+  public final void setMouseButtonEventListener(Function<ButtonEvent, Boolean> listener) {
+    if (mouseButtonEventListener != null)
+      throw new Assertion("mouse button event listener already set");
+    this.mouseButtonEventListener = listener;
+  }
+
+  public final void setKeyEventListener(Function<ButtonEvent, Boolean> listener) {
+    if (keyEventListener != null) throw new Assertion("key event listener already set");
+    this.keyEventListener = listener;
   }
 
   public final void setTypingListener(Function<String, Boolean> listener) {

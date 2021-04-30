@@ -1,19 +1,28 @@
 package com.zarbosoft.merman.editorcore.display;
 
-import com.zarbosoft.merman.editor.Context;
-import com.zarbosoft.merman.editor.display.Blank;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.display.Blank;
 
-public class MockeryBlank extends MockeryDisplayNode implements Blank {
-	private int converse;
-	private int transverse;
+public class MockeryBlank extends MockeryCourseDisplayNode implements Blank {
+	private double converseSpan;
 
 	@Override
 	public double converseSpan() {
-		return converse;
+		return converseSpan;
 	}
 
 	@Override
-	public void setConverseSpan(final Context context, final double converse) {
-		this.converse = converse;
+	public double ascent() {
+		return 0;
+	}
+
+	@Override
+	public double descent() {
+		return 0;
+	}
+
+	@Override
+	public void setConverseSpan(final Context context, final double span) {
+		this.converseSpan = span;
 	}
 }

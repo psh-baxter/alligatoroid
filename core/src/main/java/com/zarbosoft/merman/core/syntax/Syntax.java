@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.core.syntax;
 
-import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
 import com.zarbosoft.merman.core.backevents.EKeyEvent;
@@ -9,7 +10,6 @@ import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.core.backevents.ETypeEvent;
 import com.zarbosoft.merman.core.backevents.JSpecialPrimitiveEvent;
-import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.error.DuplicateAtomTypeIds;
 import com.zarbosoft.merman.core.syntax.error.DuplicateAtomTypeIdsInGroup;
 import com.zarbosoft.merman.core.syntax.error.GroupChildDoesntExist;
@@ -63,7 +63,7 @@ public class Syntax {
   public final Style primitiveHoverStyle;
   private final Grammar grammar;
 
-  public Syntax(I18nEngine i18n, Config config) {
+  public Syntax(Environment env, Config config) {
     MultiError errors = new MultiError();
     switch (config.converseDirection) {
       case LEFT:
@@ -157,7 +157,7 @@ public class Syntax {
       AtomType firstType = types.iterator().next();
       if (types.size() == 1 && key.equals(firstType.id())) {
         AtomType type = firstType;
-        grammar.add(type.id(), type.buildBackRule(i18n, this));
+        grammar.add(type.id(), type.buildBackRule(env, this));
       } else {
         final Union group = new Union();
         for (AtomType type : types) {
@@ -166,7 +166,7 @@ public class Syntax {
         grammar.add(key, group);
       }
     }
-    grammar.add(RootAtomType.ROOT_TYPE_ID, root.buildBackRule(i18n, this));
+    grammar.add(RootAtomType.ROOT_TYPE_ID, root.buildBackRule(env, this));
 
     errors.raise();
   }

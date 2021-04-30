@@ -8,7 +8,7 @@ import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.display.Image;
 import com.zarbosoft.merman.core.display.Text;
-import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
@@ -292,7 +292,7 @@ public class JavaFXDisplay extends Display {
         MouseEvent.MOUSE_PRESSED,
         e -> {
           node.requestFocus();
-          if (this.hidEventListener.apply(buildHIDEvent(convertButton(e.getButton()), true))) {
+          if (this.keyEventListener.apply(buildHIDEvent(convertButton(e.getButton()), true))) {
             e.consume();
           }
         });
@@ -300,14 +300,14 @@ public class JavaFXDisplay extends Display {
         MouseEvent.MOUSE_RELEASED,
         e -> {
           node.requestFocus();
-          if (this.hidEventListener.apply(buildHIDEvent(convertButton(e.getButton()), false))) {
+          if (this.keyEventListener.apply(buildHIDEvent(convertButton(e.getButton()), false))) {
             e.consume();
           }
         });
     node.setOnScroll(
         e -> {
           node.requestFocus();
-          if (this.hidEventListener.apply(
+          if (this.keyEventListener.apply(
               buildHIDEvent(
                   e.getDeltaY() > 0 ? Key.MOUSE_SCROLL_UP : Key.MOUSE_SCROLL_DOWN, true))) {
             e.consume();
@@ -315,7 +315,7 @@ public class JavaFXDisplay extends Display {
         });
     node.setOnKeyPressed(
         e -> {
-          if (this.hidEventListener.apply(buildHIDEvent(convertButton(e.getCode()), true))) {
+          if (this.keyEventListener.apply(buildHIDEvent(convertButton(e.getCode()), true))) {
             e.consume();
           } else if (e.getCode() == KeyCode.ENTER) {
             if (this.typingListener.apply("\n")) {
@@ -325,7 +325,7 @@ public class JavaFXDisplay extends Display {
         });
     node.setOnKeyReleased(
         e -> {
-          if (this.hidEventListener.apply(buildHIDEvent(convertButton(e.getCode()), false))) {
+          if (this.keyEventListener.apply(buildHIDEvent(convertButton(e.getCode()), false))) {
             e.consume();
           }
         });
@@ -931,8 +931,8 @@ public class JavaFXDisplay extends Display {
     }
   }
 
-  public HIDEvent buildHIDEvent(final Key key, final boolean press) {
-    final HIDEvent out = new HIDEvent(key, press, modifiers.roCopy());
+  public ButtonEvent buildHIDEvent(final Key key, final boolean press) {
+    final ButtonEvent out = new ButtonEvent(key, press, modifiers.roCopy());
     switch (key) {
       case MOUSE_SCROLL_DOWN:
       case MOUSE_SCROLL_UP:

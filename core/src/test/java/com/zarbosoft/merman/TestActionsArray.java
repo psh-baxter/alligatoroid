@@ -52,7 +52,7 @@ public class TestActionsArray {
                 .addArray("value", new TreeBuilder(infinity).build())
                 .build());
     visual(context).select(context, true, 0, 0);
-    Helper.act(context, "enter");
+    Helper.cursorArray(context).actionEnter(context);
     assertThat(
         context.cursor.getSyntaxPath(),
         equalTo(new SyntaxPath("value", "0", "value", "0", "value", "0")));
@@ -94,7 +94,7 @@ public class TestActionsArray {
                 .addArray("value", new TreeBuilder(infinity).build())
                 .build());
     visual(context).select(context, true, 0, 0);
-    Helper.act(context, "exit");
+    Helper.cursorArray(context).actionExit(context);
     assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0")));
   }
 
@@ -104,43 +104,43 @@ public class TestActionsArray {
             new TypeBuilder("infinity")
                     .back(Helper.buildBackPrimitive("infinity"))
                     .front(new FrontMarkBuilder("infinity").build())
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType one =
             new TypeBuilder("one")
                     .back(Helper.buildBackPrimitive("one"))
                     .front(new FrontMarkBuilder("one").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType two =
             new TypeBuilder("two")
                     .back(Helper.buildBackPrimitive("two"))
                     .front(new FrontMarkBuilder("two").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType three =
             new TypeBuilder("three")
                     .back(Helper.buildBackPrimitive("three"))
                     .front(new FrontMarkBuilder("three").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType four =
             new TypeBuilder("four")
                     .back(Helper.buildBackPrimitive("four"))
                     .front(new FrontMarkBuilder("four").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType five =
             new TypeBuilder("five")
                     .back(Helper.buildBackPrimitive("five"))
                     .front(new FrontMarkBuilder("five").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType seven =
             new TypeBuilder("seven")
                     .back(Helper.buildBackPrimitive("7"))
                     .front(new FrontMarkBuilder("7").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType multiback =
             new TypeBuilder("multiback")
@@ -149,7 +149,7 @@ public class TestActionsArray {
                     .frontDataPrimitive("a")
                     .frontMark("^")
                     .frontDataPrimitive("b")
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType quoted =
             new TypeBuilder("quoted")
@@ -157,13 +157,13 @@ public class TestActionsArray {
                     .front(new FrontMarkBuilder("\"").build())
                     .frontDataPrimitive("value")
                     .front(new FrontMarkBuilder("\"").build())
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType digits =
             new TypeBuilder("digits")
                     .back(Helper.buildBackDataPrimitiveDigits("value"))
                     .frontDataPrimitive("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType doubleQuoted =
             new TypeBuilder("doubleuoted")
@@ -177,7 +177,7 @@ public class TestActionsArray {
                     .front(new FrontMarkBuilder("\"").build())
                     .frontDataPrimitive("second")
                     .front(new FrontMarkBuilder("\"").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType plus =
             new TypeBuilder("plus")
@@ -189,7 +189,7 @@ public class TestActionsArray {
                     .frontDataNode("first")
                     .frontMark("+")
                     .frontDataNode("second")
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType plusEqual =
             new TypeBuilder("plusequal")
@@ -201,7 +201,7 @@ public class TestActionsArray {
                     .frontDataNode("first")
                     .frontMark("+=")
                     .frontDataNode("second")
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType binaryBang =
             new TypeBuilder("bang")
@@ -213,7 +213,7 @@ public class TestActionsArray {
                     .frontDataNode("first")
                     .frontMark("!")
                     .frontDataNode("second")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType waddle =
             new TypeBuilder("waddle")
@@ -223,7 +223,7 @@ public class TestActionsArray {
                                     .build())
                     .frontDataNode("first")
                     .frontMark("?")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType snooze =
             new TypeBuilder("snooze")
@@ -233,7 +233,7 @@ public class TestActionsArray {
                                     .build())
                     .frontMark("#")
                     .frontDataNode("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType multiplier =
             new TypeBuilder("multiplier")
@@ -245,7 +245,7 @@ public class TestActionsArray {
                     .frontMark("x")
                     .frontDataPrimitive("text")
                     .frontDataNode("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType array =
             new TypeBuilder("array")
@@ -256,7 +256,7 @@ public class TestActionsArray {
                                     .addSeparator(new FrontMarkBuilder(", ").build())
                                     .build())
                     .frontMark("]")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType doubleArray =
             new TypeBuilder("doublearray")
@@ -273,20 +273,20 @@ public class TestActionsArray {
                     .build();
     FreeAtomType record =
             new TypeBuilder("record")
-                    .back(Helper.buildBackDataRecord("value", "record_element"))
+                    .back(Helper.buildBackDataRecord("value", "recordElement"))
                     .frontMark("{")
                     .frontDataArray("value")
                     .frontMark("}")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType recordElement =
-            new TypeBuilder("record_element")
+            new TypeBuilder("recordElement")
                     .back(Helper.buildBackDataKey("key"))
                     .back(Helper.buildBackDataAtom("value", "any"))
                     .frontDataPrimitive("key")
                     .frontMark(": ")
                     .frontDataNode("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType pair =
             new TypeBuilder("pair")
@@ -300,7 +300,7 @@ public class TestActionsArray {
                     .frontMark(", ")
                     .frontDataNode("second")
                     .frontMark(">")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType ratio =
             new TypeBuilder("ratio")
@@ -328,7 +328,7 @@ public class TestActionsArray {
                     .back(Helper.buildBackDataArray("value", "restricted_array_group"))
                     .frontMark("_")
                     .front(new FrontDataArrayBuilder("value").build())
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     Syntax syntax =
             new SyntaxBuilder("any")
@@ -402,7 +402,7 @@ public class TestActionsArray {
                 .addArray("second", new TreeBuilder(one).build())
                 .build())
         .run(context -> target.valueParentRef.selectValue(context))
-        .act("next")
+        .actNext()
         .run(
             context ->
                 assertThat(
@@ -416,43 +416,43 @@ public class TestActionsArray {
             new TypeBuilder("infinity")
                     .back(Helper.buildBackPrimitive("infinity"))
                     .front(new FrontMarkBuilder("infinity").build())
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType one =
             new TypeBuilder("one")
                     .back(Helper.buildBackPrimitive("one"))
                     .front(new FrontMarkBuilder("one").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType two =
             new TypeBuilder("two")
                     .back(Helper.buildBackPrimitive("two"))
                     .front(new FrontMarkBuilder("two").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType three =
             new TypeBuilder("three")
                     .back(Helper.buildBackPrimitive("three"))
                     .front(new FrontMarkBuilder("three").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType four =
             new TypeBuilder("four")
                     .back(Helper.buildBackPrimitive("four"))
                     .front(new FrontMarkBuilder("four").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType five =
             new TypeBuilder("five")
                     .back(Helper.buildBackPrimitive("five"))
                     .front(new FrontMarkBuilder("five").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType seven =
             new TypeBuilder("seven")
                     .back(Helper.buildBackPrimitive("7"))
                     .front(new FrontMarkBuilder("7").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType multiback =
             new TypeBuilder("multiback")
@@ -461,7 +461,7 @@ public class TestActionsArray {
                     .frontDataPrimitive("a")
                     .frontMark("^")
                     .frontDataPrimitive("b")
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType quoted =
             new TypeBuilder("quoted")
@@ -469,13 +469,13 @@ public class TestActionsArray {
                     .front(new FrontMarkBuilder("\"").build())
                     .frontDataPrimitive("value")
                     .front(new FrontMarkBuilder("\"").build())
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType digits =
             new TypeBuilder("digits")
                     .back(Helper.buildBackDataPrimitiveDigits("value"))
                     .frontDataPrimitive("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType doubleQuoted =
             new TypeBuilder("doubleuoted")
@@ -489,7 +489,7 @@ public class TestActionsArray {
                     .front(new FrontMarkBuilder("\"").build())
                     .frontDataPrimitive("second")
                     .front(new FrontMarkBuilder("\"").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType plus =
             new TypeBuilder("plus")
@@ -501,7 +501,7 @@ public class TestActionsArray {
                     .frontDataNode("first")
                     .frontMark("+")
                     .frontDataNode("second")
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType plusEqual =
             new TypeBuilder("plusequal")
@@ -513,7 +513,7 @@ public class TestActionsArray {
                     .frontDataNode("first")
                     .frontMark("+=")
                     .frontDataNode("second")
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType binaryBang =
             new TypeBuilder("bang")
@@ -525,7 +525,7 @@ public class TestActionsArray {
                     .frontDataNode("first")
                     .frontMark("!")
                     .frontDataNode("second")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType waddle =
             new TypeBuilder("waddle")
@@ -535,7 +535,7 @@ public class TestActionsArray {
                                     .build())
                     .frontDataNode("first")
                     .frontMark("?")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType snooze =
             new TypeBuilder("snooze")
@@ -545,7 +545,7 @@ public class TestActionsArray {
                                     .build())
                     .frontMark("#")
                     .frontDataNode("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType multiplier =
             new TypeBuilder("multiplier")
@@ -557,7 +557,7 @@ public class TestActionsArray {
                     .frontMark("x")
                     .frontDataPrimitive("text")
                     .frontDataNode("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType array =
             new TypeBuilder("array")
@@ -568,7 +568,7 @@ public class TestActionsArray {
                                     .addSeparator(new FrontMarkBuilder(", ").build())
                                     .build())
                     .frontMark("]")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType doubleArray =
             new TypeBuilder("doublearray")
@@ -585,20 +585,20 @@ public class TestActionsArray {
                     .build();
     FreeAtomType record =
             new TypeBuilder("record")
-                    .back(Helper.buildBackDataRecord("value", "record_element"))
+                    .back(Helper.buildBackDataRecord("value", "recordElement"))
                     .frontMark("{")
                     .frontDataArray("value")
                     .frontMark("}")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType recordElement =
-            new TypeBuilder("record_element")
+            new TypeBuilder("recordElement")
                     .back(Helper.buildBackDataKey("key"))
                     .back(Helper.buildBackDataAtom("value", "any"))
                     .frontDataPrimitive("key")
                     .frontMark(": ")
                     .frontDataNode("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType pair =
             new TypeBuilder("pair")
@@ -612,7 +612,7 @@ public class TestActionsArray {
                     .frontMark(", ")
                     .frontDataNode("second")
                     .frontMark(">")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType ratio =
             new TypeBuilder("ratio")
@@ -640,7 +640,7 @@ public class TestActionsArray {
                     .back(Helper.buildBackDataArray("value", "restricted_array_group"))
                     .frontMark("_")
                     .front(new FrontDataArrayBuilder("value").build())
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     Syntax syntax =
             new SyntaxBuilder("any")
@@ -714,7 +714,7 @@ public class TestActionsArray {
                 .addArray("second", target)
                 .build())
         .run(context -> target.valueParentRef.selectValue(context))
-        .act("previous")
+        .actPrevious()
         .run(
             context ->
                 assertThat(
@@ -726,7 +726,7 @@ public class TestActionsArray {
   public void testNextElement() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "next_element");
+    Helper.cursorArray(context).actionNextElement(context);
     assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "3")));
   }
 
@@ -735,43 +735,43 @@ public class TestActionsArray {
             new TypeBuilder("infinity")
                     .back(Helper.buildBackPrimitive("infinity"))
                     .front(new FrontMarkBuilder("infinity").build())
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType one =
             new TypeBuilder("one")
                     .back(Helper.buildBackPrimitive("one"))
                     .front(new FrontMarkBuilder("one").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType two =
             new TypeBuilder("two")
                     .back(Helper.buildBackPrimitive("two"))
                     .front(new FrontMarkBuilder("two").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType three =
             new TypeBuilder("three")
                     .back(Helper.buildBackPrimitive("three"))
                     .front(new FrontMarkBuilder("three").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType four =
             new TypeBuilder("four")
                     .back(Helper.buildBackPrimitive("four"))
                     .front(new FrontMarkBuilder("four").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType five =
             new TypeBuilder("five")
                     .back(Helper.buildBackPrimitive("five"))
                     .front(new FrontMarkBuilder("five").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType seven =
             new TypeBuilder("seven")
                     .back(Helper.buildBackPrimitive("7"))
                     .front(new FrontMarkBuilder("7").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType multiback =
             new TypeBuilder("multiback")
@@ -780,7 +780,7 @@ public class TestActionsArray {
                     .frontDataPrimitive("a")
                     .frontMark("^")
                     .frontDataPrimitive("b")
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType quoted =
             new TypeBuilder("quoted")
@@ -788,13 +788,13 @@ public class TestActionsArray {
                     .front(new FrontMarkBuilder("\"").build())
                     .frontDataPrimitive("value")
                     .front(new FrontMarkBuilder("\"").build())
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType digits =
             new TypeBuilder("digits")
                     .back(Helper.buildBackDataPrimitiveDigits("value"))
                     .frontDataPrimitive("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType doubleQuoted =
             new TypeBuilder("doubleuoted")
@@ -808,7 +808,7 @@ public class TestActionsArray {
                     .front(new FrontMarkBuilder("\"").build())
                     .frontDataPrimitive("second")
                     .front(new FrontMarkBuilder("\"").build())
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType plus =
             new TypeBuilder("plus")
@@ -820,7 +820,7 @@ public class TestActionsArray {
                     .frontDataNode("first")
                     .frontMark("+")
                     .frontDataNode("second")
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType plusEqual =
             new TypeBuilder("plusequal")
@@ -832,7 +832,7 @@ public class TestActionsArray {
                     .frontDataNode("first")
                     .frontMark("+=")
                     .frontDataNode("second")
-                    .autoComplete(-1)
+                    .autoComplete(false)
                     .build();
     FreeAtomType binaryBang =
             new TypeBuilder("bang")
@@ -844,7 +844,7 @@ public class TestActionsArray {
                     .frontDataNode("first")
                     .frontMark("!")
                     .frontDataNode("second")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType waddle =
             new TypeBuilder("waddle")
@@ -854,7 +854,7 @@ public class TestActionsArray {
                                     .build())
                     .frontDataNode("first")
                     .frontMark("?")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType snooze =
             new TypeBuilder("snooze")
@@ -864,7 +864,7 @@ public class TestActionsArray {
                                     .build())
                     .frontMark("#")
                     .frontDataNode("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType multiplier =
             new TypeBuilder("multiplier")
@@ -876,7 +876,7 @@ public class TestActionsArray {
                     .frontMark("x")
                     .frontDataPrimitive("text")
                     .frontDataNode("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType array =
             new TypeBuilder("array")
@@ -887,7 +887,7 @@ public class TestActionsArray {
                                     .addSeparator(new FrontMarkBuilder(", ").build())
                                     .build())
                     .frontMark("]")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType doubleArray =
             new TypeBuilder("doublearray")
@@ -904,20 +904,20 @@ public class TestActionsArray {
                     .build();
     FreeAtomType record =
             new TypeBuilder("record")
-                    .back(Helper.buildBackDataRecord("value", "record_element"))
+                    .back(Helper.buildBackDataRecord("value", "recordElement"))
                     .frontMark("{")
                     .frontDataArray("value")
                     .frontMark("}")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType recordElement =
-            new TypeBuilder("record_element")
+            new TypeBuilder("recordElement")
                     .back(Helper.buildBackDataKey("key"))
                     .back(Helper.buildBackDataAtom("value", "any"))
                     .frontDataPrimitive("key")
                     .frontMark(": ")
                     .frontDataNode("value")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType pair =
             new TypeBuilder("pair")
@@ -931,7 +931,7 @@ public class TestActionsArray {
                     .frontMark(", ")
                     .frontDataNode("second")
                     .frontMark(">")
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     FreeAtomType ratio =
             new TypeBuilder("ratio")
@@ -959,7 +959,7 @@ public class TestActionsArray {
                     .back(Helper.buildBackDataArray("value", "restricted_array_group"))
                     .frontMark("_")
                     .front(new FrontDataArrayBuilder("value").build())
-                    .autoComplete(1)
+                    .autoComplete(true)
                     .build();
     Syntax syntax =
             new SyntaxBuilder("any")
@@ -1037,12 +1037,12 @@ public class TestActionsArray {
   public void testNextRange() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 3);
-    Helper.act(context, "next_element");
+    Helper.cursorArray(context).actionNextElement(context);
     assertSelection(context, 4, 4);
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
+    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(begin));
     assertThat(selection.endIndex, equalTo(end));
   }
@@ -1051,7 +1051,7 @@ public class TestActionsArray {
   public void testNextEnd() {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 4);
-    Helper.act(context, "next_element");
+    Helper.cursorArray(context).actionNextElement(context);
     assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "4")));
   }
 
@@ -1059,7 +1059,7 @@ public class TestActionsArray {
   public void testPreviousElement() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "previous_element");
+    Helper.cursorArray(context).actionPreviousElement(context);
     assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "1")));
   }
 
@@ -1067,7 +1067,7 @@ public class TestActionsArray {
   public void testPreviousRange() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 3);
-    Helper.act(context, "previous_element");
+    Helper.cursorArray(context).actionPreviousElement(context);
     assertSelection(context, 1, 1);
   }
 
@@ -1075,7 +1075,7 @@ public class TestActionsArray {
   public void testPreviousStart() {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
-    Helper.act(context, "previous_element");
+    Helper.cursorArray(context).actionPreviousElement(context);
     assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "0")));
   }
 
@@ -1083,8 +1083,8 @@ public class TestActionsArray {
   public void testGatherNext() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "gather_next");
-    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
+    Helper.cursorArray(context).actionGatherNext(context);
+    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(3));
   }
@@ -1093,8 +1093,8 @@ public class TestActionsArray {
   public void testGatherNextEnd() {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 4);
-    Helper.act(context, "gather_next");
-    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
+    Helper.cursorArray(context).actionGatherNext(context);
+    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(4));
     assertThat(selection.endIndex, equalTo(4));
   }
@@ -1103,8 +1103,8 @@ public class TestActionsArray {
   public void testGatherPrevious() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "gather_previous");
-    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
+    Helper.cursorArray(context).actionGatherPrevious(context);
+    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(1));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1113,8 +1113,8 @@ public class TestActionsArray {
   public void testGatherPreviousStart() {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
-    Helper.act(context, "gather_previous");
-    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
+    Helper.cursorArray(context).actionGatherPrevious(context);
+    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(0));
   }
@@ -1126,8 +1126,8 @@ public class TestActionsArray {
             ((FieldArray) ((Atom) context.syntaxLocate(new SyntaxPath("value", "0"))).fields.getOpt("value"))
                 .visual)
         .select(context, true, 2, 3);
-    Helper.act(context, "release_next");
-    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
+    Helper.cursorArray(context).actionReleaseNext(context);
+    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1136,8 +1136,8 @@ public class TestActionsArray {
   public void testReleaseNextMinimum() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "release_next");
-    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
+    Helper.cursorArray(context).actionReleaseNext(context);
+    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1149,8 +1149,8 @@ public class TestActionsArray {
             ((FieldArray) ((Atom) context.syntaxLocate(new SyntaxPath("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
-    Helper.act(context, "release_previous");
-    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
+    Helper.cursorArray(context).actionReleasePrevious(context);
+    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1159,8 +1159,8 @@ public class TestActionsArray {
   public void testReleasePreviousMinimum() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.act(context, "release_previous");
-    final VisualFrontArray.ArrayCursor selection = (VisualFrontArray.ArrayCursor) context.cursor;
+    Helper.cursorArray(context).actionReleasePrevious(context);
+    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }

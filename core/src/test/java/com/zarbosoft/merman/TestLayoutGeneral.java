@@ -62,7 +62,7 @@ public class TestLayoutGeneral {
                     .addSeparator(new FrontMarkBuilder(", ").build())
                     .build())
             .frontSplitMark("]")
-            .autoComplete(99)
+            .autoComplete(true) // was 99
             .build();
     syntax =
         new SyntaxBuilder("any")

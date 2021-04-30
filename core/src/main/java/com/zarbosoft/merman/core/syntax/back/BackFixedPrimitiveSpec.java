@@ -1,6 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
@@ -21,7 +21,7 @@ public class BackFixedPrimitiveSpec extends BackSpec {
   }
 
   @Override
-  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
+  public Node buildBackRule(Environment env, final Syntax syntax) {
     return new MatchingEventTerminal(new EPrimitiveEvent(value));
   }
 

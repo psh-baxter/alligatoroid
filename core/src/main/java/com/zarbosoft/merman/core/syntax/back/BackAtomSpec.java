@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
-import com.zarbosoft.merman.core.I18nEngine;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.syntax.Syntax;
@@ -26,7 +26,7 @@ public class BackAtomSpec extends BaseBackAtomSpec {
     return null;
   }
 
-  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
+  public Node buildBackRule(Environment env, final Syntax syntax) {
     return new Operator<StackStore>(new Reference(type)) {
       @Override
       protected StackStore process(StackStore store) {

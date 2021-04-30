@@ -1,17 +1,17 @@
 package com.zarbosoft.merman.editorcore.banner;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.DelayEngine;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.IterationContext;
 import com.zarbosoft.merman.core.IterationTask;
 import com.zarbosoft.merman.core.display.Text;
-import com.zarbosoft.merman.editorcore.displayderived.Box;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Wall;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.editorcore.displayderived.Box;
 
 import java.util.Comparator;
 import java.util.PriorityQueue;
@@ -30,11 +30,10 @@ public class Banner {
   private final Style style;
   public Text text;
   public Box background;
-  private DelayEngine.Handle timer = null;
+  private Environment.HandleDelay timer = null;
   private BannerMessage current;
   private Brick brick;
   private double transverse;
-  private double scroll;
   private Bedding bedding;
   private IterationPlace idle;
 
@@ -70,20 +69,14 @@ public class Banner {
     idle.animate = idle.animate && animate;
   }
 
-  public void setScroll(final Context context, final double scroll) {
-    this.scroll = scroll;
-    idlePlace(context, true);
-  }
-
   private void place(final Context context, final boolean animate) {
     if (text == null) return;
     final double calculatedTransverse =
-        transverse - text.descent() - context.syntax.bannerPad.transverseEnd - scroll;
+        transverse - text.descent() - context.syntax.bannerPad.transverseEnd;
     text.setBaselinePosition(
         new Vector(context.syntax.bannerPad.converseStart, calculatedTransverse), animate);
     if (background != null)
-      background.setPosition(
-          new Vector(0, calculatedTransverse - text.ascent()), animate);
+      background.setPosition(new Vector(0, calculatedTransverse - text.ascent()), animate);
   }
 
   private void resizeBackground(final Context context) {
@@ -93,10 +86,8 @@ public class Banner {
 
   public void addMessage(final Context context, final BannerMessage message) {
     if (queue.isEmpty()) {
-      if (style.box != null) {
-        background = new Box(context);
-        context.midground.add(background.drawing);
-      }
+      background = new Box(context);
+      context.midground.add(background.drawing);
       text = context.display.text();
       context.midground.add(text);
       updateStyle(context);
@@ -108,7 +99,7 @@ public class Banner {
 
   private void updateStyle(final Context context) {
     if (text == null) return;
-    background.setStyle(style.box);
+    background.setStyle(style.obbox);
     text.setFont(context, Context.getFont(context, style));
     text.setColor(context, style.color);
     if (bedding != null) context.wall.removeBedding(context, bedding);
@@ -143,7 +134,7 @@ public class Banner {
       }
       if (current.duration != 0)
         timer =
-            context.delayEngine.delay(
+            context.env.delay(
                 current.duration,
                 () -> context.addIteration(new IterationNextPage(Banner.this, context)));
     }

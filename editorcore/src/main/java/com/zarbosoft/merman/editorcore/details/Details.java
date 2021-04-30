@@ -3,13 +3,13 @@ package com.zarbosoft.merman.editorcore.details;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.IterationContext;
 import com.zarbosoft.merman.core.IterationTask;
-import com.zarbosoft.merman.editorcore.displayderived.Box;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Wall;
-import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.editorcore.displayderived.Box;
 import com.zarbosoft.rendaw.common.ChainComparator;
 
 import java.util.PriorityQueue;
@@ -24,7 +24,6 @@ public class Details {
   private Brick brick;
   private double transverse;
   private double transverseSpan;
-  private double documentScroll;
   private Bedding bedding;
   private IterationPlace idle;
   private final Attachment attachment =
@@ -41,91 +40,12 @@ public class Details {
         }
 
         @Override
-        public void setTransverseSpan(final Context context, final double ascent, final double descent) {
+        public void setTransverseSpan(
+            final Context context, final double ascent, final double descent) {
           Details.this.transverseSpan = ascent + descent;
           iterationPlace(context, false);
         }
       };
-
-  private void iterationPlace(final Context context, final boolean animate) {
-    if (current == null) return;
-    if (idle == null) {
-      idle = new IterationPlace(context);
-      context.addIteration(idle);
-    }
-    idle.animate = idle.animate && animate;
-  }
-
-  public void setScroll(final Context context, final double scroll) {
-    this.documentScroll = scroll;
-    iterationPlace(context, true);
-  }
-
-  public void tagsChanged(final Context context) {
-    if (current == null) return;
-    updateStyle(context);
-    place(context, false);
-  }
-
-  private void updateStyle(final Context context) {
-    current.tagsChanged(context);
-    if (style.box != null) {
-      if (background == null) {
-        background = new Box(context);
-        context.midground.add(background.drawing);
-      }
-      background.setStyle(style.box);
-      resizeBackground(context);
-    } else {
-      if (background != null) {
-        context.midground.remove(background.drawing);
-        background = null;
-      }
-    }
-  }
-
-  private class IterationPlace extends IterationTask {
-    private final Context context;
-    private boolean animate;
-
-    private IterationPlace(final Context context) {
-      this.context = context;
-      this.animate = context.animateCoursePlacement;
-    }
-
-    @Override
-    protected boolean runImplementation(final IterationContext iterationContext) {
-      if (current != null) {
-        place(context, animate);
-      }
-      return false;
-    }
-
-    @Override
-    protected void destroyed() {
-      idle = null;
-    }
-  }
-
-  private double pageTransverse(final Context context) {
-    final double padStart = context.syntax.detailPad.transverseStart;
-    final double padEnd = context.syntax.detailPad.transverseEnd;
-    return Math.min(
-        context.transverseEdge - padStart - current.node.transverseSpan() - padEnd,
-        -documentScroll + transverse + transverseSpan + padStart);
-  }
-
-  private void place(final Context context, final boolean animate) {
-    final double transverse = pageTransverse(context);
-    current.node.setPosition(
-            new Vector(context.syntax.detailPad.converseStart, transverse), animate);
-    if (background != null) background.setPosition(new Vector(0, transverse), animate);
-  }
-
-  private void resizeBackground(final Context context) {
-    if (background == null) return;
-    background.setSize(context, context.edge * 2, current.node.transverseSpan());
-  }
 
   public Details(final Context context, Style style) {
     this.style = style;
@@ -148,6 +68,51 @@ public class Details {
             resizeBackground(context);
           }
         });
+  }
+
+  private void iterationPlace(final Context context, final boolean animate) {
+    if (current == null) return;
+    if (idle == null) {
+      idle = new IterationPlace(context);
+      context.addIteration(idle);
+    }
+    idle.animate = idle.animate && animate;
+  }
+
+  public void tagsChanged(final Context context) {
+    if (current == null) return;
+    updateStyle(context);
+    place(context, false);
+  }
+
+  private void updateStyle(final Context context) {
+    current.tagsChanged(context);
+    if (background == null) {
+      background = new Box(context);
+      context.midground.add(background.drawing);
+    }
+    background.setStyle(style.obbox);
+    resizeBackground(context);
+  }
+
+  private double pageTransverse(final Context context) {
+    final double padStart = context.syntax.detailPad.transverseStart;
+    final double padEnd = context.syntax.detailPad.transverseEnd;
+    return Math.min(
+        context.transverseEdge - padStart - current.node.transverseSpan() - padEnd,
+        transverse + transverseSpan + padStart);
+  }
+
+  private void place(final Context context, final boolean animate) {
+    final double transverse = pageTransverse(context);
+    current.node.setPosition(
+        new Vector(context.syntax.detailPad.converseStart, transverse), animate);
+    if (background != null) background.setPosition(new Vector(0, transverse), animate);
+  }
+
+  private void resizeBackground(final Context context) {
+    if (background == null) return;
+    background.setSize(context, context.edge * 2, current.node.transverseSpan());
   }
 
   public void addPage(final Context context, final DetailsPage page) {
@@ -192,5 +157,28 @@ public class Details {
     if (queue.isEmpty()) return;
     queue.remove(page);
     update(context);
+  }
+
+  private class IterationPlace extends IterationTask {
+    private final Context context;
+    private boolean animate;
+
+    private IterationPlace(final Context context) {
+      this.context = context;
+      this.animate = context.animateCoursePlacement;
+    }
+
+    @Override
+    protected boolean runImplementation(final IterationContext iterationContext) {
+      if (current != null) {
+        place(context, animate);
+      }
+      return false;
+    }
+
+    @Override
+    protected void destroyed() {
+      idle = null;
+    }
   }
 }

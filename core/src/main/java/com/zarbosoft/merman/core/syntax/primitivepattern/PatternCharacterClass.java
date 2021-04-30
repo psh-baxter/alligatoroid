@@ -13,10 +13,10 @@ public class PatternCharacterClass extends Pattern {
   }
 
   @Override
-  public Node build() {
+  public Node build(boolean capture) {
     Union union = new Union();
     for (ROPair<String, String> range : ranges) {
-      union.add(new CharacterRangeTerminal(range.first, range.second));
+      union.add(Pattern.characterRange(capture, range.first, range.second));
     }
     return union;
   }

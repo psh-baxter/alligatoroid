@@ -1,13 +1,15 @@
 package com.zarbosoft.merman.webview.display;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.webview.compat.TextMetrics;
 import com.zarbosoft.rendaw.common.Format;
 import elemental2.dom.CanvasRenderingContext2D;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLCanvasElement;
+
+import static com.zarbosoft.merman.core.Environment.I18N_DONE;
 
 public class JSFont implements Font {
   public final String name;
@@ -47,13 +49,13 @@ public class JSFont implements Font {
 
     @Override
     public int getIndexAtConverse(Context context, String text, double converse) {
-      I18nEngine.Walker walker = context.i18n.glyphWalker(text);
+      Environment.I18nWalker walker = context.env.glyphWalker(text);
       double lastTextConverse = 0;
       int lastIndex = 0;
       int index = 0;
       while (true) {
-        index = walker.following(index);
-        if (index == I18nEngine.DONE) break;
+        index = walker.followingStart(index);
+        if (index == I18N_DONE) break;
         double textConverse = measure(text.substring(0, index)).width;
         if ((converse - lastTextConverse) / (textConverse - lastTextConverse) < 0.5) break;
         lastTextConverse = textConverse;

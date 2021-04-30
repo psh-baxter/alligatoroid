@@ -35,6 +35,16 @@ public class TSList<T> implements ROList<T> {
     return values.isEmpty();
   }
 
+  @Override
+  public boolean some() {
+    return !values.isEmpty();
+  }
+
+  @Override
+  public boolean none() {
+    return values.isEmpty();
+  }
+
   public int size() {
     return values.size();
   }
@@ -164,5 +174,15 @@ public class TSList<T> implements ROList<T> {
 
   public T removeLast() {
     return values.remove(values.size() - 1);
+  }
+
+  public T removeLastOpt() {
+    if (values.isEmpty()) return null;
+    return removeLast();
+  }
+
+  public T lastOpt() {
+    if (none()) return null;
+    return last();
   }
 }

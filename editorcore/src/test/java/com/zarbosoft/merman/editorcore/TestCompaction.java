@@ -1,11 +1,13 @@
 package com.zarbosoft.merman.editorcore;
 
-import com.google.common.collect.ImmutableList;
-import com.zarbosoft.merman.document.Atom;
-import com.zarbosoft.merman.document.values.FieldArray;
-import com.zarbosoft.merman.document.values.FieldPrimitive;
-import com.zarbosoft.merman.editor.visual.tags.FreeTag;
-import com.zarbosoft.merman.editor.visual.tags.StateTag;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
@@ -14,150 +16,39 @@ import com.zarbosoft.merman.editorcore.helper.SyntaxBuilder;
 import com.zarbosoft.merman.editorcore.helper.TreeBuilder;
 import com.zarbosoft.merman.editorcore.helper.TypeBuilder;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
-import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveAdd;
-import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitiveRemove;
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
+import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
+import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
 
 public class TestCompaction {
-  public static final FreeAtomType one;
-  public static final FreeAtomType initialSplitOne;
-  public static final FreeAtomType text;
-  public static final FreeAtomType comboText;
-  public static final FreeAtomType initialSplitText;
-  public static final FreeAtomType infinity;
-  public static final FreeAtomType line;
-  public static final FreeAtomType low;
-  public static final FreeAtomType unary;
-  public static final FreeAtomType mid;
-  public static final FreeAtomType high;
-  public static final Syntax syntax;
-  public static class GeneralTestWizard extends com.zarbosoft.merman.editorcore.helper.GeneralTestWizard {
-    public GeneralTestWizard(Syntax syntax, Atom... atoms) {
-      super(syntax, atoms);
-      this.inner.context.ellipsizeThreshold = 2;
-    }
-  }
-
-  static {
-    infinity =
-        new TypeBuilder("infinity")
-            .back(Helper.buildBackPrimitive("infinity"))
-            .front(new FrontMarkBuilder("infinity").build())
-            .build();
-    one =
+  @Test
+  public void testSplitDynamic() {
+    final FreeAtomType one =
         new TypeBuilder("one")
             .back(Helper.buildBackPrimitive("one"))
             .front(new FrontMarkBuilder("one").build())
             .build();
-    initialSplitOne =
-        new TypeBuilder("splitOne")
-            .back(Helper.buildBackPrimitive("one"))
-            .front(new FrontMarkBuilder("one").tag("split").build())
-            .build();
-    text =
-        new TypeBuilder("text")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .frontDataPrimitive("value")
-            .build();
-    comboText =
-        new TypeBuilder("comboText")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .frontDataPrimitive("value")
-            .frontMark("123")
-            .build();
-    initialSplitText =
-        new TypeBuilder("splitText")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .front(new FrontDataPrimitiveBuilder("value").tag("split").build())
-            .build();
-    line =
-        new TypeBuilder("line")
-            .back(Helper.buildBackDataArray("value", "any"))
-            .front(
-                new FrontDataArrayBuilder("value")
-                    .addPrefix(new FrontSpaceBuilder().build())
-                    .build())
-            .precedence(0)
-            .depthScore(1)
-            .build();
-    low =
+    final FreeAtomType low =
         new TypeBuilder("low")
             .back(Helper.buildBackDataArray("value", "any"))
             .front(
                 new FrontDataArrayBuilder("value")
-                    .addPrefix(new FrontSpaceBuilder().tag("split").build())
+                    .addPrefix(
+                        new FrontSymbol(
+                            new FrontSymbol.Config(
+                                new SymbolSpaceSpec(
+                                    new SymbolSpaceSpec.Config()
+                                        .splitMode(Style.SplitMode.COMPACT)))))
                     .build())
             .precedence(0)
             .depthScore(1)
             .build();
-    unary =
-        new TypeBuilder("unary")
-            .back(Helper.buildBackDataAtom("value", "any"))
-            .frontDataNode("value")
-            .precedence(20)
-            .depthScore(1)
-            .build();
-    mid =
-        new TypeBuilder("mid")
-            .back(Helper.buildBackDataArray("value", "any"))
-            .front(
-                new FrontDataArrayBuilder("value")
-                    .addPrefix(new FrontSpaceBuilder().tag("split").build())
-                    .build())
-            .precedence(50)
-            .depthScore(1)
-            .build();
-    high =
-        new TypeBuilder("high")
-            .back(Helper.buildBackDataArray("value", "any"))
-            .front(
-                new FrontDataArrayBuilder("value")
-                    .addPrefix(new FrontSpaceBuilder().tag("split").build())
-                    .build())
-            .precedence(100)
-            .depthScore(1)
-            .build();
-    syntax =
+    final Syntax syntax =
         new SyntaxBuilder("any")
             .type(one)
-            .type(initialSplitOne)
-            .type(text)
-            .type(comboText)
-            .type(initialSplitText)
-            .type(infinity)
-            .type(line)
             .type(low)
-            .type(unary)
-            .type(mid)
-            .type(high)
-            .group(
-                "any",
-                new GroupBuilder()
-                    .type(infinity)
-                    .type(one)
-                    .type(initialSplitOne)
-                    .type(line)
-                    .type(low)
-                    .type(unary)
-                    .type(mid)
-                    .type(high)
-                    .type(text)
-                    .type(comboText)
-                    .type(initialSplitText)
-                    .build())
-            .style(
-                new StyleBuilder()
-                    .tag(new FreeTag("split"))
-                    .tag(new StateTag("compact"))
-                    .split(true)
-                    .build())
+            .group("any", new GroupBuilder().type(one).type(low).build())
             .build();
-  }
-
-  @Test
-  public void testSplitDynamic() {
     final Atom lowAtom =
         new TreeBuilder(low)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
@@ -168,18 +59,12 @@ public class TestCompaction {
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(0, 3, "one")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(array, 2, 0, ImmutableList.of(new TreeBuilder(one).build()))))
+        .change(new ChangeArray(array, 2, 0, TSList.of(new TreeBuilder(one).build())))
         .checkCourseCount(3)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "one")
-        .run(
-            context ->
-                context.history.apply(context, new ChangeArray(array, 2, 1, ImmutableList.of())))
+        .change(new ChangeArray(array, 2, 1, TSList.of()))
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(0, 3, "one");
@@ -187,7 +72,39 @@ public class TestCompaction {
 
   @Test
   public void testSplitDynamicBrickChange() {
-    final Atom textAtom = new TreeBuilder(text).add("value", "oran").build();
+    final FreeAtomType one =
+        new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType textType =
+        new TypeBuilder("text")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .build();
+    final FreeAtomType low =
+        new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addPrefix(
+                        new FrontSymbol(
+                            new FrontSymbol.Config(
+                                new SymbolSpaceSpec(
+                                    new SymbolSpaceSpec.Config()
+                                        .splitMode(Style.SplitMode.COMPACT)))))
+                    .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(one)
+            .type(textType)
+            .type(low)
+            .group("any", new GroupBuilder().type(one).type(low).type(textType).build())
+            .build();
+    final Atom textAtom = new TreeBuilder(textType).add("value", "oran").build();
     final FieldPrimitive text = (FieldPrimitive) textAtom.fields.getOpt("value");
     new GeneralTestWizard(
             syntax,
@@ -196,11 +113,11 @@ public class TestCompaction {
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(0, 3, "oran")
-        .run(context -> context.history.apply(context, new ChangePrimitiveAdd(text, 4, "ge")))
+        .change(new ChangePrimitive(text, 4, 0, "ge"))
         .checkCourseCount(2)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 1, "orange")
-        .run(context -> context.history.apply(context, new ChangePrimitiveRemove(text, 4, 2)))
+        .change(new ChangePrimitive(text, 4, 2, ""))
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(0, 3, "oran");
@@ -208,17 +125,24 @@ public class TestCompaction {
 
   @Test
   public void testSplitDynamicComboBrick() {
+    final FreeAtomType comboText =
+        new TypeBuilder("comboText")
+            .back(Helper.buildBackDataPrimitive("value"))
+            .frontDataPrimitive("value")
+            .frontMark("123")
+            .build();
+    final Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(comboText)
+            .group("any", new GroupBuilder().type(comboText).build())
+            .build();
     final Atom primitive = new TreeBuilder(comboText).add("value", "I am a banana").build();
     new GeneralTestWizard(syntax, primitive)
         .resize(140)
         .checkTextBrick(0, 0, "I am a banana")
         .checkTextBrick(0, 1, "123")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangePrimitiveAdd(
-                        (FieldPrimitive) primitive.fields.getOpt("value"), 0, "wigwam ")))
+        .change(
+            new ChangePrimitive((FieldPrimitive) primitive.fields.getOpt("value"), 0, 0, "wigwam "))
         .checkTextBrick(0, 0, "wigwam I am a ")
         .checkTextBrick(1, 0, "banana")
         .checkTextBrick(1, 1, "123");
@@ -226,6 +150,40 @@ public class TestCompaction {
 
   @Test
   public void testSplitNested() {
+    final FreeAtomType one =
+        new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType low =
+        new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addPrefix(
+                        new FrontSymbol(
+                            new FrontSymbol.Config(
+                                new SymbolSpaceSpec(
+                                    new SymbolSpaceSpec.Config()
+                                        .splitMode(Style.SplitMode.COMPACT)))))
+                    .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType unary =
+        new TypeBuilder("unary")
+            .back(Helper.buildBackDataAtom("value", "any"))
+            .frontDataNode("value")
+            .precedence(20)
+            .depthScore(1)
+            .build();
+    final Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(one)
+            .type(low)
+            .type(unary)
+            .group("any", new GroupBuilder().type(one).type(low).type(unary).build())
+            .build();
     final Atom lowAtom =
         new TreeBuilder(low)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
@@ -236,18 +194,12 @@ public class TestCompaction {
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(0, 3, "one")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(array, 2, 0, ImmutableList.of(new TreeBuilder(one).build()))))
+        .change(new ChangeArray(array, 2, 0, TSList.of(new TreeBuilder(one).build())))
         .checkCourseCount(3)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "one")
-        .run(
-            context ->
-                context.history.apply(context, new ChangeArray(array, 2, 1, ImmutableList.of())))
+        .change(new ChangeArray(array, 2, 1, TSList.of()))
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(0, 3, "one");
@@ -255,6 +207,64 @@ public class TestCompaction {
 
   @Test
   public void testSplitOrderRuleDynamic() {
+    final FreeAtomType one =
+        new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType low =
+        new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addPrefix(
+                        new FrontSymbol(
+                            new FrontSymbol.Config(
+                                new SymbolSpaceSpec(
+                                    new SymbolSpaceSpec.Config()
+                                        .splitMode(Style.SplitMode.COMPACT)))))
+                    .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final FreeAtomType mid =
+        new TypeBuilder("mid")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addPrefix(
+                        new FrontSymbol(
+                            new FrontSymbol.Config(
+                                new SymbolSpaceSpec(
+                                    new SymbolSpaceSpec.Config()
+                                        .splitMode(Style.SplitMode.COMPACT)))))
+                    .build())
+            .precedence(50)
+            .depthScore(1)
+            .build();
+    final FreeAtomType high =
+        new TypeBuilder("high")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addPrefix(
+                        new FrontSymbol(
+                            new FrontSymbol.Config(
+                                new SymbolSpaceSpec(
+                                    new SymbolSpaceSpec.Config()
+                                        .splitMode(Style.SplitMode.COMPACT)))))
+                    .build())
+            .precedence(100)
+            .depthScore(1)
+            .build();
+    final Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(one)
+            .type(low)
+            .type(mid)
+            .type(high)
+            .group("any", new GroupBuilder().type(one).type(low).type(mid).type(high).build())
+            .build();
     final Atom highAtom =
         new TreeBuilder(high)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
@@ -277,20 +287,14 @@ public class TestCompaction {
         .checkTextBrick(2, 1, "one")
         .checkTextBrick(3, 2, "one")
         .checkTextBrick(3, 4, "one")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(array, 2, 0, ImmutableList.of(new TreeBuilder(one).build()))))
+        .change(new ChangeArray(array, 2, 0, TSList.of(new TreeBuilder(one).build())))
         .checkCourseCount(7)
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "one")
         .checkTextBrick(4, 1, "one")
         .checkTextBrick(5, 1, "one")
         .checkTextBrick(6, 1, "one")
-        .run(
-            context ->
-                context.history.apply(context, new ChangeArray(array, 2, 1, ImmutableList.of())))
+        .change(new ChangeArray(array, 2, 1, TSList.of()))
         .checkCourseCount(4)
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "one")
@@ -300,6 +304,38 @@ public class TestCompaction {
 
   @Test
   public void testStartCompactDynamic() {
+    final FreeAtomType infinity =
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
+            .build();
+    final FreeAtomType one =
+        new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .build();
+    final FreeAtomType low =
+        new TypeBuilder("low")
+            .back(Helper.buildBackDataArray("value", "any"))
+            .front(
+                new FrontDataArrayBuilder("value")
+                    .addPrefix(
+                        new FrontSymbol(
+                            new FrontSymbol.Config(
+                                new SymbolSpaceSpec(
+                                    new SymbolSpaceSpec.Config()
+                                        .splitMode(Style.SplitMode.COMPACT)))))
+                    .build())
+            .precedence(0)
+            .depthScore(1)
+            .build();
+    final Syntax syntax =
+        new SyntaxBuilder("any")
+            .type(one)
+            .type(infinity)
+            .type(low)
+            .group("any", new GroupBuilder().type(infinity).type(one).type(low).build())
+            .build();
     final Atom lowAtom =
         new TreeBuilder(low)
             .addArray(
@@ -314,14 +350,18 @@ public class TestCompaction {
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "infinity")
-        .run(
-            context ->
-                context.history.apply(
-                    context,
-                    new ChangeArray(array, 1, 0, ImmutableList.of(new TreeBuilder(one).build()))))
+        .change(new ChangeArray(array, 1, 0, TSList.of(new TreeBuilder(one).build())))
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "one")
         .checkTextBrick(3, 1, "infinity");
+  }
+
+  public static class GeneralTestWizard
+      extends com.zarbosoft.merman.editorcore.helper.GeneralTestWizard {
+    public GeneralTestWizard(Syntax syntax, Atom... atoms) {
+      super(syntax, atoms);
+      this.inner.editor.context.ellipsizeThreshold = 2;
+    }
   }
 }

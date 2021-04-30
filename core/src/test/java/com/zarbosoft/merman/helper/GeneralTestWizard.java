@@ -1,12 +1,15 @@
 package com.zarbosoft.merman.helper;
 
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
-import com.zarbosoft.merman.core.Action;
-import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.ButtonEvent;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Course;
@@ -14,10 +17,8 @@ import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
 import com.zarbosoft.merman.core.wall.bricks.BrickImage;
 import com.zarbosoft.merman.core.wall.bricks.BrickLine;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
-import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.editor.display.MockeryText;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 
 import java.util.function.Consumer;
@@ -39,7 +40,7 @@ public class GeneralTestWizard {
   public GeneralTestWizard(final Syntax syntax, boolean startWindowed, final Atom... atoms) {
     inner = new TestWizard(syntax, startWindowed, atoms);
     inner.context.wall.addBedding(inner.context, new Bedding(10, 7));
-    inner.runner.flush();
+    inner.flushIteration();
   }
 
   public GeneralTestWizard displayWidth(final int size) {
@@ -137,7 +138,7 @@ public class GeneralTestWizard {
   public GeneralTestWizard run(final Consumer<Context> r) {
     r.accept(inner.context);
     assertThat(inner.context.cursor, is(notNullValue()));
-    inner.runner.flush();
+    inner.flushIteration();
     return this;
   }
 
@@ -149,16 +150,91 @@ public class GeneralTestWizard {
     return this;
   }
 
-  public GeneralTestWizard act(final String name) {
-    for (final Action action : inner.context.actions()) {
-      if (action.id().equals(name)) {
-        action.run(inner.context);
-        assertThat(inner.context.cursor, is(notNullValue()));
-        inner.runner.flush();
-        return this;
-      }
-    }
-    throw new AssertionError(Format.format("No action named [%s]", name));
+  public GeneralTestWizard actWindow() {
+    if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionWindow(inner.context);
+    } else if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.context.cursor).actionWindow(inner.context);
+    } else throw new Assertion();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actNext() {
+    if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionNext(inner.context);
+    } else if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.context.cursor).actionNext(inner.context);
+    } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
+      ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionNext(inner.context);
+    } else throw new Assertion();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actGatherNext() {
+    if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.context.cursor).actionGatherNext(inner.context);
+    } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
+      ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionGatherNext(inner.context);
+    } else throw new Assertion();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actGatherPreviousLine() {
+    ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionGatherPreviousLine(inner.context);
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actPrevious() {
+    if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionPrevious(inner.context);
+    } else if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.context.cursor).actionPrevious(inner.context);
+    } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
+      ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionPrevious(inner.context);
+    } else throw new Assertion();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actExit() {
+    if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
+      ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionExit(inner.context);
+    } else if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
+      ((VisualFrontArray.Cursor) inner.context.cursor).actionExit(inner.context);
+    } else throw new Assertion();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actWindowTowardsCursor() {
+    inner.context.actionWindowTowardsCursor();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actWindowTowardsRoot() {
+    inner.context.actionWindowTowardsRoot();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
+  }
+
+  public GeneralTestWizard actWindowClear() {
+    inner.context.actionClearWindow();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
   }
 
   public GeneralTestWizard checkCourseCount(final int i) {
@@ -178,9 +254,9 @@ public class GeneralTestWizard {
     return this;
   }
 
-  public GeneralTestWizard sendHIDEvent(final HIDEvent event) {
+  public GeneralTestWizard sendHIDEvent(final ButtonEvent event) {
     inner.sendHIDEvent(event);
-    inner.runner.flush();
+    inner.flushIteration();
     return this;
   }
 
@@ -202,7 +278,7 @@ public class GeneralTestWizard {
   /*
   public GeneralTestWizard sendText(final String text) {
   	inner.context.cursor.receiveText(inner.context, text);
-  	inner.runner.flush();
+  	inner.flushIteration();
   	return this;
   }
 

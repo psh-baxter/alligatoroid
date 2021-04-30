@@ -1,13 +1,13 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Hoverable;
+import com.zarbosoft.merman.core.SelectionState;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
-import com.zarbosoft.merman.core.Action;
-import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.Cursor;
-import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.SelectionState;
+import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
@@ -16,8 +16,6 @@ import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.visual.attachments.BorderAttachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
-import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -29,7 +27,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   public final FieldArray value;
   private final FieldArray.Listener dataListener;
   private final FrontArraySpecBase front;
-  public ArrayCursor selection;
+  public Cursor selection;
   private Brick ellipsis = null;
   private Brick empty = null;
   private ArrayHoverable hoverable;
@@ -220,7 +218,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       final Context context, final boolean leadFirst, final int start, final int end) {
     if (hoverable != null) hoverable.notifySelected(context, start, end);
     if (selection == null) {
-      selection = new ArrayCursor(context, this, leadFirst, start, end);
+      selection = context.cursorFactory.createArrayCursor(context, this, leadFirst, start, end);
       context.setCursor(selection);
     } else {
       selection.setRange(context, start, end);
@@ -359,15 +357,14 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     } else return super.hover(context, point);
   }
 
-  public static class ArrayCursor extends Cursor {
+  public static class Cursor extends com.zarbosoft.merman.core.Cursor {
     public final VisualFrontArray visual;
-    private final ROList<Action> actions;
     public int beginIndex;
     public int endIndex;
     public boolean leadFirst;
     BorderAttachment border;
 
-    public ArrayCursor(
+    public Cursor(
         final Context context,
         final VisualFrontArray visual,
         final boolean leadFirst,
@@ -377,21 +374,6 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       border = new BorderAttachment(context, context.syntax.cursorStyle.obbox);
       this.leadFirst = leadFirst;
       setRange(context, start, end);
-      context.addActions(
-          this.actions =
-              TSList.of(
-                  new ActionEnter(),
-                  new ActionExit(),
-                  new ActionNext(),
-                  new ActionPrevious(),
-                  new ActionNextElement(),
-                  new ActionPreviousElement(),
-                  new ActionCopy(),
-                  new ActionGatherNext(),
-                  new ActionReleaseNext(),
-                  new ActionGatherPrevious(),
-                  new ActionReleasePrevious(),
-                  new ActionWindow()));
     }
 
     public void setRange(final Context context, final int begin, final int end) {
@@ -454,10 +436,9 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     }
 
     @Override
-    public void clear(final Context context) {
+    public void destroy(final Context context) {
       border.destroy(context);
       visual.selection = null;
-      context.removeActions(actions);
     }
 
     @Override
@@ -480,160 +461,70 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       dispatcher.handle(this);
     }
 
-    private class ActionEnter implements Action {
-      public String id() {
-        return "enter";
-      }
-
-      @Override
-      public void run(final Context context) {
-        visual.value.data.get(beginIndex).visual.selectAnyChild(context);
-      }
+    public void actionEnter(final Context context) {
+      visual.value.data.get(beginIndex).visual.selectAnyChild(context);
     }
 
-    private class ActionExit implements Action {
-      public String id() {
-        return "exit";
-      }
-
-      @Override
-      public void run(final Context context) {
-        visual.value.atomParentRef.selectAtomParent(context);
-      }
+    public void actionExit(final Context context) {
+      visual.value.atomParentRef.selectAtomParent(context);
     }
 
-    private class ActionNext implements Action {
-      public String id() {
-        return "next";
-      }
-
-      @Override
-      public void run(final Context context) {
-        visual.parent.selectNext(context);
-      }
+    public void actionNext(final Context context) {
+      visual.parent.selectNext(context);
     }
 
-    private class ActionPrevious implements Action {
-      public String id() {
-        return "previous";
-      }
-
-      @Override
-      public void run(final Context context) {
-        visual.parent.selectPrevious(context);
-      }
+    public void actionPrevious(final Context context) {
+      visual.parent.selectPrevious(context);
     }
 
-    private class ActionNextElement implements Action {
-      public String id() {
-        return "next_element";
-      }
-
-      @Override
-      public void run(final Context context) {
-
-        ArrayCursor.this.leadFirst = true;
-        final int newIndex = Math.min(visual.value.data.size() - 1, endIndex + 1);
-        if (newIndex == beginIndex && newIndex == endIndex) return;
-        setPosition(context, newIndex);
-      }
+    public void actionNextElement(final Context context) {
+      Cursor.this.leadFirst = true;
+      final int newIndex = Math.min(visual.value.data.size() - 1, endIndex + 1);
+      if (newIndex == beginIndex && newIndex == endIndex) return;
+      setPosition(context, newIndex);
     }
 
-    private class ActionPreviousElement implements Action {
-      public String id() {
-        return "previous_element";
-      }
-
-      @Override
-      public void run(final Context context) {
-
-        ArrayCursor.this.leadFirst = true;
-        final int newIndex = Math.max(0, beginIndex - 1);
-        if (newIndex == beginIndex && newIndex == endIndex) return;
-        setPosition(context, newIndex);
-      }
+    public void actionPreviousElement(final Context context) {
+      Cursor.this.leadFirst = true;
+      final int newIndex = Math.max(0, beginIndex - 1);
+      if (newIndex == beginIndex && newIndex == endIndex) return;
+      setPosition(context, newIndex);
     }
 
-    private class ActionCopy implements Action {
-      public String id() {
-        return "copy";
-      }
-
-      @Override
-      public void run(final Context context) {
-        context.copy(visual.value.data.sublist(beginIndex, endIndex + 1));
-      }
+    public void actionCopy(final Context context) {
+      context.copy(visual.value.data.sublist(beginIndex, endIndex + 1));
     }
 
-    private class ActionGatherNext implements Action {
-      public String id() {
-        return "gather_next";
-      }
-
-      @Override
-      public void run(final Context context) {
-
-        final int newIndex = Math.min(visual.value.data.size() - 1, endIndex + 1);
-        if (endIndex == newIndex) return;
-        setEnd(context, newIndex);
-      }
+    public void actionGatherNext(final Context context) {
+      final int newIndex = Math.min(visual.value.data.size() - 1, endIndex + 1);
+      if (endIndex == newIndex) return;
+      setEnd(context, newIndex);
     }
 
-    private class ActionReleaseNext implements Action {
-      public String id() {
-        return "release_next";
-      }
-
-      @Override
-      public void run(final Context context) {
-
-        final int newIndex = Math.max(beginIndex, endIndex - 1);
-        if (endIndex == newIndex) return;
-        setEnd(context, newIndex);
-      }
+    public void actionReleaseNext(final Context context) {
+      final int newIndex = Math.max(beginIndex, endIndex - 1);
+      if (endIndex == newIndex) return;
+      setEnd(context, newIndex);
     }
 
-    private class ActionGatherPrevious implements Action {
-      public String id() {
-        return "gather_previous";
-      }
-
-      @Override
-      public void run(final Context context) {
-
-        final int newIndex = Math.max(0, beginIndex - 1);
-        if (beginIndex == newIndex) return;
-        setBegin(context, newIndex);
-      }
+    public void actionGatherPrevious(final Context context) {
+      final int newIndex = Math.max(0, beginIndex - 1);
+      if (beginIndex == newIndex) return;
+      setBegin(context, newIndex);
     }
 
-    private class ActionReleasePrevious implements Action {
-      public String id() {
-        return "release_previous";
-      }
-
-      @Override
-      public void run(final Context context) {
-
-        final int newIndex = Math.min(endIndex, beginIndex + 1);
-        if (beginIndex == newIndex) return;
-        setBegin(context, newIndex);
-      }
+    public void actionReleasePrevious(final Context context) {
+      final int newIndex = Math.min(endIndex, beginIndex + 1);
+      if (beginIndex == newIndex) return;
+      setBegin(context, newIndex);
     }
 
-    private class ActionWindow implements Action {
-      public String id() {
-        return "window";
-      }
-
-      @Override
-      public void run(final Context context) {
-        final Atom root = visual.value.data.get(beginIndex);
-        if (root.visual.selectAnyChild(context)) {
-          context.windowExact(root);
-          context.triggerIdleLayBricksOutward();
-          return;
-        }
+    public void actionWindow(final Context context) {
+      final Atom root = visual.value.data.get(beginIndex);
+      if (root.visual.selectAnyChild(context)) {
+        context.windowExact(root);
+        context.triggerIdleLayBricksOutward();
+        return;
       }
     }
   }

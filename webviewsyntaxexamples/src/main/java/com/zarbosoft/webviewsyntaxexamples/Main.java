@@ -1,5 +1,6 @@
 package com.zarbosoft.webviewsyntaxexamples;
 
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
@@ -37,7 +38,7 @@ import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.merman.webview.JSI18nEngine;
+import com.zarbosoft.merman.webview.JSEnvironment;
 import com.zarbosoft.merman.webview.WebView;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
@@ -469,19 +470,19 @@ public class Main {
   public static final String addEqualOperatorType = "add_equal";
   public static final String tripleEqualOperatorType = "triple_equal";
   public static final FrontSymbol prefixCompactIndent =
-          new FrontSymbol(
-              new FrontSymbol.Config(
-                  new SymbolSpaceSpec(
-                      new SymbolSpaceSpec.Config()
-                          .splitMode(Style.SplitMode.COMPACT)
-                          .style(new Style(new Style.Config().splitAlignment(indentAlign))))));
+      new FrontSymbol(
+          new FrontSymbol.Config(
+              new SymbolSpaceSpec(
+                  new SymbolSpaceSpec.Config()
+                      .splitMode(Style.SplitMode.COMPACT)
+                      .style(new Style(new Style.Config().splitAlignment(indentAlign))))));
   public static final FrontSymbol prefixIndent =
-          new FrontSymbol(
-              new FrontSymbol.Config(
-                  new SymbolSpaceSpec(
-                      new SymbolSpaceSpec.Config()
-                          .splitMode(Style.SplitMode.ALWAYS)
-                          .style(new Style(new Style.Config().splitAlignment(indentAlign))))));
+      new FrontSymbol(
+          new FrontSymbol.Config(
+              new SymbolSpaceSpec(
+                  new SymbolSpaceSpec.Config()
+                      .splitMode(Style.SplitMode.ALWAYS)
+                      .style(new Style(new Style.Config().splitAlignment(indentAlign))))));
   public static final FrontSymbol space = text(" ", Function.identity());
 
   private static Style.Config styleBase() {
@@ -537,7 +538,7 @@ public class Main {
         DomGlobal.document.getElementById("replace-javascript-ast").replaceWith(ast);
       }
       WebView webView = new WebView();
-      JSI18nEngine i18n = new JSI18nEngine("en");
+      Environment env = new JSEnvironment("en");
       for (ROPair<String, SyntaxFrontFactory> p :
           new ROPair[] {
             new ROPair<>("javascript", new JavascriptSyntaxFrontFactory()),
@@ -549,11 +550,11 @@ public class Main {
         if (e == null) continue;
         e.replaceWith(
             webView.block(
-                buildSyntax(i18n, p.second), i18n, rawDoc, TSList.of("type", "operator", "kind")));
+                buildSyntax(env, p.second), env, rawDoc, TSList.of("type", "operator", "kind")));
       }
     } catch (GrammarTooUncertain e) {
       StringBuilder message = new StringBuilder();
-      for (Parse.State leaf : e.context.leaves) {
+      for (Parse.Branch leaf : e.context.branches) {
         message.append(Format.format(" * %s (%s)\n", leaf, leaf.color()));
       }
       throw new RuntimeException(
@@ -574,7 +575,7 @@ public class Main {
     }
   }
 
-  private static Syntax buildSyntax(JSI18nEngine i18n, SyntaxFrontFactory frontFactory) {
+  private static Syntax buildSyntax(Environment env, SyntaxFrontFactory frontFactory) {
     FrontArraySpec statementsFront =
         new FrontArraySpecBuilder("statements")
             .prefix(
@@ -681,9 +682,9 @@ public class Main {
                                     .pattern(
                                         new PatternUnion(
                                             TSList.of(
-                                                new PatternString(i18n, "true"),
-                                                new PatternString(i18n, "false"),
-                                                new PatternString(i18n, "null"),
+                                                new PatternString(env, "true"),
+                                                new PatternString(env, "false"),
+                                                new PatternString(env, "null"),
                                                 new JsonDecimal())),
                                         "json keywords")))
                         .build())
@@ -871,33 +872,35 @@ public class Main {
     syntaxConfig.converseDirection = frontFactory.converseDirection();
     syntaxConfig.transverseDirection = frontFactory.transverseDirection();
     syntaxConfig.backType = BackType.JSON;
-    return new Syntax(i18n, syntaxConfig);
+    return new Syntax(env, syntaxConfig);
   }
 
   private static Style cursorStyle(boolean primitive) {
-    return new Style(new Style.Config()
-      .obbox(
-          new ObboxStyle(
-              new ObboxStyle.Config()
-                  .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                  .roundStart(true)
-                  .roundEnd(true)
-                  .lineThickness(1.5)
-                  .roundRadius(8)
-                  .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0.5, 180, 0.8)))));
+    return new Style(
+        new Style.Config()
+            .obbox(
+                new ObboxStyle(
+                    new ObboxStyle.Config()
+                        .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                        .roundStart(true)
+                        .roundEnd(true)
+                        .lineThickness(1.5)
+                        .roundRadius(8)
+                        .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0.5, 180, 0.8)))));
   }
 
   private static Style hoverStyle(boolean primitive) {
-    return new Style(new Style.Config()
-      .obbox(
-          new ObboxStyle(
-              new ObboxStyle.Config()
-                  .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
-                  .roundEnd(true)
-                  .roundStart(true)
-                  .roundRadius(8)
-                  .lineThickness(1.5)
-                  .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0, 0, 0.4)))));
+    return new Style(
+        new Style.Config()
+            .obbox(
+                new ObboxStyle(
+                    new ObboxStyle.Config()
+                        .padding(primitive ? new Padding(0, 0, 1, 1) : Padding.same(1))
+                        .roundEnd(true)
+                        .roundStart(true)
+                        .roundRadius(8)
+                        .lineThickness(1.5)
+                        .lineColor(ModelColor.RGBA.polarOKLab(0.3, 0, 0, 0.4)))));
   }
 
   public static TypeBuilder estreeTypeBuilder(String callType, String call) {
@@ -998,7 +1001,8 @@ public class Main {
     return new FrontSymbol(
         new FrontSymbol.Config(
             new SymbolTextSpec(
-                new SymbolTextSpec.Config(text).style(new Style(styler.apply(new Style.Config()))))));
+                new SymbolTextSpec.Config(text)
+                    .style(new Style(styler.apply(new Style.Config()))))));
   }
 
   private static FrontSymbol textBase(String text, Function<Style.Config, Style.Config> styler) {
@@ -1007,7 +1011,8 @@ public class Main {
             new SymbolTextSpec(
                 new SymbolTextSpec.Config(text)
                     .splitMode(Style.SplitMode.ALWAYS)
-                    .style(new Style(styler.apply(new Style.Config()).splitAlignment(baseAlign))))));
+                    .style(
+                        new Style(styler.apply(new Style.Config()).splitAlignment(baseAlign))))));
   }
 
   private static FrontSymbol textCompactBase(
@@ -1017,7 +1022,8 @@ public class Main {
             new SymbolTextSpec(
                 new SymbolTextSpec.Config(text)
                     .splitMode(Style.SplitMode.COMPACT)
-                    .style(new Style(styler.apply(new Style.Config()).splitAlignment(baseAlign))))));
+                    .style(
+                        new Style(styler.apply(new Style.Config()).splitAlignment(baseAlign))))));
   }
 
   private static FrontSymbol textCompactIndent(
@@ -1028,7 +1034,7 @@ public class Main {
                 new SymbolTextSpec.Config(text)
                     .splitMode(Style.SplitMode.COMPACT)
                     .style(
-                            new Style(styler.apply(new Style.Config()).splitAlignment(indentAlign))))));
+                        new Style(styler.apply(new Style.Config()).splitAlignment(indentAlign))))));
   }
 
   private static BackFixedRecordSpecBuilder estreeBackBuilder() {

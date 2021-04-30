@@ -1,39 +1,30 @@
 package com.zarbosoft.merman.editorcore.helper;
 
-import com.zarbosoft.merman.misc.MultiError;
+import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.RootAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
+import com.zarbosoft.merman.core.syntax.alignments.ConcensusAlignmentSpec;
+import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import com.zarbosoft.merman.syntax.AtomType;
-import com.zarbosoft.merman.syntax.FreeAtomType;
-import com.zarbosoft.merman.syntax.Padding;
-import com.zarbosoft.merman.syntax.RootAtomType;
-import com.zarbosoft.merman.syntax.Syntax;
-import com.zarbosoft.merman.syntax.alignments.AlignmentSpec;
-import com.zarbosoft.merman.syntax.alignments.ConcensusAlignmentSpec;
-import com.zarbosoft.merman.syntax.alignments.RelativeAlignmentSpec;
-import com.zarbosoft.merman.syntax.front.FrontSymbol;
-import com.zarbosoft.merman.syntax.style.Style;
-
-import java.util.Set;
 
 public class SyntaxBuilder {
   private final TSList<AtomType> types = new TSList<>();
   private final TSMap<String, ROList<String>> groups = new TSMap<String, ROList<String>>();
-  private final TSList<Style.Config> styles = new TSList<>();
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
   private final String rootChildType;
   private final FrontDataArrayBuilder front = new FrontDataArrayBuilder("value");
-  private Padding padding;
+  private Padding padding = Padding.empty;
 
   public SyntaxBuilder(final String root) {
     rootChildType = root;
-  }
-
-  public SyntaxBuilder pad(Padding padding) {
-    this.padding = padding;
-    return this;
   }
 
   public SyntaxBuilder type(final FreeAtomType type) {
@@ -43,37 +34,25 @@ public class SyntaxBuilder {
 
   public Syntax build() {
     MultiError splayErrors = new MultiError();
-    TSMap<String, Set<AtomType>> splayed = Syntax.splayGroups(splayErrors, types, groups);
+    TSMap<String, ROSet<AtomType>> splayed = Syntax.splayGroups(splayErrors, types, groups);
     splayErrors.raise();
 
     RootAtomType root =
         new RootAtomType(
             new RootAtomType.Config(
-                ROSet.empty,
                 TSList.of(Helper.buildBackDataRootArray("value", rootChildType)),
                 TSList.of(front.build()),
                 alignments));
 
     Syntax.Config config = new Syntax.Config(types, splayed, root);
     config.pad = this.padding;
-    config.styles = styles;
-    Syntax syntax = new Syntax(config);
+    Syntax syntax = new Syntax(Helper.env, config);
 
     return syntax;
   }
 
   public SyntaxBuilder group(final String name, final ROList<String> subtypes) {
     groups.putNew(name, subtypes);
-    return this;
-  }
-
-  public SyntaxBuilder style(final Style.Config style) {
-    styles.add(style);
-    return this;
-  }
-
-  public SyntaxBuilder absoluteAlignment(final String name, final int offset) {
-    alignments.put(name, new AbsoluteAlignmentSpec(offset));
     return this;
   }
 
@@ -96,6 +75,11 @@ public class SyntaxBuilder {
 
   public SyntaxBuilder addRootFrontPrefix(final FrontSymbol part) {
     front.addPrefix(part);
+    return this;
+  }
+
+  public SyntaxBuilder pad(Padding padding) {
+    this.padding = padding;
     return this;
   }
 }

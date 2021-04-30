@@ -11,7 +11,7 @@ public class Maybe extends Pattern {
   }
 
   @Override
-  public Node build() {
-    return new Repeat(pattern.build()).min(0).max(1);
+  public Node build(boolean capture) {
+    return new Repeat(pattern.build(capture)).min(0).max(1);
   }
 }

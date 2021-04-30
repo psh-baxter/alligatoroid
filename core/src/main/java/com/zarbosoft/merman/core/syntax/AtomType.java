@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.core.syntax;
 
+import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
-import com.zarbosoft.merman.core.I18nEngine;
-import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
@@ -142,7 +142,8 @@ public abstract class AtomType {
       final TSSet<String> fieldsUsedFront = new TSSet<>();
       for (int i = 0; i < front().size(); ++i) {
         FrontSpec e = front().get(i);
-        e.finish(subErrors, new SyntaxPath("front").add(Integer.toString(i)), this, fieldsUsedFront);
+        e.finish(
+            subErrors, new SyntaxPath("front").add(Integer.toString(i)), this, fieldsUsedFront);
       }
       final TSSet<String> missing = fields.keys().difference(fieldsUsedFront);
       if (!missing.isEmpty()) {
@@ -162,11 +163,11 @@ public abstract class AtomType {
     return back;
   }
 
-  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
+  public Node buildBackRule(Environment env, final Syntax syntax) {
     final Sequence seq = new Sequence();
     seq.add(StackStore.prepVarStack);
     for (BackSpec p : back()) {
-      seq.add(p.buildBackRule(i18n, syntax));
+      seq.add(p.buildBackRule(env, syntax));
     }
     return new Color(
         "atom " + id,
@@ -174,7 +175,7 @@ public abstract class AtomType {
           @Override
           protected StackStore process(StackStore store) {
             final TSMap<String, ROPair<Field, Object>> initialValue = new TSMap<>();
-            store = store.popVarMap(initialValue.inner);
+            store = store.popVarMap(initialValue);
             return store.pushStack(new ROPair<>(new Atom(AtomType.this), initialValue));
           }
         });
@@ -218,7 +219,7 @@ public abstract class AtomType {
   }
 
   public BaseBackPrimitiveSpec getDataPrimitive(
-          MultiError errors, SyntaxPath typePath, final String key) {
+      MultiError errors, SyntaxPath typePath, final String key) {
     BackSpecData found = getBack(errors, typePath, key);
     try {
       return (BaseBackPrimitiveSpec) found;

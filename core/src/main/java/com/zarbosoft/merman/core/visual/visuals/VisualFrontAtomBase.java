@@ -1,14 +1,13 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Hoverable;
+import com.zarbosoft.merman.core.SelectionState;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
-import com.zarbosoft.merman.core.Action;
-import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.Cursor;
-import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.SelectionState;
+import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
@@ -17,9 +16,7 @@ import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.visual.attachments.BorderAttachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
-import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.DeadCode;
-import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -28,7 +25,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   protected VisualAtom body;
   VisualParent parent;
   private NestedHoverable hoverable;
-  private NestedCursor selection;
+  private Cursor selection;
   private Brick ellipsis = null;
 
   public VisualFrontAtomBase(final int visualDepth, Symbol ellipsis) {
@@ -198,7 +195,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     else if (hoverable != null) {
       context.clearHover();
     }
-    selection = new NestedCursor(this, context);
+    selection = context.cursorFactory.createAtomCursor(context, this);
     context.setCursor(selection);
   }
 
@@ -240,7 +237,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     if (body != null) body.uproot(context, null);
     this.body =
         (VisualAtom) data.ensureVisual(context, new NestedParent(), visualDepth + 1, depthScore());
-    if (selection != null) selection.nudge(context);
+    if (selection != null) selection.nudgeCreation(context);
   }
 
   @Override
@@ -254,34 +251,23 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     void handle(VisualFrontAtom visual);
   }
 
-  public static class NestedCursor extends Cursor {
-    private final ROList<Action> actions;
+  public static class Cursor extends com.zarbosoft.merman.core.Cursor {
     public VisualFrontAtomBase base;
     private BorderAttachment border;
 
-    public NestedCursor(VisualFrontAtomBase base, final Context context) {
+    public Cursor(final Context context, VisualFrontAtomBase base) {
       this.base = base;
       border = new BorderAttachment(context, context.syntax.cursorStyle.obbox);
-      final Brick first = nudge(context);
+      final Brick first = nudgeCreation(context);
       border.setFirst(context, first);
       border.setLast(context, base.body.getLastBrick(context));
-      context.addActions(
-          this.actions =
-              TSList.of(
-                  new AtomActionEnter(base),
-                  new AtomActionExit(base),
-                  new AtomActionNext(base),
-                  new AtomActionPrevious(base),
-                  new AtomActionWindow(base),
-                  new AtomActionCopy(base)));
     }
 
     @Override
-    public void clear(final Context context) {
+    public void destroy(final Context context) {
       border.destroy(context);
       border = null;
       base.selection = null;
-      context.removeActions(actions);
     }
 
     @Override
@@ -304,7 +290,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
       dispatcher.handle(this);
     }
 
-    public Brick nudge(final Context context) {
+    public Brick nudgeCreation(final Context context) {
       final Brick first = base.body.createOrGetFirstBrick(context);
       context.wall.setCornerstone(
           context,
@@ -312,6 +298,34 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
           () -> base.parent.getPreviousBrick(context),
           () -> base.parent.getNextBrick(context));
       return first;
+    }
+
+    public void actionCopy(Context context) {
+      context.copy(TSList.of(base.atomGet()));
+    }
+
+    public void actionEnter(final Context context) {
+      base.body.selectAnyChild(context);
+    }
+
+    public void actionExit(final Context context) {
+      if (base.value().atomParentRef == null) return;
+      base.value().atomParentRef.selectAtomParent(context);
+    }
+
+    public void actionNext(final Context context) {
+      base.parent.selectNext(context);
+    }
+
+    public void actionPrevious(final Context context) {
+      base.parent.selectPrevious(context);
+    }
+
+    public void actionWindow(final Context context) {
+      final Atom root = base.atomGet();
+      if (!root.visual.selectAnyChild(context)) return;
+      context.windowExact(root);
+      context.triggerIdleLayBricksOutward();
     }
   }
 
@@ -325,96 +339,6 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     @Override
     public void select(final Context context) {
       field.selectInto(context);
-    }
-  }
-
-  private static class AtomActionEnter implements Action {
-    private final VisualFrontAtomBase base;
-
-    public AtomActionEnter(VisualFrontAtomBase base) {
-      this.base = base;
-    }
-
-    public String id() {
-      return "enter";
-    }
-
-    @Override
-    public void run(final Context context) {
-      base.body.selectAnyChild(context);
-    }
-  }
-
-  private static class AtomActionExit implements Action {
-    private final VisualFrontAtomBase base;
-
-    public AtomActionExit(VisualFrontAtomBase base) {
-      this.base = base;
-    }
-
-    public String id() {
-      return "exit";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      if (base.value().atomParentRef == null) return;
-      base.value().atomParentRef.selectAtomParent(context);
-    }
-  }
-
-  private static class AtomActionNext implements Action {
-    private final VisualFrontAtomBase base;
-
-    public AtomActionNext(VisualFrontAtomBase base) {
-      this.base = base;
-    }
-
-    public String id() {
-      return "next";
-    }
-
-    @Override
-    public void run(final Context context) {
-      base.parent.selectNext(context);
-    }
-  }
-
-  private static class AtomActionPrevious implements Action {
-    private final VisualFrontAtomBase base;
-
-    public AtomActionPrevious(VisualFrontAtomBase base) {
-      this.base = base;
-    }
-
-    public String id() {
-      return "previous";
-    }
-
-    @Override
-    public void run(final Context context) {
-      base.parent.selectPrevious(context);
-    }
-  }
-
-  private static class AtomActionWindow implements Action {
-    private final VisualFrontAtomBase base;
-
-    public AtomActionWindow(VisualFrontAtomBase base) {
-      this.base = base;
-    }
-
-    public String id() {
-      return "window";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final Atom root = base.atomGet();
-      if (!root.visual.selectAnyChild(context)) return;
-      context.windowExact(root);
-      context.triggerIdleLayBricksOutward();
     }
   }
 

@@ -17,7 +17,7 @@ public class TypeBuilder {
   private int depthScore = 1;
   private int precedence = Integer.MAX_VALUE;
   private boolean associateForward = false;
-  private int autoChooseAmbiguity = 1;
+  private boolean autoChooseUnambiguous = true;
 
   public TypeBuilder(String id, String humanName) {
     this.id = id;
@@ -56,6 +56,6 @@ public class TypeBuilder {
             .alignments(alignments)
             .precedence(precedence)
             .associateForward(associateForward)
-            .autoChooseAmbiguity(autoChooseAmbiguity));
+            .autoChooseUnambiguous(autoChooseUnambiguous));
   }
 }

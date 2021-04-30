@@ -1,18 +1,14 @@
 package com.zarbosoft.merman.helper;
 
-import com.zarbosoft.merman.JavaI18nEngine;
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.ViewerCursorFactory;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
-import com.zarbosoft.merman.core.Action;
-import com.zarbosoft.merman.core.ClipboardEngine;
-import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.DelayEngine;
-import com.zarbosoft.merman.core.I18nEngine;
-import com.zarbosoft.merman.core.IterationTask;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
@@ -31,6 +27,9 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROSet;
@@ -39,20 +38,19 @@ import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.ComparisonFailure;
 
-import java.util.Locale;
-import java.util.function.Consumer;
-
 public class Helper {
-  public static I18nEngine i18n = new JavaI18nEngine(Locale.US);
+  static Environment env = new TestEnvironment();
 
-  public static void act(final Context context, final String name) {
-    for (final Action action : context.actions()) {
-      if (action.id().equals(name)) {
-        action.run(context);
-        return;
-      }
-    }
-    throw new AssertionError(Format.format("No action named [%s]", name));
+  public static VisualFrontAtomBase.Cursor cursorAtom(Context context) {
+    return (VisualFrontAtomBase.Cursor) context.cursor;
+  }
+
+  public static VisualFrontArray.Cursor cursorArray(Context context) {
+    return (VisualFrontArray.Cursor) context.cursor;
+  }
+
+  public static VisualFrontPrimitive.Cursor cursorPrimitive(Context context) {
+    return (VisualFrontPrimitive.Cursor) context.cursor;
   }
 
   public static BackSpec buildBackType(final String type, final BackSpec child) {
@@ -73,12 +71,12 @@ public class Helper {
 
   public static BackSpec buildBackDataPrimitiveLetters(final String id) {
     return new BackPrimitiveSpec(
-            new BaseBackPrimitiveSpec.Config(id).pattern(new Repeat1(new Letters()), "1+ letters"));
+        new BaseBackPrimitiveSpec.Config(id).pattern(new Repeat1(new Letters()), "1+ letters"));
   }
 
   public static BackSpec buildBackDataPrimitiveDigits(final String id) {
     return new BackPrimitiveSpec(
-            new BaseBackPrimitiveSpec.Config(id).pattern(new Repeat1(new Digits()), "1+ digits"));
+        new BaseBackPrimitiveSpec.Config(id).pattern(new Repeat1(new Digits()), "1+ digits"));
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
@@ -164,66 +162,25 @@ public class Helper {
   }
 
   public static Context buildDoc(final Syntax syntax, final Atom... root) {
-    return buildDoc(new Context.InitialConfig(), idleTask -> {}, limit -> {}, syntax, root);
+    return buildDoc(new Context.InitialConfig(), syntax, root);
   }
 
   public static Context buildDoc(
-      Context.InitialConfig contextConfig,
-      final Consumer<IterationTask> addIteration,
-      final Consumer<Integer> flushIteration,
-      final Syntax syntax,
-      final Atom... root) {
+      Context.InitialConfig contextConfig, final Syntax syntax, final Atom... root) {
     FieldArray rootArray = new FieldArray((BaseBackArraySpec) syntax.root.fields.get("value"));
     rootArray.initialSet(TSList.of(root));
     Atom rootAtom = new Atom(syntax.root);
     rootAtom.initialSet(new TSMap<String, Field>().put("value", rootArray));
-    final Document doc =
-        new Document(
-            syntax, rootAtom);
+    final Document doc = new Document(syntax, rootAtom);
     final Context context =
         new Context(
             contextConfig,
             syntax,
             doc,
             new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
-            addIteration,
-            flushIteration,
-            new DelayEngine() {
-              @Override
-              public Handle delay(long ms, Runnable r) {
-                r.run();
-                return new Handle() {
-                  @Override
-                  public void cancel() {}
-                };
-              }
-            },
-            new ClipboardEngine() {
-              byte[] data = null;
-              String string = null;
-
-              @Override
-              public void set(final Object bytes) {
-                data = (byte[]) bytes;
-              }
-
-              @Override
-              public void get(Consumer<Object> cb) {
-                cb.accept(data);
-              }
-
-              @Override
-              public void getString(Consumer<String> cb) {
-                cb.accept(string);
-              }
-
-              @Override
-              public void setString(final String string) {
-                this.string = string;
-              }
-            },
+            new TestEnvironment(),
             null,
-            i18n);
+            new ViewerCursorFactory());
     return context;
   }
 }

@@ -1,10 +1,8 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
-import com.zarbosoft.merman.core.Action;
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.Cursor;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.I18nEngine;
 import com.zarbosoft.merman.core.SelectionState;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.Font;
@@ -30,6 +28,7 @@ import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.function.Function;
 
+import static com.zarbosoft.merman.core.Environment.I18N_DONE;
 import static com.zarbosoft.merman.core.syntax.style.Style.SplitMode.ALWAYS;
 
 public class VisualFrontPrimitive extends Visual implements VisualLeaf {
@@ -42,7 +41,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   public VisualParent parent;
   public int brickCount = 0;
   public PrimitiveHoverable hoverable;
-  public PrimitiveCursor selection;
+  public Cursor selection;
   public TSList<Line> lines = new TSList<>();
   public int hardLineCount = 0;
 
@@ -118,10 +117,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
   }
 
-  protected ROList<Action> getActions() {
-    return ROList.empty;
-  }
-
   public void select(
       final Context context, final boolean leadFirst, final int beginOffset, final int endOffset) {
     if (selection != null) {
@@ -133,9 +128,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
   }
 
-  public PrimitiveCursor createSelection(
+  public Cursor createSelection(
       final Context context, final boolean leadFirst, final int beginOffset, final int endOffset) {
-    return new PrimitiveCursor(this, context, leadFirst, beginOffset, endOffset);
+    return context.cursorFactory.createPrimitiveCursor(
+        context, this, leadFirst, beginOffset, endOffset);
   }
 
   protected void commit() {}
@@ -372,17 +368,17 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       final double edge = converse + width;
       int split;
       if (converse < context.edge && edge > context.edge) {
-        final I18nEngine.Walker lineIter = context.i18n.lineWalker(text);
+        final Environment.I18nWalker lineIter = context.env.lineWalker(text);
         final double edgeOffset = context.edge - converse;
         final int under = measurer.getIndexAtConverse(context, text, edgeOffset);
         if (under == text.length()) split = under;
         else {
-          split = lineIter.preceding(under + 1);
-          if (split == 0 || split == I18nEngine.DONE) {
-            final I18nEngine.Walker clusterIter = context.i18n.glyphWalker(text);
-            split = clusterIter.preceding(under + 1);
+          split = lineIter.precedingStart(under + 1);
+          if (split == 0 || split == I18N_DONE) {
+            final Environment.I18nWalker clusterIter = context.env.glyphWalker(text);
+            split = clusterIter.precedingStart(under + 1);
           }
-          if (split < 4 || split == I18nEngine.DONE) {
+          if (split < 4 || split == I18N_DONE) {
             split = text.length();
             result.compactLimit = true;
           }
@@ -441,16 +437,15 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
   }
 
-  public static class PrimitiveCursor extends Cursor {
+  public static class Cursor extends com.zarbosoft.merman.core.Cursor {
     public final RangeAttachment range;
     public final VisualFrontPrimitive visualPrimitive;
     private final FieldPrimitive.Listener clusterListener;
-    private final TSList<Action> actions;
-    I18nEngine.Walker clusterIterator;
+    Environment.I18nWalker clusterIterator;
 
-    public PrimitiveCursor(
-        final VisualFrontPrimitive visualPrimitive,
+    public Cursor(
         final Context context,
+        final VisualFrontPrimitive visualPrimitive,
         final boolean leadFirst,
         final int beginOffset,
         final int endOffset) {
@@ -459,79 +454,73 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       range.setStyle(context, context.syntax.cursorStyle.obbox);
       range.leadFirst = leadFirst;
       range.setOffsets(context, beginOffset, endOffset);
-      clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
+      clusterIterator = context.env.glyphWalker(visualPrimitive.value.get());
       clusterListener = new ClusterIteratorUpdater(this, visualPrimitive);
       visualPrimitive.value.addListener(this.clusterListener);
-      this.actions =
-          TSList.of(
-              new VisualFrontPrimitive.ActionExit(this),
-              new VisualFrontPrimitive.ActionNext(this),
-              new VisualFrontPrimitive.ActionPrevious(this),
-              new VisualFrontPrimitive.ActionNextElement(this),
-              new VisualFrontPrimitive.ActionPreviousElement(this),
-              new VisualFrontPrimitive.ActionNextWord(this),
-              new VisualFrontPrimitive.ActionPreviousWord(this),
-              new VisualFrontPrimitive.ActionLineBegin(this),
-              new VisualFrontPrimitive.ActionLineEnd(this),
-              new VisualFrontPrimitive.ActionNextLine(this),
-              new VisualFrontPrimitive.ActionPreviousLine(this),
-              new VisualFrontPrimitive.ActionCopy(this),
-              new VisualFrontPrimitive.ActionGatherNext(this),
-              new VisualFrontPrimitive.ActionGatherNextWord(this),
-              new VisualFrontPrimitive.ActionGatherNextLineEnd(this),
-              new VisualFrontPrimitive.ActionGatherNextLine(this),
-              new VisualFrontPrimitive.ActionReleaseNext(this),
-              new VisualFrontPrimitive.ActionReleaseNextWord(this),
-              new VisualFrontPrimitive.ActionReleaseNextLineEnd(this),
-              new VisualFrontPrimitive.ActionReleaseNextLine(this),
-              new VisualFrontPrimitive.ActionGatherPrevious(this),
-              new VisualFrontPrimitive.ActionGatherPreviousWord(this),
-              new VisualFrontPrimitive.ActionGatherPreviousLineStart(this),
-              new VisualFrontPrimitive.ActionGatherPreviousLine(this),
-              new VisualFrontPrimitive.ActionReleasePrevious(this),
-              new VisualFrontPrimitive.ActionReleasePreviousWord(this),
-              new VisualFrontPrimitive.ActionReleasePreviousLineStart(this),
-              new VisualFrontPrimitive.ActionReleasePreviousLine(this, beginOffset));
-      actions.addAll(visualPrimitive.getActions());
-      context.addActions(actions);
     }
 
-    private int preceding(final int offset) {
-      return preceding(clusterIterator, offset);
-    }
-
-    private int preceding(final I18nEngine.Walker iter, final int offset) {
-      int to = iter.preceding(offset);
-      if (to == I18nEngine.DONE) to = 0;
+    private int precedingStart(final Environment.I18nWalker iter, final int offset) {
+      int to = iter.precedingStart(offset);
+      if (to == I18N_DONE) to = 0;
       return Math.max(0, to);
     }
 
-    public int preceding() {
-      return preceding(clusterIterator, range.beginOffset);
+    public int precedingStart() {
+      return precedingStart(clusterIterator, range.beginOffset);
+    }
+    private int precedingEnd(final int offset) {
+      return precedingEnd(clusterIterator, offset);
     }
 
-    public int following(final int offset) {
-      return following(clusterIterator, offset);
+    private int precedingEnd(final Environment.I18nWalker iter, final int offset) {
+      int to = iter.precedingEnd(offset);
+      if (to == I18N_DONE) to = 0;
+      return Math.max(0, to);
     }
 
-    private int following(final I18nEngine.Walker iter, final int offset) {
-      int to = iter.following(offset);
-      if (to == I18nEngine.DONE) to = visualPrimitive.value.length();
+    public int precedingEnd() {
+      return precedingEnd(clusterIterator, range.beginOffset);
+    }
+
+    public int followingStart(final int offset) {
+      return followingStart(clusterIterator, offset);
+    }
+
+    private int followingStart(final Environment.I18nWalker iter, final int offset) {
+      int to = iter.followingStart(offset);
+      if (to == I18N_DONE) to = visualPrimitive.value.length();
       return Math.min(visualPrimitive.value.length(), to);
     }
 
-    public int following() {
-      return following(clusterIterator, range.endOffset);
+    public int followingStart() {
+      return followingStart(clusterIterator, range.endOffset);
+    }
+    public int followingEnd(final int offset) {
+      return followingEnd(clusterIterator, offset);
     }
 
-    private int nextWord(Context context, final int source) {
-      final I18nEngine.Walker iter = context.i18n.wordWalker(visualPrimitive.value.get());
-      return following(iter, source);
+    private int followingEnd(final Environment.I18nWalker iter, final int offset) {
+      int to = iter.followingEnd(offset);
+      if (to == I18N_DONE) to = visualPrimitive.value.length();
+      return Math.min(visualPrimitive.value.length(), to);
     }
 
-    private int previousWord(Context context, final int source) {
-      final I18nEngine.Walker iter = context.i18n.wordWalker(visualPrimitive.value.get());
-      return preceding(iter, source);
+    public int followingEnd() {
+      return followingEnd(clusterIterator, range.endOffset);
+    }
+
+    private int nextWordStart(Context context, final int source) {
+      final Environment.I18nWalker iter = context.env.wordWalker(visualPrimitive.value.get());
+      return followingStart(iter, source);
+    }
+    private int nextWordEnd(Context context, final int source) {
+      final Environment.I18nWalker iter = context.env.wordWalker(visualPrimitive.value.get());
+      return followingEnd(iter, source);
+    }
+
+    private int previousWordStart(Context context, final int source) {
+      final Environment.I18nWalker iter = context.env.wordWalker(visualPrimitive.value.get());
+      return precedingStart(iter, source);
     }
 
     private int nextLine(final Line sourceLine, final int source) {
@@ -558,8 +547,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
-    public void clear(final Context context) {
-      context.removeActions(actions);
+    public void destroy(final Context context) {
       range.destroy(context);
       visualPrimitive.selection = null;
       visualPrimitive.commit();
@@ -587,29 +575,180 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       dispatcher.handle(this);
     }
 
+    public void actionPrevious(final Context context) {
+      visualPrimitive.parent.selectPrevious(context);
+    }
+
+    public void actionNextElement(final Context context) {
+      final int newIndex = followingStart();
+      if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+      range.setOffsets(context, newIndex);
+    }
+
+    public void actionPreviousElement(final Context context) {
+      final int newIndex = precedingStart();
+      if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+      range.setOffsets(context, newIndex);
+    }
+
+    public void actionNextWord(final Context context) {
+      final int newIndex = nextWordStart(context, range.endOffset);
+      if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+      range.setOffsets(context, newIndex);
+    }
+
+    public void actionPreviousWord(final Context context) {
+      final int newIndex = previousWordStart(context, range.beginOffset);
+      if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+      range.setOffsets(context, newIndex);
+    }
+
+    public void actionLineBegin(final Context context) {
+      final int newIndex = startOfLine(range.beginLine);
+      if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+      range.setOffsets(context, newIndex);
+    }
+
+    public void actionLineEnd(final Context context) {
+      final int newIndex = endOfLine(range.endLine);
+      if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+      range.setOffsets(context, newIndex);
+    }
+
+    public void actionNextLine(final Context context) {
+      final int newIndex = nextLine(range.endLine, range.endOffset);
+      if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+      range.setOffsets(context, newIndex);
+    }
+
+    public void actionPreviousLine(final Context context) {
+      final int newIndex = previousLine(range.beginLine, range.beginOffset);
+      if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
+      range.setOffsets(context, newIndex);
+    }
+
+    public void actionCopy(final Context context) {
+      context.copy(visualPrimitive.value.get().substring(range.beginOffset, range.endOffset));
+    }
+
+    public void actionGatherNext(final Context context) {
+      final int newIndex = followingStart();
+      if (range.endOffset == newIndex) return;
+      range.setEndOffset(context, newIndex);
+    }
+
+    public void actionGatherNextWord(final Context context) {
+      final int newIndex = nextWordEnd(context, range.endOffset);
+      if (range.endOffset == newIndex) return;
+      range.setEndOffset(context, newIndex);
+    }
+
+    public void actionGatherNextLineEnd(final Context context) {
+      final int newIndex = endOfLine(range.endLine);
+      if (range.endOffset == newIndex) return;
+      range.setEndOffset(context, newIndex);
+    }
+
+    public void actionGatherNextLine(final Context context) {
+      final int newIndex = nextLine(range.endLine, range.endOffset);
+      if (range.endOffset == newIndex) return;
+      range.setEndOffset(context, newIndex);
+    }
+
+    public void actionReleaseNext(final Context context) {
+      final int newIndex = Math.max(range.beginOffset, precedingEnd(range.endOffset));
+      if (range.endOffset == newIndex) return;
+      range.setEndOffset(context, newIndex);
+    }
+
+    public void actionReleaseNextWord(final Context context) {
+      final int newIndex = Math.max(range.beginOffset, previousWordStart(context, range.endOffset));
+      if (range.endOffset == newIndex) return;
+      range.setEndOffset(context, newIndex);
+    }
+
+    public void actionReleaseNextLineEnd(final Context context) {
+      final int newIndex = Math.max(range.beginOffset, startOfLine(range.endLine));
+      if (range.endOffset == newIndex) return;
+      range.setEndOffset(context, newIndex);
+    }
+
+    public void actionReleaseNextLine(final Context context) {
+      final int newIndex =
+          Math.max(range.beginOffset, previousLine(range.endLine, range.endOffset));
+      if (range.endOffset == newIndex) return;
+      range.setEndOffset(context, newIndex);
+    }
+
+    public void actionGatherPrevious(final Context context) {
+      final int newIndex = precedingStart();
+      if (range.beginOffset == newIndex) return;
+      range.setBeginOffset(context, newIndex);
+    }
+
+    public void actionGatherPreviousWord(final Context context) {
+      final int newIndex = previousWordStart(context, range.beginOffset);
+      if (range.beginOffset == newIndex) return;
+      range.setBeginOffset(context, newIndex);
+    }
+
+    public void actionGatherPreviousLineStart(final Context context) {
+      final int newIndex = startOfLine(range.beginLine);
+      if (range.beginOffset == newIndex) return;
+      range.setBeginOffset(context, newIndex);
+    }
+
+    public void actionGatherPreviousLine(final Context context) {
+      final int newIndex = previousLine(range.beginLine, range.beginOffset);
+      if (range.beginOffset == newIndex) return;
+      range.setBeginOffset(context, newIndex);
+    }
+
+    public void actionReleasePrevious(final Context context) {
+      final int newIndex = Math.min(range.endOffset, followingStart(range.beginOffset));
+      if (range.beginOffset == newIndex) return;
+      range.setBeginOffset(context, newIndex);
+    }
+
+    public void actionReleasePreviousWord(final Context context) {
+      final int newIndex = Math.min(range.endOffset, nextWordStart(context, range.beginOffset));
+      if (range.beginOffset == newIndex) return;
+      range.setBeginOffset(context, newIndex);
+    }
+
+    public void actionReleasePreviousLineStart(final Context context) {
+      final int newIndex = Math.min(range.endOffset, endOfLine(range.beginLine));
+      if (range.beginOffset == newIndex) return;
+      range.setBeginOffset(context, newIndex);
+    }
+
+    public void actionReleasePreviousLine(final Context context) {
+      final int newIndex = Math.min(range.endOffset, nextLine(range.beginLine, range.beginOffset));
+      if (newIndex == range.beginOffset) return;
+      range.setBeginOffset(context, newIndex);
+    }
+
+    public void actionNext(final Context context) {
+      visualPrimitive.parent.selectNext(context);
+    }
+
+    public void actionExit(final Context context) {
+      if (visualPrimitive.value.atomParentRef == null) return;
+      visualPrimitive.value.atomParentRef.selectAtomParent(context);
+    }
+
     private static class ClusterIteratorUpdater implements FieldPrimitive.Listener {
       private final VisualFrontPrimitive visualPrimitive;
-      private final PrimitiveCursor primitiveCursor;
+      private final Cursor primitiveCursor;
 
-      public ClusterIteratorUpdater(
-          PrimitiveCursor primitiveCursor, VisualFrontPrimitive visualPrimitive) {
+      public ClusterIteratorUpdater(Cursor primitiveCursor, VisualFrontPrimitive visualPrimitive) {
         this.visualPrimitive = visualPrimitive;
         this.primitiveCursor = primitiveCursor;
       }
 
       @Override
-      public void set(final Context context, final String text) {
-        primitiveCursor.clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
-      }
-
-      @Override
-      public void added(final Context context, final int index, final String text) {
-        primitiveCursor.clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
-      }
-
-      @Override
-      public void removed(final Context context, final int index, final int count) {
-        primitiveCursor.clusterIterator = context.i18n.glyphWalker(visualPrimitive.value.get());
+      public void changed(Context context, int index, int remove, String add) {
+        primitiveCursor.clusterIterator = context.env.glyphWalker(visualPrimitive.value.get());
       }
     }
   }
@@ -622,12 +761,11 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
-    public void set(final Context context, final String text) {
-      visualFrontPrimitive.set(context, text);
-      visualFrontPrimitive.idleLayBricks(context, 0, visualFrontPrimitive.lines.size());
+    public void changed(Context context, int index, int remove, String add) {
+      removed(context, index, remove);
+      added(context, index, add);
     }
 
-    @Override
     public void added(final Context context, final int offset, final String text) {
       final TSList<String> segments = TSList.of(text.split("\n", -1));
       if (segments.isEmpty()) return;
@@ -655,7 +793,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       while (true) {
         index += 1;
         movingOffset += line.text.length();
-        segment = segments.removeLast();
+        segment = segments.removeLastOpt();
         if (segment == null) break;
         line = new Line(visualFrontPrimitive, true);
         visualFrontPrimitive.hardLineCount += 1;
@@ -683,7 +821,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
           context, firstLineCreated, lastLineCreated - firstLineCreated);
     }
 
-    @Override
     public void removed(final Context context, final int offset, final int count) {
       int remaining = count;
       final Line base = visualFrontPrimitive.lines.get(visualFrontPrimitive.findContaining(offset));
@@ -739,588 +876,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         else if (newEnd >= offset) newEnd = offset;
         visualFrontPrimitive.selection.range.setOffsets(context, newBegin, newEnd);
       }
-    }
-  }
-
-  private static class ActionPrevious implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionPrevious(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "previous";
-    }
-
-    @Override
-    public void run(final Context context) {
-      primitiveCursor.visualPrimitive.parent.selectPrevious(context);
-    }
-  }
-
-  private static class ActionNextElement implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionNextElement(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "next_element";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      final int newIndex = primitiveCursor.following();
-      if (primitiveCursor.range.beginOffset == newIndex
-          && primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setOffsets(context, newIndex);
-    }
-  }
-
-  private static class ActionPreviousElement implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionPreviousElement(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "previous_element";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex = primitiveCursor.preceding();
-      if (primitiveCursor.range.beginOffset == newIndex
-          && primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setOffsets(context, newIndex);
-    }
-  }
-
-  private static class ActionNextWord implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionNextWord(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "next_word";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex = primitiveCursor.nextWord(context, primitiveCursor.range.endOffset);
-      if (primitiveCursor.range.beginOffset == newIndex
-          && primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setOffsets(context, newIndex);
-    }
-  }
-
-  private static class ActionPreviousWord implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionPreviousWord(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "previous_word";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex = primitiveCursor.previousWord(context, primitiveCursor.range.beginOffset);
-      if (primitiveCursor.range.beginOffset == newIndex
-          && primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setOffsets(context, newIndex);
-    }
-  }
-
-  private static class ActionLineBegin implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionLineBegin(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "line_begin";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      final int newIndex = primitiveCursor.startOfLine(primitiveCursor.range.beginLine);
-      if (primitiveCursor.range.beginOffset == newIndex
-          && primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setOffsets(context, newIndex);
-    }
-  }
-
-  private static class ActionLineEnd implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionLineEnd(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "line_end";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      final int newIndex = primitiveCursor.endOfLine(primitiveCursor.range.endLine);
-      if (primitiveCursor.range.beginOffset == newIndex
-          && primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setOffsets(context, newIndex);
-    }
-  }
-
-  private static class ActionNextLine implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionNextLine(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "next_line";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      final int newIndex =
-          primitiveCursor.nextLine(primitiveCursor.range.endLine, primitiveCursor.range.endOffset);
-      if (primitiveCursor.range.beginOffset == newIndex
-          && primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setOffsets(context, newIndex);
-    }
-  }
-
-  private static class ActionPreviousLine implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionPreviousLine(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "previous_line";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      final int newIndex =
-          primitiveCursor.previousLine(
-              primitiveCursor.range.beginLine, primitiveCursor.range.beginOffset);
-      if (primitiveCursor.range.beginOffset == newIndex
-          && primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setOffsets(context, newIndex);
-    }
-  }
-
-  private static class ActionCopy implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionCopy(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "copy";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      context.copy(
-          primitiveCursor
-              .visualPrimitive
-              .value
-              .get()
-              .substring(primitiveCursor.range.beginOffset, primitiveCursor.range.endOffset));
-    }
-  }
-
-  private static class ActionGatherNext implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionGatherNext(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "gather_next";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex = primitiveCursor.following();
-      if (primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setEndOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionGatherNextWord implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionGatherNextWord(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "gather_next_word";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex = primitiveCursor.nextWord(context, primitiveCursor.range.endOffset);
-      if (primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setEndOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionGatherNextLineEnd implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionGatherNextLineEnd(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "gather_next_line_end";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      final int newIndex = primitiveCursor.endOfLine(primitiveCursor.range.endLine);
-      if (primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setEndOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionGatherNextLine implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionGatherNextLine(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "gather_next_line";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex =
-          primitiveCursor.nextLine(primitiveCursor.range.endLine, primitiveCursor.range.endOffset);
-      if (primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setEndOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionReleaseNext implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionReleaseNext(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "release_next";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      final int newIndex =
-          Math.max(
-              primitiveCursor.range.beginOffset,
-              primitiveCursor.preceding(primitiveCursor.range.endOffset));
-      if (primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setEndOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionReleaseNextWord implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionReleaseNextWord(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "release_next_word";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex =
-          Math.max(
-              primitiveCursor.range.beginOffset,
-              primitiveCursor.previousWord(context, primitiveCursor.range.endOffset));
-      if (primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setEndOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionReleaseNextLineEnd implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionReleaseNextLineEnd(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "release_next_line_end";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex =
-          Math.max(
-              primitiveCursor.range.beginOffset,
-              primitiveCursor.startOfLine(primitiveCursor.range.endLine));
-      if (primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setEndOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionReleaseNextLine implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionReleaseNextLine(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "release_next_line";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex =
-          Math.max(
-              primitiveCursor.range.beginOffset,
-              primitiveCursor.previousLine(
-                  primitiveCursor.range.endLine, primitiveCursor.range.endOffset));
-      if (primitiveCursor.range.endOffset == newIndex) return;
-      primitiveCursor.range.setEndOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionGatherPrevious implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionGatherPrevious(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "gather_previous";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      final int newIndex = primitiveCursor.preceding();
-      if (primitiveCursor.range.beginOffset == newIndex) return;
-      primitiveCursor.range.setBeginOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionGatherPreviousWord implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionGatherPreviousWord(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "gather_previous_word";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex = primitiveCursor.previousWord(context, primitiveCursor.range.beginOffset);
-      if (primitiveCursor.range.beginOffset == newIndex) return;
-      primitiveCursor.range.setBeginOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionGatherPreviousLineStart implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionGatherPreviousLineStart(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "gather_previous_line_start";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex = primitiveCursor.startOfLine(primitiveCursor.range.beginLine);
-      if (primitiveCursor.range.beginOffset == newIndex) return;
-      primitiveCursor.range.setBeginOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionGatherPreviousLine implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionGatherPreviousLine(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "gather_previous_line";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex =
-          primitiveCursor.previousLine(
-              primitiveCursor.range.beginLine, primitiveCursor.range.beginOffset);
-      if (primitiveCursor.range.beginOffset == newIndex) return;
-      primitiveCursor.range.setBeginOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionReleasePrevious implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionReleasePrevious(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "release_previous";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex =
-          Math.min(
-              primitiveCursor.range.endOffset,
-              primitiveCursor.following(primitiveCursor.range.beginOffset));
-      if (primitiveCursor.range.beginOffset == newIndex) return;
-      primitiveCursor.range.setBeginOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionReleasePreviousWord implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionReleasePreviousWord(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "release_previous_word";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex =
-          Math.min(
-              primitiveCursor.range.endOffset,
-              primitiveCursor.nextWord(context, primitiveCursor.range.beginOffset));
-      if (primitiveCursor.range.beginOffset == newIndex) return;
-      primitiveCursor.range.setBeginOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionReleasePreviousLineStart implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionReleasePreviousLineStart(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "release_previous_line_start";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex =
-          Math.min(
-              primitiveCursor.range.endOffset,
-              primitiveCursor.endOfLine(primitiveCursor.range.beginLine));
-      if (primitiveCursor.range.beginOffset == newIndex) return;
-      primitiveCursor.range.setBeginOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionReleasePreviousLine implements Action {
-    private final PrimitiveCursor primitiveCursor;
-    private final int beginOffset;
-
-    public ActionReleasePreviousLine(PrimitiveCursor primitiveCursor, final int beginOffset) {
-      this.primitiveCursor = primitiveCursor;
-      this.beginOffset = beginOffset;
-    }
-
-    public String id() {
-      return "release_previous_line";
-    }
-
-    @Override
-    public void run(final Context context) {
-      final int newIndex =
-          Math.min(
-              primitiveCursor.range.endOffset,
-              primitiveCursor.nextLine(
-                  primitiveCursor.range.beginLine, primitiveCursor.range.beginOffset));
-      if (newIndex == beginOffset) return;
-      primitiveCursor.range.setBeginOffset(context, newIndex);
-    }
-  }
-
-  private static class ActionNext implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionNext(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "next";
-    }
-
-    @Override
-    public void run(final Context context) {
-      primitiveCursor.visualPrimitive.parent.selectNext(context);
-    }
-  }
-
-  private static class ActionExit implements Action {
-    private final PrimitiveCursor primitiveCursor;
-
-    public ActionExit(PrimitiveCursor primitiveCursor) {
-      this.primitiveCursor = primitiveCursor;
-    }
-
-    public String id() {
-      return "exit";
-    }
-
-    @Override
-    public void run(final Context context) {
-
-      if (primitiveCursor.visualPrimitive.value.atomParentRef == null) return;
-      primitiveCursor.visualPrimitive.value.atomParentRef.selectAtomParent(context);
     }
   }
 

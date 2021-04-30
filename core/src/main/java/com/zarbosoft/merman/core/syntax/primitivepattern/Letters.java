@@ -5,9 +5,9 @@ import com.zarbosoft.pidgoon.nodes.Union;
 
 public class Letters extends Pattern {
   @Override
-  public Node build() {
+  public Node build(boolean capture) {
     return new Union()
-        .add(new CharacterRangeTerminal("a", "z"))
-        .add(new CharacterRangeTerminal("A", "Z"));
+        .add(Pattern.characterRange(capture, "a", "z"))
+        .add(Pattern.characterRange(capture, "A", "Z"));
   }
 }

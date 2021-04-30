@@ -1,26 +1,26 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
-import com.zarbosoft.merman.core.I18nEngine;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.pidgoon.events.Event;
-import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Sequence;
-
-import java.util.List;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class PatternString extends Pattern {
-  public final List<CharacterEvent> string;
+  public final TSList<String> string;
 
-  public PatternString(I18nEngine i18n, String string) {
-    this.string = (List<CharacterEvent>) Pattern.splitGlyphs(i18n, string);
+  public PatternString(Environment env, String string) {
+    this.string = new TSList<>();
+    for (Event e : env.splitGlyphs(string)) {
+      this.string.add(((CharacterEvent) e).value);
+    }
   }
 
   @Override
-  public Node build() {
+  public Node build(boolean capture) {
     Sequence out = new Sequence();
-    for (Event g0 : string) {
-      CharacterEvent g = (CharacterEvent) g0;
-      out.add(new MatchingEventTerminal(g));
+    for (String glyph : string) {
+      out.add(Pattern.character(capture, glyph));
     }
     return out;
   }

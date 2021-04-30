@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
-import com.zarbosoft.merman.core.I18nEngine;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
@@ -49,7 +49,7 @@ public class BackRecordSpec extends BaseBackArraySpec {
   }
 
   @Override
-  public Node buildBackRule(I18nEngine i18n, final Syntax syntax) {
+  public Node buildBackRule(Environment env, final Syntax syntax) {
     final Sequence sequence;
     sequence = new Sequence();
     sequence.add(new MatchingEventTerminal(new EObjectOpenEvent()));

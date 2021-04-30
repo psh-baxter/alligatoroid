@@ -1,10 +1,11 @@
 package com.zarbosoft.pidgoon.events;
 
+import com.zarbosoft.pidgoon.BranchingStack;
 import com.zarbosoft.pidgoon.model.Position;
 import com.zarbosoft.pidgoon.model.Store;
-import com.zarbosoft.pidgoon.BranchingStack;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -82,11 +83,6 @@ public class StackStore extends Store {
   }
 
   @Override
-  public boolean hasResult() {
-    return (stack != null) && stack.isLast();
-  }
-
-  @Override
   public Object result() {
     return stackTop();
   }
@@ -150,7 +146,7 @@ public class StackStore extends Store {
     return s;
   }
 
-  public <L, R> StackStore popVarMap(Map<L, R> dest) {
+  public <L, R> StackStore popVarMap(TSMap<L, R> dest) {
     return popVarDouble((L l, R r) -> dest.put(l, r));
   }
 

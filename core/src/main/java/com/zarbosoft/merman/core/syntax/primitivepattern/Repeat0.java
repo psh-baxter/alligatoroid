@@ -11,7 +11,7 @@ public class Repeat0 extends Pattern {
   }
 
   @Override
-  public Node build() {
-    return new Repeat(pattern.build());
+  public Node build(boolean capture) {
+    return new Repeat(pattern.build(capture));
   }
 }

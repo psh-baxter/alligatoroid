@@ -8,11 +8,11 @@ import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Parse;
 import com.zarbosoft.pidgoon.model.Position;
 import com.zarbosoft.pidgoon.model.Store;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 public class Pidgoon {
@@ -33,7 +33,7 @@ public class Pidgoon {
               new Parent() {
                 @Override
                 public void advance(final Parse step, final Store store, final MismatchCause cause) {
-                  if (store.hasResult()) step.results.add(store.result());
+                    step.completed.add(store);
                 }
 
                 @Override
@@ -60,11 +60,11 @@ public class Pidgoon {
     public static Parse step(Parse parse, final Position position) {
       if (position.isEOF()) throw new RuntimeException("Cannot step; end of file reached.");
 
-      if (parse.leaves.isEmpty()) return null;
+      if (parse.branches.isEmpty()) return null;
 
       final Parse nextStep = new Parse(parse);
 
-      for (final Parse.State leaf : parse.leaves) leaf.parse(nextStep, position);
+      for (final Parse.Branch leaf : parse.branches) leaf.parse(nextStep, position);
 
       if (parse.errorHistoryLimit > 0) {
         if (nextStep.errors.isEmpty()) {
@@ -72,8 +72,8 @@ public class Pidgoon {
           if (nextStep.errorHistory == null) nextStep.errorHistory = new ArrayList<>();
         } else {
           nextStep.errorHistory = new ArrayList<>();
-          nextStep.errorHistory.add(new Pair<>(position, nextStep.errors));
-          for (Pair<Position, List<MismatchCause>> s : parse.errorHistory) {
+          nextStep.errorHistory.add(new ROPair<>(position, nextStep.errors));
+          for (ROPair<Position, TSList<MismatchCause>> s : parse.errorHistory) {
             if (nextStep.errorHistory.size() >= parse.errorHistoryLimit) break;
             nextStep.errorHistory.add(s);
           }
@@ -82,7 +82,7 @@ public class Pidgoon {
       if (nextStep.ambiguityHistory != null) {
         int dupeCount = 0;
         final Set<String> unique = new HashSet<>();
-        for (final Parse.State leaf : nextStep.leaves) {
+        for (final Parse.Branch leaf : nextStep.branches) {
           if (unique.contains(leaf.toString())) {
             dupeCount += 1;
           } else {
@@ -93,13 +93,13 @@ public class Pidgoon {
             nextStep.ambiguityHistory.push(
                 new AmbiguitySample(
                     nextStep.ambiguityHistory.top().step + 1,
-                    nextStep.leaves.size(),
+                    nextStep.branches.size(),
                     position,
                     dupeCount));
       }
-      if (nextStep.leaves.size() > nextStep.uncertaintyLimit)
+      if (nextStep.branches.size() > nextStep.uncertaintyLimit)
         throw new GrammarTooUncertain(nextStep, position);
-      if (nextStep.leaves.isEmpty() && nextStep.errors.size() == parse.leaves.size())
+      if (nextStep.branches.isEmpty() && nextStep.errors.size() == parse.branches.size())
         throw new InvalidStream(nextStep, position);
 
       return nextStep;

@@ -46,7 +46,7 @@ public class SyntaxBuilder {
 
     Syntax.Config config = new Syntax.Config(types, splayed, root);
     config.pad = this.padding;
-    Syntax syntax = new Syntax(Helper.i18n, config);
+    Syntax syntax = new Syntax(Helper.env, config);
 
     return syntax;
   }

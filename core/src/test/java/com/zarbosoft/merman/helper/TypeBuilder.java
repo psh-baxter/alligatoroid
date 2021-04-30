@@ -23,7 +23,7 @@ public class TypeBuilder {
   private final TSList<FrontSpec> front = new TSList<>();
   private final TSList<BackSpec> back = new TSList<>();
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
-  private int autoChooseAmbiguity = 0;
+  private boolean autoChooseUnambiguous = true;
   private int precedence = Integer.MAX_VALUE;
   private boolean associateForward = true;
   private int depthScore = 0;
@@ -40,7 +40,7 @@ public class TypeBuilder {
   public FreeAtomType build() {
     FreeAtomType.Config config = new FreeAtomType.Config(id, new AtomType.Config(id, back, front));
     config.alignments = alignments;
-    config.autoChooseAmbiguity = autoChooseAmbiguity;
+    config.autoChooseUnambiguous = autoChooseUnambiguous;
     config.precedence = precedence;
     config.associateForward = associateForward;
     config.depthScore = depthScore;
@@ -52,8 +52,8 @@ public class TypeBuilder {
     return this;
   }
 
-  public TypeBuilder autoComplete(final int x) {
-    autoChooseAmbiguity = x;
+  public TypeBuilder autoComplete(boolean on) {
+    autoChooseUnambiguous = on;
     return this;
   }
 

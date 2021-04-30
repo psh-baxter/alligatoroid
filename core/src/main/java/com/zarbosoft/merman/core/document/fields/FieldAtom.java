@@ -20,9 +20,15 @@ public class FieldAtom extends Field {
     this.back = back;
   }
 
+  /**
+   * Initializes the field without creating history.  Use only if none of the subtrees have any history (ex:
+   * initial document load, paste) otherwise if the atom creation is undone then redone, the atoms will have the
+   * wrong parents.
+   * @param data
+   */
   public void initialSet(Atom data) {
     this.data = data;
-    if (data != null) data.setValueParentRef(new NodeParent(this));
+    if (data != null) data.setValueParentRef(new Parent(this));
   }
 
   public void addListener(final Listener listener) {
@@ -63,8 +69,8 @@ public class FieldAtom extends Field {
     public abstract void set(Context context, Atom atom);
   }
 
-  public static class NodeParent extends Parent<FieldAtom> {
-    public NodeParent(FieldAtom child) {
+  public static class Parent extends Field.Parent<FieldAtom> {
+    public Parent(FieldAtom child) {
       super(child);
     }
 

@@ -1,14 +1,16 @@
 package com.zarbosoft.merman.core;
 
+import com.zarbosoft.merman.core.display.Display;
+import com.zarbosoft.merman.core.display.Font;
+import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
 import com.zarbosoft.merman.core.document.InvalidDocument;
 import com.zarbosoft.merman.core.document.fields.Field;
-import com.zarbosoft.merman.core.display.Display;
-import com.zarbosoft.merman.core.display.Font;
-import com.zarbosoft.merman.core.display.Group;
-import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.serialization.Serializer;
+import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
@@ -16,22 +18,31 @@ import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Wall;
-import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+/**
+ * Invariants and inner workings - Bricks are only created -- outward from the cornerstone when the
+ * selection changes -- when the window expands -- when the model changes, at the visual level where
+ * the change occurs
+ *
+ * <p>The whole document is always loaded. Visuals exist for everything in the window. Bricks
+ * eventually exist for everything on screen.
+ *
+ * <p>The selection may be null within a transaction but always exists afterwards. The initial
+ * selection is set by default in context.
+ */
 public class Context {
   public static Supplier<TSSet> createSet = () -> new TSSet();
   /** Contains the cursor and other marks. Scrolls. */
@@ -39,24 +50,18 @@ public class Context {
   /** Contains the source code. Scrolls. */
   public final Wall wall;
 
-  public final Display display;
   public final Syntax syntax;
   public final Document document;
   public final Serializer serializer;
-  public final I18nEngine i18n;
-
-  // State
-  public final TSSet<SelectionListener> cursorListeners = new TSSet<>();
+  public final TSSet<CursorListener> cursorListeners = new TSSet<>();
   public final TSSet<HoverListener> hoverListeners = new TSSet<>();
-  // Settings
-  public final DelayEngine delayEngine;
   public final WallUsageListener wallUsageListener;
   public final double toPixels;
   public final double fromPixelsToMM;
-  private final TSSet<ActionChangeListener> actionChangeListeners = new TSSet<>();
-  private final TSList<Action> actions = new TSList<>();
-  private final Consumer<IterationTask> addIteration;
-  private final Consumer<Integer> flushIteration;
+  public final CursorFactory cursorFactory;
+  public final Environment env;
+  public final Display display;
+  public final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
   public boolean animateCoursePlacement;
   public boolean animateDetails;
   public int ellipsizeThreshold;
@@ -65,10 +70,8 @@ public class Context {
   public double scrollFactor;
   public double scrollAlotFactor;
   public boolean window;
-  public KeyListener keyListener;
-  public TextListener textListener;
-  public ClipboardEngine clipboardEngine;
-  /** Contains banner/details and icons. Doesn't scroll. */
+  public KeyListener mouseButtonEventListener;
+  /** Contains banner/details and icons. Scrolls. */
   public Group midground;
   /** Contains source borders. Scrolls. */
   public Group background;
@@ -92,32 +95,22 @@ public class Context {
   boolean keyHandlingInProgress = false;
   boolean debugInHover = false;
   private Atom windowAtom;
+  private boolean iterationPending = false;
+  private Environment.HandleDelay iterationTimer = null;
+  private IterationContext iterationContext = null;
 
   public Context(
       InitialConfig config,
       Syntax syntax,
       Document document,
       Display display,
-      Consumer<IterationTask> addIteration,
-      Consumer<Integer> flushIteration,
-      DelayEngine delayEngine,
-      ClipboardEngine clipboardEngine,
+      Environment env,
       Serializer serializer,
-      I18nEngine i18n) {
+      CursorFactory cursorFactory) {
     this.serializer = serializer;
-    this.i18n = i18n;
-    actions.addVar(
-        new ActionWindowClear(),
-        new ActionWindowTowardsRoot(),
-        new ActionWindowTowardsCursor(),
-        new ActionScrollNext(),
-        new ActionScrollNextAlot(),
-        new ActionScrollPrevious(),
-        new ActionScrollPreviousAlot(),
-        new ActionScrollReset());
     this.syntax = syntax;
     this.document = document;
-    this.display = display;
+    this.env = env;
     this.animateCoursePlacement = config.animateCoursePlacement;
     this.animateDetails = config.animateDetails;
     this.ellipsizeThreshold = config.ellipsizeThreshold;
@@ -125,7 +118,8 @@ public class Context {
     this.retryExpandFactor = config.retryExpandFactor;
     this.scrollFactor = config.scrollFactor;
     this.scrollAlotFactor = config.scrollAlotFactor;
-    this.delayEngine = delayEngine;
+    this.cursorFactory = cursorFactory;
+    this.display = display;
     display.setBackgroundColor(syntax.background);
     edge = display.edge();
     transverseEdge = display.transverseEdge();
@@ -137,9 +131,6 @@ public class Context {
     display.add(midground);
     display.add(wall.visual);
     display.add(overlay);
-    this.addIteration = addIteration;
-    this.flushIteration = flushIteration;
-    this.clipboardEngine = clipboardEngine;
     toPixels = display.toPixels(syntax.displayUnit);
     fromPixelsToMM = 1.0 / display.toPixels(Syntax.DisplayUnit.MM);
     display.addConverseEdgeListener(
@@ -162,10 +153,21 @@ public class Context {
             l.changed(this, oldValue, newValue);
           }
         }));
-    display.setHIDEventListener(
+    display.setKeyEventListener(
         hidEvent -> {
           keyHandlingInProgress = false;
-          if (keyListener != null && keyListener.handleKey(this, hidEvent)) {
+          if (cursor.handleKey(this, hidEvent)) {
+            keyHandlingInProgress = true;
+            flushIteration(100);
+          }
+          clearHover();
+          return true;
+        });
+    display.setMouseButtonEventListener(
+        hidEvent -> {
+          keyHandlingInProgress = false;
+          if (mouseButtonEventListener != null
+              && mouseButtonEventListener.handleKey(this, hidEvent)) {
             keyHandlingInProgress = true;
             flushIteration(100);
           }
@@ -179,10 +181,8 @@ public class Context {
             return false;
           }
           if (text.isEmpty()) return false;
-          if (textListener != null) {
-            textListener.handleText(this, text);
-            flushIteration(100);
-          }
+          cursor.handleTyping(this, text);
+          flushIteration(100);
           return true;
         });
     display.addMouseExitListener(
@@ -197,7 +197,7 @@ public class Context {
         vector -> {
           if (hoverIdle == null) {
             hoverIdle = new HoverIteration(this);
-            addIteration.accept(hoverIdle);
+            addIteration(hoverIdle);
           }
           hoverIdle.point =
               vector.add(new Vector(-syntax.pad.converseStart * toPixels, scroll + peek));
@@ -266,6 +266,55 @@ public class Context {
     return context.display.font(style.font, style.fontSize * toPt);
   }
 
+  public void flushIteration(final int limit) {
+    final Environment.Time start = env.now();
+    // TODO measure pending event backlog, adjust batch size to accomodate
+    // by proxy? time since last invocation?
+    for (int i = 0; i < limit; ++i) {
+      {
+        Environment.Time now = start;
+        if (i % 100 == 0) {
+          now = env.now();
+        }
+        if (start.plusMillis(500).isBefore(now)) {
+          iterationContext = null;
+          break;
+        }
+      }
+      final IterationTask top = iterationQueue.poll();
+      if (top == null) {
+        iterationContext = null;
+        break;
+      } else {
+        if (iterationContext == null) iterationContext = new IterationContext();
+        if (top.run(iterationContext)) addIteration(top);
+      }
+    }
+  }
+
+  public void addIteration(final IterationTask task) {
+    iterationQueue.add(task);
+    if (iterationTimer == null) {
+      iterationTimer =
+          env.delay(
+              50,
+              () -> {
+                handleTimer();
+              });
+    }
+  }
+
+  private void handleTimer() {
+    if (iterationPending) return;
+    iterationPending = true;
+    try {
+      flushIteration(1000);
+    } finally {
+      iterationPending = false;
+      iterationTimer = null;
+    }
+  }
+
   public void clearHover() {
     if (debugInHover) throw new AssertionError();
     if (hover != null) {
@@ -305,38 +354,9 @@ public class Context {
     final double newScroll = scroll + peek;
     double conversePad = syntax.pad.converseStart * toPixels;
     wall.visual.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
+    midground.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
     background.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
     overlay.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
-  }
-
-  public void flushIteration(final int limit) {
-    this.flushIteration.accept(limit);
-  }
-
-  public void addActions(final ROList<Action> actions) {
-    this.actions.addAll(actions);
-    for (ActionChangeListener l : actionChangeListeners.copy()) {
-      l.actionsAdded(this);
-    }
-  }
-
-  public void removeActions(final ROList<Action> key) {
-    this.actions.removeAll(key);
-    for (ActionChangeListener l : actionChangeListeners.copy()) {
-      l.actionsRemoved(this);
-    }
-  }
-
-  public void addActionChangeListener(final ActionChangeListener listener) {
-    actionChangeListeners.add(listener);
-  }
-
-  public void removeActionChangeListener(final ActionChangeListener listener) {
-    actionChangeListeners.remove(listener);
-  }
-
-  public ROList<Action> actions() {
-    return actions;
   }
 
   public void addConverseEdgeListener(final ContextDoubleListener listener) {
@@ -356,15 +376,16 @@ public class Context {
   }
 
   public void copy(final ROList<Atom> atoms) {
-    clipboardEngine.set(serializer.write(atoms));
+    env.clipboardSet(syntax.backType.mime(), serializer.write(atoms));
   }
 
   public void copy(final String string) {
-    clipboardEngine.setString(string);
+    env.clipboardSetString(string);
   }
 
   public void uncopy(final String type, Consumer<ROList<Atom>> cb) {
-    clipboardEngine.get(
+    env.clipboardGet(
+        syntax.backType.mime(),
         data -> {
           if (data == null) {
             cb.accept(ROList.empty);
@@ -380,7 +401,7 @@ public class Context {
   }
 
   public void uncopyString(Consumer<String> cb) {
-    clipboardEngine.getString(cb);
+    env.clipboardGetString(cb);
   }
 
   /**
@@ -402,11 +423,11 @@ public class Context {
     return at;
   }
 
-  public void addSelectionListener(final SelectionListener listener) {
+  public void addCursorListener(final CursorListener listener) {
     this.cursorListeners.add(listener);
   }
 
-  public void removeSelectionListener(final SelectionListener listener) {
+  public void removeSelectionListener(final CursorListener listener) {
     this.cursorListeners.remove(listener);
   }
 
@@ -476,10 +497,6 @@ public class Context {
       addIteration(idleLayBricks);
     }
     idleLayBricks.ends.add(end);
-  }
-
-  public void addIteration(final IterationTask task) {
-    this.addIteration.accept(task);
   }
 
   public void triggerIdleLayBricksBeforeStart(final Brick start) {
@@ -568,7 +585,7 @@ public class Context {
 
   public void clearSelection() {
     if (cursor == null) return;
-    cursor.clear(this);
+    cursor.destroy(this);
     cursor = null;
   }
 
@@ -577,10 +594,10 @@ public class Context {
     final Cursor oldCursor = this.cursor;
     this.cursor = cursor;
     if (oldCursor != null) {
-      oldCursor.clear(this);
+      oldCursor.destroy(this);
     }
     if (localToken != selectToken) return;
-    for (SelectionListener l : cursorListeners.copy()) {
+    for (CursorListener l : cursorListeners.copy()) {
       l.cursorChanged(this, cursor);
     }
     triggerIdleLayBricksOutward();
@@ -590,19 +607,68 @@ public class Context {
     return windowAtom;
   }
 
+  public void actionClearWindow() {
+    if (!window) return;
+    windowClear();
+    triggerIdleLayBricksOutward();
+  }
+
+  public void actionWindowTowardsRoot() {
+    if (!window) return;
+    if (windowAtom == document.root) return;
+    windowToSupertree(windowAtom.valueParentRef.value.atomParentRef.atom());
+    triggerIdleLayBricksOutward();
+  }
+
+  public void actionWindowTowardsCursor() {
+    if (!window) return;
+    VisualAtom windowNext = null;
+    final VisualAtom stop = windowAtom.visual;
+    if (cursor.getVisual().parent() == null) return;
+    VisualAtom at = cursor.getVisual().parent().atomVisual();
+    while (at != null) {
+      if (at == stop) break;
+      if (at.parent() == null) break;
+      windowNext = at;
+      at = at.parent().atomVisual();
+    }
+    if (windowNext == null) return;
+    windowToNonSupertree(windowNext.atom);
+    triggerIdleLayBricksOutward();
+    return;
+  }
+
+  public void actionScrollNext() {
+    scroll -= scrollFactor * transverseEdge;
+    applyScroll();
+  }
+
+  public void actionScrollNextAlot() {
+    scroll -= scrollAlotFactor * transverseEdge;
+    applyScroll();
+  }
+
+  public void actionScrollPrevious() {
+    scroll += scrollFactor * transverseEdge;
+    applyScroll();
+  }
+
+  public void actionScrollPreviousAlot() {
+    scroll += scrollAlotFactor * transverseEdge;
+    applyScroll();
+  }
+
+  public void actionScrollReset() {
+    scrollVisible();
+  }
+
   public static interface ContextDoubleListener {
     void changed(Context context, double oldValue, double newValue);
   }
 
-  public static interface ActionChangeListener {
-    void actionsAdded(Context context);
-
-    void actionsRemoved(Context context);
-  }
-
   @FunctionalInterface
   public interface KeyListener {
-    boolean handleKey(Context context, HIDEvent event);
+    boolean handleKey(Context context, ButtonEvent event);
   }
 
   @FunctionalInterface
@@ -610,7 +676,7 @@ public class Context {
     void handleText(Context context, String text);
   }
 
-  public interface SelectionListener {
+  public interface CursorListener {
     public abstract void cursorChanged(Context context, Cursor cursor);
   }
 
@@ -779,119 +845,6 @@ public class Context {
     @Override
     protected void destroyed() {
       hoverIdle = null;
-    }
-  }
-
-  private class ActionWindowClear implements Action {
-    public String id() {
-      return "window_clear";
-    }
-
-    @Override
-    public void run(final Context context) {
-      if (!window) return;
-      windowClear();
-      triggerIdleLayBricksOutward();
-    }
-  }
-
-  private class ActionWindowTowardsRoot implements Action {
-    public ActionWindowTowardsRoot() {}
-
-    public String id() {
-      return "window_up";
-    }
-
-    @Override
-    public void run(final Context context) {
-      if (!window) return;
-      if (windowAtom == document.root) return;
-      windowToSupertree(windowAtom.valueParentRef.value.atomParentRef.atom());
-      triggerIdleLayBricksOutward();
-    }
-  }
-
-  private class ActionWindowTowardsCursor implements Action {
-    public String id() {
-      return "window_down";
-    }
-
-    @Override
-    public void run(final Context context) {
-      if (!window) return;
-      VisualAtom windowNext = null;
-      final VisualAtom stop = windowAtom.visual;
-      if (cursor.getVisual().parent() == null) return;
-      VisualAtom at = cursor.getVisual().parent().atomVisual();
-      while (at != null) {
-        if (at == stop) break;
-        if (at.parent() == null) break;
-        windowNext = at;
-        at = at.parent().atomVisual();
-      }
-      if (windowNext == null) return;
-      context.windowToNonSupertree(windowNext.atom);
-      triggerIdleLayBricksOutward();
-      return;
-    }
-  }
-
-  private class ActionScrollNext implements Action {
-    public String id() {
-      return "scroll_previous";
-    }
-
-    @Override
-    public void run(final Context context) {
-      scroll -= scrollFactor * transverseEdge;
-      applyScroll();
-    }
-  }
-
-  private class ActionScrollNextAlot implements Action {
-    public String id() {
-      return "scroll_previous_alot";
-    }
-
-    @Override
-    public void run(final Context context) {
-      scroll -= scrollAlotFactor * transverseEdge;
-      applyScroll();
-    }
-  }
-
-  private class ActionScrollPrevious implements Action {
-    public String id() {
-      return "scroll_next";
-    }
-
-    @Override
-    public void run(final Context context) {
-      scroll += scrollFactor * transverseEdge;
-      applyScroll();
-    }
-  }
-
-  private class ActionScrollPreviousAlot implements Action {
-    public String id() {
-      return "scroll_next_alot";
-    }
-
-    @Override
-    public void run(final Context context) {
-      scroll += scrollAlotFactor * transverseEdge;
-      applyScroll();
-    }
-  }
-
-  private class ActionScrollReset implements Action {
-    public String id() {
-      return "scroll_reset";
-    }
-
-    @Override
-    public void run(final Context context) {
-      scrollVisible();
     }
   }
 }

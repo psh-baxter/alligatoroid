@@ -2,11 +2,11 @@ package com.zarbosoft.merman.core.syntax.symbol;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Blank;
-import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
-import com.zarbosoft.merman.core.syntax.style.Style;
 
 public class SymbolSpaceSpec extends Symbol {
   public final Style.SplitMode splitMode;
@@ -33,7 +33,7 @@ public class SymbolSpaceSpec extends Symbol {
   }
 
   @Override
-  public DisplayNode createDisplay(final Context context) {
+  public CourseDisplayNode createDisplay(final Context context) {
     final Blank blank = context.display.blank();
     blank.setConverseSpan(context, style.space);
     return blank;

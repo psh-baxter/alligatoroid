@@ -9,50 +9,7 @@ public class FreeAtomType extends AtomType {
   public final ROMap<String, AlignmentSpec> alignments;
   public final int precedence;
   public final boolean associateForward;
-  public final int autoChooseAmbiguity;
-
-  public static class Config {
-    /**
-     * Humanistic
-     */
-    public final String name;
-    private final AtomType.Config base;
-    public int depthScore = 0;
-    public ROMap<String, AlignmentSpec> alignments = ROMap.empty;
-    public int precedence = Integer.MAX_VALUE;
-    public boolean associateForward = false;
-    public int autoChooseAmbiguity = 1;
-
-    public Config(String name, AtomType.Config base) {
-      this.name = name;
-      this.base = base;
-    }
-
-    public Config depthScore(int score) {
-      this.depthScore =  score;
-      return this;
-    }
-
-    public Config precedence(int val) {
-      this.precedence = val;
-      return this;
-    }
-
-    public Config associateForward(boolean yes) {
-      associateForward = yes;
-      return this;
-    }
-
-    public Config autoChooseAmbiguity(int val) {
-      autoChooseAmbiguity =val;
-      return this;
-    }
-
-    public Config alignments(ROMap<String, AlignmentSpec> alignments) {
-      this.alignments = alignments;
-      return this;
-    }
-  }
+  public final boolean autoChooseUnambiguous;
 
   public FreeAtomType(Config config) {
     super(config.base);
@@ -61,7 +18,7 @@ public class FreeAtomType extends AtomType {
     this.alignments = config.alignments;
     this.precedence = config.precedence;
     this.associateForward = config.associateForward;
-    this.autoChooseAmbiguity = config.autoChooseAmbiguity;
+    this.autoChooseUnambiguous = config.autoChooseUnambiguous;
   }
 
   @Override
@@ -87,5 +44,47 @@ public class FreeAtomType extends AtomType {
   @Override
   public String name() {
     return name;
+  }
+
+  public static class Config {
+    /** Humanistic */
+    public final String name;
+
+    private final AtomType.Config base;
+    public int depthScore = 0;
+    public ROMap<String, AlignmentSpec> alignments = ROMap.empty;
+    public int precedence = Integer.MAX_VALUE;
+    public boolean associateForward = false;
+    public boolean autoChooseUnambiguous = true;
+
+    public Config(String name, AtomType.Config base) {
+      this.name = name;
+      this.base = base;
+    }
+
+    public Config depthScore(int score) {
+      this.depthScore = score;
+      return this;
+    }
+
+    public Config precedence(int val) {
+      this.precedence = val;
+      return this;
+    }
+
+    public Config associateForward(boolean yes) {
+      associateForward = yes;
+      return this;
+    }
+
+    public Config autoChooseUnambiguous(boolean on) {
+      autoChooseUnambiguous = on;
+      return this;
+    }
+
+    public Config alignments(ROMap<String, AlignmentSpec> alignments) {
+      this.alignments = alignments;
+      return this;
+    }
   }
 }

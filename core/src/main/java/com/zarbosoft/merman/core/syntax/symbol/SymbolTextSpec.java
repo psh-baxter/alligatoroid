@@ -1,12 +1,12 @@
 package com.zarbosoft.merman.core.syntax.symbol;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
-import com.zarbosoft.merman.core.syntax.style.Style;
 
 public class SymbolTextSpec extends Symbol {
   public final String text;
@@ -20,7 +20,7 @@ public class SymbolTextSpec extends Symbol {
   }
 
   @Override
-  public DisplayNode createDisplay(final Context context) {
+  public CourseDisplayNode createDisplay(final Context context) {
     final Text text = context.display.text();
     text.setText(context, this.text);
     text.setFont(context, Context.getFont(context, style));

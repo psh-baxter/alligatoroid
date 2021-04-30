@@ -28,9 +28,9 @@ public abstract class Field {
   public abstract Object syntaxLocateStep(String segment);
 
   public interface ParentDispatcher {
-    void handle(FieldArray.ArrayParent parent);
+    void handle(FieldArray.Parent parent);
 
-    void handle(FieldAtom.NodeParent parent);
+    void handle(FieldAtom.Parent parent);
   }
 
   public abstract static class Parent<T extends Field> {

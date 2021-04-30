@@ -1,24 +1,22 @@
 package com.zarbosoft.merman.webview;
 
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.Hoverable;
+import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.ViewerCursorFactory;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
-import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.Cursor;
-import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.I18nEngine;
-import com.zarbosoft.merman.core.IterationContext;
-import com.zarbosoft.merman.core.IterationTask;
-import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.hid.HIDEvent;
+import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.hid.Key;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.UnsupportedDirections;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.webview.display.JSDisplay;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
@@ -32,8 +30,6 @@ import elemental2.dom.HTMLDivElement;
 import elemental2.dom.HTMLElement;
 import elemental2.dom.HTMLStyleElement;
 import jsinterop.annotations.JsMethod;
-
-import java.util.PriorityQueue;
 
 public class WebView {
   private static final String style =
@@ -78,11 +74,7 @@ public class WebView {
           + ".merman-dir-dr .merman-display-text {\n"
           + "    writing-mode: vertical-lr;\n"
           + "}\n";
-  private final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
   public DragSelectState dragSelect;
-  private boolean iterationPending = false;
-  private Double iterationTimer = null;
-  private IterationContext iterationContext = null;
 
   public WebView() {
     HTMLStyleElement style = (HTMLStyleElement) DomGlobal.document.createElement("style");
@@ -92,7 +84,7 @@ public class WebView {
 
   @JsMethod
   public HTMLElement block(
-      Syntax syntax, I18nEngine i18n, String rawDoc, ROList<String> prioritizeKeys) {
+      Syntax syntax, Environment env, String rawDoc, ROList<String> prioritizeKeys) {
     /** Shifts origin for negative */
     HTMLDivElement elementOrigin = (HTMLDivElement) DomGlobal.document.createElement("div");
     elementOrigin.classList.add("merman-block-view-container-origin");
@@ -143,17 +135,13 @@ public class WebView {
                         if (syntax.transverseDirection == Direction.UP)
                           elementOrigin.style.top = max.amount + "px";
                       }
-                    })
-                ,
+                    }),
             syntax,
             serializer.loadDocument(syntax, rawDoc),
             display,
-            this::addIteration,
-            this::flushIteration,
-            new JSDelayEngine(),
-            new JSClipboardEngine(syntax.backType),
+            env,
             serializer,
-            i18n);
+            new ViewerCursorFactory());
     context.addHoverListener(
         new Context.HoverListener() {
           @Override
@@ -170,7 +158,8 @@ public class WebView {
                 // so longest match == parent == atom
                 // - at two subtrees of an array/primitives: longest submatch == array/primitive ==
                 // field, next segment == int
-                Object base = context.syntaxLocate(new SyntaxPath(endPathList.subUntil(longestMatch)));
+                Object base =
+                    context.syntaxLocate(new SyntaxPath(endPathList.subUntil(longestMatch)));
                 if (base instanceof FieldArray) {
                   int startIndex = Integer.parseInt(startPathList.get(longestMatch));
                   int endIndex = Integer.parseInt(endPathList.get(longestMatch));
@@ -198,10 +187,10 @@ public class WebView {
             }
           }
         });
-    context.keyListener =
+    context.mouseButtonEventListener =
         new Context.KeyListener() {
           @Override
-          public boolean handleKey(Context context, HIDEvent e) {
+          public boolean handleKey(Context context, ButtonEvent e) {
             if (!e.press) {
               switch (e.key) {
                 case MOUSE_1:
@@ -236,21 +225,21 @@ public class WebView {
                             || e.modifiers.contains(Key.CONTROL_LEFT)
                             || e.modifiers.contains(Key.CONTROL_RIGHT))) {
                       context.cursor.dispatch(
-                          new Cursor.Dispatcher() {
+                          new com.zarbosoft.merman.core.Cursor.Dispatcher() {
                             @Override
-                            public void handle(VisualFrontArray.ArrayCursor cursor) {
+                            public void handle(VisualFrontArray.Cursor cursor) {
                               context.copy(
                                   cursor.visual.value.data.sublist(
                                       cursor.beginIndex, cursor.endIndex + 1));
                             }
 
                             @Override
-                            public void handle(VisualFrontAtomBase.NestedCursor cursor) {
+                            public void handle(VisualFrontAtomBase.Cursor cursor) {
                               context.copy(TSList.of(cursor.base.atomGet()));
                             }
 
                             @Override
-                            public void handle(VisualFrontPrimitive.PrimitiveCursor cursor) {
+                            public void handle(VisualFrontPrimitive.Cursor cursor) {
                               context.copy(
                                   cursor.visualPrimitive.value.data.substring(
                                       cursor.range.beginOffset, cursor.range.endOffset));
@@ -284,58 +273,6 @@ public class WebView {
           }
         });
     return element;
-  }
-
-  private void flushIteration(final int limit) {
-    final long start = System.currentTimeMillis();
-    // TODO measure pending event backlog, adjust batch size to accomodate
-    // by proxy? time since last invocation?
-    for (int i = 0; i < limit; ++i) {
-      {
-        long now = start;
-        if (i % 100 == 0) {
-          now = System.currentTimeMillis();
-        }
-        if (now - start > 500) {
-          iterationContext = null;
-          break;
-        }
-      }
-      final IterationTask top = iterationQueue.poll();
-      if (top == null) {
-        iterationContext = null;
-        break;
-      } else {
-        if (iterationContext == null) iterationContext = new IterationContext();
-        if (top.run(iterationContext)) addIteration(top);
-      }
-    }
-  }
-
-  private void addIteration(final IterationTask task) {
-    iterationQueue.add(task);
-    if (iterationTimer == null) {
-      iterationTimer =
-          DomGlobal.setTimeout(
-              new DomGlobal.SetTimeoutCallbackFn() {
-                @Override
-                public void onInvoke(Object... p0) {
-                  handleTimer();
-                }
-              },
-              50);
-    }
-  }
-
-  private void handleTimer() {
-    if (iterationPending) return;
-    iterationPending = true;
-    try {
-      flushIteration(1000);
-    } finally {
-      iterationPending = false;
-      iterationTimer = null;
-    }
   }
 
   public static class DragSelectState {

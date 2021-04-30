@@ -24,10 +24,16 @@ public class FieldArray extends Field {
     this.back = back;
   }
 
+  /**
+   * Initializes the field without creating history.  Use only if none of the subtrees have any history (ex:
+   * initial document load, paste) otherwise if the atom creation is undone then redone, the atoms will have the
+   * wrong parents.
+   * @param data
+   */
   public void initialSet(TSList<Atom> data) {
     this.data.addAll(data);
     for (Atom v : data) {
-      v.setValueParentRef(new ArrayParent(this));
+      v.setValueParentRef(new Parent(this));
     }
     renumber(0);
   }
@@ -38,14 +44,14 @@ public class FieldArray extends Field {
       sum = 0;
     } else {
       final Atom prior = data.get(from - 1);
-      final ArrayParent parent = (ArrayParent) prior.valueParentRef;
-      sum = parent.actualIndex + prior.type.back().size();
+      final Parent parent = (Parent) prior.valueParentRef;
+      sum = parent.backIndex + prior.type.back().size();
     }
     for (int i = from; i < data.size(); ++i) {
       Atom atom = data.get(i);
-      final ArrayParent parent = ((ArrayParent) atom.valueParentRef);
+      final Parent parent = ((Parent) atom.valueParentRef);
       parent.index = i;
-      parent.actualIndex = sum;
+      parent.backIndex = sum;
       sum += atom.type.back().size();
     }
   }
@@ -98,11 +104,11 @@ public class FieldArray extends Field {
     void changed(Context context, int index, int remove, ROList<Atom> add);
   }
 
-  public static class ArrayParent extends Parent<FieldArray> {
+  public static class Parent extends Field.Parent<FieldArray> {
     public int index = 0;
-    public int actualIndex = 0;
+    public int backIndex = 0;
 
-    public ArrayParent(FieldArray value) {
+    public Parent(FieldArray value) {
       super(value);
     }
 
@@ -113,7 +119,7 @@ public class FieldArray extends Field {
 
     @Override
     public SyntaxPath path() {
-      return value.back.getPath(value, actualIndex);
+      return value.back.getPath(value, backIndex);
     }
 
     @Override
