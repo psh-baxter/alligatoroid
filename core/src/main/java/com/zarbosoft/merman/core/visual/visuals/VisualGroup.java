@@ -8,6 +8,7 @@ import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class VisualGroup extends Visual {
@@ -51,21 +52,33 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public Brick createOrGetFirstBrick(final Context context) {
+  public Brick createOrGetCornerstoneCandidate(final Context context) {
     if (children.isEmpty()) throw new AssertionError();
-    return children.get(0).createOrGetFirstBrick(context);
+    for (Visual child : children) {
+      Brick out = child.createOrGetCornerstoneCandidate(context);
+      if (out != null) return out;
+    }
+    return null;
   }
 
   @Override
   public Brick createFirstBrick(final Context context) {
     if (children.isEmpty()) return null;
-    return children.get(0).createFirstBrick(context);
+    for (Visual child : children) {
+      Brick out = child.createFirstBrick(context);
+      if (out != null) return out;
+    }
+    return null;
   }
 
   @Override
   public Brick createLastBrick(final Context context) {
     if (children.isEmpty()) return null;
-    return children.last().createLastBrick(context);
+    for (Visual child : new ReverseIterable<>(children)) {
+      Brick out = child.createLastBrick(context);
+      if (out != null) return out;
+    }
+    return null;
   }
 
   @Override

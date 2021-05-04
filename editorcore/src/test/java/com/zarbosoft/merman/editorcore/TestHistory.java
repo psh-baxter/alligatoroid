@@ -19,182 +19,193 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
 
 public class TestHistory {
-	final public static FreeAtomType one;
-	final public static Syntax syntax;
-	final public static Consumer<Editor> modify;
-	final public static Consumer<Editor> undo;
-	final public static Consumer<Editor> redo;
+  public static final FreeAtomType one;
+  public static final Syntax syntax;
+  public static final Consumer<Editor> modify;
+  public static final Consumer<Editor> undo;
+  public static final Consumer<Editor> redo;
 
-	static {
-		one = new TypeBuilder("one")
-				.back(Helper.buildBackPrimitive("one"))
-				.front(new FrontMarkBuilder("one").build())
-				.autoComplete(false)
-				.build();
-		syntax = new SyntaxBuilder("any").type(one).group("any", new GroupBuilder().type(one).build()).build();
-		modify = new Consumer<Editor>() {
-			@Override
-			public void accept(final Editor editor) {
-				editor.history.record(editor.context, null, r -> r.apply(editor.context,
-						new ChangeArray(Helper.rootArray(editor.context.document),
-								0,
-								0,
-								TSList.of(new TreeBuilder(one).build())
-						)
-				));
-				editor.history.finishChange();
-			}
-		};
-		undo = new Consumer<Editor>() {
-			@Override
-			public void accept(final Editor editor) {
-				editor.history.undo(editor.context);
-			}
-		};
-		redo = new Consumer<Editor>() {
-			@Override
-			public void accept(final Editor editor) {
-				editor.history.redo(editor.context);
-			}
-		};
-	}
+  static {
+    one =
+        new TypeBuilder("one")
+            .back(Helper.buildBackPrimitive("one"))
+            .front(new FrontMarkBuilder("one").build())
+            .autoComplete(false)
+            .build();
+    syntax =
+        new SyntaxBuilder("any")
+            .type(one)
+            .group("any", new GroupBuilder().type(one).build())
+            .build();
+    modify =
+        new Consumer<Editor>() {
+          @Override
+          public void accept(final Editor editor) {
+            editor.history.record(
+                editor.context,
+                null,
+                r ->
+                    r.apply(
+                        editor.context,
+                        new ChangeArray(
+                            Helper.rootArray(editor.context.document),
+                            0,
+                            0,
+                            TSList.of(new TreeBuilder(one).build()))));
+            editor.history.finishChange();
+          }
+        };
+    undo =
+        new Consumer<Editor>() {
+          @Override
+          public void accept(final Editor editor) {
+            editor.history.undo(editor.context);
+          }
+        };
+    redo =
+        new Consumer<Editor>() {
+          @Override
+          public void accept(final Editor editor) {
+            editor.history.redo(editor.context);
+          }
+        };
+  }
 
-	public GeneralTestWizard initializeWithALongNameToForceChainWrapping() {
-		return new GeneralTestWizard(syntax).run(context -> context.history.clear());
-	}
+  public GeneralTestWizard initializeWithALongNameToForceChainWrapping() {
+    return new GeneralTestWizard(syntax).run(context -> context.history.clear());
+  }
 
-	@Test
-	public void testEmptyClear() {
-		initializeWithALongNameToForceChainWrapping().run(context -> assertThat(context.history.isModified(),
-				is(false)
-		));
-	}
+  @Test
+  public void testEmptyClear() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(context -> assertThat(context.history.isModified(), is(false)));
+  }
 
-	@Test
-	public void testChange() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(context -> assertThat(context.history.isModified(), is(true)));
-	}
+  @Test
+  public void testChange() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(context -> assertThat(context.history.isModified(), is(true)));
+  }
 
-	@Test
-	public void testUndoClear() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(undo)
-				.run(context -> assertThat(context.history.isModified(), is(false)));
-	}
+  @Test
+  public void testUndoClear() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(undo)
+        .run(context -> assertThat(context.history.isModified(), is(false)));
+  }
 
-	@Test
-	public void testRedoChange() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(undo)
-				.run(redo)
-				.run(context -> assertThat(context.history.isModified(), is(true)));
-	}
+  @Test
+  public void testRedoChange() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(undo)
+        .run(redo)
+        .run(context -> assertThat(context.history.isModified(), is(true)));
+  }
 
-	@Test
-	public void testChangeClear() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(context -> context.history.clearModified())
-				.run(context -> assertThat(context.history.isModified(), is(false)));
-	}
+  @Test
+  public void testChangeClear() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(context -> context.history.clearModified())
+        .run(context -> assertThat(context.history.isModified(), is(false)));
+  }
 
-	@Test
-	public void testClearUndoChanged() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(context -> context.history.clearModified())
-				.run(undo)
-				.run(context -> assertThat(context.history.isModified(), is(true)));
-	}
+  @Test
+  public void testClearUndoChanged() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(context -> context.history.clearModified())
+        .run(undo)
+        .run(context -> assertThat(context.history.isModified(), is(true)));
+  }
 
-	@Test
-	public void testClearRedoClear() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(context -> context.history.clearModified())
-				.run(undo)
-				.run(redo)
-				.run(context -> assertThat(context.history.isModified(), is(false)));
-	}
+  @Test
+  public void testClearRedoClear() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(context -> context.history.clearModified())
+        .run(undo)
+        .run(redo)
+        .run(context -> assertThat(context.history.isModified(), is(false)));
+  }
 
-	@Test
-	public void testLateChangeClear() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(modify)
-				.run(modify)
-				.run(context -> context.history.clearModified())
-				.run(context -> assertThat(context.history.isModified(), is(false)));
-	}
+  @Test
+  public void testLateChangeClear() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(modify)
+        .run(modify)
+        .run(context -> context.history.clearModified())
+        .run(context -> assertThat(context.history.isModified(), is(false)));
+  }
 
-	@Test
-	public void testLateClearUndoChanged() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(modify)
-				.run(modify)
-				.run(context -> context.history.clearModified())
-				.run(undo)
-				.run(context -> assertThat(context.history.isModified(), is(true)));
-	}
+  @Test
+  public void testLateClearUndoChanged() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(modify)
+        .run(modify)
+        .run(context -> context.history.clearModified())
+        .run(undo)
+        .run(context -> assertThat(context.history.isModified(), is(true)));
+  }
 
-	@Test
-	public void testLateClearRedoClear() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(modify)
-				.run(modify)
-				.run(context -> context.history.clearModified())
-				.run(undo)
-				.run(redo)
-				.run(context -> assertThat(context.history.isModified(), is(false)));
-	}
+  @Test
+  public void testLateClearRedoClear() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(modify)
+        .run(modify)
+        .run(context -> context.history.clearModified())
+        .run(undo)
+        .run(redo)
+        .run(context -> assertThat(context.history.isModified(), is(false)));
+  }
 
-	@Test
-	public void testChangeFinishChange() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(context -> context.history.finishChange())
-				.run(modify)
-				.run(undo)
-				.checkArrayTree(new TreeBuilder(one).build(), new TreeBuilder(one).build());
-	}
+  @Test
+  public void testChangeFinishChange() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(context -> context.history.finishChange())
+        .run(modify)
+        .run(undo)
+        .checkArrayTree(new TreeBuilder(one).build());
+  }
 
-	@Test
-	public void testClearModifiedChangeUndo() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(context -> context.history.clearModified())
-				.run(modify)
-				.run(undo)
-				.run(context -> assertThat(context.history.isModified(), is(false)));
-	}
+  @Test
+  public void testClearModifiedChangeUndo() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(context -> context.history.clearModified())
+        .run(modify)
+        .run(undo)
+        .run(context -> assertThat(context.history.isModified(), is(false)));
+  }
 
-	@Test
-	public void testModifyAfterFinishUndo() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(context -> context.history.finishChange())
-				.run(modify)
-				.run(undo)
-				.run(modify)
-				.run(undo)
-				.checkArrayTree(new TreeBuilder(one).build(), new TreeBuilder(one).build());
-	}
+  @Test
+  public void testModifyAfterFinishUndo() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(context -> context.history.finishChange())
+        .run(modify)
+        .run(undo)
+        .run(modify)
+        .run(undo)
+        .checkArrayTree(new TreeBuilder(one).build());
+  }
 
-	@Test
-	public void testModifyAfterFinishRedo() {
-		initializeWithALongNameToForceChainWrapping()
-				.run(modify)
-				.run(context -> context.history.finishChange())
-				.run(undo)
-				.run(redo)
-				.run(modify)
-				.run(undo)
-				.checkArrayTree(new TreeBuilder(one).build(), new TreeBuilder(one).build());
-	}
+  @Test
+  public void testModifyAfterFinishRedo() {
+    initializeWithALongNameToForceChainWrapping()
+        .run(modify)
+        .run(context -> context.history.finishChange())
+        .run(undo)
+        .run(redo)
+        .run(modify)
+        .run(undo)
+        .checkArrayTree(new TreeBuilder(one).build());
+  }
 }

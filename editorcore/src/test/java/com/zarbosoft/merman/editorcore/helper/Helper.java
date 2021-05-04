@@ -196,7 +196,7 @@ public class Helper {
             new TestEnvironment(),
             new History(),
             new JavaSerializer(syntax.backType),
-            new Editor.Config(contextConfig));
+            new Editor.Config(contextConfig.startSelected(true)));
     return editor;
   }
 }

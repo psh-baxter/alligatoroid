@@ -47,7 +47,7 @@ public class CandidateInfo {
   public static CandidateInfo inspect(Environment env, AtomType candidate) {
     ROList<FrontSpec> front = candidate.front();
     TSList<FrontSpec> preceding = new TSList<>();
-    Sequence keyGrammar = new Sequence().add(StackStore.prepVarStack);
+    Sequence keyGrammar = new Sequence();
     TSList<FrontSpec> keySpecs = new TSList<>();
     FrontSpec[] following = {null};
     new Object() {

@@ -101,7 +101,7 @@ public class TestLayoutGeneral {
                             new FrontSymbol.Config(
                                 new SymbolTextSpec(
                                     new SymbolTextSpec.Config(", ")
-                                        .splitMode(Style.SplitMode.NEVER)))))
+                                        ))))
                     .build())
             .frontSplitMark("]")
             .autoComplete(true)
@@ -119,7 +119,6 @@ public class TestLayoutGeneral {
             })
         .sendText("[")
         .checkTextBrick(0, 0, "[")
-        .checkTextBrick(1, 0, "")
-        .checkTextBrick(2, 0, "]");
+        .checkTextBrick(1, 0, "]");
   }
 }

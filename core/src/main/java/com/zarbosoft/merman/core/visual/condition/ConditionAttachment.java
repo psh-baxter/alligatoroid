@@ -28,7 +28,8 @@ public abstract class ConditionAttachment {
 
 	public abstract void destroy(Context context);
 
-	public void setState(final Context context, final boolean show) {
+	public void setState(final Context context, boolean show) {
+		if (invert) show = !show;
 		if (this.show == show)
 			return;
 		this.show = show;

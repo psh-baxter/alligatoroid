@@ -17,14 +17,40 @@ public abstract class Visual {
 
   public abstract VisualParent parent();
 
-  public abstract Brick createOrGetFirstBrick(Context context);
+  /**
+   * Used to get the cornerstone when changing selection, to seed bricklaying etc.  All atoms must return a value but
+   * if a field doesn't have a suitable cornerstone brick, it should return null.
+   * @param context
+   * @return
+   */
+  public abstract Brick createOrGetCornerstoneCandidate(Context context);
 
+  /**
+   * Used for laying bricks forward
+   * @param context
+   * @return A new brick or null (no elements afterward or brick already exists)
+   */
   public abstract Brick createFirstBrick(Context context);
 
+  /**
+   * Used for laying bricks backward
+   * @param context
+   * @return A new brick or null (no elements afterward or brick already exists)
+   */
   public abstract Brick createLastBrick(Context context);
 
+  /**
+   * Used for checking brick laying bounds
+   * @param context
+   * @return brick or null if the first visual that would produce a brick hasn't yet
+   */
   public abstract Brick getFirstBrick(Context context);
 
+  /**
+   * Used for checking brick laying bounds
+   * @param context
+   * @return brick or null if the last visual that would produce a brick hasn't yet
+   */
   public abstract Brick getLastBrick(Context context);
 
   public ROList<Visual> children() {

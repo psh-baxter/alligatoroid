@@ -13,6 +13,7 @@ import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -76,18 +77,30 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public Brick createOrGetFirstBrick(final Context context) {
-    return children.get(0).createOrGetFirstBrick(context);
+  public Brick createOrGetCornerstoneCandidate(final Context context) {
+    for (Visual child : children) {
+      Brick out = child.createOrGetCornerstoneCandidate(context);
+      if (out != null) return out;
+    }
+    return null;
   }
 
   @Override
   public Brick createFirstBrick(final Context context) {
-    return children.get(0).createFirstBrick(context);
+    for (Visual child : children) {
+      Brick out = child.createFirstBrick(context);
+      if (out != null) return out;
+    }
+    return null;
   }
 
   @Override
   public Brick createLastBrick(final Context context) {
-    return children.last().createLastBrick(context);
+    for (Visual child : new ReverseIterable<>(children)) {
+      Brick out = child.createLastBrick(context);
+      if (out != null) return out;
+    }
+    return null;
   }
 
   @Override

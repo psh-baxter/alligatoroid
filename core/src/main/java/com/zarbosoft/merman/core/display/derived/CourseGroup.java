@@ -4,6 +4,10 @@ import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.visual.Vector;
 
+/**
+ * A group that combines the ascent/descent of allll children. Baseline transverse of each child
+ * should be 0, but converse can be set freely.
+ */
 public class CourseGroup implements CourseDisplayNode {
   private final Group group;
   private double baselineTransverse;
@@ -53,6 +57,21 @@ public class CourseGroup implements CourseDisplayNode {
   @Override
   public double converseSpan() {
     return group.converseSpan();
+  }
+
+  @Override
+  public double transverse() {
+    return baselineTransverse - ascent;
+  }
+
+  @Override
+  public double transverseSpan() {
+    return ascent + descent;
+  }
+
+  @Override
+  public double transverseEdge() {
+    return baselineTransverse + descent;
   }
 
   @Override

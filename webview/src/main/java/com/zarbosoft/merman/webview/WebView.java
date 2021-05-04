@@ -269,7 +269,7 @@ public class WebView {
           public void handleEvent(Event evt0) {
             FocusEvent e = (FocusEvent) evt0;
             if (e.target == elementInner) return;
-            context.clearSelection();
+            context.clearCursor();
           }
         });
     return element;

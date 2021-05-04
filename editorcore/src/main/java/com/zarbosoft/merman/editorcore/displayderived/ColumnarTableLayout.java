@@ -35,6 +35,16 @@ public class ColumnarTableLayout {
     for (final DisplayNode node : row) group.add(node);
   }
 
+  private static class LayoutInfo {
+    private final double transverse;
+    private final double ascent;
+
+    private LayoutInfo(double transverse, double ascent) {
+      this.transverse = transverse;
+      this.ascent = ascent;
+    }
+  }
+
   public void layout() {
     int start = 0;
     int columnEdge = 0;
@@ -45,7 +55,7 @@ public class ColumnarTableLayout {
       // Find the converse size of each column, and the number of rows that fit in the transverse
       // span
       final double[] columnSpans = new double[columns];
-      final List<ROPair<Double, Double>> rowStarts = new ArrayList<>();
+      final List<LayoutInfo> rowStarts = new ArrayList<>();
       {
         double transverse = 0;
         for (int y = start; y < rows.size(); ++y) {
@@ -53,12 +63,9 @@ public class ColumnarTableLayout {
           double descent = 0;
           final ROList<CourseDisplayNode> row = rows.get(y);
           for (int x = 0; x < columns; ++x) {
-            final DisplayNode cell = row.get(x);
-            if (cell instanceof Text) {
-              ascent = Math.max(ascent, ((Text) cell).ascent());
-              descent = Math.max(descent, ((Text) cell).descent());
-            }
-            if (!(cell instanceof Text)) ascent = Math.max(ascent, cell.transverseSpan());
+            final CourseDisplayNode cell = row.get(x);
+              ascent = Math.max(ascent, cell.ascent());
+              descent = Math.max(descent, cell.descent());
           }
           if (end > start && transverse + ascent + descent >= maxTransverse) {
             break;
@@ -67,7 +74,7 @@ public class ColumnarTableLayout {
             final DisplayNode cell = row.get(x);
             columnSpans[x] = Math.max(columnSpans[x], cell.converseSpan());
           }
-          rowStarts.add(new ROPair<>(transverse, ascent));
+          rowStarts.add(new LayoutInfo(transverse, ascent));
           transverse += ascent + descent;
           end += 1;
         }
@@ -79,9 +86,9 @@ public class ColumnarTableLayout {
         int converse = columnEdge;
         for (int x = 0; x < columns; ++x) {
           final CourseDisplayNode cell = row.get(x);
-          final ROPair<Double, Double> rowTransverse = rowStarts.get(y - start);
-          double transverse = rowTransverse.first;
-          transverse += rowTransverse.second;
+          final LayoutInfo rowTransverse = rowStarts.get(y - start);
+          double transverse = rowTransverse.transverse;
+          transverse += rowTransverse.ascent;
           cell.setBaselinePosition(new Vector(converse, transverse), false);
           converse += columnSpans[x];
         }

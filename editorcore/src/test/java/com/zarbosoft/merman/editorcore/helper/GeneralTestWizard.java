@@ -148,8 +148,9 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard run(final Consumer<Editor> r) {
+    //assertThat(inner.editor.context.cursor, is(notNullValue()));
     r.accept(inner.editor);
-    assertThat(inner.editor.context.cursor, is(notNullValue()));
+    //assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
   }

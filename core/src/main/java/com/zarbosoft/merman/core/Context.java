@@ -255,7 +255,7 @@ public class Context {
     if (config.startSelected) document.root.visual.selectAnyChild(this);
     else {
       wall.setCornerstone(
-          this, document.root.visual.createOrGetFirstBrick(this), () -> null, () -> null);
+          this, document.root.visual.createOrGetCornerstoneCandidate(this), () -> null, () -> null);
     }
     triggerIdleLayBricksOutward();
   }
@@ -579,11 +579,12 @@ public class Context {
   }
 
   public void triggerIdleLayBricksOutward() {
+    if (wall.children.none()) return;
     triggerIdleLayBricksBeforeStart(wall.children.get(0).children.get(0));
     triggerIdleLayBricksAfterEnd(wall.children.last().children.last());
   }
 
-  public void clearSelection() {
+  public void clearCursor() {
     if (cursor == null) return;
     cursor.destroy(this);
     cursor = null;

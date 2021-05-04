@@ -95,12 +95,11 @@ public class StackStore extends Store {
   }
 
   /**
-   * The last event matched.
-   *
    * @param <T>
    * @return
    */
   public <T> T stackTop() {
+    if (stack == null) return null;
     return (T) stack.top();
   }
 

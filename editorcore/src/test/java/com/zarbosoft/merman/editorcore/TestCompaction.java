@@ -174,6 +174,7 @@ public class TestCompaction {
         new TypeBuilder("unary")
             .back(Helper.buildBackDataAtom("value", "any"))
             .frontDataNode("value")
+                .frontMark("")
             .precedence(20)
             .depthScore(1)
             .build();

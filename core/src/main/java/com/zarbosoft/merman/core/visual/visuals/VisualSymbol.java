@@ -52,7 +52,8 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public Brick createOrGetFirstBrick(final Context context) {
+  public Brick createOrGetCornerstoneCandidate(final Context context) {
+    if (condition != null) return null; // Cornerstones can't suddenly disappear without cursor changing
     if (brick != null) return brick;
     return createFirstBrick(context);
   }

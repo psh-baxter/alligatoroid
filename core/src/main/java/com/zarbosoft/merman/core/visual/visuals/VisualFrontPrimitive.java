@@ -142,7 +142,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   }
 
   @Override
-  public Brick createOrGetFirstBrick(final Context context) {
+  public Brick createOrGetCornerstoneCandidate(final Context context) {
     return lines.get(0).createOrGetBrick(context);
   }
 
@@ -212,7 +212,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    if (selection != null) context.clearSelection();
+    if (selection != null) context.clearCursor();
     if (hoverable != null) context.clearHover();
     value.removeListener(dataListener);
     value.visual = null;

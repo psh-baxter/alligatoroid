@@ -104,8 +104,8 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
               }
 
               @Override
-              public Brick createOrGetFirstBrick(final Context context) {
-                return nodeVisual.createOrGetFirstBrick(context);
+              public Brick createOrGetCornerstoneCandidate(final Context context) {
+                return nodeVisual.createOrGetCornerstoneCandidate(context);
               }
 
               @Override
@@ -246,14 +246,14 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   }
 
   @Override
-  public Brick createOrGetFirstBrick(final Context context) {
+  public Brick createOrGetCornerstoneCandidate(final Context context) {
     if (value.data.isEmpty()) {
       if (empty != null) return empty;
       else return createEmpty(context);
     } else if (ellipsize(context)) {
       if (ellipsis != null) return ellipsis;
       else return createEllipsis(context);
-    } else return super.createOrGetFirstBrick(context);
+    } else return super.createOrGetCornerstoneCandidate(context);
   }
 
   @Override
@@ -336,7 +336,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       // Only root array, which should never be uprooted with itself as the stop point
       throw new AssertionError();
     }
-    if (selection != null) context.clearSelection();
+    if (selection != null) context.clearCursor();
     if (hoverable != null) context.clearHover();
     if (ellipsis != null) ellipsis.destroy(context);
     if (empty != null) empty.destroy(context);
@@ -392,7 +392,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     private void setCornerstone(final Context context, final int index) {
       context.wall.setCornerstone(
           context,
-          visual.children.get(visual.visualIndex(index)).createOrGetFirstBrick(context),
+          visual.children.get(visual.visualIndex(index)).createOrGetCornerstoneCandidate(context),
           () -> {
             for (int at = visual.visualIndex(index) - 1; at >= 0; --at) {
               final Brick found = visual.children.get(at).getLastBrick(context);

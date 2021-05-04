@@ -289,7 +289,7 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
     final Pair<Parse, Position> longest =
         new ParseBuilder<>().grammar(grammar).longestMatchFromStart(glyphs);
     final TSList<StackStore> branches = new TSList<>();
-    branches.addAll((ROList<StackStore>)(ROList) longest.first.completed);
+    branches.addAll((ROList<StackStore>) (ROList) longest.first.completed);
     for (Parse.Branch leaf : longest.first.branches) {
       branches.add((StackStore) leaf.store());
     }
@@ -314,7 +314,7 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
     }
 
     /// Choose auto-choosable choices
-    if ((int) longest.second.at == glyphs.size()) {
+    if ((int) longest.second.at + 1 == glyphs.size()) {
       for (final GapChoice choice : choices) {
         if (choice.type.autoChooseUnambiguous && choices.size() == 1) {
           choice.choose(editor);

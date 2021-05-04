@@ -25,7 +25,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   protected VisualAtom body;
   VisualParent parent;
   private NestedHoverable hoverable;
-  private Cursor selection;
+  private Cursor cursor;
   private Brick ellipsis = null;
 
   public VisualFrontAtomBase(final int visualDepth, Symbol ellipsis) {
@@ -94,7 +94,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    if (selection != null) context.clearSelection();
+    if (cursor != null) context.clearCursor();
     if (hoverable != null) context.clearHover();
     if (ellipsis != null) ellipsis.destroy(context);
     if (body != null) {
@@ -105,7 +105,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
   @Override
   public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
-    if (selection != null) return null;
+    if (cursor != null) return null;
     if (hoverable != null) {
       return new ROPair<>(hoverable, false);
     } else if (ellipsis != null) {
@@ -165,11 +165,11 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   @Override
-  public Brick createOrGetFirstBrick(final Context context) {
+  public Brick createOrGetCornerstoneCandidate(final Context context) {
     if (ellipsize(context)) {
       if (ellipsis != null) return ellipsis;
       return createEllipsis(context);
-    } else return body.createOrGetFirstBrick(context);
+    } else return body.createOrGetCornerstoneCandidate(context);
   }
 
   @Override
@@ -191,12 +191,12 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   public void select(final Context context) {
-    if (selection != null) return;
+    if (cursor != null) return;
     else if (hoverable != null) {
       context.clearHover();
     }
-    selection = context.cursorFactory.createAtomCursor(context, this);
-    context.setCursor(selection);
+    cursor = context.cursorFactory.createAtomCursor(context, this);
+    context.setCursor(cursor);
   }
 
   protected void set(final Context context, final Atom data) {
@@ -204,6 +204,10 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     boolean fixDeepSelection = false;
     boolean fixDeepHover = false;
     if (context.cursor != null) {
+      if (context.cursor.getVisual() == this) {
+        fixDeepSelection = true;
+        context.clearCursor();
+      } else {
       VisualParent parent = context.cursor.getVisual().parent();
       while (parent != null) {
         final Visual visual = parent.visual();
@@ -212,6 +216,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
           break;
         }
         parent = visual.parent();
+      }
       }
     }
     if (hoverable == null && context.hover != null) {
@@ -237,7 +242,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     if (body != null) body.uproot(context, null);
     this.body =
         (VisualAtom) data.ensureVisual(context, new NestedParent(), visualDepth + 1, depthScore());
-    if (selection != null) selection.nudgeCreation(context);
+    if (cursor != null) cursor.nudgeCreation(context);
   }
 
   @Override
@@ -267,7 +272,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     public void destroy(final Context context) {
       border.destroy(context);
       border = null;
-      base.selection = null;
+      base.cursor = null;
     }
 
     @Override
@@ -291,7 +296,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     public Brick nudgeCreation(final Context context) {
-      final Brick first = base.body.createOrGetFirstBrick(context);
+      final Brick first = base.body.createOrGetCornerstoneCandidate(context);
       context.wall.setCornerstone(
           context,
           first,
@@ -404,13 +409,13 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
     @Override
     public void firstBrickChanged(final Context context, final Brick firstBrick) {
-      if (selection != null) selection.border.setFirst(context, firstBrick);
+      if (cursor != null) cursor.border.setFirst(context, firstBrick);
       if (hoverable != null) hoverable.border.setFirst(context, firstBrick);
     }
 
     @Override
     public void lastBrickChanged(final Context context, final Brick lastBrick) {
-      if (selection != null) selection.border.setFirst(context, lastBrick);
+      if (cursor != null) cursor.border.setFirst(context, lastBrick);
       if (hoverable != null) hoverable.border.setFirst(context, lastBrick);
     }
 

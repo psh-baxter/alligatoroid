@@ -27,7 +27,6 @@ public class TestDisplayDerived {
       final CourseGroup leftGroup = new CourseGroup(display.group());
       final Text left = display.text();
       left.setText(null, "1");
-      left.setBaselineTransverse(8);
       leftGroup.add(left);
       final Text right = display.text();
       right.setText(null, "aaa");
@@ -58,16 +57,14 @@ public class TestDisplayDerived {
     int index = 0;
     for (final Pair<Integer, Integer> pair :
         TSList.of(
-            /*
             new Pair<>(0, 0),
-            new Pair<>(30, 10),
-                 */
-            new Pair<>(0, 00),
-            new Pair<>(30, 00),
+            new Pair<>(30, 0),
             new Pair<>(0, 10),
             new Pair<>(30, 10),
-            new Pair<>(50, 0),
-            new Pair<>(90, 0))) {
+            new Pair<>(60, 0),
+            new Pair<>(100, 0),
+            new Pair<>(60, 10),
+            new Pair<>(100, 10))) {
       final int index2 = index++;
       assertThat(
           Format.format("for index %s, converse", index2),
@@ -89,7 +86,6 @@ public class TestDisplayDerived {
       final CourseGroup itemGroup = new CourseGroup(display.group());
       final Text item = display.text();
       item.setText(null, "dog");
-      item.setBaselineTransverse(8);
       itemGroup.add(item);
       layout.add(itemGroup);
       items.add(itemGroup);
@@ -104,7 +100,6 @@ public class TestDisplayDerived {
       final CourseGroup itemGroup = new CourseGroup(display.group());
       final Text item = display.text();
       item.setText(null, "9");
-      item.setBaselineTransverse(8);
       itemGroup.add(item);
       layout.add(itemGroup);
       items.add(itemGroup);
@@ -116,8 +111,9 @@ public class TestDisplayDerived {
       items.add(item);
     }
     layout.layout();
+    assertThat(layout.group.transverse(), new IsCloseTo(0.0, 0.01));
     TSList<Pair<Integer, Integer>> expected =
-        TSList.of(new Pair<>(0, 0), new Pair<>(30, 2), new Pair<>(80, 0), new Pair<>(90, 2));
+        TSList.of(new Pair<>(0, -8), new Pair<>(30, -8), new Pair<>(80, -8), new Pair<>(90, -8));
     for (int index = 0; index < expected.size(); ++index) {
       Pair<Integer, Integer> pair = expected.get(index);
       assertThat(

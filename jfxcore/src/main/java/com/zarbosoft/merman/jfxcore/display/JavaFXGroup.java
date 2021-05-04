@@ -47,12 +47,4 @@ public class JavaFXGroup extends JavaFXFreeDisplayNode implements Group {
     this.transverse = transverse;
     fixPosition(animate);
   }
-
-  @Override
-  public double transverseSpan() {
-    Bounds bounds = this.node.getLayoutBounds();
-    return this.display.convert.convert(
-            bounds.getMinX(), bounds.getMaxX(), bounds.getMinY(), bounds.getMaxY())
-        .transverse;
-  }
 }
