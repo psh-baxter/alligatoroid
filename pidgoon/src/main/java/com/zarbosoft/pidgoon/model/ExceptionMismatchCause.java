@@ -3,8 +3,8 @@ package com.zarbosoft.pidgoon.model;
 public class ExceptionMismatchCause extends MismatchCause {
   public final Exception error;
 
-  public ExceptionMismatchCause(Node node, Object color, Exception error) {
-    super(node, color);
+  public ExceptionMismatchCause(Node node, Exception error) {
+    super(node);
     this.error = error;
   }
 

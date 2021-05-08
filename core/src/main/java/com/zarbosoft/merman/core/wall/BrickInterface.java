@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.core.wall;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
 
@@ -11,13 +12,13 @@ public interface BrickInterface {
    * @param context
    * @return A new brick or null (no elements before or brick already exists)
    */
-  Brick createPrevious(Context context);
+  Visual.ExtendBrickResult createPrevious(Context context);
 
   /**
    * @param context
    * @return A new brick or null (no elements afterward or brick already exists)
    */
-  Brick createNext(Context context);
+  Visual.ExtendBrickResult createNext(Context context);
 
   void brickDestroyed(Context context);
 

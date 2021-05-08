@@ -1,10 +1,14 @@
 package com.zarbosoft.merman.core.syntax;
 
+import com.zarbosoft.merman.core.AtomKey;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
@@ -25,26 +29,20 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.core.syntax.error.AtomTypeErrors;
 import com.zarbosoft.merman.core.syntax.error.AtomTypeNoBack;
 import com.zarbosoft.merman.core.syntax.error.BackFieldWrongType;
-import com.zarbosoft.merman.core.syntax.error.CouldBeInvisible;
 import com.zarbosoft.merman.core.syntax.error.DuplicateBackId;
 import com.zarbosoft.merman.core.syntax.error.MissingBack;
 import com.zarbosoft.merman.core.syntax.error.UnusedBackData;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
-import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
-import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Color;
+import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.pidgoon.nodes.Operator;
-import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -54,12 +52,14 @@ import java.util.Iterator;
 
 public abstract class AtomType {
   public final ROMap<String, BackSpecData> fields;
-  private final String id;
+  public final String id;
+  public final AtomKey key;
   private final ROList<BackSpec> back;
   private final ROList<FrontSpec> front;
 
   public AtomType(Config config) {
     id = config.id;
+    key = new AtomKey(this.id);
     back = config.back;
     front = config.front;
     TSMap<String, BackSpecData> fields = new TSMap<>();
@@ -167,20 +167,17 @@ public abstract class AtomType {
     return back;
   }
 
-  public Node buildBackRule(Environment env, final Syntax syntax) {
-    final Sequence seq = new Sequence();
-    seq.add(StackStore.prepVarStack);
+  public Node<AtomParseResult> buildBackRule(Environment env, final Syntax syntax) {
+    final MergeSequence<FieldParseResult> seq = new MergeSequence<>();
     for (BackSpec p : back()) {
       seq.add(p.buildBackRule(env, syntax));
     }
-    return new Color(
+    return new Color<AtomParseResult>(
         "atom " + id,
-        new Operator<StackStore>(seq) {
+        new Operator<ROList<FieldParseResult>, AtomParseResult>(seq) {
           @Override
-          protected StackStore process(StackStore store) {
-            final TSMap<String, ROPair<Field, Object>> initialValue = new TSMap<>();
-            store = store.popVarMap(initialValue);
-            return store.pushStack(new ROPair<>(new Atom(AtomType.this), initialValue));
+          protected AtomParseResult process(ROList<FieldParseResult> value) {
+            return new AtomParseResult(new Atom(AtomType.this), value);
           }
         });
   }
@@ -264,6 +261,108 @@ public abstract class AtomType {
 
   public final String id() {
     return id;
+  }
+
+  public abstract static class FieldParseResult {
+    public final String key;
+
+    protected FieldParseResult(String key) {
+      this.key = key;
+    }
+
+    public abstract Field field();
+
+    public abstract void finish();
+  }
+
+  public static class PrimitiveFieldParseResult extends FieldParseResult {
+    final FieldPrimitive field;
+
+    public PrimitiveFieldParseResult(String key, FieldPrimitive field) {
+      super(key);
+      this.field = field;
+    }
+
+    @Override
+    public Field field() {
+      return field;
+    }
+
+    @Override
+    public void finish() {
+    }
+  }
+
+  public static class AtomFieldParseResult extends FieldParseResult {
+    final FieldAtom field;
+    public final AtomParseResult data;
+
+    public AtomFieldParseResult(String key, FieldAtom field, AtomParseResult data) {
+      super(key);
+      this.field = field;
+      this.data = data;
+    }
+
+    @Override
+    public Field field() {
+      return field;
+    }
+
+    @Override
+    public void finish() {
+      field.initialSet(data.finish());
+    }
+  }
+
+  public static class ArrayFieldParseResult extends FieldParseResult {
+    final FieldArray field;
+    final ROList<AtomParseResult> data;
+
+    public ArrayFieldParseResult(String key, FieldArray field, ROList<AtomParseResult> data) {
+      super(key);
+      this.field = field;
+      this.data = data;
+    }
+
+    @Override
+    public Field field() {
+      return field;
+    }
+
+    @Override
+    public void finish() {
+      TSList<Atom> fieldData = new TSList<>();
+      for (AtomParseResult element :
+               data) {
+        fieldData.add(element.finish());
+      }
+      field.initialSet(fieldData);
+    }
+  }
+
+  public static class AtomParseResult {
+    public final Atom atom;
+    public final ROList<FieldParseResult> fields;
+
+    /**
+     *
+     * @param atom
+     * @param fields FieldParseResult or null if no field parsed for a back element
+     */
+    public AtomParseResult(Atom atom, ROList<FieldParseResult> fields) {
+      this.atom = atom;
+      this.fields = fields;
+    }
+
+    public Atom finish() {
+      TSMap<String, Field> initialFields = new TSMap<>();
+      for (FieldParseResult field : fields) {
+        if (field == null) continue;
+        initialFields.put(field.key, field.field());
+      }
+      atom.initialSet(initialFields);
+      return atom;
+    }
   }
 
   public static final class Config {

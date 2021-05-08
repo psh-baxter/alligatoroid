@@ -28,7 +28,7 @@ import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.errors.NoResults;
 import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.model.MismatchCause;
-import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
@@ -267,7 +267,7 @@ public class NotMain extends Application {
           });
     } catch (GrammarTooUncertain e) {
       StringBuilder message = new StringBuilder();
-      for (Parse.Branch leaf : e.context.branches) {
+      for (Step.Branch leaf : e.context.branches) {
         message.append(Format.format(" * %s (%s)\n", leaf, leaf.color()));
       }
       throw new RuntimeException(
@@ -276,7 +276,7 @@ public class NotMain extends Application {
               ((Position) e.position).at, ((Position) e.position).event, message.toString()));
     } catch (InvalidStream e) {
       StringBuilder message = new StringBuilder();
-      for (MismatchCause error : e.state.errors) {
+      for (MismatchCause error : e.step.errors) {
         message.append(Format.format(" * %s\n", error));
       }
       throw new RuntimeException(

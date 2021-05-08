@@ -1,33 +1,38 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.nodes.Repeat;
-import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.pidgoon.nodes.MergeRepeat;
+import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.pidgoon.nodes.Union;
+import com.zarbosoft.rendaw.common.ROList;
 
 public class JsonDecimal extends Pattern {
   @Override
-  public Node build(boolean capture) {
-    Node digits = Pattern.characterRange(capture,"0", "9");
-    return new Sequence()
-        .add(new Repeat(Pattern.characterRange(capture, "-", "-")).max(1))
+  public Node<ROList<String>> build(boolean capture) {
+    Node<ROList<String>> digits = new CharacterRangeTerminal(capture, "0", "9");
+    return new MergeSequence<String>()
+        .add(new MergeRepeat<String>(new CharacterRangeTerminal(capture, "-", "-")).max(1))
         .add(
-            new Union()
-                .add(Pattern.characterRange(capture, "0", "0"))
-                .add(Pattern.characterRange(capture, "1", "9"))
-                .add(new Repeat(digits)))
+            new Union<ROList<String>>()
+                .add(new CharacterRangeTerminal(capture, "0", "0"))
+                .add(new CharacterRangeTerminal(capture, "1", "9"))
+                .add(new MergeRepeat<String>(digits)))
         .add(
-            new Repeat(
-                    new Sequence()
-                        .add(Pattern.characterRange(capture, ".", "-"))
-                        .add(new Repeat(digits)))
+            new MergeRepeat<String>(
+                    new MergeSequence<String>()
+                        .add(new CharacterRangeTerminal(capture, ".", "-"))
+                        .add(new MergeRepeat<String>(digits)))
                 .max(1))
         .add(
-            new Repeat(
-                    new Sequence()
-                        .add(new Repeat(Pattern.characterRange(capture, "e", "E")).max(1))
-                        .add(new Repeat(Pattern.characterRange(capture, "+", "-")).max(1))
-                        .add(new Repeat(digits).min(1)))
+            new MergeRepeat<String>(
+                    new MergeSequence<String>()
+                        .add(
+                            new MergeRepeat<String>(new CharacterRangeTerminal(capture, "e", "E"))
+                                .max(1))
+                        .add(
+                            new MergeRepeat<String>(new CharacterRangeTerminal(capture, "+", "-"))
+                                .max(1))
+                        .add(new MergeRepeat<String>(digits).min(1)))
                 .max(1));
   }
 }

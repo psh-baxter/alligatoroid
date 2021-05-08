@@ -2,34 +2,30 @@ package com.zarbosoft.luxem.read;
 
 import com.zarbosoft.luxem.Luxem;
 import com.zarbosoft.pidgoon.BaseParseBuilder;
+import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.Event;
+import com.zarbosoft.pidgoon.events.InvalidStreamAt;
+import com.zarbosoft.pidgoon.events.ParseBuilder;
 import com.zarbosoft.pidgoon.events.ParseEventSink;
-import com.zarbosoft.rendaw.common.Pair;
+import com.zarbosoft.pidgoon.events.Position;
+import com.zarbosoft.pidgoon.nodes.Reference;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
-public class Parse<O> extends BaseParseBuilder<Parse<O>> {
-  private int eventUncertainty = 20;
+public class Parse<O> extends BaseParseBuilder<O, Parse<O>> {
   private Reader.EventFactory factory = null;
 
   private Parse(final Parse<O> other) {
     super(other);
-    this.eventUncertainty = other.eventUncertainty;
     this.factory = other.factory;
   }
 
-  public Parse() {}
-
-  public Parse<O> eventUncertainty(final int limit) {
-    if (eventUncertainty != 20)
-      throw new IllegalArgumentException("Max event uncertainty already set");
-    final Parse<O> out = split();
-    out.eventUncertainty = limit;
-    return out;
+  public Parse(Reference.Key root) {
+    super(root);
   }
 
   @Override
@@ -53,18 +49,16 @@ public class Parse<O> extends BaseParseBuilder<Parse<O>> {
         Luxem.streamEvents(stream, factory == null ? new Reader.DefaultEventFactory() : factory));
   }
 
-  public O parse(final List<ROPair<Event, Object>> stream) {
+  public O parse(final ROList<Position> stream) {
     ParseEventSink<O> stream1 =
-        new com.zarbosoft.pidgoon.events.ParseBuilder<O>()
+        new ParseBuilder<O>(root)
             .grammar(grammar)
-            .root(root)
-            .store(initialStore)
-            .errorHistory(errorHistoryLimit)
-            .dumpAmbiguity(dumpAmbiguity)
-            .uncertainty(eventUncertainty)
+            .uncertainty(uncertaintyLimit)
             .parse();
-    for (final ROPair<Event, Object> pair : stream)
-      stream1 = stream1.push(pair.first, pair.second);
+    for (final Position pos : stream) {
+      if (stream1.ended()) throw new InvalidStreamAt(pos, new InvalidStream(stream1.context()));
+      stream1 = stream1.push(pos.event, pos.at);
+    }
     return stream1.result();
   }
 }

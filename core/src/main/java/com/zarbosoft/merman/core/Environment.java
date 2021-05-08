@@ -2,6 +2,7 @@ package com.zarbosoft.merman.core;
 
 import com.zarbosoft.merman.core.syntax.primitivepattern.CharacterEvent;
 import com.zarbosoft.pidgoon.events.Event;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.function.Consumer;
@@ -26,17 +27,8 @@ public interface Environment {
    * @param text
    * @return list of CharacterEvent
    */
-  default TSList<Event> splitGlyphs(String text) {
-    I18nWalker walker = glyphWalker(text);
-    TSList<String> glyphs1 = TSList.of();
-    int end = 0;
-    while (true) {
-      int start = end;
-      end = walker.followingStart(end);
-      if (end == I18N_DONE) break;
-      glyphs1.add(text.substring(start, end));
-    }
-    TSList<String> pre = glyphs1;
+  default TSList<Event> splitGlyphEvents(String text) {
+    TSList<String> pre = splitGlyphs(text);
     TSList<Event> glyphs = TSList.of();
     for (String s : pre) {
       glyphs.add(new CharacterEvent(s));
@@ -44,7 +36,24 @@ public interface Environment {
     return glyphs;
   }
 
-  default String joinGlyphs(TSList<CharacterEvent> glyphs) {
+  /**
+   * @param text
+   * @return list of CharacterEvent
+   */
+  default TSList<String> splitGlyphs(String text) {
+    I18nWalker walker = glyphWalker(text);
+    TSList<String> glyphs = TSList.of();
+    int end = 0;
+    while (true) {
+      int start = end;
+      end = walker.followingStart(end);
+      if (end == I18N_DONE) break;
+      glyphs.add(text.substring(start, end));
+    }
+    return glyphs;
+  }
+
+  public static String joinGlyphEvents(ROList<CharacterEvent> glyphs) {
     int size = 0;
     for (CharacterEvent glyph : glyphs) {
       size += glyph.value.length();
@@ -56,12 +65,25 @@ public interface Environment {
     return builder.toString();
   }
 
+  public static String joinGlyphs(ROList<String> glyphs) {
+    int size = 0;
+    for (String glyph : glyphs) {
+      size += glyph.length();
+    }
+    StringBuilder builder = new StringBuilder(size);
+    for (String glyph : glyphs) {
+      builder.append(glyph);
+    }
+    return builder.toString();
+  }
+
   public I18nWalker glyphWalker(String s);
 
   public I18nWalker wordWalker(String s);
 
   /**
    * Suitable places to break lines
+   *
    * @param s
    * @return
    */

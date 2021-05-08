@@ -1,10 +1,10 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.AtomKey;
 import com.zarbosoft.merman.core.Environment;
-import com.zarbosoft.merman.core.document.fields.FieldArray;
-import com.zarbosoft.merman.core.document.fields.FieldAtom;
-import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.ArrayBoilerplateAtomIdNotNull;
@@ -13,14 +13,15 @@ import com.zarbosoft.merman.core.syntax.error.ArrayBoilerplateMissingAtom;
 import com.zarbosoft.merman.core.syntax.error.ArrayBoilerplateNotInBaseSet;
 import com.zarbosoft.merman.core.syntax.error.ArrayBoilerplateOverlaps;
 import com.zarbosoft.merman.core.syntax.error.ArrayMultipleAtoms;
-import com.zarbosoft.pidgoon.events.StackStore;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
-import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Union;
+import com.zarbosoft.pidgoon.nodes.UnitSequence;
+import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
@@ -73,68 +74,47 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
     errors.raise();
   }
 
-  protected void buildBackRuleInnerEnd(Sequence s) {
-    s.add(
-        new Operator<StackStore>() {
-          @Override
-          protected StackStore process(StackStore store) {
-            final TSList initialValue = new TSList<>();
-            store = store.popVarSingle(v -> initialValue.add(v));
-            initialValue.reverse();
-            return store.stackVarDoubleElement(
-                id, new ROPair<>(new FieldArray(BaseBackSimpleArraySpec.this), initialValue));
-          }
-        });
+  protected Node<ROList<AtomType.FieldParseResult>> buildBackRuleInnerEnd(
+      Node<ROList<AtomType.AtomParseResult>> inner) {
+    return new Operator<ROList<AtomType.AtomParseResult>, ROList<AtomType.FieldParseResult>>(inner) {
+      @Override
+      protected ROList<AtomType.FieldParseResult> process(ROList<AtomType.AtomParseResult> value) {
+        return TSList.of(new AtomType.ArrayFieldParseResult(
+            id, new FieldArray(BaseBackSimpleArraySpec.this), value));
+      }
+    };
   }
 
-  protected void buildBackRuleInner(Environment env, Syntax syntax, Sequence s) {
-    s.add(StackStore.prepVarStack)
-        .add(
-            new Repeat(
-                new Sequence()
-                    .add(
-                        boilerplate.none()
-                            ? new Reference(type)
-                            : new Union()
-                                .apply(
-                                    union -> {
-                                      TSSet<String> remaining = new TSSet<>();
-                                      for (AtomType core : syntax.splayedTypes.get(type)) {
-                                        remaining.add(core.id());
-                                      }
-                                      for (Map.Entry<String, BackSpec> plated : boilerplate) {
-                                        for (AtomType sub :
-                                            syntax.splayedTypes.get(plated.getKey())) {
-                                          remaining.remove(sub.id());
-                                        }
-                                        union.add(
-                                            new Sequence()
-                                                .add(plated.getValue().buildBackRule(env, syntax))
-                                                .add(
-                                                    new Operator<StackStore>() {
-                                                      @Override
-                                                      protected StackStore process(
-                                                          StackStore store) {
-                                                        // The inner atom reuses the array counter,
-                                                        // reduce for when it's incremented below
-                                                        int counter = store.stackTop();
-                                                        store = store.popStack(); // counter
-                                                        store = store.popStack(); // key
-                                                        FieldAtom inner = store.stackTop();
-                                                        store = store.popStack();
-                                                        // Reset to pre-var-push state, with atom on
-                                                        // top
-                                                        return store
-                                                            .pushStack(counter - 1)
-                                                            .pushStack(inner.data);
-                                                      }
-                                                    }));
-                                      }
-                                      for (String unplated : remaining) {
-                                        union.add(new Reference(unplated));
-                                      }
-                                    }))
-                    .add(StackStore.pushVarStackSingle)));
+  protected Node<ROList<AtomType.AtomParseResult>> buildBackRuleInner(
+      Environment env, Syntax syntax) {
+    return new Repeat<AtomType.AtomParseResult>(
+        boilerplate.none()
+            ? new Reference<AtomType.AtomParseResult>(new AtomKey(type))
+            : new Union<AtomType.AtomParseResult>()
+                .apply(
+                    union -> {
+                      TSSet<String> remaining = new TSSet<>();
+                      for (AtomType core : syntax.splayedTypes.get(type)) {
+                        remaining.add(core.id());
+                      }
+                      for (Map.Entry<String, BackSpec> plated : boilerplate) {
+                        for (AtomType sub : syntax.splayedTypes.get(plated.getKey())) {
+                          remaining.remove(sub.id());
+                        }
+                        union.add(
+                            new Operator<ROList<AtomType.FieldParseResult>, AtomType.AtomParseResult>(
+                                plated.getValue().buildBackRule(env, syntax)) {
+                              @Override
+                              protected AtomType.AtomParseResult process(ROList<AtomType.FieldParseResult> value) {
+                                if (value.size() != 1) throw new Assertion();
+                                return ((AtomType.AtomFieldParseResult) value.get(0)).data;
+                              }
+                            });
+                      }
+                      for (String unplated : remaining) {
+                        union.add(new Reference<AtomType.AtomParseResult>(new AtomKey(unplated)));
+                      }
+                    }));
   }
 
   @Override

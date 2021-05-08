@@ -1,25 +1,18 @@
 package com.zarbosoft.pidgoon.nodes;
 
+import com.zarbosoft.pidgoon.errors.AbortParse;
 import com.zarbosoft.pidgoon.model.ExceptionMismatchCause;
+import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.model.RefParent;
-import com.zarbosoft.pidgoon.model.Store;
-import com.zarbosoft.pidgoon.errors.AbortParse;
-import com.zarbosoft.pidgoon.BaseParent;
 import com.zarbosoft.pidgoon.model.Parent;
-import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.ROMap;
 
-public abstract class Operator<S extends Store> extends Node {
-  private final Node root;
+public abstract class Operator<L, T> extends Node<T> {
+  private final Node<L> root;
 
-  public Operator() {
-    super();
-    root = null;
-  }
-
-  public Operator(final Node root) {
+  public Operator(final Node<L> root) {
     super();
     if (root == null) throw new AssertionError();
     this.root = root;
@@ -27,16 +20,12 @@ public abstract class Operator<S extends Store> extends Node {
 
   @Override
   public void context(
-      final Parse context,
-      final Store store,
-      final Parent parent,
-      final ROMap<Object, RefParent> seen,
-      final MismatchCause cause) {
-    if (root == null) {
-      parent.advance(context, process((S) store).pop(), cause);
-    } else {
-      root.context(context, store.push(), new OperatorParent(this, parent), seen, cause);
-    }
+          Grammar grammar, final Step step,
+          final Parent<T> parent,
+          Step.Branch branch, ROMap<Object, Reference.RefParent> seen,
+          final MismatchCause cause,
+          Object color) {
+    root.context(grammar, step, new OperatorParent<L, T>(this, parent),branch , seen, cause, color);
   }
 
   /**
@@ -45,28 +34,34 @@ public abstract class Operator<S extends Store> extends Node {
    * @param store
    * @return
    */
-  protected S process(S store) {
-    return store;
-  }
+  protected abstract T process(L value);
 
-  private static class OperatorParent<S extends Store> extends BaseParent {
-    private Operator<S> operator;
+  private static class OperatorParent<L, T> implements Parent<L> {
+    public final Parent<T> parent;
+    private final Operator<L, T> operator;
 
-    public OperatorParent(Operator<S> operator, Parent parent) {
-      super(parent);
+    public OperatorParent(Operator<L, T> operator, Parent<T> parent) {
+      super();
+      this.parent = parent;
       this.operator = operator;
     }
 
     @Override
-    public void advance(final Parse step, final Store store, final MismatchCause cause) {
-      Store tempStore = store;
+    public void advance(
+            Grammar grammar, final Step step, Step.Branch branch, L result, final MismatchCause cause) {
+      T out;
       try {
-        tempStore = operator.process((S) store);
+        out = operator.process(result);
       } catch (final AbortParse a) {
-        parent.error(step, tempStore, new ExceptionMismatchCause(operator, store.color, a));
+        parent.error(grammar, step, branch, new ExceptionMismatchCause(operator, a));
         return;
       }
-      parent.advance(step, tempStore.pop(), cause);
+      parent.advance(grammar, step, branch, out, cause);
+    }
+
+    @Override
+    public void error(Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
+      parent.error(grammar, step, branch, cause);
     }
   }
 }

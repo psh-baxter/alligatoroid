@@ -25,7 +25,9 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
+import javax.annotation.Nonnull;
 import java.util.function.Function;
 
 import static com.zarbosoft.merman.core.Environment.I18N_DONE;
@@ -142,17 +144,17 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   }
 
   @Override
-  public Brick createOrGetCornerstoneCandidate(final Context context) {
-    return lines.get(0).createOrGetBrick(context);
+  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
+    return CreateBrickResult.brick(lines.get(0).createOrGetBrick(context));
   }
 
   @Override
-  public Brick createFirstBrick(final Context context) {
+  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
     return lines.get(0).createBrick(context);
   }
 
   @Override
-  public Brick createLastBrick(final Context context) {
+  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
     return lines.last().createBrick(context);
   }
 
@@ -172,7 +174,6 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
    * @param context
    */
   public void primitiveReflow(Context context) {
-    final ResplitResult result = new ResplitResult();
     boolean anyOver = false;
     boolean allUnder = true;
     for (int i = lines.size() - 1; i >= 0; --i) {
@@ -185,7 +186,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       if (edge <= context.edge && edge * context.retryExpandFactor >= context.edge)
         allUnder = false;
       if (line.hard && (anyOver || allUnder)) {
-        result.merge(resplitOne(context, i));
+        resplitOne(context, i);
         anyOver = false;
         allUnder = true;
       }
@@ -1132,23 +1133,23 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
-    public Brick createPrevious(final Context context) {
+    public ExtendBrickResult createPrevious(final Context context) {
       return createPreviousBrick(context);
     }
 
-    public Brick createPreviousBrick(final Context context) {
+    public ExtendBrickResult createPreviousBrick(final Context context) {
       if (index == 0) return visual.parent.createPreviousBrick(context);
       return visual.lines.get(index - 1).createBrick(context);
     }
 
-    public Brick createBrick(final Context context) {
-      if (brick != null) return null;
+    public ExtendBrickResult createBrick(final Context context) {
+      if (brick != null) return ExtendBrickResult.exists();
       createBrickInternal(context);
       if (visual.selection != null
           && (visual.selection.range.beginLine == Line.this
               || visual.selection.range.endLine == Line.this))
         visual.selection.range.nudge(context);
-      return brick;
+      return ExtendBrickResult.brick(brick);
     }
 
     public Brick createBrickInternal(final Context context) {
@@ -1165,11 +1166,11 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
-    public Brick createNext(final Context context) {
+    public ExtendBrickResult createNext(final Context context) {
       return createNextBrick(context);
     }
 
-    public Brick createNextBrick(final Context context) {
+    public ExtendBrickResult createNextBrick(final Context context) {
       if (index == visual.lines.size() - 1) {
         return visual.parent.createNextBrick(context);
       }

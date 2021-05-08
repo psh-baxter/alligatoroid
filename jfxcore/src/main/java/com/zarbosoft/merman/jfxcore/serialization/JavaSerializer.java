@@ -6,9 +6,7 @@ import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
 import com.zarbosoft.luxem.read.Parse;
 import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.luxem.write.Writer;
-import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.Document;
-import com.zarbosoft.merman.core.document.fields.Field;
+import com.zarbosoft.merman.core.AtomKey;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
 import com.zarbosoft.merman.core.backevents.EKeyEvent;
@@ -16,37 +14,38 @@ import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.core.backevents.ETypeEvent;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.Document;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.Serializer;
 import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.Event;
+import com.zarbosoft.pidgoon.events.InvalidStreamAt;
 import com.zarbosoft.pidgoon.events.Position;
-import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
-import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.pidgoon.nodes.UnitSequence;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.util.Collections;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class JavaSerializer implements Serializer {
+  public static final Reference.Key<ROList<AtomType.AtomParseResult>> ROOT_KEY =
+      new Reference.Key<>();
   private final BackType backType;
 
   public JavaSerializer(BackType backType) {
@@ -266,98 +265,64 @@ public class JavaSerializer implements Serializer {
 
   public ROList<Atom> load(Syntax syntax, String type, byte[] data, boolean synthArrayContext) {
     try {
-    switch (backType) {
-      case LUXEM:
-        {
-          final Grammar grammar = new Grammar(syntax.getGrammar());
-          grammar.add(
-              Grammar.DEFAULT_ROOT_KEY,
-              new Sequence()
-                  .add(StackStore.prepVarStack)
-                  .add(
-                      new Operator<StackStore>(
-                          new Repeat(
-                                  new Sequence()
-                                      .add(new Reference(type))
-                                      .add(StackStore.pushVarStackSingle))
-                              .min(1)) {
-                        @Override
-                        protected StackStore process(StackStore store) {
-                          final TSList<Atom> temp = TSList.of();
-                          store = store.popVarSingleList(temp);
-                          Collections.reverse(temp.inner_());
-                          return store.pushStack(temp);
-                        }
-                      }));
-          ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>> result =
-              new Parse<ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>>>()
-                  .grammar(grammar)
-                  .eventFactory(luxemEventFactory())
-                  .parse(new ByteArrayInputStream((byte[]) data));
-          TSList<Atom> finalOut = new TSList<>();
-          for (ROPair<Atom, ROMap<String, ROPair<Field, Object>>> e : result) {
-            finalOut.add(Serializer.initialSet(e));
+      switch (backType) {
+        case LUXEM:
+          {
+            final Grammar grammar = new Grammar(syntax.getGrammar());
+            grammar.add(ROOT_KEY, new Repeat<>(new Reference<>(new AtomKey(type))));
+            ROList<AtomType.AtomParseResult> result =
+                new Parse<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
+                    .grammar(grammar)
+                    .eventFactory(luxemEventFactory())
+                    .parse(new ByteArrayInputStream((byte[]) data));
+            TSList<Atom> finalOut = new TSList<>();
+            for (AtomType.AtomParseResult e : result) {
+              finalOut.add(e.finish());
+            }
+            return finalOut;
           }
-          return finalOut;
-        }
-      case JSON:
-        {
-          final Grammar grammar = new Grammar(syntax.getGrammar());
-          grammar.add(
-              Grammar.DEFAULT_ROOT_KEY,
-              new Sequence()
-                  .add(
-                      synthArrayContext
-                          ? new Sequence()
-                              .add(new MatchingEventTerminal(new EArrayOpenEvent()))
-                              .add(StackStore.prepVarStack)
-                              .add(
-                                  new Repeat(
-                                      new Sequence()
-                                          .add(new Reference(type))
-                                          .add(StackStore.pushVarStackSingle)))
-                              .add(new MatchingEventTerminal(new EArrayCloseEvent()))
-                          : new Sequence()
-                              .add(new Reference(type))
-                              .add(
-                                  new Operator<StackStore>() {
-                                    @Override
-                                    protected StackStore process(StackStore store) {
-                                      return store.pushStack(1);
-                                    }
-                                  }))
-                  .add(
-                      new Operator<StackStore>() {
-                        @Override
-                        protected StackStore process(StackStore store) {
-                          final TSList<Atom> temp = TSList.of();
-                          store = store.popVarSingleList(temp);
-                          Collections.reverse(temp.inner_());
-                          return store.pushStack(temp);
-                        }
-                      }));
-          ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>> result =
-              new JSONParse<ROList<ROPair<Atom, ROMap<String, ROPair<Field, Object>>>>>()
-                  .grammar(grammar)
-                  .parse(new ByteArrayInputStream((byte[]) data));
-          TSList<Atom> finalOut = new TSList<>();
-          for (ROPair<Atom, ROMap<String, ROPair<Field, Object>>> e : result) {
-            finalOut.add(Serializer.initialSet(e));
+        case JSON:
+          {
+            final Grammar grammar = new Grammar(syntax.getGrammar());
+            grammar.add(
+                ROOT_KEY,
+                synthArrayContext
+                    ? new UnitSequence<ROList<AtomType.AtomParseResult>>()
+                        .addIgnored(new MatchingEventTerminal<>(new EArrayOpenEvent()))
+                        .add(
+                            new Repeat<AtomType.AtomParseResult>(
+                                new Reference<AtomType.AtomParseResult>(new AtomKey(type))))
+                        .addIgnored(new MatchingEventTerminal<>(new EArrayCloseEvent()))
+                    : new Operator<AtomType.AtomParseResult, ROList<AtomType.AtomParseResult>>(
+                        new Reference<AtomType.AtomParseResult>(new AtomKey(type))) {
+                      @Override
+                      protected ROList<AtomType.AtomParseResult> process(
+                          AtomType.AtomParseResult value) {
+                        return TSList.of(value);
+                      }
+                    });
+            ROList<AtomType.AtomParseResult> result =
+                new JSONParse<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
+                    .grammar(grammar)
+                    .parse(new ByteArrayInputStream((byte[]) data));
+            TSList<Atom> finalOut = new TSList<>();
+            for (AtomType.AtomParseResult e : result) {
+              finalOut.add(e.finish());
+            }
+            return finalOut;
           }
-          return finalOut;
-        }
-      default:
-        throw new DeadCode();
-    }
-    } catch (InvalidStream e) {
+        default:
+          throw new DeadCode();
+      }
+    } catch (InvalidStreamAt e) {
       StringBuilder message = new StringBuilder();
-      for (MismatchCause error : e.state.errors) {
+      for (MismatchCause error : (ROList<MismatchCause>)e.step.errors) {
         message.append(Format.format(" * %s\n", error));
       }
       throw new RuntimeException(
-              Format.format(
-                      "Clipboard contents conform to syntax tree\nat %s %s\nmismatches at final stream element:\n%s",
-                      ((Position) e.position).at, ((Position) e.position).event, message.toString()));
+          Format.format(
+              "Clipboard contents don't conform to syntax tree\nat %s %s\nmismatches at final stream element:\n%s",
+              ((Position) e.at).at, ((Position) e.at).event, message.toString()));
     }
   }
 }

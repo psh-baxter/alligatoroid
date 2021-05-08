@@ -33,7 +33,7 @@ public class TSMap<K, V> implements ROMap<K, V> {
 
   @Override
   public V get(K k) {
-    Object val = ((Map)inner).getOrDefault(k, missing);
+    Object val = ((Map) inner).getOrDefault(k, missing);
     if (val == missing) throw new Assertion();
     return (V) val;
   }
@@ -71,8 +71,13 @@ public class TSMap<K, V> implements ROMap<K, V> {
     return this;
   }
 
-  public V remove(K k) {
+  public V removeGet(K k) {
     return inner.remove(k);
+  }
+
+  public TSMap<K, V> remove(K k) {
+    inner.remove(k);
+    return this;
   }
 
   public Set<Map.Entry<K, V>> entries() {
@@ -92,7 +97,8 @@ public class TSMap<K, V> implements ROMap<K, V> {
     if (got != null) {
       return got;
     }
-    got = s.get(); inner.put(k, got);
+    got = s.get();
+    inner.put(k, got);
     return got;
   }
 

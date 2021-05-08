@@ -17,13 +17,13 @@ public class EditPrimitiveCursor extends BaseEditPrimitiveCursor {
   @Override
   public void handleTyping(Context context, String text) {
     FieldPrimitive value = visualPrimitive.value;
-    if (value.middle.matcher != null) {
+    if (value.back.matcher != null) {
       String preview = value.get();
       preview =
           preview.substring(0, range.beginOffset)
               + text
               + preview.substring(range.endOffset, preview.length());
-      if (!value.middle.matcher.match(context.env, preview)) {
+      if (!value.back.matcher.match(context.env, preview)) {
         return;
       }
     }

@@ -1,29 +1,30 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.AtomKey;
 import com.zarbosoft.merman.core.Environment;
-import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateDataArray;
 import com.zarbosoft.merman.core.serialization.WriteStateRecordEnd;
-import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.RecordChildMissingValue;
 import com.zarbosoft.merman.core.syntax.error.RecordChildNotKeyAt;
 import com.zarbosoft.merman.core.syntax.error.RecordChildNotValueAt;
-import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
-import com.zarbosoft.pidgoon.nodes.Sequence;
-import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.pidgoon.nodes.UnitSequence;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -49,22 +50,17 @@ public class BackRecordSpec extends BaseBackArraySpec {
   }
 
   @Override
-  public Node buildBackRule(Environment env, final Syntax syntax) {
-    final Sequence sequence;
-    sequence = new Sequence();
-    sequence.add(new MatchingEventTerminal(new EObjectOpenEvent()));
-    sequence.add(StackStore.prepVarStack);
-    sequence.add(
-        new Repeat(new Sequence().add(new Reference(element)).add(StackStore.pushVarStackSingle)));
-    sequence.add(new MatchingEventTerminal(new EObjectCloseEvent()));
-    return new Operator<StackStore>(sequence) {
+  public Node<ROList<AtomType.FieldParseResult>> buildBackRule(Environment env, Syntax syntax) {
+    return new Operator<ROList<AtomType.AtomParseResult>, ROList<AtomType.FieldParseResult>>(
+        new UnitSequence<ROList<AtomType.AtomParseResult>>()
+            .addIgnored(new MatchingEventTerminal<BackEvent>(new EObjectOpenEvent()))
+            .add(
+                new Repeat<AtomType.AtomParseResult>(
+                    new Reference<AtomType.AtomParseResult>(new AtomKey(element))))
+            .addIgnored(new MatchingEventTerminal<BackEvent>(new EObjectCloseEvent()))) {
       @Override
-      protected StackStore process(StackStore store) {
-        final TSList initialValue = new TSList<>();
-        store = store.popVarSingleList(initialValue);
-        initialValue.reverse();
-        return store.stackVarDoubleElement(
-            id, new ROPair<>(new FieldArray(BackRecordSpec.this), initialValue));
+      protected ROList<AtomType.FieldParseResult> process(ROList<AtomType.AtomParseResult> value) {
+        return TSList.of(new AtomType.ArrayFieldParseResult(id, new FieldArray(BackRecordSpec.this), value));
       }
     };
   }

@@ -11,12 +11,14 @@ import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
+import javax.annotation.Nonnull;
 import java.util.Map;
 
 public class VisualAtom extends Visual {
@@ -77,30 +79,38 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public Brick createOrGetCornerstoneCandidate(final Context context) {
+  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     for (Visual child : children) {
-      Brick out = child.createOrGetCornerstoneCandidate(context);
-      if (out != null) return out;
+      CreateBrickResult out = child.createOrGetCornerstoneCandidate(context);
+      if (out.empty) continue;
+      if (out.brick != null) return out;
+      throw new Assertion();
     }
-    return null;
+    return CreateBrickResult.empty();
   }
 
   @Override
-  public Brick createFirstBrick(final Context context) {
+  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
     for (Visual child : children) {
-      Brick out = child.createFirstBrick(context);
-      if (out != null) return out;
+      ExtendBrickResult out = child.createFirstBrick(context);
+      if (out.empty) continue;
+      if (out.exists) return out;
+      if (out.brick != null) return out;
+      throw new Assertion();
     }
-    return null;
+    return ExtendBrickResult.empty();
   }
 
   @Override
-  public Brick createLastBrick(final Context context) {
+  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
     for (Visual child : new ReverseIterable<>(children)) {
-      Brick out = child.createLastBrick(context);
-      if (out != null) return out;
+      ExtendBrickResult out = child.createLastBrick(context);
+      if (out.empty) continue;
+      if (out.exists) return out;
+      if (out.brick != null) return out;
+      throw new Assertion();
     }
-    return null;
+    return ExtendBrickResult.empty();
   }
 
   @Override
@@ -222,18 +232,18 @@ public class VisualAtom extends Visual {
     }
 
     @Override
-    public Brick createNextBrick(final Context context) {
+    public ExtendBrickResult createNextBrick(final Context context) {
       if (index + 1 < children.size()) return children.get(index + 1).createFirstBrick(context);
-      if (parent == null) return null;
-      if (context.windowAtom() == VisualAtom.this.atom) return null;
+      if (parent == null) return ExtendBrickResult.empty();
+      if (context.windowAtom() == VisualAtom.this.atom) return ExtendBrickResult.empty();
       return parent.createNextBrick(context);
     }
 
     @Override
-    public Brick createPreviousBrick(final Context context) {
+    public ExtendBrickResult createPreviousBrick(final Context context) {
       if (index - 1 >= 0) return children.get(index - 1).createLastBrick(context);
-      if (parent == null) return null;
-      if (context.windowAtom() == VisualAtom.this.atom) return null;
+      if (parent == null) return ExtendBrickResult.empty();
+      if (context.windowAtom() == VisualAtom.this.atom) return ExtendBrickResult.empty();
       return parent.createPreviousBrick(context);
     }
 

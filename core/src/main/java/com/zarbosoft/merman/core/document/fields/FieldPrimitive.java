@@ -9,13 +9,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class FieldPrimitive extends Field {
-  public final BaseBackPrimitiveSpec middle;
+  public final BaseBackPrimitiveSpec back;
   public final Set<Listener> listeners = new HashSet<>();
   public VisualFrontPrimitive visual;
   public StringBuilder data;
 
-  public FieldPrimitive(final BaseBackPrimitiveSpec middle, final String data) {
-    this.middle = middle;
+  public FieldPrimitive(final BaseBackPrimitiveSpec back, final String data) {
+    this.back = back;
     this.data = new StringBuilder(data);
   }
 
@@ -55,7 +55,7 @@ public class FieldPrimitive extends Field {
 
   @Override
   public BackSpecData back() {
-    return middle;
+    return back;
   }
 
   public interface Listener {

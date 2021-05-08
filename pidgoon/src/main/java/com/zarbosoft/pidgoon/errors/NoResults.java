@@ -1,11 +1,11 @@
 package com.zarbosoft.pidgoon.errors;
 
-import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.Step;
 
 public class NoResults extends RuntimeException {
-  public final Parse state;
+  public final Step state;
 
-  public NoResults(Parse state) {
+  public NoResults(Step state) {
     this.state = state;
   }
 }

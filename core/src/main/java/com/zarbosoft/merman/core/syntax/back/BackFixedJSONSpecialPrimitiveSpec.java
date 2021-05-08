@@ -1,12 +1,16 @@
 package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
+import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.nodes.Discard;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -20,8 +24,9 @@ public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
   }
 
   @Override
-  public Node buildBackRule(Environment env, final Syntax syntax) {
-    return new MatchingEventTerminal(new JSpecialPrimitiveEvent(value));
+  public Node<ROList<AtomType.FieldParseResult>> buildBackRule(Environment env, Syntax syntax) {
+    return new Discard<AtomType.FieldParseResult>(
+        new MatchingEventTerminal<BackEvent>(new JSpecialPrimitiveEvent(value)));
   }
 
   @Override

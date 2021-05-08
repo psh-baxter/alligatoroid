@@ -44,4 +44,6 @@ public interface ROList<T> extends Iterable<T> {
   int longestMatch(ROList<T> other);
 
   ROList<T> subUntil(int end);
+
+  T lastOpt();
 }

@@ -2,14 +2,14 @@ package com.zarbosoft.merman.core;
 
 public abstract class IterationTask implements Comparable<IterationTask> {
 	public static class P {
-		public static double coursePlace = 170;
-		public static double courseCompact = 165;
-		public static double wallAdjust = 160;
-		public static double layBricks = 150;
-		public static double notifyBricks = 140;
-		public static double wallCompact = 110;
-		public static double courseExpand = -95;
-		public static double wallExpand = -100;
+		public final static double coursePlace = 170;
+		public final static double courseCompact = 165;
+		public final static double wallAdjust = 160;
+		public final static double layBricks = 150;
+		public final static double notifyBricks = 140;
+		public final static double wallCompact = 110;
+		public final static double courseExpand = -95;
+		public final static double wallExpand = -100;
 	}
 
 	public boolean destroyed = false;

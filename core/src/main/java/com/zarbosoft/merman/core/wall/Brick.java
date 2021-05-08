@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.visual.Vector;
+import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
 import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.syntax.style.Style;
@@ -67,7 +68,7 @@ public abstract class Brick {
    * @param context
    * @return A new brick or null (no elements before or brick already exists)
    */
-  public Brick createPrevious(final Context context) {
+  public Visual.ExtendBrickResult createPrevious(final Context context) {
     return inter.createPrevious(context);
   }
 
@@ -75,7 +76,7 @@ public abstract class Brick {
    * @param context
    * @return A new brick or null (no elements afterward or brick already exists)
    */
-  public Brick createNext(final Context context) {
+  public Visual.ExtendBrickResult createNext(final Context context) {
     return inter.createNext(context);
   }
 

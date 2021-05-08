@@ -1,15 +1,15 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
-import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.nodes.Sequence;
-import com.zarbosoft.pidgoon.nodes.Wildcard;
+import com.zarbosoft.pidgoon.nodes.Discard;
+import com.zarbosoft.rendaw.common.ROList;
 
 public class Any extends Pattern {
   public static Pattern repeatedAny = new Repeat0(new Any());
 
   @Override
-  public Node build(boolean capture) {
-    return new Sequence().add(new Wildcard()).add(StackStore.pushVarStackSingle);
+  public Node<ROList<String>> build(boolean capture) {
+    if (capture) return new WildcardTerminal();
+    else return new Discard<>(new WildcardTerminal());
   }
 }

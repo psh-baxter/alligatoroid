@@ -311,7 +311,7 @@ public class Course {
           attachment.setConverse(context, brickPlacement.first);
       }
       if (calcContext.alignment == null && alignment != null) {
-        if (alignment != null) alignment.removeBrick(context, alignmentBrick);
+        alignment.removeBrick(context, alignmentBrick);
       }
       if (calcContext.converse > context.edge) getIdleCompact(context);
       if (calcContext.converse * context.retryExpandFactor < lastExpandCheckConverse)

@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.editorcore.gap;
 
 import com.zarbosoft.merman.core.Environment;
-import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
@@ -10,15 +9,17 @@ import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Any;
+import com.zarbosoft.merman.core.syntax.primitivepattern.ForceEndCharacterEvent;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternString;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.pidgoon.events.StackStore;
+import com.zarbosoft.pidgoon.events.EscapableResult;
+import com.zarbosoft.pidgoon.events.nodes.Terminal;
 import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.nodes.HomogenousSequence;
 import com.zarbosoft.pidgoon.nodes.Operator;
-import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 public class CandidateInfo {
   /** Atom/array fronts preceding the concrete key text */
@@ -27,7 +28,7 @@ public class CandidateInfo {
    * Matches the key text and puts a var double list of (string key, string primitive contents) for
    * parsed primitive front
    */
-  public final Node keyGrammar;
+  public final Node<EscapableResult<ROList<FieldPrimitive>>> keyGrammar;
 
   public final ROList<FrontSpec> keySpecs;
   /** May be null */
@@ -35,7 +36,7 @@ public class CandidateInfo {
 
   public CandidateInfo(
       ROList<FrontSpec> preceding,
-      Node keyGrammar,
+      Node<EscapableResult<ROList<FieldPrimitive>>> keyGrammar,
       ROList<FrontSpec> keySpecs,
       FrontSpec following) {
     this.preceding = preceding;
@@ -47,7 +48,9 @@ public class CandidateInfo {
   public static CandidateInfo inspect(Environment env, AtomType candidate) {
     ROList<FrontSpec> front = candidate.front();
     TSList<FrontSpec> preceding = new TSList<>();
-    Sequence keyGrammar = new Sequence();
+    HomogenousSequence<FieldPrimitive> keyGrammar =
+        (HomogenousSequence<FieldPrimitive>)
+            new HomogenousSequence<FieldPrimitive>();
     TSList<FrontSpec> keySpecs = new TSList<>();
     FrontSpec[] following = {null};
     new Object() {
@@ -81,20 +84,17 @@ public class CandidateInfo {
 
           } else if (f instanceof FrontPrimitiveSpec) {
             keySpecs.add(f);
-            keyGrammar
-                .add(
-                    new Operator<StackStore>() {
-                      @Override
-                      protected StackStore process(StackStore store) {
-                        return store.pushStack(f);
-                      }
-                    })
-                .add(StackStore.prepVarStack);
-            if (((FrontPrimitiveSpec) f).field.pattern != null) {
-              keyGrammar.add(((FrontPrimitiveSpec) f).field.pattern.build(true));
-            } else {
-              keyGrammar.add(Any.repeatedAny.build(true));
-            }
+            keyGrammar.add(
+                new Operator<ROList<String>, FieldPrimitive>(
+                    ((FrontPrimitiveSpec) f).field.pattern != null
+                        ? ((FrontPrimitiveSpec) f).field.pattern.build(true)
+                        : Any.repeatedAny.build(true)) {
+                  @Override
+                  protected FieldPrimitive process(ROList<String> value) {
+                    return new FieldPrimitive(
+                        ((FrontPrimitiveSpec) f).field, Environment.joinGlyphs(value));
+                  }
+                });
           }
         }
       }
@@ -102,42 +102,21 @@ public class CandidateInfo {
       void processSymbol(FrontSymbol f) {
         keySpecs.add(f);
         if (f.gapKey != null) {
-          keyGrammar.add(new PatternString(env, f.gapKey).build(false));
+          keyGrammar.addIgnored(new PatternString(env, f.gapKey).build(false));
         } else if (f.type instanceof SymbolTextSpec) {
-          keyGrammar.add(new PatternString(env, ((SymbolTextSpec) f.type).text).build(false));
+          keyGrammar.addIgnored(
+              new PatternString(env, ((SymbolTextSpec) f.type).text).build(false));
         }
       }
     };
+
     return new CandidateInfo(preceding, keyGrammar, keySpecs, following[0]);
   }
 
-  /**
-   * Parses matched text into fields, placed in fieldsOut. The field containing the last bit of text
-   * is returned.
-   *
-   * @param branch
-   * @param fieldsOut
-   * @return
-   */
-  public static Field extractFromGrammarMatch(StackStore branch, TSMap<String, Field> fieldsOut) {
-    Field lastPrimitive = null;
-    TSList<String> glyphs = new TSList<>();
-    while (branch.stackTop() != null) {
-      glyphs.clear();
-      branch = branch.popVarSingleList(glyphs);
-      glyphs.reverse();
-      StringBuilder builder = new StringBuilder();
-      for (String glyph : glyphs) {
-        builder.append(glyph);
-      }
-      FrontPrimitiveSpec spec = branch.stackTop();
-      branch = branch.popStack();
-      FieldPrimitive field = new FieldPrimitive(spec.field, builder.toString());
-      fieldsOut.put(spec.fieldId, field);
-      if (lastPrimitive == null) {
-        lastPrimitive = field;
-      }
+  public static class ForceEndTerminal extends Terminal<Object, Object> {
+    @Override
+    protected ROPair<Boolean, Object> matches(Object event) {
+      return new ROPair<>(event instanceof ForceEndCharacterEvent, null);
     }
-    return lastPrimitive;
   }
 }

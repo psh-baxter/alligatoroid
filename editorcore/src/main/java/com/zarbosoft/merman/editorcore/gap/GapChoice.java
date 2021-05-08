@@ -9,15 +9,9 @@ import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
-import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
-import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
-import com.zarbosoft.merman.core.syntax.back.BackSpecData;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
@@ -30,15 +24,11 @@ import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeNodeSet;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
 import com.zarbosoft.pidgoon.events.Event;
-import com.zarbosoft.pidgoon.events.StackStore;
-import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-
-import java.util.Map;
 
 public class GapChoice extends TwoColumnChoice {
   public final Atom gap;
@@ -46,10 +36,10 @@ public class GapChoice extends TwoColumnChoice {
   public final int consumePreceding;
   public final ROList<EditGapCursor.PrepareAtomField> supplyFillAtoms;
   public final int consumeText;
-  public final StackStore branch;
   private final TSList<Event> glyphs;
   private final FrontSpec followingSpec;
   private final ROList<FrontSpec> keySpecs;
+  private ROList fields;
 
   public GapChoice(
       Atom gap,
@@ -58,7 +48,7 @@ public class GapChoice extends TwoColumnChoice {
       ROList<EditGapCursor.PrepareAtomField> supplyFillAtoms,
       TSList<Event> glyphs,
       int consumeText,
-      StackStore branch,
+      ROList<FieldPrimitive> fields,
       ROList<FrontSpec> keySpecs,
       FrontSpec followingSpec) {
     this.gap = gap;
@@ -67,7 +57,7 @@ public class GapChoice extends TwoColumnChoice {
     this.supplyFillAtoms = supplyFillAtoms;
     this.glyphs = glyphs;
     this.consumeText = consumeText;
-    this.branch = branch;
+    this.fields = fields;
     this.keySpecs = keySpecs;
     this.followingSpec = followingSpec;
   }
@@ -82,7 +72,11 @@ public class GapChoice extends TwoColumnChoice {
 
           /// Aggregate typed text parsing results into primitive fields
           // + identify last primitive
-          Field lastPrimitive = CandidateInfo.extractFromGrammarMatch(branch, fields);
+          ROList<FieldPrimitive> preFields = this.fields;
+          FieldPrimitive lastPrimitive = preFields.lastOpt();
+          for (FieldPrimitive field : preFields) {
+            fields.put(field.back.id, field);
+          }
 
           // Remainder text
           StringBuilder remainderText = new StringBuilder();

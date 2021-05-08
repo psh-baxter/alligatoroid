@@ -20,6 +20,8 @@ import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
+import javax.annotation.Nonnull;
+
 public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   private final Symbol ellipsisSpec;
   protected VisualAtom body;
@@ -136,12 +138,12 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
               }
 
               @Override
-              public Brick createPrevious(final Context context) {
+              public ExtendBrickResult createPrevious(final Context context) {
                 return parent.createPreviousBrick(context);
               }
 
               @Override
-              public Brick createNext(final Context context) {
+              public ExtendBrickResult createNext(final Context context) {
                 return parent.createNextBrick(context);
               }
 
@@ -165,26 +167,28 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   @Override
-  public Brick createOrGetCornerstoneCandidate(final Context context) {
+  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (ellipsize(context)) {
-      if (ellipsis != null) return ellipsis;
-      return createEllipsis(context);
+      if (ellipsis != null) return CreateBrickResult.brick(ellipsis);
+      return CreateBrickResult.brick(createEllipsis(context));
     } else return body.createOrGetCornerstoneCandidate(context);
   }
 
   @Override
-  public Brick createFirstBrick(final Context context) {
+  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
     if (ellipsize(context)) {
-      return createEllipsis(context);
+      if (ellipsis != null) return ExtendBrickResult.exists();
+      return ExtendBrickResult.brick(createEllipsis(context));
     } else {
       return body.createFirstBrick(context);
     }
   }
 
   @Override
-  public Brick createLastBrick(final Context context) {
+  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
     if (ellipsize(context)) {
-      return createEllipsis(context);
+      if (ellipsis != null) return ExtendBrickResult.exists();
+      return ExtendBrickResult.brick(createEllipsis(context));
     } else {
       return body.createLastBrick(context);
     }
@@ -296,13 +300,13 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     public Brick nudgeCreation(final Context context) {
-      final Brick first = base.body.createOrGetCornerstoneCandidate(context);
+      final CreateBrickResult first = base.body.createOrGetCornerstoneCandidate(context);
       context.wall.setCornerstone(
           context,
-          first,
+          first.brick,
           () -> base.parent.getPreviousBrick(context),
           () -> base.parent.getNextBrick(context));
-      return first;
+      return first.brick;
     }
 
     public void actionCopy(Context context) {
@@ -398,12 +402,12 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public Brick createPreviousBrick(final Context context) {
+    public ExtendBrickResult createPreviousBrick(final Context context) {
       return parent.createPreviousBrick(context);
     }
 
     @Override
-    public Brick createNextBrick(final Context context) {
+    public ExtendBrickResult createNextBrick(final Context context) {
       return parent.createNextBrick(context);
     }
 

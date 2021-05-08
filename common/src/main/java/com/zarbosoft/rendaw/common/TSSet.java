@@ -38,6 +38,11 @@ public class TSSet<T> implements ROSetRef<T> {
     return new ROSet<>(new HashSet<>(data));
   }
 
+  /**
+   * True if new, false if existed
+   * @param v
+   * @return
+   */
   public boolean addNew(T v) {
     return data.add(v);
   }

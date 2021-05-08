@@ -22,6 +22,7 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSSet;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -44,6 +45,7 @@ import java.util.function.Supplier;
  * selection is set by default in context.
  */
 public class Context {
+  @SuppressFBWarnings("MS_SHOULD_BE_FINAL")
   public static Supplier<TSSet> createSet = () -> new TSSet();
   /** Contains the cursor and other marks. Scrolls. */
   public final Group overlay;
@@ -255,7 +257,7 @@ public class Context {
     if (config.startSelected) document.root.visual.selectAnyChild(this);
     else {
       wall.setCornerstone(
-          this, document.root.visual.createOrGetCornerstoneCandidate(this), () -> null, () -> null);
+          this, document.root.visual.createOrGetCornerstoneCandidate(this).brick, () -> null, () -> null);
     }
     triggerIdleLayBricksOutward();
   }
@@ -746,7 +748,7 @@ public class Context {
           final Brick next = ends.iterator().next();
           ends.remove(next);
           if (next.parent != null) {
-            final Brick created = next.createNext(Context.this);
+            final Brick created = next.createNext(Context.this).brick;
             if (created != null) {
               next.addAfter(Context.this, created);
               ends.add(created);
@@ -757,7 +759,7 @@ public class Context {
           final Brick previous = starts.iterator().next();
           starts.remove(previous);
           if (previous.parent != null) {
-            final Brick created = previous.createPrevious(Context.this);
+            final Brick created = previous.createPrevious(Context.this).brick;
             if (created != null) {
               previous.addBefore(Context.this, created);
               starts.add(created);

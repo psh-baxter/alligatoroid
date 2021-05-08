@@ -13,11 +13,10 @@ import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.core.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.core.serialization.JSONObjectPath;
 import com.zarbosoft.merman.core.serialization.JSONPath;
-import com.zarbosoft.pidgoon.model.Store;
+import com.zarbosoft.pidgoon.BaseParseBuilder;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseEventSink;
-import com.zarbosoft.pidgoon.events.StackStore;
-import com.zarbosoft.pidgoon.BaseParseBuilder;
+import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROPair;
 
@@ -27,7 +26,7 @@ import java.util.List;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
-public class JSONParse<O> extends BaseParseBuilder<JSONParse<O>> {
+public class JSONParse<O> extends BaseParseBuilder<O, JSONParse<O>> {
 
   private int eventUncertainty = 20;
 
@@ -36,7 +35,9 @@ public class JSONParse<O> extends BaseParseBuilder<JSONParse<O>> {
     this.eventUncertainty = other.eventUncertainty;
   }
 
-  public JSONParse() {}
+  public JSONParse(Reference.Key<O> root) {
+    super(root);
+  }
 
   public static List<ROPair<? extends Event, Object>> streamEvents(InputStream stream) {
     List<ROPair<? extends Event, Object>> out = new ArrayList<>();
@@ -152,8 +153,6 @@ public class JSONParse<O> extends BaseParseBuilder<JSONParse<O>> {
    * @return
    */
   public ParseEventSink<O> parse() {
-    final Store store = initialStore == null ? new StackStore() : initialStore;
-    return new ParseEventSink<>(
-        grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
+    return new ParseEventSink<>(grammar, root, uncertaintyLimit);
   }
 }

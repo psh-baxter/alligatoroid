@@ -1,7 +1,9 @@
 package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EKeyEvent;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
@@ -9,14 +11,16 @@ import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateRecord;
 import com.zarbosoft.merman.core.serialization.WriteStateRecordEnd;
-import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.RecordDiscardDuplicateKey;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.nodes.MergeSequence;
+import com.zarbosoft.pidgoon.nodes.MergeSet;
 import com.zarbosoft.pidgoon.nodes.Reference;
-import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Set;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -40,27 +44,26 @@ public class BackFixedRecordSpec extends BackSpec {
   }
 
   @Override
-  public Node buildBackRule(Environment env, final Syntax syntax) {
-    final Sequence sequence;
-    sequence = new Sequence();
-    sequence.add(new MatchingEventTerminal(new EObjectOpenEvent()));
-    final Set set = new Set();
+  public Node<ROList<AtomType.FieldParseResult>> buildBackRule(Environment env, Syntax syntax) {
+    final MergeSequence<AtomType.FieldParseResult> sequence = new MergeSequence<>();
+    sequence.addIgnored(new MatchingEventTerminal<BackEvent>(new EObjectOpenEvent()));
+    final MergeSet<AtomType.FieldParseResult> set = new MergeSet<>();
     for (Map.Entry<String, BackSpec> pair : pairs) {
       set.add(
-          new Sequence()
-              .add(new MatchingEventTerminal(new EKeyEvent(pair.getKey())))
+          new MergeSequence<AtomType.FieldParseResult>()
+              .addIgnored(new MatchingEventTerminal<BackEvent>(new EKeyEvent(pair.getKey())))
               .add(pair.getValue().buildBackRule(env, syntax)),
           true);
     }
     for (String key : discard) {
       set.add(
-          new Sequence()
-              .add(new MatchingEventTerminal(new EKeyEvent(key)))
-              .add(new Reference(Syntax.GRAMMAR_WILDCARD_KEY)),
+          new MergeSequence<AtomType.FieldParseResult>()
+              .addIgnored(new MatchingEventTerminal<BackEvent>(new EKeyEvent(key)))
+              .addIgnored(new Reference<>(Syntax.GRAMMAR_WILDCARD_KEY)),
           false);
     }
     sequence.add(set);
-    sequence.add(new MatchingEventTerminal(new EObjectCloseEvent()));
+    sequence.addIgnored(new MatchingEventTerminal<BackEvent>(new EObjectCloseEvent()));
     return sequence;
   }
 

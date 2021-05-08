@@ -1,17 +1,12 @@
 package com.zarbosoft.pidgoon.model;
 
+import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.rendaw.common.Format;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class Grammar {
-  public static final Object DEFAULT_ROOT_KEY = new Object(){
-    @Override
-    public String toString() {
-      return "<DEFAULT_ROOT_KEY>";
-    }
-  };
   protected final Map<Object, Node> nodes;
 
   public Grammar() {
@@ -22,14 +17,14 @@ public class Grammar {
     this.nodes = new HashMap<>(other.nodes);
   }
 
-  public Grammar add(final Object key, final Node node) {
+  public <T> Grammar add(final Reference.Key<T> key, final Node<T> node) {
     if (nodes.containsKey(key))
       throw new AssertionError(Format.format("Node with name [%s] already exists.", key));
     nodes.put(key, node);
     return this;
   }
 
-  public Node getNode(final Object key) {
+  public <T> Node<T> getNode(final Reference.Key<T> key) {
     if (!nodes.containsKey(key)) throw new RuntimeException(Format.format("No rule named %s", key));
     return nodes.get(key);
   }

@@ -1,12 +1,10 @@
 package com.zarbosoft.pidgoon.nodes;
 
+import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.model.RefParent;
-import com.zarbosoft.pidgoon.model.Store;
-import com.zarbosoft.pidgoon.BaseParent;
 import com.zarbosoft.pidgoon.model.Parent;
-import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.ROMap;
 
 import java.util.ArrayList;
@@ -14,44 +12,49 @@ import java.util.List;
 import java.util.function.Consumer;
 
 /** Match exactly one child. */
-public class Union extends Node {
-  List<Node> children = new ArrayList<>();
+public class Union<T> extends Node<T> {
+  List<Node<T>> children = new ArrayList<>();
 
-  public Union add(final Node child) {
+  public Union<T> add(final Node<T> child) {
     children.add(child);
     return this;
   }
 
-  public <T> Union apply(Consumer<Union> c) {
+  public Union<T> apply(Consumer<Union<T>> c) {
     c.accept(this);
     return this;
   }
 
   @Override
   public void context(
-      final Parse context,
-      final Store store,
-      final Parent parent,
-      final ROMap<Object, RefParent> seen,
-      final MismatchCause cause) {
-    for (Node child : children) {
-          child.context(
-                  context,
-                  store.push(),
-                  new UnionParent(parent),
-                  seen,
-                  cause);
-      }
+          Grammar grammar, final Step step,
+          final Parent<T> parent,
+          Step.Branch branch,
+          final ROMap<Object, Reference.RefParent> seen,
+          final MismatchCause cause,
+          Object color) {
+    for (Node<T> child : children) {
+      child.context(grammar, step, new UnionParent<T>(parent), branch, seen, cause, color);
+    }
   }
 
-    private static class UnionParent extends BaseParent {
-        public UnionParent(Parent parent) {
-            super(parent);
-        }
+  private static class UnionParent<T> implements Parent<T> {
+    public final Parent<T> parent;
 
-        @Override
-        public void advance(final Parse step, final Store store, final MismatchCause cause) {
-            parent.advance(step, store.pop(), cause);
-        }
+    public UnionParent(Parent<T> parent) {
+      super();
+      this.parent = parent;
     }
+
+    @Override
+    public void advance(
+            Grammar grammar, final Step step, Step.Branch branch, T result, final MismatchCause cause) {
+      parent.advance(grammar, step, branch, result, cause);
+    }
+
+    @Override
+    public void error(Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
+      parent.error(grammar, step, branch, cause);
+    }
+  }
 }

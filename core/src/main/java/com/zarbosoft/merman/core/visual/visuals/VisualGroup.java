@@ -6,10 +6,13 @@ import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.wall.Brick;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
+
+import javax.annotation.Nonnull;
 
 public class VisualGroup extends Visual {
 
@@ -52,33 +55,41 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public Brick createOrGetCornerstoneCandidate(final Context context) {
+  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (children.isEmpty()) throw new AssertionError();
     for (Visual child : children) {
-      Brick out = child.createOrGetCornerstoneCandidate(context);
-      if (out != null) return out;
+      CreateBrickResult out = child.createOrGetCornerstoneCandidate(context);
+      if (out.empty) continue;
+      if (out.brick != null) return out;
+      throw new Assertion();
     }
-    return null;
+    return CreateBrickResult.empty();
   }
 
   @Override
-  public Brick createFirstBrick(final Context context) {
-    if (children.isEmpty()) return null;
+  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+    if (children.isEmpty()) return ExtendBrickResult.empty();
     for (Visual child : children) {
-      Brick out = child.createFirstBrick(context);
-      if (out != null) return out;
+      ExtendBrickResult out = child.createFirstBrick(context);
+      if (out.empty) continue;
+      if (out.exists) return out;
+      if (out.brick != null) return out;
+      throw new Assertion();
     }
-    return null;
+    return ExtendBrickResult.empty();
   }
 
   @Override
-  public Brick createLastBrick(final Context context) {
-    if (children.isEmpty()) return null;
+  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
+    if (children.isEmpty()) return ExtendBrickResult.empty();
     for (Visual child : new ReverseIterable<>(children)) {
-      Brick out = child.createLastBrick(context);
-      if (out != null) return out;
+      ExtendBrickResult out = child.createLastBrick(context);
+      if (out.empty) continue;
+      if (out.exists) return out;
+      if (out.brick != null) return out;
+      throw new Assertion();
     }
-    return null;
+    return ExtendBrickResult.empty();
   }
 
   @Override
@@ -193,14 +204,14 @@ public class VisualGroup extends Visual {
     }
 
     @Override
-    public Brick createNextBrick(final Context context) {
+    public ExtendBrickResult createNextBrick(final Context context) {
       if (index + 1 < target.children.size())
         return target.children.get(index + 1).createFirstBrick(context);
       return target.parent.createNextBrick(context);
     }
 
     @Override
-    public Brick createPreviousBrick(final Context context) {
+    public ExtendBrickResult createPreviousBrick(final Context context) {
       if (index - 1 >= 0) return target.children.get(index - 1).createLastBrick(context);
       return target.parent.createPreviousBrick(context);
     }

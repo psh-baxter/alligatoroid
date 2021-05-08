@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax;
 
+import com.zarbosoft.merman.core.AtomKey;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
@@ -21,9 +22,9 @@ import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.nodes.HomogenousSequence;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
-import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Pair;
@@ -38,10 +39,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class Syntax {
-
-  public static final Object GRAMMAR_WILDCARD_KEY = new Object();
-  public static final Object GRAMMAR_WILDCARD_KEY_UNTYPED = new Object();
-  public static final Object GRAMMAR_ROOT = new Object();
+  public static final Reference.Key<Object> GRAMMAR_WILDCARD_KEY = new Reference.Key<>();
+  public static final Reference.Key<Object> GRAMMAR_WILDCARD_KEY_UNTYPED = new Reference.Key<>();
   public final BackType backType;
   public final ModelColor background;
   public final Padding pad;
@@ -127,29 +126,29 @@ public class Syntax {
     grammar.add(
         GRAMMAR_WILDCARD_KEY_UNTYPED,
         new Union()
-            .add(new MatchingEventTerminal(new EPrimitiveEvent()))
-            .add(new MatchingEventTerminal(new JSpecialPrimitiveEvent()))
+            .add(new MatchingEventTerminal<>(new EPrimitiveEvent()))
+            .add(new MatchingEventTerminal<>(new JSpecialPrimitiveEvent()))
             .add(
-                new Sequence()
-                    .add(new MatchingEventTerminal(new EArrayOpenEvent()))
+                new HomogenousSequence()
+                    .add(new MatchingEventTerminal<>(new EArrayOpenEvent()))
                     .add(new Repeat(new Reference(GRAMMAR_WILDCARD_KEY)))
-                    .add(new MatchingEventTerminal(new EArrayCloseEvent())))
+                    .add(new MatchingEventTerminal<>(new EArrayCloseEvent())))
             .add(
-                new Sequence()
-                    .add(new MatchingEventTerminal(new EObjectOpenEvent()))
+                new HomogenousSequence()
+                    .add(new MatchingEventTerminal<>(new EObjectOpenEvent()))
                     .add(
-                        new Reference(
-                            new Sequence()
-                                .add(new MatchingEventTerminal(new EKeyEvent()))
+                        new Repeat(
+                            new HomogenousSequence()
+                                .add(new MatchingEventTerminal<>(new EKeyEvent()))
                                 .add(new Reference(GRAMMAR_WILDCARD_KEY))))
-                    .add(new MatchingEventTerminal(new EObjectCloseEvent()))));
+                    .add(new MatchingEventTerminal<>(new EObjectCloseEvent()))));
     grammar.add(
         GRAMMAR_WILDCARD_KEY,
         new Union()
             .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))
             .add(
-                new Sequence()
-                    .add(new MatchingEventTerminal(new ETypeEvent()))
+                new HomogenousSequence()
+                    .add(new MatchingEventTerminal<>(new ETypeEvent()))
                     .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))));
     for (Map.Entry<String, ROSet<AtomType>> entry : splayedTypes) {
       ROSet<AtomType> types = entry.getValue();
@@ -157,16 +156,16 @@ public class Syntax {
       AtomType firstType = types.iterator().next();
       if (types.size() == 1 && key.equals(firstType.id())) {
         AtomType type = firstType;
-        grammar.add(type.id(), type.buildBackRule(env, this));
+        grammar.add(type.key, type.buildBackRule(env, this));
       } else {
-        final Union group = new Union();
+        final Union<AtomType.AtomParseResult> group = new Union<>();
         for (AtomType type : types) {
-          group.add(new Reference(type.id()));
+          group.add(new Reference<AtomType.AtomParseResult>(type.key));
         }
-        grammar.add(key, group);
+        grammar.add(new AtomKey(key), group);
       }
     }
-    grammar.add(RootAtomType.ROOT_TYPE_ID, root.buildBackRule(env, this));
+    grammar.add(root.key, root.buildBackRule(env, this));
 
     errors.raise();
   }
@@ -243,11 +242,11 @@ public class Syntax {
     return splayedTypes;
   }
 
-  public Node backRuleRef(final String type) {
-    final Union out = new Union();
-    out.add(new Reference(type));
-    out.add(new Reference(gap.backType));
-    out.add(new Reference(suffixGap.backType));
+  public Node<AtomType.AtomParseResult> backRuleRef(final String type) {
+    final Union<AtomType.AtomParseResult> out = new Union<>();
+    out.add(new Reference<>(new AtomKey(type)));
+    out.add(new Reference<>(new AtomKey(gap.backType)));
+    out.add(new Reference<>(new AtomKey(suffixGap.backType)));
     return out;
   }
 

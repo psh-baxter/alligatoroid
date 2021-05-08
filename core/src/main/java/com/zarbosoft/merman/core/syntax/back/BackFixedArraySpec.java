@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
@@ -8,11 +9,12 @@ import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateArrayEnd;
 import com.zarbosoft.merman.core.serialization.WriteStateBack;
-import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
-import com.zarbosoft.pidgoon.nodes.Sequence;
+import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.nodes.MergeSequence;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -29,14 +31,13 @@ public class BackFixedArraySpec extends BackSpec {
   }
 
   @Override
-  public Node buildBackRule(Environment env, final Syntax syntax) {
-    final Sequence sequence;
-    sequence = new Sequence();
-    sequence.add(new MatchingEventTerminal(new EArrayOpenEvent()));
+  public Node<ROList<AtomType.FieldParseResult>> buildBackRule(Environment env, Syntax syntax) {
+    final MergeSequence<AtomType.FieldParseResult> sequence = new MergeSequence<>();
+    sequence.addIgnored(new MatchingEventTerminal<>(new EArrayOpenEvent()));
     for (final BackSpec element : elements) {
       sequence.add(element.buildBackRule(env, syntax));
     }
-    sequence.add(new MatchingEventTerminal(new EArrayCloseEvent()));
+    sequence.addIgnored(new MatchingEventTerminal<>(new EArrayCloseEvent()));
     return sequence;
   }
 

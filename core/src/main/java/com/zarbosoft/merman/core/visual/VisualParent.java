@@ -11,9 +11,9 @@ public abstract class VisualParent {
 
 	public abstract VisualAtom atomVisual();
 
-	public abstract Brick createPreviousBrick(Context context);
+	public abstract Visual.ExtendBrickResult createPreviousBrick(Context context);
 
-	public abstract Brick createNextBrick(Context context);
+	public abstract Visual.ExtendBrickResult createNextBrick(Context context);
 
 	public abstract Brick getPreviousBrick(Context context);
 

@@ -5,8 +5,10 @@ import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -38,7 +40,7 @@ public abstract class BackSpec {
 
   protected abstract Iterator<BackSpec> walkStep();
 
-  public abstract Node buildBackRule(Environment env, Syntax syntax);
+  public abstract Node<ROList<AtomType.FieldParseResult>> buildBackRule(Environment env, Syntax syntax);
 
   public void finish(
       MultiError errors,

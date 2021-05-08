@@ -285,8 +285,6 @@ public class Wall {
     private final Context context;
     int forward = Integer.MAX_VALUE;
     int backward = Integer.MIN_VALUE;
-    int minTransverse = Integer.MAX_VALUE;
-    int maxTransverse = Integer.MIN_VALUE;
 
     IterationAdjustTask(final Context context) {
       this.context = context;

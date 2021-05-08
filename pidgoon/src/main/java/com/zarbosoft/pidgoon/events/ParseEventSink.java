@@ -1,13 +1,13 @@
 package com.zarbosoft.pidgoon.events;
 
 import com.zarbosoft.pidgoon.Pidgoon;
-import com.zarbosoft.pidgoon.model.Grammar;
-import com.zarbosoft.pidgoon.model.Store;
+import com.zarbosoft.pidgoon.errors.AbortParse;
+import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.errors.NoResults;
-import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Step;
+import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.rendaw.common.Assertion;
-
-import java.util.List;
 
 /**
  * Created by Parse. A push-based parse (user pushes events when they are available). This is
@@ -15,44 +15,48 @@ import java.util.List;
  *
  * @param <O> Parse result type. Returned by `finish`.
  */
-public class ParseEventSink<O> implements EventSink {
-  private final Parse context;
+public class ParseEventSink<O> implements EventSink<ParseEventSink<O>> {
+  private final Step<O> step;
   private final Grammar grammar;
+  private final int uncertaintyLimit;
 
   public ParseEventSink(
-      final Grammar grammar,
-      final Object root,
-      final Store store,
-      final int errorHistoryLimit,
-      final int uncertaintyLimit,
-      final boolean dumpAmbiguity) {
+      final Grammar grammar, final Reference.Key<O> root, final int uncertaintyLimit) {
     this.grammar = grammar;
-    this.context =
-        Pidgoon.prepare(grammar, root, store, errorHistoryLimit, uncertaintyLimit, dumpAmbiguity);
+    this.uncertaintyLimit = uncertaintyLimit;
+    this.step = Pidgoon.prepare(grammar, root);
   }
 
-  public ParseEventSink(final Parse step, final Grammar grammar) {
-    this.context = step;
+  public ParseEventSink(final Step<O> step, final Grammar grammar, int uncertaintyLimit) {
+    this.step = step;
     this.grammar = grammar;
+    this.uncertaintyLimit = uncertaintyLimit;
   }
 
   @Override
   public ParseEventSink<O> push(final Event event, final Object at) {
     if (ended()) throw new Assertion();
-    final Parse nextStep = Pidgoon.step(context, new Position(event, at));
-    return new ParseEventSink<O>(nextStep, grammar);
+    final Step<O> nextStep;
+    try {
+      nextStep = Pidgoon.step(grammar, uncertaintyLimit, step, event);
+    } catch (InvalidStream e) {
+      throw new InvalidStreamAt(at, e);
+    } catch (AbortParse e) {
+      throw new AbortParseAt(at, e);
+    }
+    return new ParseEventSink<O>(nextStep, grammar, uncertaintyLimit);
   }
 
   public boolean ended() {
-    return context.branches.isEmpty();
+    return step.branches.isEmpty();
   }
 
   public O result() {
-    if (context.completed.isEmpty()) throw new NoResults(context);
-    return (O) context.completed.get(0).result();
+    if (step.completed.isEmpty()) throw new NoResults(step);
+    return step.completed.get(0);
   }
 
-  public Parse context() {
-    return context;
+  public Step<O> context() {
+    return step;
   }
 }

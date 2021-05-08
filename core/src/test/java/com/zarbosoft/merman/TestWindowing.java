@@ -402,8 +402,11 @@ public class TestWindowing {
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
                     .valueParentRef.selectValue(context))
+            .dumpWall()
         .actWindow()
+            .dumpWall()
         .actWindowClear()
+            .dumpWall()
         .checkTextBrick(0, i++, "0_0")
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")

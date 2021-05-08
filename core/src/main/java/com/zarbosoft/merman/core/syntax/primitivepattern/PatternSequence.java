@@ -1,6 +1,8 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
 import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.nodes.HomogenousSequence;
+import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class PatternSequence extends Pattern {
@@ -11,8 +13,8 @@ public class PatternSequence extends Pattern {
   }
 
   @Override
-  public Node build(boolean capture) {
-    final com.zarbosoft.pidgoon.nodes.Sequence out = new com.zarbosoft.pidgoon.nodes.Sequence();
+  public Node<ROList<String>> build(boolean capture) {
+    final MergeSequence<String> out = new MergeSequence<String>();
     for (final Pattern child : children) out.add(child.build(capture));
     return out;
   }

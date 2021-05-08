@@ -1,57 +1,48 @@
 package com.zarbosoft.pidgoon.nodes;
 
-import com.zarbosoft.pidgoon.BaseParent;
+import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
-import com.zarbosoft.pidgoon.model.Parse;
-import com.zarbosoft.pidgoon.model.RefParent;
-import com.zarbosoft.pidgoon.model.Store;
-import com.zarbosoft.rendaw.common.Format;
+import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.ROMap;
 
-public class Not extends Node {
-  private final Node root;
+/** Returns null if the child node raises an error. Raises an error if the child node matches. */
+public class Not extends Node<Void> {
+  private final Node child;
 
-  public Not(final Node root) {
-    this.root = root;
+  public Not(final Node child) {
+    this.child = child;
   }
 
   @Override
   public void context(
-      final Parse context,
-      final Store store,
-      final Parent parent,
-      final ROMap<Object, RefParent> seen,
-      final MismatchCause cause) {
-    root.context(context, store.push(), new OperatorParent(parent), seen, cause);
+          Grammar grammar, final Step step,
+          final Parent<Void> parent,
+          Step.Branch branch,
+          ROMap<Object, Reference.RefParent> seen,
+          final MismatchCause cause,
+          Object color) {
+    child.context(grammar, step, new OperatorParent(parent), branch, ROMap.empty, cause, color);
   }
 
-  @Override
-  public String toString() {
-    final String out;
-    if ((root instanceof Sequence) || (root instanceof Union) || (root instanceof Repeat)) {
-      out = Format.format("~(%s)", root);
-    } else {
-      out = Format.format("~%s", root);
-    }
-    return out;
-  }
+  private static class OperatorParent implements Parent {
+    public final Parent parent;
 
-  private static class OperatorParent extends BaseParent {
     public OperatorParent(Parent parent) {
-      super(parent);
+      super();
+      this.parent = parent;
     }
 
     @Override
-    public void error(final Parse step, final Store store, final MismatchCause cause) {
-      parent.advance(step, store.pop(), cause);
+    public void error(Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
+      parent.advance(grammar, step, branch, null, cause);
     }
 
     @Override
-    public void advance(final Parse step, Store store, final MismatchCause cause) {
-      store = store.pop();
-      super.error(step, store, cause);
+    public void advance(
+            Grammar grammar, final Step step, Step.Branch branch, Object result, final MismatchCause cause) {
+      error(grammar, step, branch, cause);
     }
   }
 }

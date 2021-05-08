@@ -1,31 +1,34 @@
 package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.model.ExceptionMismatchCause;
+import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
-import com.zarbosoft.pidgoon.model.Parse;
-import com.zarbosoft.pidgoon.model.RefParent;
-import com.zarbosoft.pidgoon.model.Store;
+import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.ROMap;
 
-/** Recurse via the grammar rule of this name. */
-public class Reference extends Node {
-  private final Object key;
-  private Node base = null;
+import java.util.ArrayList;
+import java.util.List;
 
-  public Reference(final Object key) {
+/** Recurse via the grammar rule of this name. */
+public class Reference<T> extends Node<T> {
+  private final Key<T> key;
+  private Node<T> base = null;
+
+  public Reference(Key<T> key) {
     super();
     this.key = key;
   }
 
   @Override
   public void context(
-      final Parse context,
-      final Store store,
-      final Parent parent,
-      final ROMap<Object, RefParent> seen,
-      final MismatchCause cause) {
+          Grammar grammar, final Step step,
+          final Parent<T> parent,
+          Step.Branch branch,
+          final ROMap<Object, RefParent> seen,
+          final MismatchCause cause,
+          Object color) {
     if (seen.has(key)) {
       seen.get(key).loopParents.add(parent);
       return;
@@ -33,17 +36,43 @@ public class Reference extends Node {
     final RefParent subParent = new RefParent(parent);
     if (base == null) {
       try {
-        base = context.grammar.getNode(key);
+        base = grammar.getNode(key);
       } catch (Exception e) {
-        parent.error(context, store, new ExceptionMismatchCause(this, store.color, e));
+        parent.error(grammar, step, branch, new ExceptionMismatchCause(this, e));
         return;
       }
     }
-    base.context(context, store.push(), subParent, seen.mut().put(key, subParent), cause);
+    base.context(grammar, step, subParent, branch, seen.mut().put(key, subParent), cause, color);
   }
 
-  @Override
-  public String toString() {
-    return "REFERENCE " +key.toString();
+  /**
+   * Needs equals and hashcode
+   * @param <T> result type of node stored with this key
+   */
+  public static class Key<T> {
+
+  }
+
+  public static class RefParent<T> implements Parent<T> {
+    public final Parent<T> originalParent;
+    public final List<Parent<T>> loopParents = new ArrayList<>();
+
+    public RefParent(final Parent<T> parent) {
+      originalParent = parent;
+    }
+
+    @Override
+    public void advance(
+            Grammar grammar, final Step step, Step.Branch branch, T result, final MismatchCause cause) {
+      originalParent.advance(grammar, step, branch, result, cause);
+      for (final Parent<T> p : loopParents) {
+        p.advance(grammar, step, branch, result, cause);
+      }
+    }
+
+    @Override
+    public void error(Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
+      originalParent.error(grammar, step, branch, cause);
+    }
   }
 }

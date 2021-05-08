@@ -21,6 +21,7 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
+import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 public class VisualFrontArray extends VisualGroup implements VisualLeaf {
@@ -104,17 +105,18 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
               }
 
               @Override
-              public Brick createOrGetCornerstoneCandidate(final Context context) {
+              public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(
+                  final Context context) {
                 return nodeVisual.createOrGetCornerstoneCandidate(context);
               }
 
               @Override
-              public Brick createFirstBrick(final Context context) {
+              public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
                 return nodeVisual.createFirstBrick(context);
               }
 
               @Override
-              public Brick createLastBrick(final Context context) {
+              public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
                 return nodeVisual.createLastBrick(context);
               }
 
@@ -182,12 +184,12 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
               }
 
               @Override
-              public Brick createPrevious(final Context context) {
+              public ExtendBrickResult createPrevious(final Context context) {
                 return parent.createPreviousBrick(context);
               }
 
               @Override
-              public Brick createNext(final Context context) {
+              public ExtendBrickResult createNext(final Context context) {
                 return parent.createNextBrick(context);
               }
 
@@ -246,27 +248,39 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   }
 
   @Override
-  public Brick createOrGetCornerstoneCandidate(final Context context) {
+  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (value.data.isEmpty()) {
-      if (empty != null) return empty;
-      else return createEmpty(context);
+      if (empty != null) return CreateBrickResult.brick(empty);
+      else return CreateBrickResult.brick(createEmpty(context));
     } else if (ellipsize(context)) {
-      if (ellipsis != null) return ellipsis;
-      else return createEllipsis(context);
+      if (ellipsis != null) return CreateBrickResult.brick(ellipsis);
+      else return CreateBrickResult.brick(createEllipsis(context));
     } else return super.createOrGetCornerstoneCandidate(context);
   }
 
   @Override
-  public Brick createFirstBrick(final Context context) {
-    if (value.data.isEmpty()) return createEmpty(context);
-    if (ellipsize(context)) return createEllipsis(context);
+  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+    if (value.data.isEmpty()) {
+      if (empty != null) return ExtendBrickResult.exists();
+      return ExtendBrickResult.brick(createEmpty(context));
+    }
+    if (ellipsize(context)) {
+      if (ellipsis != null) return ExtendBrickResult.exists();
+      return ExtendBrickResult.brick(createEllipsis(context));
+    }
     return super.createFirstBrick(context);
   }
 
   @Override
-  public Brick createLastBrick(final Context context) {
-    if (value.data.isEmpty()) return createEmpty(context);
-    if (ellipsize(context)) return createEllipsis(context);
+  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
+    if (value.data.isEmpty()) {
+      if (empty != null) return ExtendBrickResult.exists();
+      return ExtendBrickResult.brick(createEmpty(context));
+    }
+    if (ellipsize(context)) {
+      if (ellipsis != null) return ExtendBrickResult.exists();
+      return ExtendBrickResult.brick(createEllipsis(context));
+    }
     return super.createLastBrick(context);
   }
 
@@ -308,12 +322,12 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
               }
 
               @Override
-              public Brick createPrevious(final Context context) {
+              public ExtendBrickResult createPrevious(final Context context) {
                 return parent.createPreviousBrick(context);
               }
 
               @Override
-              public Brick createNext(final Context context) {
+              public ExtendBrickResult createNext(final Context context) {
                 return parent.createNextBrick(context);
               }
 
@@ -392,7 +406,11 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
     private void setCornerstone(final Context context, final int index) {
       context.wall.setCornerstone(
           context,
-          visual.children.get(visual.visualIndex(index)).createOrGetCornerstoneCandidate(context),
+          visual
+              .children
+              .get(visual.visualIndex(index))
+              .createOrGetCornerstoneCandidate(context)
+              .brick,
           () -> {
             for (int at = visual.visualIndex(index) - 1; at >= 0; --at) {
               final Brick found = visual.children.get(at).getLastBrick(context);

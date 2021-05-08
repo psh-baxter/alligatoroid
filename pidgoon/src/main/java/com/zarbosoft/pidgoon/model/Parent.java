@@ -1,9 +1,7 @@
 package com.zarbosoft.pidgoon.model;
 
-public interface Parent {
-  void advance(Parse step, Store store, MismatchCause mismatchCause);
+public interface Parent<E> {
+  void advance(Grammar grammar, Step step, Step.Branch branch, E result, MismatchCause mismatchCause);
 
-  void error(Parse step, Store store, MismatchCause mismatchCause);
-
-  long size(Parent stopAt, long start);
+  void error(Grammar grammar, Step step, Step.Branch branch, MismatchCause mismatchCause);
 }

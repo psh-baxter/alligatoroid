@@ -20,20 +20,22 @@ import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeNodeSet;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
+import com.zarbosoft.pidgoon.events.EscapableResult;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
 import com.zarbosoft.pidgoon.events.Position;
-import com.zarbosoft.pidgoon.events.StackStore;
 import com.zarbosoft.pidgoon.model.Grammar;
-import com.zarbosoft.pidgoon.model.Parse;
+import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.pidgoon.nodes.Color;
+import com.zarbosoft.pidgoon.nodes.HomogenousSequence;
 import com.zarbosoft.pidgoon.nodes.Operator;
+import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
-import com.zarbosoft.pidgoon.nodes.Sequence;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -42,6 +44,9 @@ import java.util.Deque;
 import java.util.Iterator;
 
 public class EditGapCursor extends BaseEditPrimitiveCursor {
+  public static Reference.Key<ROList<PrepareAtomField>> PRECEDING_ROOT_KEY = new Reference.Key<>();
+  public static Reference.Key<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>
+      GAP_ROOT_KEY = new Reference.Key<>();
   public final Grammar grammar;
   public String currentText;
   public TwoColumnChoicePage choicePage;
@@ -76,7 +81,7 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
     Atom gap = gapAtom();
     AtomType gapType = gap.type;
     String baseType = gap.valueParentRef.valueType();
-    Union union = new Union();
+    Union<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>> union = new Union<>();
 
     TSSet<AtomType> seen = new TSSet<>();
     Deque<Iterator<AtomType>> stack = new ArrayDeque<>();
@@ -98,12 +103,16 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
               new PreGapChoice(
                   (FreeAtomType) leafType, 0, TSList.empty, info.keySpecs, info.following);
           union.add(
-              new Color(
+              new Color<>(
                   preChoice,
-                  new Operator<StackStore>(info.keyGrammar) {
+                  new Operator<
+                      EscapableResult<ROList<FieldPrimitive>>,
+                      ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>(
+                      info.keyGrammar) {
                     @Override
-                    protected StackStore process(StackStore store) {
-                      return store.pushStack(preChoice);
+                    protected ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>> process(
+                        EscapableResult<ROList<FieldPrimitive>> value) {
+                      return new ROPair<>(preChoice, value);
                     }
                   }));
         } else {
@@ -122,79 +131,55 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
         /// Check if all front slots before gap match preceding atoms, if so this is a candidate
         // Match reversed slots against reversed preceding atoms (match from ends)
         do {
-          Sequence precedingConsumptionGrammar = new Sequence().add(StackStore.prepVarStack);
+          HomogenousSequence<PrepareAtomField> precedingConsumptionGrammar =
+              new HomogenousSequence<>();
           {
             TSList<FrontSpec> reversePreceding = info.preceding.mut();
             reversePreceding.reverse();
             for (FrontSpec front : reversePreceding) {
               if (front instanceof FrontArraySpecBase) {
-                precedingConsumptionGrammar
-                    .add(StackStore.prepVarStack)
-                    .add(
-                        new Repeat(
-                            new Operator<StackStore>(
-                                new AtomTypeMatch(
-                                    context.syntax.splayedTypes.get(
-                                        ((FrontArraySpecBase) front).field().elementAtomType()))) {
-                              @Override
-                              protected StackStore process(StackStore store) {
-                                return store.stackSingleElement(((AtomEvent) store.top()).atom);
-                              }
-                            }))
-                    .add(
-                        new Operator<StackStore>() {
+                precedingConsumptionGrammar.add(
+                    new Operator<ROList<Atom>, PrepareAtomField>(
+                        new Repeat<Atom>(
+                            new AtomTypeMatch(
+                                context.syntax.splayedTypes.get(
+                                    ((FrontArraySpecBase) front).field().elementAtomType())))) {
+                      @Override
+                      protected PrepareAtomField process(ROList<Atom> value) {
+                        return new PrepareAtomField() {
                           @Override
-                          protected StackStore process(StackStore store) {
-                            TSList<Atom> values = new TSList<>();
-                            store = store.popVarSingleList(values);
-                            return store.stackSingleElement(
-                                new PrepareAtomField() {
-                                  @Override
-                                  public Field process(Editor editor, History.Recorder recorder) {
-                                    FieldArray field =
-                                        new FieldArray(((FrontArraySpecBase) front).field);
-                                    recorder.apply(
-                                        editor.context, new ChangeArray(field, 0, 0, values));
-                                    return field;
-                                  }
-                                });
+                          public Field process(Editor editor, History.Recorder recorder) {
+                            FieldArray field = new FieldArray(((FrontArraySpecBase) front).field);
+                            recorder.apply(editor.context, new ChangeArray(field, 0, 0, value));
+                            return field;
                           }
-                        });
+                        };
+                      }
+                    });
               } else if (front instanceof FrontAtomSpec) {
                 precedingConsumptionGrammar.add(
-                    new Operator<StackStore>(
+                    new Operator<Atom, PrepareAtomField>(
                         new AtomTypeMatch(
                             context.syntax.splayedTypes.get(
                                 ((FrontAtomSpec) front).field().type))) {
                       @Override
-                      protected StackStore process(StackStore store) {
-                        Atom atom = (Atom) store.top();
-                        return store.stackSingleElement(
-                            new PrepareAtomField() {
-                              @Override
-                              public Field process(Editor editor, History.Recorder recorder) {
-                                FieldAtom field = new FieldAtom(((FrontAtomSpec) front).field());
-                                recorder.apply(editor.context, new ChangeNodeSet(field, atom));
-                                return field;
-                              }
-                            });
+                      protected PrepareAtomField process(Atom value) {
+                        return new PrepareAtomField() {
+                          @Override
+                          public Field process(Editor editor, History.Recorder recorder) {
+                            FieldAtom field = new FieldAtom(((FrontAtomSpec) front).field());
+                            recorder.apply(editor.context, new ChangeNodeSet(field, value));
+                            return field;
+                          }
+                        };
                       }
                     });
               } else throw new Assertion();
             }
           }
-          precedingConsumptionGrammar.add(
-              new Operator<StackStore>() {
-                @Override
-                protected StackStore process(StackStore store) {
-                  TSList<PrepareAtomField> fillAtomFields = new TSList<>();
-                  store = store.popVarSingleList(fillAtomFields);
-                  return store.pushStack(fillAtomFields);
-                }
-              });
 
           Grammar precedingPlacementsGrammar =
-              new Grammar().add(Grammar.DEFAULT_ROOT_KEY, precedingConsumptionGrammar);
+              new Grammar().add(PRECEDING_ROOT_KEY, precedingConsumptionGrammar);
 
           FieldArray precedingValues = (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY);
           TSList<Atom> reversePrecedingValues = precedingValues.data.mut();
@@ -203,15 +188,17 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
           for (Atom atom : reversePrecedingValues) {
             events.add(new AtomEvent(atom));
           }
-          Pair<Parse, Position> longestMatch;
+          Pair<Step<ROList<PrepareAtomField>>, Position> longestMatch;
           try {
             longestMatch =
-                new ParseBuilder<>()
+                new ParseBuilder<>(PRECEDING_ROOT_KEY)
                     .grammar(precedingPlacementsGrammar)
-                    .store(new StackStore())
                     .uncertainty(100)
                     .longestMatchFromStart(events);
           } catch (InvalidStream | GrammarTooUncertain ignored) {
+            break;
+          }
+          if ((Integer) longestMatch.second.at == -1) {
             break;
           }
 
@@ -220,17 +207,20 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
               new PreGapChoice(
                   (FreeAtomType) leafType,
                   (Integer) longestMatch.second.at + 1,
-                  (TSList<PrepareAtomField>)
-                      ((StackStore) longestMatch.first.completed.get(0)).stackTop(),
+                  longestMatch.first.completed.get(0),
                   info.keySpecs,
                   info.following);
           union.add(
-              new Color(
+              new Color<>(
                   preChoice,
-                  new Operator<StackStore>(info.keyGrammar) {
+                  new Operator<
+                      EscapableResult<ROList<FieldPrimitive>>,
+                      ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>(
+                      info.keyGrammar) {
                     @Override
-                    protected StackStore process(StackStore store) {
-                      return store.pushStack(preChoice);
+                    protected ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>> process(
+                        EscapableResult<ROList<FieldPrimitive>> value) {
+                      return new ROPair<>(preChoice, value);
                     }
                   }));
         } while (false);
@@ -251,7 +241,7 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
         }
       } else throw new Assertion();
     }
-    return new Grammar().add(Grammar.DEFAULT_ROOT_KEY, union);
+    return new Grammar().add(GAP_ROOT_KEY, union);
   }
 
   private Atom gapAtom() {
@@ -285,32 +275,30 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
     /// Parse new text, rank choices
     // If the whole text matches, try to auto complete
     // Display info on matches and not-yet-mismatches
-    TSList<Event> glyphs = context.env.splitGlyphs(text);
-    final Pair<Parse, Position> longest =
-        new ParseBuilder<>().grammar(grammar).longestMatchFromStart(glyphs);
-    final TSList<StackStore> branches = new TSList<>();
-    branches.addAll((ROList<StackStore>) (ROList) longest.first.completed);
-    for (Parse.Branch leaf : longest.first.branches) {
-      branches.add((StackStore) leaf.store());
-    }
+    TSList<Event> glyphs = context.env.splitGlyphEvents(text);
+    final Pair<Step<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>, Position>
+        longest = new ParseBuilder<>(GAP_ROOT_KEY).grammar(grammar).longestMatchFromStart(glyphs);
     TSList<GapChoice> choices = new TSList<>();
-    for (StackStore branch : branches) {
-      PreGapChoice choice = (PreGapChoice) branch.color;
-      if (choice == null) {
-        choice = branch.stackTop();
-        branch = branch.popStack();
+    TSSet<AtomType> seen = new TSSet<>();
+    for (boolean completed : new boolean[] {true, false}) {
+      for (ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>> result :
+          longest.first.completed) {
+        if (completed != !result.second.escaped) continue;
+        PreGapChoice choice = result.first;
+        seen.add(result.first.type);
+        choices.add(
+            new GapChoice(
+                gap,
+                choice.type,
+                choice.consumePreceding,
+                choice.supplyFillAtoms,
+                glyphs,
+                ((int) longest.second.at) + 1,
+                result.second.value,
+                null,
+                choice.keySpecs,
+                choice.following));
       }
-      choices.add(
-          new GapChoice(
-              gap,
-              choice.type,
-              choice.consumePreceding,
-              choice.supplyFillAtoms,
-              glyphs,
-              ((int) longest.second.at) + 1,
-              (StackStore) branch,
-              choice.keySpecs,
-              choice.following));
     }
 
     /// Choose auto-choosable choices

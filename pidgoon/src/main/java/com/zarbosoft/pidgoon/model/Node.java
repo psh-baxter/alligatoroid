@@ -1,13 +1,9 @@
 package com.zarbosoft.pidgoon.model;
 
+import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.rendaw.common.ROMap;
 
-public abstract class Node {
-  public void context(
-          final Parse context, final Store store, final Parent parent, final MismatchCause cause) {
-    context(context, store, parent, ROMap.empty, cause);
-  }
-
+public abstract class Node<T> {
   public abstract void context(
-          Parse context, Store store, Parent parent, ROMap<Object, RefParent> seen, MismatchCause cause);
+          Grammar grammar, Step step, Parent<T> parent, Step.Branch branch, ROMap<Object, Reference.RefParent> seen, MismatchCause cause, Object color);
 }

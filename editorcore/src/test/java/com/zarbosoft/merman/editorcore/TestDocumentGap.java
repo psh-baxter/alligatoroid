@@ -21,6 +21,7 @@ import com.zarbosoft.merman.editorcore.helper.TreeBuilder;
 import com.zarbosoft.merman.editorcore.helper.TypeBuilder;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
 import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSSet;
 import org.hamcrest.Matchers;
 import org.junit.Test;
 
@@ -85,7 +86,7 @@ public class TestDocumentGap {
     final Editor editor = blank(syntax);
     assertThat(
         editor.context.syntax.splayedTypes.get("test_group_1"),
-        equalTo(TSList.of(infinity, one, two, three)));
+        equalTo(TSSet.of(infinity, one, two, three)));
   }
 
   private Editor blank(Syntax syntax) {
@@ -98,17 +99,19 @@ public class TestDocumentGap {
   // ========================================================================
   // ========================================================================
   // Decision making and replacement
+
+  /**
+   * Check that typing a letter that matches a type produces that type as a choice
+   */
   @Test
   public void decisionMaking_choiceCount() {
-    // Check that typing a letter that matches a type produces that type as a choice
-    // TODO how does this work?
     FreeAtomType quoted =
         new TypeBuilder("quoted")
             .back(Helper.buildBackDataPrimitive("value"))
             .front(new FrontMarkBuilder("\"").build())
             .frontDataPrimitive("value")
             .front(new FrontMarkBuilder("\"").build())
-            .autoComplete(true)
+            .autoComplete(false)
             .build();
     FreeAtomType restricted =
         new TypeBuilder("restricted")
@@ -135,303 +138,33 @@ public class TestDocumentGap {
                     ((EditGapCursor) editor.context.cursor).choicePage.choices.size(), is(1)));
   }
 
+  /**
+   * With an ambiguous character (potentially matching multiple autocompletable types) a gap autocompletes neither
+   */
   @Test
   public void decisionMaking_undecided() {
-    // With an ambiguous character (potentially matching multiple autocompletable types)
-    // a gap autocompletes neither
-    FreeAtomType infinity =
-        new TypeBuilder("infinity")
-            .back(Helper.buildBackPrimitive("infinity"))
-            .front(new FrontMarkBuilder("infinity").build())
-            .autoComplete(true)
-            .build();
     FreeAtomType one =
         new TypeBuilder("one")
             .back(Helper.buildBackPrimitive("one"))
             .front(new FrontMarkBuilder("one").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType two =
-        new TypeBuilder("two")
-            .back(Helper.buildBackPrimitive("two"))
-            .front(new FrontMarkBuilder("two").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType three =
-        new TypeBuilder("three")
-            .back(Helper.buildBackPrimitive("three"))
-            .front(new FrontMarkBuilder("three").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType four =
-        new TypeBuilder("four")
-            .back(Helper.buildBackPrimitive("four"))
-            .front(new FrontMarkBuilder("four").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType five =
-        new TypeBuilder("five")
-            .back(Helper.buildBackPrimitive("five"))
-            .front(new FrontMarkBuilder("five").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType seven =
-        new TypeBuilder("seven")
-            .back(Helper.buildBackPrimitive("7"))
-            .front(new FrontMarkBuilder("7").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType multiback =
-        new TypeBuilder("multiback")
-            .back(Helper.buildBackDataPrimitive("a"))
-            .back(Helper.buildBackDataPrimitive("b"))
-            .frontDataPrimitive("a")
-            .frontMark("^")
-            .frontDataPrimitive("b")
-            .autoComplete(false)
-            .build();
-    FreeAtomType quoted =
-        new TypeBuilder("quoted")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .front(new FrontMarkBuilder("\"").build())
-            .frontDataPrimitive("value")
-            .front(new FrontMarkBuilder("\"").build())
             .autoComplete(true)
             .build();
-    FreeAtomType digits =
-        new TypeBuilder("digits")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .frontDataPrimitive("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType doubleQuoted =
-        new TypeBuilder("doubleuoted")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataPrimitive("first"))
-                    .add("second", Helper.buildBackDataPrimitive("second"))
-                    .build())
-            .front(new FrontMarkBuilder("\"").build())
-            .frontDataPrimitive("first")
-            .front(new FrontMarkBuilder("\"").build())
-            .frontDataPrimitive("second")
-            .front(new FrontMarkBuilder("\"").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType plus =
-        new TypeBuilder("plus")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .add("second", Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("+")
-            .frontDataNode("second")
-            .autoComplete(false)
-            .build();
-    FreeAtomType plusEqual =
-        new TypeBuilder("plusequal")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .add("second", Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("+=")
-            .frontDataNode("second")
-            .autoComplete(false)
-            .build();
-    FreeAtomType binaryBang =
-        new TypeBuilder("bang")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .add("second", Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("!")
-            .frontDataNode("second")
-            .autoComplete(true)
-            .build();
-    FreeAtomType waddle =
-        new TypeBuilder("waddle")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("?")
-            .autoComplete(true)
-            .build();
-    FreeAtomType snooze =
-        new TypeBuilder("snooze")
-            .back(
-                new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value", "any"))
-                    .build())
-            .frontMark("#")
-            .frontDataNode("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType multiplier =
-        new TypeBuilder("multiplier")
-            .back(
-                new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value", "any"))
-                    .add("text", Helper.buildBackDataPrimitive("text"))
-                    .build())
-            .frontMark("x")
-            .frontDataPrimitive("text")
-            .frontDataNode("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType array =
-        new TypeBuilder("array")
-            .back(Helper.buildBackDataArray("value", "any"))
-            .frontMark("[")
-            .front(
-                new FrontDataArrayBuilder("value")
-                    .addSeparator(new FrontMarkBuilder(", ").build())
-                    .build())
-            .frontMark("]")
-            .autoComplete(true)
-            .build();
-    FreeAtomType doubleArray =
-        new TypeBuilder("doublearray")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first", "any"))
-                    .add("second", Helper.buildBackDataArray("second", "any"))
-                    .build())
-            .frontMark("[")
-            .frontDataArray("first")
-            .frontMark("?")
-            .frontDataArray("second")
-            .frontMark("]")
-            .build();
-    FreeAtomType record =
-        new TypeBuilder("record")
-            .back(Helper.buildBackDataRecord("value", "record_element"))
-            .frontMark("{")
-            .frontDataArray("value")
-            .frontMark("}")
-            .autoComplete(true)
-            .build();
-    FreeAtomType recordElement =
-        new TypeBuilder("record_element")
-            .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value", "any"))
-            .frontDataPrimitive("key")
-            .frontMark(": ")
-            .frontDataNode("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType pair =
-        new TypeBuilder("pair")
-            .back(
-                new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first", "any"))
-                    .add(Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontMark("<")
-            .frontDataNode("first")
-            .frontMark(", ")
-            .frontDataNode("second")
-            .frontMark(">")
-            .autoComplete(true)
-            .build();
-    FreeAtomType ratio =
-        new TypeBuilder("ratio")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataPrimitive("first"))
-                    .add("second", Helper.buildBackDataPrimitive("second"))
-                    .build())
-            .frontMark("<")
-            .frontDataPrimitive("first")
-            .frontMark(":")
-            .frontDataPrimitive("second")
-            .frontMark(">")
-            .build();
-    FreeAtomType restricted =
-        new TypeBuilder("restricted")
-            .back(
-                new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
-                    .build())
-            .frontDataNode("value")
-            .build();
-    FreeAtomType restrictedArray =
-        new TypeBuilder("restricted_array")
-            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
-            .frontMark("_")
-            .front(new FrontDataArrayBuilder("value").build())
-            .autoComplete(true)
-            .build();
+    FreeAtomType onyx =
+            new TypeBuilder("onyx")
+                    .back(Helper.buildBackPrimitive("onyx"))
+                    .front(new FrontMarkBuilder("onyx").build())
+                    .autoComplete(true)
+                    .build();
     Syntax syntax =
         new SyntaxBuilder("any")
-            .type(infinity)
             .type(one)
-            .type(two)
-            .type(three)
-            .type(four)
-            .type(five)
-            .type(seven)
-            .type(multiback)
-            .type(quoted)
-            .type(digits)
-            .type(doubleQuoted)
-            .type(plus)
-            .type(plusEqual)
-            .type(binaryBang)
-            .type(waddle)
-            .type(snooze)
-            .type(multiplier)
-            .type(array)
-            .type(doubleArray)
-            .type(record)
-            .type(recordElement)
-            .type(pair)
-            .type(ratio)
-            .type(restricted)
-            .type(restrictedArray)
-            .group(
-                "test_group_1",
-                new GroupBuilder()
-                    .type(infinity)
-                    .type(one)
-                    .type(multiback)
-                    .group("test_group_2")
-                    .build())
-            .group("test_group_2", new GroupBuilder().type(quoted).build())
-            .group("restricted_group", new GroupBuilder().type(quoted).build())
-            .group("restricted_array_group", new GroupBuilder().type(quoted).build())
+            .type(onyx)
             .group(
                 "any",
                 new GroupBuilder()
-                    .type(infinity)
                     .type(one)
-                    .type(two)
-                    .type(three)
-                    .type(four)
-                    .type(five)
-                    .type(quoted)
-                    .type(digits)
-                    .type(seven)
-                    .type(plus)
-                    .type(plusEqual)
-                    .type(binaryBang)
-                    .type(waddle)
-                    .type(snooze)
-                    .type(multiplier)
-                    .type(array)
-                    .type(restrictedArray)
-                    .type(record)
-                    .type(pair)
-                    .type(ratio)
+                        .type(onyx)
                     .build())
-            .group("arrayChildren", new GroupBuilder().type(one).type(multiback).build())
             .build();
 
     final Editor editor = blank(syntax);
@@ -442,303 +175,33 @@ public class TestDocumentGap {
         Helper.rootArray(editor.context.document));
   }
 
+  /**
+   * If ambiguous input is entered into a gap, even if the input exactly matches a choice, that choice isn't autocompleted.
+   */
   @Test
   public void decisionMaking_undecidedFull() {
-    // If ambiguous input is entered into a gap, even if the input exactly matches
-    // a choice, that choice isn't autocompleted.
-    FreeAtomType infinity =
-        new TypeBuilder("infinity")
-            .back(Helper.buildBackPrimitive("infinity"))
-            .front(new FrontMarkBuilder("infinity").build())
-            .autoComplete(true)
-            .build();
     FreeAtomType one =
         new TypeBuilder("one")
             .back(Helper.buildBackPrimitive("one"))
             .front(new FrontMarkBuilder("one").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType two =
-        new TypeBuilder("two")
-            .back(Helper.buildBackPrimitive("two"))
-            .front(new FrontMarkBuilder("two").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType three =
-        new TypeBuilder("three")
-            .back(Helper.buildBackPrimitive("three"))
-            .front(new FrontMarkBuilder("three").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType four =
-        new TypeBuilder("four")
-            .back(Helper.buildBackPrimitive("four"))
-            .front(new FrontMarkBuilder("four").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType five =
-        new TypeBuilder("five")
-            .back(Helper.buildBackPrimitive("five"))
-            .front(new FrontMarkBuilder("five").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType seven =
-        new TypeBuilder("seven")
-            .back(Helper.buildBackPrimitive("7"))
-            .front(new FrontMarkBuilder("7").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType multiback =
-        new TypeBuilder("multiback")
-            .back(Helper.buildBackDataPrimitive("a"))
-            .back(Helper.buildBackDataPrimitive("b"))
-            .frontDataPrimitive("a")
-            .frontMark("^")
-            .frontDataPrimitive("b")
-            .autoComplete(false)
-            .build();
-    FreeAtomType quoted =
-        new TypeBuilder("quoted")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .front(new FrontMarkBuilder("\"").build())
-            .frontDataPrimitive("value")
-            .front(new FrontMarkBuilder("\"").build())
             .autoComplete(true)
             .build();
-    FreeAtomType digits =
-        new TypeBuilder("digits")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .frontDataPrimitive("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType doubleQuoted =
-        new TypeBuilder("doubleuoted")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataPrimitive("first"))
-                    .add("second", Helper.buildBackDataPrimitive("second"))
-                    .build())
-            .front(new FrontMarkBuilder("\"").build())
-            .frontDataPrimitive("first")
-            .front(new FrontMarkBuilder("\"").build())
-            .frontDataPrimitive("second")
-            .front(new FrontMarkBuilder("\"").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType plus =
-        new TypeBuilder("plus")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .add("second", Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("+")
-            .frontDataNode("second")
-            .autoComplete(false)
-            .build();
-    FreeAtomType plusEqual =
-        new TypeBuilder("plusequal")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .add("second", Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("+=")
-            .frontDataNode("second")
-            .autoComplete(false)
-            .build();
-    FreeAtomType binaryBang =
-        new TypeBuilder("bang")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .add("second", Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("!")
-            .frontDataNode("second")
-            .autoComplete(true)
-            .build();
-    FreeAtomType waddle =
-        new TypeBuilder("waddle")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("?")
-            .autoComplete(true)
-            .build();
-    FreeAtomType snooze =
-        new TypeBuilder("snooze")
-            .back(
-                new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value", "any"))
-                    .build())
-            .frontMark("#")
-            .frontDataNode("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType multiplier =
-        new TypeBuilder("multiplier")
-            .back(
-                new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value", "any"))
-                    .add("text", Helper.buildBackDataPrimitive("text"))
-                    .build())
-            .frontMark("x")
-            .frontDataPrimitive("text")
-            .frontDataNode("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType array =
-        new TypeBuilder("array")
-            .back(Helper.buildBackDataArray("value", "any"))
-            .frontMark("[")
-            .front(
-                new FrontDataArrayBuilder("value")
-                    .addSeparator(new FrontMarkBuilder(", ").build())
-                    .build())
-            .frontMark("]")
-            .autoComplete(true)
-            .build();
-    FreeAtomType doubleArray =
-        new TypeBuilder("doublearray")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first", "any"))
-                    .add("second", Helper.buildBackDataArray("second", "any"))
-                    .build())
-            .frontMark("[")
-            .frontDataArray("first")
-            .frontMark("?")
-            .frontDataArray("second")
-            .frontMark("]")
-            .build();
-    FreeAtomType record =
-        new TypeBuilder("record")
-            .back(Helper.buildBackDataRecord("value", "record_element"))
-            .frontMark("{")
-            .frontDataArray("value")
-            .frontMark("}")
-            .autoComplete(true)
-            .build();
-    FreeAtomType recordElement =
-        new TypeBuilder("record_element")
-            .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value", "any"))
-            .frontDataPrimitive("key")
-            .frontMark(": ")
-            .frontDataNode("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType pair =
-        new TypeBuilder("pair")
-            .back(
-                new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first", "any"))
-                    .add(Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontMark("<")
-            .frontDataNode("first")
-            .frontMark(", ")
-            .frontDataNode("second")
-            .frontMark(">")
-            .autoComplete(true)
-            .build();
-    FreeAtomType ratio =
-        new TypeBuilder("ratio")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataPrimitive("first"))
-                    .add("second", Helper.buildBackDataPrimitive("second"))
-                    .build())
-            .frontMark("<")
-            .frontDataPrimitive("first")
-            .frontMark(":")
-            .frontDataPrimitive("second")
-            .frontMark(">")
-            .build();
-    FreeAtomType restricted =
-        new TypeBuilder("restricted")
-            .back(
-                new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
-                    .build())
-            .frontDataNode("value")
-            .build();
-    FreeAtomType restrictedArray =
-        new TypeBuilder("restricted_array")
-            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
-            .frontMark("_")
-            .front(new FrontDataArrayBuilder("value").build())
+    FreeAtomType onep =
+        new TypeBuilder("onep")
+            .back(Helper.buildBackPrimitive("onep"))
+            .front(new FrontMarkBuilder("onep").build())
             .autoComplete(true)
             .build();
     Syntax syntax =
         new SyntaxBuilder("any")
-            .type(infinity)
             .type(one)
-            .type(two)
-            .type(three)
-            .type(four)
-            .type(five)
-            .type(seven)
-            .type(multiback)
-            .type(quoted)
-            .type(digits)
-            .type(doubleQuoted)
-            .type(plus)
-            .type(plusEqual)
-            .type(binaryBang)
-            .type(waddle)
-            .type(snooze)
-            .type(multiplier)
-            .type(array)
-            .type(doubleArray)
-            .type(record)
-            .type(recordElement)
-            .type(pair)
-            .type(ratio)
-            .type(restricted)
-            .type(restrictedArray)
-            .group(
-                "test_group_1",
-                new GroupBuilder()
-                    .type(infinity)
-                    .type(one)
-                    .type(multiback)
-                    .group("test_group_2")
-                    .build())
-            .group("test_group_2", new GroupBuilder().type(quoted).build())
-            .group("restricted_group", new GroupBuilder().type(quoted).build())
-            .group("restricted_array_group", new GroupBuilder().type(quoted).build())
+            .type(onep)
             .group(
                 "any",
                 new GroupBuilder()
-                    .type(infinity)
                     .type(one)
-                    .type(two)
-                    .type(three)
-                    .type(four)
-                    .type(five)
-                    .type(quoted)
-                    .type(digits)
-                    .type(seven)
-                    .type(plus)
-                    .type(plusEqual)
-                    .type(binaryBang)
-                    .type(waddle)
-                    .type(snooze)
-                    .type(multiplier)
-                    .type(array)
-                    .type(restrictedArray)
-                    .type(record)
-                    .type(pair)
-                    .type(ratio)
+                    .type(onep)
                     .build())
-            .group("arrayChildren", new GroupBuilder().type(one).type(multiback).build())
             .build();
 
     final Editor editor = blank(syntax);
@@ -751,311 +214,42 @@ public class TestDocumentGap {
         Helper.rootArray(editor.context.document));
   }
 
+  /**
+   * If a partial input is entered that matches only one autocomplete type, autocomplete.
+   */
   @Test
   public void decisionMaking_immediate() {
-    // If a partial input is entered that matches only one
-    // autocomplete type, autocomplete.
-    FreeAtomType infinity =
-        new TypeBuilder("infinity")
-            .back(Helper.buildBackPrimitive("infinity"))
-            .front(new FrontMarkBuilder("infinity").build())
-            .autoComplete(true)
-            .build();
     FreeAtomType one =
         new TypeBuilder("one")
             .back(Helper.buildBackPrimitive("one"))
             .front(new FrontMarkBuilder("one").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType two =
-        new TypeBuilder("two")
-            .back(Helper.buildBackPrimitive("two"))
-            .front(new FrontMarkBuilder("two").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType three =
-        new TypeBuilder("three")
-            .back(Helper.buildBackPrimitive("three"))
-            .front(new FrontMarkBuilder("three").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType four =
-        new TypeBuilder("four")
-            .back(Helper.buildBackPrimitive("four"))
-            .front(new FrontMarkBuilder("four").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType five =
-        new TypeBuilder("five")
-            .back(Helper.buildBackPrimitive("five"))
-            .front(new FrontMarkBuilder("five").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType seven =
-        new TypeBuilder("seven")
-            .back(Helper.buildBackPrimitive("7"))
-            .front(new FrontMarkBuilder("7").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType multiback =
-        new TypeBuilder("multiback")
-            .back(Helper.buildBackDataPrimitive("a"))
-            .back(Helper.buildBackDataPrimitive("b"))
-            .frontDataPrimitive("a")
-            .frontMark("^")
-            .frontDataPrimitive("b")
-            .autoComplete(false)
-            .build();
-    FreeAtomType quoted =
-        new TypeBuilder("quoted")
-            .back(Helper.buildBackDataPrimitive("value"))
-            .front(new FrontMarkBuilder("\"").build())
-            .frontDataPrimitive("value")
-            .front(new FrontMarkBuilder("\"").build())
             .autoComplete(true)
             .build();
-    FreeAtomType digits =
-        new TypeBuilder("digits")
-            .back(Helper.buildBackDataPrimitiveDigits("value"))
-            .frontDataPrimitive("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType doubleQuoted =
-        new TypeBuilder("doubleuoted")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataPrimitive("first"))
-                    .add("second", Helper.buildBackDataPrimitive("second"))
-                    .build())
-            .front(new FrontMarkBuilder("\"").build())
-            .frontDataPrimitive("first")
-            .front(new FrontMarkBuilder("\"").build())
-            .frontDataPrimitive("second")
-            .front(new FrontMarkBuilder("\"").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType plus =
-        new TypeBuilder("plus")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .add("second", Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("+")
-            .frontDataNode("second")
-            .autoComplete(false)
-            .build();
-    FreeAtomType plusEqual =
-        new TypeBuilder("plusequal")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .add("second", Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("+=")
-            .frontDataNode("second")
-            .autoComplete(false)
-            .build();
-    FreeAtomType binaryBang =
-        new TypeBuilder("bang")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .add("second", Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("!")
-            .frontDataNode("second")
-            .autoComplete(true)
-            .build();
-    FreeAtomType waddle =
-        new TypeBuilder("waddle")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataAtom("first", "any"))
-                    .build())
-            .frontDataNode("first")
-            .frontMark("?")
-            .autoComplete(true)
-            .build();
-    FreeAtomType snooze =
-        new TypeBuilder("snooze")
-            .back(
-                new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value", "any"))
-                    .build())
-            .frontMark("#")
-            .frontDataNode("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType multiplier =
-        new TypeBuilder("multiplier")
-            .back(
-                new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value", "any"))
-                    .add("text", Helper.buildBackDataPrimitive("text"))
-                    .build())
-            .frontMark("x")
-            .frontDataPrimitive("text")
-            .frontDataNode("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType array =
-        new TypeBuilder("array")
-            .back(Helper.buildBackDataArray("value", "any"))
-            .frontMark("[")
-            .front(
-                new FrontDataArrayBuilder("value")
-                    .addSeparator(new FrontMarkBuilder(", ").build())
-                    .build())
-            .frontMark("]")
-            .autoComplete(true)
-            .build();
-    FreeAtomType doubleArray =
-        new TypeBuilder("doublearray")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataArray("first", "any"))
-                    .add("second", Helper.buildBackDataArray("second", "any"))
-                    .build())
-            .frontMark("[")
-            .frontDataArray("first")
-            .frontMark("?")
-            .frontDataArray("second")
-            .frontMark("]")
-            .build();
-    FreeAtomType record =
-        new TypeBuilder("record")
-            .back(Helper.buildBackDataRecord("value", "record_element"))
-            .frontMark("{")
-            .frontDataArray("value")
-            .frontMark("}")
-            .autoComplete(true)
-            .build();
-    FreeAtomType recordElement =
-        new TypeBuilder("record_element")
-            .back(Helper.buildBackDataKey("key"))
-            .back(Helper.buildBackDataAtom("value", "any"))
-            .frontDataPrimitive("key")
-            .frontMark(": ")
-            .frontDataNode("value")
-            .autoComplete(true)
-            .build();
-    FreeAtomType pair =
-        new TypeBuilder("pair")
-            .back(
-                new BackArrayBuilder()
-                    .add(Helper.buildBackDataAtom("first", "any"))
-                    .add(Helper.buildBackDataAtom("second", "any"))
-                    .build())
-            .frontMark("<")
-            .frontDataNode("first")
-            .frontMark(", ")
-            .frontDataNode("second")
-            .frontMark(">")
-            .autoComplete(true)
-            .build();
-    FreeAtomType ratio =
-        new TypeBuilder("ratio")
-            .back(
-                new BackRecordBuilder()
-                    .add("first", Helper.buildBackDataPrimitive("first"))
-                    .add("second", Helper.buildBackDataPrimitive("second"))
-                    .build())
-            .frontMark("<")
-            .frontDataPrimitive("first")
-            .frontMark(":")
-            .frontDataPrimitive("second")
-            .frontMark(">")
-            .build();
-    FreeAtomType restricted =
-        new TypeBuilder("restricted")
-            .back(
-                new BackRecordBuilder()
-                    .add("value", Helper.buildBackDataAtom("value", "restricted_group"))
-                    .build())
-            .frontDataNode("value")
-            .build();
-    FreeAtomType restrictedArray =
-        new TypeBuilder("restricted_array")
-            .back(Helper.buildBackDataArray("value", "restricted_array_group"))
-            .frontMark("_")
-            .front(new FrontDataArrayBuilder("value").build())
+    FreeAtomType onut =
+        new TypeBuilder("orgol")
+            .back(Helper.buildBackPrimitive("orgol"))
+            .front(new FrontMarkBuilder("orgol").build())
             .autoComplete(true)
             .build();
     Syntax syntax =
         new SyntaxBuilder("any")
-            .type(infinity)
             .type(one)
-            .type(two)
-            .type(three)
-            .type(four)
-            .type(five)
-            .type(seven)
-            .type(multiback)
-            .type(quoted)
-            .type(digits)
-            .type(doubleQuoted)
-            .type(plus)
-            .type(plusEqual)
-            .type(binaryBang)
-            .type(waddle)
-            .type(snooze)
-            .type(multiplier)
-            .type(array)
-            .type(doubleArray)
-            .type(record)
-            .type(recordElement)
-            .type(pair)
-            .type(ratio)
-            .type(restricted)
-            .type(restrictedArray)
-            .group(
-                "test_group_1",
-                new GroupBuilder()
-                    .type(infinity)
-                    .type(one)
-                    .type(multiback)
-                    .group("test_group_2")
-                    .build())
-            .group("test_group_2", new GroupBuilder().type(quoted).build())
-            .group("restricted_group", new GroupBuilder().type(quoted).build())
-            .group("restricted_array_group", new GroupBuilder().type(quoted).build())
+            .type(onut)
             .group(
                 "any",
                 new GroupBuilder()
-                    .type(infinity)
                     .type(one)
-                    .type(two)
-                    .type(three)
-                    .type(four)
-                    .type(five)
-                    .type(quoted)
-                    .type(digits)
-                    .type(seven)
-                    .type(plus)
-                    .type(plusEqual)
-                    .type(binaryBang)
-                    .type(waddle)
-                    .type(snooze)
-                    .type(multiplier)
-                    .type(array)
-                    .type(restrictedArray)
-                    .type(record)
-                    .type(pair)
-                    .type(ratio)
+                    .type(onut)
                     .build())
-            .group("arrayChildren", new GroupBuilder().type(one).type(multiback).build())
             .build();
 
     final Editor editor = blank(syntax);
-    editor.context.cursor.handleTyping(editor.context, "i");
+    editor.context.cursor.handleTyping(editor.context, "o");
+    editor.context.cursor.handleTyping(editor.context, "n");
     assertTreeEqual(
         editor.context,
         new TreeBuilder(syntax.suffixGap)
-            .addArray("value", TSList.of(new TreeBuilder(infinity).build()))
+            .addArray("value", TSList.of(new TreeBuilder(one).build()))
             .add("gap", "")
             .build(),
         Helper.rootArray(editor.context.document));

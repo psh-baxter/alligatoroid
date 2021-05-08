@@ -2,6 +2,7 @@ package com.zarbosoft.rendaw.common;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -12,6 +13,10 @@ public class TSList<T> implements ROList<T> {
 
   public TSList(ROList<T> other) {
     this.values = new ArrayList<>(((TSList<T>) other).values);
+  }
+
+  public TSList(Deque<T> other) {
+    this.values = new ArrayList<>(other);
   }
 
   public TSList() {
@@ -181,6 +186,7 @@ public class TSList<T> implements ROList<T> {
     return removeLast();
   }
 
+  @Override
   public T lastOpt() {
     if (none()) return null;
     return last();

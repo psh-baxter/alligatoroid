@@ -39,8 +39,6 @@ import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.ComparisonFailure;
 
 public class Helper {
-  static Environment env = new TestEnvironment();
-
   public static VisualFrontAtomBase.Cursor cursorAtom(Context context) {
     return (VisualFrontAtomBase.Cursor) context.cursor;
   }

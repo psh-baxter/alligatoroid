@@ -1,15 +1,17 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.visual.alignment.Alignment;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
 import com.zarbosoft.merman.core.visual.VisualParent;
+import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.visual.condition.ConditionAttachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.rendaw.common.TSList;
+
+import javax.annotation.Nonnull;
 
 public class VisualSymbol extends Visual
     implements VisualLeaf, ConditionAttachment.Listener, BrickInterface {
@@ -52,22 +54,25 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public Brick createOrGetCornerstoneCandidate(final Context context) {
-    if (condition != null) return null; // Cornerstones can't suddenly disappear without cursor changing
-    if (brick != null) return brick;
-    return createFirstBrick(context);
-  }
-
-  @Override
-  public Brick createFirstBrick(final Context context) {
-    if (brick != null) return null;
-    if (condition != null && !condition.show()) return null;
+  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
+    if (condition != null)
+      return CreateBrickResult
+          .empty(); // Cornerstones can't suddenly disappear without cursor changing
+    if (brick != null) return CreateBrickResult.brick(brick);
     brick = frontSymbol.type.createBrick(context, this);
-    return brick;
+    return CreateBrickResult.brick(brick);
   }
 
   @Override
-  public Brick createLastBrick(final Context context) {
+  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+    if (brick != null) return ExtendBrickResult.exists();
+    if (condition != null && !condition.show()) return ExtendBrickResult.empty();
+    brick = frontSymbol.type.createBrick(context, this);
+    return ExtendBrickResult.brick(brick);
+  }
+
+  @Override
+  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
     return createFirstBrick(context);
   }
 
@@ -83,30 +88,26 @@ public class VisualSymbol extends Visual
 
   @Override
   public void compact(Context context) {
-    if (brick != null)
-    brick.changed(context);
+    if (brick != null) brick.changed(context);
   }
 
   @Override
   public void expand(Context context) {
-    if (brick != null)
-    brick.changed(context);
+    if (brick != null) brick.changed(context);
   }
 
   @Override
-  public void getLeafBricks(
-          final Context context,
-          TSList<Brick> bricks) {
+  public void getLeafBricks(final Context context, TSList<Brick> bricks) {
     if (brick == null) return;
     bricks.add(brick);
   }
 
   @Override
   public void root(
-          final Context context,
-          final VisualParent parent,
-          final int visualDepth,
-          final int depthScore) {
+      final Context context,
+      final VisualParent parent,
+      final int visualDepth,
+      final int depthScore) {
     super.root(context, parent, visualDepth, depthScore);
     expand(context);
   }
@@ -123,12 +124,12 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public Brick createPrevious(final Context context) {
+  public ExtendBrickResult createPrevious(final Context context) {
     return parent.createPreviousBrick(context);
   }
 
   @Override
-  public Brick createNext(final Context context) {
+  public ExtendBrickResult createNext(final Context context) {
     return parent.createNextBrick(context);
   }
 
