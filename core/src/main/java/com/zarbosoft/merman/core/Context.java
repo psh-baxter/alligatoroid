@@ -254,11 +254,11 @@ public class Context {
     wallUsageListener = config.wallUsageListener;
     if (!config.startWindowed) windowClear();
     else windowToSupertree(document.root);
-    if (config.startSelected) document.root.visual.selectAnyChild(this);
-    else {
-      wall.setCornerstone(
-          this, document.root.visual.createOrGetCornerstoneCandidate(this).brick, () -> null, () -> null);
-    }
+    wall.setCornerstone(
+        this,
+        document.root.visual.createOrGetCornerstoneCandidate(this).brick,
+        () -> null,
+        () -> null);
     triggerIdleLayBricksOutward();
   }
 
@@ -522,10 +522,10 @@ public class Context {
     int depth = 0;
     while (true) {
       if (nextWindow == windowAtom) return;
-      if (nextWindow.valueParentRef == null) break;
+      if (nextWindow.fieldParentRef == null) break;
       depth += nextWindow.type.depthScore();
       if (depth >= ellipsizeThreshold) break;
-      nextWindow = nextWindow.valueParentRef.value.atomParentRef.atom();
+      nextWindow = nextWindow.fieldParentRef.field.atomParentRef.atom();
     }
 
     if (isSubtree(windowAtom, nextWindow)) windowToSupertree(nextWindow);
@@ -566,8 +566,8 @@ public class Context {
     Atom at = subtree;
     while (true) {
       if (at == supertree) return true;
-      if (at.valueParentRef == null) break;
-      at = at.valueParentRef.value.atomParentRef.atom();
+      if (at.fieldParentRef == null) break;
+      at = at.fieldParentRef.field.atomParentRef.atom();
     }
     return false;
   }
@@ -619,7 +619,7 @@ public class Context {
   public void actionWindowTowardsRoot() {
     if (!window) return;
     if (windowAtom == document.root) return;
-    windowToSupertree(windowAtom.valueParentRef.value.atomParentRef.atom());
+    windowToSupertree(windowAtom.fieldParentRef.field.atomParentRef.atom());
     triggerIdleLayBricksOutward();
   }
 
@@ -698,17 +698,17 @@ public class Context {
     public boolean animateDetails = false;
     public int ellipsizeThreshold = Integer.MAX_VALUE;
     public int layBrickBatchSize = 10;
+    /**
+     * Split courses are unwrapped when their length passes below the threshold of the last failed
+     * unwrap-length check. This is applied to the current length to reduce the number of unwrap
+     * checks/reduce wrap/unwrap bouncing.
+     */
     public double retryExpandFactor = 1.25;
+
     public double scrollFactor = 0.1;
     public double scrollAlotFactor = 0.8;
-    public boolean startSelected = true;
     public boolean startWindowed = false;
     public WallUsageListener wallUsageListener = null;
-
-    public InitialConfig startSelected(boolean b) {
-      startSelected = b;
-      return this;
-    }
 
     public InitialConfig startWindowed(boolean b) {
       startWindowed = b;

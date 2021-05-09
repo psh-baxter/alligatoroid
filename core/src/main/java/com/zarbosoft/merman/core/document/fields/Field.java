@@ -7,6 +7,9 @@ import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.rendaw.common.Assertion;
 
 public abstract class Field {
+  /**
+   * The atom that contains this field
+   */
   public Atom.Parent atomParentRef = null;
 
   public void setAtomParentRef(final Atom.Parent atomParentRef) {
@@ -34,16 +37,16 @@ public abstract class Field {
   }
 
   public abstract static class Parent<T extends Field> {
-    public final T value;
+    public final T field;
 
-    protected Parent(T value) {
-      this.value = value;
+    protected Parent(T field) {
+      this.field = field;
     }
 
     public abstract String valueType();
 
     public String id() {
-      return value.back().id;
+      return field.back().id;
     }
 
     public abstract SyntaxPath path();

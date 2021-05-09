@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.BackRecordBuilder;
@@ -401,7 +402,7 @@ public class TestActionsArray {
                 .addArray("first", target)
                 .addArray("second", new TreeBuilder(one).build())
                 .build())
-        .run(context -> target.valueParentRef.selectValue(context))
+        .run(context -> target.fieldParentRef.selectValue(context))
         .actNext()
         .run(
             context ->
@@ -713,7 +714,7 @@ public class TestActionsArray {
                 .addArray("first", new TreeBuilder(one).build())
                 .addArray("second", target)
                 .build())
-        .run(context -> target.valueParentRef.selectValue(context))
+        .run(context -> target.fieldParentRef.selectValue(context))
         .actPrevious()
         .run(
             context ->
@@ -1042,7 +1043,7 @@ public class TestActionsArray {
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
+    final ArrayCursor selection = (ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(begin));
     assertThat(selection.endIndex, equalTo(end));
   }
@@ -1084,7 +1085,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.cursorArray(context).actionGatherNext(context);
-    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
+    final ArrayCursor selection = (ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(3));
   }
@@ -1094,7 +1095,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 4);
     Helper.cursorArray(context).actionGatherNext(context);
-    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
+    final ArrayCursor selection = (ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(4));
     assertThat(selection.endIndex, equalTo(4));
   }
@@ -1104,7 +1105,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.cursorArray(context).actionGatherPrevious(context);
-    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
+    final ArrayCursor selection = (ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(1));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1114,7 +1115,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
     Helper.cursorArray(context).actionGatherPrevious(context);
-    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
+    final ArrayCursor selection = (ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(0));
   }
@@ -1127,7 +1128,7 @@ public class TestActionsArray {
                 .visual)
         .select(context, true, 2, 3);
     Helper.cursorArray(context).actionReleaseNext(context);
-    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
+    final ArrayCursor selection = (ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1137,7 +1138,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.cursorArray(context).actionReleaseNext(context);
-    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
+    final ArrayCursor selection = (ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1150,7 +1151,7 @@ public class TestActionsArray {
                 .visual))
         .select(context, true, 1, 2);
     Helper.cursorArray(context).actionReleasePrevious(context);
-    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
+    final ArrayCursor selection = (ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1160,7 +1161,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.cursorArray(context).actionReleasePrevious(context);
-    final VisualFrontArray.Cursor selection = (VisualFrontArray.Cursor) context.cursor;
+    final ArrayCursor selection = (ArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }

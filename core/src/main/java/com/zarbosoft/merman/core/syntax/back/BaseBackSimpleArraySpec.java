@@ -174,9 +174,9 @@ public abstract class BaseBackSimpleArraySpec extends BaseBackArraySpec {
      * element type. Use this to remove when parsing and add when writing boilerplate required to
      * place certain atoms in this location.
      */
-    public final TSList<BackSpec> boilerplate;
+    public final ROList<BackSpec> boilerplate;
 
-    public Config(String id, String element, TSList<BackSpec> boilerplate) {
+    public Config(String id, String element, ROList<BackSpec> boilerplate) {
       this.id = id;
       this.element = element;
       this.boilerplate = boilerplate;

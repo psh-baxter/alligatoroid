@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
+import com.zarbosoft.pidgoon.events.EscapableResult;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.ROList;
@@ -13,8 +14,8 @@ public class PatternCharacterClass extends Pattern {
   }
 
   @Override
-  public Node<ROList<String>> build(boolean capture) {
-    Union union = new Union();
+  public Node<EscapableResult<ROList<String>>> build(boolean capture) {
+    Union<EscapableResult<ROList<String>>> union = new Union<>();
     for (ROPair<String, String> range : ranges) {
         union.add(new CharacterRangeTerminal(capture, range.first, range.second));
     }

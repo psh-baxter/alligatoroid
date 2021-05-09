@@ -1,13 +1,13 @@
 package com.zarbosoft.merman.editorcore.history;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.SelectionState;
+import com.zarbosoft.merman.core.CursorState;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class ChangeLevel extends Change {
   public final TSList<Change> subchanges = new TSList<>();
   final int id;
-  SelectionState select;
+  CursorState select;
 
   ChangeLevel(final int id) {
     this.id = id;

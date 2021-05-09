@@ -111,7 +111,7 @@ public class TestLayoutGeneral {
             .type(array)
             .group("any", new GroupBuilder().type(array).build())
             .build();
-    final Atom gap = new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build();
+    final Atom gap = new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build();
     new GeneralTestWizard(syntax, gap)
         .run(
             editor -> {

@@ -3,15 +3,18 @@ package com.zarbosoft.merman.editorcore.cursors;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
+import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class EditArrayCursor extends VisualFrontArray.Cursor {
+public class EditArrayCursor extends ArrayCursor {
   public EditArrayCursor(
       Context context, VisualFrontArray visual, boolean leadFirst, int start, int end) {
     super(context, visual, leadFirst, start, end);
@@ -23,10 +26,18 @@ public class EditArrayCursor extends VisualFrontArray.Cursor {
         null,
         recorder -> {
           editor.context.copy(visual.value.data.sublist(beginIndex, endIndex + 1));
-          recorder.apply(
-              editor.context,
-              new ChangeArray(visual.value, beginIndex, endIndex - beginIndex + 1, ROList.empty));
+          editDeleteInner(editor, recorder);
         });
+  }
+
+  private void editDeleteInner(Editor editor, History.Recorder recorder) {
+    ROList<Atom> replacement = ROList.empty;
+    if (visual.value.atomParentRef.atom().type instanceof RootAtomType
+        && visual.value.data.size() == endIndex - beginIndex + 1)
+      replacement = TSList.of(Editor.createEmptyGap(editor.context.syntax.gap));
+    recorder.apply(
+        editor.context,
+        new ChangeArray(visual.value, beginIndex, endIndex - beginIndex + 1, replacement));
   }
 
   public void editDelete(Editor editor) {
@@ -34,9 +45,7 @@ public class EditArrayCursor extends VisualFrontArray.Cursor {
         editor.context,
         new ROPair(visual.value, "delete"),
         recorder -> {
-          recorder.apply(
-              editor.context,
-              new ChangeArray(visual.value, beginIndex, endIndex - beginIndex + 1, ROList.empty));
+          editDeleteInner(editor, recorder);
         });
   }
 

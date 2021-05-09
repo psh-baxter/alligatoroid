@@ -40,8 +40,8 @@ import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.webview.JSEnvironment;
 import com.zarbosoft.merman.webview.WebView;
-import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
-import com.zarbosoft.pidgoon.errors.InvalidStream;
+import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
+import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
 import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Step;
@@ -552,24 +552,24 @@ public class Main {
             webView.block(
                 buildSyntax(env, p.second), env, rawDoc, TSList.of("type", "operator", "kind")));
       }
-    } catch (GrammarTooUncertain e) {
+    } catch (GrammarTooUncertainAt e) {
       StringBuilder message = new StringBuilder();
-      for (Step.Branch leaf : e.context.branches) {
+      for (Step.Branch leaf : (TSList<Step.Branch>) e.e.step.branches) {
         message.append(Format.format(" * %s (%s)\n", leaf, leaf.color()));
       }
       throw new RuntimeException(
           Format.format(
               "Too much uncertainty while parsing!\nat %s %s\n%s branches:\n%s",
-              ((Position) e.position).at, ((Position) e.position).event, message.toString()));
-    } catch (InvalidStream e) {
+              ((Position) e.at).at, ((Position) e.at).event, message.toString()));
+    } catch (InvalidStreamAt e) {
       StringBuilder message = new StringBuilder();
-      for (MismatchCause error : e.step.errors) {
+      for (MismatchCause error : (TSList<MismatchCause>) e.step.errors) {
         message.append(Format.format(" * %s\n", error));
       }
       throw new RuntimeException(
           Format.format(
               "Document doesn't conform to syntax tree\nat %s %s\nexpected:\n%s",
-              ((Position) e.position).at, ((Position) e.position).event, message.toString()));
+              ((Position) e.at).at, ((Position) e.at).event, message.toString()));
     } catch (RuntimeException e) {
       throw new RuntimeException("\n" + e.toString());
     }

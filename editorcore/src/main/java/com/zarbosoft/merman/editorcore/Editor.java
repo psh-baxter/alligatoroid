@@ -22,6 +22,7 @@ import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
+import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
@@ -31,11 +32,12 @@ import com.zarbosoft.merman.editorcore.banner.Banner;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditPrimitiveCursor;
 import com.zarbosoft.merman.editorcore.cursors.EditArrayCursor;
 import com.zarbosoft.merman.editorcore.cursors.EditAtomCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
 import com.zarbosoft.merman.editorcore.details.Details;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursor;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeNodeSet;
+import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -81,12 +83,12 @@ public class Editor {
                   return new EditGapCursor(
                       Editor.this, visualPrimitive, leadFirst, beginOffset, endOffset);
                 else
-                  return new BaseEditPrimitiveCursor(
+                  return new EditPrimitiveCursor(
                       context, visualPrimitive, leadFirst, beginOffset, endOffset);
               }
 
               @Override
-              public VisualFrontArray.Cursor createArrayCursor(
+              public ArrayCursor createArrayCursor(
                   Context context, VisualFrontArray visual, boolean leadFirst, int start, int end) {
                 return new EditArrayCursor(context, visual, leadFirst, start, end);
               }
@@ -95,6 +97,29 @@ public class Editor {
               public VisualFrontAtomBase.Cursor createAtomCursor(
                   Context context, VisualFrontAtomBase base) {
                 return new EditAtomCursor(context, base);
+              }
+
+              @Override
+              public boolean prepSelectEmptyArray(Context context, FieldArray value) {
+                Editor editor = Editor.get(context);
+                ROSet<AtomType> candidates =
+                    context.syntax.splayedTypes.get(value.back().elementAtomType());
+                editor.history.record(
+                    context,
+                    null,
+                    recorder -> {
+                      recorder.apply(
+                          context,
+                          new ChangeArray(
+                              value,
+                              0,
+                              0,
+                              TSList.of(
+                                  candidates.size() == 1
+                                      ? createEmptyAtom(context, candidates.iterator().next())
+                                      : createEmptyAtom(context, context.syntax.gap))));
+                    });
+                return true;
               }
             },
             this);
@@ -132,13 +157,13 @@ public class Editor {
           @Override
           public void handle(VisualFrontAtomFromArray visual) {
             recorder.apply(
-                    context,
-                    new ChangeArray(((VisualFrontAtomFromArray) base).value, 0, 1, TSList.of(value)));
+                context,
+                new ChangeArray(((VisualFrontAtomFromArray) base).value, 0, 1, TSList.of(value)));
           }
 
           @Override
           public void handle(VisualFrontAtom visual) {
-            recorder.apply(context, new ChangeNodeSet(((VisualFrontAtom) base).value, value));
+            recorder.apply(context, new ChangeAtom(((VisualFrontAtom) base).value, value));
           }
         });
   }
@@ -152,43 +177,6 @@ public class Editor {
     out.initialSet(fields);
     return out;
   }
-
-  /*
-  public static void arrayParentDelete(FieldArray.Parent parent) {
-    history.apply(context, new ChangeArray(parent.value, parent.index, 1, ImmutableList.of()));
-  }
-
-  public static void parentDelete(Field.Parent<?> parent) {
-    parent.dispatch(
-        new Field.ParentDispatcher() {
-          @Override
-          public void handle(FieldArray.Parent parent) {
-            arrayParentDelete(parent);
-          }
-
-          @Override
-          public void handle(FieldAtom.NodeParent parent) {
-            history.apply(context, new ChangeNodeSet(parent.value, gap.create()));
-          }
-        });
-  }
-
-  public static void parentReplace(Field.Parent<?> parent, Atom atom) {
-    parent.dispatch(
-        new Field.ParentDispatcher() {
-          @Override
-          public void handle(FieldArray.Parent parent) {
-            history.apply(
-                context, new ChangeArray(parent.value, parent.index, 1, ImmutableList.of(atom)));
-          }
-
-          @Override
-          public void handle(FieldAtom.NodeParent parent) {
-            history.apply(context, new ChangeNodeSet(parent.value, atom));
-          }
-        });
-  }
-   */
 
   public static Atom createEmptyAtom(Context context, AtomType atomType) {
     Atom out = new Atom(atomType);

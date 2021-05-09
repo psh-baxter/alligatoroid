@@ -10,22 +10,27 @@ import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.rendaw.common.ROMap;
 
 public class Pidgoon {
-  public static <R> Step<R> prepare(
-      final Grammar grammar, final Reference.Key<R> root) {
+  public static <R> Step<R> prepare(final Grammar grammar, final Reference.Key<R> root) {
     final Step<R> step = new Step<R>();
     grammar
         .getNode(root)
         .context(
-                grammar, step,
+            grammar,
+            step,
             new Parent<R>() {
               @Override
               public void advance(
-                      Grammar grammar, final Step step, Step.Branch branch, R result, final MismatchCause cause) {
+                  Grammar grammar,
+                  final Step step,
+                  Step.Branch branch,
+                  R result,
+                  final MismatchCause cause) {
                 step.completed.add(result);
               }
 
               @Override
-              public void error(Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
+              public void error(
+                  Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
                 step.errors.add(cause);
               }
             },
@@ -50,8 +55,7 @@ public class Pidgoon {
 
     for (final Step.Branch<E> leaf : step.branches) leaf.parse(grammar, nextStep, event);
 
-    if (nextStep.branches.size() > uncertaintyLimit)
-      throw new GrammarTooUncertain(nextStep);
+    if (nextStep.branches.size() > uncertaintyLimit) throw new GrammarTooUncertain(nextStep);
     if (nextStep.branches.isEmpty() && nextStep.errors.size() == step.branches.size())
       throw new InvalidStream(nextStep);
 

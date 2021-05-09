@@ -342,47 +342,4 @@ public class TestLayoutArray {
         .checkSpaceBrick(0, 1)
         .checkTextBrick(0, 2, "]");
   }
-
-  @Test
-  public void testDynamicGapDeselectLast() {
-    FreeAtomType one =
-        new TypeBuilder("one")
-            .back(Helper.buildBackPrimitive("one"))
-            .front(new FrontMarkBuilder("one").build())
-            .autoComplete(false)
-            .build();
-    FreeAtomType multiback =
-        new TypeBuilder("multiback")
-            .back(Helper.buildBackDataPrimitive("a"))
-            .back(Helper.buildBackDataPrimitive("b"))
-            .frontDataPrimitive("a")
-            .frontMark("^")
-            .frontDataPrimitive("b")
-            .autoComplete(false)
-            .build();
-    FreeAtomType array =
-        new TypeBuilder("array")
-            .back(Helper.buildBackDataArray("value", "any"))
-            .frontMark("[")
-            .front(
-                new FrontDataArrayBuilder("value")
-                    .addSeparator(new FrontMarkBuilder(", ").build())
-                    .build())
-            .frontMark("]")
-            .autoComplete(true)
-            .build();
-    Syntax syntax =
-        new SyntaxBuilder("any")
-            .type(one)
-            .type(multiback)
-            .type(array)
-            .group("any", new GroupBuilder().type(one).type(array).build())
-            .build();
-    new GeneralTestWizard(syntax, new TreeBuilder(array).addArray("value").build())
-        .actEnter()
-        .actExit()
-        .checkTextBrick(0, 0, "[")
-        .checkSpaceBrick(0, 1)
-        .checkTextBrick(0, 2, "]");
-  }
 }

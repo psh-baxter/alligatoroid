@@ -44,7 +44,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                                                 "text",
                                                 new BackPrimitiveSpec(
                                                     new BaseBackPrimitiveSpec.Config(
-                                                        GAP_PRIMITIVE_KEY)))),
+                                                            PRIMITIVE_KEY)))),
                                 ROSet.empty))))),
             new TSList<FrontSpec>()
                 .add(
@@ -59,8 +59,8 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                             .condition(
                                 new ConditionValue(
                                     new ConditionValue.Config(
-                                        GAP_PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))))
-                .add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(GAP_PRIMITIVE_KEY)))
+                                            PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))))
+                .add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(PRIMITIVE_KEY)))
                 .addAll(config.frontSuffix)));
     backType = config.backType;
   }

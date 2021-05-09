@@ -8,7 +8,7 @@ import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROMap;
 
 public abstract class BaseGapAtomType extends AtomType {
-  public static final String GAP_PRIMITIVE_KEY = "gap";
+  public static final String PRIMITIVE_KEY = "gap";
 
   public BaseGapAtomType(Config config) {
     super(config);

@@ -91,7 +91,7 @@ public abstract class AtomType {
    */
   public static boolean isPrecedent(
       final FreeAtomType type, final Field.Parent test, final boolean allowed) {
-    final Atom testAtom = test.value.atomParentRef.atom();
+    final Atom testAtom = test.field.atomParentRef.atom();
 
     // Can't move up if current level is bounded by any other front parts
     final int index = getIndexOfData(test, testAtom);

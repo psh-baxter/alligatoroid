@@ -7,7 +7,7 @@ import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.core.wall.Bedding;
@@ -137,7 +137,6 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard run(final Consumer<Context> r) {
     r.accept(inner.context);
-    assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
   }
@@ -153,8 +152,8 @@ public class GeneralTestWizard {
   public GeneralTestWizard actWindow() {
     if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
       ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionWindow(inner.context);
-    } else if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
-      ((VisualFrontArray.Cursor) inner.context.cursor).actionWindow(inner.context);
+    } else if (inner.context.cursor instanceof ArrayCursor) {
+      ((ArrayCursor) inner.context.cursor).actionWindow(inner.context);
     } else throw new Assertion();
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
@@ -164,8 +163,8 @@ public class GeneralTestWizard {
   public GeneralTestWizard actNext() {
     if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
       ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionNext(inner.context);
-    } else if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
-      ((VisualFrontArray.Cursor) inner.context.cursor).actionNext(inner.context);
+    } else if (inner.context.cursor instanceof ArrayCursor) {
+      ((ArrayCursor) inner.context.cursor).actionNext(inner.context);
     } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
       ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionNext(inner.context);
     } else throw new Assertion();
@@ -175,8 +174,8 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actGatherNext() {
-    if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
-      ((VisualFrontArray.Cursor) inner.context.cursor).actionGatherNext(inner.context);
+    if (inner.context.cursor instanceof ArrayCursor) {
+      ((ArrayCursor) inner.context.cursor).actionGatherNext(inner.context);
     } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
       ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionGatherNext(inner.context);
     } else throw new Assertion();
@@ -195,8 +194,8 @@ public class GeneralTestWizard {
   public GeneralTestWizard actPrevious() {
     if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
       ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionPrevious(inner.context);
-    } else if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
-      ((VisualFrontArray.Cursor) inner.context.cursor).actionPrevious(inner.context);
+    } else if (inner.context.cursor instanceof ArrayCursor) {
+      ((ArrayCursor) inner.context.cursor).actionPrevious(inner.context);
     } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
       ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionPrevious(inner.context);
     } else throw new Assertion();
@@ -208,8 +207,8 @@ public class GeneralTestWizard {
   public GeneralTestWizard actExit() {
     if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
       ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionExit(inner.context);
-    } else if (inner.context.cursor instanceof VisualFrontArray.Cursor) {
-      ((VisualFrontArray.Cursor) inner.context.cursor).actionExit(inner.context);
+    } else if (inner.context.cursor instanceof ArrayCursor) {
+      ((ArrayCursor) inner.context.cursor).actionExit(inner.context);
     } else throw new Assertion();
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();

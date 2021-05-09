@@ -57,7 +57,7 @@ public class TypeBuilder {
     return this;
   }
 
-  public TypeBuilder frontDataNode(final String middle) {
+  public TypeBuilder frontDataAtom(final String middle) {
     this.front.add(new FrontAtomSpec(new FrontAtomSpec.Config(middle)));
     return this;
   }

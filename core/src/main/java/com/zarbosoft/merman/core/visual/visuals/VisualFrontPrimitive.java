@@ -3,7 +3,7 @@ package com.zarbosoft.merman.core.visual.visuals;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.SelectionState;
+import com.zarbosoft.merman.core.CursorState;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
@@ -25,7 +25,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import javax.annotation.Nonnull;
 import java.util.function.Function;
@@ -43,7 +42,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   public VisualParent parent;
   public int brickCount = 0;
   public PrimitiveHoverable hoverable;
-  public Cursor selection;
+  public Cursor cursor;
   public TSList<Line> lines = new TSList<>();
   public int hardLineCount = 0;
 
@@ -95,9 +94,9 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       this.lines.add(line);
       offset += 1 + rawLine.length();
     }
-    if (selection != null) {
-      selection.range.setOffsets(
-          context, Math.max(0, Math.min(text.length(), selection.range.beginOffset)));
+    if (cursor != null) {
+      cursor.range.setOffsets(
+          context, Math.max(0, Math.min(text.length(), cursor.range.beginOffset)));
     }
   }
 
@@ -121,12 +120,12 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   public void select(
       final Context context, final boolean leadFirst, final int beginOffset, final int endOffset) {
-    if (selection != null) {
-      selection.range.leadFirst = leadFirst;
-      selection.range.setOffsets(context, beginOffset, endOffset);
+    if (cursor != null) {
+      cursor.range.leadFirst = leadFirst;
+      cursor.range.setOffsets(context, beginOffset, endOffset);
     } else {
-      selection = createSelection(context, leadFirst, beginOffset, endOffset);
-      context.setCursor(selection);
+      cursor = createSelection(context, leadFirst, beginOffset, endOffset);
+      context.setCursor(cursor);
     }
   }
 
@@ -213,7 +212,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    if (selection != null) context.clearCursor();
+    if (cursor != null) context.clearCursor();
     if (hoverable != null) context.clearHover();
     value.removeListener(dataListener);
     value.visual = null;
@@ -342,8 +341,8 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
         context.clearHover();
       }
     }
-    if (selection != null) {
-      selection.range.nudge(context);
+    if (cursor != null) {
+      cursor.range.nudge(context);
     }
 
     return result;
@@ -405,13 +404,13 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     public abstract void lastChanged(Context context, Brick brick);
   }
 
-  public static class PrimitiveSelectionState implements SelectionState {
+  public static class PrimitiveCursorState implements CursorState {
     private final FieldPrimitive value;
     private final int beginOffset;
     private final int endOffset;
     private final boolean leadFirst;
 
-    public PrimitiveSelectionState(
+    public PrimitiveCursorState(
         final FieldPrimitive value,
         final boolean leadFirst,
         final int beginOffset,
@@ -469,6 +468,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     public int precedingStart() {
       return precedingStart(clusterIterator, range.beginOffset);
     }
+
     private int precedingEnd(final int offset) {
       return precedingEnd(clusterIterator, offset);
     }
@@ -496,6 +496,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     public int followingStart() {
       return followingStart(clusterIterator, range.endOffset);
     }
+
     public int followingEnd(final int offset) {
       return followingEnd(clusterIterator, offset);
     }
@@ -514,6 +515,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       final Environment.I18nWalker iter = context.env.wordWalker(visualPrimitive.value.get());
       return followingStart(iter, source);
     }
+
     private int nextWordEnd(Context context, final int source) {
       final Environment.I18nWalker iter = context.env.wordWalker(visualPrimitive.value.get());
       return followingEnd(iter, source);
@@ -550,7 +552,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     @Override
     public void destroy(final Context context) {
       range.destroy(context);
-      visualPrimitive.selection = null;
+      visualPrimitive.cursor = null;
       visualPrimitive.commit();
       visualPrimitive.value.removeListener(clusterListener);
     }
@@ -561,8 +563,8 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     @Override
-    public SelectionState saveState() {
-      return new PrimitiveSelectionState(
+    public CursorState saveState() {
+      return new PrimitiveCursorState(
           visualPrimitive.value, range.leadFirst, range.beginOffset, range.endOffset);
     }
 
@@ -810,12 +812,12 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       // Renumber/adjust offset of following lines
       visualFrontPrimitive.renumber(index, movingOffset);
 
-      if (visualFrontPrimitive.selection != null) {
+      if (visualFrontPrimitive.cursor != null) {
         final int newBegin;
-        if (visualFrontPrimitive.selection.range.beginOffset < offset)
-          newBegin = visualFrontPrimitive.selection.range.beginOffset;
-        else newBegin = visualFrontPrimitive.selection.range.beginOffset + text.length();
-        visualFrontPrimitive.selection.range.setOffsets(context, newBegin);
+        if (visualFrontPrimitive.cursor.range.beginOffset < offset)
+          newBegin = visualFrontPrimitive.cursor.range.beginOffset;
+        else newBegin = visualFrontPrimitive.cursor.range.beginOffset + text.length();
+        visualFrontPrimitive.cursor.range.setOffsets(context, newBegin);
       }
 
       visualFrontPrimitive.idleLayBricks(
@@ -868,14 +870,14 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
           context.clearHover();
         }
       }
-      if (visualFrontPrimitive.selection != null) {
-        int newBegin = visualFrontPrimitive.selection.range.beginOffset;
-        int newEnd = visualFrontPrimitive.selection.range.endOffset;
+      if (visualFrontPrimitive.cursor != null) {
+        int newBegin = visualFrontPrimitive.cursor.range.beginOffset;
+        int newEnd = visualFrontPrimitive.cursor.range.endOffset;
         if (newBegin >= offset + count) newBegin = newBegin - count;
         else if (newBegin >= offset) newBegin = offset;
         if (newEnd >= offset + count) newEnd = newEnd - count;
         else if (newEnd >= offset) newEnd = offset;
-        visualFrontPrimitive.selection.range.setOffsets(context, newBegin, newEnd);
+        visualFrontPrimitive.cursor.range.setOffsets(context, newBegin, newEnd);
       }
     }
   }
@@ -1112,7 +1114,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
-      if (visual.selection == null) {
+      if (visual.cursor == null) {
         final ROPair<Hoverable, Boolean> out = visual.hover(context, point);
         if (out != null) return out;
       }
@@ -1145,10 +1147,10 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     public ExtendBrickResult createBrick(final Context context) {
       if (brick != null) return ExtendBrickResult.exists();
       createBrickInternal(context);
-      if (visual.selection != null
-          && (visual.selection.range.beginLine == Line.this
-              || visual.selection.range.endLine == Line.this))
-        visual.selection.range.nudge(context);
+      if (visual.cursor != null
+          && (visual.cursor.range.beginLine == Line.this
+              || visual.cursor.range.endLine == Line.this))
+        visual.cursor.range.nudge(context);
       return ExtendBrickResult.brick(brick);
     }
 

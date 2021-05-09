@@ -2,7 +2,7 @@ package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.SelectionState;
+import com.zarbosoft.merman.core.CursorState;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
@@ -285,8 +285,8 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public SelectionState saveState() {
-      return new VisualNodeSelectionState(base.value());
+    public CursorState saveState() {
+      return new VisualNodeCursorState(base.value());
     }
 
     @Override
@@ -338,10 +338,10 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
   }
 
-  private static class VisualNodeSelectionState implements SelectionState {
+  private static class VisualNodeCursorState implements CursorState {
     private final Field field;
 
-    private VisualNodeSelectionState(final Field field) {
+    private VisualNodeCursorState(final Field field) {
       this.field = field;
     }
 

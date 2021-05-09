@@ -17,14 +17,15 @@ import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.Padding;
+import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
 import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
-import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
-import com.zarbosoft.pidgoon.errors.InvalidStream;
+import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
+import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
 import com.zarbosoft.pidgoon.errors.NoResults;
 import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.model.MismatchCause;
@@ -108,7 +109,7 @@ public class NotMain extends Application {
                             context.cursor.dispatch(
                                 new com.zarbosoft.merman.core.Cursor.Dispatcher() {
                                   @Override
-                                  public void handle(VisualFrontArray.Cursor cursor) {
+                                  public void handle(ArrayCursor cursor) {
                                     context.copy(
                                         cursor.visual.value.data.sublist(
                                             cursor.beginIndex, cursor.endIndex + 1));
@@ -151,13 +152,13 @@ public class NotMain extends Application {
                 }
 
                 @Override
-                public VisualFrontArray.Cursor createArrayCursor(
+                public ArrayCursor createArrayCursor(
                     Context context,
                     VisualFrontArray visual,
                     boolean leadFirst,
                     int start,
                     int end) {
-                  return new VisualFrontArray.Cursor(context, visual, leadFirst, start, end) {
+                  return new ArrayCursor(context, visual, leadFirst, start, end) {
                     @Override
                     public boolean handleKey(Context context, ButtonEvent hidEvent) {
                       return handleCommon(context, hidEvent);
@@ -174,6 +175,11 @@ public class NotMain extends Application {
                       return handleCommon(context, hidEvent);
                     }
                   };
+                }
+
+                @Override
+                public boolean prepSelectEmptyArray(Context context, FieldArray value) {
+                  return false;
                 }
               });
       context.addHoverListener(
@@ -217,7 +223,7 @@ public class NotMain extends Application {
                       ((FieldPrimitive) base).selectInto(context, false, startIndex, endIndex);
                     }
                   } else if (base instanceof Atom) {
-                    ((Atom) base).valueParentRef.selectValue(context);
+                    ((Atom) base).fieldParentRef.selectValue(context);
                   } else throw new Assertion();
                 }
               }
@@ -265,27 +271,27 @@ public class NotMain extends Application {
           windowEvent -> {
             worker.shutdown();
           });
-    } catch (GrammarTooUncertain e) {
+    } catch (GrammarTooUncertainAt e) {
       StringBuilder message = new StringBuilder();
-      for (Step.Branch leaf : e.context.branches) {
+      for (Step.Branch leaf : (TSList<Step.Branch>) e.e.step.branches) {
         message.append(Format.format(" * %s (%s)\n", leaf, leaf.color()));
       }
       throw new RuntimeException(
           Format.format(
               "Too much uncertainty while parsing!\nat %s %s\n%s branches:\n%s",
-              ((Position) e.position).at, ((Position) e.position).event, message.toString()));
-    } catch (InvalidStream e) {
+              ((Position) e.at).at, ((Position) e.at).event, message.toString()));
+    } catch (InvalidStreamAt e) {
       StringBuilder message = new StringBuilder();
-      for (MismatchCause error : e.step.errors) {
+      for (MismatchCause error : (TSList<MismatchCause>) e.step.errors) {
         message.append(Format.format(" * %s\n", error));
       }
       throw new RuntimeException(
           Format.format(
               "Document doesn't conform to syntax tree\nat %s %s\nmismatches at final stream element:\n%s",
-              ((Position) e.position).at, ((Position) e.position).event, message.toString()));
+              ((Position) e.at).at, ((Position) e.at).event, message.toString()));
     } catch (NoResults e) {
       StringBuilder message = new StringBuilder();
-      for (MismatchCause error : e.state.errors) {
+      for (MismatchCause error : (TSList<MismatchCause>) e.state.errors) {
         message.append(Format.format(" * %s\n", error));
       }
       throw new RuntimeException(

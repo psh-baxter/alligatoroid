@@ -94,7 +94,7 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
             .context(
                     grammar,
                 step,
-                new SeqParent<K, T>(self, parent, nextStep, collected, color),
+                new SeqParent<K, T>(self, parent, nextStep, newCollected, color),
                 branch,
                 ROMap.empty,
                 mismatchCause,

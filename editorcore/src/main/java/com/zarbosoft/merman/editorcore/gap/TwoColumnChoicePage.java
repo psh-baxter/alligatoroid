@@ -84,7 +84,7 @@ public class TwoColumnChoicePage extends DetailsPage {
   public void tagsChanged(final Context context) {}
 
   public void choose(Editor editor) {
-    choices.get(index).choose(editor);
+    choices.get(index).choose(editor, null);
   }
 
   public void nextChoice(Context context) {

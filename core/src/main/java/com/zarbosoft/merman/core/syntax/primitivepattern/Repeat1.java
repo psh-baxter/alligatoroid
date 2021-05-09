@@ -1,7 +1,8 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
+import com.zarbosoft.pidgoon.events.EscapableResult;
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.nodes.MergeRepeat;
+import com.zarbosoft.pidgoon.nodes.MergeEscapableRepeat;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class Repeat1 extends Pattern {
@@ -12,7 +13,7 @@ public class Repeat1 extends Pattern {
   }
 
   @Override
-  public Node<ROList<String>> build(boolean capture) {
-    return new MergeRepeat<String>(pattern.build(capture)).min(1);
+  public Node<EscapableResult<ROList<String>>> build(boolean capture) {
+    return new MergeEscapableRepeat<String>(pattern.build(capture)).min(1);
   }
 }

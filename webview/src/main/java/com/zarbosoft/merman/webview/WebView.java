@@ -14,7 +14,7 @@ import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.UnsupportedDirections;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.webview.display.JSDisplay;
@@ -181,7 +181,7 @@ public class WebView {
                     ((FieldPrimitive) base).selectInto(context, false, startIndex, endIndex);
                   }
                 } else if (base instanceof Atom) {
-                  ((Atom) base).valueParentRef.selectValue(context);
+                  ((Atom) base).fieldParentRef.selectValue(context);
                 } else throw new Assertion();
               }
             }
@@ -227,7 +227,7 @@ public class WebView {
                       context.cursor.dispatch(
                           new com.zarbosoft.merman.core.Cursor.Dispatcher() {
                             @Override
-                            public void handle(VisualFrontArray.Cursor cursor) {
+                            public void handle(ArrayCursor cursor) {
                               context.copy(
                                   cursor.visual.value.data.sublist(
                                       cursor.beginIndex, cursor.endIndex + 1));

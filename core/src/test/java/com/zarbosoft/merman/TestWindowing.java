@@ -15,7 +15,7 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Course;
@@ -209,7 +209,7 @@ public class TestWindowing {
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
@@ -228,7 +228,7 @@ public class TestWindowing {
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "2")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .checkTextBrick(0, 0, "0_0")
         .actWindow()
         .checkTextBrick(0, i++, "0_0")
@@ -250,12 +250,12 @@ public class TestWindowing {
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .checkTextBrick(0, i++, "2_0")
         .checkTextBrick(0, i++, "3_0")
@@ -309,7 +309,7 @@ public class TestWindowing {
                 ((Atom)
                         context.syntaxLocate(
                             new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .checkTextBrick(0, i++, "4");
   }
@@ -321,14 +321,14 @@ public class TestWindowing {
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .run(
             context ->
                 ((Atom)
                         context.syntaxLocate(
                             new SyntaxPath("value", "1", "value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindowTowardsCursor()
         .checkTextBrick(0, i++, "2_0")
         .checkTextBrick(0, i++, "3_0")
@@ -347,7 +347,7 @@ public class TestWindowing {
                 ((Atom)
                         context.syntaxLocate(
                             new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .actWindowTowardsCursor()
         .checkTextBrick(0, i++, "4");
@@ -362,7 +362,7 @@ public class TestWindowing {
                 ((Atom)
                         context.syntaxLocate(
                             new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .checkCourseCount(1)
         .checkTextBrick(0, 0, "4")
@@ -401,7 +401,7 @@ public class TestWindowing {
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
             .dumpWall()
         .actWindow()
             .dumpWall()
@@ -426,13 +426,13 @@ public class TestWindowing {
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .checkTextBrick(0, 0, "1_0")
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
         .checkTextBrick(0, i++, "3_0")
@@ -450,14 +450,14 @@ public class TestWindowing {
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .run(
             context ->
                 ((Atom)
                         context.syntaxLocate(
                             new SyntaxPath("value", "1", "value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actEnter()
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
@@ -476,7 +476,7 @@ public class TestWindowing {
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "0")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .checkTextBrick(0, 0, "0_0")
         .checkCourseCount(1)
@@ -485,7 +485,7 @@ public class TestWindowing {
                 ((Atom)
                         context.syntaxLocate(
                             new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
         .checkTextBrick(0, i++, "3_0")
@@ -503,14 +503,14 @@ public class TestWindowing {
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "0")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .checkTextBrick(0, 0, "0_0")
         .checkCourseCount(1)
         .run(
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .checkTextBrick(0, i++, "0_0")
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
@@ -529,7 +529,7 @@ public class TestWindowing {
                 ((Atom)
                         context.syntaxLocate(
                             new SyntaxPath("value", "1", "value", "1", "value", "1", "value", "1")))
-                    .valueParentRef.selectValue(context))
+                    .fieldParentRef.selectValue(context))
         .actWindow()
         .checkTextBrick(0, 0, "4")
         .checkCourseCount(1)
@@ -613,8 +613,8 @@ public class TestWindowing {
     public GeneralTestWizard actWindow() {
       if (context.cursor instanceof VisualFrontAtomBase.Cursor) {
         ((VisualFrontAtomBase.Cursor) context.cursor).actionWindow(context);
-      } else if (context.cursor instanceof VisualFrontArray.Cursor) {
-        ((VisualFrontArray.Cursor) context.cursor).actionWindow(context);
+      } else if (context.cursor instanceof ArrayCursor) {
+        ((ArrayCursor) context.cursor).actionWindow(context);
       } else throw new Assertion();
       assertThat(context.cursor, is(notNullValue()));
       flushIteration();
@@ -624,8 +624,8 @@ public class TestWindowing {
     public GeneralTestWizard actEnter() {
       if (context.cursor instanceof VisualFrontAtomBase.Cursor) {
         ((VisualFrontAtomBase.Cursor) context.cursor).actionEnter(context);
-      } else if (context.cursor instanceof VisualFrontArray.Cursor) {
-        ((VisualFrontArray.Cursor) context.cursor).actionEnter(context);
+      } else if (context.cursor instanceof ArrayCursor) {
+        ((ArrayCursor) context.cursor).actionEnter(context);
       } else throw new Assertion();
       assertThat(context.cursor, is(notNullValue()));
       flushIteration();
@@ -635,8 +635,8 @@ public class TestWindowing {
     public GeneralTestWizard actExit() {
       if (context.cursor instanceof VisualFrontAtomBase.Cursor) {
         ((VisualFrontAtomBase.Cursor) context.cursor).actionExit(context);
-      } else if (context.cursor instanceof VisualFrontArray.Cursor) {
-        ((VisualFrontArray.Cursor) context.cursor).actionExit(context);
+      } else if (context.cursor instanceof ArrayCursor) {
+        ((ArrayCursor) context.cursor).actionExit(context);
       } else throw new Assertion();
       assertThat(context.cursor, is(notNullValue()));
       flushIteration();

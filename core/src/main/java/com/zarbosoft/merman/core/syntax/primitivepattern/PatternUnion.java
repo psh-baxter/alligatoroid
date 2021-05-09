@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.primitivepattern;
 
+import com.zarbosoft.pidgoon.events.EscapableResult;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.ROList;
@@ -13,8 +14,8 @@ public class PatternUnion extends Pattern {
   }
 
   @Override
-  public Node<ROList<String>> build(boolean capture) {
-    final Union<ROList<String>> out = new Union<ROList<String>>();
+  public Node<EscapableResult<ROList<String>>> build(boolean capture) {
+    final Union<EscapableResult<ROList<String>>> out = new Union<>();
     for (final Pattern child : children) out.add(child.build(capture));
     return out;
   }

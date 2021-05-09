@@ -6,7 +6,6 @@ import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Step;
-import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -16,20 +15,13 @@ import java.util.function.Consumer;
 
 public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<ROList<T>>> {
   private final TSList<ROPair<Node, Boolean>> children = new TSList<>();
-  private Node escape;
 
-  public BaseEscapableSequence<K, T> escape(Node escape) {
-    if (this.escape != null) throw new Assertion();
-    this.escape = escape;
-    return this;
-  }
-
-  public BaseEscapableSequence<K, T> add(final Node<ROPair<Boolean, K>> child) {
+  public BaseEscapableSequence<K, T> add(final Node<EscapableResult<K>> child) {
     children.add(new ROPair<>(child, true));
     return this;
   }
 
-  public BaseEscapableSequence<K, T> addIgnored(final Node<?> child) {
+  public <Q> BaseEscapableSequence<K, T> addIgnored(final Node<EscapableResult<Q>> child) {
     children.add(new ROPair<>(child, false));
     return this;
   }
@@ -49,7 +41,7 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
       final MismatchCause cause,
       Object color) {
     if (children.isEmpty()) {
-      parent.advance(grammar, step, branch, new EscapableResult<>(false, ROList.empty), cause);
+      parent.advance(grammar, step, branch, new EscapableResult<>(true, ROList.empty), cause);
     } else {
       children
           .get(0)
@@ -62,36 +54,6 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
               seen,
               cause,
               color);
-      if (escape != null)
-        escape.context(
-            grammar,
-            step,
-            new Parent<EscapableResult<K>>() {
-              @Override
-              public void advance(
-                  Grammar grammar,
-                  Step step,
-                  Step.Branch branch,
-                  EscapableResult<K> result,
-                  MismatchCause mismatchCause) {
-                parent.advance(
-                    grammar,
-                    step,
-                    branch,
-                    new EscapableResult<>(true, ROList.empty),
-                    mismatchCause);
-              }
-
-              @Override
-              public void error(
-                  Grammar grammar, Step step, Step.Branch branch, MismatchCause mismatchCause) {
-                parent.error(grammar, step, branch, mismatchCause);
-              }
-            },
-            branch,
-            seen,
-            cause,
-            color);
     }
   }
 
@@ -132,12 +94,12 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
       ROList<T> newCollected;
       if (self.children.get(this.step).second) newCollected = self.collect(collected, result.value);
       else newCollected = collected;
-      if (result.escaped || nextStep >= self.children.size()) {
+      if (!result.completed || nextStep >= self.children.size()) {
         parent.advance(
             grammar,
             step,
             branch,
-            new EscapableResult<>(result.escaped, newCollected),
+            new EscapableResult<>(result.completed, newCollected),
             mismatchCause);
       } else {
         self.children
@@ -146,42 +108,11 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
             .context(
                 grammar,
                 step,
-                new SeqParent<K, T>(self, parent, nextStep, collected, color),
+                new SeqParent<K, T>(self, parent, nextStep, newCollected, color),
                 branch,
                 ROMap.empty,
                 mismatchCause,
                 color);
-        if (self.escape != null) {
-          self.escape.context(
-              grammar,
-              step,
-              new Parent<EscapableResult<ROList<K>>>() {
-                @Override
-                public void advance(
-                    Grammar grammar,
-                    Step step,
-                    Step.Branch branch,
-                    EscapableResult<ROList<K>> result,
-                    MismatchCause mismatchCause) {
-                  parent.advance(
-                      grammar,
-                      step,
-                      branch,
-                      new EscapableResult<>(true, newCollected),
-                      mismatchCause);
-                }
-
-                @Override
-                public void error(
-                    Grammar grammar, Step step, Step.Branch branch, MismatchCause mismatchCause) {
-                  parent.error(grammar, step, branch, mismatchCause);
-                }
-              },
-              branch,
-              ROMap.empty,
-              mismatchCause,
-              color);
-        }
       }
     }
 

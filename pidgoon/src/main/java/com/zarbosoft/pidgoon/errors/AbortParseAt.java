@@ -1,4 +1,4 @@
-package com.zarbosoft.pidgoon.events;
+package com.zarbosoft.pidgoon.errors;
 
 import com.zarbosoft.pidgoon.errors.AbortParse;
 

@@ -1,5 +1,7 @@
 package com.zarbosoft.merman.core;
 
+import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
@@ -12,7 +14,7 @@ public interface CursorFactory {
       final int beginOffset,
       final int endOffset);
 
-  VisualFrontArray.Cursor createArrayCursor(
+  ArrayCursor createArrayCursor(
       final Context context,
       final VisualFrontArray visual,
       final boolean leadFirst,
@@ -20,4 +22,6 @@ public interface CursorFactory {
       final int end);
 
   VisualFrontAtomBase.Cursor createAtomCursor(final Context context, VisualFrontAtomBase base);
+
+  boolean prepSelectEmptyArray(Context context, FieldArray value);
 }

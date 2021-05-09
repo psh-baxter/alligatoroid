@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.helper;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.ViewerCursorFactory;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
@@ -27,7 +26,7 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
@@ -43,8 +42,8 @@ public class Helper {
     return (VisualFrontAtomBase.Cursor) context.cursor;
   }
 
-  public static VisualFrontArray.Cursor cursorArray(Context context) {
-    return (VisualFrontArray.Cursor) context.cursor;
+  public static ArrayCursor cursorArray(Context context) {
+    return (ArrayCursor) context.cursor;
   }
 
   public static VisualFrontPrimitive.Cursor cursorPrimitive(Context context) {

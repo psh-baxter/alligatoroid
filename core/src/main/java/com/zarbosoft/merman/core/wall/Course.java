@@ -166,9 +166,9 @@ public class Course {
     }
     brick.setParent(null, 0);
     children.remove(at);
+    if (index - 1 >= 0) parent.children.get(index - 1).getIdleExpand(context);
+    if (index + 1 < parent.children.size()) parent.children.get(index + 1).getIdleExpand(context);
     if (children.isEmpty()) {
-      if (index - 1 >= 0) parent.children.get(index - 1).getIdleExpand(context);
-      if (index + 1 < parent.children.size()) parent.children.get(index + 1).getIdleExpand(context);
       destroyInner(context);
     } else {
       if (at == 0 && this.index > 0) {

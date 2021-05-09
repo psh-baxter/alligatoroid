@@ -24,7 +24,7 @@ import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.events.Event;
-import com.zarbosoft.pidgoon.events.InvalidStreamAt;
+import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
 import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;

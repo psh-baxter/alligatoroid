@@ -39,7 +39,7 @@ public class TestActionsNested {
                     .add("value", Helper.buildBackDataAtom("value", "any"))
                     .build())
             .frontMark("#")
-            .frontDataNode("value")
+            .frontDataAtom("value")
             .autoComplete(true)
             .build();
     Syntax syntax =
@@ -58,14 +58,14 @@ public class TestActionsNested {
         .run(
             editor -> {
               ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom")))
-                  .valueParentRef.selectValue(editor.context);
+                  .fieldParentRef.selectValue(editor.context);
             })
         .editDelete()
         .checkArrayTree(
             new TreeBuilder(snooze)
                 .add(
                     "value",
-                    new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build())
+                    new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
                 .build());
   }
 
@@ -84,9 +84,9 @@ public class TestActionsNested {
                     .add("first", Helper.buildBackDataAtom("first", "any"))
                     .add("second", Helper.buildBackDataAtom("second", "any"))
                     .build())
-            .frontDataNode("first")
+            .frontDataAtom("first")
             .frontMark("+")
-            .frontDataNode("second")
+            .frontDataAtom("second")
             .precedence(10)
             .associateForward()
             .autoComplete(true)
@@ -105,7 +105,7 @@ public class TestActionsNested {
                 .add("first", new TreeBuilder(infinity).build())
                 .add(
                     "second",
-                    new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build())
+                    new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
                 .build());
     ((FieldAtom) editor.context.syntaxLocate(new SyntaxPath("value", "0", "first")))
         .visual.select(editor.context);
@@ -136,7 +136,7 @@ public class TestActionsNested {
                 new BackRecordBuilder()
                     .add("value", Helper.buildBackDataAtom("value", "any"))
                     .build())
-            .frontDataNode("value")
+            .frontDataAtom("value")
             .frontMark("!")
             .autoComplete(false)
             .build();
@@ -158,7 +158,7 @@ public class TestActionsNested {
         editor.context,
         new TreeBuilder(factorial)
             .add(
-                "value", new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build())
+                "value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
             .build(),
         Helper.rootArray(editor.context.document));
     ((EditAtomCursor) editor.context.cursor).editPaste(editor);
@@ -182,7 +182,7 @@ public class TestActionsNested {
                 new BackRecordBuilder()
                     .add("value", Helper.buildBackDataAtom("value", "any"))
                     .build())
-            .frontDataNode("value")
+            .frontDataAtom("value")
             .frontMark("!")
             .autoComplete(false)
             .build();
@@ -205,7 +205,7 @@ public class TestActionsNested {
             .add(
                 "value",
                 new TreeBuilder(editor.context.syntax.suffixGap)
-                    .add(SuffixGapAtomType.GAP_PRIMITIVE_KEY, "")
+                    .add(SuffixGapAtomType.PRIMITIVE_KEY, "")
                     .addArray(SuffixGapAtomType.PRECEDING_KEY, new TreeBuilder(infinity).build())
                     .build())
             .build(),

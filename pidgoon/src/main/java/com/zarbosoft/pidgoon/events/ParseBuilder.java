@@ -2,6 +2,8 @@ package com.zarbosoft.pidgoon.events;
 
 import com.zarbosoft.pidgoon.BaseParseBuilder;
 import com.zarbosoft.pidgoon.Pidgoon;
+import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
+import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.pidgoon.nodes.Reference;
@@ -59,19 +61,25 @@ public class ParseBuilder<J> extends BaseParseBuilder<J, ParseBuilder<J>> {
    *     length of stream - 1
    */
   public Pair<Step<J>, Position> longestMatchFromStart(final TSList<Event> events) {
-    Step<J> context = Pidgoon.prepare(grammar, root);
-    Pair<Step<J>, Position> record = new Pair<>(context, new Position(null, -1));
+    Step<J> step = Pidgoon.prepare(grammar, root);
+    Pair<Step<J>, Position> record = new Pair<>(step, new Position(null, -1));
     for (int i = 0; i < events.size(); ++i) {
       Event event = events.get(i);
       Position position = new Position(event, i);
       try {
-        context = Pidgoon.step(grammar, uncertaintyLimit, context, event);
+        step = Pidgoon.step(grammar, uncertaintyLimit, step, event);
+      } catch (final GrammarTooUncertain e) {
+        throw new GrammarTooUncertainAt(position, e);
       } catch (final InvalidStream e) {
         break;
       }
-      if (context == null) break;
-      record = new Pair<>(context, position);
-      if (context.branches.isEmpty()) break;
+      if (step == null) {
+        break;
+      }
+      record = new Pair<>(step, position);
+      if (step.branches.isEmpty()) {
+        break;
+      }
     }
     return record;
   }

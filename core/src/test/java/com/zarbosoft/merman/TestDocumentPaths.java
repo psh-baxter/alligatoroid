@@ -242,7 +242,7 @@ public class TestDocumentPaths {
     final Context context =
         buildDoc(
             MiscSyntax.syntax, new TreeBuilder(MiscSyntax.snooze).add("value", quoted).build());
-    assertThat(context.syntaxLocate(new SyntaxPath("value", "0", "value")), equalTo(quoted.valueParentRef.value));
+    assertThat(context.syntaxLocate(new SyntaxPath("value", "0", "value")), equalTo(quoted.fieldParentRef.field));
   }
 
   @Test

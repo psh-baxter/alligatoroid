@@ -14,7 +14,6 @@ import com.zarbosoft.merman.editorcore.helper.SyntaxBuilder;
 import com.zarbosoft.merman.editorcore.helper.TreeBuilder;
 import com.zarbosoft.merman.editorcore.helper.TypeBuilder;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
-import org.hamcrest.core.Is;
 import org.hamcrest.number.IsCloseTo;
 import org.junit.Test;
 
@@ -92,8 +91,8 @@ public class TestPrimitiveBreaking {
         .checkCourse(0, -10, 0)
         .run(
             context -> {
-              assertThat(primitive.visual.selection.range.cursor.drawing.transverse(), new IsCloseTo(-13.0, 0.01));
-              assertThat(primitive.visual.selection.range.cursor.drawing.transverseEdge(), new IsCloseTo(1, 0.01));
+              assertThat(primitive.visual.cursor.range.cursor.drawing.transverse(), new IsCloseTo(-13.0, 0.01));
+              assertThat(primitive.visual.cursor.range.cursor.drawing.transverseEdge(), new IsCloseTo(1, 0.01));
             });
   }
 
@@ -143,8 +142,8 @@ public class TestPrimitiveBreaking {
         .checkCourse(0, -10, 0)
         .run(
             context -> {
-              assertThat(primitive.visual.selection.range.cursor.drawing.transverse(), new IsCloseTo(-13, 0.01));
-              assertThat(primitive.visual.selection.range.cursor.drawing.transverseEdge(), new IsCloseTo(1, 0.01));
+              assertThat(primitive.visual.cursor.range.cursor.drawing.transverse(), new IsCloseTo(-13, 0.01));
+              assertThat(primitive.visual.cursor.range.cursor.drawing.transverseEdge(), new IsCloseTo(1, 0.01));
             });
   }
 

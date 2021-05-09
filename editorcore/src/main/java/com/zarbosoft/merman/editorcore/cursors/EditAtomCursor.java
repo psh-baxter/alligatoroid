@@ -46,7 +46,7 @@ public class EditAtomCursor extends VisualFrontAtomBase.Cursor {
                   recorder.apply(
                       editor.context,
                       new ChangeArray(
-                          (FieldArray) gap.fields.get(BaseGapAtomType.GAP_PRIMITIVE_KEY),
+                          (FieldArray) gap.fields.get(BaseGapAtomType.PRIMITIVE_KEY),
                           0,
                           0,
                           atoms));
@@ -64,7 +64,7 @@ public class EditAtomCursor extends VisualFrontAtomBase.Cursor {
           recorder.apply(
               editor.context,
               new ChangeArray((FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY), 0, 0, TSList.of(old)));
-          gap.fields.get(GapAtomType.GAP_PRIMITIVE_KEY).selectInto(editor.context);
+          gap.fields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
         });
   }
 }

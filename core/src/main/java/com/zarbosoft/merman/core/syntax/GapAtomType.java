@@ -24,7 +24,7 @@ public class GapAtomType extends BaseGapAtomType {
                     new BackFixedTypeSpec.Config(
                         config.backType,
                         new BackPrimitiveSpec(
-                            new BaseBackPrimitiveSpec.Config(GAP_PRIMITIVE_KEY))))),
+                            new BaseBackPrimitiveSpec.Config(PRIMITIVE_KEY))))),
             new TSList<FrontSpec>()
                 .addAll(config.frontPrefix == null ? ROList.empty : config.frontPrefix)
                 .add(
@@ -36,8 +36,8 @@ public class GapAtomType extends BaseGapAtomType {
                             .condition(
                                 new ConditionValue(
                                     new ConditionValue.Config(
-                                        GAP_PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))))
-                .add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(GAP_PRIMITIVE_KEY)))
+                                            PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))))
+                .add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(PRIMITIVE_KEY)))
                 .addAll(config.frontSuffix == null ? ROList.empty : config.frontSuffix)));
     backType = config.backType;
   }

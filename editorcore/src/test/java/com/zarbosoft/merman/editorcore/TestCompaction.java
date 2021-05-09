@@ -173,7 +173,7 @@ public class TestCompaction {
     final FreeAtomType unary =
         new TypeBuilder("unary")
             .back(Helper.buildBackDataAtom("value", "any"))
-            .frontDataNode("value")
+            .frontDataAtom("value")
                 .frontMark("")
             .precedence(20)
             .depthScore(1)
@@ -191,6 +191,7 @@ public class TestCompaction {
             .build();
     final FieldArray array = (FieldArray) lowAtom.fields.getOpt("value");
     new GeneralTestWizard(syntax, new TreeBuilder(unary).add("value", lowAtom).build())
+            .run(e -> e.context.retryExpandFactor = 1.0)
         .resize(70)
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "one")

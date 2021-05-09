@@ -28,7 +28,7 @@ public class FieldAtom extends Field {
    */
   public void initialSet(Atom data) {
     this.data = data;
-    if (data != null) data.setValueParentRef(new Parent(this));
+    if (data != null) data.setFieldParentRef(new Parent(this));
   }
 
   public void addListener(final Listener listener) {
@@ -76,30 +76,30 @@ public class FieldAtom extends Field {
 
     @Override
     public String valueType() {
-      return value.back.type;
+      return field.back.type;
     }
 
     @Override
     public String id() {
-      return value.back.id;
+      return field.back.id;
     }
 
     @Override
     public SyntaxPath path() {
-      return value.getSyntaxPath();
+      return field.getSyntaxPath();
     }
 
     @Override
     public boolean selectValue(final Context context) {
-      value.select(context);
+      field.select(context);
       return true;
     }
 
     @Override
     public SyntaxPath getSyntaxPath() {
       SyntaxPath out;
-      if (value.atomParentRef == null) out = new SyntaxPath();
-      else out = value.atomParentRef.getSyntaxPath();
+      if (field.atomParentRef == null) out = new SyntaxPath();
+      else out = field.atomParentRef.getSyntaxPath();
       return out.add(SYNTAX_PATH_KEY);
     }
 

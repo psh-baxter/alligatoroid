@@ -4,10 +4,15 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
 import com.zarbosoft.rendaw.common.ROPair;
 
+import java.util.function.Consumer;
+
 public class BaseEditPrimitiveCursor extends VisualFrontPrimitive.Cursor {
+  // TODO check pattern against more edits: split, join, newline, paste, etc
+
   public BaseEditPrimitiveCursor(
       Context context,
       VisualFrontPrimitive visualPrimitive,
@@ -19,18 +24,20 @@ public class BaseEditPrimitiveCursor extends VisualFrontPrimitive.Cursor {
 
   @Override
   public void handleTyping(Context context, String text) {
+    editHandleTyping(Editor.get(context), null, text);
+  }
+
+  public void editHandleTyping(Editor editor, History.Recorder recorder, String text) {
     FieldPrimitive value = visualPrimitive.value;
-    Editor.get(context)
-        .history
-        .record(
-            context,
-            new ROPair(visualPrimitive.value, "text"),
-            recorder -> {
-              recorder.apply(
-                  context,
-                  new ChangePrimitive(
-                      value, range.beginOffset, range.endOffset - range.beginOffset, text));
-            });
+    Consumer<History.Recorder> apply =
+        recorder1 -> {
+          recorder1.apply(
+              editor.context,
+              new ChangePrimitive(
+                  value, range.beginOffset, range.endOffset - range.beginOffset, text));
+        };
+    if (recorder != null) apply.accept(recorder);
+    else editor.history.record(editor.context, new ROPair(visualPrimitive.value, "text"), apply);
   }
 
   public void editCut(Editor editor) {
@@ -155,20 +162,19 @@ public class BaseEditPrimitiveCursor extends VisualFrontPrimitive.Cursor {
   }
 
   public void editPaste(Editor editor) {
-    editor.history.record(
-        editor.context,
-        null,
-        recorder -> {
-          editor.context.uncopyString(
-              text -> {
-                if (text == null) return;
-                FieldPrimitive value = visualPrimitive.value;
-                recorder.apply(
-                    editor.context,
-                    new ChangePrimitive(
-                        value, range.beginOffset, range.endOffset - range.beginOffset, text));
-              });
-        });
+    editor.context.uncopyString(
+        text ->
+            editor.history.record(
+                editor.context,
+                null,
+                recorder -> {
+                  if (text == null) return;
+                  FieldPrimitive value = visualPrimitive.value;
+                  recorder.apply(
+                      editor.context,
+                      new ChangePrimitive(
+                          value, range.beginOffset, range.endOffset - range.beginOffset, text));
+                }));
   }
 
   public void editSplitLines(Editor editor) {

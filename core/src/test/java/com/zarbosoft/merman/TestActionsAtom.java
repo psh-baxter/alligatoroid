@@ -27,7 +27,7 @@ public class TestActionsAtom {
                         .build())
                 .build());
     ((Atom) context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom")))
-        .valueParentRef.selectValue(context);
+        .fieldParentRef.selectValue(context);
     Helper.cursorAtom(context).actionEnter(context);
     assertThat(
         context.cursor.getSyntaxPath(),
@@ -47,7 +47,7 @@ public class TestActionsAtom {
                         .build())
                 .build());
     ((Atom) context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom")))
-        .valueParentRef.selectValue(context);
+        .fieldParentRef.selectValue(context);
     Helper.cursorAtom(context).actionExit(context);
     assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0")));
   }
@@ -61,7 +61,7 @@ public class TestActionsAtom {
                 .add("first", target)
                 .add("second", new TreeBuilder(MiscSyntax.one).build())
                 .build())
-        .run(context -> target.valueParentRef.selectValue(context))
+        .run(context -> target.fieldParentRef.selectValue(context))
         .actNext()
         .run(
             context ->
@@ -79,7 +79,7 @@ public class TestActionsAtom {
                 .add("first", new TreeBuilder(MiscSyntax.one).build())
                 .add("second", target)
                 .build())
-        .run(context -> target.valueParentRef.selectValue(context))
+        .run(context -> target.fieldParentRef.selectValue(context))
         .actPrevious()
         .run(
             context ->

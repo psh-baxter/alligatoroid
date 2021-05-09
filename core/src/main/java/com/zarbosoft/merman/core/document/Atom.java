@@ -23,7 +23,7 @@ public class Atom {
   /**
    * Null if root
    */
-  public Field.Parent<?> valueParentRef;
+  public Field.Parent<?> fieldParentRef;
   public final AtomType type;
   public VisualAtom visual;
 
@@ -43,15 +43,15 @@ public class Atom {
 
                 @Override
                 public boolean selectAtomParent(final Context context) {
-                  if (valueParentRef == null) return false;
-                  return Atom.this.valueParentRef.selectValue(context);
+                  if (fieldParentRef == null) return false;
+                  return Atom.this.fieldParentRef.selectValue(context);
                 }
 
                 @Override
                 public SyntaxPath getSyntaxPath() {
                   SyntaxPath out;
-                  if (Atom.this.valueParentRef == null) out = new SyntaxPath();
-                  else out = Atom.this.valueParentRef.getSyntaxPath();
+                  if (Atom.this.fieldParentRef == null) out = new SyntaxPath();
+                  else out = Atom.this.fieldParentRef.getSyntaxPath();
                   return out.add(entry.getKey());
                 }
               });
@@ -59,8 +59,8 @@ public class Atom {
   }
 
   public SyntaxPath getSyntaxPath() {
-    if (valueParentRef == null) return new SyntaxPath();
-    else return valueParentRef.path();
+    if (fieldParentRef == null) return new SyntaxPath();
+    else return fieldParentRef.path();
   }
 
   public Visual ensureVisual(
@@ -76,8 +76,8 @@ public class Atom {
     return visual;
   }
 
-  public void setValueParentRef(final Field.Parent<?> valueParentRef) {
-    this.valueParentRef = valueParentRef;
+  public void setFieldParentRef(final Field.Parent<?> fieldParentRef) {
+    this.fieldParentRef = fieldParentRef;
   }
 
   public Object syntaxLocateStep(String segment) {

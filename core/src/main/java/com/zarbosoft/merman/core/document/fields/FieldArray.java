@@ -33,7 +33,7 @@ public class FieldArray extends Field {
   public void initialSet(TSList<Atom> data) {
     this.data.addAll(data);
     for (Atom v : data) {
-      v.setValueParentRef(new Parent(this));
+      v.setFieldParentRef(new Parent(this));
     }
     renumber(0);
   }
@@ -44,12 +44,12 @@ public class FieldArray extends Field {
       sum = 0;
     } else {
       final Atom prior = data.get(from - 1);
-      final Parent parent = (Parent) prior.valueParentRef;
+      final Parent parent = (Parent) prior.fieldParentRef;
       sum = parent.backIndex + prior.type.back().size();
     }
     for (int i = from; i < data.size(); ++i) {
       Atom atom = data.get(i);
-      final Parent parent = ((Parent) atom.valueParentRef);
+      final Parent parent = ((Parent) atom.fieldParentRef);
       parent.index = i;
       parent.backIndex = sum;
       sum += atom.type.back().size();
@@ -67,7 +67,7 @@ public class FieldArray extends Field {
 
   public boolean selectInto(
       final Context context, final boolean leadFirst, final int start, final int end) {
-    if (data.isEmpty()) {
+    if (data.isEmpty() && !context.cursorFactory.prepSelectEmptyArray(context, this)) {
       return false;
     }
     if (context.window) context.windowAdjustMinimalTo(this);
@@ -114,25 +114,25 @@ public class FieldArray extends Field {
 
     @Override
     public String valueType() {
-      return value.back.elementAtomType();
+      return field.back.elementAtomType();
     }
 
     @Override
     public SyntaxPath path() {
-      return value.back.getPath(value, backIndex);
+      return field.back.getPath(field, backIndex);
     }
 
     @Override
     public boolean selectValue(final Context context) {
-      value.selectInto(context, true, index, index);
+      field.selectInto(context, true, index, index);
       return true;
     }
 
     @Override
     public SyntaxPath getSyntaxPath() {
       SyntaxPath out;
-      if (value.atomParentRef == null) out = new SyntaxPath();
-      else out = value.atomParentRef.getSyntaxPath();
+      if (field.atomParentRef == null) out = new SyntaxPath();
+      else out = field.atomParentRef.getSyntaxPath();
       return out.add(Integer.toString(index));
     }
 

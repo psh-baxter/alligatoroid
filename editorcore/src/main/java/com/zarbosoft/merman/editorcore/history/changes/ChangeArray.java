@@ -47,12 +47,12 @@ public class ChangeArray extends Change {
     final TSList<Atom> clearSublist = value.data.sublist(index, index + remove);
     final ChangeArray reverse = new ChangeArray(value, index, add.size(), clearSublist.mut());
     for (Atom atom : clearSublist) {
-      atom.setValueParentRef(null);
+      atom.setFieldParentRef(null);
     }
     clearSublist.clear();
     value.data.insertAll(index, add);
     for (Atom atom : add) {
-      atom.setValueParentRef(new FieldArray.Parent(value));
+      atom.setFieldParentRef(new FieldArray.Parent(value));
     }
     value.renumber(index);
     for (final FieldArray.Listener listener : value.listeners) {

@@ -27,12 +27,12 @@ public class ConditionNode extends ConditionType {
   @Override
   public ConditionAttachment create(final Context context, final Atom atom) {
     final boolean show;
-    if (atom.valueParentRef == null) {
+    if (atom.fieldParentRef == null) {
       show = true;
     } else if (!(atom.type instanceof FreeAtomType)) {
       show = true;
     } else {
-      show = AtomType.isPrecedent((FreeAtomType) atom.type, atom.valueParentRef, true);
+      show = AtomType.isPrecedent((FreeAtomType) atom.type, atom.fieldParentRef, true);
     }
     final ConditionAttachment condition =
         new ConditionAttachment(invert) {

@@ -2,7 +2,11 @@ package com.zarbosoft.pidgoon.events;
 
 import com.zarbosoft.pidgoon.Pidgoon;
 import com.zarbosoft.pidgoon.errors.AbortParse;
+import com.zarbosoft.pidgoon.errors.AbortParseAt;
+import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
+import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
+import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
 import com.zarbosoft.pidgoon.errors.NoResults;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.Step;
@@ -39,6 +43,8 @@ public class ParseEventSink<O> implements EventSink<ParseEventSink<O>> {
     final Step<O> nextStep;
     try {
       nextStep = Pidgoon.step(grammar, uncertaintyLimit, step, event);
+    } catch (GrammarTooUncertain e) {
+      throw new GrammarTooUncertainAt(at, e);
     } catch (InvalidStream e) {
       throw new InvalidStreamAt(at, e);
     } catch (AbortParse e) {

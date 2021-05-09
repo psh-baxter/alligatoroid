@@ -8,6 +8,7 @@ import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
@@ -17,7 +18,7 @@ import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditPrimitiveCursor;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeNodeSet;
+import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.EscapableResult;
@@ -36,6 +37,7 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -59,28 +61,28 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
       int endOffset) {
     super(editor.context, visualPrimitive, leadFirst, beginOffset, endOffset);
     grammar = createChoiceGrammar(editor.context);
-    textChanged(editor, visualPrimitive.value.data.toString());
+    textChanged(editor, null, visualPrimitive.value.data.toString());
   }
 
   @Override
-  public void handleTyping(Context context, String text) {
+  public void editHandleTyping(Editor editor, History.Recorder recorder, String text) {
     FieldPrimitive value = visualPrimitive.value;
     String preview = value.get();
     preview =
         preview.substring(0, range.beginOffset)
             + text
             + preview.substring(range.endOffset, preview.length());
-    if (textChanged(Editor.get(context), preview)) {
+    if (textChanged(editor, recorder, preview)) {
       return;
     }
-    super.handleTyping(context, text);
+    super.editHandleTyping(editor, recorder, text);
   }
 
   private Grammar createChoiceGrammar(Context context) {
     // Walk all directly and indirectly reachable types, creating a choice for each
     Atom gap = gapAtom();
     AtomType gapType = gap.type;
-    String baseType = gap.valueParentRef.valueType();
+    String baseType = gap.fieldParentRef.valueType();
     Union<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>> union = new Union<>();
 
     TSSet<AtomType> seen = new TSSet<>();
@@ -168,7 +170,7 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
                           @Override
                           public Field process(Editor editor, History.Recorder recorder) {
                             FieldAtom field = new FieldAtom(((FrontAtomSpec) front).field());
-                            recorder.apply(editor.context, new ChangeNodeSet(field, value));
+                            recorder.apply(editor.context, new ChangeAtom(field, value));
                             return field;
                           }
                         };
@@ -262,7 +264,7 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
    * @param editor
    * @return true if consumed, false if text should proceed to value
    */
-  private boolean textChanged(final Editor editor, String text) {
+  public boolean textChanged(final Editor editor, History.Recorder recorder, String text) {
     Context context = editor.context;
     Atom gap = gapAtom();
 
@@ -280,45 +282,60 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
         longest = new ParseBuilder<>(GAP_ROOT_KEY).grammar(grammar).longestMatchFromStart(glyphs);
     TSList<GapChoice> choices = new TSList<>();
     TSSet<AtomType> seen = new TSSet<>();
-    for (boolean completed : new boolean[] {true, false}) {
-      for (ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>> result :
-          longest.first.completed) {
-        if (completed != !result.second.escaped) continue;
-        PreGapChoice choice = result.first;
-        seen.add(result.first.type);
-        choices.add(
-            new GapChoice(
-                gap,
-                choice.type,
-                choice.consumePreceding,
-                choice.supplyFillAtoms,
-                glyphs,
-                ((int) longest.second.at) + 1,
-                result.second.value,
-                null,
-                choice.keySpecs,
-                choice.following));
-      }
+    for (ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>> result :
+        longest.first.completed) {
+      PreGapChoice choice = result.first;
+      seen.add(result.first.type);
+      choices.add(
+          new GapChoice(
+              gap,
+              choice.type,
+              choice.consumePreceding,
+              choice.supplyFillAtoms,
+              glyphs,
+              ((int) longest.second.at) + 1,
+              result.second.value,
+              null,
+              choice.keySpecs,
+              choice.following));
+    }
+    for (Step.Branch leaf : longest.first.branches) {
+      PreGapChoice choice = (PreGapChoice) leaf.color();
+      if (!seen.addNew(choice.type)) continue;
+      choices.add(
+          new GapChoice(
+              gap,
+              choice.type,
+              choice.consumePreceding,
+              choice.supplyFillAtoms,
+              glyphs,
+              ((int) longest.second.at) + 1,
+              null,
+              leaf,
+              choice.keySpecs,
+              choice.following));
     }
 
     /// Choose auto-choosable choices
-    if ((int) longest.second.at + 1 == glyphs.size()) {
-      for (final GapChoice choice : choices) {
-        if (choice.type.autoChooseUnambiguous && choices.size() == 1) {
-          choice.choose(editor);
+    if (glyphs.some()) {
+      if ((int) longest.second.at + 1 == glyphs.size()) {
+        for (final GapChoice choice : choices) {
+          if (choice.type.autoChooseUnambiguous && choices.size() == 1) {
+            choice.choose(editor, recorder);
+            return true;
+          }
+        }
+      } else if ((int) longest.second.at >= 0) {
+        // While typing, whole text will generally continue to match
+        // If there's a typo, nothing will match (at == 0)
+        // If has typed a whole candidate and continue to suffix, match will be < full, > 0 (ex:
+        // text.length() - 1)
+        // -> When the text stops matching (new element started?) go ahead and choose the
+        // closest-to-full choice
+        for (final GapChoice choice : choices) {
+          choice.choose(editor, recorder);
           return true;
         }
-      }
-    } else if ((int) longest.second.at > 0) {
-      // While typing, whole text will generally continue to match
-      // If there's a typo, nothing will match (at == 0)
-      // If has typed a whole candidate and continue to suffix, match will be < full, > 0 (ex:
-      // text.length() - 1)
-      // -> When the text stops matching (new element started?) go ahead and choose the
-      // closest-to-full choice
-      for (final GapChoice choice : choices) {
-        choice.choose(editor);
-        return true;
       }
     }
 
@@ -334,6 +351,78 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
       }
     }
     return false;
+  }
+
+  public void editExit(Editor editor) {
+    Atom.Parent atomParentRef = visualPrimitive.value.atomParentRef;
+    if (atomParentRef == null) return;
+    Atom gap = atomParentRef.atom();
+    atomParentRef.selectAtomParent(editor.context);
+    Field gapInField = gap.fieldParentRef.field;
+    if (gap.type == editor.context.syntax.gap)
+      do {
+        if (!(gapInField instanceof FieldArray)) break;
+        FieldArray value = (FieldArray) gapInField;
+        TSList<Atom> data = value.data;
+        if (data.size() > 1) break;
+        Atom atom = data.get(0);
+        if (atom.type != editor.context.syntax.gap) break;
+        FieldPrimitive field = (FieldPrimitive) atom.fields.get(GapAtomType.PRIMITIVE_KEY);
+        if (!field.get().isEmpty()) break;
+        editor.history.record(
+            editor.context,
+            null,
+            recorder -> {
+              recorder.apply(editor.context, new ChangeArray(value, 0, 1, ROList.empty));
+            });
+      } while (false);
+    else
+      do {
+        /// Remove empty syntax gaps and place lifted preceding back into parent
+        FieldPrimitive prim = visualPrimitive.value;
+        if (!prim.get().isEmpty()) break;
+        FieldArray array = (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY);
+        ROSet<AtomType> canPlace;
+        if (array.data.size() == 0) {
+          canPlace = ROSet.empty;
+        } else if (array.data.size() == 1 && gapInField instanceof FieldAtom) {
+          canPlace = editor.context.syntax.splayedTypes.get(((FieldAtom) gapInField).back().type);
+        } else if (gapInField instanceof FieldArray) {
+          canPlace =
+              editor.context.syntax.splayedTypes.get(
+                  ((FieldArray) gapInField).back().elementAtomType());
+        } else break;
+        boolean canPlaceAll = true;
+        for (Atom atom : array.data) {
+          if (!canPlace.contains(atom.type)) {
+            canPlaceAll = false;
+            break;
+          }
+        }
+        if (!canPlaceAll) break;
+        TSList<Atom> transplant = array.data.mut();
+        if (transplant.none())
+          transplant.add(Editor.createEmptyAtom(editor.context, editor.context.syntax.gap));
+        editor.history.record(
+            editor.context,
+            null,
+            recorder -> {
+              recorder.apply(
+                  editor.context, new ChangeArray(array, 0, array.data.size(), ROList.empty));
+              if (gapInField instanceof FieldAtom) {
+                recorder.apply(
+                    editor.context, new ChangeAtom((FieldAtom) gapInField, transplant.get(0)));
+              } else if (gapInField instanceof FieldArray) {
+                recorder.apply(
+                    editor.context,
+                    new ChangeArray(
+                        (FieldArray) gapInField,
+                        ((FieldArray.Parent) gap.fieldParentRef).index,
+                        1,
+                        transplant));
+              } else throw new Assertion();
+            });
+      } while (false);
   }
 
   @FunctionalInterface

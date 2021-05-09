@@ -35,6 +35,7 @@ import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
 import com.zarbosoft.merman.editorcore.display.MockeryDisplay;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -42,17 +43,19 @@ import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.ComparisonFailure;
 
+import java.util.Map;
+
 public class Helper {
 
   public static Environment env = new TestEnvironment();
 
   public static Atom createGap(Syntax syntax) {
-    return new TreeBuilder(syntax.gap).add(GapAtomType.GAP_PRIMITIVE_KEY, "").build();
+    return new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build();
   }
 
   public static Atom createSuffixGap(Syntax syntax, Atom... preceding) {
     return new TreeBuilder(syntax.suffixGap)
-        .add(SuffixGapAtomType.GAP_PRIMITIVE_KEY, "")
+        .add(SuffixGapAtomType.PRIMITIVE_KEY, "")
         .addArray(SuffixGapAtomType.PRECEDING_KEY, preceding)
         .build();
   }
@@ -157,7 +160,7 @@ public class Helper {
       final FieldPrimitive gotValue = (FieldPrimitive) got;
       if (!expectedValue.get().equals(gotValue.get()))
         throw new ComparisonFailure(
-            Format.format("Array length mismatch.\nAt: %s", got.getSyntaxPath()),
+            Format.format("Primitive length mismatch.\nAt: %s", got.getSyntaxPath()),
             expectedValue.get(),
             gotValue.get());
     } else
@@ -196,7 +199,34 @@ public class Helper {
             new TestEnvironment(),
             new History(),
             new JavaSerializer(syntax.backType),
-            new Editor.Config(contextConfig.startSelected(true)));
+            new Editor.Config(contextConfig));
     return editor;
+  }
+
+  private static void dumpTreeInner(Atom a, String indentText) {
+    String indentChunk = "   ";
+    System.out.format("%s%s\n", indentText, a.type.id);
+    indentText += indentChunk;
+    for (Map.Entry<String, Field> field : a.fields) {
+      System.out.format(
+          "%s%s %s\n", indentText, field.getKey(), field.getValue().getClass().getName());
+      if (field.getValue() instanceof FieldArray) {
+        String subIndent = indentText + indentChunk;
+        int index = 0;
+        for (Atom el : ((FieldArray) field.getValue()).data) {
+          dumpTreeInner(el, subIndent + " " + index + " ");
+          index += 1;
+        }
+      } else if (field.getValue() instanceof FieldAtom) {
+        dumpTreeInner(((FieldAtom) field.getValue()).data, indentText + indentChunk);
+      } else if (field.getValue() instanceof FieldPrimitive) {
+        System.out.format(
+            "%s[%s]\n", indentText + indentChunk, ((FieldPrimitive) field.getValue()).get());
+      } else throw new Assertion();
+    }
+  }
+
+  public static void dumpTree(Editor editor) {
+    dumpTreeInner(editor.context.document.root, "");
   }
 }
