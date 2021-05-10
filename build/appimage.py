@@ -23,17 +23,21 @@ if not os.path.exists(ait):
 
 apprun = """#!/bin/sh
 SELF_DIR="$(dirname "$(readlink -f "$0")")"
-exec "$SELF_DIR/bin/java" \
-    -p modules \
-    -m com.zarbosoft.merman.jfxeditor1/com.zarbosoft.merman.jfxeditor1.Main
+exec "$SELF_DIR/bin/java" \\
+    -p modules \\
+    -m com.zarbosoft.merman.jfxeditor1/com.zarbosoft.merman.jfxeditor1.Main \\
+    "$@"
 """
-with open(sourcedir + "/AppRun", "wt") as dest:
+apprun_path = sourcedir + "/AppRun"
+with open(apprun_path, "wt") as dest:
     dest.write(apprun)
+os.chmod(apprun_path, 0o744)
 
 desktop = """[Desktop Entry]
 Type=Application
 Name=merman1
 Icon=icon
+Categories=Development;
 """
 with open(sourcedir + "/merman1.desktop", "wt") as dest:
     dest.write(desktop)

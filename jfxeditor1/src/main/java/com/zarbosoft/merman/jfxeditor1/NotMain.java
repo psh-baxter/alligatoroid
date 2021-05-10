@@ -44,8 +44,10 @@ import javafx.application.Application;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -242,6 +244,7 @@ public class NotMain extends Application {
               return false;
             }
           };
+      primaryStage.getIcons().add(new Image(new ByteArrayInputStream(Embedded.icon48)));
       primaryStage.setScene(new Scene(display.node, 800, 600));
       primaryStage.show();
       primaryStage.setOnCloseRequest(

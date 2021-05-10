@@ -52,6 +52,7 @@
                         <configuration>
                             <sources>
                                 <source>${build.directory}/moditect/generated-sources</source>
+                                <source>${build.directory}/sources</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -80,7 +81,7 @@
                         <configuration>
                             <module>
                                 <moduleInfo>
-                                    <name>com.zarbosoft.merman.jfxviewer</name>
+                                    <name>com.zarbosoft.merman.jfxeditor1</name>
                                     <exports>
                                         *;
                                     </exports>
@@ -109,6 +110,42 @@
                             <goal>jlink</goal>
                         </goals>
                         <id>create dep reduced package</id>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>exec-maven-plugin</artifactId>
+                <groupId>org.codehaus.mojo</groupId>
+                <executions>
+                    <execution>
+                        <id>Embed resources</id>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <workingDirectory>${basedir}/..</workingDirectory>
+                            <executable>python3</executable>
+                            <arguments>
+                                <argument>build/embed.py</argument>
+                                <argument>jfxeditor1</argument>
+                            </arguments>
+                        </configuration>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>Generate Appimage</id>
+                        <phase>package</phase>
+                        <configuration>
+                            <workingDirectory>${basedir}/..</workingDirectory>
+                            <executable>python3</executable>
+                            <arguments>
+                                <argument>build/appimage.py</argument>
+                                <argument>jfxeditor1</argument>
+                            </arguments>
+                        </configuration>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
