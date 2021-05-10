@@ -402,7 +402,7 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
         if (!canPlaceAll) break;
         TSList<Atom> transplant = array.data.mut();
         if (transplant.none())
-          transplant.add(Editor.createEmptyAtom(editor.context, editor.context.syntax.gap));
+          transplant.add(Editor.createEmptyAtom(editor.context.syntax, editor.context.syntax.gap));
         editor.history.record(
             editor.context,
             null,

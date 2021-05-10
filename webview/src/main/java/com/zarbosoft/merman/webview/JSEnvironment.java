@@ -138,10 +138,12 @@ public class JSEnvironment implements Environment {
 
   private static class I18nWalker implements Environment.I18nWalker {
     private final TSList<Integer> segments = new TSList<>();
+    private final String text;
     private int index;
 
     private I18nWalker(Segmenter segmenter, String text) {
-      JsObject segments0 = segmenter.segment(text);
+      this.text = text;
+      JsObject segments0 = segmenter.segment(this.text);
       JsIteratorIterable<JsPropertyMap> iter =
           (JsIteratorIterable<JsPropertyMap>) CompatOverlay.getSymbol(segments0, Symbol.iterator);
       JsIIterableResult<JsPropertyMap> at = iter.next();
@@ -153,8 +155,7 @@ public class JSEnvironment implements Environment {
       segments.add(text.length());
     }
 
-    @Override
-    public int precedingStart(int offset) {
+    public int preceding(int offset) {
       while (segments.get(index) >= offset) {
         index -= 1;
         if (index < 0) {
@@ -165,8 +166,8 @@ public class JSEnvironment implements Environment {
       return segments.get(index);
     }
 
-    @Override
-    public int followingStart(int offset) {
+
+    public int following(int offset) {
       while (segments.get(index) <= offset) {
         index += 1;
         if (index >= segments.size()) {
@@ -175,6 +176,36 @@ public class JSEnvironment implements Environment {
         }
       }
       return segments.get(index);
+    }
+    @Override
+    public int precedingStart(int offset) {
+      int out = preceding(offset);
+      if (out != -1 && Character.isWhitespace(text.codePointAt(out))) out = preceding(out);
+      return out;
+    }
+
+    @Override
+    public int precedingEnd(int offset) {
+      int out = preceding(offset);
+      if (out != -1 && !Character.isWhitespace(text.codePointAt(out))) out = preceding(out);
+      if (out == -1 && offset > 0) return 0;
+      return out;
+    }
+
+    @Override
+    public int followingStart(int offset) {
+      int out = following(offset);
+      if (out != -1 && out < text.length() && Character.isWhitespace(text.codePointAt(out)))
+        out = following(out);
+      return out;
+    }
+
+    @Override
+    public int followingEnd(int offset) {
+      int out = following(offset);
+      if (out != -1 && out < text.length() && !Character.isWhitespace(text.codePointAt(out)))
+        out = following(out);
+      return out;
     }
   }
 

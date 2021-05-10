@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.CursorState;
+import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
@@ -19,8 +19,6 @@ import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
-
-import javax.annotation.Nonnull;
 
 public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   private final Symbol ellipsisSpec;
@@ -167,7 +165,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   @Override
-  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
+  public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (ellipsize(context)) {
       if (ellipsis != null) return CreateBrickResult.brick(ellipsis);
       return CreateBrickResult.brick(createEllipsis(context));
@@ -175,7 +173,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+  public ExtendBrickResult createFirstBrick(final Context context) {
     if (ellipsize(context)) {
       if (ellipsis != null) return ExtendBrickResult.exists();
       return ExtendBrickResult.brick(createEllipsis(context));
@@ -185,7 +183,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
+  public ExtendBrickResult createLastBrick(final Context context) {
     if (ellipsize(context)) {
       if (ellipsis != null) return ExtendBrickResult.exists();
       return ExtendBrickResult.brick(createEllipsis(context));
@@ -212,15 +210,15 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
         fixDeepSelection = true;
         context.clearCursor();
       } else {
-      VisualParent parent = context.cursor.getVisual().parent();
-      while (parent != null) {
-        final Visual visual = parent.visual();
-        if (visual == this) {
-          fixDeepSelection = true;
-          break;
+        VisualParent parent = context.cursor.getVisual().parent();
+        while (parent != null) {
+          final Visual visual = parent.visual();
+          if (visual == this) {
+            fixDeepSelection = true;
+            break;
+          }
+          parent = visual.parent();
         }
-        parent = visual.parent();
-      }
       }
     }
     if (hoverable == null && context.hover != null) {

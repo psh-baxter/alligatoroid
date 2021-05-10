@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.CursorState;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.CursorState;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
@@ -26,7 +26,6 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import javax.annotation.Nonnull;
 import java.util.function.Function;
 
 import static com.zarbosoft.merman.core.Environment.I18N_DONE;
@@ -143,17 +142,17 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   }
 
   @Override
-  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
+  public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     return CreateBrickResult.brick(lines.get(0).createOrGetBrick(context));
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+  public ExtendBrickResult createFirstBrick(final Context context) {
     return lines.get(0).createBrick(context);
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
+  public ExtendBrickResult createLastBrick(final Context context) {
     return lines.last().createBrick(context);
   }
 
@@ -582,13 +581,13 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       visualPrimitive.parent.selectPrevious(context);
     }
 
-    public void actionNextElement(final Context context) {
+    public void actionNextGlyph(final Context context) {
       final int newIndex = followingStart();
       if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
       range.setOffsets(context, newIndex);
     }
 
-    public void actionPreviousElement(final Context context) {
+    public void actionPreviousGlyph(final Context context) {
       final int newIndex = precedingStart();
       if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
       range.setOffsets(context, newIndex);
@@ -598,6 +597,27 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       final int newIndex = nextWordStart(context, range.endOffset);
       if (range.beginOffset == newIndex && range.endOffset == newIndex) return;
       range.setOffsets(context, newIndex);
+    }
+
+    public void actionGatherFirst(Context context) {
+      if (range.beginOffset == 0) return;
+      range.setBeginOffset(context, 0);
+    }
+
+    public void actionGatherLast(Context context) {
+      int last = visualPrimitive.value.length();
+      if (range.endOffset == last) return;
+      range.setEndOffset(context, last);
+    }
+
+    public void actionFirstGlyph(Context context) {
+      if (range.beginOffset == 0 && range.endOffset == 0) return;
+      range.setOffsets(context, 0);
+    }
+
+    public void actionLastGlyph(Context context) {
+      if (range.beginOffset == 0 && range.endOffset == 0) return;
+      range.setOffsets(context, visualPrimitive.value.length());
     }
 
     public void actionPreviousWord(final Context context) {
@@ -634,7 +654,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       context.copy(visualPrimitive.value.get().substring(range.beginOffset, range.endOffset));
     }
 
-    public void actionGatherNext(final Context context) {
+    public void actionGatherNextGlyph(final Context context) {
       final int newIndex = followingStart();
       if (range.endOffset == newIndex) return;
       range.setEndOffset(context, newIndex);
@@ -658,7 +678,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       range.setEndOffset(context, newIndex);
     }
 
-    public void actionReleaseNext(final Context context) {
+    public void actionReleaseNextGlyph(final Context context) {
       final int newIndex = Math.max(range.beginOffset, precedingEnd(range.endOffset));
       if (range.endOffset == newIndex) return;
       range.setEndOffset(context, newIndex);
@@ -683,7 +703,12 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       range.setEndOffset(context, newIndex);
     }
 
-    public void actionGatherPrevious(final Context context) {
+    public void actionReleaseAll(final Context context) {
+      if (range.beginOffset == range.endOffset) return;
+      range.setOffsets(context, range.leadFirst ? range.beginOffset : range.endOffset);
+    }
+
+    public void actionGatherPreviousGlyph(final Context context) {
       final int newIndex = precedingStart();
       if (range.beginOffset == newIndex) return;
       range.setBeginOffset(context, newIndex);
@@ -707,7 +732,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       range.setBeginOffset(context, newIndex);
     }
 
-    public void actionReleasePrevious(final Context context) {
+    public void actionReleasePreviousGlyph(final Context context) {
       final int newIndex = Math.min(range.endOffset, followingStart(range.beginOffset));
       if (range.beginOffset == newIndex) return;
       range.setBeginOffset(context, newIndex);
@@ -890,7 +915,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     public int endOffset;
     public Line beginLine;
     public Line endLine;
-    boolean leadFirst;
+    public boolean leadFirst;
     TextBorderAttachment border;
     TSSet<BoundsListener> listeners = new TSSet<>();
     private ObboxStyle style;
@@ -1003,13 +1028,23 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     }
 
     private void setBeginOffset(final Context context, final int offset) {
-      leadFirst = true;
-      setOffsetsInternal(context, offset, endOffset);
+      if (offset >= endOffset) {
+        leadFirst = false;
+        setOffsetsInternal(context, endOffset, offset);
+      } else {
+        leadFirst = true;
+        setOffsetsInternal(context, offset, endOffset);
+      }
     }
 
     private void setEndOffset(final Context context, final int offset) {
-      leadFirst = false;
-      setOffsetsInternal(context, beginOffset, offset);
+      if (offset <= beginOffset) {
+        leadFirst = true;
+        setOffsetsInternal(context, offset, beginOffset);
+      } else {
+        leadFirst = false;
+        setOffsetsInternal(context, beginOffset, offset);
+      }
     }
 
     public void destroy(final Context context) {
@@ -1149,8 +1184,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
       createBrickInternal(context);
       if (visual.cursor != null
           && (visual.cursor.range.beginLine == Line.this
-              || visual.cursor.range.endLine == Line.this))
-        visual.cursor.range.nudge(context);
+              || visual.cursor.range.endLine == Line.this)) visual.cursor.range.nudge(context);
       return ExtendBrickResult.brick(brick);
     }
 

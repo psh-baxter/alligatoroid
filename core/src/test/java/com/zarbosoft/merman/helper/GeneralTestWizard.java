@@ -177,7 +177,7 @@ public class GeneralTestWizard {
     if (inner.context.cursor instanceof ArrayCursor) {
       ((ArrayCursor) inner.context.cursor).actionGatherNext(inner.context);
     } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
-      ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionGatherNext(inner.context);
+      ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionGatherNextGlyph(inner.context);
     } else throw new Assertion();
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();

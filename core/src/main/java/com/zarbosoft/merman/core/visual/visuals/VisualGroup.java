@@ -12,8 +12,6 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 
-import javax.annotation.Nonnull;
-
 public class VisualGroup extends Visual {
 
   public VisualParent parent = null;
@@ -55,7 +53,7 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
+  public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (children.isEmpty()) throw new AssertionError();
     for (Visual child : children) {
       CreateBrickResult out = child.createOrGetCornerstoneCandidate(context);
@@ -67,7 +65,7 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+  public ExtendBrickResult createFirstBrick(final Context context) {
     if (children.isEmpty()) return ExtendBrickResult.empty();
     for (Visual child : children) {
       ExtendBrickResult out = child.createFirstBrick(context);
@@ -80,7 +78,7 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
+  public ExtendBrickResult createLastBrick(final Context context) {
     if (children.isEmpty()) return ExtendBrickResult.empty();
     for (Visual child : new ReverseIterable<>(children)) {
       ExtendBrickResult out = child.createLastBrick(context);

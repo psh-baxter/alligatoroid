@@ -62,11 +62,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <plugin>
-                <groupId>com.github.spotbugs</groupId>
-                <artifactId>spotbugs-maven-plugin</artifactId>
-                <version>4.2.0</version>
-            </plugin>
         </plugins>
     </build>
     <dependencies>
@@ -91,11 +86,6 @@
             <groupId>com.zarbosoft.rendaw</groupId>
             <artifactId>common</artifactId>
             <version>99.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.github.spotbugs</groupId>
-            <artifactId>spotbugs-annotations</artifactId>
-            <version>4.2.3</version>
         </dependency>
     </dependencies>
 </project>

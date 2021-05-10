@@ -18,7 +18,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import javax.annotation.Nonnull;
 import java.util.function.Consumer;
 
 public class VisualFrontArray extends VisualGroup implements VisualLeaf {
@@ -26,9 +25,9 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   private final FieldArray.Listener dataListener;
   private final FrontArraySpecBase front;
   public ArrayCursor selection;
+  public ArrayHoverable hoverable;
   private Brick ellipsis = null;
   private Brick empty = null;
-  public ArrayHoverable hoverable;
 
   public VisualFrontArray(
       final FrontArraySpecBase front,
@@ -102,18 +101,17 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
               }
 
               @Override
-              public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(
-                  final Context context) {
+              public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
                 return nodeVisual.createOrGetCornerstoneCandidate(context);
               }
 
               @Override
-              public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+              public ExtendBrickResult createFirstBrick(final Context context) {
                 return nodeVisual.createFirstBrick(context);
               }
 
               @Override
-              public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
+              public ExtendBrickResult createLastBrick(final Context context) {
                 return nodeVisual.createLastBrick(context);
               }
 
@@ -245,7 +243,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   }
 
   @Override
-  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
+  public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (value.data.isEmpty()) {
       if (empty != null) return CreateBrickResult.brick(empty);
       else return CreateBrickResult.brick(createEmpty(context));
@@ -256,7 +254,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+  public ExtendBrickResult createFirstBrick(final Context context) {
     if (value.data.isEmpty()) {
       if (empty != null) return ExtendBrickResult.exists();
       return ExtendBrickResult.brick(createEmpty(context));
@@ -269,7 +267,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
+  public ExtendBrickResult createLastBrick(final Context context) {
     if (value.data.isEmpty()) {
       if (empty != null) return ExtendBrickResult.exists();
       return ExtendBrickResult.brick(createEmpty(context));

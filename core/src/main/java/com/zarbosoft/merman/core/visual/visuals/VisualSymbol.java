@@ -11,8 +11,6 @@ import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
 import com.zarbosoft.rendaw.common.TSList;
 
-import javax.annotation.Nonnull;
-
 public class VisualSymbol extends Visual
     implements VisualLeaf, ConditionAttachment.Listener, BrickInterface {
   private final FrontSymbol frontSymbol;
@@ -54,7 +52,7 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
+  public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (condition != null)
       return CreateBrickResult
           .empty(); // Cornerstones can't suddenly disappear without cursor changing
@@ -64,7 +62,7 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+  public ExtendBrickResult createFirstBrick(final Context context) {
     if (brick != null) return ExtendBrickResult.exists();
     if (condition != null && !condition.show()) return ExtendBrickResult.empty();
     brick = frontSymbol.type.createBrick(context, this);
@@ -72,7 +70,7 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
+  public ExtendBrickResult createLastBrick(final Context context) {
     return createFirstBrick(context);
   }
 

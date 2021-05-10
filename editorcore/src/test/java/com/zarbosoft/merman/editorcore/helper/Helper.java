@@ -29,6 +29,7 @@ import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.EditorCursorFactory;
 import com.zarbosoft.merman.editorcore.cursors.EditArrayCursor;
 import com.zarbosoft.merman.editorcore.cursors.EditAtomCursor;
 import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
@@ -199,6 +200,7 @@ public class Helper {
             new TestEnvironment(),
             new History(),
             new JavaSerializer(syntax.backType),
+            e -> new EditorCursorFactory(e),
             new Editor.Config(contextConfig));
     return editor;
   }

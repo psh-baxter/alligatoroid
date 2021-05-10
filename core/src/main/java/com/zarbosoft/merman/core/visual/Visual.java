@@ -9,7 +9,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-import javax.annotation.Nonnull;
 
 public abstract class Visual {
   public int visualDepth;
@@ -27,7 +26,7 @@ public abstract class Visual {
    * @param context
    * @return
    */
-  public abstract @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(Context context);
+  public abstract CreateBrickResult createOrGetCornerstoneCandidate(Context context);
 
   /**
    * Used for laying bricks forward
@@ -35,7 +34,7 @@ public abstract class Visual {
    * @param context
    * @return A new brick or null (no elements afterward or brick already exists)
    */
-  public abstract @Nonnull ExtendBrickResult createFirstBrick(Context context);
+  public abstract ExtendBrickResult createFirstBrick(Context context);
 
   /**
    * Used for laying bricks backward
@@ -43,7 +42,7 @@ public abstract class Visual {
    * @param context
    * @return A new brick or null (no elements afterward or brick already exists)
    */
-  public abstract @Nonnull ExtendBrickResult createLastBrick(Context context);
+  public abstract ExtendBrickResult createLastBrick(Context context);
 
   /**
    * Used for checking brick laying bounds

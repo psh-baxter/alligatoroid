@@ -121,7 +121,6 @@ public class WebView {
     Context context =
         new Context(
             new Context.InitialConfig()
-                .startSelected(false)
                 .wallTransverseUsageListener(
                     (min, max) -> {
                       if (max.x) {

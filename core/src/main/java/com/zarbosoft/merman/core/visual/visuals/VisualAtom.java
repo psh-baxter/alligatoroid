@@ -18,7 +18,6 @@ import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import javax.annotation.Nonnull;
 import java.util.Map;
 
 public class VisualAtom extends Visual {
@@ -79,7 +78,7 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public @Nonnull CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
+  public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     for (Visual child : children) {
       CreateBrickResult out = child.createOrGetCornerstoneCandidate(context);
       if (out.empty) continue;
@@ -90,7 +89,7 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createFirstBrick(final Context context) {
+  public ExtendBrickResult createFirstBrick(final Context context) {
     for (Visual child : children) {
       ExtendBrickResult out = child.createFirstBrick(context);
       if (out.empty) continue;
@@ -102,7 +101,7 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public @Nonnull ExtendBrickResult createLastBrick(final Context context) {
+  public ExtendBrickResult createLastBrick(final Context context) {
     for (Visual child : new ReverseIterable<>(children)) {
       ExtendBrickResult out = child.createLastBrick(context);
       if (out.empty) continue;

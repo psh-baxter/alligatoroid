@@ -1,11 +1,8 @@
-package com.zarbosoft.merman.jfxviewer;
+package com.zarbosoft.merman.jfxeditor1;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.CursorFactory;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.IterationContext;
-import com.zarbosoft.merman.core.IterationTask;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
@@ -14,16 +11,21 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.example.JsonSyntax;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.hid.Key;
-import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.EditorCursorFactory;
+import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
 import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalArrayCursor;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalAtomCursor;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalPrimitiveCursor;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
 import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
 import com.zarbosoft.pidgoon.errors.NoResults;
@@ -33,156 +35,131 @@ import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSSet;
 import javafx.application.Application;
-import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.layout.Region;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
-import java.util.PriorityQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class NotMain extends Application {
+  public static final ROSet<Key> controlKeys =
+      TSSet.of(Key.CONTROL, Key.CONTROL_LEFT, Key.CONTROL_RIGHT).ro();
+  public static final ROSet<Key> shiftKeys =
+      TSSet.of(Key.SHIFT, Key.SHIFT_LEFT, Key.SHIFT_RIGHT).ro();
   private final ScheduledThreadPoolExecutor worker = new ScheduledThreadPoolExecutor(1);
-  private final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
   public DragSelectState dragSelect;
-  private boolean iterationPending = false;
-  private ScheduledFuture<?> iterationTimer = null;
-  private IterationContext iterationContext = null;
-  private Stage stage;
+  private String path;
+  private Editor editor;
 
   public static void main(String[] args) {
     NotMain.launch(args);
   }
 
+  public static String extension(String path) {
+    int dot = path.lastIndexOf(".");
+    if (dot == -1) return "";
+    return path.substring(dot + 1);
+  }
+
+  public static void logException(Exception e, String s, Object... args) {
+    System.out.format(s + "\n", args);
+    e.printStackTrace();
+  }
+
   @Override
   public void start(Stage primaryStage) throws Exception {
     try {
-      this.stage = primaryStage;
       List<String> args = getParameters().getUnnamed();
       if (args.isEmpty())
-        throw new RuntimeException("need to specify one file to open on the command line");
-      String path = args.get(0);
+        throw new RuntimeException("Need to specify one file to open on the command line");
+
       Environment env = new JFXEnvironment(Locale.getDefault());
-      Syntax syntax = JsonSyntax.create(env, new Padding(5, 5, 5, 5));
       JavaSerializer serializer;
+      ROMap<String, Syntax> syntaxes =
+          new TSMap<String, Syntax>().put("json", JsonSyntax.create(env, new Padding(5, 5, 5, 5)));
+
+      path = args.get(0);
       Document document;
-      if (path.endsWith(".json")) {
-        serializer = new JavaSerializer(BackType.JSON);
+      String extension = extension(path);
+      Syntax syntax =
+          syntaxes.getOr(
+              extension,
+              () -> {
+                throw new RuntimeException(
+                    Format.format("No syntax for files with extension [%s]", extension));
+              });
+      serializer = new JavaSerializer(syntax.backType);
+      try {
         document = serializer.loadDocument(syntax, Files.readAllBytes(Paths.get(path)));
-      } else {
-        throw new RuntimeException("unknown file type (using file extension)");
+      } catch (NoSuchFileException e) {
+        document = new Document(syntax, Editor.createEmptyAtom(syntax, syntax.root));
       }
+
       JavaFXDisplay display = new JavaFXDisplay(syntax);
-      Context context =
-          new Context(
-              new Context.InitialConfig(),
+      editor =
+          new Editor(
               syntax,
               document,
               display,
               env,
+              new History(),
               serializer,
-              new CursorFactory() {
-                boolean handleCommon(Context context, ButtonEvent e) {
-                  if (e.press) {
-                    switch (e.key) {
-                      case C:
-                        {
-                          if (context.cursor != null
-                              && (e.modifiers.contains(Key.CONTROL)
-                                  || e.modifiers.contains(Key.CONTROL_LEFT)
-                                  || e.modifiers.contains(Key.CONTROL_RIGHT))) {
-                            context.cursor.dispatch(
-                                new com.zarbosoft.merman.core.Cursor.Dispatcher() {
-                                  @Override
-                                  public void handle(ArrayCursor cursor) {
-                                    context.copy(
-                                        cursor.visual.value.data.sublist(
-                                            cursor.beginIndex, cursor.endIndex + 1));
-                                  }
-
-                                  @Override
-                                  public void handle(VisualFrontAtomBase.Cursor cursor) {
-                                    context.copy(TSList.of(cursor.base.atomGet()));
-                                  }
-
-                                  @Override
-                                  public void handle(VisualFrontPrimitive.Cursor cursor) {
-                                    context.copy(
-                                        cursor.visualPrimitive.value.data.substring(
-                                            cursor.range.beginOffset, cursor.range.endOffset));
-                                  }
-                                });
-                          }
-                          return true;
-                        }
-                    }
-                  }
-                  return false;
-                }
-
-                @Override
-                public VisualFrontPrimitive.Cursor createPrimitiveCursor(
-                    Context context,
-                    VisualFrontPrimitive visualPrimitive,
-                    boolean leadFirst,
-                    int beginOffset,
-                    int endOffset) {
-                  return new VisualFrontPrimitive.Cursor(
-                      context, visualPrimitive, leadFirst, beginOffset, endOffset) {
+              e ->
+                  new EditorCursorFactory(e) {
                     @Override
-                    public boolean handleKey(Context context, ButtonEvent hidEvent) {
-                      return handleCommon(context, hidEvent);
+                    public VisualFrontPrimitive.Cursor createPrimitiveCursor(
+                        Context context,
+                        VisualFrontPrimitive visualPrimitive,
+                        boolean leadFirst,
+                        int beginOffset,
+                        int endOffset) {
+                      return new ModalPrimitiveCursor(
+                          context,
+                          visualPrimitive,
+                          leadFirst,
+                          beginOffset,
+                          endOffset,
+                          NotMain.this);
                     }
-                  };
-                }
 
-                @Override
-                public ArrayCursor createArrayCursor(
-                    Context context,
-                    VisualFrontArray visual,
-                    boolean leadFirst,
-                    int start,
-                    int end) {
-                  return new ArrayCursor(context, visual, leadFirst, start, end) {
                     @Override
-                    public boolean handleKey(Context context, ButtonEvent hidEvent) {
-                      return handleCommon(context, hidEvent);
+                    public VisualFrontAtomBase.Cursor createAtomCursor(
+                        Context context, VisualFrontAtomBase base) {
+                      return new ModalAtomCursor(context, base, NotMain.this);
                     }
-                  };
-                }
 
-                @Override
-                public VisualFrontAtomBase.Cursor createAtomCursor(
-                    Context context, VisualFrontAtomBase base) {
-                  return new VisualFrontAtomBase.Cursor(context, base) {
                     @Override
-                    public boolean handleKey(Context context, ButtonEvent hidEvent) {
-                      return handleCommon(context, hidEvent);
+                    public ArrayCursor createArrayCursor(
+                        Context context,
+                        VisualFrontArray visual,
+                        boolean leadFirst,
+                        int start,
+                        int end) {
+                      return new ModalArrayCursor(
+                          context, visual, leadFirst, start, end, NotMain.this);
                     }
-                  };
-                }
+                  },
+              new Editor.Config(new Context.InitialConfig()));
+      editor.context.document.root.visual.selectAnyChild(editor.context);
 
-                @Override
-                public boolean prepSelectEmptyArray(Context context, FieldArray value) {
-                  return false;
-                }
-              });
-      context.addHoverListener(
+      editor.context.addHoverListener(
           new Context.HoverListener() {
             @Override
             public void hoverChanged(Context context, Hoverable hover) {
@@ -229,7 +206,7 @@ public class NotMain extends Application {
               }
             }
           });
-      context.mouseButtonEventListener =
+      editor.context.mouseButtonEventListener =
           new Context.KeyListener() {
             @Override
             public boolean handleKey(Context context, ButtonEvent e) {
@@ -269,8 +246,24 @@ public class NotMain extends Application {
       primaryStage.show();
       primaryStage.setOnCloseRequest(
           windowEvent -> {
+            flush(false);
             worker.shutdown();
           });
+      primaryStage
+          .focusedProperty()
+          .addListener(
+              new ChangeListener<Boolean>() {
+                @Override
+                public void changed(
+                    ObservableValue<? extends Boolean> observable,
+                    Boolean oldValue,
+                    Boolean newValue) {
+                  if (!newValue && oldValue) {
+                    flush(false);
+                  }
+                }
+              });
+
     } catch (GrammarTooUncertainAt e) {
       StringBuilder message = new StringBuilder();
       for (Step.Branch leaf : (TSList<Step.Branch>) e.e.step.branches) {
@@ -303,84 +296,33 @@ public class NotMain extends Application {
     }
   }
 
-  private void flushIteration(final int limit) {
-    final long start = System.currentTimeMillis();
-    // TODO measure pending event backlog, adjust batch size to accomodate
-    // by proxy? time since last invocation?
-    for (int i = 0; i < limit; ++i) {
-      {
-        long now = start;
-        if (i % 100 == 0) {
-          now = System.currentTimeMillis();
-        }
-        if (now - start > 500) {
-          iterationContext = null;
-          break;
+  public void flush(boolean clearBackup) {
+    String backupPath = path + ".merman_backup";
+    if (editor.history.isModified()) {
+      if (!clearBackup) {
+        try {
+          Files.copy(Paths.get(path), Paths.get(backupPath));
+        } catch (FileAlreadyExistsException e) {
+          // nop
+        } catch (IOException e) {
+          logException(e, "Failed to write backup to %s", backupPath);
         }
       }
-      final IterationTask top = iterationQueue.poll();
-      if (top == null) {
-        iterationContext = null;
-        break;
-      } else {
-        if (iterationContext == null) iterationContext = new IterationContext();
-        if (top.run(iterationContext)) addIteration(top);
-      }
-    }
-  }
-
-  private void addIteration(final IterationTask task) {
-    iterationQueue.add(task);
-    if (iterationTimer == null) {
       try {
-        iterationTimer =
-            worker.scheduleWithFixedDelay(
-                () -> {
-                  if (iterationPending) return;
-                  iterationPending = true;
-                  Platform.runLater(
-                      () -> {
-                        wrap(
-                            stage.getOwner(),
-                            () -> {
-                              try {
-                                flushIteration(1000);
-                              } finally {
-                                iterationPending = false;
-                              }
-                            });
-                      });
-                },
-                0,
-                50,
-                TimeUnit.MILLISECONDS);
-      } catch (final RejectedExecutionException e) {
-        // Happens on unhover when window closes to shutdown
+        Files.write(
+            Paths.get(path),
+            (byte[]) editor.context.serializer.write(editor.context.document.root));
+      } catch (IOException e) {
+        logException(e, "Failed to write to %s", path);
+        return;
       }
+      editor.history.clearModified();
     }
-  }
-
-  private void wrap(final Window top, final Wrappable runnable) {
     try {
-      runnable.run();
-    } catch (final Exception e) {
-      StringWriter writer = new StringWriter();
-      e.printStackTrace(new PrintWriter(writer));
-      System.out.format("Exception passed sieve: %s\n%s\n", e, writer.toString());
-      final Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
-      alert.initModality(Modality.APPLICATION_MODAL);
-      alert.initOwner(top);
-      alert.setResizable(true);
-      alert.getDialogPane().getChildren().stream()
-          .filter(node -> node instanceof Label)
-          .forEach(node -> ((Label) node).setMinHeight(Region.USE_PREF_SIZE));
-      alert.showAndWait();
+      Files.deleteIfExists(Paths.get(backupPath));
+    } catch (IOException e) {
+      logException(e, "Failed to clean up backup %s", backupPath);
     }
-  }
-
-  @FunctionalInterface
-  private interface Wrappable {
-    void run() throws Exception;
   }
 
   public static class DragSelectState {

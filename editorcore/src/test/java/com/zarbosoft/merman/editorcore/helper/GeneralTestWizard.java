@@ -194,7 +194,7 @@ public class GeneralTestWizard {
       ((ArrayCursor) inner.editor.context.cursor).actionGatherNext(inner.editor.context);
     } else if (inner.editor.context.cursor instanceof VisualFrontPrimitive.Cursor) {
       ((VisualFrontPrimitive.Cursor) inner.editor.context.cursor)
-          .actionGatherNext(inner.editor.context);
+          .actionGatherNextGlyph(inner.editor.context);
     } else throw new Assertion();
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();

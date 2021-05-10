@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.CursorFactory;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.display.Display;
 import com.zarbosoft.merman.core.document.Atom;
@@ -22,19 +21,11 @@ import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomFromArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.banner.Banner;
-import com.zarbosoft.merman.editorcore.cursors.BaseEditPrimitiveCursor;
-import com.zarbosoft.merman.editorcore.cursors.EditArrayCursor;
-import com.zarbosoft.merman.editorcore.cursors.EditAtomCursor;
-import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
 import com.zarbosoft.merman.editorcore.details.Details;
-import com.zarbosoft.merman.editorcore.gap.EditGapCursor;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
@@ -44,6 +35,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Map;
+import java.util.function.Function;
 
 public class Editor {
   public final Context context;
@@ -61,6 +53,7 @@ public class Editor {
       Environment environment,
       final History history,
       Serializer serializer,
+      Function<Editor, EditorCursorFactory> cursorFactory,
       Config config) {
     context =
         new EditorContext(
@@ -70,58 +63,7 @@ public class Editor {
             display,
             environment,
             serializer,
-            new CursorFactory() {
-              @Override
-              public VisualFrontPrimitive.Cursor createPrimitiveCursor(
-                  Context context,
-                  VisualFrontPrimitive visualPrimitive,
-                  boolean leadFirst,
-                  int beginOffset,
-                  int endOffset) {
-                Atom atom = visualPrimitive.value.atomParentRef.atom();
-                if (atom.type == context.syntax.gap || atom.type == context.syntax.suffixGap)
-                  return new EditGapCursor(
-                      Editor.this, visualPrimitive, leadFirst, beginOffset, endOffset);
-                else
-                  return new EditPrimitiveCursor(
-                      context, visualPrimitive, leadFirst, beginOffset, endOffset);
-              }
-
-              @Override
-              public ArrayCursor createArrayCursor(
-                  Context context, VisualFrontArray visual, boolean leadFirst, int start, int end) {
-                return new EditArrayCursor(context, visual, leadFirst, start, end);
-              }
-
-              @Override
-              public VisualFrontAtomBase.Cursor createAtomCursor(
-                  Context context, VisualFrontAtomBase base) {
-                return new EditAtomCursor(context, base);
-              }
-
-              @Override
-              public boolean prepSelectEmptyArray(Context context, FieldArray value) {
-                Editor editor = Editor.get(context);
-                ROSet<AtomType> candidates =
-                    context.syntax.splayedTypes.get(value.back().elementAtomType());
-                editor.history.record(
-                    context,
-                    null,
-                    recorder -> {
-                      recorder.apply(
-                          context,
-                          new ChangeArray(
-                              value,
-                              0,
-                              0,
-                              TSList.of(
-                                  candidates.size() == 1
-                                      ? createEmptyAtom(context, candidates.iterator().next())
-                                      : createEmptyAtom(context, context.syntax.gap))));
-                    });
-                return true;
-              }
-            },
+            cursorFactory.apply(this),
             this);
     this.history = history;
     this.choiceCursorStyle =
@@ -178,11 +120,11 @@ public class Editor {
     return out;
   }
 
-  public static Atom createEmptyAtom(Context context, AtomType atomType) {
+  public static Atom createEmptyAtom(Syntax syntax, AtomType atomType) {
     Atom out = new Atom(atomType);
     TSMap<String, Field> fields = new TSMap<>();
     for (Map.Entry<String, BackSpecData> field : atomType.fields) {
-      fields.put(field.getKey(), createEmptyField(context, field.getValue()));
+      fields.put(field.getKey(), createEmptyField(syntax, field.getValue()));
     }
     out.initialSet(fields);
     return out;
@@ -202,10 +144,10 @@ public class Editor {
     } else throw new Assertion();
   }
 
-  public static Field createEmptyField(Context context, BackSpecData backSpecData) {
+  public static Field createEmptyField(Syntax syntax, BackSpecData backSpecData) {
     if (backSpecData instanceof BackAtomSpec) {
       FieldAtom field = new FieldAtom((BaseBackAtomSpec) backSpecData);
-      field.initialSet(createEmptyGap(context.syntax.gap));
+      field.initialSet(createEmptyGap(syntax.gap));
       return field;
     } else return createEndEmptyField(backSpecData);
   }
@@ -215,7 +157,7 @@ public class Editor {
         this.context.syntax.splayedTypes.get(value.back().elementAtomType());
     final Atom element;
     if (childTypes.size() == 1)
-      element = createEmptyAtom(this.context, childTypes.iterator().next());
+      element = createEmptyAtom(this.context.syntax, childTypes.iterator().next());
     else element = createEmptyGap(this.context.syntax.gap);
     recorder.apply(this.context, new ChangeArray(value, index, 0, TSList.of(element)));
     return element;
@@ -244,7 +186,7 @@ public class Editor {
         Display display,
         Environment env,
         Serializer serializer,
-        CursorFactory cursorFactory,
+        com.zarbosoft.merman.core.CursorFactory cursorFactory,
         Editor editor) {
       super(config, syntax, document, display, env, serializer, cursorFactory);
       this.editor = editor;

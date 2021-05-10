@@ -22,7 +22,6 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSSet;
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -45,7 +44,6 @@ import java.util.function.Supplier;
  * selection is set by default in context.
  */
 public class Context {
-  @SuppressFBWarnings("MS_SHOULD_BE_FINAL")
   public static Supplier<TSSet> createSet = () -> new TSSet();
   /** Contains the cursor and other marks. Scrolls. */
   public final Group overlay;

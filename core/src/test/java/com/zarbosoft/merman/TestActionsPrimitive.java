@@ -73,7 +73,7 @@ public class TestActionsPrimitive {
   public void testNextElement() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.cursorPrimitive(context).actionNextElement(context);
+    Helper.cursorPrimitive(context).actionNextGlyph(context);
     assertSelection(context, 3, 3);
   }
 
@@ -92,7 +92,7 @@ public class TestActionsPrimitive {
   public void testNextEOL() {
     final Context context = build("1\n2");
     visual(context).select(context, true, 1, 1);
-    Helper.cursorPrimitive(context).actionNextElement(context);
+    Helper.cursorPrimitive(context).actionNextGlyph(context);
     assertSelection(context, 2, 2);
   }
 
@@ -100,7 +100,7 @@ public class TestActionsPrimitive {
   public void testNextDeselect() {
     final Context context = buildFive();
     visual(context).select(context, true, 1, 2);
-    Helper.cursorPrimitive(context).actionNextElement(context);
+    Helper.cursorPrimitive(context).actionNextGlyph(context);
     assertSelection(context, 3, 3);
   }
 
@@ -108,7 +108,7 @@ public class TestActionsPrimitive {
   public void testNextEnd() {
     final Context context = buildFive();
     visual(context).select(context, true, 5, 5);
-    Helper.cursorPrimitive(context).actionNextElement(context);
+    Helper.cursorPrimitive(context).actionNextGlyph(context);
     assertSelection(context, 5, 5);
   }
 
@@ -116,7 +116,7 @@ public class TestActionsPrimitive {
   public void testNextDeselectEnd() {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 5);
-    Helper.cursorPrimitive(context).actionNextElement(context);
+    Helper.cursorPrimitive(context).actionNextGlyph(context);
     assertSelection(context, 5, 5);
   }
 
@@ -124,7 +124,7 @@ public class TestActionsPrimitive {
   public void testPreviousElement() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.cursorPrimitive(context).actionPreviousElement(context);
+    Helper.cursorPrimitive(context).actionPreviousGlyph(context);
     assertSelection(context, 1, 1);
   }
 
@@ -132,7 +132,7 @@ public class TestActionsPrimitive {
   public void testPreviousBOL() {
     final Context context = build("a\n2");
     visual(context).select(context, true, 2, 2);
-    Helper.cursorPrimitive(context).actionPreviousElement(context);
+    Helper.cursorPrimitive(context).actionPreviousGlyph(context);
     assertSelection(context, 1, 1);
   }
 
@@ -140,7 +140,7 @@ public class TestActionsPrimitive {
   public void testPreviousDeselect() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 3);
-    Helper.cursorPrimitive(context).actionPreviousElement(context);
+    Helper.cursorPrimitive(context).actionPreviousGlyph(context);
     assertSelection(context, 1, 1);
   }
 
@@ -148,7 +148,7 @@ public class TestActionsPrimitive {
   public void testPreviousStart() {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
-    Helper.cursorPrimitive(context).actionPreviousElement(context);
+    Helper.cursorPrimitive(context).actionPreviousGlyph(context);
     assertSelection(context, 0, 0);
   }
 
@@ -156,7 +156,7 @@ public class TestActionsPrimitive {
   public void testPreviousDeselectStart() {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 1);
-    Helper.cursorPrimitive(context).actionPreviousElement(context);
+    Helper.cursorPrimitive(context).actionPreviousGlyph(context);
     assertSelection(context, 0, 0);
   }
 
@@ -308,7 +308,7 @@ public class TestActionsPrimitive {
   public void testGatherNext() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.cursorPrimitive(context).actionGatherNext(context);
+    Helper.cursorPrimitive(context).actionGatherNextGlyph(context);
     assertSelection(context, 2, 3);
   }
 
@@ -316,7 +316,7 @@ public class TestActionsPrimitive {
   public void testGatherNextEnd() {
     final Context context = buildFive();
     visual(context).select(context, true, 5, 5);
-    Helper.cursorPrimitive(context).actionGatherNext(context);
+    Helper.cursorPrimitive(context).actionGatherNextGlyph(context);
     assertSelection(context, 5, 5);
   }
 
@@ -374,7 +374,7 @@ public class TestActionsPrimitive {
   public void testGatherPrevious() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.cursorPrimitive(context).actionGatherPrevious(context);
+    Helper.cursorPrimitive(context).actionGatherPreviousGlyph(context);
     assertSelection(context, 1, 2);
   }
 
@@ -430,7 +430,7 @@ public class TestActionsPrimitive {
   public void testGatherPreviousStart() {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
-    Helper.cursorPrimitive(context).actionGatherPrevious(context);
+    Helper.cursorPrimitive(context).actionGatherPreviousGlyph(context);
     assertSelection(context, 0, 0);
   }
 
@@ -438,7 +438,7 @@ public class TestActionsPrimitive {
   public void testReleaseNext() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 3);
-    Helper.cursorPrimitive(context).actionReleaseNext(context);
+    Helper.cursorPrimitive(context).actionReleaseNextGlyph(context);
     assertSelection(context, 2, 2);
   }
 
@@ -446,7 +446,7 @@ public class TestActionsPrimitive {
   public void testReleaseNextMinimum() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.cursorPrimitive(context).actionReleaseNext(context);
+    Helper.cursorPrimitive(context).actionReleaseNextGlyph(context);
     assertSelection(context, 2, 2);
   }
 
@@ -486,7 +486,7 @@ public class TestActionsPrimitive {
   public void testReleasePrevious() {
     final Context context = buildFive();
     visual(context).select(context, true, 1, 2);
-    Helper.cursorPrimitive(context).actionReleasePrevious(context);
+    Helper.cursorPrimitive(context).actionReleasePreviousGlyph(context);
     assertSelection(context, 2, 2);
   }
 
@@ -494,7 +494,7 @@ public class TestActionsPrimitive {
   public void testReleasePreviousMinimum() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
-    Helper.cursorPrimitive(context).actionReleasePrevious(context);
+    Helper.cursorPrimitive(context).actionReleasePreviousGlyph(context);
     assertSelection(context, 2, 2);
   }
 

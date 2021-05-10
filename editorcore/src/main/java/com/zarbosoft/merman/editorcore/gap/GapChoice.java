@@ -32,7 +32,6 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
-import edu.umd.cs.findbugs.annotations.Nullable;
 
 import java.util.function.Consumer;
 
@@ -44,7 +43,6 @@ public class GapChoice extends TwoColumnChoice {
   public final int consumeText;
   public final Step.Branch incompleteFields;
   private final TSList<Event> glyphs;
-  @Nullable
   private final FrontSpec followingSpec;
   private final ROList<FrontSpec> keySpecs;
   private ROList fields;
@@ -59,7 +57,6 @@ public class GapChoice extends TwoColumnChoice {
       ROList<FieldPrimitive> fields,
       Step.Branch incompleteFields,
       ROList<FrontSpec> keySpecs,
-      @Nullable
       FrontSpec followingSpec) {
     this.gap = gap;
     this.type = type;
@@ -119,7 +116,7 @@ public class GapChoice extends TwoColumnChoice {
           Field following = null;
           Atom created = new Atom(type);
           for (String fieldId : type.fields.keys().difference(fields.keys())) {
-            Field field = editor.createEmptyField(editor.context, type.fields.get(fieldId));
+            Field field = editor.createEmptyField(editor.context.syntax, type.fields.get(fieldId));
             fields.put(fieldId, field);
             if (followingSpec != null && followingSpec.fieldId().equals(fieldId)) {
               following = field;
@@ -212,8 +209,7 @@ public class GapChoice extends TwoColumnChoice {
             editor.context, new ChangeArray(parent.field, parent.index, 1, TSList.of(created)));
       } else if (gap.fieldParentRef instanceof FieldAtom.Parent) {
         recorder.apply(
-            editor.context,
-            new ChangeAtom(((FieldAtom.Parent) gap.fieldParentRef).field, created));
+            editor.context, new ChangeAtom(((FieldAtom.Parent) gap.fieldParentRef).field, created));
       }
     }
   }
