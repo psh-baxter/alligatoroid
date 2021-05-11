@@ -14,7 +14,8 @@ build:
     - master
   script:
     - apt-get update && apt-get install -y maven openjdk-11-jdk inkscape
-    - mvn clean install -e
+    - mvn clean install -e || find common
+    - exit 1
   artifacts:
     paths:
       - webviewsyntaxexamples/target
