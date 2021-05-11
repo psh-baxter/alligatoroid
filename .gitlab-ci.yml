@@ -13,7 +13,12 @@ build:
   only:
     - master
   script:
-    - apt-get update && apt-get install -y maven openjdk-15-jdk inkscape
+    - apt-get update && apt-get install -y maven openjdk-15-jdk inkscape wget
+    - wget https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage -O /opt/appimagetool
+    - chmod +x /opt/appimagetool
+    - (cd /opt/; ./appimagetool --appimage-extract)
+    - mv /opt/squashfs-root /opt/appimagetool.AppDir
+    - ln -s /opt/appimagetool.AppDir/AppRun appimagetool-x86_64.AppImage
     - mvn install -e
   artifacts:
     paths:
