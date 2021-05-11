@@ -13,7 +13,7 @@ build:
   only:
     - master
   script:
-    - apt-get update && apt-get install -y maven openjdk-16-jdk inkscape
+    - apt-get update && apt-get install -y maven openjdk-15-jdk inkscape
     - mvn install -e
   artifacts:
     paths:
