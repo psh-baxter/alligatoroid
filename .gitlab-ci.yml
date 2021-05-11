@@ -2,7 +2,7 @@ cache:
   paths:
     - /root/.cache
     - /root/.m2
-image: debian:10.8
+image: ubuntu:20.10
 
 stages:
   - build
@@ -13,9 +13,8 @@ build:
   only:
     - master
   script:
-    - apt-get update && apt-get install -y maven openjdk-11-jdk inkscape
-    - mvn clean install -e || find common
-    - exit 1
+    - apt-get update && apt-get install -y maven openjdk-16-jdk inkscape
+    - mvn install -e
   artifacts:
     paths:
       - webviewsyntaxexamples/target
