@@ -2,15 +2,29 @@ cache:
   paths:
     - /root/.cache
     - /root/.m2
+image: debian:10.8
 
-pages:
-  image: debian:10.8
+stages:
+  - build
+  - deploy
+
+build:
   stage: build
   only:
     - master
   script:
-    - apt-get update && apt-get install -y maven openjdk-11-jdk
-    - mvn install -X -e
+    - apt-get update && apt-get install -y maven openjdk-11-jdk inkscape
+    - mvn clean install -X -e
+  artifacts:
+    paths:
+      - webviewsyntaxexamples/target
+      - jfxeditor1/target
+
+pages:
+  stage: deploy
+  only:
+    - master
+  script:
     - mkdir public
     - cp webviewsyntaxexamples/target/webviewsyntaxexamples-0.0.0/webviewsyntaxexamples/webviewsyntaxexamples.js public/entry.js
     - cp webviewsyntaxexamples/src/main/java/main_dev.html public/index.html
