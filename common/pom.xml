@@ -46,7 +46,6 @@
                                 <arg>--multi-release</arg>
                                 <arg>9</arg>
                             </jdepsExtraArgs>
-                            <overwriteExistingFiles>true</overwriteExistingFiles>
                         </configuration>
                     </execution>
                 </executions>
