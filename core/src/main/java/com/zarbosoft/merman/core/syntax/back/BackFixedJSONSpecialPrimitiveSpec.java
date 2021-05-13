@@ -1,12 +1,16 @@
 package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.error.BackElementUnsupportedInBackFormat;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Discard;
@@ -21,6 +25,14 @@ public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
 
   public BackFixedJSONSpecialPrimitiveSpec(String value) {
     this.value = value;
+  }
+
+  @Override
+  public void finish(MultiError errors, Syntax syntax, SyntaxPath typePath, boolean singularRestriction, boolean typeRestriction) {
+    if (syntax.backType != BackType.JSON) {
+      errors.add(new BackElementUnsupportedInBackFormat("json special primitive", syntax.backType, typePath));
+    }
+    super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
   }
 
   @Override

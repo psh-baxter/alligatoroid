@@ -19,9 +19,10 @@ build:
     - (cd /opt/; ./appimagetool --appimage-extract)
     - mv /opt/squashfs-root /opt/appimagetool.AppDir
     - ln -s /opt/appimagetool.AppDir/AppRun appimagetool-x86_64.AppImage
-    - mvn install -e
+    - mvn install -e -P full
   artifacts:
     paths:
+      - merman1-x86_64.AppImage
       - webviewsyntaxexamples/target
       - jfxeditor1/target
 

@@ -48,7 +48,6 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.ByteArrayInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -58,14 +57,12 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 
 public class NotMain extends Application {
   public static final ROSet<Key> controlKeys =
       TSSet.of(Key.CONTROL, Key.CONTROL_LEFT, Key.CONTROL_RIGHT).ro();
   public static final ROSet<Key> shiftKeys =
       TSSet.of(Key.SHIFT, Key.SHIFT_LEFT, Key.SHIFT_RIGHT).ro();
-  private final ScheduledThreadPoolExecutor worker = new ScheduledThreadPoolExecutor(1);
   public DragSelectState dragSelect;
   private String path;
   private Editor editor;
@@ -112,6 +109,8 @@ public class NotMain extends Application {
         document = serializer.loadDocument(syntax, Files.readAllBytes(Paths.get(path)));
       } catch (NoSuchFileException e) {
         document = new Document(syntax, Editor.createEmptyAtom(syntax, syntax.root));
+      } catch (Exception e) {
+        throw new RuntimeException(Format.format("Failed to load document %s", path), e);
       }
 
       JavaFXDisplay display = new JavaFXDisplay(syntax);
@@ -244,13 +243,18 @@ public class NotMain extends Application {
               return false;
             }
           };
-      primaryStage.getIcons().add(new Image(new ByteArrayInputStream(Embedded.icon48)));
+      primaryStage
+          .getIcons()
+          .addAll(
+              new Image(new ByteArrayInputStream(Embedded.icon128)),
+              new Image(new ByteArrayInputStream(Embedded.icon64)),
+              new Image(new ByteArrayInputStream(Embedded.icon16)));
       primaryStage.setScene(new Scene(display.node, 800, 600));
       primaryStage.show();
       primaryStage.setOnCloseRequest(
           windowEvent -> {
             flush(false);
-            worker.shutdown();
+            env.destroy();
           });
       primaryStage
           .focusedProperty()

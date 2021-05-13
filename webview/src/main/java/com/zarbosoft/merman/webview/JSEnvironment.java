@@ -47,6 +47,10 @@ public class JSEnvironment implements Environment {
   }
 
   @Override
+  public void destroy() {
+  }
+
+  @Override
   public HandleDelay delay(long ms, Runnable r) {
     return new Handle(
         DomGlobal.setTimeout(

@@ -4,8 +4,6 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.CursorFactory;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.IterationContext;
-import com.zarbosoft.merman.core.IterationTask;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
@@ -35,14 +33,8 @@ import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import javafx.application.Application;
-import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.layout.Region;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
-import javafx.stage.Window;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -50,20 +42,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
-import java.util.PriorityQueue;
-import java.util.concurrent.RejectedExecutionException;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 public class NotMain extends Application {
-  private final ScheduledThreadPoolExecutor worker = new ScheduledThreadPoolExecutor(1);
-  private final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
   public DragSelectState dragSelect;
-  private boolean iterationPending = false;
-  private ScheduledFuture<?> iterationTimer = null;
-  private IterationContext iterationContext = null;
-  private Stage stage;
 
   public static void main(String[] args) {
     NotMain.launch(args);
@@ -72,7 +53,6 @@ public class NotMain extends Application {
   @Override
   public void start(Stage primaryStage) throws Exception {
     try {
-      this.stage = primaryStage;
       List<String> args = getParameters().getUnnamed();
       if (args.isEmpty())
         throw new RuntimeException("need to specify one file to open on the command line");
@@ -269,7 +249,7 @@ public class NotMain extends Application {
       primaryStage.show();
       primaryStage.setOnCloseRequest(
           windowEvent -> {
-            worker.shutdown();
+            env.destroy();
           });
     } catch (GrammarTooUncertainAt e) {
       StringBuilder message = new StringBuilder();
@@ -301,86 +281,6 @@ public class NotMain extends Application {
       e.printStackTrace(new PrintWriter(writer));
       throw new RuntimeException("\n" + writer.toString());
     }
-  }
-
-  private void flushIteration(final int limit) {
-    final long start = System.currentTimeMillis();
-    // TODO measure pending event backlog, adjust batch size to accomodate
-    // by proxy? time since last invocation?
-    for (int i = 0; i < limit; ++i) {
-      {
-        long now = start;
-        if (i % 100 == 0) {
-          now = System.currentTimeMillis();
-        }
-        if (now - start > 500) {
-          iterationContext = null;
-          break;
-        }
-      }
-      final IterationTask top = iterationQueue.poll();
-      if (top == null) {
-        iterationContext = null;
-        break;
-      } else {
-        if (iterationContext == null) iterationContext = new IterationContext();
-        if (top.run(iterationContext)) addIteration(top);
-      }
-    }
-  }
-
-  private void addIteration(final IterationTask task) {
-    iterationQueue.add(task);
-    if (iterationTimer == null) {
-      try {
-        iterationTimer =
-            worker.scheduleWithFixedDelay(
-                () -> {
-                  if (iterationPending) return;
-                  iterationPending = true;
-                  Platform.runLater(
-                      () -> {
-                        wrap(
-                            stage.getOwner(),
-                            () -> {
-                              try {
-                                flushIteration(1000);
-                              } finally {
-                                iterationPending = false;
-                              }
-                            });
-                      });
-                },
-                0,
-                50,
-                TimeUnit.MILLISECONDS);
-      } catch (final RejectedExecutionException e) {
-        // Happens on unhover when window closes to shutdown
-      }
-    }
-  }
-
-  private void wrap(final Window top, final Wrappable runnable) {
-    try {
-      runnable.run();
-    } catch (final Exception e) {
-      StringWriter writer = new StringWriter();
-      e.printStackTrace(new PrintWriter(writer));
-      System.out.format("Exception passed sieve: %s\n%s\n", e, writer.toString());
-      final Alert alert = new Alert(Alert.AlertType.ERROR, e.getMessage());
-      alert.initModality(Modality.APPLICATION_MODAL);
-      alert.initOwner(top);
-      alert.setResizable(true);
-      alert.getDialogPane().getChildren().stream()
-          .filter(node -> node instanceof Label)
-          .forEach(node -> ((Label) node).setMinHeight(Region.USE_PREF_SIZE));
-      alert.showAndWait();
-    }
-  }
-
-  @FunctionalInterface
-  private interface Wrappable {
-    void run() throws Exception;
   }
 
   public static class DragSelectState {

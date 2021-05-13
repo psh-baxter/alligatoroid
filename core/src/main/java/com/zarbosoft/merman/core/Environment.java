@@ -89,6 +89,8 @@ public interface Environment {
    */
   public I18nWalker lineWalker(String s);
 
+  void destroy();
+
   public interface Time {
     boolean isBefore(Time other);
 

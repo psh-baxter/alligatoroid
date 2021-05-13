@@ -3,8 +3,11 @@ package com.zarbosoft.merman.core.example;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
+import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
@@ -221,6 +224,11 @@ public class JsonSyntax {
                             new BackAtomSpec(new BaseBackAtomSpec.Config(DEFAULT_ID, GROUP_ANY))),
                         TSList.of(new FrontAtomSpec(new FrontAtomSpec.Config(DEFAULT_ID))),
                         ROMap.empty)))
+            .gap(new GapAtomType(new GapAtomType.Config().back(GapAtomType.jsonBack)))
+            .suffixGap(
+                new SuffixGapAtomType(
+                    new SuffixGapAtomType.Config().back(SuffixGapAtomType.jsonBack)))
+            .backType(BackType.JSON)
             .displayUnit(Syntax.DisplayUnit.MM)
             .background(ModelColor.RGB.hex("333333"))
             .hoverStyle(hoverStyle(false))

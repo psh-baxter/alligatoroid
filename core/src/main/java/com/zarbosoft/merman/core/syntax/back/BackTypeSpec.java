@@ -10,8 +10,10 @@ import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateBack;
 import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.TypeInvalidAtLocation;
+import com.zarbosoft.merman.core.syntax.error.BackElementUnsupportedInBackFormat;
 import com.zarbosoft.pidgoon.events.nodes.Terminal;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.ROList;
@@ -85,6 +87,9 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
     if (typeRestriction) {
       errors.add(new TypeInvalidAtLocation(typePath));
+    }
+    if (syntax.backType != BackType.LUXEM) {
+      errors.add(new BackElementUnsupportedInBackFormat("type", syntax.backType, typePath));
     }
     value.finish(errors, syntax, typePath.add("value"), true, true);
     value.parent =

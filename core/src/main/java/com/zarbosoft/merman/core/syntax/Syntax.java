@@ -288,6 +288,21 @@ public class Syntax {
       this.root = root;
     }
 
+    public Config backType(BackType backType) {
+      this.backType = backType;
+      return this;
+    }
+
+    public Config gap(GapAtomType gap) {
+      this.gap = gap;
+      return this;
+    }
+
+    public Config suffixGap(SuffixGapAtomType gap) {
+      this.suffixGap = gap;
+      return this;
+    }
+
     public Config displayUnit(DisplayUnit unit) {
       this.displayUnit = unit;
       return this;

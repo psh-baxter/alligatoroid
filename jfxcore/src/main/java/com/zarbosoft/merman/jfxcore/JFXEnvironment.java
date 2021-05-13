@@ -12,10 +12,12 @@ import java.time.Instant;
 import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class JFXEnvironment implements Environment {
   private final Locale locale;
+  private final Timer timer = new Timer();
   private Clipboard clipboard;
 
   public JFXEnvironment(Locale locale) {
@@ -29,12 +31,13 @@ public class JFXEnvironment implements Environment {
 
   @Override
   public Environment.HandleDelay delay(long ms, Runnable r) {
-    Timer t = new Timer();
+    AtomicBoolean alive = new AtomicBoolean(true);
     try {
-      t.schedule(
+      timer.schedule(
           new TimerTask() {
             @Override
             public void run() {
+              if (!alive.get()) return;
               Platform.runLater(r);
             }
           },
@@ -42,7 +45,7 @@ public class JFXEnvironment implements Environment {
     } catch (IllegalStateException ignore) {
       // When trying to schedule while shutting down
     }
-    return new HandleDelay(t);
+    return new HandleDelay(alive);
   }
 
   @Override
@@ -104,6 +107,11 @@ public class JFXEnvironment implements Environment {
     return new I18nWalker(BreakIterator.getLineInstance(locale), s);
   }
 
+  @Override
+  public void destroy() {
+    timer.cancel();
+  }
+
   public static class JavaTime implements Time {
     public final Instant data;
 
@@ -123,15 +131,15 @@ public class JFXEnvironment implements Environment {
   }
 
   public static class HandleDelay implements Environment.HandleDelay {
-    private final Timer t;
+    private AtomicBoolean alive;
 
-    public HandleDelay(Timer t) {
-      this.t = t;
+    public HandleDelay(AtomicBoolean alive) {
+      this.alive = alive;
     }
 
     @Override
     public void cancel() {
-      t.cancel();
+      alive.set(false);
     }
   }
 

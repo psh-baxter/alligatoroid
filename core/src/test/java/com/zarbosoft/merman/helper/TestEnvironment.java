@@ -129,4 +129,8 @@ public class TestEnvironment implements Environment {
   public I18nWalker lineWalker(String s) {
     return wordWalker(s);
   }
+
+  @Override
+  public void destroy() {
+  }
 }
