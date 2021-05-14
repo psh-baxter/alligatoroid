@@ -3,21 +3,25 @@ package com.zarbosoft.merman.helper;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.style.Padding;
+import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
+import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.alignments.ConcensusAlignmentSpec;
 import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class SyntaxBuilder {
   private final TSList<AtomType> types = new TSList<>();
-  private final TSMap<String, ROList<String>> groups = new TSMap<String, ROList<String>>();
+  private final TSOrderedMap<String, ROList<String>> groups =
+      new TSOrderedMap<String, ROList<String>>();
   private final TSMap<String, AlignmentSpec> alignments = new TSMap<>();
   private final String rootChildType;
   private final FrontDataArrayBuilder front = new FrontDataArrayBuilder("value");
@@ -34,7 +38,10 @@ public class SyntaxBuilder {
 
   public Syntax build() {
     MultiError splayErrors = new MultiError();
-    TSMap<String, ROSet<AtomType>> splayed = Syntax.splayGroups(splayErrors, types, groups);
+    GapAtomType gap = new GapAtomType(new GapAtomType.Config());
+    SuffixGapAtomType suffixGap = new SuffixGapAtomType(new SuffixGapAtomType.Config());
+    TSMap<String, ROOrderedSetRef<AtomType>> splayed =
+        Syntax.splayGroups(splayErrors, types, gap, suffixGap, groups);
     splayErrors.raise();
 
     RootAtomType root =
@@ -44,7 +51,7 @@ public class SyntaxBuilder {
                 TSList.of(front.build()),
                 alignments));
 
-    Syntax.Config config = new Syntax.Config(types, splayed, root);
+    Syntax.Config config = new Syntax.Config(splayed, root, gap, suffixGap);
     config.pad = this.padding;
     Syntax syntax = new Syntax(new TestEnvironment(), config);
 

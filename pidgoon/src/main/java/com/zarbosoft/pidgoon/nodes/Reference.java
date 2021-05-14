@@ -1,5 +1,6 @@
 package com.zarbosoft.pidgoon.nodes;
 
+import com.zarbosoft.pidgoon.errors.AbortParse;
 import com.zarbosoft.pidgoon.model.ExceptionMismatchCause;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.MismatchCause;
@@ -37,7 +38,7 @@ public class Reference<T> extends Node<T> {
     if (base == null) {
       try {
         base = grammar.getNode(key);
-      } catch (Exception e) {
+      } catch (AbortParse e) {
         parent.error(grammar, step, branch, new ExceptionMismatchCause(this, e));
         return;
       }

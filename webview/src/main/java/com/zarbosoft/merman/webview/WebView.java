@@ -14,13 +14,12 @@ import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.UnsupportedDirections;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.webview.display.JSDisplay;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.TSList;
 import elemental2.dom.CSSProperties;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Event;
@@ -226,22 +225,18 @@ public class WebView {
                       context.cursor.dispatch(
                           new com.zarbosoft.merman.core.Cursor.Dispatcher() {
                             @Override
-                            public void handle(ArrayCursor cursor) {
-                              context.copy(
-                                  cursor.visual.value.data.sublist(
-                                      cursor.beginIndex, cursor.endIndex + 1));
+                            public void handle(FieldArrayCursor cursor) {
+                              cursor.actionCopy(context);
                             }
 
                             @Override
-                            public void handle(VisualFrontAtomBase.Cursor cursor) {
-                              context.copy(TSList.of(cursor.base.atomGet()));
+                            public void handle(FieldAtomCursor cursor) {
+                              cursor.actionCopy(context);
                             }
 
                             @Override
                             public void handle(VisualFrontPrimitive.Cursor cursor) {
-                              context.copy(
-                                  cursor.visualPrimitive.value.data.substring(
-                                      cursor.range.beginOffset, cursor.range.endOffset));
+                              cursor.actionCopy(context);
                             }
                           });
                     }

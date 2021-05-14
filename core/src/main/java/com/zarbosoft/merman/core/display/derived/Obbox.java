@@ -3,8 +3,8 @@ package com.zarbosoft.merman.core.display.derived;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Drawing;
 import com.zarbosoft.merman.core.display.DrawingContext;
-import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -32,6 +32,48 @@ public class Obbox {
 
   private static boolean aeq(double a, double b, double t) {
     return (a - b) * (a - b) < t * t;
+  }
+
+  public static void drawRounded(
+      DrawingContext gc, TSList<ROPair<Vector, Boolean>> points, double baseRadius) {
+    for (int i = 0; i < points.size(); ++i) {
+      final ROPair<Vector, Boolean> mid = points.get(i);
+      if (mid.second) {
+        final ROPair<Vector, Boolean> pre = points.get((i + points.size() - 1) % points.size());
+        final ROPair<Vector, Boolean> post = points.get((i + 1) % points.size());
+        final Vector toPre =
+            new Vector(
+                pre.first.converse - mid.first.converse,
+                pre.first.transverse - mid.first.transverse);
+        final Vector toPost =
+            new Vector(
+                post.first.converse - mid.first.converse,
+                post.first.transverse - mid.first.transverse);
+        double radius = baseRadius;
+        // Math.max on converse/transverse assumes non-angled segments to select one (provides distance)
+        radius =
+            Math.min(radius, Math.max(Math.abs(toPre.converse), Math.abs(toPre.transverse)) / 2);
+        radius =
+            Math.min(radius, Math.max(Math.abs(toPost.converse), Math.abs(toPost.transverse)) / 2);
+        if (i == 0) {
+          gc.moveTo(
+              mid.first.converse + simpleNorm(toPre.converse) * radius,
+              mid.first.transverse + simpleNorm(toPre.transverse) * radius);
+        }
+        gc.arcTo(
+            mid.first.converse,
+            mid.first.transverse,
+            mid.first.converse + simpleNorm(toPost.converse) * radius,
+            mid.first.transverse + simpleNorm(toPost.transverse) * radius,
+            radius);
+      } else {
+        if (i == 0) {
+          gc.moveTo(mid.first.converse, mid.first.transverse);
+        } else {
+          gc.lineTo(mid.first.converse, mid.first.transverse);
+        }
+      }
+    }
   }
 
   public void setStyle(final ObboxStyle style) {
@@ -160,48 +202,5 @@ public class Obbox {
       }
     }
     drawRounded(gc, points, styleRoundRadius);
-  }
-
-  public static void drawRounded(DrawingContext gc, TSList<ROPair<Vector, Boolean>> points, double baseRadius) {
-    for (int i = 0; i < points.size(); ++i) {
-      final ROPair<Vector, Boolean> mid = points.get(i);
-      if (mid.second) {
-        final ROPair<Vector, Boolean> pre = points.get((i + points.size() - 1) % points.size());
-        final ROPair<Vector, Boolean> post = points.get((i + 1) % points.size());
-        final Vector toPre =
-            new Vector(
-                pre.first.converse - mid.first.converse,
-                pre.first.transverse - mid.first.transverse);
-        final Vector toPost =
-            new Vector(
-                post.first.converse - mid.first.converse,
-                post.first.transverse - mid.first.transverse);
-         double radius = baseRadius;
-        if (pre.second)
-          radius =
-              Math.min(radius, Math.min(Math.abs(toPre.converse), Math.abs(toPre.transverse)) / 2);
-        if (post.second)
-          radius =
-              Math.min(
-                  radius, Math.min(Math.abs(toPost.converse), Math.abs(toPost.transverse)) / 2);
-        if (i == 0) {
-          gc.moveTo(
-              mid.first.converse + simpleNorm(toPre.converse) * radius,
-              mid.first.transverse + simpleNorm(toPre.transverse) * radius);
-        }
-        gc.arcTo(
-            mid.first.converse,
-            mid.first.transverse,
-            mid.first.converse + simpleNorm(toPost.converse) * radius,
-            mid.first.transverse + simpleNorm(toPost.transverse) * radius,
-            radius);
-      } else {
-        if (i == 0) {
-          gc.moveTo(mid.first.converse, mid.first.transverse);
-        } else {
-          gc.lineTo(mid.first.converse, mid.first.transverse);
-        }
-      }
-    }
   }
 }

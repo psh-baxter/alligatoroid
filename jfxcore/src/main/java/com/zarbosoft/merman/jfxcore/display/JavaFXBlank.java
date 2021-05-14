@@ -6,7 +6,7 @@ import com.zarbosoft.merman.core.visual.Vector;
 import javafx.scene.Node;
 import javafx.scene.layout.Region;
 
-public class JavaFXBlank implements Blank, JavaFXNode {
+public class JavaFXBlank implements Blank {
   private final Region node;
   private double converseSpan;
   private double converse;
@@ -18,7 +18,7 @@ public class JavaFXBlank implements Blank, JavaFXNode {
   }
 
   @Override
-  public Node node() {
+  public Node inner_() {
     return node;
   }
 

@@ -6,6 +6,8 @@ import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.GapAtomType;
+import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
@@ -15,9 +17,9 @@ import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackJSONSpecialPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.core.syntax.builder.BackFixedRecordSpecBuilder;
 import com.zarbosoft.merman.core.syntax.builder.FrontArraySpecBuilder;
 import com.zarbosoft.merman.core.syntax.builder.RootTypeBuilder;
@@ -47,10 +49,11 @@ import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSOrderedMap;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.Element;
 import jsinterop.annotations.JsMethod;
@@ -586,17 +589,18 @@ public class Main {
             .build();
     BackArraySpec statementBackArray =
         new BackArraySpec(
-            new BaseBackSimpleArraySpec.Config(
+            new BaseBackArraySpec.Config(
                 "statements",
                 statementGroupType,
                 TSList.of(
-                    estreeBackBuilder()
-                        .field("type", new BackFixedPrimitiveSpec("ExpressionStatement"))
-                        .field(
-                            "expression",
-                            new BackAtomSpec(
-                                new BaseBackAtomSpec.Config(null, expresisonGroupType)))
-                        .build())));
+                    new TSList<>(
+                        estreeBackBuilder()
+                            .field("type", new BackFixedPrimitiveSpec("ExpressionStatement"))
+                            .field(
+                                "expression",
+                                new BackAtomSpec(
+                                    new BaseBackAtomSpec.Config(null, expresisonGroupType)))
+                            .build()))));
     TSList<AtomType> types =
         TSList.of(
             frontFactory
@@ -622,7 +626,7 @@ public class Main {
                                 .field(
                                     "declarations",
                                     new BackArraySpec(
-                                        new BaseBackSimpleArraySpec.Config(
+                                        new BaseBackArraySpec.Config(
                                             "declarations", declareInner, new TSList<>())))
                                 .build()),
                     "declarations")
@@ -819,7 +823,7 @@ public class Main {
                                 .field(
                                     "arguments",
                                     new BackArraySpec(
-                                        new BaseBackSimpleArraySpec.Config(
+                                        new BaseBackArraySpec.Config(
                                             "arguments", expresisonGroupType, new TSList<>())))
                                 .field("optional", new BackFixedJSONSpecialPrimitiveSpec("false"))
                                 .build()),
@@ -827,34 +831,34 @@ public class Main {
                     "arguments")
                 .precedence(0)
                 .build());
-    TSMap<String, ROList<String>> groups =
-        new TSMap<>(
-            m ->
-                m.put(
-                        statementGroupType,
-                        TSList.of(
-                            declareGroupType, forType, ifType, blockType, expresisonGroupType))
-                    .put(accessGroupType, TSList.of(identifierType, memberType))
-                    .put(declareGroupType, TSList.of(letType))
-                    .put(
-                        expresisonGroupType,
-                        TSList.of(
-                            literalGroupType,
-                            accessGroupType,
-                            preincrementOperatorType,
-                            addOperatorType,
-                            lessThanEqualOperatorType,
-                            moduloOperatorType,
-                            addEqualOperatorType,
-                            tripleEqualOperatorType,
-                            callType))
-                    .put(literalGroupType, TSList.of(symbolLiteralType, stringLiteralType)));
+    TSOrderedMap<String, ROList<String>> groups =
+        new TSOrderedMap<String, ROList<String>>()
+            .put(
+                statementGroupType,
+                TSList.of(declareGroupType, forType, ifType, blockType, expresisonGroupType))
+            .put(accessGroupType, TSList.of(identifierType, memberType))
+            .put(declareGroupType, TSList.of(letType))
+            .put(
+                expresisonGroupType,
+                TSList.of(
+                    literalGroupType,
+                    accessGroupType,
+                    preincrementOperatorType,
+                    addOperatorType,
+                    lessThanEqualOperatorType,
+                    moduloOperatorType,
+                    addEqualOperatorType,
+                    tripleEqualOperatorType,
+                    callType))
+            .put(literalGroupType, TSList.of(symbolLiteralType, stringLiteralType));
     MultiError errors = new MultiError();
-    TSMap<String, ROSet<AtomType>> splayedTypes = Syntax.splayGroups(errors, types, groups);
+    GapAtomType gap = new GapAtomType(new GapAtomType.Config());
+    SuffixGapAtomType suffixGap = new SuffixGapAtomType(new SuffixGapAtomType.Config());
+    TSMap<String, ROOrderedSetRef<AtomType>> splayedTypes =
+        Syntax.splayGroups(errors, types, gap, suffixGap, groups);
     errors.raise();
     Syntax.Config syntaxConfig =
         new Syntax.Config(
-                types,
                 splayedTypes,
                 new RootTypeBuilder()
                     .back(
@@ -864,7 +868,9 @@ public class Main {
                             .field("body", statementBackArray)
                             .build())
                     .front(statementsFront)
-                    .build())
+                    .build(),
+                gap,
+                suffixGap)
             .hoverStyle(hoverStyle(false))
             .primitiveHoverStyle(hoverStyle(true))
             .cursorStyle(cursorStyle(false))

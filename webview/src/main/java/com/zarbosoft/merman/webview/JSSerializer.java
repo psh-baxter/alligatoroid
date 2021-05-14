@@ -2,6 +2,7 @@ package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.core.AtomKey;
 import com.zarbosoft.merman.core.BackPath;
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
@@ -24,9 +25,12 @@ import com.zarbosoft.merman.webview.serialization.JsonEventConsumer;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;
-import com.zarbosoft.pidgoon.nodes.HomogenousSequence;
+import com.zarbosoft.pidgoon.model.Node;
+import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
+import com.zarbosoft.pidgoon.nodes.Union;
+import com.zarbosoft.pidgoon.nodes.UnitSequence;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
@@ -40,6 +44,7 @@ import jsinterop.base.JsPropertyMap;
 
 import java.util.Map;
 
+import static com.zarbosoft.merman.core.Context.UncopyContext.NONE;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class JSSerializer implements Serializer {
@@ -85,7 +90,7 @@ public class JSSerializer implements Serializer {
         });
   }
 
-  public String write(ROList<Atom> atoms) {
+  public String write(Context.CopyContext copyContext, ROList<Atom> atoms) {
     return uncheck(
         () -> {
           final JSEventConsumer writer;
@@ -145,16 +150,22 @@ public class JSSerializer implements Serializer {
   }
 
   public Document loadDocument(Syntax syntax, java.lang.String data) {
-    return new Document(syntax, load(syntax, RootAtomType.ROOT_TYPE_ID, data, false).get(0));
+    return new Document(
+        syntax,
+        load(syntax, new Reference<>(new AtomKey(RootAtomType.ROOT_TYPE_ID)), data, NONE).get(0));
   }
 
   @Override
   public ROList<Atom> loadFromClipboard(
-      Syntax syntax, java.lang.String type, java.lang.Object data) {
-    return load(syntax, type, (java.lang.String) data, true);
+      Syntax syntax, Context.UncopyContext uncopyContext, String type, Object data) {
+    return load(syntax, syntax.backRuleRef(type), (java.lang.String) data, uncopyContext);
   }
 
-  public ROList<Atom> load(Syntax syntax, String type, String data, boolean synthArrayContext) {
+  public ROList<Atom> load(
+      Syntax syntax,
+      Node<AtomType.AtomParseResult> type,
+      String data,
+      Context.UncopyContext uncopyContext) {
     switch (backType) {
       case LUXEM:
         // TODO, dead atm
@@ -162,15 +173,52 @@ public class JSSerializer implements Serializer {
       case JSON:
         {
           final Grammar grammar = new Grammar(syntax.getGrammar());
-          grammar.add(
-              ROOT_KEY,
-              synthArrayContext
-                  ? new HomogenousSequence<AtomType.AtomParseResult>()
-                      .addIgnored(new MatchingEventTerminal<>(new EArrayOpenEvent()))
-                      .add(new Repeat(new Reference<AtomType.AtomParseResult>(new AtomKey(type))))
-                      .addIgnored(new MatchingEventTerminal<>(new EArrayCloseEvent()))
-                  : new HomogenousSequence<AtomType.AtomParseResult>()
-                      .add(new Reference<AtomType.AtomParseResult>(new AtomKey(type))));
+          switch (uncopyContext) {
+            case NONE:
+              {
+                grammar.add(
+                    ROOT_KEY,
+                    new Operator<AtomType.AtomParseResult, ROList<AtomType.AtomParseResult>>(type) {
+                      @Override
+                      protected ROList<AtomType.AtomParseResult> process(
+                          AtomType.AtomParseResult value) {
+                        return TSList.of(value);
+                      }
+                    });
+                break;
+              }
+            case RECORD:
+              {
+                grammar.add(
+                    ROOT_KEY,
+                    new UnitSequence<ROList<AtomType.AtomParseResult>>()
+                        .addIgnored(new MatchingEventTerminal<>(new EObjectOpenEvent()))
+                        .add(new Repeat<AtomType.AtomParseResult>(type))
+                        .addIgnored(new MatchingEventTerminal<>(new EObjectCloseEvent())));
+                break;
+              }
+            case MAYBE_ARRAY:
+              {
+                grammar.add(
+                    ROOT_KEY,
+                    new Union<ROList<AtomType.AtomParseResult>>()
+                        .add(
+                            new UnitSequence<ROList<AtomType.AtomParseResult>>()
+                                .addIgnored(new MatchingEventTerminal<>(new EArrayOpenEvent()))
+                                .add(new Repeat<AtomType.AtomParseResult>(type))
+                                .addIgnored(new MatchingEventTerminal<>(new EArrayCloseEvent())))
+                        .add(
+                            new Operator<
+                                AtomType.AtomParseResult, ROList<AtomType.AtomParseResult>>(type) {
+                              @Override
+                              protected ROList<AtomType.AtomParseResult> process(
+                                  AtomType.AtomParseResult value) {
+                                return TSList.of(value);
+                              }
+                            }));
+                break;
+              }
+          }
           TSList<ROPair<BackEvent, BackPath>> events = new TSList<>();
           walkJSJson(events, Global.JSON.parse(data), BackPath.root);
           ROList<AtomType.AtomParseResult> result =

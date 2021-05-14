@@ -15,29 +15,31 @@ import com.zarbosoft.merman.core.syntax.front.ConditionValue;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 import java.util.function.Function;
 
 public class GapAtomType extends BaseGapAtomType {
-  public final String backType;
-
-  public static ROList<BackSpec> jsonBack = TSList.of(
+  public static ROList<BackSpec> jsonBack =
+      TSList.of(
           new BackFixedRecordSpec(
-                  new BackFixedRecordSpec.Config(
-                          new TSMap<String, BackSpec>()
-                                  .put("type", new BackFixedPrimitiveSpec("gap"))
-                                  .put(
-                                          "primitive",
-                                          new BackPrimitiveSpec(
-                                                  new BaseBackPrimitiveSpec.Config(
-                                                          GapAtomType.PRIMITIVE_KEY))),
-                          ROSet.empty)));
+              new BackFixedRecordSpec.Config(
+                  new TSOrderedMap<>(
+                      m ->
+                          m.put("type", new BackFixedPrimitiveSpec("gap"))
+                              .put(
+                                  "primitive",
+                                  new BackPrimitiveSpec(
+                                      new BaseBackPrimitiveSpec.Config(
+                                          GapAtomType.PRIMITIVE_KEY)))),
+                  ROSet.empty)));
+  public final String backType;
 
   public GapAtomType(Config config) {
     super(
@@ -63,7 +65,9 @@ public class GapAtomType extends BaseGapAtomType {
                                 new ConditionValue(
                                     new ConditionValue.Config(
                                         PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))))
-                .add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(PRIMITIVE_KEY)))
+                .add(
+                    new FrontPrimitiveSpec(
+                        new FrontPrimitiveSpec.Config(PRIMITIVE_KEY).style(config.primitiveStyle)))
                 .addAll(config.frontSuffix == null ? ROList.empty : config.frontSuffix)));
     backType = config.backType;
     MultiError checkErrors = new MultiError();
@@ -108,6 +112,7 @@ public class GapAtomType extends BaseGapAtomType {
     public ROList<FrontSpec> frontPrefix = null;
     public ROList<FrontSpec> frontSuffix = null;
     public Symbol gapPlaceholderSymbol;
+    public Style primitiveStyle;
 
     public Config() {}
 
@@ -121,6 +126,11 @@ public class GapAtomType extends BaseGapAtomType {
 
     public Config back(ROList<BackSpec> back) {
       this.back = back;
+      return this;
+    }
+
+    public Config primitiveStyle(Style style) {
+      this.primitiveStyle = style;
       return this;
     }
   }

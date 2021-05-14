@@ -1,9 +1,9 @@
 package com.zarbosoft.merman.editorcore.banner;
 
 public class BannerMessage {
-  /** ms */
-  public long duration;
+  public final String text;
 
-  public int priority = 0;
-  public String text;
+  public BannerMessage(String text) {
+    this.text = text;
+  }
 }

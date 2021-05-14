@@ -22,4 +22,6 @@ public interface DisplayNode {
   default double converseEdge() {
     return converse() + converseSpan();
   }
+
+  Object inner_();
 }

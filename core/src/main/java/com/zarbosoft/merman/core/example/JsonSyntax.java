@@ -18,10 +18,11 @@ import com.zarbosoft.merman.core.syntax.back.BackJSONSpecialPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.core.syntax.builder.FrontArraySpecBuilder;
+import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
@@ -35,9 +36,10 @@ import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 public class JsonSyntax {
   private static final String DEFAULT_ID = "default";
@@ -64,6 +66,8 @@ public class JsonSyntax {
         new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("7DD4FB")));
     final Style symbolStyle =
         new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA")));
+    final Style gapStyle =
+        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("eabeca")));
     final Style baseAlignSymbolStyle =
         new Style(
             new Style.Config()
@@ -153,7 +157,8 @@ public class JsonSyntax {
                             TYPE_RECORD,
                             TSList.of(
                                 new BackRecordSpec(
-                                    new BackRecordSpec.Config(DEFAULT_ID, TYPE_RECORD_PAIR))),
+                                    new BaseBackArraySpec.Config(
+                                        DEFAULT_ID, TYPE_RECORD_PAIR, ROList.empty))),
                             TSList.of(
                                 textSym("{", symbolStyle),
                                 new FrontArraySpecBuilder(DEFAULT_ID)
@@ -182,7 +187,7 @@ public class JsonSyntax {
                             TYPE_ARRAY,
                             TSList.of(
                                 new BackArraySpec(
-                                    new BaseBackSimpleArraySpec.Config(
+                                    new BaseBackArraySpec.Config(
                                         DEFAULT_ID, GROUP_ANY, TSList.of()))),
                             TSList.of(
                                 textSym("[", symbolStyle),
@@ -192,14 +197,25 @@ public class JsonSyntax {
                                     .build(),
                                 baseAlignTextSym("]", baseAlignSymbolStyle))))
                     .alignments(containerAlignments)));
-    TSMap<String, ROSet<AtomType>> splayedTypes;
+    GapAtomType gap =
+        new GapAtomType(
+            new GapAtomType.Config().back(GapAtomType.jsonBack).primitiveStyle(gapStyle));
+    SuffixGapAtomType suffixGap =
+        new SuffixGapAtomType(
+            new SuffixGapAtomType.Config()
+                .back(SuffixGapAtomType.jsonBack)
+                .primitiveStyle(gapStyle)
+                .frontArrayConfig(new FrontArraySpecBase.Config().prefix(TSList.of(breakIndent))));
+    TSMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
     {
       MultiError errors = new MultiError();
       splayedTypes =
           Syntax.splayGroups(
               errors,
               types,
-              new TSMap<String, ROList<String>>()
+              gap,
+              suffixGap,
+              new TSOrderedMap<String, ROList<String>>()
                   .put(
                       GROUP_ANY,
                       TSList.of(
@@ -216,18 +232,15 @@ public class JsonSyntax {
     return new Syntax(
         env,
         new Syntax.Config(
-                types,
                 splayedTypes,
                 new RootAtomType(
                     new RootAtomType.Config(
                         TSList.of(
                             new BackAtomSpec(new BaseBackAtomSpec.Config(DEFAULT_ID, GROUP_ANY))),
                         TSList.of(new FrontAtomSpec(new FrontAtomSpec.Config(DEFAULT_ID))),
-                        ROMap.empty)))
-            .gap(new GapAtomType(new GapAtomType.Config().back(GapAtomType.jsonBack)))
-            .suffixGap(
-                new SuffixGapAtomType(
-                    new SuffixGapAtomType.Config().back(SuffixGapAtomType.jsonBack)))
+                        ROMap.empty)),
+                gap,
+                suffixGap)
             .backType(BackType.JSON)
             .displayUnit(Syntax.DisplayUnit.MM)
             .background(ModelColor.RGB.hex("333333"))

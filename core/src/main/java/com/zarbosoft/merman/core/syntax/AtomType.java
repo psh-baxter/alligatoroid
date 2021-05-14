@@ -22,10 +22,9 @@ import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.merman.core.syntax.back.BackSubArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackTypeSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.error.AtomTypeErrors;
 import com.zarbosoft.merman.core.syntax.error.AtomTypeNoBack;
 import com.zarbosoft.merman.core.syntax.error.BackFieldWrongType;
@@ -75,7 +74,7 @@ public abstract class AtomType {
               BackSpecData s1 = (BackSpecData) s;
               BackSpecData old = fields.putReplace(s1.id, s1);
               if (old != null) errors.add(new DuplicateBackId(s1.id));
-              if (s instanceof BaseBackSimpleArraySpec) return false;
+              if (s instanceof BaseBackArraySpec) return false;
               return true;
             });
       }
@@ -289,13 +288,12 @@ public abstract class AtomType {
     }
 
     @Override
-    public void finish() {
-    }
+    public void finish() {}
   }
 
   public static class AtomFieldParseResult extends FieldParseResult {
-    final FieldAtom field;
     public final AtomParseResult data;
+    final FieldAtom field;
 
     public AtomFieldParseResult(String key, FieldAtom field, AtomParseResult data) {
       super(key);
@@ -332,8 +330,7 @@ public abstract class AtomType {
     @Override
     public void finish() {
       TSList<Atom> fieldData = new TSList<>();
-      for (AtomParseResult element :
-               data) {
+      for (AtomParseResult element : data) {
         fieldData.add(element.finish());
       }
       field.initialSet(fieldData);
@@ -345,7 +342,6 @@ public abstract class AtomType {
     public final ROList<FieldParseResult> fields;
 
     /**
-     *
      * @param atom
      * @param fields FieldParseResult or null if no field parsed for a back element
      */
@@ -358,6 +354,7 @@ public abstract class AtomType {
       TSMap<String, Field> initialFields = new TSMap<>();
       for (FieldParseResult field : fields) {
         if (field == null) continue;
+        field.finish();
         initialFields.put(field.key, field.field());
       }
       atom.initialSet(initialFields);

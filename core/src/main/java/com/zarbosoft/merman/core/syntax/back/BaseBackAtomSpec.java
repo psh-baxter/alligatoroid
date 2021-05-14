@@ -9,6 +9,7 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.AtomCandidatePluralBack;
 import com.zarbosoft.merman.core.syntax.error.AtomCandidateTypeNotAllowed;
 import com.zarbosoft.merman.core.syntax.error.AtomTypeDoesntExist;
+import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -44,7 +45,7 @@ public abstract class BaseBackAtomSpec extends BackSpecData {
       boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
     if (type == null) return; // Gaps have null type, take anything
-    ROSet<AtomType> childTypes = syntax.splayedTypes.getOpt(type);
+    ROOrderedSetRef<AtomType> childTypes = syntax.splayedTypes.getOpt(type);
     if (childTypes == null) {
       errors.add(new AtomTypeDoesntExist(typePath, type));
     } else {

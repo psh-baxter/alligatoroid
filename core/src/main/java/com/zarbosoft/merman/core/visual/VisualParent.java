@@ -29,9 +29,7 @@ public abstract class VisualParent {
 
 	public abstract boolean selectNext(Context context);
 
-	public void firstBrickChanged(final Context context, final Brick firstBrick) {
-	}
+	public abstract void notifyLastBrickCreated(Context context, Brick brick);
 
-	public void lastBrickChanged(final Context context, final Brick lastBrick) {
-	}
+	public abstract void notifyFirstBrickCreated(Context context, Brick brick);
 }

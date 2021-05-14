@@ -79,6 +79,11 @@ public class CourseGroup implements CourseDisplayNode {
     group.setConverse(converse, animate);
   }
 
+  @Override
+  public Object inner_() {
+    return group.inner_();
+  }
+
   public void add(CourseDisplayNode node) {
     if (node.ascent() > ascent) {
       ascent = node.ascent();

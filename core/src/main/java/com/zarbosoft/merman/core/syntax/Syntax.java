@@ -26,13 +26,15 @@ import com.zarbosoft.pidgoon.nodes.HomogenousSequence;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.Union;
-import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROOrderedMap;
+import com.zarbosoft.rendaw.common.ROOrderedSetRef;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSOrderedSet;
 import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.Iterator;
@@ -48,8 +50,7 @@ public class Syntax {
   public final Padding bannerPad;
   public final Padding detailPad;
   public final int detailSpan;
-  public final ROList<AtomType> types;
-  public final ROMap<String, ROSet<AtomType>> splayedTypes;
+  public final ROMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
   public final RootAtomType root;
   public final GapAtomType gap;
   public final SuffixGapAtomType suffixGap;
@@ -90,13 +91,10 @@ public class Syntax {
     this.bannerPad = config.bannerPad;
     this.detailPad = config.detailPad;
     this.detailSpan = config.detailSpan;
-    this.types = config.types;
     this.splayedTypes = config.splayedTypes;
     this.root = config.root;
-    if (config.gap == null) gap = new GapAtomType(new GapAtomType.Config());
-    else this.gap = config.gap;
-    if (config.suffixGap == null) suffixGap = new SuffixGapAtomType(new SuffixGapAtomType.Config());
-    else this.suffixGap = config.suffixGap;
+    this.gap = config.gap;
+    this.suffixGap = config.suffixGap;
     this.converseDirection = config.converseDirection;
     this.transverseDirection = config.transverseDirection;
     this.cursorStyle =
@@ -112,7 +110,7 @@ public class Syntax {
             : config.primitiveHoverStyle;
 
     TSSet<AtomType> seen = new TSSet<>();
-    for (Map.Entry<String, ROSet<AtomType>> splayedType : splayedTypes) {
+    for (Map.Entry<String, ROOrderedSetRef<AtomType>> splayedType : splayedTypes) {
       for (AtomType atomType : splayedType.getValue()) {
         if (!seen.addNew(atomType)) continue;
         atomType.finish(errors, this);
@@ -150,8 +148,8 @@ public class Syntax {
                 new HomogenousSequence()
                     .add(new MatchingEventTerminal<>(new ETypeEvent()))
                     .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))));
-    for (Map.Entry<String, ROSet<AtomType>> entry : splayedTypes) {
-      ROSet<AtomType> types = entry.getValue();
+    for (Map.Entry<String, ROOrderedSetRef<AtomType>> entry : splayedTypes) {
+      ROOrderedSetRef<AtomType> types = entry.getValue();
       String key = entry.getKey();
       AtomType firstType = types.iterator().next();
       if (types.size() == 1 && key.equals(firstType.id())) {
@@ -178,31 +176,38 @@ public class Syntax {
    * @param groups
    * @return
    */
-  public static TSMap<String, ROSet<AtomType>> splayGroups(
-      MultiError errors, ROList<AtomType> types, ROMap<String, ROList<String>> groups) {
-    TSMap<String, ROSet<AtomType>> splayedTypes = new TSMap<>();
+  public static TSMap<String, ROOrderedSetRef<AtomType>> splayGroups(
+      MultiError errors,
+      ROList<AtomType> types,
+      GapAtomType gap,
+      SuffixGapAtomType suffixGap,
+      ROOrderedMap<String, ROList<String>> groups) {
+    TSMap<String, ROOrderedSetRef<AtomType>> splayedTypes = new TSMap<>();
 
     TSMap<String, AtomType> typeLookup = new TSMap<>();
+
+    splayedTypes.putReplace(gap.id, TSOrderedSet.of(gap));
+    splayedTypes.putReplace(suffixGap.id, TSOrderedSet.of(suffixGap));
+
     for (AtomType entry : types) {
       if (typeLookup.putReplace(entry.id(), entry) != null) {
         errors.add(new DuplicateAtomTypeIds(entry.id()));
       }
-      ;
-      splayedTypes.putReplace(entry.id(), TSSet.of(entry).ro());
+      splayedTypes.putReplace(entry.id(), TSOrderedSet.of(entry));
     }
 
-    for (Map.Entry<String, ROList<String>> group : groups) {
-      if (splayedTypes.contains(group.getKey())) {
-        errors.add(new DuplicateAtomTypeIds(group.getKey()));
+    for (ROPair<String, ROList<String>> group : groups) {
+      if (splayedTypes.contains(group.first)) {
+        errors.add(new DuplicateAtomTypeIds(group.first));
       }
-      if (group.getValue().toSet().size() != group.getValue().size()) {
-        errors.add(new DuplicateAtomTypeIdsInGroup(group.getKey()));
+      if (group.second.toSet().size() != group.second.size()) {
+        errors.add(new DuplicateAtomTypeIdsInGroup(group.first));
       }
       final TSList<Pair<ROList<String>, Iterator<String>>> stack = new TSList<>();
-      Iterator<String> seed = group.getValue().iterator();
-      TSSet<AtomType> out = new TSSet<>();
+      Iterator<String> seed = group.second.iterator();
+      TSOrderedSet<AtomType> out = new TSOrderedSet<>();
       if (seed.hasNext()) {
-        stack.add(new Pair<ROList<String>, Iterator<String>>(TSList.of(group.getKey()), seed));
+        stack.add(new Pair<ROList<String>, Iterator<String>>(TSList.of(group.first), seed));
         while (!stack.isEmpty()) {
           Pair<ROList<String>, Iterator<String>> top = stack.last();
           final String childKey = top.second.next();
@@ -215,7 +220,7 @@ public class Syntax {
             continue;
           }
 
-          final ROSet<AtomType> splayed = splayedTypes.getOpt(childKey);
+          final ROOrderedSetRef<AtomType> splayed = splayedTypes.getOpt(childKey);
           if (splayed != null) {
             out.addAll(splayed);
             continue;
@@ -236,7 +241,7 @@ public class Syntax {
           errors.add(new GroupChildDoesntExist(top.first.last(), childKey));
         }
       }
-      splayedTypes.put(group.getKey(), out.ro());
+      splayedTypes.put(group.first, out);
     }
 
     return splayedTypes;
@@ -244,14 +249,13 @@ public class Syntax {
 
   public Node<AtomType.AtomParseResult> backRuleRef(final String type) {
     final Union<AtomType.AtomParseResult> out = new Union<>();
-    out.add(new Reference<>(new AtomKey(type)));
     out.add(new Reference<>(new AtomKey(gap.backType)));
     out.add(new Reference<>(new AtomKey(suffixGap.backType)));
+    out.add(new Reference<>(new AtomKey(type)));
     return out;
   }
 
   public Grammar getGrammar() {
-    if (grammar == null) throw new Assertion("finish() never called on syntax");
     return grammar;
   }
 
@@ -261,8 +265,7 @@ public class Syntax {
   }
 
   public static class Config {
-    public final ROList<AtomType> types;
-    public final ROMap<String, ROSet<AtomType>> splayedTypes;
+    public final ROMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
     public final RootAtomType root;
     public BackType backType = BackType.LUXEM;
     public ModelColor background = ModelColor.RGB.white;
@@ -271,8 +274,8 @@ public class Syntax {
     public Padding bannerPad = Padding.empty;
     public Padding detailPad = Padding.empty;
     public int detailSpan = 300;
-    public GapAtomType gap;
-    public SuffixGapAtomType suffixGap;
+    public final GapAtomType gap;
+    public final SuffixGapAtomType suffixGap;
     public Direction converseDirection = Direction.RIGHT;
     public Direction transverseDirection = Direction.DOWN;
     public DisplayUnit displayUnit = DisplayUnit.MM;
@@ -281,25 +284,15 @@ public class Syntax {
     public Style hoverStyle;
     public Style primitiveHoverStyle;
 
-    public Config(
-        ROList<AtomType> types, ROMap<String, ROSet<AtomType>> splayedTypes, RootAtomType root) {
-      this.types = types;
+    public Config(ROMap<String, ROOrderedSetRef<AtomType>> splayedTypes, RootAtomType root, GapAtomType gap, SuffixGapAtomType suffixGap) {
       this.splayedTypes = splayedTypes;
       this.root = root;
+      this.gap = gap;
+      this.suffixGap = suffixGap;
     }
 
     public Config backType(BackType backType) {
       this.backType = backType;
-      return this;
-    }
-
-    public Config gap(GapAtomType gap) {
-      this.gap = gap;
-      return this;
-    }
-
-    public Config suffixGap(SuffixGapAtomType gap) {
-      this.suffixGap = gap;
       return this;
     }
 

@@ -7,6 +7,7 @@ import com.zarbosoft.luxem.read.Parse;
 import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.merman.core.AtomKey;
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
 import com.zarbosoft.merman.core.backevents.EKeyEvent;
@@ -23,15 +24,17 @@ import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
+import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.MismatchCause;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.pidgoon.nodes.Repeat;
+import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.pidgoon.nodes.UnitSequence;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.Format;
@@ -189,7 +192,14 @@ public class JavaSerializer implements Serializer {
   }
 
   public Document loadDocument(Syntax syntax, byte[] data) {
-    return new Document(syntax, load(syntax, RootAtomType.ROOT_TYPE_ID, data, false).get(0));
+    return new Document(
+        syntax,
+        load(
+                syntax,
+                new Reference<>(new AtomKey(RootAtomType.ROOT_TYPE_ID)),
+                data,
+                Context.UncopyContext.NONE)
+            .get(0));
   }
 
   @Override
@@ -221,7 +231,7 @@ public class JavaSerializer implements Serializer {
     return stream.toByteArray();
   }
 
-  public Object write(ROList<Atom> atoms) {
+  public Object write(Context.CopyContext copyContext, ROList<Atom> atoms) {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     uncheck(
         () -> {
@@ -230,26 +240,67 @@ public class JavaSerializer implements Serializer {
           switch (backType) {
             case LUXEM:
               writer = luxemEventConsumer(new Writer(stream, (byte) ' ', 4));
+              switch (copyContext) {
+                case NONE:
+                case ARRAY:
+                  break;
+                case RECORD:
+                  writer.recordBegin();
+                  break;
+              }
               break;
             case JSON:
               {
                 jsonGenerator = new JsonFactory().createGenerator(stream);
                 jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
-                jsonGenerator.writeStartArray();
+                switch (copyContext) {
+                  case NONE:
+                    break;
+                  case RECORD:
+                    jsonGenerator.writeStartObject();
+                    break;
+                  case ARRAY:
+                    jsonGenerator.writeStartArray();
+                    break;
+                }
                 writer = jsonEventConsumer(jsonGenerator);
                 break;
               }
             default:
               throw new DeadCode();
           }
-          for (final Atom atom : atoms) write(atom, writer);
+          for (final Atom atom : atoms) {
+            write(atom, writer);
+          }
           switch (backType) {
             case LUXEM:
-              stream.write('\n');
-              break;
+              {
+                switch (copyContext) {
+                  case NONE:
+                  case ARRAY:
+                    break;
+                  case RECORD:
+                    writer.recordEnd();
+                    break;
+                }
+                stream.write('\n');
+                break;
+              }
             case JSON:
-              jsonGenerator.writeEndArray();
-              break;
+              {
+                switch (copyContext) {
+                  case NONE:
+                    break;
+                  case RECORD:
+                    jsonGenerator.writeEndObject();
+                    break;
+                  case ARRAY:
+                    jsonGenerator.writeEndArray();
+                    break;
+                }
+                jsonGenerator.flush();
+                break;
+              }
             default:
               throw new DeadCode();
           }
@@ -259,17 +310,35 @@ public class JavaSerializer implements Serializer {
   }
 
   @Override
-  public ROList<Atom> loadFromClipboard(Syntax syntax, String type, Object data) {
-    return load(syntax, type, (byte[]) data, true);
+  public ROList<Atom> loadFromClipboard(
+      Syntax syntax, Context.UncopyContext uncopyContext, String type, Object data) {
+    return load(syntax, syntax.backRuleRef(type), (byte[]) data, uncopyContext);
   }
 
-  public ROList<Atom> load(Syntax syntax, String type, byte[] data, boolean synthArrayContext) {
+  public ROList<Atom> load(
+      Syntax syntax,
+      Node<AtomType.AtomParseResult> type,
+      byte[] data,
+      Context.UncopyContext uncopyContext) {
     try {
       switch (backType) {
         case LUXEM:
           {
             final Grammar grammar = new Grammar(syntax.getGrammar());
-            grammar.add(ROOT_KEY, new Repeat<>(new Reference<>(new AtomKey(type))));
+            switch (uncopyContext) {
+              case MAYBE_ARRAY:
+              case NONE:
+                grammar.add(ROOT_KEY, new Repeat<>(type));
+                break;
+              case RECORD:
+                grammar.add(
+                    ROOT_KEY,
+                    new UnitSequence<ROList<AtomType.AtomParseResult>>()
+                        .addIgnored(new MatchingEventTerminal(new EObjectOpenEvent()))
+                        .add(new Repeat<>(type))
+                        .addIgnored(new MatchingEventTerminal(new EObjectCloseEvent())));
+                break;
+            }
             ROList<AtomType.AtomParseResult> result =
                 new Parse<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
                     .grammar(grammar)
@@ -284,23 +353,54 @@ public class JavaSerializer implements Serializer {
         case JSON:
           {
             final Grammar grammar = new Grammar(syntax.getGrammar());
-            grammar.add(
-                ROOT_KEY,
-                synthArrayContext
-                    ? new UnitSequence<ROList<AtomType.AtomParseResult>>()
-                        .addIgnored(new MatchingEventTerminal<>(new EArrayOpenEvent()))
-                        .add(
-                            new Repeat<AtomType.AtomParseResult>(
-                                new Reference<AtomType.AtomParseResult>(new AtomKey(type))))
-                        .addIgnored(new MatchingEventTerminal<>(new EArrayCloseEvent()))
-                    : new Operator<AtomType.AtomParseResult, ROList<AtomType.AtomParseResult>>(
-                        new Reference<AtomType.AtomParseResult>(new AtomKey(type))) {
-                      @Override
-                      protected ROList<AtomType.AtomParseResult> process(
-                          AtomType.AtomParseResult value) {
-                        return TSList.of(value);
-                      }
-                    });
+            switch (uncopyContext) {
+              case NONE:
+                {
+                  grammar.add(
+                      ROOT_KEY,
+                      new Operator<AtomType.AtomParseResult, ROList<AtomType.AtomParseResult>>(
+                          type) {
+                        @Override
+                        protected ROList<AtomType.AtomParseResult> process(
+                            AtomType.AtomParseResult value) {
+                          return TSList.of(value);
+                        }
+                      });
+                  break;
+                }
+              case RECORD:
+                {
+                  grammar.add(
+                      ROOT_KEY,
+                      new UnitSequence<ROList<AtomType.AtomParseResult>>()
+                          .addIgnored(new MatchingEventTerminal<>(new EObjectOpenEvent()))
+                          .add(new Repeat<AtomType.AtomParseResult>(type))
+                          .addIgnored(new MatchingEventTerminal<>(new EObjectCloseEvent())));
+                  break;
+                }
+              case MAYBE_ARRAY:
+                {
+                  grammar.add(
+                      ROOT_KEY,
+                      new Union<ROList<AtomType.AtomParseResult>>()
+                          .add(
+                              new UnitSequence<ROList<AtomType.AtomParseResult>>()
+                                  .addIgnored(new MatchingEventTerminal<>(new EArrayOpenEvent()))
+                                  .add(new Repeat<AtomType.AtomParseResult>(type))
+                                  .addIgnored(new MatchingEventTerminal<>(new EArrayCloseEvent())))
+                          .add(
+                              new Operator<
+                                  AtomType.AtomParseResult, ROList<AtomType.AtomParseResult>>(
+                                  type) {
+                                @Override
+                                protected ROList<AtomType.AtomParseResult> process(
+                                    AtomType.AtomParseResult value) {
+                                  return TSList.of(value);
+                                }
+                              }));
+                  break;
+                }
+            }
             ROList<AtomType.AtomParseResult> result =
                 new JSONParse<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
                     .grammar(grammar)
@@ -316,7 +416,7 @@ public class JavaSerializer implements Serializer {
       }
     } catch (InvalidStreamAt e) {
       StringBuilder message = new StringBuilder();
-      for (MismatchCause error : (ROList<MismatchCause>)e.step.errors) {
+      for (MismatchCause error : (ROList<MismatchCause>) e.step.errors) {
         message.append(Format.format(" * %s\n", error));
       }
       throw new RuntimeException(

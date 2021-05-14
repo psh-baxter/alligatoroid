@@ -50,6 +50,11 @@ public class MockeryText extends MockeryCourseDisplayNode implements Text {
   }
 
   @Override
+  public Object inner_() {
+    return null;
+  }
+
+  @Override
   public double ascent() {
     return (font.size * 8) / 10;
   }

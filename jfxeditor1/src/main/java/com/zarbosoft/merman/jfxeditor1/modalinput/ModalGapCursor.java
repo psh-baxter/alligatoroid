@@ -3,21 +3,22 @@ package com.zarbosoft.merman.jfxeditor1.modalinput;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
+import com.zarbosoft.merman.editorcore.Editor;
+import com.zarbosoft.merman.editorcore.gap.EditGapCursor;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 
-public class ModalPrimitiveCursor extends EditPrimitiveCursor {
+public class ModalGapCursor extends EditGapCursor {
   private final ModalPrimitiveInner inner;
 
-  public ModalPrimitiveCursor(
-      Context context,
+  public ModalGapCursor(
+      Editor editor,
       VisualFrontPrimitive visualPrimitive,
       boolean leadFirst,
       int beginOffset,
       int endOffset,
       NotMain main) {
-    super(context, visualPrimitive, leadFirst, beginOffset, endOffset);
-    inner = new ModalPrimitiveInner(context, main, this, getSyntaxPath());
+    super(editor, visualPrimitive, leadFirst, beginOffset, endOffset);
+    inner = new ModalPrimitiveInner(editor.context, main, this, getSyntaxPath());
   }
 
   @Override

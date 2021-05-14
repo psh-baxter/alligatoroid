@@ -3,12 +3,12 @@ package com.zarbosoft.merman.core.syntax.front;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
@@ -43,7 +43,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
       final Atom atom,
       final int visualDepth,
       final int depthScore) {
-    VisualFrontArray out = new VisualFrontArray(this,  parent, atom, visualDepth);
+    VisualFieldArray out = new VisualFieldArray(this,  parent, atom, visualDepth);
     out.root(context, parent, depthScore, depthScore);
     return out;
   }
@@ -72,6 +72,12 @@ public abstract class FrontArraySpecBase extends FrontSpec {
     public Symbol ellipsis = new SymbolTextSpec(new SymbolTextSpec.Config("..."));
     public Symbol empty = new SymbolSpaceSpec(new SymbolSpaceSpec.Config());
 
+    public Config prefix(ROList<FrontSymbol> prefix) {
+      this.prefix = prefix;
+      return this;
+    }
+
     public Config() {}
+
   }
 }

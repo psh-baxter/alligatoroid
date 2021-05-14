@@ -7,11 +7,11 @@ import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -24,7 +24,7 @@ public class TreeBuilder {
   }
 
   public TreeBuilder(Syntax syntax, String type) {
-    ROSet<AtomType> t = syntax.splayedTypes.get(type);
+    ROOrderedSetRef<AtomType> t = syntax.splayedTypes.get(type);
     if (t.size() != 1) throw new Assertion();
     this.type = t.iterator().next();
   }

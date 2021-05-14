@@ -9,6 +9,7 @@ import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.rendaw.common.ChainComparator;
+import com.zarbosoft.rendaw.common.EnumerateIterable;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -139,8 +140,8 @@ public class Course {
       brick.setParent(this, at + i);
     }
     renumber(at + bricks.size());
-    for (Brick brick : bricks) {
-      visual.add(brick.getDisplayNode());
+    for (EnumerateIterable.El<Brick> brick : new EnumerateIterable<>(bricks)) {
+      visual.add(at + brick.index, brick.value.getDisplayNode());
     }
     for (Brick brick : bricks) {
       brick.allocateTransverse(context, ascent, descent);

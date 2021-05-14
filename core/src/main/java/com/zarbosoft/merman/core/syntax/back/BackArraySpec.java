@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
@@ -17,9 +18,21 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-public class BackArraySpec extends BaseBackSimpleArraySpec {
+import java.util.function.Consumer;
+
+public class BackArraySpec extends BaseBackArraySpec {
   public BackArraySpec(Config config) {
     super(config);
+  }
+
+  @Override
+  public void copy(Context context, TSList<Atom> children) {
+    context.copy(Context.CopyContext.ARRAY, children);
+  }
+
+  @Override
+  public void uncopy(Context context, Consumer<ROList<Atom>> consumer) {
+    context.uncopy(elementAtomType(), Context.UncopyContext.MAYBE_ARRAY, consumer);
   }
 
   @Override

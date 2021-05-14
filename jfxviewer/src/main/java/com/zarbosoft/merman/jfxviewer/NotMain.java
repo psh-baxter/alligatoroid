@@ -15,8 +15,9 @@ import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
@@ -89,22 +90,18 @@ public class NotMain extends Application {
                             context.cursor.dispatch(
                                 new com.zarbosoft.merman.core.Cursor.Dispatcher() {
                                   @Override
-                                  public void handle(ArrayCursor cursor) {
-                                    context.copy(
-                                        cursor.visual.value.data.sublist(
-                                            cursor.beginIndex, cursor.endIndex + 1));
+                                  public void handle(FieldArrayCursor cursor) {
+                                    cursor.actionCopy(context);
                                   }
 
                                   @Override
-                                  public void handle(VisualFrontAtomBase.Cursor cursor) {
-                                    context.copy(TSList.of(cursor.base.atomGet()));
+                                  public void handle(FieldAtomCursor cursor) {
+                                    cursor.actionCopy(context);
                                   }
 
                                   @Override
                                   public void handle(VisualFrontPrimitive.Cursor cursor) {
-                                    context.copy(
-                                        cursor.visualPrimitive.value.data.substring(
-                                            cursor.range.beginOffset, cursor.range.endOffset));
+                                    cursor.actionCopy(context);
                                   }
                                 });
                           }
@@ -132,13 +129,13 @@ public class NotMain extends Application {
                 }
 
                 @Override
-                public ArrayCursor createArrayCursor(
+                public FieldArrayCursor createArrayCursor(
                     Context context,
-                    VisualFrontArray visual,
+                    VisualFieldArray visual,
                     boolean leadFirst,
                     int start,
                     int end) {
-                  return new ArrayCursor(context, visual, leadFirst, start, end) {
+                  return new FieldArrayCursor(context, visual, leadFirst, start, end) {
                     @Override
                     public boolean handleKey(Context context, ButtonEvent hidEvent) {
                       return handleCommon(context, hidEvent);
@@ -147,9 +144,9 @@ public class NotMain extends Application {
                 }
 
                 @Override
-                public VisualFrontAtomBase.Cursor createAtomCursor(
+                public FieldAtomCursor createAtomCursor(
                     Context context, VisualFrontAtomBase base) {
-                  return new VisualFrontAtomBase.Cursor(context, base) {
+                  return new FieldAtomCursor(context, base) {
                     @Override
                     public boolean handleKey(Context context, ButtonEvent hidEvent) {
                       return handleCommon(context, hidEvent);

@@ -274,6 +274,9 @@ public class JavaFXDisplay extends Display {
     node.setSnapToPixel(true);
     node.setFocusTraversable(true);
     node.getChildren().add(origin);
+    node.setOnMouseEntered(event -> {
+        node.requestFocus();
+    });
     node.setOnMouseExited(
         event -> {
           mouseExited();
@@ -898,13 +901,13 @@ public class JavaFXDisplay extends Display {
 
   @Override
   public void add(final int index, final DisplayNode node) {
-    Node node1 = ((JavaFXNode) node).node();
+    Node node1 = (Node) node.inner_();
     if (node1 != null) this.origin.getChildren().add(index, node1);
   }
 
   @Override
   public void remove(final DisplayNode node) {
-    Node node1 = ((JavaFXNode) node).node();
+    Node node1 = (Node) node.inner_();
     if (node1 != null) this.origin.getChildren().remove(node1);
   }
 

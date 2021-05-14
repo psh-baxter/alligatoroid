@@ -4,8 +4,8 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.BackRecordBuilder;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
@@ -20,7 +20,7 @@ import com.zarbosoft.merman.helper.TypeBuilder;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.rendaw.common.TSList;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ public class TestActionsArray {
                     .build();
     FreeAtomType snooze =
             new TypeBuilder("snooze")
-                    .back(new BackArraySpec(new BaseBackSimpleArraySpec.Config("value", infinity.id(), TSList.of())))
+                    .back(new BackArraySpec(new BaseBackArraySpec.Config("value", infinity.id(), TSList.of())))
                     .frontDataArray("value")
                     .build();
     Syntax syntax =
@@ -68,8 +68,8 @@ public class TestActionsArray {
     return context;
   }
 
-  public static VisualFrontArray visual(final Context context) {
-    return (VisualFrontArray) context.cursor.getVisual().parent().visual();
+  public static VisualFieldArray visual(final Context context) {
+    return (VisualFieldArray) context.cursor.getVisual().parent().visual();
   }
 
   @Test
@@ -81,7 +81,7 @@ public class TestActionsArray {
                     .build();
     FreeAtomType snooze =
             new TypeBuilder("snooze")
-                    .back(new BackArraySpec(new BaseBackSimpleArraySpec.Config("value", infinity.id(), TSList.of())))
+                    .back(new BackArraySpec(new BaseBackArraySpec.Config("value", infinity.id(), TSList.of())))
                     .frontDataArray("value")
                     .build();
     Syntax syntax =
@@ -1043,7 +1043,7 @@ public class TestActionsArray {
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final ArrayCursor selection = (ArrayCursor) context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(begin));
     assertThat(selection.endIndex, equalTo(end));
   }
@@ -1085,7 +1085,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.cursorArray(context).actionGatherNext(context);
-    final ArrayCursor selection = (ArrayCursor) context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(3));
   }
@@ -1095,7 +1095,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 4);
     Helper.cursorArray(context).actionGatherNext(context);
-    final ArrayCursor selection = (ArrayCursor) context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(4));
     assertThat(selection.endIndex, equalTo(4));
   }
@@ -1105,7 +1105,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.cursorArray(context).actionGatherPrevious(context);
-    final ArrayCursor selection = (ArrayCursor) context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(1));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1115,7 +1115,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
     Helper.cursorArray(context).actionGatherPrevious(context);
-    final ArrayCursor selection = (ArrayCursor) context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(0));
   }
@@ -1123,12 +1123,12 @@ public class TestActionsArray {
   @Test
   public void testReleaseNext() {
     final Context context = buildFive();
-    ((VisualFrontArray)
+    ((VisualFieldArray)
             ((FieldArray) ((Atom) context.syntaxLocate(new SyntaxPath("value", "0"))).fields.getOpt("value"))
                 .visual)
         .select(context, true, 2, 3);
     Helper.cursorArray(context).actionReleaseNext(context);
-    final ArrayCursor selection = (ArrayCursor) context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1138,7 +1138,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.cursorArray(context).actionReleaseNext(context);
-    final ArrayCursor selection = (ArrayCursor) context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1146,12 +1146,12 @@ public class TestActionsArray {
   @Test
   public void testReleasePrevious() {
     final Context context = buildFive();
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray) ((Atom) context.syntaxLocate(new SyntaxPath("value", "0"))).fields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.cursorArray(context).actionReleasePrevious(context);
-    final ArrayCursor selection = (ArrayCursor) context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }
@@ -1161,7 +1161,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
     Helper.cursorArray(context).actionReleasePrevious(context);
-    final ArrayCursor selection = (ArrayCursor) context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(2));
   }

@@ -11,6 +11,7 @@ import com.zarbosoft.rendaw.common.TSMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class BaseKVError extends TSMap<String, Object> {
   protected abstract String description();
@@ -35,7 +36,7 @@ public abstract class BaseKVError extends TSMap<String, Object> {
         out.append(
             Format.format("%s (%s)", ((BackSpecData) value).id, value.getClass().getSimpleName()));
       } else {
-        out.append(value.toString());
+        out.append(value);
       }
     }
     out.append("\n");

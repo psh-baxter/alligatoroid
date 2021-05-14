@@ -5,8 +5,8 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
@@ -14,18 +14,18 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class EditArrayCursor extends ArrayCursor {
-  public EditArrayCursor(
-      Context context, VisualFrontArray visual, boolean leadFirst, int start, int end) {
+public class EditFieldArrayCursor extends FieldArrayCursor {
+  public EditFieldArrayCursor(
+          Context context, VisualFieldArray visual, boolean leadFirst, int start, int end) {
     super(context, visual, leadFirst, start, end);
   }
 
   public void editCut(Editor editor) {
+    visual.value.back().copy(editor.context, visual.value.data.sublist(beginIndex, endIndex + 1));
     editor.history.record(
         editor.context,
         null,
         recorder -> {
-          editor.context.copy(visual.value.data.sublist(beginIndex, endIndex + 1));
           editDeleteInner(editor, recorder);
         });
   }
@@ -106,19 +106,23 @@ public class EditArrayCursor extends ArrayCursor {
   }
 
   public void editPaste(Editor editor) {
-    editor.context.uncopy(
-        visual.value.back().elementAtomType(),
-        atoms -> {
-          if (atoms.isEmpty()) return;
-          editor.history.record(
-              editor.context,
-              null,
-              recorder -> {
-                recorder.apply(
-                    editor.context,
-                    new ChangeArray(visual.value, beginIndex, endIndex - beginIndex + 1, atoms));
-              });
-        });
+    visual
+        .value
+        .back()
+        .uncopy(
+            editor.context,
+            atoms -> {
+              if (atoms.isEmpty()) return;
+              editor.history.record(
+                  editor.context,
+                  null,
+                  recorder -> {
+                    recorder.apply(
+                        editor.context,
+                        new ChangeArray(
+                            visual.value, beginIndex, endIndex - beginIndex + 1, atoms));
+                  });
+            });
   }
 
   public void editSuffix(Editor editor) {

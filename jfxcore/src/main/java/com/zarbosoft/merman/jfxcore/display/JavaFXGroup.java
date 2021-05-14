@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.rendaw.common.ROList;
 import javafx.geometry.Bounds;
+import javafx.scene.Node;
 
 import java.util.List;
 
@@ -14,7 +15,7 @@ public class JavaFXGroup extends JavaFXFreeDisplayNode implements Group {
 
   @Override
   public void add(final int index, final DisplayNode node) {
-    ((javafx.scene.Group) this.node).getChildren().add(index, ((JavaFXNode) node).node());
+    ((javafx.scene.Group) this.node).getChildren().add(index, (Node) node.inner_());
   }
 
   @Override
@@ -29,7 +30,7 @@ public class JavaFXGroup extends JavaFXFreeDisplayNode implements Group {
 
   @Override
   public void remove(final DisplayNode node) {
-    ((javafx.scene.Group) this.node).getChildren().remove(((JavaFXNode) node).node());
+    ((javafx.scene.Group) this.node).getChildren().remove(node.inner_());
   }
 
   @Override

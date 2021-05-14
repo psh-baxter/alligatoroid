@@ -40,12 +40,13 @@ public class UnitSequence<T> extends Node<T> {
 
   @Override
   public void context(
-          Grammar grammar, final Step step,
-          final Parent<T> parent,
-          Step.Branch branch,
-          final ROMap<Object, Reference.RefParent> seen,
-          final MismatchCause cause,
-          Object color) {
+      Grammar grammar,
+      final Step step,
+      final Parent<T> parent,
+      Step.Branch branch,
+      final ROMap<Object, Reference.RefParent> seen,
+      final MismatchCause cause,
+      Object color) {
     if (children.isEmpty()) {
       throw new Assertion("No children added!");
     } else {
@@ -53,7 +54,13 @@ public class UnitSequence<T> extends Node<T> {
           .get(0)
           .first
           .context(
-                  grammar, step, new SeqParent<T>(this, parent, 0, null, color), branch, seen, cause, color);
+              grammar,
+              step,
+              new SeqParent<T>(this, parent, 0, null, color),
+              branch,
+              seen,
+              cause,
+              color);
     }
   }
 
@@ -78,7 +85,12 @@ public class UnitSequence<T> extends Node<T> {
     }
 
     @Override
-    public void advance(Grammar grammar, Step step, Step.Branch branch, Object result, MismatchCause mismatchCause) {
+    public void advance(
+        Grammar grammar,
+        Step step,
+        Step.Branch branch,
+        Object result,
+        MismatchCause mismatchCause) {
       final int nextStep = this.step + 1;
       T newCollected;
       if (self.children.get(this.step).second) newCollected = (T) result;
@@ -90,8 +102,9 @@ public class UnitSequence<T> extends Node<T> {
             .get(nextStep)
             .first
             .context(
-                    grammar, step,
-                new SeqParent<T>(self, parent, nextStep, collected, color),
+                grammar,
+                step,
+                new SeqParent<T>(self, parent, nextStep, newCollected, color),
                 branch,
                 ROMap.empty,
                 mismatchCause,

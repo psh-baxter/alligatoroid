@@ -4,7 +4,7 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.Helper;
@@ -24,7 +24,7 @@ public class TestActionsPrimitive {
     final Context context = buildFive();
     assertThat(context.cursor.getVisual(), instanceOf(VisualFrontPrimitive.class));
     Helper.cursorPrimitive(context).actionExit(context);
-    assertNotNull(((VisualFrontArray) Helper.rootArray(context.document).visual).selection);
+    assertNotNull(((VisualFieldArray) Helper.rootArray(context.document).visual).cursor);
   }
 
   public static Context buildFive() {

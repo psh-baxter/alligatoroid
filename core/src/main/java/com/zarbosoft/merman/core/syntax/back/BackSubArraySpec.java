@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.syntax.back;
 
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.SyntaxPath;
@@ -15,7 +16,11 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-public class BackSubArraySpec extends BaseBackSimpleArraySpec {
+import java.util.function.Consumer;
+
+import static com.zarbosoft.merman.core.Context.UncopyContext.MAYBE_ARRAY;
+
+public class BackSubArraySpec extends BaseBackArraySpec {
 
   public BackSubArraySpec(Config config) {
     super(config);
@@ -32,6 +37,18 @@ public class BackSubArraySpec extends BaseBackSimpleArraySpec {
     if (singularRestriction) {
       errors.add(new PluralInvalidAtLocation(typePath));
     }
+  }
+
+  @Override
+  public void copy(Context context, TSList<Atom> children) {
+    context.copy(Context.CopyContext.ARRAY, children);
+  }
+  @Override
+  public void uncopy(Context context, Consumer<ROList<Atom>> consumer) {
+    context.uncopy(
+            elementAtomType(),
+            MAYBE_ARRAY,
+            consumer);
   }
 
   @Override

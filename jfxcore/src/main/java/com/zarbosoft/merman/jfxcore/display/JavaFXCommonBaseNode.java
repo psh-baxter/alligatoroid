@@ -5,12 +5,12 @@ import com.zarbosoft.merman.core.display.DisplayNode;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 
-public abstract class JavaFXCommonBaseNode implements DisplayNode, JavaFXNode {
+public abstract class JavaFXCommonBaseNode implements DisplayNode {
   public final Node node;
   protected final JavaFXDisplay display;
 
   @Override
-  public Node node() {
+  public final Node inner_() {
     return node;
   }
 

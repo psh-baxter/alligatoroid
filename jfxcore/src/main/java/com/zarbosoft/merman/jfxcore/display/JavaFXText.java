@@ -13,7 +13,7 @@ import javafx.geometry.VPos;
 import javafx.scene.Node;
 import javafx.scene.paint.Paint;
 
-public class JavaFXText implements Text, JavaFXNode {
+public class JavaFXText implements Text {
   private final javafx.scene.text.Text text;
   private final JavaFXDisplay display;
   private double transverseBaseline;
@@ -22,7 +22,7 @@ public class JavaFXText implements Text, JavaFXNode {
   private double converse;
 
   @Override
-  public Node node() {
+  public Node inner_() {
     return text;
   }
 

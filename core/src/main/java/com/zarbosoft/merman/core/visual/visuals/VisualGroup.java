@@ -53,6 +53,16 @@ public class VisualGroup extends Visual {
   }
 
   @Override
+  public void notifyLastBrickCreated(Context context, Brick brick) {
+    parent.notifyLastBrickCreated(context, brick);
+  }
+
+  @Override
+  public void notifyFirstBrickCreated(Context context, Brick brick) {
+    parent.notifyFirstBrickCreated(context, brick);
+  }
+
+  @Override
   public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (children.isEmpty()) throw new AssertionError();
     for (Visual child : children) {
@@ -193,88 +203,100 @@ public class VisualGroup extends Visual {
   }
 
   public static class Parent extends VisualParent {
-    public final VisualGroup target;
+    public final VisualGroup parent;
     public int index;
 
-    public Parent(final VisualGroup target, final int index) {
-      this.target = target;
+    public Parent(final VisualGroup parent, final int index) {
+      this.parent = parent;
       this.index = index;
     }
 
     @Override
     public ExtendBrickResult createNextBrick(final Context context) {
-      if (index + 1 < target.children.size())
-        return target.children.get(index + 1).createFirstBrick(context);
-      return target.parent.createNextBrick(context);
+      if (index + 1 < parent.children.size())
+        return parent.children.get(index + 1).createFirstBrick(context);
+      return parent.parent.createNextBrick(context);
     }
 
     @Override
     public ExtendBrickResult createPreviousBrick(final Context context) {
-      if (index - 1 >= 0) return target.children.get(index - 1).createLastBrick(context);
-      return target.parent.createPreviousBrick(context);
+      if (index - 1 >= 0) return parent.children.get(index - 1).createLastBrick(context);
+      return parent.parent.createPreviousBrick(context);
     }
 
     @Override
     public Visual visual() {
-      return target;
+      return parent;
     }
 
     @Override
     public VisualAtom atomVisual() {
-      return target.parent.atomVisual();
+      return parent.parent.atomVisual();
     }
 
     @Override
     public Brick findPreviousBrick(final Context context) {
       for (int at = index - 1; at >= 0; --at) {
-        final Brick test = target.children.get(at).getLastBrick(context);
+        final Brick test = parent.children.get(at).getLastBrick(context);
         if (test != null) return test;
       }
-      return target.parent.findPreviousBrick(context);
+      return parent.parent.findPreviousBrick(context);
     }
 
     @Override
     public Brick findNextBrick(final Context context) {
-      for (int at = index + 1; at < target.children.size(); ++at) {
-        final Brick test = target.children.get(at).getLastBrick(context);
+      for (int at = index + 1; at < parent.children.size(); ++at) {
+        final Brick test = parent.children.get(at).getLastBrick(context);
         if (test != null) return test;
       }
-      return target.parent.findNextBrick(context);
+      return parent.parent.findNextBrick(context);
     }
 
     @Override
     public Brick getPreviousBrick(final Context context) {
-      if (index == 0) return target.parent.getPreviousBrick(context);
-      else return target.children.get(index - 1).getLastBrick(context);
+      if (index == 0) return parent.parent.getPreviousBrick(context);
+      else return parent.children.get(index - 1).getLastBrick(context);
     }
 
     @Override
     public Brick getNextBrick(final Context context) {
-      if (index + 1 >= target.children.size()) return target.parent.getNextBrick(context);
-      else return target.children.get(index + 1).getFirstBrick(context);
+      if (index + 1 >= parent.children.size()) return parent.parent.getNextBrick(context);
+      else return parent.children.get(index + 1).getFirstBrick(context);
     }
 
     @Override
     public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
-      return target.hover(context, point);
+      return parent.hover(context, point);
     }
 
     @Override
     public boolean selectNext(final Context context) {
       int test = index;
-      while (++test < target.children.size()) {
-        if (target.children.get(test).selectAnyChild(context)) return true;
+      while (++test < parent.children.size()) {
+        if (parent.children.get(test).selectAnyChild(context)) return true;
       }
-      return target.parent.selectNext(context);
+      return parent.parent.selectNext(context);
+    }
+
+    @Override
+    public void notifyLastBrickCreated(Context context, Brick brick) {
+      if (index + 1 != parent.children.size()) return;
+      parent.notifyLastBrickCreated(context, brick);
+    }
+
+    @Override
+    public void notifyFirstBrickCreated(Context context, Brick brick) {
+      if (index != 0) return;
+      parent.notifyFirstBrickCreated(context, brick);
     }
 
     @Override
     public boolean selectPrevious(final Context context) {
       int test = index;
       while (--test >= 0) {
-        if (target.children.get(test).selectAnyChild(context)) return true;
+        if (parent.children.get(test).selectAnyChild(context)) return true;
       }
-      return target.parent.selectPrevious(context);
+      return parent.parent.selectPrevious(context);
     }
 
     public int getIndex() {

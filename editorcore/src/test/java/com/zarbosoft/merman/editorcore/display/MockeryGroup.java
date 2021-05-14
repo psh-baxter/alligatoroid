@@ -56,6 +56,11 @@ public class MockeryGroup extends MockFreeDisplayNode implements Group {
   }
 
   @Override
+  public Object inner_() {
+    return null;
+  }
+
+  @Override
   public double transverseSpan() {
     double max = 0;
     for (DisplayNode node : nodes) {

@@ -12,19 +12,25 @@ import com.zarbosoft.merman.core.example.JsonSyntax;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.syntax.style.Style;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
+import com.zarbosoft.merman.editorcore.gap.EditGapCursor;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
 import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalArrayCursor;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalAtomCursor;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalFieldArrayCursor;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalFieldAtomCursor;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalGapCursor;
 import com.zarbosoft.merman.jfxeditor1.modalinput.ModalPrimitiveCursor;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
 import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
@@ -51,9 +57,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
@@ -125,7 +131,17 @@ public class NotMain extends Application {
               e ->
                   new EditorCursorFactory(e) {
                     @Override
-                    public VisualFrontPrimitive.Cursor createPrimitiveCursor(
+                    public EditGapCursor createGapCursor(
+                        VisualFrontPrimitive visualPrimitive,
+                        boolean leadFirst,
+                        int beginOffset,
+                        int endOffset) {
+                      return new ModalGapCursor(
+                          editor, visualPrimitive, leadFirst, beginOffset, endOffset, NotMain.this);
+                    }
+
+                    @Override
+                    public VisualFrontPrimitive.Cursor createPrimitiveCursor1(
                         Context context,
                         VisualFrontPrimitive visualPrimitive,
                         boolean leadFirst,
@@ -141,23 +157,31 @@ public class NotMain extends Application {
                     }
 
                     @Override
-                    public VisualFrontAtomBase.Cursor createAtomCursor(
+                    public FieldAtomCursor createAtomCursor(
                         Context context, VisualFrontAtomBase base) {
-                      return new ModalAtomCursor(context, base, NotMain.this);
+                      return new ModalFieldAtomCursor(context, base, NotMain.this);
                     }
 
                     @Override
-                    public ArrayCursor createArrayCursor(
+                    public FieldArrayCursor createArrayCursor(
                         Context context,
-                        VisualFrontArray visual,
+                        VisualFieldArray visual,
                         boolean leadFirst,
                         int start,
                         int end) {
-                      return new ModalArrayCursor(
+                      return new ModalFieldArrayCursor(
                           context, visual, leadFirst, start, end, NotMain.this);
                     }
                   },
-              new Editor.Config(new Context.InitialConfig()));
+              new Editor.Config(new Context.InitialConfig())
+                  .bannerStyle(
+                      new Style(
+                          new Style.Config()
+                              .fontSize(5)
+                              .color(ModelColor.RGB.hex("938f8d"))
+                              .obbox(
+                                  new ObboxStyle(
+                                      new ObboxStyle.Config().line(false).fill(false))))));
       editor.context.document.root.visual.selectAnyChild(editor.context);
 
       editor.context.addHoverListener(
@@ -250,6 +274,7 @@ public class NotMain extends Application {
               new Image(new ByteArrayInputStream(Embedded.icon64)),
               new Image(new ByteArrayInputStream(Embedded.icon16)));
       primaryStage.setScene(new Scene(display.node, 800, 600));
+      primaryStage.setTitle(path + " - merman1");
       primaryStage.show();
       primaryStage.setOnCloseRequest(
           windowEvent -> {
@@ -304,32 +329,32 @@ public class NotMain extends Application {
   }
 
   public void flush(boolean clearBackup) {
-    String backupPath = path + ".merman_backup";
+    Path backupPath = Paths.get((path.startsWith(".") ? "" : ".") + path + ".merman_backup");
     if (editor.history.isModified()) {
-      if (!clearBackup) {
+      Path path1 = Paths.get(this.path);
+      if (!clearBackup && !Files.exists(backupPath)) {
         try {
-          Files.copy(Paths.get(path), Paths.get(backupPath));
-        } catch (FileAlreadyExistsException e) {
+          Files.copy(path1, backupPath);
+        } catch (NoSuchFileException e) {
           // nop
         } catch (IOException e) {
           logException(e, "Failed to write backup to %s", backupPath);
         }
       }
       try {
-        Files.write(
-            Paths.get(path),
-            (byte[]) editor.context.serializer.write(editor.context.document.root));
+        Files.write(path1, (byte[]) editor.context.serializer.write(editor.context.document.root));
       } catch (IOException e) {
-        logException(e, "Failed to write to %s", path);
+        logException(e, "Failed to write to %s", this.path);
         return;
       }
       editor.history.clearModified();
     }
-    try {
-      Files.deleteIfExists(Paths.get(backupPath));
-    } catch (IOException e) {
-      logException(e, "Failed to clean up backup %s", backupPath);
-    }
+    if (clearBackup)
+      try {
+        Files.deleteIfExists(backupPath);
+      } catch (IOException e) {
+        logException(e, "Failed to clean up backup %s", backupPath);
+      }
   }
 
   public static class DragSelectState {

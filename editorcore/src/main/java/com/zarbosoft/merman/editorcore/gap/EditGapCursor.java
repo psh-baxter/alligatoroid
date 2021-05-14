@@ -36,6 +36,7 @@ import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -382,9 +383,9 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
         FieldPrimitive prim = visualPrimitive.value;
         if (!prim.get().isEmpty()) break;
         FieldArray array = (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY);
-        ROSet<AtomType> canPlace;
+        ROOrderedSetRef<AtomType> canPlace;
         if (array.data.size() == 0) {
-          canPlace = ROSet.empty;
+          canPlace = ROOrderedSetRef.empty;
         } else if (array.data.size() == 1 && gapInField instanceof FieldAtom) {
           canPlace = editor.context.syntax.splayedTypes.get(((FieldAtom) gapInField).back().type);
         } else if (gapInField instanceof FieldArray) {

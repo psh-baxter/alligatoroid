@@ -16,7 +16,8 @@ public abstract class JSDisplayNode implements DisplayNode {
     this.element = element;
   }
 
-  public final HTMLElement js() {
+  @Override
+  public final HTMLElement inner_() {
     return element;
   }
 
@@ -27,16 +28,16 @@ public abstract class JSDisplayNode implements DisplayNode {
   public void fixPosition(boolean animate) {
     Display.UnconvertVector v =
         display.convert.unconvert(
-            converseCorner(), transverseCorner(), js().clientWidth, js().clientHeight);
+            converseCorner(), transverseCorner(), inner_().clientWidth, inner_().clientHeight);
     if (animate) {
-      js().classList.add(CSS_ANIMATE_LEFT);
-      js().classList.add(CSS_ANIMATE_TOP);
+      inner_().classList.add(CSS_ANIMATE_LEFT);
+      inner_().classList.add(CSS_ANIMATE_TOP);
     } else {
-      js().classList.remove(CSS_ANIMATE_LEFT);
-      js().classList.remove(CSS_ANIMATE_TOP);
+      inner_().classList.remove(CSS_ANIMATE_LEFT);
+      inner_().classList.remove(CSS_ANIMATE_TOP);
     }
-    js().style.left = v.x + "px";
-    js().style.top = v.y + "px";
+    inner_().style.left = v.x + "px";
+    inner_().style.top = v.y + "px";
   }
 
   protected abstract double transverseCorner();
@@ -45,13 +46,13 @@ public abstract class JSDisplayNode implements DisplayNode {
 
   protected void setJSPositionInternal(Display.UnconvertAxis v, boolean animate) {
     if (v.x) {
-      if (animate) js().classList.add(CSS_ANIMATE_LEFT);
-      else js().classList.remove(CSS_ANIMATE_LEFT);
-      js().style.left = Format.format("%spx", v.amount);
+      if (animate) inner_().classList.add(CSS_ANIMATE_LEFT);
+      else inner_().classList.remove(CSS_ANIMATE_LEFT);
+      inner_().style.left = Format.format("%spx", v.amount);
     } else {
-      if (animate) js().classList.add(CSS_ANIMATE_TOP);
-      else js().classList.remove(CSS_ANIMATE_TOP);
-      js().style.top = Format.format("%spx", v.amount);
+      if (animate) inner_().classList.add(CSS_ANIMATE_TOP);
+      else inner_().classList.remove(CSS_ANIMATE_TOP);
+      inner_().style.top = Format.format("%spx", v.amount);
     }
   }
 }

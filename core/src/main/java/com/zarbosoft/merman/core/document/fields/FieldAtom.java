@@ -3,7 +3,7 @@ package com.zarbosoft.merman.core.document.fields;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtom;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 
 import java.util.HashSet;
@@ -13,7 +13,7 @@ public class FieldAtom extends Field {
   public static final String SYNTAX_PATH_KEY = "atom";
   public final Set<Listener> listeners = new HashSet<>();
   private final BaseBackAtomSpec back;
-  public VisualFrontAtom visual;
+  public VisualFieldAtom visual;
   public Atom data; // INVARIANT: Never null when in tree
 
   public FieldAtom(final BaseBackAtomSpec back) {

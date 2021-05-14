@@ -249,6 +249,16 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
     return parent.hover(context, point);
   }
 
+  @Override
+  public void notifyLastBrickCreated(Context context, Brick brick) {
+    parent.notifyLastBrickCreated(context, brick);
+  }
+
+  @Override
+  public void notifyFirstBrickCreated(Context context, Brick brick) {
+    parent.notifyFirstBrickCreated(context, brick);
+  }
+
   private ResplitResult resplitOne(final Context context, final int i) {
     final VisualAtom atom = parent.atomVisual();
     final ResplitResult result = new ResplitResult();
@@ -1198,6 +1208,8 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
                   ? visual.spec.firstStyle
                   : hard ? visual.spec.hardStyle : visual.spec.softStyle);
       brick.setText(context, text);
+      if (index == 0) visual.notifyFirstBrickCreated(context, brick);
+      if (index + 1 == visual.lines.size()) visual.notifyLastBrickCreated(context, brick);
       return brick;
     }
 

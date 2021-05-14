@@ -20,16 +20,16 @@ import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.function.Consumer;
 
-public class VisualFrontArray extends VisualGroup implements VisualLeaf {
+public class VisualFieldArray extends VisualGroup implements VisualLeaf {
   public final FieldArray value;
   private final FieldArray.Listener dataListener;
   private final FrontArraySpecBase front;
-  public ArrayCursor selection;
-  public ArrayHoverable hoverable;
+  public FieldArrayCursor cursor;
+  public FieldArrayHoverable hoverable;
   private Brick ellipsis = null;
   private Brick empty = null;
 
-  public VisualFrontArray(
+  public VisualFieldArray(
       final FrontArraySpecBase front,
       final VisualParent parent,
       final Atom atom,
@@ -61,7 +61,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
             final VisualGroup group =
                 new VisualGroup(
                     context,
-                    new ArrayVisualParent(this, addAt, false),
+                    new FrontArrayParent(this, addAt, false),
                     visualDepth + 1,
                     depthScore());
             for (int fixIndex = 0; fixIndex < front.separator.size(); ++fixIndex) {
@@ -78,10 +78,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
         if (!front.separator.isEmpty() && addIndex > 0) addSeparator.accept(addIndex++);
         final VisualGroup group =
             new VisualGroup(
-                context,
-                new ArrayVisualParent(this, addIndex, true),
-                visualDepth + 1,
-                depthScore());
+                context, new FrontArrayParent(this, addIndex, true), visualDepth + 1, depthScore());
         int groupIndex = 0;
         for (final FrontSymbol fix : front.prefix)
           group.add(
@@ -153,6 +150,24 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
               public boolean selectAnyChild(final Context context) {
                 return nodeVisual.selectAnyChild(context);
               }
+
+              @Override
+              public void notifyLastBrickCreated(Context context, Brick brick) {
+                if (cursor != null
+                    && cursor.endIndex
+                        == ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index)
+                  cursor.border.setLast(context, brick);
+                parent.notifyLastBrickCreated(context, brick);
+              }
+
+              @Override
+              public void notifyFirstBrickCreated(Context context, Brick brick) {
+                if (cursor != null
+                    && cursor.beginIndex
+                        == ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index)
+                  cursor.border.setFirst(context, brick);
+                parent.notifyFirstBrickCreated(context, brick);
+              }
             });
         for (final FrontSymbol fix : front.suffix)
           group.add(
@@ -175,7 +190,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
             new BrickInterface() {
               @Override
               public VisualLeaf getVisual() {
-                return VisualFrontArray.this;
+                return VisualFieldArray.this;
               }
 
               @Override
@@ -214,11 +229,11 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   public void select(
       final Context context, final boolean leadFirst, final int start, final int end) {
     if (hoverable != null) hoverable.notifySelected(context, start, end);
-    if (selection == null) {
-      selection = context.cursorFactory.createArrayCursor(context, this, leadFirst, start, end);
-      context.setCursor(selection);
+    if (cursor == null) {
+      cursor = context.cursorFactory.createArrayCursor(context, this, leadFirst, start, end);
+      context.setCursor(cursor);
     } else {
-      selection.setRange(context, start, end);
+      cursor.setRange(context, start, end);
     }
   }
 
@@ -313,7 +328,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
             new BrickInterface() {
               @Override
               public VisualLeaf getVisual() {
-                return VisualFrontArray.this;
+                return VisualFieldArray.this;
               }
 
               @Override
@@ -345,7 +360,7 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       // Only root array, which should never be uprooted with itself as the stop point
       throw new AssertionError();
     }
-    if (selection != null) context.clearCursor();
+    if (cursor != null) context.clearCursor();
     if (hoverable != null) context.clearHover();
     if (ellipsis != null) ellipsis.destroy(context);
     if (empty != null) empty.destroy(context);
@@ -358,19 +373,19 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
   @Override
   public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
     if (empty != null) {
-      hoverable = new ArrayPlaceholderHoverable(context, empty, this);
+      hoverable = new FieldArrayPlaceholderHoverable(context, empty, this);
       return new ROPair<>(hoverable, true);
     } else if (ellipsis != null) {
-      hoverable = new ArrayPlaceholderHoverable(context, ellipsis, this);
+      hoverable = new FieldArrayPlaceholderHoverable(context, ellipsis, this);
       return new ROPair<>(hoverable, true);
     } else return super.hover(context, point);
   }
 
-  private static class ArrayVisualParent extends Parent {
+  private static class FrontArrayParent extends Parent {
     private final boolean selectable;
-    private final VisualFrontArray visual;
+    private final VisualFieldArray visual;
 
-    public ArrayVisualParent(VisualFrontArray visual, final int index, final boolean selectable) {
+    public FrontArrayParent(VisualFieldArray visual, final int index, final boolean selectable) {
       super(visual, index);
       this.selectable = selectable;
       this.visual = visual;
@@ -384,14 +399,14 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       }
       boolean changed = false;
       int newIndex = valueIndex();
-      if (visual.selection != null
-          && visual.selection.beginIndex == visual.selection.endIndex
-          && visual.selection.beginIndex == newIndex) return null;
+      if (visual.cursor != null
+          && visual.cursor.beginIndex == visual.cursor.endIndex
+          && visual.cursor.beginIndex == newIndex) return null;
       if (visual.hoverable == null) {
-        visual.hoverable = visual.new ElementHoverable(context, visual);
+        visual.hoverable = visual.new ElementHoverableField(context, visual);
         changed = true;
       }
-      ElementHoverable elementHoverable = (ElementHoverable) visual.hoverable;
+      ElementHoverableField elementHoverable = (ElementHoverableField) visual.hoverable;
       if (elementHoverable.index != newIndex) changed = true;
       elementHoverable.setIndex(context, newIndex);
       return new ROPair<>(visual.hoverable, changed);
@@ -401,28 +416,12 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       if (visual.front.separator.isEmpty()) return index;
       return index / 2;
     }
-
-    @Override
-    public void firstBrickChanged(final Context context, final Brick firstBrick) {
-      if (visual.selection != null && valueIndex() == visual.selection.beginIndex)
-        visual.selection.border.setFirst(context, firstBrick);
-      if (visual.hoverable != null && valueIndex() == ((ElementHoverable) visual.hoverable).index)
-        ((ElementHoverable) visual.hoverable).border.setFirst(context, firstBrick);
-    }
-
-    @Override
-    public void lastBrickChanged(final Context context, final Brick lastBrick) {
-      if (visual.selection != null && valueIndex() == visual.selection.endIndex)
-        visual.selection.border.setLast(context, lastBrick);
-      if (visual.hoverable != null && valueIndex() == ((ElementHoverable) visual.hoverable).index)
-        ((ElementHoverable) visual.hoverable).border.setLast(context, lastBrick);
-    }
   }
 
-  private class ElementHoverable extends ArrayHoverable {
+  private class ElementHoverableField extends FieldArrayHoverable {
     private int index;
 
-    ElementHoverable(final Context context, VisualFrontArray visual) {
+    ElementHoverableField(final Context context, VisualFieldArray visual) {
       super(visual, context);
     }
 
@@ -433,12 +432,12 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
 
     @Override
     public void select(final Context context) {
-      VisualFrontArray.this.select(context, true, index, index);
+      VisualFieldArray.this.select(context, true, index, index);
     }
 
     @Override
     public VisualAtom atom() {
-      return VisualFrontArray.this.parent.atomVisual();
+      return VisualFieldArray.this.parent.atomVisual();
     }
 
     @Override
@@ -496,15 +495,15 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
       Integer fixDeepHoverIndex = null;
       Integer oldSelectionBeginIndex = null;
       Integer oldSelectionEndIndex = null;
-      if (selection != null) {
-        oldSelectionBeginIndex = selection.beginIndex;
-        oldSelectionEndIndex = selection.endIndex;
+      if (cursor != null) {
+        oldSelectionBeginIndex = cursor.beginIndex;
+        oldSelectionEndIndex = cursor.endIndex;
       } else if (context.cursor != null) {
         VisualParent parent = context.cursor.getVisual().parent();
         while (parent != null) {
           final Visual visual = parent.visual();
-          if (visual == VisualFrontArray.this) {
-            fixDeepSelectionIndex = ((ArrayVisualParent) parent).valueIndex();
+          if (visual == VisualFieldArray.this) {
+            fixDeepSelectionIndex = ((FrontArrayParent) parent).valueIndex();
             break;
           }
           parent = visual.parent();
@@ -514,8 +513,8 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
         VisualParent parent = context.hover.visual().parent();
         while (parent != null) {
           final Visual visual = parent.visual();
-          if (visual == VisualFrontArray.this) {
-            fixDeepHoverIndex = ((ArrayVisualParent) parent).valueIndex();
+          if (visual == VisualFieldArray.this) {
+            fixDeepHoverIndex = ((FrontArrayParent) parent).valueIndex();
             break;
           }
           parent = visual.parent();
@@ -553,14 +552,14 @@ public class VisualFrontArray extends VisualGroup implements VisualLeaf {
         if (value.data.isEmpty()) value.atomParentRef.selectAtomParent(context);
         else {
           if (oldSelectionBeginIndex >= index + remove)
-            selection.setBegin(context, oldSelectionBeginIndex - remove + add.size());
+            cursor.setBegin(context, oldSelectionBeginIndex - remove + add.size());
           else if (oldSelectionBeginIndex >= index)
-            selection.setBegin(
+            cursor.setBegin(
                 context, Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
           if (oldSelectionEndIndex >= index + remove)
-            selection.setEnd(context, oldSelectionEndIndex - remove + add.size());
+            cursor.setEnd(context, oldSelectionEndIndex - remove + add.size());
           else if (oldSelectionEndIndex >= index)
-            selection.setEnd(
+            cursor.setEnd(
                 context, Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
         }
       } else if (fixDeepSelectionIndex != null) {

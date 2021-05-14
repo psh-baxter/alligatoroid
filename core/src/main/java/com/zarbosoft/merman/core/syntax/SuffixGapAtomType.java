@@ -10,7 +10,6 @@ import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
 import com.zarbosoft.merman.core.syntax.error.GapHasExtraField;
 import com.zarbosoft.merman.core.syntax.error.GapPrimitiveCantHavePattern;
 import com.zarbosoft.merman.core.syntax.error.GapPrimitiveHasBadId;
@@ -21,12 +20,13 @@ import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSOrderedMap;
 
 import java.util.function.Function;
 
@@ -36,17 +36,18 @@ public class SuffixGapAtomType extends BaseGapAtomType {
       TSList.of(
           new BackFixedRecordSpec(
               new BackFixedRecordSpec.Config(
-                  new TSMap<String, BackSpec>()
-                      .put("type", new BackFixedPrimitiveSpec("suffix_gap"))
-                      .put(
-                          "primitive",
-                          new BackPrimitiveSpec(
-                              new BaseBackPrimitiveSpec.Config(GapAtomType.PRIMITIVE_KEY)))
-                      .put(
-                          "preceding",
-                          new BackArraySpec(
-                              new BaseBackSimpleArraySpec.Config(
-                                  SuffixGapAtomType.PRECEDING_KEY, null, ROList.empty))),
+                  new TSOrderedMap<>(
+                      m ->
+                          m.put("type", new BackFixedPrimitiveSpec("suffix_gap"))
+                              .put(
+                                  "primitive",
+                                  new BackPrimitiveSpec(
+                                      new BaseBackPrimitiveSpec.Config(GapAtomType.PRIMITIVE_KEY)))
+                              .put(
+                                  "preceding",
+                                  new BackArraySpec(
+                                      new BaseBackArraySpec.Config(
+                                          SuffixGapAtomType.PRECEDING_KEY, null, ROList.empty)))),
                   ROSet.empty)));
   public final String backType;
 
@@ -61,12 +62,12 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                             config.backType,
                             new BackFixedRecordSpec(
                                 new BackFixedRecordSpec.Config(
-                                    new TSMap<>(
-                                        s ->
-                                            s.put(
+                                    new TSOrderedMap<>(
+                                        m ->
+                                            m.put(
                                                     "preceding",
                                                     new BackArraySpec(
-                                                        new BaseBackSimpleArraySpec.Config(
+                                                        new BaseBackArraySpec.Config(
                                                             PRECEDING_KEY, null, ROList.empty)))
                                                 .put(
                                                     "text",
@@ -89,7 +90,9 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                                 new ConditionValue(
                                     new ConditionValue.Config(
                                         PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))))
-                .add(new FrontPrimitiveSpec(new FrontPrimitiveSpec.Config(PRIMITIVE_KEY)))
+                .add(
+                    new FrontPrimitiveSpec(
+                        new FrontPrimitiveSpec.Config(PRIMITIVE_KEY).style(config.primitiveStyle)))
                 .addAll(config.frontSuffix)));
     backType = config.backType;
     MultiError checkErrors = new MultiError();
@@ -138,6 +141,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
     public FrontArraySpecBase.Config frontArrayConfig = new FrontArraySpecBase.Config();
     public ROList<FrontSpec> frontSuffix = ROList.empty;
     public Symbol gapPlaceholderSymbol;
+    public Style primitiveStyle;
 
     public Config() {}
 
@@ -154,6 +158,16 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
     public Config back(ROList<BackSpec> back) {
       this.back = back;
+      return this;
+    }
+
+    public Config primitiveStyle(Style style) {
+      this.primitiveStyle = style;
+      return this;
+    }
+
+    public Config frontArrayConfig(FrontArraySpecBase.Config config) {
+      this.frontArrayConfig = config;
       return this;
     }
   }

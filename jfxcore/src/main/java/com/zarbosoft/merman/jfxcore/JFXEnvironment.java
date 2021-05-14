@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.jfxcore;
 
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.rendaw.common.TSMap;
 import javafx.application.Platform;
 import javafx.scene.input.Clipboard;
 import javafx.scene.input.ClipboardContent;
@@ -19,6 +20,7 @@ public class JFXEnvironment implements Environment {
   private final Locale locale;
   private final Timer timer = new Timer();
   private Clipboard clipboard;
+  public static TSMap<String, DataFormat> dataFormats = new TSMap<>();
 
   public JFXEnvironment(Locale locale) {
     this.locale = locale;
@@ -54,7 +56,7 @@ public class JFXEnvironment implements Environment {
       this.clipboard = Clipboard.getSystemClipboard();
     }
     final ClipboardContent content = new ClipboardContent();
-    content.put(new DataFormat(mime), bytes);
+    content.put(dataFormats.getCreate(mime, () -> new DataFormat(mime)), bytes);
     content.putString(new String((byte[]) bytes, StandardCharsets.UTF_8));
     clipboard.setContent(content);
   }
@@ -131,7 +133,7 @@ public class JFXEnvironment implements Environment {
   }
 
   public static class HandleDelay implements Environment.HandleDelay {
-    private AtomicBoolean alive;
+    private final AtomicBoolean alive;
 
     public HandleDelay(AtomicBoolean alive) {
       this.alive = alive;

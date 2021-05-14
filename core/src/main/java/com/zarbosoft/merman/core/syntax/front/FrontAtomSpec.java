@@ -5,7 +5,7 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtom;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
@@ -36,7 +36,7 @@ public class FrontAtomSpec extends FrontSpec {
       final Atom atom,
       final int visualDepth,
       final int depthScore) {
-    return new VisualFrontAtom(
+    return new VisualFieldAtom(
         context, parent, field.get(atom.fields), visualDepth, depthScore, ellipsis);
   }
 

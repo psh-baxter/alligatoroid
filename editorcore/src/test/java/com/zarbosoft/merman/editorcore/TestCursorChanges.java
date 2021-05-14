@@ -9,9 +9,9 @@ import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
-import com.zarbosoft.merman.editorcore.cursors.EditArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
+import com.zarbosoft.merman.editorcore.cursors.EditFieldArrayCursor;
 import com.zarbosoft.merman.editorcore.helper.BackRecordBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
@@ -88,7 +88,7 @@ public class TestCursorChanges {
         new SyntaxPath("value", "0"),
         (editor, selected, changer) ->
         {
-          ((EditArrayCursor)editor.context.cursor).editDelete(editor);
+          ((EditFieldArrayCursor)editor.context.cursor).editDelete(editor);
         },
         new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build(),
         new SyntaxPath("value", "0"));
@@ -564,9 +564,9 @@ public class TestCursorChanges {
 
     final FieldArray value =
         (FieldArray) Helper.rootArray(editor.context.document).data.get(0).fields.getOpt("value");
-    final VisualFrontArray visual = (VisualFrontArray) value.visual;
+    final VisualFieldArray visual = (VisualFieldArray) value.visual;
     visual.select(editor.context, true, beginSelectBegin, beginSelectEnd);
-    final ArrayCursor selection = visual.selection;
+    final FieldArrayCursor selection = visual.cursor;
 
     // Transform
     transform.accept(

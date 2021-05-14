@@ -14,14 +14,14 @@ import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtom;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomFromArray;
 import com.zarbosoft.merman.editorcore.banner.Banner;
@@ -30,7 +30,7 @@ import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -104,8 +104,8 @@ public class Editor {
           }
 
           @Override
-          public void handle(VisualFrontAtom visual) {
-            recorder.apply(context, new ChangeAtom(((VisualFrontAtom) base).value, value));
+          public void handle(VisualFieldAtom visual) {
+            recorder.apply(context, new ChangeAtom(((VisualFieldAtom) base).value, value));
           }
         });
   }
@@ -153,7 +153,7 @@ public class Editor {
   }
 
   public Atom arrayInsertNewDefault(History.Recorder recorder, FieldArray value, int index) {
-    final ROSet<AtomType> childTypes =
+    final ROOrderedSetRef<AtomType> childTypes =
         this.context.syntax.splayedTypes.get(value.back().elementAtomType());
     final Atom element;
     if (childTypes.size() == 1)
@@ -164,7 +164,6 @@ public class Editor {
   }
 
   public void destroy() {
-    banner.destroy();
     context.wall.clear(context);
   }
 
@@ -203,6 +202,11 @@ public class Editor {
 
     public Config(Context.InitialConfig context) {
       this.context = context;
+    }
+
+    public Config bannerStyle(Style style) {
+      this.bannerStyle = style;
+      return this;
     }
 
     public Config choiceDescriptionStyle(Style style) {

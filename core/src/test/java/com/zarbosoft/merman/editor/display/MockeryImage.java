@@ -16,6 +16,11 @@ public class MockeryImage extends MockeryCourseDisplayNode implements Image {
   }
 
   @Override
+  public Object inner_() {
+    return null;
+  }
+
+  @Override
   public double ascent() {
     return 25;
   }

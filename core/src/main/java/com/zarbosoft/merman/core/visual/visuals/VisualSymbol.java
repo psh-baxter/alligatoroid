@@ -9,6 +9,7 @@ import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.visual.condition.ConditionAttachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class VisualSymbol extends Visual
@@ -52,12 +53,24 @@ public class VisualSymbol extends Visual
   }
 
   @Override
+  public void notifyLastBrickCreated(Context context, Brick brick) {
+    throw new Assertion(); // leaf
+  }
+
+  @Override
+  public void notifyFirstBrickCreated(Context context, Brick brick) {
+    throw new Assertion(); // leaf
+  }
+
+  @Override
   public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     if (condition != null)
-      return CreateBrickResult
-          .empty(); // Cornerstones can't suddenly disappear without cursor changing
+      /* Cornerstones can't suddenly disappear without cursor changing */
+      return CreateBrickResult.empty();
     if (brick != null) return CreateBrickResult.brick(brick);
     brick = frontSymbol.type.createBrick(context, this);
+    parent.notifyFirstBrickCreated(context, brick);
+    parent.notifyLastBrickCreated(context, brick);
     return CreateBrickResult.brick(brick);
   }
 
@@ -66,6 +79,8 @@ public class VisualSymbol extends Visual
     if (brick != null) return ExtendBrickResult.exists();
     if (condition != null && !condition.show()) return ExtendBrickResult.empty();
     brick = frontSymbol.type.createBrick(context, this);
+    parent.notifyFirstBrickCreated(context, brick);
+    parent.notifyLastBrickCreated(context, brick);
     return ExtendBrickResult.brick(brick);
   }
 

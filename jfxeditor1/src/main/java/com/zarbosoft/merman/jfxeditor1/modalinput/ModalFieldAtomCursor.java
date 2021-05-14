@@ -4,15 +4,32 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.cursors.EditAtomCursor;
+import com.zarbosoft.merman.editorcore.banner.BannerMessage;
+import com.zarbosoft.merman.editorcore.cursors.EditFieldAtomCursor;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
+import com.zarbosoft.rendaw.common.Format;
 
-public class ModalAtomCursor extends EditAtomCursor {
+public class ModalFieldAtomCursor extends EditFieldAtomCursor {
   public final NotMain main;
+  private BannerMessage info;
 
-  public ModalAtomCursor(Context context, VisualFrontAtomBase base, NotMain main) {
+  public ModalFieldAtomCursor(Context context, VisualFrontAtomBase base, NotMain main) {
     super(context, base);
     this.main = main;
+    Editor editor = Editor.get(context);
+    editor.banner.addMessage(
+        editor.context,
+        info =
+            new BannerMessage(
+                Format.format(
+                    "%s - %s / %s (atom)",
+                    getSyntaxPath(), base.atomVisual().atom.type.id, base.backId())));
+  }
+
+  @Override
+  public void destroy(Context context) {
+    Editor.get(context).banner.removeMessage(context, info);
+    super.destroy(context);
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {

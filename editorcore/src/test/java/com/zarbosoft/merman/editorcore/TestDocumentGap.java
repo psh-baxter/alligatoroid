@@ -13,10 +13,9 @@ import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
-import com.zarbosoft.merman.editorcore.cursors.EditArrayCursor;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursor;
 import com.zarbosoft.merman.editorcore.helper.BackRecordBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
@@ -436,7 +435,7 @@ public class TestDocumentGap {
     FreeAtomType pref =
         new TypeBuilder("pref")
             .back(
-                new BackArraySpec(new BaseBackSimpleArraySpec.Config("value", "any", ROList.empty)))
+                new BackArraySpec(new BaseBackArraySpec.Config("value", "any", ROList.empty)))
             .frontMark("+")
             .frontDataArray("value")
             .autoComplete(true)
@@ -531,7 +530,7 @@ public class TestDocumentGap {
         new TypeBuilder("suf")
             .back(
                 new BackArraySpec(
-                    new BaseBackSimpleArraySpec.Config("pre1", "infinity", ROList.empty)))
+                    new BaseBackArraySpec.Config("pre1", "infinity", ROList.empty)))
             .frontDataArray("pre1")
             .frontMark("+")
             .autoComplete(false)
@@ -701,7 +700,7 @@ public class TestDocumentGap {
     FreeAtomType suf =
         new TypeBuilder("suf")
             .back(
-                new BackArraySpec(new BaseBackSimpleArraySpec.Config("pre1", "any", ROList.empty)))
+                new BackArraySpec(new BaseBackArraySpec.Config("pre1", "any", ROList.empty)))
             .back(new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config("post")))
             .frontDataArray("pre1")
             .frontMark("+")

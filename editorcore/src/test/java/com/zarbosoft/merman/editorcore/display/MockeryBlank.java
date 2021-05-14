@@ -12,6 +12,11 @@ public class MockeryBlank extends MockeryCourseDisplayNode implements Blank {
 	}
 
 	@Override
+	public Object inner_() {
+		return null;
+	}
+
+	@Override
 	public double ascent() {
 		return 0;
 	}

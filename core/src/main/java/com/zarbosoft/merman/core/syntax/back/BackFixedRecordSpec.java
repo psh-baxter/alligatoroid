@@ -9,7 +9,7 @@ import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
-import com.zarbosoft.merman.core.serialization.WriteStateRecord;
+import com.zarbosoft.merman.core.serialization.WriteStateFixedRecord;
 import com.zarbosoft.merman.core.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
@@ -19,19 +19,18 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.pidgoon.nodes.MergeSet;
 import com.zarbosoft.pidgoon.nodes.Reference;
-import com.zarbosoft.pidgoon.nodes.Set;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROMap;
+import com.zarbosoft.rendaw.common.ROOrderedMap;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Iterator;
-import java.util.Map;
 
 public class BackFixedRecordSpec extends BackSpec {
 
-  public final ROMap<String, BackSpec> pairs;
+  public final ROOrderedMap<String, BackSpec> pairs;
   /**
    * Discard these keys if they appear in the data - warning! Even if you don't perform any edits
    * saving a loaded file will cause data in discard keys to be removed.
@@ -48,11 +47,11 @@ public class BackFixedRecordSpec extends BackSpec {
     final MergeSequence<AtomType.FieldParseResult> sequence = new MergeSequence<>();
     sequence.addIgnored(new MatchingEventTerminal<BackEvent>(new EObjectOpenEvent()));
     final MergeSet<AtomType.FieldParseResult> set = new MergeSet<>();
-    for (Map.Entry<String, BackSpec> pair : pairs) {
+    for (ROPair<String, BackSpec> pair : pairs) {
       set.add(
           new MergeSequence<AtomType.FieldParseResult>()
-              .addIgnored(new MatchingEventTerminal<BackEvent>(new EKeyEvent(pair.getKey())))
-              .add(pair.getValue().buildBackRule(env, syntax)),
+              .addIgnored(new MatchingEventTerminal<BackEvent>(new EKeyEvent(pair.first)))
+              .add(pair.second.buildBackRule(env, syntax)),
           true);
     }
     for (String key : discard) {
@@ -75,10 +74,10 @@ public class BackFixedRecordSpec extends BackSpec {
       boolean singularRestriction,
       boolean typeRestriction) {
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
-    for (Map.Entry<String, BackSpec> e : pairs) {
-      String k = e.getKey();
-      e.getValue().finish(errors, syntax, typePath.add(k), true, false);
-      e.getValue().parent =
+    for (ROPair<String, BackSpec> e : pairs) {
+      String k = e.first;
+      e.second.finish(errors, syntax, typePath.add(k), true, false);
+      e.second.parent =
           new PartParent() {
             @Override
             public BackSpec part() {
@@ -100,7 +99,7 @@ public class BackFixedRecordSpec extends BackSpec {
   public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
     stack.add(new WriteStateRecordEnd());
-    stack.add(new WriteStateRecord(data, pairs));
+    stack.add(new WriteStateFixedRecord(data, pairs));
   }
 
   @Override
@@ -119,10 +118,10 @@ public class BackFixedRecordSpec extends BackSpec {
   }
 
   public static class Config {
-    public final ROMap<String, BackSpec> pairs;
+    public final ROOrderedMap<String, BackSpec> pairs;
     public final ROSet<String> discard;
 
-    public Config(ROMap<String, BackSpec> pairs, ROSet<String> discard) {
+    public Config(ROOrderedMap<String, BackSpec> pairs, ROSet<String> discard) {
       this.pairs = pairs;
       this.discard = discard;
     }

@@ -10,6 +10,7 @@ import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.serialization.Serializer;
 import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
@@ -62,6 +63,7 @@ public class Context {
   public final Environment env;
   public final Display display;
   public final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
+  private final Padding pad;
   public boolean animateCoursePlacement;
   public boolean animateDetails;
   public int ellipsizeThreshold;
@@ -127,6 +129,12 @@ public class Context {
     midground = display.group();
     this.wall = new Wall(this);
     this.overlay = display.group();
+    this.pad =
+        new Padding(
+            (config.pad == null ? 0 : config.pad.converseStart) + syntax.pad.converseStart,
+            (config.pad == null ? 0 : config.pad.converseEnd) + syntax.pad.converseEnd,
+            (config.pad == null ? 0 : config.pad.transverseStart) + syntax.pad.transverseStart,
+            (config.pad == null ? 0 : config.pad.transverseEnd) + syntax.pad.transverseEnd);
     display.add(background);
     display.add(midground);
     display.add(wall.visual);
@@ -135,12 +143,7 @@ public class Context {
     fromPixelsToMM = 1.0 / display.toPixels(Syntax.DisplayUnit.MM);
     display.addConverseEdgeListener(
         (oldValue, newValue) -> {
-          edge =
-              Math.max(
-                  0,
-                  newValue
-                      - document.syntax.pad.converseStart * toPixels
-                      - document.syntax.pad.converseEnd * toPixels);
+          edge = Math.max(0, newValue - pad.converseStart * toPixels - pad.converseEnd * toPixels);
           for (ContextDoubleListener l : converseEdgeListeners) {
             l.changed(this, oldValue, newValue);
           }
@@ -328,10 +331,8 @@ public class Context {
   }
 
   private void scrollVisible() {
-    final double minimum =
-        scrollStart - scrollStartBeddingBefore - syntax.pad.transverseStart * toPixels;
-    final double maximum =
-        scrollEnd + scrollStartBeddingAfter + syntax.pad.transverseEnd * toPixels;
+    final double minimum = scrollStart - scrollStartBeddingBefore - pad.transverseStart * toPixels;
+    final double maximum = scrollEnd + scrollStartBeddingAfter + pad.transverseEnd * toPixels;
 
     // Change to scroll required to make it match the start of the window that ends at the max
     final double maxDiff = maximum - transverseEdge - scroll;
@@ -352,7 +353,7 @@ public class Context {
 
   public void applyScroll() {
     final double newScroll = scroll + peek;
-    double conversePad = syntax.pad.converseStart * toPixels;
+    double conversePad = pad.converseStart * toPixels;
     wall.visual.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
     midground.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
     background.setPosition(new Vector(conversePad, -newScroll), animateCoursePlacement);
@@ -375,15 +376,15 @@ public class Context {
     transverseEdgeListeners.remove(listener);
   }
 
-  public void copy(final ROList<Atom> atoms) {
-    env.clipboardSet(syntax.backType.mime(), serializer.write(atoms));
+  public void copy(CopyContext copyContext, final ROList<Atom> atoms) {
+    env.clipboardSet(syntax.backType.mime(), serializer.write(copyContext, atoms));
   }
 
   public void copy(final String string) {
     env.clipboardSetString(string);
   }
 
-  public void uncopy(final String type, Consumer<ROList<Atom>> cb) {
+  public void uncopy(final String type, UncopyContext uncopyContext, Consumer<ROList<Atom>> cb) {
     env.clipboardGet(
         syntax.backType.mime(),
         data -> {
@@ -392,7 +393,7 @@ public class Context {
             return;
           }
           try {
-            cb.accept(serializer.loadFromClipboard(syntax, type, data));
+            cb.accept(serializer.loadFromClipboard(syntax, uncopyContext, type, data));
             return;
           } catch (final InvalidDocument ignored) {
           }
@@ -663,6 +664,18 @@ public class Context {
     scrollVisible();
   }
 
+  public static enum CopyContext {
+    NONE,
+    RECORD,
+    ARRAY
+  }
+
+  public static enum UncopyContext {
+    NONE,
+    RECORD,
+    MAYBE_ARRAY
+  }
+
   public static interface ContextDoubleListener {
     void changed(Context context, double oldValue, double newValue);
   }
@@ -707,6 +720,8 @@ public class Context {
     public double scrollAlotFactor = 0.8;
     public boolean startWindowed = false;
     public WallUsageListener wallUsageListener = null;
+    /** Additional padding, builds on syntax padding */
+    public Padding pad;
 
     public InitialConfig startWindowed(boolean b) {
       startWindowed = b;
@@ -715,6 +730,11 @@ public class Context {
 
     public InitialConfig wallTransverseUsageListener(WallUsageListener l) {
       this.wallUsageListener = l;
+      return this;
+    }
+
+    public InitialConfig pad(Padding pad) {
+      this.pad = pad;
       return this;
     }
   }

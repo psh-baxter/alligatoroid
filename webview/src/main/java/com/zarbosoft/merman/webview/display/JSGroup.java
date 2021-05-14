@@ -16,8 +16,8 @@ public class JSGroup extends JSFreeDisplayNode implements Group {
   @Override
   public void add(int index, DisplayNode node) {
     if (index < element.childNodes.length)
-      element.insertBefore(((JSDisplayNode) node).js(), element.childNodes.getAt(index));
-    else element.appendChild(((JSDisplayNode) node).js());
+      element.insertBefore(((JSDisplayNode) node).inner_(), element.childNodes.getAt(index));
+    else element.appendChild(((JSDisplayNode) node).inner_());
     fixPosition();
   }
 
@@ -32,11 +32,11 @@ public class JSGroup extends JSFreeDisplayNode implements Group {
     if (index < element.childNodes.length) {
       Node following = element.childNodes.getAt(index);
       for (DisplayNode node : nodes) {
-        element.insertBefore(((JSDisplayNode) node).js(), following);
+        element.insertBefore(((JSDisplayNode) node).inner_(), following);
       }
     } else {
       for (DisplayNode node : nodes) {
-        element.appendChild(((JSDisplayNode) node).js());
+        element.appendChild(((JSDisplayNode) node).inner_());
       }
     }
     fixPosition();
@@ -52,7 +52,7 @@ public class JSGroup extends JSFreeDisplayNode implements Group {
 
   @Override
   public void remove(DisplayNode node) {
-    ((JSDisplayNode) node).js().remove();
+    ((JSDisplayNode) node).inner_().remove();
     fixPosition();
   }
 

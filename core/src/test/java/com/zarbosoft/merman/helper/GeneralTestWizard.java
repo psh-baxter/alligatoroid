@@ -7,8 +7,8 @@ import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
@@ -150,10 +150,10 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actWindow() {
-    if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
-      ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionWindow(inner.context);
-    } else if (inner.context.cursor instanceof ArrayCursor) {
-      ((ArrayCursor) inner.context.cursor).actionWindow(inner.context);
+    if (inner.context.cursor instanceof FieldAtomCursor) {
+      ((FieldAtomCursor) inner.context.cursor).actionWindow(inner.context);
+    } else if (inner.context.cursor instanceof FieldArrayCursor) {
+      ((FieldArrayCursor) inner.context.cursor).actionWindow(inner.context);
     } else throw new Assertion();
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
@@ -161,10 +161,10 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actNext() {
-    if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
-      ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionNext(inner.context);
-    } else if (inner.context.cursor instanceof ArrayCursor) {
-      ((ArrayCursor) inner.context.cursor).actionNext(inner.context);
+    if (inner.context.cursor instanceof FieldAtomCursor) {
+      ((FieldAtomCursor) inner.context.cursor).actionNext(inner.context);
+    } else if (inner.context.cursor instanceof FieldArrayCursor) {
+      ((FieldArrayCursor) inner.context.cursor).actionNext(inner.context);
     } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
       ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionNext(inner.context);
     } else throw new Assertion();
@@ -174,8 +174,8 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actGatherNext() {
-    if (inner.context.cursor instanceof ArrayCursor) {
-      ((ArrayCursor) inner.context.cursor).actionGatherNext(inner.context);
+    if (inner.context.cursor instanceof FieldArrayCursor) {
+      ((FieldArrayCursor) inner.context.cursor).actionGatherNext(inner.context);
     } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
       ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionGatherNextGlyph(inner.context);
     } else throw new Assertion();
@@ -192,10 +192,10 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actPrevious() {
-    if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
-      ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionPrevious(inner.context);
-    } else if (inner.context.cursor instanceof ArrayCursor) {
-      ((ArrayCursor) inner.context.cursor).actionPrevious(inner.context);
+    if (inner.context.cursor instanceof FieldAtomCursor) {
+      ((FieldAtomCursor) inner.context.cursor).actionPrevious(inner.context);
+    } else if (inner.context.cursor instanceof FieldArrayCursor) {
+      ((FieldArrayCursor) inner.context.cursor).actionPrevious(inner.context);
     } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
       ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionPrevious(inner.context);
     } else throw new Assertion();
@@ -205,10 +205,10 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actExit() {
-    if (inner.context.cursor instanceof VisualFrontAtomBase.Cursor) {
-      ((VisualFrontAtomBase.Cursor) inner.context.cursor).actionExit(inner.context);
-    } else if (inner.context.cursor instanceof ArrayCursor) {
-      ((ArrayCursor) inner.context.cursor).actionExit(inner.context);
+    if (inner.context.cursor instanceof FieldAtomCursor) {
+      ((FieldAtomCursor) inner.context.cursor).actionExit(inner.context);
+    } else if (inner.context.cursor instanceof FieldArrayCursor) {
+      ((FieldArrayCursor) inner.context.cursor).actionExit(inner.context);
     } else throw new Assertion();
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();

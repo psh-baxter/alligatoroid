@@ -21,23 +21,23 @@ import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSubArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
-import com.zarbosoft.merman.editorcore.cursors.EditArrayCursor;
-import com.zarbosoft.merman.editorcore.cursors.EditAtomCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditFieldArrayCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditFieldAtomCursor;
 import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
 import com.zarbosoft.merman.editorcore.display.MockeryDisplay;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -61,12 +61,12 @@ public class Helper {
         .build();
   }
 
-  public static EditAtomCursor cursorAtom(Context context) {
-    return (EditAtomCursor) context.cursor;
+  public static EditFieldAtomCursor cursorAtom(Context context) {
+    return (EditFieldAtomCursor) context.cursor;
   }
 
-  public static EditArrayCursor cursorArray(Context context) {
-    return (EditArrayCursor) context.cursor;
+  public static EditFieldArrayCursor cursorArray(Context context) {
+    return (EditFieldArrayCursor) context.cursor;
   }
 
   public static EditPrimitiveCursor cursorPrimitive(Context context) {
@@ -100,7 +100,7 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
-    return new BackRecordSpec(new BackRecordSpec.Config(id, type));
+    return new BackRecordSpec(new BaseBackArraySpec.Config(id, type, ROList.empty));
   }
 
   public static BackKeySpec buildBackDataKey(final String id) {
@@ -108,11 +108,11 @@ public class Helper {
   }
 
   public static BackArraySpec buildBackDataArray(final String id, String type) {
-    return new BackArraySpec(new BaseBackSimpleArraySpec.Config(id, type, new TSList<>()));
+    return new BackArraySpec(new BaseBackArraySpec.Config(id, type, new TSList<>()));
   }
 
   public static BackSubArraySpec buildBackDataRootArray(final String id, String type) {
-    return new BackSubArraySpec(new BaseBackSimpleArraySpec.Config(id, type, new TSList<>()));
+    return new BackSubArraySpec(new BaseBackArraySpec.Config(id, type, new TSList<>()));
   }
 
   public static void assertTreeEqual(final Atom expected, final Atom got) {

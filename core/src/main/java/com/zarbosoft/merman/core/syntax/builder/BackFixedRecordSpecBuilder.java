@@ -3,10 +3,12 @@ package com.zarbosoft.merman.core.syntax.builder;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSOrderedMap;
+import com.zarbosoft.rendaw.common.TSOrderedSet;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class BackFixedRecordSpecBuilder {
-  private final TSMap<String, BackSpec> pairs = new TSMap<>();
+  private final TSOrderedMap<String, BackSpec> pairs = new TSOrderedMap<>();
   private final TSSet<String> discard = new TSSet<>();
 
   public BackFixedRecordSpecBuilder field(String key, BackSpec spec) {

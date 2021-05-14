@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.CursorState;
 import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
@@ -22,15 +21,28 @@ import com.zarbosoft.rendaw.common.TSList;
 
 public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   private final Symbol ellipsisSpec;
+  public FieldAtomCursor cursor;
   protected VisualAtom body;
   VisualParent parent;
   private NestedHoverable hoverable;
-  private Cursor cursor;
   private Brick ellipsis = null;
 
   public VisualFrontAtomBase(final int visualDepth, Symbol ellipsis) {
     super(visualDepth);
     ellipsisSpec = ellipsis;
+  }
+  @Override
+  public void notifyLastBrickCreated(Context context, Brick brick) {
+    if (cursor != null) cursor.border.setLast(context, brick);
+    if (hoverable != null) hoverable.border.setLast(context, brick);
+    parent.notifyLastBrickCreated(context, brick);
+  }
+
+  @Override
+  public void notifyFirstBrickCreated(Context context, Brick brick) {
+    if (cursor != null) cursor.border.setFirst(context, brick);
+    if (hoverable != null) hoverable.border.setFirst(context, brick);
+    parent.notifyFirstBrickCreated(context, brick);
   }
 
   @Override
@@ -46,6 +58,8 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   public abstract String nodeType();
 
   protected abstract Field value();
+
+  public abstract String backId();
 
   protected abstract SyntaxPath getBackPath();
 
@@ -87,7 +101,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
         if (body == null) {
           coreSet(context, atomGet());
           context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
-        } else body.root(context, new NestedParent(), visualDepth + 1, depthScore);
+        } else body.root(context, new FrontAtomParent(), visualDepth + 1, depthScore);
       }
     }
   }
@@ -155,6 +169,8 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
                 return parent.atomVisual().findAlignment(alignment);
               }
             });
+    notifyFirstBrickCreated(context,ellipsis);
+    notifyLastBrickCreated(context,ellipsis);
     return ellipsis;
   }
 
@@ -243,7 +259,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   private void coreSet(final Context context, final Atom data) {
     if (body != null) body.uproot(context, null);
     this.body =
-        (VisualAtom) data.ensureVisual(context, new NestedParent(), visualDepth + 1, depthScore());
+        (VisualAtom) data.ensureVisual(context, new FrontAtomParent(), visualDepth + 1, depthScore());
     if (cursor != null) cursor.nudgeCreation(context);
   }
 
@@ -255,98 +271,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   public interface VisualNestedDispatcher {
     void handle(VisualFrontAtomFromArray visual);
 
-    void handle(VisualFrontAtom visual);
-  }
-
-  public static class Cursor extends com.zarbosoft.merman.core.Cursor {
-    public VisualFrontAtomBase base;
-    private BorderAttachment border;
-
-    public Cursor(final Context context, VisualFrontAtomBase base) {
-      this.base = base;
-      border = new BorderAttachment(context, context.syntax.cursorStyle.obbox);
-      final Brick first = nudgeCreation(context);
-      border.setFirst(context, first);
-      border.setLast(context, base.body.getLastBrick(context));
-    }
-
-    @Override
-    public void destroy(final Context context) {
-      border.destroy(context);
-      border = null;
-      base.cursor = null;
-    }
-
-    @Override
-    public Visual getVisual() {
-      return base;
-    }
-
-    @Override
-    public CursorState saveState() {
-      return new VisualNodeCursorState(base.value());
-    }
-
-    @Override
-    public SyntaxPath getSyntaxPath() {
-      return base.getBackPath().add(FieldAtom.SYNTAX_PATH_KEY);
-    }
-
-    @Override
-    public void dispatch(Dispatcher dispatcher) {
-      dispatcher.handle(this);
-    }
-
-    public Brick nudgeCreation(final Context context) {
-      final CreateBrickResult first = base.body.createOrGetCornerstoneCandidate(context);
-      context.wall.setCornerstone(
-          context,
-          first.brick,
-          () -> base.parent.getPreviousBrick(context),
-          () -> base.parent.getNextBrick(context));
-      return first.brick;
-    }
-
-    public void actionCopy(Context context) {
-      context.copy(TSList.of(base.atomGet()));
-    }
-
-    public void actionEnter(final Context context) {
-      base.body.selectAnyChild(context);
-    }
-
-    public void actionExit(final Context context) {
-      if (base.value().atomParentRef == null) return;
-      base.value().atomParentRef.selectAtomParent(context);
-    }
-
-    public void actionNext(final Context context) {
-      base.parent.selectNext(context);
-    }
-
-    public void actionPrevious(final Context context) {
-      base.parent.selectPrevious(context);
-    }
-
-    public void actionWindow(final Context context) {
-      final Atom root = base.atomGet();
-      if (!root.visual.selectAnyChild(context)) return;
-      context.windowExact(root);
-      context.triggerIdleLayBricksOutward();
-    }
-  }
-
-  private static class VisualNodeCursorState implements CursorState {
-    private final Field field;
-
-    private VisualNodeCursorState(final Field field) {
-      this.field = field;
-    }
-
-    @Override
-    public void select(final Context context) {
-      field.selectInto(context);
-    }
+    void handle(VisualFieldAtom visual);
   }
 
   private static class NestedHoverable extends Hoverable {
@@ -388,7 +313,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
   }
 
-  private class NestedParent extends VisualParent {
+  private class FrontAtomParent extends VisualParent {
     @Override
     public Visual visual() {
       return VisualFrontAtomBase.this;
@@ -410,15 +335,13 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
 
     @Override
-    public void firstBrickChanged(final Context context, final Brick firstBrick) {
-      if (cursor != null) cursor.border.setFirst(context, firstBrick);
-      if (hoverable != null) hoverable.border.setFirst(context, firstBrick);
+    public void notifyLastBrickCreated(Context context, Brick brick) {
+      VisualFrontAtomBase.this.notifyLastBrickCreated(context, brick);
     }
 
     @Override
-    public void lastBrickChanged(final Context context, final Brick lastBrick) {
-      if (cursor != null) cursor.border.setFirst(context, lastBrick);
-      if (hoverable != null) hoverable.border.setFirst(context, lastBrick);
+    public void notifyFirstBrickCreated(Context context, Brick brick) {
+      VisualFrontAtomBase.this.notifyFirstBrickCreated(context, brick);
     }
 
     @Override

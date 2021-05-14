@@ -19,18 +19,18 @@ import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSubArraySpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackSimpleArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.rendaw.common.Format;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -38,12 +38,12 @@ import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.ComparisonFailure;
 
 public class Helper {
-  public static VisualFrontAtomBase.Cursor cursorAtom(Context context) {
-    return (VisualFrontAtomBase.Cursor) context.cursor;
+  public static FieldAtomCursor cursorAtom(Context context) {
+    return (FieldAtomCursor) context.cursor;
   }
 
-  public static ArrayCursor cursorArray(Context context) {
-    return (ArrayCursor) context.cursor;
+  public static FieldArrayCursor cursorArray(Context context) {
+    return (FieldArrayCursor) context.cursor;
   }
 
   public static VisualFrontPrimitive.Cursor cursorPrimitive(Context context) {
@@ -77,7 +77,7 @@ public class Helper {
   }
 
   public static BackSpec buildBackDataRecord(final String id, String type) {
-    return new BackRecordSpec(new BackRecordSpec.Config(id, type));
+    return new BackRecordSpec(new BaseBackArraySpec.Config(id, type, ROList.empty));
   }
 
   public static BackKeySpec buildBackDataKey(final String id) {
@@ -85,11 +85,11 @@ public class Helper {
   }
 
   public static BackArraySpec buildBackDataArray(final String id, String type) {
-    return new BackArraySpec(new BaseBackSimpleArraySpec.Config(id, type, new TSList<>()));
+    return new BackArraySpec(new BaseBackArraySpec.Config(id, type, new TSList<>()));
   }
 
   public static BackSubArraySpec buildBackDataRootArray(final String id, String type) {
-    return new BackSubArraySpec(new BaseBackSimpleArraySpec.Config(id, type, new TSList<>()));
+    return new BackSubArraySpec(new BaseBackArraySpec.Config(id, type, new TSList<>()));
   }
 
   public static void assertTreeEqual(final Atom expected, final Atom got) {

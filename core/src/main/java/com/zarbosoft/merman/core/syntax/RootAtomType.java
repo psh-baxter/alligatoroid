@@ -7,7 +7,7 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 
 public class RootAtomType extends AtomType {
-  public static final String ROOT_TYPE_ID = "root";
+  public static final String ROOT_TYPE_ID = "__root";
   private final ROMap<String, AlignmentSpec> alignments;
 
   public RootAtomType(Config config) {

@@ -6,8 +6,8 @@ import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
@@ -95,12 +95,12 @@ public class TestActionsArray {
             .build();
   }
 
-  public static VisualFrontArray visual(final Editor editor) {
-    return (VisualFrontArray) editor.context.cursor.getVisual().parent().visual();
+  public static VisualFieldArray visual(final Editor editor) {
+    return (VisualFieldArray) editor.context.cursor.getVisual().parent().visual();
   }
 
   public static void assertSelection(final Editor editor, final int begin, final int end) {
-    final ArrayCursor selection = (ArrayCursor) editor.context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(begin));
     assertThat(selection.endIndex, equalTo(end));
   }
@@ -124,7 +124,7 @@ public class TestActionsArray {
   @Test
   public void testDelete() {
     final Editor editor = buildFive();
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -148,7 +148,7 @@ public class TestActionsArray {
   @Test
   public void testInsertBefore() {
     final Editor editor = buildFive();
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -223,7 +223,7 @@ public class TestActionsArray {
   @Test
   public void testInsertAfter() {
     final Editor editor = buildFive();
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -298,7 +298,7 @@ public class TestActionsArray {
   @Test
   public void testMoveBefore() {
     final Editor editor = buildFive();
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -317,7 +317,7 @@ public class TestActionsArray {
                 new TreeBuilder(five).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final ArrayCursor selection = (ArrayCursor) editor.context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(1));
   }
@@ -325,7 +325,7 @@ public class TestActionsArray {
   @Test
   public void testMoveBeforeStart() {
     final Editor editor = buildFive();
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -344,7 +344,7 @@ public class TestActionsArray {
                 new TreeBuilder(five).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final ArrayCursor selection = (ArrayCursor) editor.context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(1));
   }
@@ -352,7 +352,7 @@ public class TestActionsArray {
   @Test
   public void testMoveAfter() {
     final Editor editor = buildFive();
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -371,7 +371,7 @@ public class TestActionsArray {
                 new TreeBuilder(five).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final ArrayCursor selection = (ArrayCursor) editor.context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(3));
   }
@@ -379,7 +379,7 @@ public class TestActionsArray {
   @Test
   public void testMoveAfterEnd() {
     final Editor editor = buildFive();
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -398,7 +398,7 @@ public class TestActionsArray {
                 new TreeBuilder(five).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final ArrayCursor selection = (ArrayCursor) editor.context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(3));
     assertThat(selection.endIndex, equalTo(4));
   }
@@ -406,8 +406,8 @@ public class TestActionsArray {
   @Test
   public void testCopyPaste() {
     final Editor editor = buildFive();
-    final VisualFrontArray visual =
-        ((VisualFrontArray)
+    final VisualFieldArray visual =
+        ((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -429,7 +429,7 @@ public class TestActionsArray {
                 new TreeBuilder(three).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final ArrayCursor selection = (ArrayCursor) editor.context.cursor;
+    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(5));
     assertThat(selection.endIndex, equalTo(5));
     assertThat(
@@ -439,7 +439,7 @@ public class TestActionsArray {
   @Test
   public void testCutPaste() {
     final Editor editor = buildFive();
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -447,11 +447,11 @@ public class TestActionsArray {
         .select(editor.context, true, 1, 2);
     Helper.cursorArray(editor.context).editCut(editor);
     {
-      final ArrayCursor selection = (ArrayCursor) editor.context.cursor;
+      final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
       assertThat(selection.beginIndex, equalTo(1));
       assertThat(selection.endIndex, equalTo(1));
     }
-    (((VisualFrontArray)
+    (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))
@@ -470,7 +470,7 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(editor.context.document));
     {
-      final ArrayCursor selection = (ArrayCursor) editor.context.cursor;
+      final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
       assertThat(selection.beginIndex, equalTo(3));
       assertThat(selection.endIndex, equalTo(3));
     }
@@ -481,8 +481,8 @@ public class TestActionsArray {
   @Test
   public void testSuffix() {
     final Editor editor = buildFive();
-    final VisualFrontArray visual =
-        ((VisualFrontArray)
+    final VisualFieldArray visual =
+        ((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
                         .fields.getOpt("value"))

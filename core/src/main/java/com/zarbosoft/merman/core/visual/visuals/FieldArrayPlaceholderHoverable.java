@@ -5,10 +5,10 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.rendaw.common.DeadCode;
 
-class ArrayPlaceholderHoverable extends ArrayHoverable {
-  public final VisualFrontArray visual;
+class FieldArrayPlaceholderHoverable extends FieldArrayHoverable {
+  public final VisualFieldArray visual;
 
-  ArrayPlaceholderHoverable(final Context context, final Brick brick, VisualFrontArray visual) {
+  FieldArrayPlaceholderHoverable(final Context context, final Brick brick, VisualFieldArray visual) {
     super(visual, context);
     this.visual = visual;
     border.setFirst(context, brick);

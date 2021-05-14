@@ -3,10 +3,10 @@ package com.zarbosoft.merman.core.document.fields;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.visual.Visual;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomFromArray;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
+import com.zarbosoft.merman.core.visual.Visual;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomFromArray;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -71,8 +71,8 @@ public class FieldArray extends Field {
       return false;
     }
     if (context.window) context.windowAdjustMinimalTo(this);
-    if (visual instanceof VisualFrontArray)
-      ((VisualFrontArray) visual).select(context, leadFirst, start, end);
+    if (visual instanceof VisualFieldArray)
+      ((VisualFieldArray) visual).select(context, leadFirst, start, end);
     else if (visual instanceof VisualFrontAtomFromArray)
       ((VisualFrontAtomFromArray) visual).select(context);
     else throw new DeadCode();

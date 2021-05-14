@@ -2,30 +2,54 @@ package com.zarbosoft.merman.jfxeditor1.modalinput;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.cursors.EditArrayCursor;
+import com.zarbosoft.merman.editorcore.banner.BannerMessage;
+import com.zarbosoft.merman.editorcore.cursors.EditFieldArrayCursor;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.Format;
 
-public class ModalArrayCursor extends EditArrayCursor {
+public class ModalFieldArrayCursor extends EditFieldArrayCursor {
   public final NotMain main;
   public Mode mode = Mode.NAV;
+  private BannerMessage info;
 
-  public ModalArrayCursor(
+  public ModalFieldArrayCursor(
       Context context,
-      VisualFrontArray visual,
+      VisualFieldArray visual,
       boolean leadFirst,
       int start,
       int end,
       NotMain main) {
     super(context, visual, leadFirst, start, end);
     this.main = main;
-    if (start != end) mode = Mode.SELECT;
+    if (start != end) setMode(Editor.get(context), Mode.SELECT);
+    else updateInfo(Editor.get(context));
   }
 
-  public void setMode(Mode mode) {
+  public void updateInfo(Editor editor) {
+    editor.banner.addMessage(
+        editor.context,
+        info =
+            new BannerMessage(
+                Format.format(
+                    "%s - %s / %s (array) %s",
+                    getSyntaxPath(),
+                    visual.atomVisual().atom.type.id,
+                    visual.value.back().id,
+                    mode)));
+  }
+
+  @Override
+  public void destroy(Context context) {
+    Editor.get(context).banner.removeMessage(context, info);
+    super.destroy(context);
+  }
+
+  public void setMode(Editor editor, Mode mode) {
     this.mode = mode;
+    updateInfo(editor);
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {
@@ -36,7 +60,7 @@ public class ModalArrayCursor extends EditArrayCursor {
             switch (hidEvent.key) {
               case G:
                 {
-                  setMode(Mode.SELECT);
+                  setMode(Editor.get(context), Mode.SELECT);
                   return true;
                 }
               case H:
@@ -119,7 +143,7 @@ public class ModalArrayCursor extends EditArrayCursor {
               case G:
                 {
                   actionReleaseAll(context);
-                  setMode(Mode.NAV);
+                  setMode(Editor.get(context), Mode.NAV);
                   return true;
                 }
               case H:
@@ -171,7 +195,7 @@ public class ModalArrayCursor extends EditArrayCursor {
                 {
                   if (beginIndex != endIndex) editCut(Editor.get(context));
                   else editDelete(Editor.get(context));
-                  setMode(Mode.NAV);
+                  setMode(Editor.get(context), Mode.NAV);
                   return true;
                 }
               case C:
@@ -187,19 +211,19 @@ public class ModalArrayCursor extends EditArrayCursor {
               case S:
                 {
                   editSuffix(Editor.get(context));
-                  setMode(Mode.NAV);
+                  setMode(Editor.get(context), Mode.NAV);
                   return true;
                 }
               case B:
                 {
                   editInsertBefore(Editor.get(context));
-                  setMode(Mode.NAV);
+                  setMode(Editor.get(context), Mode.NAV);
                   return true;
                 }
               case A:
                 {
                   editInsertAfter(Editor.get(context));
-                  setMode(Mode.NAV);
+                  setMode(Editor.get(context), Mode.NAV);
                   return true;
                 }
               case F:

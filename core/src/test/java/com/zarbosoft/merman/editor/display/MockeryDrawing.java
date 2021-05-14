@@ -20,6 +20,11 @@ public class MockeryDrawing extends MockFreeDisplayNode implements Drawing {
   }
 
   @Override
+  public Object inner_() {
+    return null;
+  }
+
+  @Override
   public void clear() {}
 
   @Override

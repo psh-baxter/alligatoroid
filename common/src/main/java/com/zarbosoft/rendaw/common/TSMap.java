@@ -45,9 +45,9 @@ public class TSMap<K, V> implements ROMap<K, V> {
 
   @Override
   public V getOr(K k, Supplier<V> v) {
-    Object out = get(k);
-    if (out == null) return v.get();
-    return (V) out;
+    Object val = ((Map) inner).getOrDefault(k, missing);
+    if (val == missing) return v.get();
+    return (V) val;
   }
 
   public V putReplace(K k, V v) {

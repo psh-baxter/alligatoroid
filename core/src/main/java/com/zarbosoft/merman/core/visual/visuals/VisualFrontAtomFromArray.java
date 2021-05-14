@@ -1,13 +1,13 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
-import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
-import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.rendaw.common.ROList;
 
 public class VisualFrontAtomFromArray extends VisualFrontAtomBase {
@@ -55,6 +55,11 @@ public class VisualFrontAtomFromArray extends VisualFrontAtomBase {
   @Override
   protected Field value() {
     return value;
+  }
+
+  @Override
+  public String backId() {
+    return value.back().id;
   }
 
   @Override

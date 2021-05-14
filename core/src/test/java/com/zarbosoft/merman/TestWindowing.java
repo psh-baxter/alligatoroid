@@ -15,8 +15,8 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.merman.core.visual.visuals.ArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Course;
 import com.zarbosoft.merman.core.wall.bricks.BrickEmpty;
@@ -611,10 +611,10 @@ public class TestWindowing {
     }
 
     public GeneralTestWizard actWindow() {
-      if (context.cursor instanceof VisualFrontAtomBase.Cursor) {
-        ((VisualFrontAtomBase.Cursor) context.cursor).actionWindow(context);
-      } else if (context.cursor instanceof ArrayCursor) {
-        ((ArrayCursor) context.cursor).actionWindow(context);
+      if (context.cursor instanceof FieldAtomCursor) {
+        ((FieldAtomCursor) context.cursor).actionWindow(context);
+      } else if (context.cursor instanceof FieldArrayCursor) {
+        ((FieldArrayCursor) context.cursor).actionWindow(context);
       } else throw new Assertion();
       assertThat(context.cursor, is(notNullValue()));
       flushIteration();
@@ -622,10 +622,10 @@ public class TestWindowing {
     }
 
     public GeneralTestWizard actEnter() {
-      if (context.cursor instanceof VisualFrontAtomBase.Cursor) {
-        ((VisualFrontAtomBase.Cursor) context.cursor).actionEnter(context);
-      } else if (context.cursor instanceof ArrayCursor) {
-        ((ArrayCursor) context.cursor).actionEnter(context);
+      if (context.cursor instanceof FieldAtomCursor) {
+        ((FieldAtomCursor) context.cursor).actionEnter(context);
+      } else if (context.cursor instanceof FieldArrayCursor) {
+        ((FieldArrayCursor) context.cursor).actionEnter(context);
       } else throw new Assertion();
       assertThat(context.cursor, is(notNullValue()));
       flushIteration();
@@ -633,10 +633,10 @@ public class TestWindowing {
     }
 
     public GeneralTestWizard actExit() {
-      if (context.cursor instanceof VisualFrontAtomBase.Cursor) {
-        ((VisualFrontAtomBase.Cursor) context.cursor).actionExit(context);
-      } else if (context.cursor instanceof ArrayCursor) {
-        ((ArrayCursor) context.cursor).actionExit(context);
+      if (context.cursor instanceof FieldAtomCursor) {
+        ((FieldAtomCursor) context.cursor).actionExit(context);
+      } else if (context.cursor instanceof FieldArrayCursor) {
+        ((FieldArrayCursor) context.cursor).actionExit(context);
       } else throw new Assertion();
       assertThat(context.cursor, is(notNullValue()));
       flushIteration();

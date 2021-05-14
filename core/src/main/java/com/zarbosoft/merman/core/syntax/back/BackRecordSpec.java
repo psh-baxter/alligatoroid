@@ -1,17 +1,15 @@
 package com.zarbosoft.merman.core.syntax.back;
 
-import com.zarbosoft.merman.core.AtomKey;
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EObjectCloseEvent;
 import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
-import com.zarbosoft.merman.core.serialization.WriteStateDataArray;
+import com.zarbosoft.merman.core.serialization.WriteStateDeepDataArray;
 import com.zarbosoft.merman.core.serialization.WriteStateRecordEnd;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
@@ -20,66 +18,37 @@ import com.zarbosoft.merman.core.syntax.error.RecordChildNotKeyAt;
 import com.zarbosoft.merman.core.syntax.error.RecordChildNotValueAt;
 import com.zarbosoft.pidgoon.events.nodes.MatchingEventTerminal;
 import com.zarbosoft.pidgoon.model.Node;
-import com.zarbosoft.pidgoon.nodes.Operator;
-import com.zarbosoft.pidgoon.nodes.Reference;
-import com.zarbosoft.pidgoon.nodes.Repeat;
 import com.zarbosoft.pidgoon.nodes.UnitSequence;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Iterator;
+import java.util.function.Consumer;
 
 public class BackRecordSpec extends BaseBackArraySpec {
-  /** Type/group name or null; null means any type */
-  public final String element;
-
-  public BackRecordSpec(Config config) {
-    super(config.id);
-    this.element = config.element;
-  }
-
-  @Override
-  public String elementAtomType() {
-    return element;
-  }
-
-  @Override
-  protected Iterator<BackSpec> walkStep() {
-    return null;
+  public BackRecordSpec(BaseBackArraySpec.Config config) {
+    super(config);
   }
 
   @Override
   public Node<ROList<AtomType.FieldParseResult>> buildBackRule(Environment env, Syntax syntax) {
-    return new Operator<ROList<AtomType.AtomParseResult>, ROList<AtomType.FieldParseResult>>(
+    return buildBackRuleInnerEnd(
         new UnitSequence<ROList<AtomType.AtomParseResult>>()
-            .addIgnored(new MatchingEventTerminal<BackEvent>(new EObjectOpenEvent()))
-            .add(
-                new Repeat<AtomType.AtomParseResult>(
-                    new Reference<AtomType.AtomParseResult>(new AtomKey(element))))
-            .addIgnored(new MatchingEventTerminal<BackEvent>(new EObjectCloseEvent()))) {
-      @Override
-      protected ROList<AtomType.FieldParseResult> process(ROList<AtomType.AtomParseResult> value) {
-        return TSList.of(new AtomType.ArrayFieldParseResult(id, new FieldArray(BackRecordSpec.this), value));
-      }
-    };
+            .addIgnored(new MatchingEventTerminal(new EObjectOpenEvent()))
+            .add(buildBackRuleInner(env, syntax))
+            .addIgnored(new MatchingEventTerminal(new EObjectCloseEvent())));
   }
 
   @Override
   public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
     stack.add(new WriteStateRecordEnd());
-    stack.add(new WriteStateDataArray(((TSList<Atom>) data.get(id))));
+    stack.add(new WriteStateDeepDataArray(((TSList<Atom>) data.get(id)), splayedBoilerplate));
   }
 
   @Override
   protected boolean isSingularValue() {
     return true;
-  }
-
-  @Override
-  protected boolean isTypedValue() {
-    return false;
   }
 
   @Override
@@ -89,8 +58,23 @@ public class BackRecordSpec extends BaseBackArraySpec {
       SyntaxPath typePath,
       boolean singularRestriction,
       boolean typeRestriction) {
+    boilerplate =
+        boilerplate
+            .mut()
+            .put(
+                syntax.gap.id,
+                new TSList<>(
+                    new BackKeySpec(
+                        new BaseBackPrimitiveSpec.Config(WriteStateDeepDataArray.INDEX_KEY)),
+                    new BackAtomSpec(new BaseBackAtomSpec.Config(null, syntax.gap.id))))
+            .put(
+                syntax.suffixGap.id,
+                new TSList<>(
+                    new BackKeySpec(
+                        new BaseBackPrimitiveSpec.Config(WriteStateDeepDataArray.INDEX_KEY)),
+                    new BackAtomSpec(new BaseBackAtomSpec.Config(null, syntax.suffixGap.id))));
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
-    for (final AtomType element : syntax.splayedTypes.get(element)) {
+    for (final AtomType element : syntax.splayedTypes.get(type)) {
       CheckBackState state = CheckBackState.KEY;
       for (int i = 0; i < element.back().size(); ++i) {
         BackSpec back = element.back().get(i);
@@ -120,6 +104,16 @@ public class BackRecordSpec extends BaseBackArraySpec {
         errors.add(new RecordChildMissingValue(typePath, element));
       }
     }
+  }
+
+  @Override
+  public void copy(Context context, TSList<Atom> children) {
+    context.copy(Context.CopyContext.RECORD, children);
+  }
+
+  @Override
+  public void uncopy(Context context, Consumer<ROList<Atom>> consumer) {
+    context.uncopy(elementAtomType(), Context.UncopyContext.RECORD, consumer);
   }
 
   public static enum CheckBackState {

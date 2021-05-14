@@ -78,6 +78,18 @@ public class VisualAtom extends Visual {
   }
 
   @Override
+  public void notifyLastBrickCreated(Context context, Brick brick) {
+    if (parent == null) return;
+    parent.notifyLastBrickCreated(context, brick);
+  }
+
+  @Override
+  public void notifyFirstBrickCreated(Context context, Brick brick) {
+    if (parent == null) return;
+    parent.notifyFirstBrickCreated(context, brick);
+  }
+
+  @Override
   public CreateBrickResult createOrGetCornerstoneCandidate(final Context context) {
     for (Visual child : children) {
       CreateBrickResult out = child.createOrGetCornerstoneCandidate(context);
@@ -300,6 +312,18 @@ public class VisualAtom extends Visual {
     @Override
     public boolean selectNext(final Context context) {
       throw new DeadCode();
+    }
+
+    @Override
+    public void notifyLastBrickCreated(Context context, Brick brick) {
+      if (index +1!=children.size()) return;
+      VisualAtom.this.notifyLastBrickCreated(context, brick);
+    }
+
+    @Override
+    public void notifyFirstBrickCreated(Context context, Brick brick) {
+      if (index !=0) return;
+      VisualAtom.this.notifyFirstBrickCreated(context, brick);
     }
   }
 
