@@ -207,11 +207,11 @@ public class Helper {
 
   private static void dumpTreeInner(Atom a, String indentText) {
     String indentChunk = "   ";
-    System.out.format("%s%s\n", indentText, a.type.id);
+    System.out.format("%satom type [%s]\n", indentText, a.type.id);
     indentText += indentChunk;
     for (Map.Entry<String, Field> field : a.fields) {
       System.out.format(
-          "%s%s %s\n", indentText, field.getKey(), field.getValue().getClass().getName());
+          "%sfield [%s] %s\n", indentText, field.getKey(), field.getValue().getClass().getName());
       if (field.getValue() instanceof FieldArray) {
         String subIndent = indentText + indentChunk;
         int index = 0;
@@ -223,7 +223,7 @@ public class Helper {
         dumpTreeInner(((FieldAtom) field.getValue()).data, indentText + indentChunk);
       } else if (field.getValue() instanceof FieldPrimitive) {
         System.out.format(
-            "%s[%s]\n", indentText + indentChunk, ((FieldPrimitive) field.getValue()).get());
+            "%sprimitive text [%s]\n", indentText + indentChunk, ((FieldPrimitive) field.getValue()).get());
       } else throw new Assertion();
     }
   }

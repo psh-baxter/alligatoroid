@@ -86,9 +86,8 @@ public class TestCursorChanges {
         syntax,
         new TreeBuilder(infinity).build(),
         new SyntaxPath("value", "0"),
-        (editor, selected, changer) ->
-        {
-          ((EditCursorFieldArray)editor.context.cursor).editDelete(editor);
+        (editor, selected, changer) -> {
+          ((EditCursorFieldArray) editor.context.cursor).editDelete(editor);
         },
         new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build(),
         new SyntaxPath("value", "0"));
@@ -104,8 +103,16 @@ public class TestCursorChanges {
     final Editor editor = Helper.buildDoc(syntax, begin);
 
     // Initial selection and double checking
-    final Atom found = (Atom) editor.context.syntaxLocate(selectBegin);
-    found.fieldParentRef.selectField(editor.context);
+    Object located = editor.context.syntaxLocate(selectBegin);
+    final Atom found;
+    if (located instanceof Atom) {
+      found = (Atom) located;
+      found.fieldParentRef.selectField(editor.context);
+    } else {
+      FieldAtom foundField = (FieldAtom) located;
+      found = foundField.data;
+      foundField.selectInto(editor.context);
+    }
     selectBegin = editor.context.cursor.getSyntaxPath();
     // assertThat(context.selection.getSyntaxPath(), equalTo(selectBegin));
 
@@ -785,7 +792,7 @@ public class TestCursorChanges {
     innerTestTransform(
         syntax,
         new TreeBuilder(snooze).add("value", new TreeBuilder(infinity).build()).build(),
-        new SyntaxPath("value", "0", "value", "atom"),
+        new SyntaxPath("value", "0", "value"),
         (context, selected, changer) -> {
           changer.accept(
               new ChangeAtom(
@@ -793,10 +800,9 @@ public class TestCursorChanges {
                   new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build()));
         },
         new TreeBuilder(snooze)
-            .add(
-                "value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
+            .add("value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
             .build(),
-        new SyntaxPath("value", "0", "value", "atom"));
+        new SyntaxPath("value", "0", "value"));
   }
 
   @Test
@@ -842,20 +848,18 @@ public class TestCursorChanges {
                 "value",
                 new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "atom", "value", "0"),
+        new SyntaxPath("value", "0", "value", "value", "0"),
         (editor, selected, changer) -> {
           parentDelete(
               editor,
               ((FieldArray)
-                      editor.context.syntaxLocate(
-                          new SyntaxPath("value", "0", "value", "atom", "value")))
+                      editor.context.syntaxLocate(new SyntaxPath("value", "0", "value", "value")))
                   .atomParentRef.atom().fieldParentRef);
         },
         new TreeBuilder(snooze)
-            .add(
-                "value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
+            .add("value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
             .build(),
-        new SyntaxPath("value", "0", "value", "atom"));
+        new SyntaxPath("value", "0", "value"));
   }
 
   @FunctionalInterface

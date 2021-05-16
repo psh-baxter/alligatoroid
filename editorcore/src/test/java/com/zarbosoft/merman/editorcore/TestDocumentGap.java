@@ -11,9 +11,9 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
@@ -28,7 +28,7 @@ import com.zarbosoft.merman.editorcore.helper.TreeBuilder;
 import com.zarbosoft.merman.editorcore.helper.TypeBuilder;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSSet;
+import com.zarbosoft.rendaw.common.TSOrderedSet;
 import org.junit.Test;
 
 import java.util.function.Consumer;
@@ -43,8 +43,12 @@ import static org.junit.Assert.assertThat;
 public class TestDocumentGap {
 
   public static void assertChoices(Editor editor, int count) {
-    if (count == 0) assertThat(((EditGapCursorFieldPrimitive) editor.context.cursor).choicePage, equalTo(null));
-    else assertThat(((EditGapCursorFieldPrimitive) editor.context.cursor).choicePage.choices.size(), is(count));
+    if (count == 0)
+      assertThat(((EditGapCursorFieldPrimitive) editor.context.cursor).choicePage, equalTo(null));
+    else
+      assertThat(
+          ((EditGapCursorFieldPrimitive) editor.context.cursor).choicePage.choices.size(),
+          is(count));
   }
 
   /** Confirm all concrete atom types are found */
@@ -96,8 +100,8 @@ public class TestDocumentGap {
 
     final Editor editor = blank(syntax);
     assertThat(
-        editor.context.syntax.splayedTypes.get("test_group_1"),
-        equalTo(TSSet.of(infinity, one, two, three)));
+        editor.context.syntax.splayedTypes.get("test_group_1").inner_(),
+        equalTo(TSOrderedSet.of(infinity, one, two, three).inner_()));
   }
 
   // ========================================================================
@@ -418,7 +422,7 @@ public class TestDocumentGap {
     editor.context.cursor.handleTyping(editor.context, "+");
     assertThat(
         editor.context.cursor.getSyntaxPath(),
-        equalTo(new SyntaxPath("value", "0", "value", "atom", GapAtomType.PRIMITIVE_KEY, "0")));
+        equalTo(new SyntaxPath("value", "0", "value", GapAtomType.PRIMITIVE_KEY, "0")));
   }
 
   /** After completing a gap, if the next field is an array the array/inner gap is selected */
@@ -434,8 +438,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType pref =
         new TypeBuilder("pref")
-            .back(
-                new BackArraySpec(new BaseBackArraySpec.Config("value", "any", ROList.empty)))
+            .back(new BackArraySpec(new BaseBackArraySpec.Config("value", "any", ROList.empty)))
             .frontMark("+")
             .frontDataArray("value")
             .autoComplete(true)
@@ -528,9 +531,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType suf =
         new TypeBuilder("suf")
-            .back(
-                new BackArraySpec(
-                    new BaseBackArraySpec.Config("pre1", "infinity", ROList.empty)))
+            .back(new BackArraySpec(new BaseBackArraySpec.Config("pre1", "infinity", ROList.empty)))
             .frontDataArray("pre1")
             .frontMark("+")
             .autoComplete(false)
@@ -699,8 +700,7 @@ public class TestDocumentGap {
             .build();
     FreeAtomType suf =
         new TypeBuilder("suf")
-            .back(
-                new BackArraySpec(new BaseBackArraySpec.Config("pre1", "any", ROList.empty)))
+            .back(new BackArraySpec(new BaseBackArraySpec.Config("pre1", "any", ROList.empty)))
             .back(new BackPrimitiveSpec(new BaseBackPrimitiveSpec.Config("post")))
             .frontDataArray("pre1")
             .frontMark("+")

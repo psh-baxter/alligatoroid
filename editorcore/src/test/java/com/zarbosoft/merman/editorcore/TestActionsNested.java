@@ -2,6 +2,7 @@ package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
@@ -56,8 +57,8 @@ public class TestActionsNested {
                 .build())
         .run(
             editor -> {
-              ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom")))
-                  .fieldParentRef.selectField(editor.context);
+              ((FieldAtom) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value")))
+                  .selectInto(editor.context);
             })
         .editDelete()
         .checkArrayTree(
@@ -209,6 +210,6 @@ public class TestActionsNested {
         Helper.rootArray(editor.context.document));
     assertThat(
         editor.context.cursor.getSyntaxPath(),
-        equalTo(new SyntaxPath("value", "0", "value", "atom", "gap", "0")));
+        equalTo(new SyntaxPath("value", "0", "value", "gap", "0")));
   }
 }

@@ -4,10 +4,13 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
@@ -53,6 +56,11 @@ public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFact
   public CursorFieldArray createFieldArrayCursor(
           Context context, VisualFieldArray visual, boolean leadFirst, int start, int end) {
     return new EditCursorFieldArray(context, visual, leadFirst, start, end);
+  }
+
+  @Override
+  public CursorAtom createAtomCursor(Context context, VisualAtom base, int index) {
+    return new EditCursorAtom(context,base,index);
   }
 
   @Override

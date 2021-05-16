@@ -194,8 +194,36 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
 
   protected void set(final Context context, final Atom data) {
     if (ellipsize(context)) return;
+    boolean fixDeepSelection = false;
+    boolean fixDeepHover = false;
+    if (context.cursor != null) {
+        VisualParent parent = context.cursor.getVisual().parent();
+        while (parent != null) {
+          final Visual visual = parent.visual();
+          if (visual == this) {
+            fixDeepSelection = true;
+            break;
+          }
+          parent = visual.parent();
+        }
+    }
+    if (context.hover != null) {
+      VisualParent parent = context.hover.visual().parent();
+      while (parent != null) {
+        final Visual visual = parent.visual();
+        if (visual == this) {
+          fixDeepHover = true;
+          break;
+        }
+        parent = visual.parent();
+      }
+    }
+
     coreSet(context, data);
     context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
+
+    if (fixDeepSelection) atomGet().fieldParentRef.selectField(context);
+    if (fixDeepHover) context.clearHover();
   }
 
   private void coreSet(final Context context, final Atom data) {
