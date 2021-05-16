@@ -270,15 +270,6 @@ public class VisualGroup extends Visual {
     }
 
     @Override
-    public boolean selectNext(final Context context) {
-      int test = index;
-      while (++test < parent.children.size()) {
-        if (parent.children.get(test).selectAnyChild(context)) return true;
-      }
-      return parent.parent.selectNext(context);
-    }
-
-    @Override
     public void notifyLastBrickCreated(Context context, Brick brick) {
       if (index + 1 != parent.children.size()) return;
       parent.notifyLastBrickCreated(context, brick);
@@ -288,15 +279,6 @@ public class VisualGroup extends Visual {
     public void notifyFirstBrickCreated(Context context, Brick brick) {
       if (index != 0) return;
       parent.notifyFirstBrickCreated(context, brick);
-    }
-
-    @Override
-    public boolean selectPrevious(final Context context) {
-      int test = index;
-      while (--test >= 0) {
-        if (parent.children.get(test).selectAnyChild(context)) return true;
-      }
-      return parent.parent.selectPrevious(context);
     }
 
     public int getIndex() {

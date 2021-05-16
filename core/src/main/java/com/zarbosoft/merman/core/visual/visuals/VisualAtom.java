@@ -1,18 +1,18 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
-import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Hoverable;
+import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.wall.Brick;
-import com.zarbosoft.merman.core.syntax.AtomType;
-import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.DeadCode;
+import com.zarbosoft.rendaw.common.EnumerateIterable;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
@@ -23,11 +23,15 @@ import java.util.Map;
 public class VisualAtom extends Visual {
   public final Atom atom;
   public final TSList<Visual> children = new TSList<>();
+  public final TSList<ROPair<String, Visual>> selectable = new TSList<>();
   /** Merged map of parent alignments and this alignments */
   private final TSMap<String, Alignment> localAlignments = new TSMap<>();
-  private final TSList<Visual> selectable = new TSList<>();
+
   public int depthScore = 0;
   public boolean compact = false;
+  public CursorAtom cursor;
+  public AtomHoverable hoverable;
+  private boolean needIntermediateCursor = false;
   private VisualParent parent;
 
   public VisualAtom(
@@ -54,8 +58,12 @@ public class VisualAtom extends Visual {
               this.visualDepth + 1,
               this.depthScore);
       children.add(visual);
-      if (front.fieldId() != null) selectable.add(visual);
+      if (front.fieldId() != null) {
+        if (visual instanceof VisualFieldAtomBase) needIntermediateCursor = true;
+        selectable.add(new ROPair<>(front.fieldId(), visual));
+      }
     }
+    if (selectable.size() >= 2) needIntermediateCursor = true;
     atom.visual = this;
   }
 
@@ -73,7 +81,8 @@ public class VisualAtom extends Visual {
   @Override
   public boolean selectAnyChild(final Context context) {
     if (selectable.isEmpty()) return false;
-    selectable.get(0).selectAnyChild(context);
+    if (needIntermediateCursor) select(context, 0);
+    else selectable.get(0).second.selectAnyChild(context);
     return true;
   }
 
@@ -155,9 +164,7 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public void getLeafBricks(
-          final Context context,
-          TSList<Brick> bricks) {
+  public void getLeafBricks(final Context context, TSList<Brick> bricks) {
     for (Visual child : children) {
       child.getLeafBricks(context, bricks);
     }
@@ -198,6 +205,8 @@ public class VisualAtom extends Visual {
   @Override
   public void uproot(final Context context, final Visual root) {
     if (root == this) return;
+    if (cursor != null) context.clearCursor();
+    if (hoverable != null) context.clearHover();
     atom.visual = null;
     for (int i = children.size(); i > 0; --i) {
       Visual child = children.get(i - 1);
@@ -225,8 +234,28 @@ public class VisualAtom extends Visual {
     return null;
   }
 
+  public void select(Context context, int index) {
+    if (hoverable != null) hoverable.notifySelected(context, index);
+    if (cursor == null) {
+      cursor = context.cursorFactory.createAtomCursor(context, this, index);
+      context.setCursor(cursor);
+    } else {
+      cursor.setIndex(context, index);
+    }
+  }
+
+  public void selectById(Context context, String id) {
+    for (EnumerateIterable.El<ROPair<String, Visual>> el : new EnumerateIterable<>(selectable)) {
+      if (el.value.first.equals(id)) {
+        select(context, el.index);
+        return;
+      }
+    }
+    throw new Assertion();
+  }
+
   private class ChildParent extends VisualParent {
-    private final int index;
+    public final int index;
 
     public ChildParent(final int index) {
       this.index = index;
@@ -305,25 +334,21 @@ public class VisualAtom extends Visual {
     }
 
     @Override
-    public boolean selectPrevious(final Context context) {
-      throw new DeadCode();
-    }
-
-    @Override
-    public boolean selectNext(final Context context) {
-      throw new DeadCode();
-    }
-
-    @Override
     public void notifyLastBrickCreated(Context context, Brick brick) {
-      if (index +1!=children.size()) return;
-      VisualAtom.this.notifyLastBrickCreated(context, brick);
+      if (cursor != null && cursor.index == index) cursor.border.setLast(context, brick);
+      if (hoverable != null && hoverable.index == index) hoverable.border.setLast(context, brick);
+      if (index + 1 == children.size()) {
+        VisualAtom.this.notifyLastBrickCreated(context, brick);
+      }
     }
 
     @Override
     public void notifyFirstBrickCreated(Context context, Brick brick) {
-      if (index !=0) return;
-      VisualAtom.this.notifyFirstBrickCreated(context, brick);
+      if (cursor != null && cursor.index == index) cursor.border.setFirst(context, brick);
+      if (hoverable != null && hoverable.index == index) hoverable.border.setFirst(context, brick);
+      if (index == 0) {
+        VisualAtom.this.notifyFirstBrickCreated(context, brick);
+      }
     }
   }
 
@@ -336,17 +361,23 @@ public class VisualAtom extends Visual {
     }
 
     @Override
-    public boolean selectNext(final Context context) {
-      int at = selectableIndex;
-      while (++at < selectable.size()) if (selectable.get(at).selectAnyChild(context)) return true;
-      return false;
-    }
-
-    @Override
-    public boolean selectPrevious(final Context context) {
-      int at = selectableIndex;
-      while (--at >= 0) if (selectable.get(at).selectAnyChild(context)) return true;
-      return false;
+    public ROPair<Hoverable, Boolean> hover(Context context, Vector point) {
+      if (cursor != null && cursor.index == selectableIndex) return null;
+      if (needIntermediateCursor) {
+        boolean changed = false;
+        if (hoverable == null) {
+          hoverable = new AtomHoverable(VisualAtom.this, context);
+          changed = true;
+        } else if (hoverable.index != selectableIndex) {
+          changed = true;
+        }
+        if (changed) {
+          hoverable.setIndex(context, selectableIndex);
+        }
+        return new ROPair<>(hoverable, changed);
+      }
+      if (parent != null) return parent.hover(context, point);
+      return null;
     }
   }
 }

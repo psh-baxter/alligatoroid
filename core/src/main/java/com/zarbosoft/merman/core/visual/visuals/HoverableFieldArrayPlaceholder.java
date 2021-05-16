@@ -5,10 +5,10 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.rendaw.common.DeadCode;
 
-class FieldArrayPlaceholderHoverable extends FieldArrayHoverable {
+class HoverableFieldArrayPlaceholder extends HoverableFieldArray {
   public final VisualFieldArray visual;
 
-  FieldArrayPlaceholderHoverable(final Context context, final Brick brick, VisualFieldArray visual) {
+  HoverableFieldArrayPlaceholder(final Context context, final Brick brick, VisualFieldArray visual) {
     super(visual, context);
     this.visual = visual;
     border.setFirst(context, brick);
@@ -23,11 +23,6 @@ class FieldArrayPlaceholderHoverable extends FieldArrayHoverable {
   @Override
   public void select(final Context context) {
     visual.select(context, true, 0, 0);
-  }
-
-  @Override
-  public VisualAtom atom() {
-    return visual.parent.atomVisual();
   }
 
   @Override

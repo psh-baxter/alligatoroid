@@ -14,6 +14,6 @@ public class InvalidPath extends RuntimeException {
 
   @Override
   public String toString() {
-    return Format.format("valid %s, full %s", valid, full);
+    return Format.format("valid %s, full %s", valid.inner_(), full.inner_());
   }
 }

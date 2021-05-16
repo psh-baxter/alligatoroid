@@ -57,7 +57,7 @@ public class JsonSyntax {
   private static final String ALIGNMENT_BASE = "base";
 
   public static Syntax create(Environment env, Padding pad) {
-    double fontSize = 5;
+    double fontSize = 6;
     final Style stringStyle =
         new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("F79578")));
     final Style numberStyle =

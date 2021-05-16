@@ -19,6 +19,11 @@ public abstract class FrontSpec {
       final AtomType atomType,
       final TSSet<String> middleUsed) {}
 
+  /**
+   * Field id or null if non-data front
+   *
+   * @return
+   */
   public abstract String fieldId();
 
   public abstract void dispatch(DispatchHandler handler);

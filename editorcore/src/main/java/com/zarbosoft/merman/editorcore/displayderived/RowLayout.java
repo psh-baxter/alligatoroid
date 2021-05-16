@@ -31,9 +31,7 @@ public class RowLayout {
     double converse = 0;
     double maxAscent = 0;
     for (final DisplayNode node : nodes) {
-      if (node instanceof CourseDisplayNode)
         maxAscent = Math.max(maxAscent, ((CourseDisplayNode) node).ascent());
-      else maxAscent = Math.max(maxAscent, node.transverseSpan());
     }
     group.setBaselineTransverse(maxAscent);
     for (final DisplayNode node : nodes) {

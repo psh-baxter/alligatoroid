@@ -5,11 +5,11 @@ import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.attachments.BorderAttachment;
 
-abstract class FieldArrayHoverable extends Hoverable {
+abstract class HoverableFieldArray extends Hoverable {
     public final VisualFieldArray visual;
     final BorderAttachment border;
 
-    FieldArrayHoverable(VisualFieldArray visual, final Context context) {
+    HoverableFieldArray(VisualFieldArray visual, final Context context) {
         this.visual = visual;
         border = new BorderAttachment(context, context.syntax.hoverStyle.obbox);
     }

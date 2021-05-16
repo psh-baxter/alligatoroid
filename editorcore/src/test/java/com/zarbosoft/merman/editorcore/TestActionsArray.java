@@ -6,7 +6,7 @@ import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
@@ -100,7 +100,7 @@ public class TestActionsArray {
   }
 
   public static void assertSelection(final Editor editor, final int begin, final int end) {
-    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
+    final CursorFieldArray selection = (CursorFieldArray) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(begin));
     assertThat(selection.endIndex, equalTo(end));
   }
@@ -317,7 +317,7 @@ public class TestActionsArray {
                 new TreeBuilder(five).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
+    final CursorFieldArray selection = (CursorFieldArray) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(1));
   }
@@ -344,7 +344,7 @@ public class TestActionsArray {
                 new TreeBuilder(five).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
+    final CursorFieldArray selection = (CursorFieldArray) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(0));
     assertThat(selection.endIndex, equalTo(1));
   }
@@ -371,7 +371,7 @@ public class TestActionsArray {
                 new TreeBuilder(five).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
+    final CursorFieldArray selection = (CursorFieldArray) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(2));
     assertThat(selection.endIndex, equalTo(3));
   }
@@ -398,7 +398,7 @@ public class TestActionsArray {
                 new TreeBuilder(five).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
+    final CursorFieldArray selection = (CursorFieldArray) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(3));
     assertThat(selection.endIndex, equalTo(4));
   }
@@ -429,7 +429,7 @@ public class TestActionsArray {
                 new TreeBuilder(three).build())
             .build(),
         Helper.rootArray(editor.context.document));
-    final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
+    final CursorFieldArray selection = (CursorFieldArray) editor.context.cursor;
     assertThat(selection.beginIndex, equalTo(5));
     assertThat(selection.endIndex, equalTo(5));
     assertThat(
@@ -447,7 +447,7 @@ public class TestActionsArray {
         .select(editor.context, true, 1, 2);
     Helper.cursorArray(editor.context).editCut(editor);
     {
-      final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
+      final CursorFieldArray selection = (CursorFieldArray) editor.context.cursor;
       assertThat(selection.beginIndex, equalTo(1));
       assertThat(selection.endIndex, equalTo(1));
     }
@@ -470,7 +470,7 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(editor.context.document));
     {
-      final FieldArrayCursor selection = (FieldArrayCursor) editor.context.cursor;
+      final CursorFieldArray selection = (CursorFieldArray) editor.context.cursor;
       assertThat(selection.beginIndex, equalTo(3));
       assertThat(selection.endIndex, equalTo(3));
     }

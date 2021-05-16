@@ -3,13 +3,13 @@ package com.zarbosoft.merman.jfxeditor1.modalinput;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldPrimitive;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 
-public class ModalPrimitiveCursor extends EditPrimitiveCursor {
+public class ModalCursorFieldPrimitive extends EditCursorFieldPrimitive {
   private final ModalPrimitiveInner inner;
 
-  public ModalPrimitiveCursor(
+  public ModalCursorFieldPrimitive(
       Context context,
       VisualFrontPrimitive visualPrimitive,
       boolean leadFirst,

@@ -14,7 +14,5 @@ public abstract class Hoverable {
 
   public abstract void select(Context context);
 
-  public abstract VisualAtom atom();
-
   public abstract Visual visual();
 }

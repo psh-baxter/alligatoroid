@@ -7,9 +7,9 @@ import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Course;
@@ -18,8 +18,8 @@ import com.zarbosoft.merman.core.wall.bricks.BrickImage;
 import com.zarbosoft.merman.core.wall.bricks.BrickLine;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.cursors.EditFieldArrayCursor;
-import com.zarbosoft.merman.editorcore.cursors.EditFieldAtomCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
 import com.zarbosoft.merman.editorcore.display.MockeryText;
 import com.zarbosoft.merman.editorcore.history.Change;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -166,23 +166,10 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actWindow() {
-    if (inner.editor.context.cursor instanceof FieldAtomCursor) {
-      ((FieldAtomCursor) inner.editor.context.cursor).actionWindow(inner.editor.context);
-    } else if (inner.editor.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.editor.context.cursor).actionWindow(inner.editor.context);
-    } else throw new Assertion();
-    assertThat(inner.editor.context.cursor, is(notNullValue()));
-    inner.flushIteration();
-    return this;
-  }
-
-  public GeneralTestWizard actNext() {
-    if (inner.editor.context.cursor instanceof FieldAtomCursor) {
-      ((FieldAtomCursor) inner.editor.context.cursor).actionNext(inner.editor.context);
-    } else if (inner.editor.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.editor.context.cursor).actionNext(inner.editor.context);
-    } else if (inner.editor.context.cursor instanceof VisualFrontPrimitive.Cursor) {
-      ((VisualFrontPrimitive.Cursor) inner.editor.context.cursor).actionNext(inner.editor.context);
+    if (inner.editor.context.cursor instanceof CursorAtom) {
+      ((CursorAtom) inner.editor.context.cursor).actionWindow(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof CursorFieldArray) {
+      ((CursorFieldArray) inner.editor.context.cursor).actionWindow(inner.editor.context);
     } else throw new Assertion();
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
@@ -190,10 +177,10 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actGatherNext() {
-    if (inner.editor.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.editor.context.cursor).actionGatherNext(inner.editor.context);
-    } else if (inner.editor.context.cursor instanceof VisualFrontPrimitive.Cursor) {
-      ((VisualFrontPrimitive.Cursor) inner.editor.context.cursor)
+    if (inner.editor.context.cursor instanceof CursorFieldArray) {
+      ((CursorFieldArray) inner.editor.context.cursor).actionGatherNext(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof CursorFieldPrimitive) {
+      ((CursorFieldPrimitive) inner.editor.context.cursor)
           .actionGatherNextGlyph(inner.editor.context);
     } else throw new Assertion();
     assertThat(inner.editor.context.cursor, is(notNullValue()));
@@ -202,33 +189,18 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actGatherPreviousLine() {
-    ((VisualFrontPrimitive.Cursor) inner.editor.context.cursor)
+    ((CursorFieldPrimitive) inner.editor.context.cursor)
         .actionGatherPreviousLine(inner.editor.context);
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
   }
 
-  public GeneralTestWizard actPrevious() {
-    if (inner.editor.context.cursor instanceof FieldAtomCursor) {
-      ((FieldAtomCursor) inner.editor.context.cursor)
-          .actionPrevious(inner.editor.context);
-    } else if (inner.editor.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.editor.context.cursor).actionPrevious(inner.editor.context);
-    } else if (inner.editor.context.cursor instanceof VisualFrontPrimitive.Cursor) {
-      ((VisualFrontPrimitive.Cursor) inner.editor.context.cursor)
-          .actionPrevious(inner.editor.context);
-    } else throw new Assertion();
-    assertThat(inner.editor.context.cursor, is(notNullValue()));
-    inner.flushIteration();
-    return this;
-  }
-
   public GeneralTestWizard actEnter() {
-    if (inner.editor.context.cursor instanceof FieldAtomCursor) {
-      ((FieldAtomCursor) inner.editor.context.cursor).actionEnter(inner.editor.context);
-    } else if (inner.editor.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.editor.context.cursor).actionEnter(inner.editor.context);
+    if (inner.editor.context.cursor instanceof CursorAtom) {
+      ((CursorAtom) inner.editor.context.cursor).actionEnter(inner.editor.context);
+    } else if (inner.editor.context.cursor instanceof CursorFieldArray) {
+      ((CursorFieldArray) inner.editor.context.cursor).actionEnter(inner.editor.context);
     } else throw new Assertion();
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
@@ -237,12 +209,12 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard actExit() {
     Cursor cursor = inner.editor.context.cursor;
-    if (cursor instanceof FieldAtomCursor) {
-      ((FieldAtomCursor) cursor).actionExit(inner.editor.context);
-    } else if (cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) cursor).actionExit(inner.editor.context);
-    } else if (cursor instanceof VisualFrontPrimitive.Cursor) {
-      ((VisualFrontPrimitive.Cursor) cursor).actionExit(inner.editor.context);
+    if (cursor instanceof CursorAtom) {
+      ((CursorAtom) cursor).actionExit(inner.editor.context);
+    } else if (cursor instanceof CursorFieldArray) {
+      ((CursorFieldArray) cursor).actionExit(inner.editor.context);
+    } else if (cursor instanceof CursorFieldPrimitive) {
+      ((CursorFieldPrimitive) cursor).actionExit(inner.editor.context);
     } else throw new Assertion();
     assertThat(cursor, is(notNullValue()));
     inner.flushIteration();
@@ -309,24 +281,24 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard editInsertBefore() {
-    ((EditFieldArrayCursor) inner.editor.context.cursor).editInsertBefore(inner.editor);
+    ((EditCursorFieldArray) inner.editor.context.cursor).editInsertBefore(inner.editor);
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
   }
 
   public GeneralTestWizard editInsertAfter() {
-    ((EditFieldArrayCursor) inner.editor.context.cursor).editInsertAfter(inner.editor);
+    ((EditCursorFieldArray) inner.editor.context.cursor).editInsertAfter(inner.editor);
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
   }
 
   public GeneralTestWizard editDelete() {
-    if (inner.editor.context.cursor instanceof FieldAtomCursor) {
-      ((EditFieldAtomCursor) inner.editor.context.cursor).editDelete(inner.editor);
-    } else if (inner.editor.context.cursor instanceof FieldArrayCursor) {
-      ((EditFieldArrayCursor) inner.editor.context.cursor).editDelete(inner.editor);
+    if (inner.editor.context.cursor instanceof EditCursorAtom) {
+      ((EditCursorAtom) inner.editor.context.cursor).editDelete(inner.editor);
+    } else if (inner.editor.context.cursor instanceof CursorFieldArray) {
+      ((EditCursorFieldArray) inner.editor.context.cursor).editDelete(inner.editor);
     } else throw new Assertion();
     assertThat(inner.editor.context.cursor, is(notNullValue()));
     inner.flushIteration();

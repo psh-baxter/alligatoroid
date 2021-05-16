@@ -15,33 +15,26 @@ import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.visual.attachments.BorderAttachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
-import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
+public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   private final Symbol ellipsisSpec;
-  public FieldAtomCursor cursor;
   protected VisualAtom body;
   VisualParent parent;
-  private NestedHoverable hoverable;
   private Brick ellipsis = null;
 
-  public VisualFrontAtomBase(final int visualDepth, Symbol ellipsis) {
+  public VisualFieldAtomBase(final int visualDepth, Symbol ellipsis) {
     super(visualDepth);
     ellipsisSpec = ellipsis;
   }
   @Override
   public void notifyLastBrickCreated(Context context, Brick brick) {
-    if (cursor != null) cursor.border.setLast(context, brick);
-    if (hoverable != null) hoverable.border.setLast(context, brick);
     parent.notifyLastBrickCreated(context, brick);
   }
 
   @Override
   public void notifyFirstBrickCreated(Context context, Brick brick) {
-    if (cursor != null) cursor.border.setFirst(context, brick);
-    if (hoverable != null) hoverable.border.setFirst(context, brick);
     parent.notifyFirstBrickCreated(context, brick);
   }
 
@@ -62,6 +55,10 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   public abstract String backId();
 
   protected abstract SyntaxPath getBackPath();
+
+  public void copy(Context context) {
+    context.copy(Context.CopyContext.ARRAY, TSList.of(atomGet()));
+  }
 
   @Override
   public VisualParent parent() {
@@ -108,8 +105,6 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
   @Override
   public void uproot(final Context context, final Visual root) {
-    if (cursor != null) context.clearCursor();
-    if (hoverable != null) context.clearHover();
     if (ellipsis != null) ellipsis.destroy(context);
     if (body != null) {
       body.uproot(context, root);
@@ -119,18 +114,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
   @Override
   public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
-    if (cursor != null) return null;
-    if (hoverable != null) {
-      return new ROPair<>(hoverable, false);
-    } else if (ellipsis != null) {
-      return new ROPair<>(hoverable = new NestedHoverable(this, context, ellipsis, ellipsis), true);
-    } else {
-      return new ROPair<>(
-          hoverable =
-              new NestedHoverable(
-                  this, context, body.getFirstBrick(context), body.getLastBrick(context)),
-          true);
-    }
+    return parent.hover(context, point);
   }
 
   @Override
@@ -146,7 +130,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
             new BrickInterface() {
               @Override
               public VisualLeaf getVisual() {
-                return VisualFrontAtomBase.this;
+                return VisualFieldAtomBase.this;
               }
 
               @Override
@@ -208,59 +192,16 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
     }
   }
 
-  public void select(final Context context) {
-    if (cursor != null) return;
-    else if (hoverable != null) {
-      context.clearHover();
-    }
-    cursor = context.cursorFactory.createAtomCursor(context, this);
-    context.setCursor(cursor);
-  }
-
   protected void set(final Context context, final Atom data) {
     if (ellipsize(context)) return;
-    boolean fixDeepSelection = false;
-    boolean fixDeepHover = false;
-    if (context.cursor != null) {
-      if (context.cursor.getVisual() == this) {
-        fixDeepSelection = true;
-        context.clearCursor();
-      } else {
-        VisualParent parent = context.cursor.getVisual().parent();
-        while (parent != null) {
-          final Visual visual = parent.visual();
-          if (visual == this) {
-            fixDeepSelection = true;
-            break;
-          }
-          parent = visual.parent();
-        }
-      }
-    }
-    if (hoverable == null && context.hover != null) {
-      VisualParent parent = context.hover.visual().parent();
-      while (parent != null) {
-        final Visual visual = parent.visual();
-        if (visual == this) {
-          fixDeepHover = true;
-          break;
-        }
-        parent = visual.parent();
-      }
-    }
-
     coreSet(context, data);
     context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
-
-    if (fixDeepSelection) select(context);
-    if (fixDeepHover) context.clearHover();
   }
 
   private void coreSet(final Context context, final Atom data) {
     if (body != null) body.uproot(context, null);
     this.body =
         (VisualAtom) data.ensureVisual(context, new FrontAtomParent(), visualDepth + 1, depthScore());
-    if (cursor != null) cursor.nudgeCreation(context);
   }
 
   @Override
@@ -269,54 +210,15 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
   }
 
   public interface VisualNestedDispatcher {
-    void handle(VisualFrontAtomFromArray visual);
+    void handle(VisualFieldAtomFromArray visual);
 
     void handle(VisualFieldAtom visual);
-  }
-
-  private static class NestedHoverable extends Hoverable {
-    public final BorderAttachment border;
-    private final VisualFrontAtomBase visual;
-
-    private NestedHoverable(
-        VisualFrontAtomBase visual, final Context context, final Brick first, final Brick last) {
-      border = new BorderAttachment(context, context.syntax.hoverStyle.obbox);
-      border.setFirst(context, first);
-      border.setLast(context, last);
-      this.visual = visual;
-    }
-
-    @Override
-    public SyntaxPath getSyntaxPath() {
-      return visual.getBackPath().add(FieldAtom.SYNTAX_PATH_KEY);
-    }
-
-    @Override
-    protected void clear(final Context context) {
-      border.destroy(context);
-      visual.hoverable = null;
-    }
-
-    @Override
-    public void select(final Context context) {
-      visual.selectAnyChild(context);
-    }
-
-    @Override
-    public VisualAtom atom() {
-      return visual.parent.atomVisual();
-    }
-
-    @Override
-    public Visual visual() {
-      return visual;
-    }
   }
 
   private class FrontAtomParent extends VisualParent {
     @Override
     public Visual visual() {
-      return VisualFrontAtomBase.this;
+      return VisualFieldAtomBase.this;
     }
 
     @Override
@@ -336,12 +238,12 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
     @Override
     public void notifyLastBrickCreated(Context context, Brick brick) {
-      VisualFrontAtomBase.this.notifyLastBrickCreated(context, brick);
+      VisualFieldAtomBase.this.notifyLastBrickCreated(context, brick);
     }
 
     @Override
     public void notifyFirstBrickCreated(Context context, Brick brick) {
-      VisualFrontAtomBase.this.notifyFirstBrickCreated(context, brick);
+      VisualFieldAtomBase.this.notifyFirstBrickCreated(context, brick);
     }
 
     @Override
@@ -366,17 +268,7 @@ public abstract class VisualFrontAtomBase extends Visual implements VisualLeaf {
 
     @Override
     public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
-      return VisualFrontAtomBase.this.hover(context, point);
-    }
-
-    @Override
-    public boolean selectNext(final Context context) {
-      throw new DeadCode();
-    }
-
-    @Override
-    public boolean selectPrevious(final Context context) {
-      throw new DeadCode();
+      return VisualFieldAtomBase.this.hover(context, point);
     }
   }
 }

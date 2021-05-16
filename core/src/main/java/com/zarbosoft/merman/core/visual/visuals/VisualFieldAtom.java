@@ -8,9 +8,8 @@ import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
-import com.zarbosoft.merman.core.wall.Brick;
 
-public class VisualFieldAtom extends VisualFrontAtomBase {
+public class VisualFieldAtom extends VisualFieldAtomBase {
   public final FieldAtom value;
   private final FieldAtom.Listener dataListener;
 

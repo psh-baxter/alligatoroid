@@ -1,11 +1,11 @@
 package com.zarbosoft.merman.webview;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.CursorFactory;
 import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.ViewerCursorFactory;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
@@ -14,8 +14,11 @@ import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.UnsupportedDirections;
-import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
+import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.webview.display.JSDisplay;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -139,7 +142,68 @@ public class WebView {
             display,
             env,
             serializer,
-            new ViewerCursorFactory());
+            new CursorFactory() {
+              boolean handleCommon(Context context, ButtonEvent e, Runnable copy) {
+                if (e.press) {
+                  switch (e.key) {
+                    case C:
+                      {
+                        if (context.cursor != null
+                            && (e.modifiers.contains(Key.CONTROL)
+                                || e.modifiers.contains(Key.CONTROL_LEFT)
+                                || e.modifiers.contains(Key.CONTROL_RIGHT))) {
+                          copy.run();
+                        }
+                        return true;
+                      }
+                  }
+                }
+                return false;
+              }
+
+              @Override
+              public CursorFieldPrimitive createFieldPrimitiveCursor(
+                  Context context,
+                  VisualFrontPrimitive visualPrimitive,
+                  boolean leadFirst,
+                  int beginOffset,
+                  int endOffset) {
+                return new CursorFieldPrimitive(
+                    context, visualPrimitive, leadFirst, beginOffset, endOffset) {
+                  @Override
+                  public boolean handleKey(Context context, ButtonEvent hidEvent) {
+                    return handleCommon(context, hidEvent, () -> actionCopy(context));
+                  }
+                };
+              }
+
+              @Override
+              public CursorFieldArray createFieldArrayCursor(
+                  Context context, VisualFieldArray visual, boolean leadFirst, int start, int end) {
+                return new CursorFieldArray(context, visual, leadFirst, start, end) {
+                  @Override
+                  public boolean handleKey(Context context, ButtonEvent hidEvent) {
+                    return handleCommon(context, hidEvent, () -> actionCopy(context));
+                  }
+                };
+              }
+
+              @Override
+              public CursorAtom createAtomCursor(
+                      Context context, VisualAtom base, int index) {
+                return new CursorAtom(context, base, index) {
+                  @Override
+                  public boolean handleKey(Context context, ButtonEvent hidEvent) {
+                    return handleCommon(context, hidEvent, () -> actionCopy(context));
+                  }
+                };
+              }
+
+              @Override
+              public boolean prepSelectEmptyArray(Context context, FieldArray value) {
+                return false;
+              }
+            });
     context.addHoverListener(
         new Context.HoverListener() {
           @Override
@@ -179,7 +243,7 @@ public class WebView {
                     ((FieldPrimitive) base).selectInto(context, false, startIndex, endIndex);
                   }
                 } else if (base instanceof Atom) {
-                  ((Atom) base).fieldParentRef.selectValue(context);
+                  ((Atom) base).fieldParentRef.selectField(context);
                 } else throw new Assertion();
               }
             }
@@ -215,32 +279,6 @@ public class WebView {
                       dragSelect = new DragSelectState(path);
                       return true;
                     }
-                  }
-                case C:
-                  {
-                    if (context.cursor != null
-                        && (e.modifiers.contains(Key.CONTROL)
-                            || e.modifiers.contains(Key.CONTROL_LEFT)
-                            || e.modifiers.contains(Key.CONTROL_RIGHT))) {
-                      context.cursor.dispatch(
-                          new com.zarbosoft.merman.core.Cursor.Dispatcher() {
-                            @Override
-                            public void handle(FieldArrayCursor cursor) {
-                              cursor.actionCopy(context);
-                            }
-
-                            @Override
-                            public void handle(FieldAtomCursor cursor) {
-                              cursor.actionCopy(context);
-                            }
-
-                            @Override
-                            public void handle(VisualFrontPrimitive.Cursor cursor) {
-                              cursor.actionCopy(context);
-                            }
-                          });
-                    }
-                    return true;
                   }
               }
             }

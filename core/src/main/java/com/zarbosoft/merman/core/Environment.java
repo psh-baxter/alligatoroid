@@ -11,6 +11,30 @@ import java.util.function.Consumer;
 public interface Environment {
   public static final int I18N_DONE = -1;
 
+  public static String joinGlyphEvents(ROList<CharacterEvent> glyphs) {
+    int size = 0;
+    for (CharacterEvent glyph : glyphs) {
+      size += glyph.value.length();
+    }
+    StringBuilder builder = new StringBuilder(size);
+    for (CharacterEvent glyph : glyphs) {
+      builder.append(glyph.value);
+    }
+    return builder.toString();
+  }
+
+  public static String joinGlyphs(ROList<String> glyphs) {
+    int size = 0;
+    for (String glyph : glyphs) {
+      size += glyph.length();
+    }
+    StringBuilder builder = new StringBuilder(size);
+    for (String glyph : glyphs) {
+      builder.append(glyph);
+    }
+    return builder.toString();
+  }
+
   Time now();
 
   HandleDelay delay(long ms, Runnable r);
@@ -53,30 +77,6 @@ public interface Environment {
     return glyphs;
   }
 
-  public static String joinGlyphEvents(ROList<CharacterEvent> glyphs) {
-    int size = 0;
-    for (CharacterEvent glyph : glyphs) {
-      size += glyph.value.length();
-    }
-    StringBuilder builder = new StringBuilder(size);
-    for (CharacterEvent glyph : glyphs) {
-      builder.append(glyph.value);
-    }
-    return builder.toString();
-  }
-
-  public static String joinGlyphs(ROList<String> glyphs) {
-    int size = 0;
-    for (String glyph : glyphs) {
-      size += glyph.length();
-    }
-    StringBuilder builder = new StringBuilder(size);
-    for (String glyph : glyphs) {
-      builder.append(glyph);
-    }
-    return builder.toString();
-  }
-
   public I18nWalker glyphWalker(String s);
 
   public I18nWalker wordWalker(String s);
@@ -99,6 +99,51 @@ public interface Environment {
 
   public interface HandleDelay {
     void cancel();
+  }
+
+  /**
+   * Moves in larger increments: doesn't flop before/after whitespace between words (1 glyph
+   * movement)
+   */
+  public static interface FixedWordI18nWalker extends I18nWalker {
+    int precedingAny(int offset);
+
+    int followingAny(int offset);
+
+    boolean isWhitespace(String glyph);
+
+    String charAt(int offset);
+
+    int length();
+
+    @Override
+    default int precedingStart(int offset) {
+      int out = precedingAny(offset);
+      if (out != -1 && isWhitespace(charAt(out))) out = precedingAny(out);
+      return out;
+    }
+
+    @Override
+    default int precedingEnd(int offset) {
+      int out = precedingAny(offset);
+      if (out != -1 && !isWhitespace(charAt(out))) out = precedingAny(out);
+      if (out == -1 && offset > 0) return 0;
+      return out;
+    }
+
+    @Override
+    default int followingStart(int offset) {
+      int out = followingAny(offset);
+      if (out != -1 && out < length() && isWhitespace(charAt(out))) out = followingAny(out);
+      return out;
+    }
+
+    @Override
+    default int followingEnd(int offset) {
+      int out = followingAny(offset);
+      if (out != -1 && out < length() && !isWhitespace(charAt(out))) out = followingAny(out);
+      return out;
+    }
   }
 
   public static interface I18nWalker {

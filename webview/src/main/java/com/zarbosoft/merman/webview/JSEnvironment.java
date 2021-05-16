@@ -8,6 +8,7 @@ import elemental2.core.JsDate;
 import elemental2.core.JsIIterableResult;
 import elemental2.core.JsIteratorIterable;
 import elemental2.core.JsObject;
+import elemental2.core.JsRegExp;
 import elemental2.core.Symbol;
 import elemental2.dom.DataTransfer;
 import elemental2.dom.DataTransferItem;
@@ -18,6 +19,7 @@ import jsinterop.base.JsPropertyMap;
 import java.util.function.Consumer;
 
 public class JSEnvironment implements Environment {
+  public static JsRegExp isWhitespace = new JsRegExp("\\s");
   private final Segmenter wordSegmenter;
   private final Segmenter glyphSegmenter;
 
@@ -33,22 +35,21 @@ public class JSEnvironment implements Environment {
 
   @Override
   public Environment.I18nWalker glyphWalker(String s) {
-    return new I18nWalker(glyphSegmenter, s);
+    return new NormalI18nWalker(glyphSegmenter, s);
   }
 
   @Override
   public Environment.I18nWalker wordWalker(String s) {
-    return new I18nWalker(wordSegmenter, s);
+    return new WordI18nWalker(wordSegmenter, s);
   }
 
   @Override
   public Environment.I18nWalker lineWalker(String s) {
-    return new I18nWalker(wordSegmenter, s);
+    return new NormalI18nWalker(wordSegmenter, s);
   }
 
   @Override
-  public void destroy() {
-  }
+  public void destroy() {}
 
   @Override
   public HandleDelay delay(long ms, Runnable r) {
@@ -140,12 +141,59 @@ public class JSEnvironment implements Environment {
     }
   }
 
-  private static class I18nWalker implements Environment.I18nWalker {
+  private static class NormalI18nWalker extends BaseI18nWalker implements I18nWalker {
+    private NormalI18nWalker(Segmenter segmenter, String text) {
+      super(segmenter, text);
+    }
+
+    @Override
+    public int precedingStart(int offset) {
+      return precedingAny(offset);
+    }
+
+    @Override
+    public int precedingEnd(int offset) {
+      return precedingAny(offset);
+    }
+
+    @Override
+    public int followingStart(int offset) {
+      return followingAny(offset);
+    }
+
+    @Override
+    public int followingEnd(int offset) {
+      return followingAny(offset);
+    }
+  }
+
+  private static class WordI18nWalker extends BaseI18nWalker implements FixedWordI18nWalker {
+    private WordI18nWalker(Segmenter segmenter, String text) {
+      super(segmenter, text);
+    }
+
+    @Override
+    public boolean isWhitespace(String glyph) {
+      return isWhitespace.test(glyph);
+    }
+
+    @Override
+    public String charAt(int offset) {
+      return text.substring(offset, 1);
+    }
+
+    @Override
+    public int length() {
+      return text.length();
+    }
+  }
+
+  private static class BaseI18nWalker {
+    public final String text;
     private final TSList<Integer> segments = new TSList<>();
-    private final String text;
     private int index;
 
-    private I18nWalker(Segmenter segmenter, String text) {
+    private BaseI18nWalker(Segmenter segmenter, String text) {
       this.text = text;
       JsObject segments0 = segmenter.segment(this.text);
       JsIteratorIterable<JsPropertyMap> iter =
@@ -159,7 +207,7 @@ public class JSEnvironment implements Environment {
       segments.add(text.length());
     }
 
-    public int preceding(int offset) {
+    public int precedingAny(int offset) {
       while (segments.get(index) >= offset) {
         index -= 1;
         if (index < 0) {
@@ -170,8 +218,7 @@ public class JSEnvironment implements Environment {
       return segments.get(index);
     }
 
-
-    public int following(int offset) {
+    public int followingAny(int offset) {
       while (segments.get(index) <= offset) {
         index += 1;
         if (index >= segments.size()) {
@@ -180,36 +227,6 @@ public class JSEnvironment implements Environment {
         }
       }
       return segments.get(index);
-    }
-    @Override
-    public int precedingStart(int offset) {
-      int out = preceding(offset);
-      if (out != -1 && Character.isWhitespace(text.codePointAt(out))) out = preceding(out);
-      return out;
-    }
-
-    @Override
-    public int precedingEnd(int offset) {
-      int out = preceding(offset);
-      if (out != -1 && !Character.isWhitespace(text.codePointAt(out))) out = preceding(out);
-      if (out == -1 && offset > 0) return 0;
-      return out;
-    }
-
-    @Override
-    public int followingStart(int offset) {
-      int out = following(offset);
-      if (out != -1 && out < text.length() && Character.isWhitespace(text.codePointAt(out)))
-        out = following(out);
-      return out;
-    }
-
-    @Override
-    public int followingEnd(int offset) {
-      int out = following(offset);
-      if (out != -1 && out < text.length() && !Character.isWhitespace(text.codePointAt(out)))
-        out = following(out);
-      return out;
     }
   }
 

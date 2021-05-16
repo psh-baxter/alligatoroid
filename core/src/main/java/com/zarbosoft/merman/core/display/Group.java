@@ -28,8 +28,6 @@ public interface Group extends FreeDisplayNode {
     return 0;
   }
 
-  void addAll(int index, ROList<? extends DisplayNode> nodes);
-
   default void remove(final int index) {
     remove(index, 1);
   }

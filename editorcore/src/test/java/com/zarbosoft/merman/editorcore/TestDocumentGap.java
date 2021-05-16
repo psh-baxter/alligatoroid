@@ -16,7 +16,7 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
-import com.zarbosoft.merman.editorcore.gap.EditGapCursor;
+import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.helper.BackRecordBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
@@ -43,8 +43,8 @@ import static org.junit.Assert.assertThat;
 public class TestDocumentGap {
 
   public static void assertChoices(Editor editor, int count) {
-    if (count == 0) assertThat(((EditGapCursor) editor.context.cursor).choicePage, equalTo(null));
-    else assertThat(((EditGapCursor) editor.context.cursor).choicePage.choices.size(), is(count));
+    if (count == 0) assertThat(((EditGapCursorFieldPrimitive) editor.context.cursor).choicePage, equalTo(null));
+    else assertThat(((EditGapCursorFieldPrimitive) editor.context.cursor).choicePage.choices.size(), is(count));
   }
 
   /** Confirm all concrete atom types are found */
@@ -810,7 +810,7 @@ public class TestDocumentGap {
           ((FieldPrimitive)
                   editor.context.syntaxLocate(new SyntaxPath("value", "0", "value", "0", "gap")))
               .selectInto(editor.context);
-          ((EditGapCursor) editor.context.cursor).editExit(editor);
+          ((EditGapCursorFieldPrimitive) editor.context.cursor).editExit(editor);
         },
         new TreeBuilder(array).addArray("value").build());
   }
@@ -835,7 +835,7 @@ public class TestDocumentGap {
         editor -> {
           ((FieldPrimitive) editor.context.syntaxLocate(new SyntaxPath("value", "0", "gap")))
               .selectInto(editor.context);
-          ((EditGapCursor) editor.context.cursor).editExit(editor);
+          ((EditGapCursorFieldPrimitive) editor.context.cursor).editExit(editor);
         },
         new TreeBuilder(infinity).build());
   }

@@ -1,10 +1,8 @@
 package com.zarbosoft.merman.editorcore.display;
 
-import com.zarbosoft.merman.core.display.Display;
 import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.visual.Vector;
-import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class MockeryGroup extends MockFreeDisplayNode implements Group {
@@ -18,11 +16,6 @@ public class MockeryGroup extends MockFreeDisplayNode implements Group {
   @Override
   public void setTransverse(double transverse, boolean animate) {
     setPosition(new Vector(converse(), transverse), animate);
-  }
-
-  @Override
-  public void addAll(final int index, final ROList<? extends DisplayNode> nodes) {
-    this.nodes.insertAll(index, (ROList) nodes);
   }
 
   @Override

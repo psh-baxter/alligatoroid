@@ -6,8 +6,8 @@ import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.History;
 
-public class EditPrimitiveCursor extends BaseEditPrimitiveCursor {
-  public EditPrimitiveCursor(
+public class EditCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
+  public EditCursorFieldPrimitive(
       Context context,
       VisualFrontPrimitive visualPrimitive,
       boolean leadFirst,

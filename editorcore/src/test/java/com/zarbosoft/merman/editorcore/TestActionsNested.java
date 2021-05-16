@@ -2,12 +2,11 @@ package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
-import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.editorcore.cursors.EditFieldAtomCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
 import com.zarbosoft.merman.editorcore.helper.BackRecordBuilder;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
@@ -58,14 +57,13 @@ public class TestActionsNested {
         .run(
             editor -> {
               ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom")))
-                  .fieldParentRef.selectValue(editor.context);
+                  .fieldParentRef.selectField(editor.context);
             })
         .editDelete()
         .checkArrayTree(
             new TreeBuilder(snooze)
                 .add(
-                    "value",
-                    new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
+                    "value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
                 .build());
   }
 
@@ -107,12 +105,12 @@ public class TestActionsNested {
                     "second",
                     new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
                 .build());
-    ((FieldAtom) editor.context.syntaxLocate(new SyntaxPath("value", "0", "first")))
-        .visual.select(editor.context);
-    ((EditFieldAtomCursor) editor.context.cursor).actionCopy(editor.context);
-    ((FieldAtom) editor.context.syntaxLocate(new SyntaxPath("value", "0", "second")))
-        .visual.select(editor.context);
-    ((EditFieldAtomCursor) editor.context.cursor).editPaste(editor);
+    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+        .visual.selectById(editor.context, "first");
+    ((EditCursorAtom) editor.context.cursor).actionCopy(editor.context);
+    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+        .visual.selectById(editor.context, "second");
+    ((EditCursorAtom) editor.context.cursor).editPaste(editor);
     assertTreeEqual(
         editor.context,
         new TreeBuilder(plus)
@@ -151,17 +149,16 @@ public class TestActionsNested {
         buildDoc(
             syntax,
             new TreeBuilder(factorial).add("value", new TreeBuilder(infinity).build()).build());
-    ((FieldAtom) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value")))
-        .visual.select(editor.context);
-    ((EditFieldAtomCursor) editor.context.cursor).editCut(editor);
+    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+        .visual.selectById(editor.context, "value");
+    ((EditCursorAtom) editor.context.cursor).editCut(editor);
     assertTreeEqual(
         editor.context,
         new TreeBuilder(factorial)
-            .add(
-                "value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
+            .add("value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
             .build(),
         Helper.rootArray(editor.context.document));
-    ((EditFieldAtomCursor) editor.context.cursor).editPaste(editor);
+    ((EditCursorAtom) editor.context.cursor).editPaste(editor);
     assertTreeEqual(
         editor.context,
         new TreeBuilder(factorial).add("value", new TreeBuilder(infinity).build()).build(),
@@ -196,9 +193,9 @@ public class TestActionsNested {
         buildDoc(
             syntax,
             new TreeBuilder(factorial).add("value", new TreeBuilder(infinity).build()).build());
-    ((FieldAtom) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value")))
-        .visual.select(editor.context);
-    ((EditFieldAtomCursor) editor.context.cursor).editSuffix(editor);
+    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+        .visual.selectById(editor.context, "value");
+    ((EditCursorAtom) editor.context.cursor).editSuffix(editor);
     assertTreeEqual(
         editor.context,
         new TreeBuilder(factorial)

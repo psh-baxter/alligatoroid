@@ -51,7 +51,7 @@ public abstract class Field {
 
     public abstract SyntaxPath path();
 
-    public abstract boolean selectValue(final Context context);
+    public abstract boolean selectField(final Context context);
 
     public abstract SyntaxPath getSyntaxPath();
 

@@ -39,7 +39,7 @@ public class GapChoice extends TwoColumnChoice {
   public final Atom gap;
   public final FreeAtomType type;
   public final int consumePreceding;
-  public final ROList<EditGapCursor.PrepareAtomField> supplyFillAtoms;
+  public final ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms;
   public final int consumeText;
   public final Step.Branch incompleteFields;
   private final TSList<Event> glyphs;
@@ -51,7 +51,7 @@ public class GapChoice extends TwoColumnChoice {
       Atom gap,
       FreeAtomType type,
       int consumePreceding,
-      ROList<EditGapCursor.PrepareAtomField> supplyFillAtoms,
+      ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms,
       TSList<Event> glyphs,
       int consumeText,
       ROList<FieldPrimitive> fields,
@@ -107,7 +107,7 @@ public class GapChoice extends TwoColumnChoice {
                     preceding.size() - consumePreceding,
                     consumePreceding,
                     ROList.empty));
-            for (EditGapCursor.PrepareAtomField s : supplyFillAtoms) {
+            for (EditGapCursorFieldPrimitive.PrepareAtomField s : supplyFillAtoms) {
               Field field = s.process(editor, recorder1);
               fields.put(field.back().id, field);
             }
@@ -131,7 +131,7 @@ public class GapChoice extends TwoColumnChoice {
             } else {
               placeWithSuffixSelect(editor, recorder1, created);
             }
-            ((EditGapCursor) editor.context.cursor)
+            ((EditGapCursorFieldPrimitive) editor.context.cursor)
                 .editHandleTyping(editor, recorder1, remainderText.toString());
           } else if (lastPrimitive != null) {
             place(editor, recorder1, created);
@@ -232,6 +232,7 @@ public class GapChoice extends TwoColumnChoice {
     previewLayout.layout();
 
     final Text text = editor.context.display.text();
+    text.setBaselineTransverse(0);
     text.setColor(editor.context, editor.choiceDescriptionStyle.color);
     text.setFont(editor.context, Context.getFont(editor.context, editor.choiceDescriptionStyle));
     text.setText(editor.context, type.name());

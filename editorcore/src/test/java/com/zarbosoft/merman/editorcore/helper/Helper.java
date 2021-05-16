@@ -29,9 +29,9 @@ import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
-import com.zarbosoft.merman.editorcore.cursors.EditFieldArrayCursor;
-import com.zarbosoft.merman.editorcore.cursors.EditFieldAtomCursor;
-import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.display.MockeryDisplay;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
@@ -61,16 +61,16 @@ public class Helper {
         .build();
   }
 
-  public static EditFieldAtomCursor cursorAtom(Context context) {
-    return (EditFieldAtomCursor) context.cursor;
+  public static EditCursorAtom cursorAtom(Context context) {
+    return (EditCursorAtom) context.cursor;
   }
 
-  public static EditFieldArrayCursor cursorArray(Context context) {
-    return (EditFieldArrayCursor) context.cursor;
+  public static EditCursorFieldArray cursorArray(Context context) {
+    return (EditCursorFieldArray) context.cursor;
   }
 
-  public static EditPrimitiveCursor cursorPrimitive(Context context) {
-    return (EditPrimitiveCursor) context.cursor;
+  public static EditCursorFieldPrimitive cursorPrimitive(Context context) {
+    return (EditCursorFieldPrimitive) context.cursor;
   }
 
   public static BackSpec buildBackType(final String type, final BackSpec child) {

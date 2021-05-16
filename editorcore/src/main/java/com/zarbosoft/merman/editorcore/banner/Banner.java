@@ -70,7 +70,7 @@ public class Banner {
     background.setSize(context, context.edge, text.descent() + text.ascent());
   }
 
-  public void addMessage(final Context context, final BannerMessage message) {
+  public void setMessage(final Context context, final BannerMessage message) {
     if (current == null) {
       if (style.obbox.line || style.obbox.fill) {
         background = new Box(context);

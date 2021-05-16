@@ -7,9 +7,9 @@ import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Course;
@@ -150,23 +150,10 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actWindow() {
-    if (inner.context.cursor instanceof FieldAtomCursor) {
-      ((FieldAtomCursor) inner.context.cursor).actionWindow(inner.context);
-    } else if (inner.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.context.cursor).actionWindow(inner.context);
-    } else throw new Assertion();
-    assertThat(inner.context.cursor, is(notNullValue()));
-    inner.flushIteration();
-    return this;
-  }
-
-  public GeneralTestWizard actNext() {
-    if (inner.context.cursor instanceof FieldAtomCursor) {
-      ((FieldAtomCursor) inner.context.cursor).actionNext(inner.context);
-    } else if (inner.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.context.cursor).actionNext(inner.context);
-    } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
-      ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionNext(inner.context);
+    if (inner.context.cursor instanceof CursorAtom) {
+      ((CursorAtom) inner.context.cursor).actionWindow(inner.context);
+    } else if (inner.context.cursor instanceof CursorFieldArray) {
+      ((CursorFieldArray) inner.context.cursor).actionWindow(inner.context);
     } else throw new Assertion();
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
@@ -174,10 +161,10 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actGatherNext() {
-    if (inner.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.context.cursor).actionGatherNext(inner.context);
-    } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
-      ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionGatherNextGlyph(inner.context);
+    if (inner.context.cursor instanceof CursorFieldArray) {
+      ((CursorFieldArray) inner.context.cursor).actionGatherNext(inner.context);
+    } else if (inner.context.cursor instanceof CursorFieldPrimitive) {
+      ((CursorFieldPrimitive) inner.context.cursor).actionGatherNextGlyph(inner.context);
     } else throw new Assertion();
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
@@ -185,30 +172,17 @@ public class GeneralTestWizard {
   }
 
   public GeneralTestWizard actGatherPreviousLine() {
-    ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionGatherPreviousLine(inner.context);
-    assertThat(inner.context.cursor, is(notNullValue()));
-    inner.flushIteration();
-    return this;
-  }
-
-  public GeneralTestWizard actPrevious() {
-    if (inner.context.cursor instanceof FieldAtomCursor) {
-      ((FieldAtomCursor) inner.context.cursor).actionPrevious(inner.context);
-    } else if (inner.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.context.cursor).actionPrevious(inner.context);
-    } else if (inner.context.cursor instanceof VisualFrontPrimitive.Cursor) {
-      ((VisualFrontPrimitive.Cursor) inner.context.cursor).actionPrevious(inner.context);
-    } else throw new Assertion();
+    ((CursorFieldPrimitive) inner.context.cursor).actionGatherPreviousLine(inner.context);
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
     return this;
   }
 
   public GeneralTestWizard actExit() {
-    if (inner.context.cursor instanceof FieldAtomCursor) {
-      ((FieldAtomCursor) inner.context.cursor).actionExit(inner.context);
-    } else if (inner.context.cursor instanceof FieldArrayCursor) {
-      ((FieldArrayCursor) inner.context.cursor).actionExit(inner.context);
+    if (inner.context.cursor instanceof CursorAtom) {
+      ((CursorAtom) inner.context.cursor).actionExit(inner.context);
+    } else if (inner.context.cursor instanceof CursorFieldArray) {
+      ((CursorFieldArray) inner.context.cursor).actionExit(inner.context);
     } else throw new Assertion();
     assertThat(inner.context.cursor, is(notNullValue()));
     inner.flushIteration();
@@ -274,16 +248,25 @@ public class GeneralTestWizard {
     return this;
   }
 
-  /*
-  public GeneralTestWizard sendText(final String text) {
-  	inner.context.cursor.receiveText(inner.context, text);
-  	inner.flushIteration();
-  	return this;
+  public GeneralTestWizard actNextElement() {
+    if (inner.context.cursor instanceof CursorAtom) {
+      ((CursorAtom) inner.context.cursor).actionNextElement(inner.context);
+    } else if (inner.context.cursor instanceof CursorFieldArray) {
+      ((CursorFieldArray) inner.context.cursor).actionNextElement(inner.context);
+    } else throw new Assertion();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
   }
 
-  public GeneralTestWizard checkChoices(final int count) {
-  	assertThat(choices.size(), equalTo(count));
-  	return this;
+  public GeneralTestWizard actPreviousElement() {
+    if (inner.context.cursor instanceof CursorAtom) {
+      ((CursorAtom) inner.context.cursor).actionPreviousElement(inner.context);
+    } else if (inner.context.cursor instanceof CursorFieldArray) {
+      ((CursorFieldArray) inner.context.cursor).actionPreviousElement(inner.context);
+    } else throw new Assertion();
+    assertThat(inner.context.cursor, is(notNullValue()));
+    inner.flushIteration();
+    return this;
   }
-   */
 }

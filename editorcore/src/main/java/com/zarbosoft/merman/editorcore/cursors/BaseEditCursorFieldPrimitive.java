@@ -2,6 +2,7 @@ package com.zarbosoft.merman.editorcore.cursors;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.History;
@@ -10,10 +11,10 @@ import com.zarbosoft.rendaw.common.ROPair;
 
 import java.util.function.Consumer;
 
-public class BaseEditPrimitiveCursor extends VisualFrontPrimitive.Cursor {
+public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
   // TODO check pattern against more edits: split, join, newline, paste, etc
 
-  public BaseEditPrimitiveCursor(
+  public BaseEditCursorFieldPrimitive(
       Context context,
       VisualFrontPrimitive visualPrimitive,
       boolean leadFirst,

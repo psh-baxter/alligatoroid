@@ -15,7 +15,7 @@ import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.cursors.BaseEditPrimitiveCursor;
+import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
@@ -38,7 +38,6 @@ import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.ROPair;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
@@ -46,7 +45,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
 
-public class EditGapCursor extends BaseEditPrimitiveCursor {
+public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
   public static Reference.Key<ROList<PrepareAtomField>> PRECEDING_ROOT_KEY = new Reference.Key<>();
   public static Reference.Key<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>
       GAP_ROOT_KEY = new Reference.Key<>();
@@ -54,7 +53,7 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
   public String currentText;
   public TwoColumnChoicePage choicePage;
 
-  public EditGapCursor(
+  public EditGapCursorFieldPrimitive(
       Editor editor,
       VisualFrontPrimitive visualPrimitive,
       boolean leadFirst,
@@ -343,7 +342,7 @@ public class EditGapCursor extends BaseEditPrimitiveCursor {
     /// Update visual
     if (!choices.isEmpty()) {
       choicePage = new TwoColumnChoicePage(editor, (TSList<TwoColumnChoice>) (TSList) choices);
-      editor.details.addPage(context, choicePage);
+      editor.details.setPage(context, choicePage);
     } else {
       if (choicePage != null) {
         editor.details.removePage(context, choicePage);

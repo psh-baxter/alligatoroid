@@ -16,22 +16,21 @@ import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
-import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
-import com.zarbosoft.merman.editorcore.gap.EditGapCursor;
+import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
 import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalFieldArrayCursor;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalFieldAtomCursor;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalGapCursor;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalPrimitiveCursor;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalCursorFieldArray;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalGapCursorFieldPrimitive;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalCursorFieldPrimitive;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
 import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
 import com.zarbosoft.pidgoon.errors.NoResults;
@@ -131,23 +130,23 @@ public class NotMain extends Application {
               e ->
                   new EditorCursorFactory(e) {
                     @Override
-                    public EditGapCursor createGapCursor(
+                    public EditGapCursorFieldPrimitive createGapCursor(
                         VisualFrontPrimitive visualPrimitive,
                         boolean leadFirst,
                         int beginOffset,
                         int endOffset) {
-                      return new ModalGapCursor(
+                      return new ModalGapCursorFieldPrimitive(
                           editor, visualPrimitive, leadFirst, beginOffset, endOffset, NotMain.this);
                     }
 
                     @Override
-                    public VisualFrontPrimitive.Cursor createPrimitiveCursor1(
+                    public CursorFieldPrimitive createPrimitiveCursor1(
                         Context context,
                         VisualFrontPrimitive visualPrimitive,
                         boolean leadFirst,
                         int beginOffset,
                         int endOffset) {
-                      return new ModalPrimitiveCursor(
+                      return new ModalCursorFieldPrimitive(
                           context,
                           visualPrimitive,
                           leadFirst,
@@ -157,19 +156,13 @@ public class NotMain extends Application {
                     }
 
                     @Override
-                    public FieldAtomCursor createAtomCursor(
-                        Context context, VisualFrontAtomBase base) {
-                      return new ModalFieldAtomCursor(context, base, NotMain.this);
-                    }
-
-                    @Override
-                    public FieldArrayCursor createArrayCursor(
+                    public CursorFieldArray createFieldArrayCursor(
                         Context context,
                         VisualFieldArray visual,
                         boolean leadFirst,
                         int start,
                         int end) {
-                      return new ModalFieldArrayCursor(
+                      return new ModalCursorFieldArray(
                           context, visual, leadFirst, start, end, NotMain.this);
                     }
                   },
@@ -179,9 +172,35 @@ public class NotMain extends Application {
                           new Style.Config()
                               .fontSize(5)
                               .color(ModelColor.RGB.hex("938f8d"))
-                              .obbox(
-                                  new ObboxStyle(
-                                      new ObboxStyle.Config().line(false).fill(false))))));
+                              .obbox(new ObboxStyle(new ObboxStyle.Config().line(false)))))
+                  .choiceCursorStyle(
+                      new ObboxStyle(
+                          new ObboxStyle.Config()
+                              .lineThickness(0.3)
+                              .padding(Padding.ct(1.5, 0.5))
+                              .roundStart(true)
+                              .roundEnd(true)
+                              .roundOuterEdges(true)
+                              .roundRadius(1)
+                              .lineColor(ModelColor.RGB.hex("938f8d"))))
+                  .choiceDescriptionStyle(
+                      new Style(
+                          new Style.Config()
+                              .fontSize(5)
+                              .color(ModelColor.RGB.hex("938f8d"))
+                              .spaceBefore(4)))
+                  .detailsStyle(
+                      new Style(
+                          new Style.Config()
+                              .obbox(new ObboxStyle(new ObboxStyle.Config().line(false)))))
+                  .gapPlaceholderSymbol(
+                      new SymbolTextSpec(
+                          new SymbolTextSpec.Config("▢")
+                              .style(
+                                  new Style(
+                                      new Style.Config()
+                                          .fontSize(5)
+                                          .color(ModelColor.RGB.hex("938f8d")))))));
       editor.context.document.root.visual.selectAnyChild(editor.context);
 
       editor.context.addHoverListener(
@@ -225,7 +244,7 @@ public class NotMain extends Application {
                       ((FieldPrimitive) base).selectInto(context, false, startIndex, endIndex);
                     }
                   } else if (base instanceof Atom) {
-                    ((Atom) base).fieldParentRef.selectValue(context);
+                    ((Atom) base).fieldParentRef.selectField(context);
                   } else throw new Assertion();
                 }
               }

@@ -22,8 +22,8 @@ import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomFromArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomBase;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomFromArray;
 import com.zarbosoft.merman.editorcore.banner.Banner;
 import com.zarbosoft.merman.editorcore.details.Details;
 import com.zarbosoft.merman.editorcore.history.History;
@@ -45,6 +45,7 @@ public class Editor {
   public final Symbol gapPlaceholderSymbol;
   public Banner banner;
   public Details details;
+  public final int detailSpan;
 
   public Editor(
       final Syntax syntax,
@@ -86,6 +87,7 @@ public class Editor {
         new Details(
             this.context,
             config.detailsStyle == null ? new Style(new Style.Config()) : config.detailsStyle);
+    this.detailSpan = config.detailSpan;
   }
 
   public static Editor get(Context context) {
@@ -93,14 +95,14 @@ public class Editor {
   }
 
   public static void atomSet(
-      Context context, History.Recorder recorder, VisualFrontAtomBase base, Atom value) {
+          Context context, History.Recorder recorder, VisualFieldAtomBase base, Atom value) {
     base.dispatch(
-        new VisualFrontAtomBase.VisualNestedDispatcher() {
+        new VisualFieldAtomBase.VisualNestedDispatcher() {
           @Override
-          public void handle(VisualFrontAtomFromArray visual) {
+          public void handle(VisualFieldAtomFromArray visual) {
             recorder.apply(
                 context,
-                new ChangeArray(((VisualFrontAtomFromArray) base).value, 0, 1, TSList.of(value)));
+                new ChangeArray(((VisualFieldAtomFromArray) base).value, 0, 1, TSList.of(value)));
           }
 
           @Override
@@ -199,6 +201,7 @@ public class Editor {
     public ObboxStyle choiceCursorStyle;
     public Style bannerStyle;
     public Style detailsStyle;
+    public int detailSpan = 300;
 
     public Config(Context.InitialConfig context) {
       this.context = context;
@@ -211,6 +214,11 @@ public class Editor {
 
     public Config choiceDescriptionStyle(Style style) {
       this.choiceDescriptionStyle = style;
+      return this;
+    }
+
+    public Config detailsStyle(Style style) {
+      this.detailsStyle = style;
       return this;
     }
 

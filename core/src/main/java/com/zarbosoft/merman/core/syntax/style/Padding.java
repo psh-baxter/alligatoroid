@@ -18,4 +18,8 @@ public class Padding {
   public static Padding same(double amount) {
     return new Padding(amount, amount, amount, amount);
   }
+
+  public static Padding ct(double converse, double transverse) {
+    return new Padding(converse, converse, transverse, transverse);
+  }
 }

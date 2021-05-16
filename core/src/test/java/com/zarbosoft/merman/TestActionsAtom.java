@@ -3,6 +3,7 @@ package com.zarbosoft.merman;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.MiscSyntax;
@@ -26,12 +27,10 @@ public class TestActionsAtom {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((Atom) context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom")))
-        .fieldParentRef.selectValue(context);
+    ((FieldAtom) context.syntaxLocate(new SyntaxPath("value", "0", "value"))).selectInto(context);
     Helper.cursorAtom(context).actionEnter(context);
     assertThat(
-        context.cursor.getSyntaxPath(),
-        equalTo(new SyntaxPath("value", "0", "value", "atom", "value", "atom")));
+        context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "value")));
   }
 
   @Test
@@ -46,8 +45,7 @@ public class TestActionsAtom {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((Atom) context.syntaxLocate(new SyntaxPath("value", "0", "value", "atom")))
-        .fieldParentRef.selectValue(context);
+    ((FieldAtom) context.syntaxLocate(new SyntaxPath("value", "0", "value"))).selectInto(context);
     Helper.cursorAtom(context).actionExit(context);
     assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0")));
   }
@@ -61,13 +59,13 @@ public class TestActionsAtom {
                 .add("first", target)
                 .add("second", new TreeBuilder(MiscSyntax.one).build())
                 .build())
-        .run(context -> target.fieldParentRef.selectValue(context))
-        .actNext()
+        .run(context -> target.fieldParentRef.selectField(context))
+        .actNextElement()
         .run(
             context ->
                 assertThat(
                     context.cursor.getSyntaxPath(),
-                    equalTo(new SyntaxPath("value", "0", "second", "atom"))));
+                    equalTo(new SyntaxPath("value", "0", "second"))));
   }
 
   @Test
@@ -79,12 +77,12 @@ public class TestActionsAtom {
                 .add("first", new TreeBuilder(MiscSyntax.one).build())
                 .add("second", target)
                 .build())
-        .run(context -> target.fieldParentRef.selectValue(context))
-        .actPrevious()
+        .run(context -> target.fieldParentRef.selectField(context))
+        .actPreviousElement()
         .run(
             context ->
                 assertThat(
                     context.cursor.getSyntaxPath(),
-                    equalTo(new SyntaxPath("value", "0", "first", "atom"))));
+                    equalTo(new SyntaxPath("value", "0", "first"))));
   }
 }

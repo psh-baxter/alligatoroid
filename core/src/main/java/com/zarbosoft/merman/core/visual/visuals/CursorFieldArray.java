@@ -9,14 +9,14 @@ import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.attachments.BorderAttachment;
 import com.zarbosoft.merman.core.wall.Brick;
 
-public class FieldArrayCursor extends com.zarbosoft.merman.core.Cursor {
+public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
   public final VisualFieldArray visual;
   public int beginIndex;
   public int endIndex;
   public boolean leadFirst;
   BorderAttachment border;
 
-  public FieldArrayCursor(
+  public CursorFieldArray(
       final Context context,
       final VisualFieldArray visual,
       final boolean leadFirst,
@@ -96,7 +96,7 @@ public class FieldArrayCursor extends com.zarbosoft.merman.core.Cursor {
 
   @Override
   public Visual getVisual() {
-    return visual.children.get(beginIndex);
+    return visual;
   }
 
   @Override
@@ -109,7 +109,7 @@ public class FieldArrayCursor extends com.zarbosoft.merman.core.Cursor {
 
       {
         this.value = visual.value;
-        this.leadFirst = FieldArrayCursor.this.leadFirst;
+        this.leadFirst = CursorFieldArray.this.leadFirst;
         this.start = beginIndex;
         this.end = endIndex;
       }
@@ -126,11 +126,6 @@ public class FieldArrayCursor extends com.zarbosoft.merman.core.Cursor {
     return visual.value.getSyntaxPath().add(String.valueOf(beginIndex));
   }
 
-  @Override
-  public void dispatch(Dispatcher dispatcher) {
-    dispatcher.handle(this);
-  }
-
   public void actionEnter(final Context context) {
     visual.value.data.get(beginIndex).visual.selectAnyChild(context);
   }
@@ -139,16 +134,8 @@ public class FieldArrayCursor extends com.zarbosoft.merman.core.Cursor {
     visual.value.atomParentRef.selectAtomParent(context);
   }
 
-  public void actionNext(final Context context) {
-    visual.parent.selectNext(context);
-  }
-
-  public void actionPrevious(final Context context) {
-    visual.parent.selectPrevious(context);
-  }
-
   public void actionNextElement(final Context context) {
-    FieldArrayCursor.this.leadFirst = true;
+    CursorFieldArray.this.leadFirst = true;
     final int newIndex = Math.min(visual.value.data.size() - 1, endIndex + 1);
     if (newIndex == beginIndex && newIndex == endIndex) return;
     setPosition(context, newIndex);
@@ -167,14 +154,14 @@ public class FieldArrayCursor extends com.zarbosoft.merman.core.Cursor {
   }
 
   public void actionPreviousElement(final Context context) {
-    FieldArrayCursor.this.leadFirst = true;
+    CursorFieldArray.this.leadFirst = true;
     final int newIndex = Math.max(0, beginIndex - 1);
     if (newIndex == beginIndex && newIndex == endIndex) return;
     setPosition(context, newIndex);
   }
 
   public void actionCopy(final Context context) {
-    visual.value.back().copy(context, visual.value.data.sublist(beginIndex, endIndex + 1));
+    visual.copy(context,beginIndex,endIndex);
   }
 
   public void actionGatherNext(final Context context) {

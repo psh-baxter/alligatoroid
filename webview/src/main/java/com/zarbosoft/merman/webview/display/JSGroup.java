@@ -2,10 +2,8 @@ package com.zarbosoft.merman.webview.display;
 
 import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.display.Group;
-import com.zarbosoft.rendaw.common.ROList;
 import elemental2.dom.DomGlobal;
 import elemental2.dom.HTMLElement;
-import elemental2.dom.Node;
 
 public class JSGroup extends JSFreeDisplayNode implements Group {
   protected JSGroup(JSDisplay display) {
@@ -27,22 +25,7 @@ public class JSGroup extends JSFreeDisplayNode implements Group {
     fixPosition(animate);
   }
 
-  @Override
-  public void addAll(int index, ROList<? extends DisplayNode> nodes) {
-    if (index < element.childNodes.length) {
-      Node following = element.childNodes.getAt(index);
-      for (DisplayNode node : nodes) {
-        element.insertBefore(((JSDisplayNode) node).inner_(), following);
-      }
-    } else {
-      for (DisplayNode node : nodes) {
-        element.appendChild(((JSDisplayNode) node).inner_());
-      }
-    }
-    fixPosition();
-  }
-
-  @Override
+    @Override
   public void remove(int start, int count) {
     for (int i = 0; i < count; ++i) {
       ((HTMLElement) element.childNodes.getAt(start)).remove();

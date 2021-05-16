@@ -1,17 +1,17 @@
 package com.zarbosoft.merman.core.document;
 
+import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
-import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateBack;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
-import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -19,12 +19,10 @@ import com.zarbosoft.rendaw.common.TSMap;
 import java.util.Map;
 
 public class Atom {
-  public TSMap<String, Field> fields;
-  /**
-   * Null if root
-   */
-  public Field.Parent<?> fieldParentRef;
   public final AtomType type;
+  public TSMap<String, Field> fields;
+  /** Null if root */
+  public Field.Parent<?> fieldParentRef;
   public VisualAtom visual;
 
   public Atom(final AtomType type) {
@@ -34,7 +32,9 @@ public class Atom {
   public void initialSet(final TSMap<String, Field> fields) {
     this.fields = fields;
     for (Map.Entry<String, Field> entry : fields.entries()) {
-      entry.getValue().setAtomParentRef(
+      entry
+          .getValue()
+          .setAtomParentRef(
               new Parent() {
                 @Override
                 public Atom atom() {
@@ -44,7 +44,7 @@ public class Atom {
                 @Override
                 public boolean selectAtomParent(final Context context) {
                   if (fieldParentRef == null) return false;
-                  return Atom.this.fieldParentRef.selectValue(context);
+                  return Atom.this.fieldParentRef.selectField(context);
                 }
 
                 @Override
@@ -63,11 +63,13 @@ public class Atom {
     else return fieldParentRef.path();
   }
 
+  public boolean selectInto(final Context context) {
+    if (context.window) context.windowAdjustMinimalTo(this);
+    return visual.selectAnyChild(context);
+  }
+
   public Visual ensureVisual(
-          final Context context,
-          final VisualParent parent,
-          final int depth,
-          final int depthScore) {
+      final Context context, final VisualParent parent, final int depth, final int depthScore) {
     if (visual != null) {
       visual.root(context, parent, depth, depthScore);
     } else {

@@ -406,6 +406,8 @@ public class Context {
   }
 
   /**
+   * Note that the paths for atom fields and atoms are the same. There's no way to get an Atom back if the atom's in an
+   * atom field, you'll always get the field.
    * @param path
    * @return an atom or field
    */
@@ -508,16 +510,16 @@ public class Context {
     idleLayBricks.starts.add(start);
   }
 
-  public void windowAdjustMinimalTo(final Field field) {
+  public void windowAdjustMinimalTo(final Atom atom) {
     // Check if the selection is a supertree of the current window
-    if (isSubtree(windowAtom, field.atomParentRef.atom())) {
-      windowToSupertree(field.atomParentRef.atom());
+    if (isSubtree(windowAtom, atom)) {
+      windowToSupertree(atom);
       return;
     }
 
     // Otherwise from the selection go towards the root to find the last parent where the selection
     // is still visible
-    Atom nextWindow = field.atomParentRef.atom();
+    Atom nextWindow = atom;
     int depth = 0;
     while (true) {
       if (nextWindow == windowAtom) return;
@@ -529,6 +531,10 @@ public class Context {
 
     if (isSubtree(windowAtom, nextWindow)) windowToSupertree(nextWindow);
     else windowToNonSupertree(nextWindow);
+  }
+
+  public void windowAdjustMinimalTo(final Field field) {
+    windowAdjustMinimalTo(field.atomParentRef.atom());
   }
 
   public void windowClear() {

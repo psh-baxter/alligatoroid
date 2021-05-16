@@ -5,7 +5,7 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.banner.BannerMessage;
-import com.zarbosoft.merman.editorcore.cursors.BaseEditPrimitiveCursor;
+import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
@@ -14,13 +14,13 @@ import static com.zarbosoft.merman.jfxeditor1.NotMain.controlKeys;
 
 public class ModalPrimitiveInner {
   public final NotMain main;
-  private final BaseEditPrimitiveCursor cursor;
+  private final BaseEditCursorFieldPrimitive cursor;
   public Mode mode = Mode.NAV;
   private SyntaxPath syntaxPath;
   private BannerMessage info;
 
   public ModalPrimitiveInner(
-      Context context, NotMain main, BaseEditPrimitiveCursor cursor, SyntaxPath syntaxPath) {
+          Context context, NotMain main, BaseEditCursorFieldPrimitive cursor, SyntaxPath syntaxPath) {
     this.main = main;
     this.cursor = cursor;
     this.syntaxPath = syntaxPath;
@@ -35,7 +35,7 @@ public class ModalPrimitiveInner {
   }
 
   public void updateInfo(Editor editor) {
-    editor.banner.addMessage(
+    editor.banner.setMessage(
         editor.context,
         info =
             new BannerMessage(
@@ -113,16 +113,6 @@ public class ModalPrimitiveInner {
               case I:
                 {
                   cursor.actionFirstGlyph(context);
-                  return true;
-                }
-              case M:
-                {
-                  cursor.actionNext(context);
-                  return true;
-                }
-              case COMMA:
-                {
-                  cursor.actionPrevious(context);
                   return true;
                 }
               case BACK_SPACE:
@@ -221,16 +211,6 @@ public class ModalPrimitiveInner {
               case I:
                 {
                   cursor.actionGatherFirst(context);
-                  return true;
-                }
-              case M:
-                {
-                  cursor.actionNext(context);
-                  return true;
-                }
-              case COMMA:
-                {
-                  cursor.actionPrevious(context);
                   return true;
                 }
               case DELETE:

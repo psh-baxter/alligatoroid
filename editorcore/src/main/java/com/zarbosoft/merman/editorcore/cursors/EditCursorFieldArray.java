@@ -5,7 +5,7 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
-import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.History;
@@ -14,8 +14,8 @@ import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class EditFieldArrayCursor extends FieldArrayCursor {
-  public EditFieldArrayCursor(
+public class EditCursorFieldArray extends CursorFieldArray {
+  public EditCursorFieldArray(
           Context context, VisualFieldArray visual, boolean leadFirst, int start, int end) {
     super(context, visual, leadFirst, start, end);
   }

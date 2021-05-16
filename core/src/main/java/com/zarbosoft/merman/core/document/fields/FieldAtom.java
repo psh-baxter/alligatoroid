@@ -1,16 +1,15 @@
 package com.zarbosoft.merman.core.document.fields;
 
-import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
-import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class FieldAtom extends Field {
-  public static final String SYNTAX_PATH_KEY = "atom";
   public final Set<Listener> listeners = new HashSet<>();
   private final BaseBackAtomSpec back;
   public VisualFieldAtom visual;
@@ -21,9 +20,10 @@ public class FieldAtom extends Field {
   }
 
   /**
-   * Initializes the field without creating history.  Use only if none of the subtrees have any history (ex:
-   * initial document load, paste) otherwise if the atom creation is undone then redone, the atoms will have the
-   * wrong parents.
+   * Initializes the field without creating history. Use only if none of the subtrees have any
+   * history (ex: initial document load, paste) otherwise if the atom creation is undone then
+   * redone, the atoms will have the wrong parents.
+   *
    * @param data
    */
   public void initialSet(Atom data) {
@@ -50,19 +50,14 @@ public class FieldAtom extends Field {
 
   @Override
   public boolean selectInto(final Context context) {
-    select(context);
+    if (context.window) context.windowAdjustMinimalTo(this);
+    atomParentRef.atom().visual.selectById(context, back.id);
     return true;
   }
 
   @Override
   public Object syntaxLocateStep(String segment) {
-    if (!SYNTAX_PATH_KEY.equals(segment)) return null;
-    return data;
-  }
-
-  public void select(final Context context) {
-    if (context.window) context.windowAdjustMinimalTo(this);
-    visual.select(context);
+    return data.syntaxLocateStep(segment);
   }
 
   public abstract static class Listener {
@@ -90,17 +85,14 @@ public class FieldAtom extends Field {
     }
 
     @Override
-    public boolean selectValue(final Context context) {
-      field.select(context);
+    public boolean selectField(final Context context) {
+      field.atomParentRef.atom().visual.selectById(context, field.back.id);
       return true;
     }
 
     @Override
     public SyntaxPath getSyntaxPath() {
-      SyntaxPath out;
-      if (field.atomParentRef == null) out = new SyntaxPath();
-      else out = field.atomParentRef.getSyntaxPath();
-      return out.add(SYNTAX_PATH_KEY);
+      return field.getSyntaxPath();
     }
 
     @Override

@@ -38,7 +38,7 @@ public class TwoColumnChoicePage extends DetailsPage {
     highlight.setStyle(editor.choiceCursorStyle);
     group.add(highlight.drawing);
 
-    final ColumnarTableLayout table = new ColumnarTableLayout(editor.context, editor.context.syntax.detailSpan);
+    final ColumnarTableLayout table = new ColumnarTableLayout(editor.context, editor.detailSpan);
     tableGroup = table.group;
     group.add(table.group);
 
@@ -67,7 +67,7 @@ public class TwoColumnChoicePage extends DetailsPage {
     final CourseDisplayNode preview = row.first;
     final CourseDisplayNode text = row.second;
     final double converse = preview.converse();
-    final double transverse = Math.min(preview.baselineTransverse(), text.baselineTransverse());
+    final double transverse = Math.min(preview.transverse(), text.transverse());
     final double converseEdge = text.converseEdge();
     final double transverseEdge =
         Math.max(preview.transverseEdge(), text.transverseEdge());
@@ -79,9 +79,6 @@ public class TwoColumnChoicePage extends DetailsPage {
   public void destroy(final Context context) {
     context.removeConverseEdgeListener(edgeListener);
   }
-
-  @Override
-  public void tagsChanged(final Context context) {}
 
   public void choose(Editor editor) {
     choices.get(index).choose(editor, null);

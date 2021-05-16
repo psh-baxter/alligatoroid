@@ -5,8 +5,7 @@ import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.visual.Vector;
 
 /**
- * A group that combines the ascent/descent of allll children. Baseline transverse of each child
- * should be 0, but converse can be set freely.
+ * A group that maintains course display node childrens' baselines.
  */
 public class CourseGroup implements CourseDisplayNode {
   private final Group group;
@@ -25,13 +24,13 @@ public class CourseGroup implements CourseDisplayNode {
   }
 
   private void updateLocation(boolean animate) {
-    group.setTransverse(baselineTransverse + ascent, animate);
+    group.setTransverse(baselineTransverse, animate);
   }
 
   @Override
   public void setBaselinePosition(Vector vector, boolean animate) {
     baselineTransverse = vector.transverse;
-    group.setPosition(new Vector(vector.converse, baselineTransverse + ascent), animate);
+    group.setPosition(new Vector(vector.converse, baselineTransverse), animate);
   }
 
   @Override
@@ -92,6 +91,7 @@ public class CourseGroup implements CourseDisplayNode {
     if (node.descent() > descent) {
       descent = node.descent();
     }
+    node.setBaselineTransverse(0);
     group.add(node);
   }
 }

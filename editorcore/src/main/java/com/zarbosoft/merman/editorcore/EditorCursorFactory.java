@@ -4,15 +4,13 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.AtomType;
-import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.merman.editorcore.cursors.EditFieldArrayCursor;
-import com.zarbosoft.merman.editorcore.cursors.EditFieldAtomCursor;
-import com.zarbosoft.merman.editorcore.cursors.EditPrimitiveCursor;
-import com.zarbosoft.merman.editorcore.gap.EditGapCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldPrimitive;
+import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.TSList;
@@ -25,7 +23,7 @@ public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFact
   }
 
   @Override
-  public final VisualFrontPrimitive.Cursor createPrimitiveCursor(
+  public final CursorFieldPrimitive createFieldPrimitiveCursor(
       Context context,
       VisualFrontPrimitive visualPrimitive,
       boolean leadFirst,
@@ -37,29 +35,24 @@ public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFact
     else return createPrimitiveCursor1(context, visualPrimitive, leadFirst, beginOffset, endOffset);
   }
 
-  public EditGapCursor createGapCursor(
+  public EditGapCursorFieldPrimitive createGapCursor(
       VisualFrontPrimitive visualPrimitive, boolean leadFirst, int beginOffset, int endOffset) {
-    return new EditGapCursor(editor, visualPrimitive, leadFirst, beginOffset, endOffset);
+    return new EditGapCursorFieldPrimitive(editor, visualPrimitive, leadFirst, beginOffset, endOffset);
   }
 
-  public VisualFrontPrimitive.Cursor createPrimitiveCursor1(
+  public CursorFieldPrimitive createPrimitiveCursor1(
       Context context,
       VisualFrontPrimitive visualPrimitive,
       boolean leadFirst,
       int beginOffset,
       int endOffset) {
-    return new EditPrimitiveCursor(context, visualPrimitive, leadFirst, beginOffset, endOffset);
+    return new EditCursorFieldPrimitive(context, visualPrimitive, leadFirst, beginOffset, endOffset);
   }
 
   @Override
-  public FieldArrayCursor createArrayCursor(
+  public CursorFieldArray createFieldArrayCursor(
           Context context, VisualFieldArray visual, boolean leadFirst, int start, int end) {
-    return new EditFieldArrayCursor(context, visual, leadFirst, start, end);
-  }
-
-  @Override
-  public FieldAtomCursor createAtomCursor(Context context, VisualFrontAtomBase base) {
-    return new EditFieldAtomCursor(context, base);
+    return new EditCursorFieldArray(context, visual, leadFirst, start, end);
   }
 
   @Override

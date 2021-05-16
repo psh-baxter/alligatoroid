@@ -3,8 +3,9 @@ package com.zarbosoft.merman.editorcore;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
-import com.zarbosoft.merman.editorcore.cursors.BaseEditPrimitiveCursor;
+import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
 import com.zarbosoft.merman.editorcore.helper.Helper;
@@ -52,7 +53,7 @@ public class TestActionsPrimitive {
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final VisualFrontPrimitive.Cursor selection = (VisualFrontPrimitive.Cursor) context.cursor;
+    final CursorFieldPrimitive selection = (CursorFieldPrimitive) context.cursor;
     assertThat(selection.range.beginOffset, equalTo(begin));
     assertThat(selection.range.endOffset, equalTo(end));
   }
@@ -61,7 +62,7 @@ public class TestActionsPrimitive {
   public void testSplitSingleStart() {
     final Editor editor = build("ab");
     visual(editor.context).select(editor.context, true, 0, 0);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editSplitLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editSplitLines(editor);
     assertText(editor, "\nab");
     assertSelection(editor.context, 1, 1);
   }
@@ -70,7 +71,7 @@ public class TestActionsPrimitive {
   public void testSplitSingleMid() {
     final Editor editor = build("ab");
     visual(editor.context).select(editor.context, true, 1, 1);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editSplitLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editSplitLines(editor);
     assertText(editor, "a\nb");
     assertSelection(editor.context, 2, 2);
   }
@@ -79,7 +80,7 @@ public class TestActionsPrimitive {
   public void testSplitSingleEnd() {
     final Editor editor = build("ab");
     visual(editor.context).select(editor.context, true, 2, 2);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editSplitLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editSplitLines(editor);
     assertText(editor, "ab\n");
     assertSelection(editor.context, 3, 3);
   }
@@ -88,7 +89,7 @@ public class TestActionsPrimitive {
   public void testSplitMultipleStart() {
     final Editor editor = build("1\nab\n2");
     visual(editor.context).select(editor.context, true, 2, 2);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editSplitLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editSplitLines(editor);
     assertText(editor, "1\n\nab\n2");
     assertSelection(editor.context, 3, 3);
   }
@@ -97,7 +98,7 @@ public class TestActionsPrimitive {
   public void testSplitMultipleMid() {
     final Editor editor = build("1\nab\n2");
     visual(editor.context).select(editor.context, true, 3, 3);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editSplitLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editSplitLines(editor);
     assertText(editor, "1\na\nb\n2");
     assertSelection(editor.context, 4, 4);
   }
@@ -106,7 +107,7 @@ public class TestActionsPrimitive {
   public void testSplitMultipleEnd() {
     final Editor editor = build("1\nab\n2");
     visual(editor.context).select(editor.context, true, 4, 4);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editSplitLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editSplitLines(editor);
     assertText(editor, "1\nab\n\n2");
     assertSelection(editor.context, 5, 5);
   }
@@ -115,7 +116,7 @@ public class TestActionsPrimitive {
   public void testSplitEmpty() {
     final Editor editor = build("");
     visual(editor.context).select(editor.context, true, 0, 0);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editSplitLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editSplitLines(editor);
     assertText(editor, "\n");
     assertSelection(editor.context, 1, 1);
   }
@@ -124,7 +125,7 @@ public class TestActionsPrimitive {
   public void testSplitRange() {
     final Editor editor = build("abcd");
     visual(editor.context).select(editor.context, true, 1, 3);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editSplitLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editSplitLines(editor);
     assertText(editor, "a\nd");
     assertSelection(editor.context, 2, 2);
   }
@@ -133,7 +134,7 @@ public class TestActionsPrimitive {
   public void testJoinEmpty() {
     final Editor editor = build("");
     visual(editor.context).select(editor.context, true, 0, 0);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editJoinLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editJoinLines(editor);
     assertSelection(editor.context, 0, 0);
   }
 
@@ -141,7 +142,7 @@ public class TestActionsPrimitive {
   public void testJoinMinimal() {
     final Editor editor = build("\n");
     visual(editor.context).select(editor.context, true, 0, 0);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editJoinLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editJoinLines(editor);
     assertText(editor, "");
     assertSelection(editor.context, 0, 0);
   }
@@ -150,7 +151,7 @@ public class TestActionsPrimitive {
   public void testJoin() {
     final Editor editor = build("a\nb");
     visual(editor.context).select(editor.context, true, 0, 0);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editJoinLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editJoinLines(editor);
     assertText(editor, "ab");
     assertSelection(editor.context, 1, 1);
   }
@@ -159,7 +160,7 @@ public class TestActionsPrimitive {
   public void testJoinRange() {
     final Editor editor = build("ab\nc\nde");
     visual(editor.context).select(editor.context, true, 1, 6);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editJoinLines(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editJoinLines(editor);
     assertText(editor, "abcde");
     assertSelection(editor.context, 1, 4);
   }
@@ -168,7 +169,7 @@ public class TestActionsPrimitive {
   public void testDeletePrevious() {
     final Editor editor = buildFive();
     visual(editor.context).select(editor.context, true, 2, 2);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeletePrevious(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeletePrevious(editor);
     assertText(editor, "1345");
     assertSelection(editor.context, 1, 1);
   }
@@ -177,7 +178,7 @@ public class TestActionsPrimitive {
   public void testDeleteBOL() {
     final Editor editor = build("a\nb");
     visual(editor.context).select(editor.context, true, 2, 2);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeletePrevious(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeletePrevious(editor);
     assertText(editor, "ab");
     assertSelection(editor.context, 1, 1);
   }
@@ -186,7 +187,7 @@ public class TestActionsPrimitive {
   public void testDeleteBOF() {
     final Editor editor = build("a");
     visual(editor.context).select(editor.context, true, 0, 0);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeletePrevious(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeletePrevious(editor);
     assertText(editor, "a");
     assertSelection(editor.context, 0, 0);
   }
@@ -195,7 +196,7 @@ public class TestActionsPrimitive {
   public void testDeletePreviousRange() {
     final Editor editor = buildFive();
     visual(editor.context).select(editor.context, true, 1, 2);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeletePrevious(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeletePrevious(editor);
     assertText(editor, "1345");
     assertSelection(editor.context, 1, 1);
   }
@@ -204,7 +205,7 @@ public class TestActionsPrimitive {
   public void testDeletePreviousRangeLines() {
     final Editor editor = build("ab\ncd");
     visual(editor.context).select(editor.context, true, 1, 4);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeletePrevious(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeletePrevious(editor);
     assertText(editor, "ad");
     assertSelection(editor.context, 1, 1);
   }
@@ -213,7 +214,7 @@ public class TestActionsPrimitive {
   public void testDeleteNext() {
     final Editor editor = buildFive();
     visual(editor.context).select(editor.context, true, 2, 2);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeleteNext(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeleteNext(editor);
     assertText(editor, "1245");
     assertSelection(editor.context, 2, 2);
   }
@@ -222,7 +223,7 @@ public class TestActionsPrimitive {
   public void testDeleteEOL() {
     final Editor editor = build("a\nb");
     visual(editor.context).select(editor.context, true, 1, 1);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeleteNext(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeleteNext(editor);
     assertText(editor, "ab");
     assertSelection(editor.context, 1, 1);
   }
@@ -231,7 +232,7 @@ public class TestActionsPrimitive {
   public void testDeleteEOF() {
     final Editor editor = build("a");
     visual(editor.context).select(editor.context, true, 1, 1);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeleteNext(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeleteNext(editor);
     assertText(editor, "a");
     assertSelection(editor.context, 1, 1);
   }
@@ -240,7 +241,7 @@ public class TestActionsPrimitive {
   public void testDeleteNextRange() {
     final Editor editor = buildFive();
     visual(editor.context).select(editor.context, true, 1, 2);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeleteNext(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeleteNext(editor);
     assertText(editor, "1345");
     assertSelection(editor.context, 1, 1);
   }
@@ -249,7 +250,7 @@ public class TestActionsPrimitive {
   public void testDeleteNextRangeLines() {
     final Editor editor = build("ab\ncd");
     visual(editor.context).select(editor.context, true, 1, 4);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeleteNext(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeleteNext(editor);
     assertText(editor, "ad");
     assertSelection(editor.context, 1, 1);
   }
@@ -258,7 +259,7 @@ public class TestActionsPrimitive {
   public void testDeleteNextLongRangeLines() {
     final Editor editor = build("ab\ncognate\nefg");
     visual(editor.context).select(editor.context, true, 1, 13);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editDeleteNext(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editDeleteNext(editor);
     assertText(editor, "ag");
     assertSelection(editor.context, 1, 1);
   }
@@ -267,9 +268,9 @@ public class TestActionsPrimitive {
   public void testCopyPasteSingle() {
     final Editor editor = buildFive();
     visual(editor.context).select(editor.context, true, 1, 3);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).actionCopy(editor.context);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).actionCopy(editor.context);
     visual(editor.context).select(editor.context, true, 4, 4);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editPaste(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editPaste(editor);
     assertText(editor, "1234235");
     assertSelection(editor.context, 6, 6);
   }
@@ -278,9 +279,9 @@ public class TestActionsPrimitive {
   public void testCopyPasteRange() {
     final Editor editor = buildFive();
     visual(editor.context).select(editor.context, true, 1, 3);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).actionCopy(editor.context);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).actionCopy(editor.context);
     visual(editor.context).select(editor.context, true, 4, 5);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editPaste(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editPaste(editor);
     assertText(editor, "123423");
     assertSelection(editor.context, 6, 6);
   }
@@ -289,10 +290,10 @@ public class TestActionsPrimitive {
   public void testCutPaste() {
     final Editor editor = buildFive();
     visual(editor.context).select(editor.context, true, 1, 3);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editCut(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editCut(editor);
     assertSelection(editor.context, 1, 1);
     visual(editor.context).select(editor.context, true, 2, 3);
-    ((BaseEditPrimitiveCursor) editor.context.cursor).editPaste(editor);
+    ((BaseEditCursorFieldPrimitive) editor.context.cursor).editPaste(editor);
     assertText(editor, "1423");
     assertSelection(editor.context, 4, 4);
   }

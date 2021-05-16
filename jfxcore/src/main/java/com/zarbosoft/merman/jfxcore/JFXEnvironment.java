@@ -17,10 +17,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class JFXEnvironment implements Environment {
+  public static TSMap<String, DataFormat> dataFormats = new TSMap<>();
   private final Locale locale;
   private final Timer timer = new Timer();
   private Clipboard clipboard;
-  public static TSMap<String, DataFormat> dataFormats = new TSMap<>();
 
   public JFXEnvironment(Locale locale) {
     this.locale = locale;
@@ -96,17 +96,102 @@ public class JFXEnvironment implements Environment {
 
   @Override
   public Environment.I18nWalker glyphWalker(String s) {
-    return new I18nWalker(BreakIterator.getCharacterInstance(locale), s);
+    return new I18nWalker() {
+      private final BreakIterator iter;
+
+      {
+        iter = BreakIterator.getCharacterInstance(locale);
+      }
+
+      @Override
+      public int precedingStart(int offset) {
+        return iter.preceding(offset);
+      }
+
+      @Override
+      public int precedingEnd(int offset) {
+        return iter.preceding(offset);
+      }
+
+      @Override
+      public int followingStart(int offset) {
+        return iter.following(offset);
+      }
+
+      @Override
+      public int followingEnd(int offset) {
+        return iter.following(offset);
+      }
+    };
   }
 
   @Override
   public Environment.I18nWalker wordWalker(String s) {
-    return new I18nWalker(BreakIterator.getWordInstance(locale), s);
+    return new FixedWordI18nWalker() {
+      private final String text;
+      private final BreakIterator iter;
+
+      {
+        iter = BreakIterator.getWordInstance(locale);
+        text = s;
+      }
+
+      @Override
+      public int precedingAny(int offset) {
+        return iter.preceding(offset);
+      }
+
+      @Override
+      public int followingAny(int offset) {
+        return iter.following(offset);
+      }
+
+      @Override
+      public boolean isWhitespace(String glyph) {
+        return Character.isWhitespace(glyph.codePointAt(0));
+      }
+
+      @Override
+      public String charAt(int offset) {
+        return text.substring(offset, 1);
+      }
+
+      @Override
+      public int length() {
+        return text.length();
+      }
+    };
   }
 
   @Override
   public Environment.I18nWalker lineWalker(String s) {
-    return new I18nWalker(BreakIterator.getLineInstance(locale), s);
+    return new I18nWalker() {
+      private final BreakIterator iter;
+
+      {
+        iter = BreakIterator.getLineInstance(locale);
+      }
+
+      @Override
+      public int precedingStart(int offset) {
+        return iter.preceding(offset);
+      }
+
+      @Override
+      public int precedingEnd(int offset) {
+        return iter.preceding(offset);
+      }
+
+      @Override
+      public int followingStart(int offset) {
+        return iter.following(offset);
+      }
+
+      @Override
+      public int followingEnd(int offset) {
+        return iter.following(offset);
+      }
+    };
   }
 
   @Override
@@ -142,48 +227,6 @@ public class JFXEnvironment implements Environment {
     @Override
     public void cancel() {
       alive.set(false);
-    }
-  }
-
-  private static class I18nWalker implements Environment.I18nWalker {
-    private final BreakIterator i;
-    private final String text;
-
-    private I18nWalker(BreakIterator i, String s) {
-      this.i = i;
-      this.text = s;
-      i.setText(s);
-    }
-
-    @Override
-    public int precedingStart(int offset) {
-      int out = i.preceding(offset);
-      if (out != -1 && Character.isWhitespace(text.codePointAt(out))) out = i.preceding(out);
-      return out;
-    }
-
-    @Override
-    public int precedingEnd(int offset) {
-      int out = i.preceding(offset);
-      if (out != -1 && !Character.isWhitespace(text.codePointAt(out))) out = i.preceding(out);
-      if (out == -1 && offset > 0) return 0;
-      return out;
-    }
-
-    @Override
-    public int followingStart(int offset) {
-      int out = i.following(offset);
-      if (out != -1 && out < text.length() && Character.isWhitespace(text.codePointAt(out)))
-        out = i.following(out);
-      return out;
-    }
-
-    @Override
-    public int followingEnd(int offset) {
-      int out = i.following(offset);
-      if (out != -1 && out < text.length() && !Character.isWhitespace(text.codePointAt(out)))
-        out = i.following(out);
-      return out;
     }
   }
 }

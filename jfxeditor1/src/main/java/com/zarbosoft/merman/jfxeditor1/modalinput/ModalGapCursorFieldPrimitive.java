@@ -4,13 +4,13 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.gap.EditGapCursor;
+import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 
-public class ModalGapCursor extends EditGapCursor {
+public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
   private final ModalPrimitiveInner inner;
 
-  public ModalGapCursor(
+  public ModalGapCursorFieldPrimitive(
       Editor editor,
       VisualFrontPrimitive visualPrimitive,
       boolean leadFirst,

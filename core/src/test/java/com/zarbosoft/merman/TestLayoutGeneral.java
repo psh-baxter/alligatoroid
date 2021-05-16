@@ -128,7 +128,7 @@ public class TestLayoutGeneral {
         .displayHeight(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectValue(context);
+              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectField(context);
             })
         .checkCourse(4, 47, 57)
         .checkScroll(24)
@@ -149,12 +149,12 @@ public class TestLayoutGeneral {
         .displayHeight(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectValue(context);
+              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectField(context);
             })
         .checkScroll(24)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(0).fieldParentRef.selectValue(context);
+              Helper.rootArray(context.document).data.get(0).fieldParentRef.selectField(context);
             })
         .checkCourse(0, -3, 7)
         .checkScroll(-13);
@@ -173,7 +173,7 @@ public class TestLayoutGeneral {
         .displayHeight(50)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectValue(context);
+              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectField(context);
             })
         .checkCourse(4, 47, 57)
         .checkScroll(23)
@@ -194,12 +194,12 @@ public class TestLayoutGeneral {
         .displayHeight(50)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectValue(context);
+              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectField(context);
             })
         .checkScroll(23)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(0).fieldParentRef.selectValue(context);
+              Helper.rootArray(context.document).data.get(0).fieldParentRef.selectField(context);
             })
         .checkCourse(0, -3, 7)
         .checkScroll(-22);
@@ -218,7 +218,7 @@ public class TestLayoutGeneral {
         .displayHeight(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectValue(context);
+              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectField(context);
             })
         .checkCourse(4, 47, 107)
         .checkScroll(37)
@@ -239,12 +239,12 @@ public class TestLayoutGeneral {
         .displayHeight(40)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectValue(context);
+              Helper.rootArray(context.document).data.get(4).fieldParentRef.selectField(context);
             })
         .checkScroll(37)
         .run(
             context -> {
-              Helper.rootArray(context.document).data.get(0).fieldParentRef.selectValue(context);
+              Helper.rootArray(context.document).data.get(0).fieldParentRef.selectField(context);
             })
         .checkCourse(0, -3, 7)
         .checkScroll(-13);

@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
@@ -40,36 +41,6 @@ public class TestActionsPrimitive {
   }
 
   @Test
-  public void testNext() {
-    final Atom target =
-        new TreeBuilder(MiscSyntax.doubleQuoted).add("first", "").add("second", "").build();
-    final FieldPrimitive value = (FieldPrimitive) target.fields.getOpt("first");
-    new GeneralTestWizard(MiscSyntax.syntax,  target)
-        .run(context -> value.selectInto(context))
-        .actNext()
-        .run(
-            context ->
-                assertThat(
-                    context.cursor.getSyntaxPath(),
-                    equalTo(new SyntaxPath("value", "0", "second", "0"))));
-  }
-
-  @Test
-  public void testPrevious() {
-    final Atom target =
-        new TreeBuilder(MiscSyntax.doubleQuoted).add("first", "").add("second", "").build();
-    final FieldPrimitive value = (FieldPrimitive) target.fields.getOpt("second");
-    new GeneralTestWizard(MiscSyntax.syntax,  target)
-        .run(context -> value.selectInto(context))
-        .actPrevious()
-        .run(
-            context ->
-                assertThat(
-                    context.cursor.getSyntaxPath(),
-                    equalTo(new SyntaxPath("value", "0", "first", "0"))));
-  }
-
-  @Test
   public void testNextElement() {
     final Context context = buildFive();
     visual(context).select(context, true, 2, 2);
@@ -82,8 +53,8 @@ public class TestActionsPrimitive {
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {
-    final VisualFrontPrimitive.Cursor selection =
-        (VisualFrontPrimitive.Cursor) context.cursor;
+    final CursorFieldPrimitive selection =
+        (CursorFieldPrimitive) context.cursor;
     assertThat(selection.range.beginOffset, equalTo(begin));
     assertThat(selection.range.endOffset, equalTo(end));
   }

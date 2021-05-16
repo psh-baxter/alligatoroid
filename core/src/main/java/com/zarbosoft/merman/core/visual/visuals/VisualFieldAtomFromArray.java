@@ -10,11 +10,11 @@ import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.rendaw.common.ROList;
 
-public class VisualFrontAtomFromArray extends VisualFrontAtomBase {
+public class VisualFieldAtomFromArray extends VisualFieldAtomBase {
   public final FieldArray value;
   private final FieldArray.Listener dataListener;
 
-  public VisualFrontAtomFromArray(
+  public VisualFieldAtomFromArray(
       final Context context,
       final VisualParent parent,
       final FieldArray value,

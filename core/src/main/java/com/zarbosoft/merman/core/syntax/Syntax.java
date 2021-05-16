@@ -49,7 +49,6 @@ public class Syntax {
   public final String unprintable;
   public final Padding bannerPad;
   public final Padding detailPad;
-  public final int detailSpan;
   public final ROMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
   public final RootAtomType root;
   public final GapAtomType gap;
@@ -90,7 +89,6 @@ public class Syntax {
     this.unprintable = config.unprintable;
     this.bannerPad = config.bannerPad;
     this.detailPad = config.detailPad;
-    this.detailSpan = config.detailSpan;
     this.splayedTypes = config.splayedTypes;
     this.root = config.root;
     this.gap = config.gap;
@@ -273,7 +271,6 @@ public class Syntax {
     public String unprintable = "▢";
     public Padding bannerPad = Padding.empty;
     public Padding detailPad = Padding.empty;
-    public int detailSpan = 300;
     public final GapAtomType gap;
     public final SuffixGapAtomType suffixGap;
     public Direction converseDirection = Direction.RIGHT;

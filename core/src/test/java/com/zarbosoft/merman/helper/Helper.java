@@ -25,9 +25,9 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
-import com.zarbosoft.merman.core.visual.visuals.FieldArrayCursor;
-import com.zarbosoft.merman.core.visual.visuals.FieldAtomCursor;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
@@ -38,16 +38,16 @@ import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.ComparisonFailure;
 
 public class Helper {
-  public static FieldAtomCursor cursorAtom(Context context) {
-    return (FieldAtomCursor) context.cursor;
+  public static CursorAtom cursorAtom(Context context) {
+    return (CursorAtom) context.cursor;
   }
 
-  public static FieldArrayCursor cursorArray(Context context) {
-    return (FieldArrayCursor) context.cursor;
+  public static CursorFieldArray cursorArray(Context context) {
+    return (CursorFieldArray) context.cursor;
   }
 
-  public static VisualFrontPrimitive.Cursor cursorPrimitive(Context context) {
-    return (VisualFrontPrimitive.Cursor) context.cursor;
+  public static CursorFieldPrimitive cursorPrimitive(Context context) {
+    return (CursorFieldPrimitive) context.cursor;
   }
 
   public static BackSpec buildBackType(final String type, final BackSpec child) {

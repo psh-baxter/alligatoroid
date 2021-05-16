@@ -6,7 +6,7 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontAtomFromArray;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomFromArray;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -73,8 +73,10 @@ public class FieldArray extends Field {
     if (context.window) context.windowAdjustMinimalTo(this);
     if (visual instanceof VisualFieldArray)
       ((VisualFieldArray) visual).select(context, leadFirst, start, end);
-    else if (visual instanceof VisualFrontAtomFromArray)
-      ((VisualFrontAtomFromArray) visual).select(context);
+    else if (visual instanceof VisualFieldAtomFromArray)
+    {
+      atomParentRef.atom().visual.selectById(context, back.id);
+    }
     else throw new DeadCode();
     return true;
   }
@@ -123,7 +125,7 @@ public class FieldArray extends Field {
     }
 
     @Override
-    public boolean selectValue(final Context context) {
+    public boolean selectField(final Context context) {
       field.selectInto(context, true, index, index);
       return true;
     }

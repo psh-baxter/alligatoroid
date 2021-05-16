@@ -912,7 +912,7 @@ public class TestCompaction {
         .checkTextBrick(1, 1, "one")
         .checkTextBrick(2, 1, "...")
         .checkTextBrick(3, 1, "one")
-        .run(context -> midAtom.fieldParentRef.selectValue(context))
+        .run(context -> midAtom.fieldParentRef.selectField(context))
         .actWindow()
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(1, 2, "one")
@@ -997,7 +997,7 @@ public class TestCompaction {
             .build();
     Atom highAtom = new TreeBuilder(high).addArray("value", midAtom).build();
     new GeneralTestWizard(syntax, highAtom)
-        .run(context -> highAtom.fieldParentRef.selectValue(context))
+        .run(context -> highAtom.fieldParentRef.selectField(context))
         .dumpCourses()
         .actWindow()
         .dumpCourses()
@@ -1006,7 +1006,7 @@ public class TestCompaction {
         .checkTextBrick(1, 1, "two")
         .checkTextBrick(2, 1, "...")
         .checkTextBrick(3, 1, "two")
-        .run(context -> midAtom.fieldParentRef.selectValue(context))
+        .run(context -> midAtom.fieldParentRef.selectField(context))
         .actWindow()
         .checkTextBrick(0, 1, "two")
         .checkTextBrick(1, 1, "one")

@@ -10,14 +10,8 @@ import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Wall;
 import com.zarbosoft.merman.editorcore.displayderived.Box;
-import com.zarbosoft.rendaw.common.ChainComparator;
-
-import java.util.PriorityQueue;
 
 public class Details {
-  private final PriorityQueue<DetailsPage> queue =
-      new PriorityQueue<>(
-          11, new ChainComparator<DetailsPage>().greaterFirst(m -> m.priority).build());
   private final Style style;
   public DetailsPage current;
   public Box background;
@@ -79,22 +73,6 @@ public class Details {
     idle.animate = idle.animate && animate;
   }
 
-  public void tagsChanged(final Context context) {
-    if (current == null) return;
-    updateStyle(context);
-    place(context, false);
-  }
-
-  private void updateStyle(final Context context) {
-    current.tagsChanged(context);
-    if (background == null) {
-      background = new Box(context);
-      context.midground.add(background.drawing);
-    }
-    background.setStyle(style.obbox);
-    resizeBackground(context);
-  }
-
   private double pageTransverse(final Context context) {
     final double padStart = context.syntax.detailPad.transverseStart;
     final double padEnd = context.syntax.detailPad.transverseEnd;
@@ -115,32 +93,19 @@ public class Details {
     background.setSize(context, context.edge * 2, current.node.transverseSpan());
   }
 
-  public void addPage(final Context context, final DetailsPage page) {
-    queue.add(page);
-    update(context);
-  }
-
-  private void update(final Context context) {
-    if (queue.isEmpty()) {
-      if (current != null) {
-        context.wall.removeBedding(context, bedding);
-        bedding = null;
-        context.midground.remove(current.node);
-        current = null;
-        if (background != null) {
-          context.midground.remove(background.drawing);
-          background = null;
-        }
+  public void setPage(final Context context, final DetailsPage page) {
+    if (current != null) {
+      context.midground.remove(current.node);
+      context.wall.removeBedding(context, bedding);
+    }
+    current = page;
+    if (current != null) {
+      if (background == null && (style.obbox.line || style.obbox.fill)) {
+        background = new Box(context);
+        background.setStyle(style.obbox);
+        context.midground.add(background.drawing);
       }
-    } else if (queue.peek() != current) {
-      if (current != null) {
-        context.midground.remove(current.node);
-        context.wall.removeBedding(context, bedding);
-      } else {
-
-      }
-      current = queue.peek();
-      updateStyle(context);
+      resizeBackground(context);
       place(context, false);
       context.midground.add(current.node);
       bedding =
@@ -154,9 +119,17 @@ public class Details {
   }
 
   public void removePage(final Context context, final DetailsPage page) {
-    if (queue.isEmpty()) return;
-    queue.remove(page);
-    update(context);
+    if (page != current) return;
+    if (current != null) {
+      context.wall.removeBedding(context, bedding);
+      bedding = null;
+      context.midground.remove(current.node);
+      current = null;
+      if (background != null) {
+        context.midground.remove(background.drawing);
+        background = null;
+      }
+    }
   }
 
   private class IterationPlace extends IterationTask {

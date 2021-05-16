@@ -5,17 +5,17 @@ import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.banner.BannerMessage;
-import com.zarbosoft.merman.editorcore.cursors.EditFieldArrayCursor;
+import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 
-public class ModalFieldArrayCursor extends EditFieldArrayCursor {
+public class ModalCursorFieldArray extends EditCursorFieldArray {
   public final NotMain main;
   public Mode mode = Mode.NAV;
   private BannerMessage info;
 
-  public ModalFieldArrayCursor(
+  public ModalCursorFieldArray(
       Context context,
       VisualFieldArray visual,
       boolean leadFirst,
@@ -29,7 +29,7 @@ public class ModalFieldArrayCursor extends EditFieldArrayCursor {
   }
 
   public void updateInfo(Editor editor) {
-    editor.banner.addMessage(
+    editor.banner.setMessage(
         editor.context,
         info =
             new BannerMessage(
@@ -91,16 +91,6 @@ public class ModalFieldArrayCursor extends EditFieldArrayCursor {
               case I:
                 {
                   actionFirstElement(context);
-                  return true;
-                }
-              case M:
-                {
-                  actionNext(context);
-                  return true;
-                }
-              case COMMA:
-                {
-                  actionPrevious(context);
                   return true;
                 }
               case DELETE:
@@ -178,16 +168,6 @@ public class ModalFieldArrayCursor extends EditFieldArrayCursor {
               case I:
                 {
                   actionGatherFirst(context);
-                  return true;
-                }
-              case M:
-                {
-                  actionNext(context);
-                  return true;
-                }
-              case COMMA:
-                {
-                  actionPrevious(context);
                   return true;
                 }
               case DELETE:
