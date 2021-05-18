@@ -23,6 +23,7 @@ public class Atom {
   public TSMap<String, Field> fields;
   /** Null if root */
   public Field.Parent<?> fieldParentRef;
+
   public VisualAtom visual;
 
   public Atom(final AtomType type) {
@@ -42,9 +43,14 @@ public class Atom {
                 }
 
                 @Override
-                public boolean selectAtomParent(final Context context) {
-                  if (fieldParentRef == null) return false;
-                  return Atom.this.fieldParentRef.selectField(context);
+                public boolean selectParent(final Context context) {
+                  if (visual.needIntermediateCursor) {
+                    visual.selectById(context, entry.getKey());
+                    return true;
+                  } else {
+                    if (fieldParentRef == null) return false;
+                    return Atom.this.fieldParentRef.selectField(context);
+                  }
                 }
 
                 @Override
@@ -65,7 +71,7 @@ public class Atom {
 
   public boolean selectInto(final Context context) {
     if (context.window) context.windowAdjustMinimalTo(this);
-    return visual.selectAnyChild(context);
+    return visual.selectIntoAnyChild(context);
   }
 
   public Visual ensureVisual(
@@ -103,7 +109,7 @@ public class Atom {
   public abstract static class Parent {
     public abstract Atom atom();
 
-    public abstract boolean selectAtomParent(final Context context);
+    public abstract boolean selectParent(final Context context);
 
     /**
      * Get path relative to syntax structure

@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Blank;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.display.derived.CourseGroup;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
@@ -18,7 +19,6 @@ import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.syntax.primitivepattern.CharacterEvent;
 import com.zarbosoft.merman.core.syntax.primitivepattern.ForceEndCharacterEvent;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.displayderived.RowLayout;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
@@ -216,7 +216,7 @@ public class GapChoice extends TwoColumnChoice {
 
   @Override
   public ROPair<CourseDisplayNode, CourseDisplayNode> display(Editor editor) {
-    final RowLayout previewLayout = new RowLayout(editor.context.display);
+    final CourseGroup previewLayout = new CourseGroup(editor.context.display.group());
     for (final FrontSpec part : keySpecs) {
       final CourseDisplayNode node;
       if (part instanceof FrontSymbol) {
@@ -227,9 +227,9 @@ public class GapChoice extends TwoColumnChoice {
       previewLayout.add(node);
     }
     final Blank space = editor.context.display.blank();
-    space.setConverseSpan(editor.context, editor.choiceDescriptionStyle.spaceBefore);
+    space.setConverseSpan(
+        editor.context, editor.choiceDescriptionStyle.spaceBefore * editor.context.toPixels);
     previewLayout.add(space);
-    previewLayout.layout();
 
     final Text text = editor.context.display.text();
     text.setBaselineTransverse(0);
@@ -237,6 +237,6 @@ public class GapChoice extends TwoColumnChoice {
     text.setFont(editor.context, Context.getFont(editor.context, editor.choiceDescriptionStyle));
     text.setText(editor.context, type.name());
 
-    return new ROPair<CourseDisplayNode, CourseDisplayNode>(previewLayout.group, text);
+    return new ROPair<CourseDisplayNode, CourseDisplayNode>(previewLayout, text);
   }
 }

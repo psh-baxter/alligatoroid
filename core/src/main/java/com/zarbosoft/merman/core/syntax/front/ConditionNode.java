@@ -1,23 +1,13 @@
 package com.zarbosoft.merman.core.syntax.front;
 
-import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.visual.condition.ConditionAttachment;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.visual.condition.ConditionAttachment;
 
 public class ConditionNode extends ConditionType {
   public final Is is;
-
-  public static class Config {
-    public final Is is;
-    public final boolean invert;
-
-    public Config(Is is, boolean invert) {
-      this.is = is;
-      this.invert = invert;
-    }
-  }
 
   public ConditionNode(Config config) {
     super(config.invert);
@@ -35,11 +25,10 @@ public class ConditionNode extends ConditionType {
       show = AtomType.isPrecedent((FreeAtomType) atom.type, atom.fieldParentRef, true);
     }
     final ConditionAttachment condition =
-        new ConditionAttachment(invert) {
+        new ConditionAttachment(invert, show) {
           @Override
           public void destroy(final Context context) {}
         };
-    condition.setState(context, show);
     return condition;
   }
 
@@ -51,5 +40,15 @@ public class ConditionNode extends ConditionType {
 
   public static enum Is {
     PRECEDENT,
+  }
+
+  public static class Config {
+    public final Is is;
+    public final boolean invert;
+
+    public Config(Is is, boolean invert) {
+      this.is = is;
+      this.invert = invert;
+    }
   }
 }

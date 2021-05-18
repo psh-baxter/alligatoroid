@@ -10,6 +10,7 @@ import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Wall;
+import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.displayderived.Box;
 
 public class Banner {
@@ -55,12 +56,13 @@ public class Banner {
     idle.animate = idle.animate && animate;
   }
 
-  private void place(final Context context, final boolean animate) {
+  private void place(final Editor editor, final boolean animate) {
     if (text == null) return;
     final double calculatedTransverse =
-        transverse - text.descent() - context.syntax.bannerPad.transverseEnd;
+        transverse - text.descent() - editor.bannerPad.transverseEnd * editor.context.toPixels;
     text.setBaselinePosition(
-        new Vector(context.syntax.bannerPad.converseStart, calculatedTransverse), animate);
+        new Vector(editor.bannerPad.converseStart * editor.context.toPixels, calculatedTransverse),
+        animate);
     if (background != null)
       background.setPosition(new Vector(0, calculatedTransverse - text.ascent()), animate);
   }
@@ -70,35 +72,35 @@ public class Banner {
     background.setSize(context, context.edge, text.descent() + text.ascent());
   }
 
-  public void setMessage(final Context context, final BannerMessage message) {
+  public void setMessage(final Editor editor, final BannerMessage message) {
     if (current == null) {
       if (style.obbox.line || style.obbox.fill) {
-        background = new Box(context);
-        context.midground.add(background.drawing);
+        background = new Box(editor.context);
+        editor.context.midground.add(background.drawing);
       }
-      text = context.display.text();
-      context.midground.add(text);
-      updateStyle(context);
-      resizeBackground(context);
+      text = editor.context.display.text();
+      editor.context.midground.add(text);
+      updateStyle(editor);
+      resizeBackground(editor.context);
     }
     current = message;
-    text.setText(context, current.text);
+    text.setText(editor.context, current.text);
   }
 
-  private void updateStyle(final Context context) {
+  private void updateStyle(final Editor editor) {
     if (text == null) return;
     if (background != null) background.setStyle(style.obbox);
-    text.setFont(context, Context.getFont(context, style));
-    text.setColor(context, style.color);
-    if (bedding != null) context.wall.removeBedding(context, bedding);
+    text.setFont(editor.context, Context.getFont(editor.context, style));
+    text.setColor(editor.context, style.color);
+    if (bedding != null) editor.context.wall.removeBedding(editor.context, bedding);
     bedding =
         new Bedding(
             text.transverseSpan()
-                + context.syntax.bannerPad.transverseStart
-                + context.syntax.bannerPad.transverseEnd,
+                + (editor.bannerPad.transverseStart + editor.bannerPad.transverseEnd)
+                    * editor.context.toPixels,
             0);
-    context.wall.addBedding(context, bedding);
-    idlePlace(context, true);
+    editor.context.wall.addBedding(editor.context, bedding);
+    idlePlace(editor.context, true);
   }
 
   public void removeMessage(final Context context, final BannerMessage message) {
@@ -144,7 +146,7 @@ public class Banner {
 
     @Override
     protected boolean runImplementation(final IterationContext iterationContext) {
-      place(context, animate);
+      place(Editor.get(context), animate);
       return false;
     }
 

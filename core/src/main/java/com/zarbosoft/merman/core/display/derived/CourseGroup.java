@@ -4,14 +4,13 @@ import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.visual.Vector;
 
-/**
- * A group that maintains course display node childrens' baselines.
- */
+/** A group that maintains course display node childrens' baselines. */
 public class CourseGroup implements CourseDisplayNode {
   private final Group group;
   private double baselineTransverse;
   private double ascent;
   private double descent;
+  private double converseSpan;
 
   public CourseGroup(Group group) {
     this.group = group;
@@ -55,7 +54,7 @@ public class CourseGroup implements CourseDisplayNode {
 
   @Override
   public double converseSpan() {
-    return group.converseSpan();
+    return converseSpan;
   }
 
   @Override
@@ -91,7 +90,8 @@ public class CourseGroup implements CourseDisplayNode {
     if (node.descent() > descent) {
       descent = node.descent();
     }
-    node.setBaselineTransverse(0);
+    node.setConverse(converseSpan);
+    converseSpan += node.converseSpan();
     group.add(node);
   }
 }

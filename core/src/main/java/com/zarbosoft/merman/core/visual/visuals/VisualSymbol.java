@@ -48,7 +48,7 @@ public class VisualSymbol extends Visual
   }
 
   @Override
-  public boolean selectAnyChild(final Context context) {
+  public boolean selectIntoAnyChild(final Context context) {
     return false;
   }
 
@@ -77,7 +77,9 @@ public class VisualSymbol extends Visual
   @Override
   public ExtendBrickResult createFirstBrick(final Context context) {
     if (brick != null) return ExtendBrickResult.exists();
-    if (condition != null && !condition.show()) return ExtendBrickResult.empty();
+    if (condition != null && !condition.show()) {
+      return ExtendBrickResult.empty();
+    }
     brick = frontSymbol.type.createBrick(context, this);
     parent.notifyFirstBrickCreated(context, brick);
     parent.notifyLastBrickCreated(context, brick);

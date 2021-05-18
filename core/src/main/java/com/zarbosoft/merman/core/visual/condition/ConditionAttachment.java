@@ -6,12 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class ConditionAttachment {
-	private boolean show = false;
+	private boolean show;
 	private final List<Listener> listeners = new ArrayList<>();
 	private final boolean invert;
 
-	protected ConditionAttachment(final boolean invert) {
+	protected ConditionAttachment(final boolean invert, boolean initialShow) {
 		this.invert = invert;
+		this.show = invert ? !initialShow : initialShow;
 	}
 
 	public interface Listener {

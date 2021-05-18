@@ -342,7 +342,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     /// Update visual
     if (!choices.isEmpty()) {
       choicePage = new TwoColumnChoicePage(editor, (TSList<TwoColumnChoice>) (TSList) choices);
-      editor.details.setPage(context, choicePage);
+      editor.details.setPage(editor, choicePage);
     } else {
       if (choicePage != null) {
         editor.details.removePage(context, choicePage);
@@ -357,7 +357,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     Atom.Parent atomParentRef = visualPrimitive.value.atomParentRef;
     if (atomParentRef == null) return;
     Atom gap = atomParentRef.atom();
-    atomParentRef.selectAtomParent(editor.context);
+    atomParentRef.selectParent(editor.context);
     Field gapInField = gap.fieldParentRef.field;
     if (gap.type == editor.context.syntax.gap)
       do {

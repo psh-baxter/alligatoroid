@@ -30,7 +30,7 @@ public class ModalCursorFieldArray extends EditCursorFieldArray {
 
   public void updateInfo(Editor editor) {
     editor.banner.setMessage(
-        editor.context,
+        editor,
         info =
             new BannerMessage(
                 Format.format(

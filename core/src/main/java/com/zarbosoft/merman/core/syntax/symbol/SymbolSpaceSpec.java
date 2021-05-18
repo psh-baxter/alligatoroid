@@ -35,7 +35,7 @@ public class SymbolSpaceSpec extends Symbol {
   @Override
   public CourseDisplayNode createDisplay(final Context context) {
     final Blank blank = context.display.blank();
-    blank.setConverseSpan(context, style.space);
+    blank.setConverseSpan(context, style.space * context.toPixels);
     return blank;
   }
 

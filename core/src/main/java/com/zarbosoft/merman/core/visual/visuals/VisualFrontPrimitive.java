@@ -242,7 +242,7 @@ public class VisualFrontPrimitive extends Visual implements VisualLeaf {
   }
 
   @Override
-  public boolean selectAnyChild(final Context context) {
+  public boolean selectIntoAnyChild(final Context context) {
     value.selectInto(context);
     return true;
   }

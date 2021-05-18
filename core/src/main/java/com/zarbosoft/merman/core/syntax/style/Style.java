@@ -51,6 +51,7 @@ public class Style {
     }
     obbox = config.obbox == null ? new ObboxStyle(new ObboxStyle.Config()) : config.obbox;
   }
+
   public static enum SplitMode {
     NEVER,
     COMPACT,

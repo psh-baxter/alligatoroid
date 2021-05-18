@@ -321,7 +321,7 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
 
   public void actionExit(final Context context) {
     if (visualPrimitive.value.atomParentRef == null) return;
-    visualPrimitive.value.atomParentRef.selectAtomParent(context);
+    visualPrimitive.value.atomParentRef.selectParent(context);
   }
 
   private static class ClusterIteratorUpdater implements FieldPrimitive.Listener {

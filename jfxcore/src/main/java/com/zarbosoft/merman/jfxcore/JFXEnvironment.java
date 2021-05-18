@@ -101,6 +101,7 @@ public class JFXEnvironment implements Environment {
 
       {
         iter = BreakIterator.getCharacterInstance(locale);
+        iter.setText(s);
       }
 
       @Override
@@ -133,6 +134,7 @@ public class JFXEnvironment implements Environment {
 
       {
         iter = BreakIterator.getWordInstance(locale);
+        iter.setText(s);
         text = s;
       }
 
@@ -170,6 +172,7 @@ public class JFXEnvironment implements Environment {
 
       {
         iter = BreakIterator.getLineInstance(locale);
+        iter.setText(s);
       }
 
       @Override

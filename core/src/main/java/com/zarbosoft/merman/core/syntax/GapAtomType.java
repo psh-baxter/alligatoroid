@@ -11,13 +11,9 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.error.GapHasExtraField;
 import com.zarbosoft.merman.core.syntax.error.GapPrimitiveCantHavePattern;
 import com.zarbosoft.merman.core.syntax.error.GapPrimitiveHasBadId;
-import com.zarbosoft.merman.core.syntax.front.ConditionValue;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.syntax.style.Style;
-import com.zarbosoft.merman.core.syntax.symbol.Symbol;
-import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
@@ -55,16 +51,6 @@ public class GapAtomType extends BaseGapAtomType {
                 : config.back,
             new TSList<FrontSpec>()
                 .addAll(config.frontPrefix == null ? ROList.empty : config.frontPrefix)
-                .add(
-                    new FrontSymbol(
-                        new FrontSymbol.Config(
-                                config.gapPlaceholderSymbol == null
-                                    ? new SymbolTextSpec(new SymbolTextSpec.Config("•"))
-                                    : config.gapPlaceholderSymbol)
-                            .condition(
-                                new ConditionValue(
-                                    new ConditionValue.Config(
-                                        PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))))
                 .add(
                     new FrontPrimitiveSpec(
                         new FrontPrimitiveSpec.Config(PRIMITIVE_KEY).style(config.primitiveStyle)))
@@ -111,18 +97,9 @@ public class GapAtomType extends BaseGapAtomType {
     public ROList<BackSpec> back;
     public ROList<FrontSpec> frontPrefix = null;
     public ROList<FrontSpec> frontSuffix = null;
-    public Symbol gapPlaceholderSymbol;
     public Style primitiveStyle;
 
     public Config() {}
-
-    public Config(
-        String id, String backType, ROList<FrontSpec> frontPrefix, ROList<FrontSpec> frontSuffix) {
-      this.id = id;
-      this.backType = backType;
-      this.frontPrefix = frontPrefix;
-      this.frontSuffix = frontSuffix;
-    }
 
     public Config back(ROList<BackSpec> back) {
       this.back = back;
@@ -131,6 +108,16 @@ public class GapAtomType extends BaseGapAtomType {
 
     public Config primitiveStyle(Style style) {
       this.primitiveStyle = style;
+      return this;
+    }
+
+    public Config frontPrefix(ROList<FrontSpec> frontPrefix) {
+      this.frontPrefix = frontPrefix;
+      return this;
+    }
+
+    public Config frontSuffix(ROList<FrontSpec> frontSuffix) {
+      this.frontSuffix = frontSuffix;
       return this;
     }
   }

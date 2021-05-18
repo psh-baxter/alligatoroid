@@ -7,7 +7,6 @@ import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.editorcore.display.MockeryDisplay;
 import com.zarbosoft.merman.editorcore.display.MockeryGroup;
 import com.zarbosoft.merman.editorcore.displayderived.ColumnarTableLayout;
-import com.zarbosoft.merman.editorcore.displayderived.RowLayout;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.Pair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -78,9 +77,9 @@ public class TestDisplayDerived {
   }
 
   @Test
-  public void testRowLayout() {
+  public void testCourseGroupLayout() {
     final MockeryDisplay display = new MockeryDisplay(Direction.RIGHT, Direction.DOWN);
-    final RowLayout layout = new RowLayout(display);
+    final CourseGroup layout = new CourseGroup(display.group());
     TSList<CourseDisplayNode> items = new TSList<>();
     {
       final CourseGroup itemGroup = new CourseGroup(display.group());
@@ -110,8 +109,7 @@ public class TestDisplayDerived {
       layout.add(item);
       items.add(item);
     }
-    layout.layout();
-    assertThat(layout.group.transverse(), new IsCloseTo(0.0, 0.01));
+    assertThat(layout.transverse(), new IsCloseTo(-8.0, 0.01));
     TSList<Pair<Integer, Integer>> expected =
         TSList.of(new Pair<>(0, -8), new Pair<>(30, -8), new Pair<>(80, -8), new Pair<>(90, -8));
     for (int index = 0; index < expected.size(); ++index) {

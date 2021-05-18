@@ -151,8 +151,8 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
               }
 
               @Override
-              public boolean selectAnyChild(final Context context) {
-                return nodeVisual.selectAnyChild(context);
+              public boolean selectIntoAnyChild(final Context context) {
+                return nodeVisual.selectIntoAnyChild(context);
               }
 
               @Override
@@ -266,7 +266,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
   }
 
   @Override
-  public boolean selectAnyChild(final Context context) {
+  public boolean selectIntoAnyChild(final Context context) {
     value.selectInto(context, true, 0, 0);
     return true;
   }
@@ -558,7 +558,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
         context.clearHover();
       }
       if (oldSelectionBeginIndex != null) {
-        if (value.data.isEmpty()) value.atomParentRef.selectAtomParent(context);
+        if (value.data.isEmpty()) value.atomParentRef.selectParent(context);
         else {
           if (oldSelectionBeginIndex >= index + remove)
             cursor.setBegin(context, oldSelectionBeginIndex - remove + add.size());
@@ -572,7 +572,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
                 context, Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1)));
         }
       } else if (fixDeepSelectionIndex != null) {
-        if (value.data.isEmpty()) value.atomParentRef.selectAtomParent(context);
+        if (value.data.isEmpty()) value.atomParentRef.selectParent(context);
         else if (fixDeepSelectionIndex >= index && fixDeepSelectionIndex < index + remove) {
           final int newIndex = Math.min(value.data.size() - 1, index + Math.max(0, add.size() - 1));
           select(context, true, newIndex, newIndex);

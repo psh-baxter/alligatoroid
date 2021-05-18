@@ -159,7 +159,7 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard select(String... path) {
     Object got = inner.editor.context.syntaxLocate(new SyntaxPath(path));
-    if (got instanceof Atom) ((Atom) got).visual.selectAnyChild(inner.editor.context);
+    if (got instanceof Atom) ((Atom) got).visual.selectIntoAnyChild(inner.editor.context);
     else if (got instanceof Field) ((Field) got).selectInto(inner.editor.context);
     else throw Assertion.format("Invalid path %s", (Object) path);
     return this;

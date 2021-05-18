@@ -9,6 +9,7 @@ import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Bedding;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Wall;
+import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.displayderived.Box;
 
 public class Details {
@@ -73,18 +74,17 @@ public class Details {
     idle.animate = idle.animate && animate;
   }
 
-  private double pageTransverse(final Context context) {
-    final double padStart = context.syntax.detailPad.transverseStart;
-    final double padEnd = context.syntax.detailPad.transverseEnd;
+  private double pageTransverse(Editor editor) {
+    final double padStart = editor.detailPad.transverseStart * editor.context.toPixels;
+    final double padEnd = editor.detailPad.transverseEnd * editor.context.toPixels;
     return Math.min(
-        context.transverseEdge - padStart - current.node.transverseSpan() - padEnd,
+        editor.context.transverseEdge - padStart - current.node.transverseSpan() - padEnd,
         transverse + transverseSpan + padStart);
   }
 
-  private void place(final Context context, final boolean animate) {
-    final double transverse = pageTransverse(context);
-    current.node.setPosition(
-        new Vector(context.syntax.detailPad.converseStart, transverse), animate);
+  private void place(Editor editor, final boolean animate) {
+    final double transverse = pageTransverse(editor);
+    current.node.setPosition(new Vector(editor.detailPad.converseStart, transverse), animate);
     if (background != null) background.setPosition(new Vector(0, transverse), animate);
   }
 
@@ -93,7 +93,8 @@ public class Details {
     background.setSize(context, context.edge * 2, current.node.transverseSpan());
   }
 
-  public void setPage(final Context context, final DetailsPage page) {
+  public void setPage(Editor editor, final DetailsPage page) {
+    Context context = editor.context;
     if (current != null) {
       context.midground.remove(current.node);
       context.wall.removeBedding(context, bedding);
@@ -106,14 +107,14 @@ public class Details {
         context.midground.add(background.drawing);
       }
       resizeBackground(context);
-      place(context, false);
+      place(editor, false);
       context.midground.add(current.node);
       bedding =
           new Bedding(
               0,
-              context.syntax.detailPad.transverseStart
+              editor.detailPad.transverseStart * context.toPixels
                   + current.node.transverseSpan()
-                  + context.syntax.detailPad.transverseEnd);
+                  + editor.detailPad.transverseEnd * context.toPixels);
       context.wall.addBedding(context, bedding);
     }
   }
@@ -144,7 +145,7 @@ public class Details {
     @Override
     protected boolean runImplementation(final IterationContext iterationContext) {
       if (current != null) {
-        place(context, animate);
+        place(Editor.get(context), animate);
       }
       return false;
     }

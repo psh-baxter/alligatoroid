@@ -233,7 +233,7 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   }
 
   @Override
-  public boolean selectAnyChild(final Context context) {
+  public boolean selectIntoAnyChild(final Context context) {
     return value().selectInto(context);
   }
 

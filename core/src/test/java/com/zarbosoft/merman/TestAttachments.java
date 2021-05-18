@@ -1,8 +1,10 @@
 package com.zarbosoft.merman;
 
+import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
-import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.syntax.FreeAtomType;
+import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
@@ -11,8 +13,6 @@ import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.SyntaxBuilder;
 import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
-import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.rendaw.common.TSSet;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -162,6 +162,7 @@ public class TestAttachments {
     new GeneralTestWizard(syntax, textAtom)
         .displayWidth(60)
         .checkCourseCount(2)
+        .dumpCourses()
         .run(
             context -> {
               textAtom.visual.getLastBrick(context).addAttachment(context, listener);

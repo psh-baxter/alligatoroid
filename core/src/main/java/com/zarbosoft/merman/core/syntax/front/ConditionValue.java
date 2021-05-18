@@ -58,9 +58,22 @@ public class ConditionValue extends ConditionType {
     private final Is is;
 
     PrimitiveCondition(boolean invert, FieldPrimitive value, Is is) {
-      super(invert);
+      super(invert, check(value, is));
       this.value = value;
       this.is = is;
+    }
+
+    private static boolean check(FieldPrimitive value, Is is) {
+      switch (is) {
+        case EMPTY:
+          {
+            if (value.data.length() == 0) {
+              return true;
+            } else return false;
+          }
+        default:
+          throw new Assertion();
+      }
     }
 
     @Override
@@ -68,17 +81,7 @@ public class ConditionValue extends ConditionType {
 
     @Override
     public void changed(Context context, int index, int remove, String add) {
-      switch (is) {
-        case EMPTY:
-          {
-            if (value.data.length() == 0) {
-              setState(context, true);
-            } else setState(context, false);
-          }
-          break;
-        default:
-          throw new Assertion();
-      }
+      setState(context, check(value, is));
     }
   }
 
@@ -87,9 +90,22 @@ public class ConditionValue extends ConditionType {
     private final Is is;
 
     ArrayCondition(boolean invert, FieldArray value, Is is) {
-      super(invert);
+      super(invert, check(value, is));
       this.value = value;
       this.is = is;
+    }
+
+    private static boolean check(FieldArray value, Is is) {
+      switch (is) {
+        case EMPTY:
+          {
+            if (value.data.isEmpty()) {
+              return true;
+            } else return false;
+          }
+        default:
+          throw new Assertion();
+      }
     }
 
     @Override
@@ -98,17 +114,7 @@ public class ConditionValue extends ConditionType {
     @Override
     public void changed(
         final Context context, final int index, final int remove, final ROList<Atom> add) {
-      switch (is) {
-        case EMPTY:
-          {
-            if (((FieldArray) value).data.isEmpty()) {
-              setState(context, true);
-            } else setState(context, false);
-          }
-          break;
-        default:
-          throw new Assertion();
-      }
+      setState(context, check(value, is));
     }
   }
 }

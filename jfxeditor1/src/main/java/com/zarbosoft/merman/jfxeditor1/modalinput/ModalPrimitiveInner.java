@@ -36,7 +36,7 @@ public class ModalPrimitiveInner {
 
   public void updateInfo(Editor editor) {
     editor.banner.setMessage(
-        editor.context,
+        editor,
         info =
             new BannerMessage(
                 Format.format(
@@ -75,7 +75,7 @@ public class ModalPrimitiveInner {
                 }
 
                 // Actions
-              case H:
+              case M:
                 {
                   cursor.actionPreviousGlyph(context);
                   return true;

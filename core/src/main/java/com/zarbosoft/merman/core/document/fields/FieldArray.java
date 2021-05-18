@@ -1,8 +1,8 @@
 package com.zarbosoft.merman.core.document.fields;
 
-import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
@@ -25,9 +25,10 @@ public class FieldArray extends Field {
   }
 
   /**
-   * Initializes the field without creating history.  Use only if none of the subtrees have any history (ex:
-   * initial document load, paste) otherwise if the atom creation is undone then redone, the atoms will have the
-   * wrong parents.
+   * Initializes the field without creating history. Use only if none of the subtrees have any
+   * history (ex: initial document load, paste) otherwise if the atom creation is undone then
+   * redone, the atoms will have the wrong parents.
+   *
    * @param data
    */
   public void initialSet(TSList<Atom> data) {
@@ -73,11 +74,9 @@ public class FieldArray extends Field {
     if (context.window) context.windowAdjustMinimalTo(this);
     if (visual instanceof VisualFieldArray)
       ((VisualFieldArray) visual).select(context, leadFirst, start, end);
-    else if (visual instanceof VisualFieldAtomFromArray)
-    {
+    else if (visual instanceof VisualFieldAtomFromArray) {
       atomParentRef.atom().visual.selectById(context, back.id);
-    }
-    else throw new DeadCode();
+    } else throw new DeadCode();
     return true;
   }
 

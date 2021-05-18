@@ -127,11 +127,11 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
   }
 
   public void actionEnter(final Context context) {
-    visual.value.data.get(beginIndex).visual.selectAnyChild(context);
+    visual.value.data.get(beginIndex).visual.selectIntoAnyChild(context);
   }
 
   public void actionExit(final Context context) {
-    visual.value.atomParentRef.selectAtomParent(context);
+    visual.value.atomParentRef.selectParent(context);
   }
 
   public void actionNextElement(final Context context) {
@@ -208,7 +208,7 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
 
   public void actionWindow(final Context context) {
     final Atom root = visual.value.data.get(beginIndex);
-    if (root.visual.selectAnyChild(context)) {
+    if (root.visual.selectIntoAnyChild(context)) {
       context.windowExact(root);
       context.triggerIdleLayBricksOutward();
       return;

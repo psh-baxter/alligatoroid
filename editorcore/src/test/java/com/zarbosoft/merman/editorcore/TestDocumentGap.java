@@ -111,7 +111,7 @@ public class TestDocumentGap {
   private Editor blank(Syntax syntax) {
     final Atom gap = Helper.createGap(syntax);
     final Editor editor = buildDoc(syntax, gap);
-    gap.visual.selectAnyChild(editor.context);
+    gap.visual.selectIntoAnyChild(editor.context);
     return editor;
   }
 
@@ -878,7 +878,7 @@ public class TestDocumentGap {
         () -> new TreeBuilder(array).addArray("value").build(),
         editor -> {
           ((FieldArray) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value")))
-              .visual.selectAnyChild(editor.context);
+              .visual.selectIntoAnyChild(editor.context);
         },
         new TreeBuilder(array).addArray("value", Helper.createGap(syntax)).build());
   }
@@ -911,7 +911,7 @@ public class TestDocumentGap {
         () -> new TreeBuilder(array).addArray("value").build(),
         editor -> {
           ((FieldArray) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value")))
-              .visual.selectAnyChild(editor.context);
+              .visual.selectIntoAnyChild(editor.context);
         },
         new TreeBuilder(array).addArray("value", new TreeBuilder(one).build()).build());
   }

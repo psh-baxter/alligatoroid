@@ -45,9 +45,9 @@ public class VisualGroup extends Visual {
   }
 
   @Override
-  public boolean selectAnyChild(final Context context) {
+  public boolean selectIntoAnyChild(final Context context) {
     for (final Visual child : children) {
-      if (child.selectAnyChild(context)) return true;
+      if (child.selectIntoAnyChild(context)) return true;
     }
     return false;
   }

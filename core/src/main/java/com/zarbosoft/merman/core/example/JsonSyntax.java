@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BackType;
+import com.zarbosoft.merman.core.syntax.BaseGapAtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
@@ -22,6 +23,7 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.builder.FrontArraySpecBuilder;
+import com.zarbosoft.merman.core.syntax.front.ConditionValue;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
@@ -199,7 +201,21 @@ public class JsonSyntax {
                     .alignments(containerAlignments)));
     GapAtomType gap =
         new GapAtomType(
-            new GapAtomType.Config().back(GapAtomType.jsonBack).primitiveStyle(gapStyle));
+            new GapAtomType.Config()
+                .back(GapAtomType.jsonBack)
+                .primitiveStyle(gapStyle)
+                .frontPrefix(
+                    new TSList<>(
+                        new FrontSymbol(
+                            new FrontSymbol.Config(
+                                    new SymbolTextSpec(
+                                        new SymbolTextSpec.Config("•").style(gapStyle)))
+                                .condition(
+                                    new ConditionValue(
+                                        new ConditionValue.Config(
+                                            BaseGapAtomType.PRIMITIVE_KEY,
+                                            ConditionValue.Is.EMPTY,
+                                            false)))))));
     SuffixGapAtomType suffixGap =
         new SuffixGapAtomType(
             new SuffixGapAtomType.Config()

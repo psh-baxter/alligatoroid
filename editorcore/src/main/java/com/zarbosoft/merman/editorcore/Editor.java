@@ -14,10 +14,11 @@ import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
@@ -43,9 +44,11 @@ public class Editor {
   public final ObboxStyle choiceCursorStyle;
   public final Style choiceDescriptionStyle;
   public final Symbol gapPlaceholderSymbol;
+  public final int detailSpan;
+  public final Padding bannerPad;
+  public final Padding detailPad;
   public Banner banner;
   public Details details;
-  public final int detailSpan;
 
   public Editor(
       final Syntax syntax,
@@ -83,10 +86,12 @@ public class Editor {
         new Banner(
             this.context,
             config.bannerStyle == null ? new Style(new Style.Config()) : config.bannerStyle);
+    this.bannerPad = config.bannerPad;
     this.details =
         new Details(
             this.context,
             config.detailsStyle == null ? new Style(new Style.Config()) : config.detailsStyle);
+    this.detailPad = config.detailPad;
     this.detailSpan = config.detailSpan;
   }
 
@@ -95,7 +100,7 @@ public class Editor {
   }
 
   public static void atomSet(
-          Context context, History.Recorder recorder, VisualFieldAtomBase base, Atom value) {
+      Context context, History.Recorder recorder, VisualFieldAtomBase base, Atom value) {
     base.dispatch(
         new VisualFieldAtomBase.VisualNestedDispatcher() {
           @Override
@@ -202,6 +207,8 @@ public class Editor {
     public Style bannerStyle;
     public Style detailsStyle;
     public int detailSpan = 300;
+    public Padding bannerPad = Padding.empty;
+    public Padding detailPad = Padding.empty;
 
     public Config(Context.InitialConfig context) {
       this.context = context;
@@ -212,6 +219,11 @@ public class Editor {
       return this;
     }
 
+    public Config bannerPad(Padding padding) {
+      this.bannerPad = padding;
+      return this;
+    }
+
     public Config choiceDescriptionStyle(Style style) {
       this.choiceDescriptionStyle = style;
       return this;
@@ -219,6 +231,11 @@ public class Editor {
 
     public Config detailsStyle(Style style) {
       this.detailsStyle = style;
+      return this;
+    }
+
+    public Config detailsPad(Padding padding) {
+      this.detailPad = padding;
       return this;
     }
 

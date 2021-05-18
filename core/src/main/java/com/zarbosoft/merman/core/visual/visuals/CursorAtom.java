@@ -87,11 +87,12 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
     if (selectable instanceof VisualFieldAtomBase) {
       ((VisualFieldAtomBase) selectable).atomGet().selectInto(context);
     } else {
-      selectable.selectAnyChild(context);
+      selectable.selectIntoAnyChild(context);
     }
   }
 
   public void actionExit(final Context context) {
+    if (visual.atom.fieldParentRef == null) return;
     visual.atom.fieldParentRef.selectField(context);
   }
 
@@ -131,7 +132,7 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
       if (editable) {
         context.windowExact(((VisualFieldAtomBase) selectable).atomGet());
         context.triggerIdleLayBricksOutward();
-        ((VisualFieldAtomBase) selectable).atomGet().visual.selectAnyChild(context);
+        ((VisualFieldAtomBase) selectable).atomGet().visual.selectIntoAnyChild(context);
       }
     } else if (selectable instanceof VisualFieldArray
         || selectable instanceof VisualFrontPrimitive) {

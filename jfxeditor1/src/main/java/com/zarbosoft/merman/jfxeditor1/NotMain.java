@@ -17,8 +17,10 @@ import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
-import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
@@ -28,9 +30,10 @@ import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
 import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalCursorAtom;
 import com.zarbosoft.merman.jfxeditor1.modalinput.ModalCursorFieldArray;
-import com.zarbosoft.merman.jfxeditor1.modalinput.ModalGapCursorFieldPrimitive;
 import com.zarbosoft.merman.jfxeditor1.modalinput.ModalCursorFieldPrimitive;
+import com.zarbosoft.merman.jfxeditor1.modalinput.ModalGapCursorFieldPrimitive;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
 import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
 import com.zarbosoft.pidgoon.errors.NoResults;
@@ -118,6 +121,8 @@ public class NotMain extends Application {
         throw new RuntimeException(Format.format("Failed to load document %s", path), e);
       }
 
+      Padding dialogPadding = Padding.ct(0, 5);
+
       JavaFXDisplay display = new JavaFXDisplay(syntax);
       editor =
           new Editor(
@@ -165,6 +170,12 @@ public class NotMain extends Application {
                       return new ModalCursorFieldArray(
                           context, visual, leadFirst, start, end, NotMain.this);
                     }
+
+                    @Override
+                    public CursorAtom createAtomCursor(
+                        Context context, VisualAtom base, int index) {
+                      return new ModalCursorAtom(context, base, index, NotMain.this);
+                    }
                   },
               new Editor.Config(new Context.InitialConfig())
                   .bannerStyle(
@@ -173,6 +184,7 @@ public class NotMain extends Application {
                               .fontSize(5)
                               .color(ModelColor.RGB.hex("938f8d"))
                               .obbox(new ObboxStyle(new ObboxStyle.Config().line(false)))))
+                  .bannerPad(dialogPadding)
                   .choiceCursorStyle(
                       new ObboxStyle(
                           new ObboxStyle.Config()
@@ -193,6 +205,7 @@ public class NotMain extends Application {
                       new Style(
                           new Style.Config()
                               .obbox(new ObboxStyle(new ObboxStyle.Config().line(false)))))
+                  .detailsPad(dialogPadding)
                   .gapPlaceholderSymbol(
                       new SymbolTextSpec(
                           new SymbolTextSpec.Config("▢")
@@ -200,8 +213,10 @@ public class NotMain extends Application {
                                   new Style(
                                       new Style.Config()
                                           .fontSize(5)
+                                              .spaceBefore(1)
+                                              .spaceAfter(1)
                                           .color(ModelColor.RGB.hex("938f8d")))))));
-      editor.context.document.root.visual.selectAnyChild(editor.context);
+      editor.context.document.root.visual.selectIntoAnyChild(editor.context);
 
       editor.context.addHoverListener(
           new Context.HoverListener() {

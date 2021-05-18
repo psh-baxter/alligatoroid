@@ -31,7 +31,7 @@ public class VisualAtom extends Visual {
   public boolean compact = false;
   public CursorAtom cursor;
   public AtomHoverable hoverable;
-  private boolean needIntermediateCursor = false;
+  public boolean needIntermediateCursor = false;
   private VisualParent parent;
 
   public VisualAtom(
@@ -79,10 +79,10 @@ public class VisualAtom extends Visual {
   }
 
   @Override
-  public boolean selectAnyChild(final Context context) {
+  public boolean selectIntoAnyChild(final Context context) {
     if (selectable.isEmpty()) return false;
     if (needIntermediateCursor) select(context, 0);
-    else selectable.get(0).second.selectAnyChild(context);
+    else selectable.get(0).second.selectIntoAnyChild(context);
     return true;
   }
 
@@ -135,12 +135,20 @@ public class VisualAtom extends Visual {
 
   @Override
   public Brick getFirstBrick(final Context context) {
-    return children.get(0).getFirstBrick(context);
+    for (Visual child : children) {
+      Brick out = child.getFirstBrick(context);
+      if (out != null) return out;
+    }
+    return null;
   }
 
   @Override
   public Brick getLastBrick(final Context context) {
-    return children.last().getLastBrick(context);
+    for (Visual child : new ReverseIterable<>(children)) {
+      Brick out = child.getLastBrick(context);
+      if (out != null) return out;
+    }
+    return null;
   }
 
   public int spacePriority() {
@@ -362,7 +370,9 @@ public class VisualAtom extends Visual {
 
     @Override
     public ROPair<Hoverable, Boolean> hover(Context context, Vector point) {
-      if (cursor != null && cursor.index == selectableIndex) return null;
+      if (cursor != null && cursor.index == selectableIndex) {
+        return null;
+      }
       if (needIntermediateCursor) {
         boolean changed = false;
         if (hoverable == null) {

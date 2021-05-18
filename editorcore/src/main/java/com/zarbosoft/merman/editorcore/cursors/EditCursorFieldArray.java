@@ -55,7 +55,7 @@ public class EditCursorFieldArray extends CursorFieldArray {
         new ROPair(visual.value, "insert_after"),
         recorder -> {
           final Atom created = editor.arrayInsertNewDefault(recorder, visual.value, endIndex + 1);
-          if (!created.visual.selectAnyChild(editor.context))
+          if (!created.visual.selectIntoAnyChild(editor.context))
             setPosition(editor.context, endIndex + 1);
         });
   }
@@ -66,7 +66,7 @@ public class EditCursorFieldArray extends CursorFieldArray {
         new ROPair(visual.value, "insert_before"),
         recorder -> {
           final Atom created = editor.arrayInsertNewDefault(recorder, visual.value, beginIndex);
-          if (!created.visual.selectAnyChild(editor.context))
+          if (!created.visual.selectIntoAnyChild(editor.context))
             setPosition(editor.context, beginIndex);
         });
   }

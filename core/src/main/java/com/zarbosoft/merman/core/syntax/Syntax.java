@@ -47,8 +47,6 @@ public class Syntax {
   public final ModelColor background;
   public final Padding pad;
   public final String unprintable;
-  public final Padding bannerPad;
-  public final Padding detailPad;
   public final ROMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
   public final RootAtomType root;
   public final GapAtomType gap;
@@ -87,8 +85,6 @@ public class Syntax {
     this.background = config.background;
     this.pad = config.pad;
     this.unprintable = config.unprintable;
-    this.bannerPad = config.bannerPad;
-    this.detailPad = config.detailPad;
     this.splayedTypes = config.splayedTypes;
     this.root = config.root;
     this.gap = config.gap;
@@ -269,8 +265,6 @@ public class Syntax {
     public ModelColor background = ModelColor.RGB.white;
     public Padding pad = Padding.empty;
     public String unprintable = "▢";
-    public Padding bannerPad = Padding.empty;
-    public Padding detailPad = Padding.empty;
     public final GapAtomType gap;
     public final SuffixGapAtomType suffixGap;
     public Direction converseDirection = Direction.RIGHT;

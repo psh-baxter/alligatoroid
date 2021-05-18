@@ -91,7 +91,7 @@ public abstract class Visual {
     this.visualDepth = depth;
   }
 
-  public abstract boolean selectAnyChild(final Context context);
+  public abstract boolean selectIntoAnyChild(final Context context);
 
   public ROPair<Hoverable, Boolean> hover(final Context context, final Vector point) {
     return parent().hover(context, point);
