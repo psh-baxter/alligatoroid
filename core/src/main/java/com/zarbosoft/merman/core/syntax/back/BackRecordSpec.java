@@ -65,13 +65,15 @@ public class BackRecordSpec extends BaseBackArraySpec {
                 syntax.gap.id,
                 new TSList<>(
                     new BackKeySpec(
-                        new BaseBackPrimitiveSpec.Config(WriteStateDeepDataArray.INDEX_KEY)),
+                        new BaseBackPrimitiveSpec.Config(WriteStateDeepDataArray.INDEX_KEY)
+                            .pattern(syntax.gapInRecordKeyPrefixPattern, "gap-in-record key")),
                     new BackAtomSpec(new BaseBackAtomSpec.Config(null, syntax.gap.id))))
             .put(
                 syntax.suffixGap.id,
                 new TSList<>(
                     new BackKeySpec(
-                        new BaseBackPrimitiveSpec.Config(WriteStateDeepDataArray.INDEX_KEY)),
+                        new BaseBackPrimitiveSpec.Config(WriteStateDeepDataArray.INDEX_KEY)
+                            .pattern(syntax.gapInRecordKeyPrefixPattern, "gap-in-record key")),
                     new BackAtomSpec(new BaseBackAtomSpec.Config(null, syntax.suffixGap.id))));
     super.finish(errors, syntax, typePath, singularRestriction, typeRestriction);
     for (final AtomType element : syntax.splayedTypes.get(type)) {

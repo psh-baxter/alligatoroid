@@ -11,11 +11,15 @@ import com.zarbosoft.merman.core.backevents.EObjectOpenEvent;
 import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.core.backevents.ETypeEvent;
 import com.zarbosoft.merman.core.backevents.JSpecialPrimitiveEvent;
+import com.zarbosoft.merman.core.serialization.WriteStateDeepDataArray;
 import com.zarbosoft.merman.core.syntax.error.DuplicateAtomTypeIds;
 import com.zarbosoft.merman.core.syntax.error.DuplicateAtomTypeIdsInGroup;
 import com.zarbosoft.merman.core.syntax.error.GroupChildDoesntExist;
 import com.zarbosoft.merman.core.syntax.error.NotTransverse;
 import com.zarbosoft.merman.core.syntax.error.TypeCircularReference;
+import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
+import com.zarbosoft.merman.core.syntax.primitivepattern.PatternSequence;
+import com.zarbosoft.merman.core.syntax.primitivepattern.PatternString;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
@@ -58,7 +62,9 @@ public class Syntax {
   public final Style primitiveCursorStyle;
   public final Style hoverStyle;
   public final Style primitiveHoverStyle;
+  public final String gapInRecordKeyPrefix;
   private final Grammar grammar;
+  public final PatternSequence gapInRecordKeyPrefixPattern;
 
   public Syntax(Environment env, Config config) {
     MultiError errors = new MultiError();
@@ -102,6 +108,12 @@ public class Syntax {
         config.primitiveHoverStyle == null
             ? new Style(new Style.Config())
             : config.primitiveHoverStyle;
+    this.gapInRecordKeyPrefix = config.gapInRecordKeyPrefix;
+    this.gapInRecordKeyPrefixPattern = new PatternSequence(
+            TSList.of(
+                    new PatternString(
+                            env, WriteStateDeepDataArray.INDEX_KEY_PREFIX),
+                    new Digits()));
 
     TSSet<AtomType> seen = new TSSet<>();
     for (Map.Entry<String, ROOrderedSetRef<AtomType>> splayedType : splayedTypes) {
@@ -261,12 +273,12 @@ public class Syntax {
   public static class Config {
     public final ROMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
     public final RootAtomType root;
+    public final GapAtomType gap;
+    public final SuffixGapAtomType suffixGap;
     public BackType backType = BackType.LUXEM;
     public ModelColor background = ModelColor.RGB.white;
     public Padding pad = Padding.empty;
     public String unprintable = "▢";
-    public final GapAtomType gap;
-    public final SuffixGapAtomType suffixGap;
     public Direction converseDirection = Direction.RIGHT;
     public Direction transverseDirection = Direction.DOWN;
     public DisplayUnit displayUnit = DisplayUnit.MM;
@@ -274,12 +286,29 @@ public class Syntax {
     public Style primitiveCursorStyle;
     public Style hoverStyle;
     public Style primitiveHoverStyle;
+    public String gapInRecordKeyPrefix = "__gap_pair_";
 
-    public Config(ROMap<String, ROOrderedSetRef<AtomType>> splayedTypes, RootAtomType root, GapAtomType gap, SuffixGapAtomType suffixGap) {
+    public Config(
+        ROMap<String, ROOrderedSetRef<AtomType>> splayedTypes,
+        RootAtomType root,
+        GapAtomType gap,
+        SuffixGapAtomType suffixGap) {
       this.splayedTypes = splayedTypes;
       this.root = root;
       this.gap = gap;
       this.suffixGap = suffixGap;
+    }
+
+    /**
+     * When a gap is in a record before it has been resolved into a key/value pair, generate a
+     * standin key with this prefix to use for serialization
+     *
+     * @param prefix
+     * @return
+     */
+    public Config gapInRecordKeyPrefix(String prefix) {
+      this.gapInRecordKeyPrefix = prefix;
+      return this;
     }
 
     public Config backType(BackType backType) {

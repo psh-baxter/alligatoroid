@@ -136,7 +136,7 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
 
   public void actionNextElement(final Context context) {
     CursorFieldArray.this.leadFirst = true;
-    final int newIndex = Math.min(visual.value.data.size() - 1, endIndex + 1);
+    final int newIndex = (endIndex + 1) % visual.value.data.size();
     if (newIndex == beginIndex && newIndex == endIndex) return;
     setPosition(context, newIndex);
   }
@@ -155,7 +155,7 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
 
   public void actionPreviousElement(final Context context) {
     CursorFieldArray.this.leadFirst = true;
-    final int newIndex = Math.max(0, beginIndex - 1);
+    final int newIndex = (beginIndex + visual.value.data.size() - 1) % visual.value.data.size();
     if (newIndex == beginIndex && newIndex == endIndex) return;
     setPosition(context, newIndex);
   }
