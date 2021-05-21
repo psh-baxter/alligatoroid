@@ -29,10 +29,6 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
   private Brick ellipsis = null;
   private Brick empty = null;
 
-  public void copy(Context context, int beginIndex, int endIndex) {
-    value.back().copy(context, value.data.sublist(beginIndex, endIndex + 1));
-  }
-
   public VisualFieldArray(
       final FrontArraySpecBase front,
       final VisualParent parent,
@@ -44,6 +40,10 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
     dataListener = new DataListener(value, parent);
     value.addListener(dataListener);
     value.visual = this;
+  }
+
+  public void copy(Context context, int beginIndex, int endIndex) {
+    value.back().copy(context, value.data.sublist(beginIndex, endIndex + 1));
   }
 
   private void coreChange(
@@ -157,6 +157,11 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
 
               @Override
               public void notifyLastBrickCreated(Context context, Brick brick) {
+                if (cursor != null) {
+                  System.out.format(
+                      "notify last: cursor end %s, field index %s\n",
+                      cursor.endIndex, ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index);
+                }
                 if (cursor != null
                     && cursor.endIndex
                         == ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index)
@@ -171,13 +176,19 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
 
               @Override
               public void notifyFirstBrickCreated(Context context, Brick brick) {
+                if (cursor != null) {
+                  System.out.format(
+                      "notify first: cursor begin %s, field index %s\n",
+                      cursor.beginIndex,
+                      ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index);
+                }
                 if (cursor != null
                     && cursor.beginIndex
                         == ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index)
                   cursor.border.setFirst(context, brick);
                 if (hoverable != null
-                        && hoverable instanceof ElementHoverableFieldFieldArray
-                        && ((ElementHoverableFieldFieldArray) hoverable).index
+                    && hoverable instanceof ElementHoverableFieldFieldArray
+                    && ((ElementHoverableFieldFieldArray) hoverable).index
                         == ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index)
                   hoverable.border.setFirst(context, brick);
                 parent.notifyFirstBrickCreated(context, brick);
@@ -420,7 +431,8 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
         visual.hoverable = visual.new ElementHoverableFieldFieldArray(context, visual);
         changed = true;
       }
-      ElementHoverableFieldFieldArray elementHoverable = (ElementHoverableFieldFieldArray) visual.hoverable;
+      ElementHoverableFieldFieldArray elementHoverable =
+          (ElementHoverableFieldFieldArray) visual.hoverable;
       if (elementHoverable.index != newIndex) changed = true;
       elementHoverable.setIndex(context, newIndex);
       return new ROPair<>(visual.hoverable, changed);

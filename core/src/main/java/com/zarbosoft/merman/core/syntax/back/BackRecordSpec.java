@@ -43,7 +43,11 @@ public class BackRecordSpec extends BaseBackArraySpec {
   public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
     stack.add(new WriteStateRecordEnd());
-    stack.add(new WriteStateDeepDataArray(((TSList<Atom>) data.get(id)), splayedBoilerplate));
+    stack.add(writeContents((TSList<Atom>) data.get(id)));
+  }
+
+  private WriteState writeContents(ROList<Atom> atoms) {
+    return new WriteStateDeepDataArray(atoms, splayedBoilerplate);
   }
 
   @Override
@@ -110,12 +114,12 @@ public class BackRecordSpec extends BaseBackArraySpec {
 
   @Override
   public void copy(Context context, TSList<Atom> children) {
-    context.copy(Context.CopyContext.RECORD, children);
+    context.copy(Context.CopyContext.RECORD, new TSList<>(writeContents(children)));
   }
 
   @Override
   public void uncopy(Context context, Consumer<ROList<Atom>> consumer) {
-    context.uncopy(elementAtomType(), Context.UncopyContext.RECORD, consumer);
+    context.uncopy(buildBackRuleInner(context.env, context.syntax), Context.CopyContext.RECORD, consumer);
   }
 
   public static enum CheckBackState {

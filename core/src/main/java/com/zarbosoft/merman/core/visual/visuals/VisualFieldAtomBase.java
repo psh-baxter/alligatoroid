@@ -5,16 +5,16 @@ import com.zarbosoft.merman.core.Hoverable;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
-import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.serialization.WriteStateDeepDataArray;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.alignment.Alignment;
-import com.zarbosoft.merman.core.visual.attachments.BorderAttachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -28,6 +28,7 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
     super(visualDepth);
     ellipsisSpec = ellipsis;
   }
+
   @Override
   public void notifyLastBrickCreated(Context context, Brick brick) {
     parent.notifyLastBrickCreated(context, brick);
@@ -57,7 +58,9 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   protected abstract SyntaxPath getBackPath();
 
   public void copy(Context context) {
-    context.copy(Context.CopyContext.ARRAY, TSList.of(atomGet()));
+    context.copy(
+        Context.CopyContext.ARRAY,
+        TSList.of(new WriteStateDeepDataArray(TSList.of(atomGet()), ROMap.empty)));
   }
 
   @Override
@@ -153,8 +156,8 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
                 return parent.atomVisual().findAlignment(alignment);
               }
             });
-    notifyFirstBrickCreated(context,ellipsis);
-    notifyLastBrickCreated(context,ellipsis);
+    notifyFirstBrickCreated(context, ellipsis);
+    notifyLastBrickCreated(context, ellipsis);
     return ellipsis;
   }
 
@@ -197,15 +200,15 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
     boolean fixDeepSelection = false;
     boolean fixDeepHover = false;
     if (context.cursor != null) {
-        VisualParent parent = context.cursor.getVisual().parent();
-        while (parent != null) {
-          final Visual visual = parent.visual();
-          if (visual == this) {
-            fixDeepSelection = true;
-            break;
-          }
-          parent = visual.parent();
+      VisualParent parent = context.cursor.getVisual().parent();
+      while (parent != null) {
+        final Visual visual = parent.visual();
+        if (visual == this) {
+          fixDeepSelection = true;
+          break;
         }
+        parent = visual.parent();
+      }
     }
     if (context.hover != null) {
       VisualParent parent = context.hover.visual().parent();
@@ -229,7 +232,8 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   private void coreSet(final Context context, final Atom data) {
     if (body != null) body.uproot(context, null);
     this.body =
-        (VisualAtom) data.ensureVisual(context, new FrontAtomParent(), visualDepth + 1, depthScore());
+        (VisualAtom)
+            data.ensureVisual(context, new FrontAtomParent(), visualDepth + 1, depthScore());
   }
 
   @Override

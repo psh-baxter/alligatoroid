@@ -27,12 +27,13 @@ public class BackArraySpec extends BaseBackArraySpec {
 
   @Override
   public void copy(Context context, TSList<Atom> children) {
-    context.copy(Context.CopyContext.ARRAY, children);
+    context.copy(Context.CopyContext.ARRAY, new TSList<>(writeContents(children)));
   }
 
   @Override
   public void uncopy(Context context, Consumer<ROList<Atom>> consumer) {
-    context.uncopy(elementAtomType(), Context.UncopyContext.MAYBE_ARRAY, consumer);
+    context.uncopy(
+        buildBackRuleInner(context.env, context.syntax), Context.CopyContext.ARRAY, consumer);
   }
 
   @Override
@@ -48,7 +49,11 @@ public class BackArraySpec extends BaseBackArraySpec {
   public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.arrayBegin();
     stack.add(new WriteStateArrayEnd());
-    stack.add(new WriteStateDeepDataArray(((TSList<Atom>) data.get(id)), splayedBoilerplate));
+    stack.add(writeContents((TSList<Atom>) data.get(id)));
+  }
+
+  private WriteState writeContents(ROList<Atom> atoms) {
+    return new WriteStateDeepDataArray(atoms, splayedBoilerplate);
   }
 
   @Override

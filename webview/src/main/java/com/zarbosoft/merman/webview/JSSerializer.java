@@ -13,7 +13,6 @@ import com.zarbosoft.merman.core.backevents.EPrimitiveEvent;
 import com.zarbosoft.merman.core.backevents.JSpecialPrimitiveEvent;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
-import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.Serializer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.syntax.AtomType;
@@ -28,8 +27,6 @@ import com.zarbosoft.pidgoon.model.Grammar;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.pidgoon.nodes.Reference;
-import com.zarbosoft.pidgoon.nodes.Repeat;
-import com.zarbosoft.pidgoon.nodes.Union;
 import com.zarbosoft.pidgoon.nodes.UnitSequence;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
@@ -44,7 +41,6 @@ import jsinterop.base.JsPropertyMap;
 
 import java.util.Map;
 
-import static com.zarbosoft.merman.core.Context.UncopyContext.NONE;
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class JSSerializer implements Serializer {
@@ -59,17 +55,8 @@ public class JSSerializer implements Serializer {
     if (backType == BackType.LUXEM) throw new Assertion();
   }
 
-  private static void write(final Atom atom, final EventConsumer writer) {
-    final TSList<WriteState> stack = new TSList<>();
-    atom.write(stack);
-    uncheck(
-        () -> {
-          while (!stack.isEmpty()) stack.removeLast().run(stack, writer);
-        });
-  }
-
   @Override
-  public String write(Atom atom) {
+  public String writeDocument(Document document) {
     return uncheck(
         () -> {
           final JSEventConsumer writer;
@@ -85,12 +72,18 @@ public class JSSerializer implements Serializer {
             default:
               throw new DeadCode();
           }
-          write(atom, writer);
+          final TSList<WriteState> stack = new TSList<>();
+          document.root.write(stack);
+          uncheck(
+              () -> {
+                while (!stack.isEmpty()) stack.removeLast().run(stack, writer);
+              });
           return writer.resultOne();
         });
   }
 
-  public String write(Context.CopyContext copyContext, ROList<Atom> atoms) {
+  @Override
+  public String writeForClipboard(Context.CopyContext copyContext, TSList<WriteState> stack) {
     return uncheck(
         () -> {
           final JSEventConsumer writer;
@@ -106,7 +99,7 @@ public class JSSerializer implements Serializer {
             default:
               throw new DeadCode();
           }
-          for (final Atom atom : atoms) write(atom, writer);
+          while (!stack.isEmpty()) stack.removeLast().run(stack, writer);
           return writer.resultMany();
         });
   }
@@ -152,20 +145,34 @@ public class JSSerializer implements Serializer {
   public Document loadDocument(Syntax syntax, java.lang.String data) {
     return new Document(
         syntax,
-        load(syntax, new Reference<>(new AtomKey(RootAtomType.ROOT_TYPE_ID)), data, NONE).get(0));
+        load(
+                syntax,
+                new Operator<>(new Reference<>(new AtomKey(RootAtomType.ROOT_TYPE_ID))) {
+                  @Override
+                  protected ROList<AtomType.AtomParseResult> process(
+                      AtomType.AtomParseResult value) {
+                    return TSList.of(value);
+                  }
+                },
+                data,
+                Context.CopyContext.ROOT)
+            .get(0));
   }
 
   @Override
   public ROList<Atom> loadFromClipboard(
-      Syntax syntax, Context.UncopyContext uncopyContext, String type, Object data) {
-    return load(syntax, syntax.backRuleRef(type), (java.lang.String) data, uncopyContext);
+      Syntax syntax,
+      Context.CopyContext copyContext,
+      Node<ROList<AtomType.AtomParseResult>> child,
+      Object data) {
+    return load(syntax, child, (java.lang.String) data, copyContext);
   }
 
   public ROList<Atom> load(
       Syntax syntax,
-      Node<AtomType.AtomParseResult> type,
+      Node<ROList<AtomType.AtomParseResult>> child,
       String data,
-      Context.UncopyContext uncopyContext) {
+      Context.CopyContext uncopyContext) {
     switch (backType) {
       case LUXEM:
         // TODO, dead atm
@@ -174,17 +181,9 @@ public class JSSerializer implements Serializer {
         {
           final Grammar grammar = new Grammar(syntax.getGrammar());
           switch (uncopyContext) {
-            case NONE:
+            case ROOT:
               {
-                grammar.add(
-                    ROOT_KEY,
-                    new Operator<AtomType.AtomParseResult, ROList<AtomType.AtomParseResult>>(type) {
-                      @Override
-                      protected ROList<AtomType.AtomParseResult> process(
-                          AtomType.AtomParseResult value) {
-                        return TSList.of(value);
-                      }
-                    });
+                grammar.add(ROOT_KEY, child);
                 break;
               }
             case RECORD:
@@ -193,29 +192,18 @@ public class JSSerializer implements Serializer {
                     ROOT_KEY,
                     new UnitSequence<ROList<AtomType.AtomParseResult>>()
                         .addIgnored(new MatchingEventTerminal<>(new EObjectOpenEvent()))
-                        .add(new Repeat<AtomType.AtomParseResult>(type))
+                        .add(child)
                         .addIgnored(new MatchingEventTerminal<>(new EObjectCloseEvent())));
                 break;
               }
-            case MAYBE_ARRAY:
+            case ARRAY:
               {
                 grammar.add(
                     ROOT_KEY,
-                    new Union<ROList<AtomType.AtomParseResult>>()
-                        .add(
-                            new UnitSequence<ROList<AtomType.AtomParseResult>>()
-                                .addIgnored(new MatchingEventTerminal<>(new EArrayOpenEvent()))
-                                .add(new Repeat<AtomType.AtomParseResult>(type))
-                                .addIgnored(new MatchingEventTerminal<>(new EArrayCloseEvent())))
-                        .add(
-                            new Operator<
-                                AtomType.AtomParseResult, ROList<AtomType.AtomParseResult>>(type) {
-                              @Override
-                              protected ROList<AtomType.AtomParseResult> process(
-                                  AtomType.AtomParseResult value) {
-                                return TSList.of(value);
-                              }
-                            }));
+                    new UnitSequence<ROList<AtomType.AtomParseResult>>()
+                        .addIgnored(new MatchingEventTerminal<>(new EArrayOpenEvent()))
+                        .add(child)
+                        .addIgnored(new MatchingEventTerminal<>(new EArrayCloseEvent())));
                 break;
               }
           }

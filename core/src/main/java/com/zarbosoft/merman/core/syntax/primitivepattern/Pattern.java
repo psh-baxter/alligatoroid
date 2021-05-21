@@ -38,7 +38,7 @@ public abstract class Pattern {
       } catch (final InvalidStream e) {
         return false;
       } catch (NoResults e) {
-        return true;
+        return false;
       }
     }
   }

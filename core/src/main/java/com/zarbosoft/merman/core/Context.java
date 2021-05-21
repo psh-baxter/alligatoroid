@@ -9,6 +9,8 @@ import com.zarbosoft.merman.core.document.InvalidDocument;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.serialization.Serializer;
+import com.zarbosoft.merman.core.serialization.WriteState;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
@@ -19,9 +21,11 @@ import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.Wall;
+import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.ArrayList;
@@ -376,15 +380,15 @@ public class Context {
     transverseEdgeListeners.remove(listener);
   }
 
-  public void copy(CopyContext copyContext, final ROList<Atom> atoms) {
-    env.clipboardSet(syntax.backType.mime(), serializer.write(copyContext, atoms));
+  public void copy(CopyContext copyContext, TSList<WriteState> stack) {
+    env.clipboardSet(syntax.backType.mime(), serializer.writeForClipboard(copyContext, stack));
   }
 
   public void copy(final String string) {
     env.clipboardSetString(string);
   }
 
-  public void uncopy(final String type, UncopyContext uncopyContext, Consumer<ROList<Atom>> cb) {
+  public void uncopy(Node<ROList<AtomType.AtomParseResult>> child, CopyContext copyContext, Consumer<ROList<Atom>> cb) {
     env.clipboardGet(
         syntax.backType.mime(),
         data -> {
@@ -393,7 +397,7 @@ public class Context {
             return;
           }
           try {
-            cb.accept(serializer.loadFromClipboard(syntax, uncopyContext, type, data));
+            cb.accept(serializer.loadFromClipboard(syntax, copyContext, child, data));
             return;
           } catch (final InvalidDocument ignored) {
           }
@@ -406,8 +410,9 @@ public class Context {
   }
 
   /**
-   * Note that the paths for atom fields and atoms are the same. There's no way to get an Atom back if the atom's in an
-   * atom field, you'll always get the field.
+   * Note that the paths for atom fields and atoms are the same. There's no way to get an Atom back
+   * if the atom's in an atom field, you'll always get the field.
+   *
    * @param path
    * @return an atom or field
    */
@@ -671,15 +676,9 @@ public class Context {
   }
 
   public static enum CopyContext {
-    NONE,
+    ROOT,
     RECORD,
     ARRAY
-  }
-
-  public static enum UncopyContext {
-    NONE,
-    RECORD,
-    MAYBE_ARRAY
   }
 
   public static interface ContextDoubleListener {

@@ -3,6 +3,7 @@ package com.zarbosoft.merman.editorcore.cursors;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BaseGapAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
@@ -12,6 +13,8 @@ import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomBase;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
+import com.zarbosoft.pidgoon.nodes.Operator;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -57,8 +60,15 @@ public class EditCursorAtom extends CursorAtom {
     ROPair<String, Visual> selectable = visual.selectable.get(index);
     if (selectable.second instanceof VisualFieldAtomBase) {
       editor.context.uncopy(
-          ((VisualFieldAtomBase) selectable.second).nodeType(),
-          Context.UncopyContext.MAYBE_ARRAY,
+          new Operator<>(
+              editor.context.syntax.backRuleRef(
+                  ((VisualFieldAtomBase) selectable.second).nodeType())) {
+            @Override
+            protected ROList<AtomType.AtomParseResult> process(AtomType.AtomParseResult value) {
+              return TSList.of(value);
+            }
+          },
+          Context.CopyContext.ARRAY,
           atoms -> {
             if (atoms.isEmpty()) return;
             editor.history.record(

@@ -16,14 +16,20 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 public class History {
+  /*
+  Implementation:
+  Top level in past is the "in progress" change, may not exist
+  To finish a change means to push a new empty change onto past
+  Undo pops the last change in past, applies it, adds the reverse to end of future
+  Redo pops the last change in future, applies it, adds the reverse to the end of past
+   */
   private final Deque<ChangeLevel> past = new ArrayDeque<>();
   private final Deque<ChangeLevel> future = new ArrayDeque<>();
   private final TSSet<ModifiedStateListener> modifiedStateListeners = new TSSet<>();
   boolean locked = false;
   private Object lastChangeUnique;
   private Environment.Time lastChangeTime;
-  private int levelId = 0;
-  private Integer clearLevel;
+  private ChangeLevel clearLevel;
 
   public History() {}
 
@@ -50,7 +56,7 @@ public class History {
       if (past.getLast().isEmpty()) past.removeLast();
       if (past.isEmpty()) return false;
       future.addLast(applyLevel(context, past.removeLast()));
-      past.addLast(new ChangeLevel(levelId++));
+      past.addLast(new ChangeLevel());
     } catch (final IOException ignored) {
     }
     if (isModified() != wasModified) {
@@ -66,7 +72,7 @@ public class History {
     try (Closeable ignored = lock()) {
       if (future.isEmpty()) return false;
       past.addLast(applyLevel(context, future.removeLast()));
-      past.addLast(new ChangeLevel(levelId++));
+      past.addLast(new ChangeLevel());
     } catch (final IOException ignored) {
     }
     if (wasModified != isModified()) {
@@ -86,7 +92,7 @@ public class History {
 
   private void finishChangeInner() {
     if (!past.isEmpty() && past.getLast().isEmpty()) return;
-    past.addLast(new ChangeLevel(levelId++));
+    past.addLast(new ChangeLevel());
   }
 
   public void record(Context context, ROPair unique, Consumer<Recorder> c) {
@@ -105,12 +111,10 @@ public class History {
       lastChangeTime = now;
       lastChangeUnique = unique;
 
-      /// Remaining change prep
-      if (past.isEmpty()) past.add(new ChangeLevel(levelId++));
       future.clear();
 
       /// Record and apply changes as they're recorded
-      ChangeLevel partialUndo = new ChangeLevel(-1);
+      ChangeLevel partialUndo = new ChangeLevel();
       partialUndo.select = past.getLast().select;
       try {
         c.accept(new Recorder(partialUndo));
@@ -131,23 +135,30 @@ public class History {
     }
   }
 
-  private Integer fixedTop() {
+  /**
+   * The last not in-progress change
+   *
+   * @return
+   */
+  private ChangeLevel fixedTop() {
     final Iterator<ChangeLevel> iter = past.descendingIterator();
     if (!iter.hasNext()) return null;
     ChangeLevel next = iter.next();
     if (next.isEmpty())
       if (iter.hasNext()) next = iter.next();
       else return null;
-    return next.id;
+    return next;
   }
 
   public boolean isModified() {
-    if (clearLevel == null) {
-      if (past.isEmpty()) return false;
-      return past.size() > 1 || !past.getLast().isEmpty();
-    } else {
-      return !clearLevel.equals(fixedTop());
-    }
+    System.out.format("is mod?\n");
+    System.out.format("clear lev = %s, top = %s\n", clearLevel, fixedTop());
+    if (clearLevel!= fixedTop()) return true;
+    System.out.format("past empty %s\n", past.isEmpty());
+    if (!past.isEmpty()) System.out.format("past last empty %s\n", past.getLast().isEmpty());
+    if (!past.isEmpty() && !past.getLast().isEmpty()) return true;
+    System.out.format("-> not mod\n");
+    return false;
   }
 
   public void clear() {
@@ -158,9 +169,9 @@ public class History {
 
   public void clearModified() {
     finishChange();
-    final Integer oldClearLevel = clearLevel;
+    final ChangeLevel oldClearLevel = clearLevel;
     clearLevel = fixedTop();
-    if (!Objects.equals(clearLevel, oldClearLevel)) {
+    if (clearLevel != oldClearLevel) {
       for (ModifiedStateListener l : modifiedStateListeners) {
         l.changed(false);
       }

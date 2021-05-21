@@ -2,12 +2,12 @@ package com.zarbosoft.merman.core.syntax.back;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
-import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.SyntaxPath;
+import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.serialization.EventConsumer;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateDeepDataArray;
-import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.PluralInvalidAtLocation;
@@ -17,8 +17,6 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.function.Consumer;
-
-import static com.zarbosoft.merman.core.Context.UncopyContext.MAYBE_ARRAY;
 
 public class BackSubArraySpec extends BaseBackArraySpec {
 
@@ -41,14 +39,12 @@ public class BackSubArraySpec extends BaseBackArraySpec {
 
   @Override
   public void copy(Context context, TSList<Atom> children) {
-    context.copy(Context.CopyContext.ARRAY, children);
+    context.copy(Context.CopyContext.ARRAY, new TSList<>(writeContents(children)));
   }
+
   @Override
   public void uncopy(Context context, Consumer<ROList<Atom>> consumer) {
-    context.uncopy(
-            elementAtomType(),
-            MAYBE_ARRAY,
-            consumer);
+    context.uncopy(buildBackRuleInner(context.env, context.syntax), Context.CopyContext.ARRAY, consumer);
   }
 
   @Override
@@ -58,7 +54,11 @@ public class BackSubArraySpec extends BaseBackArraySpec {
 
   @Override
   public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
-    stack.add(new WriteStateDeepDataArray(((TSList<Atom>) data.get(id)), splayedBoilerplate));
+    stack.add(writeContents((TSList<Atom>) data.get(id)));
+  }
+
+  private WriteState writeContents(ROList<Atom> atoms) {
+    return new WriteStateDeepDataArray(atoms, splayedBoilerplate);
   }
 
   @Override

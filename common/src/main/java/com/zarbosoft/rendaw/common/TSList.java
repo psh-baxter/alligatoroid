@@ -23,7 +23,7 @@ public class TSList<T> implements ROList<T> {
     this.values = new ArrayList<>();
   }
   public TSList(T... values) {
-    this.values = Arrays.asList(values);
+    this.values = new ArrayList<>(Arrays.asList(values));
   }
 
   private TSList(List<T> values) {
