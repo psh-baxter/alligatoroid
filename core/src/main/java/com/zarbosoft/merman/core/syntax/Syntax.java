@@ -63,8 +63,8 @@ public class Syntax {
   public final Style hoverStyle;
   public final Style primitiveHoverStyle;
   public final String gapInRecordKeyPrefix;
-  private final Grammar grammar;
   public final PatternSequence gapInRecordKeyPrefixPattern;
+  private final Grammar grammar;
 
   public Syntax(Environment env, Config config) {
     MultiError errors = new MultiError();
@@ -109,11 +109,10 @@ public class Syntax {
             ? new Style(new Style.Config())
             : config.primitiveHoverStyle;
     this.gapInRecordKeyPrefix = config.gapInRecordKeyPrefix;
-    this.gapInRecordKeyPrefixPattern = new PatternSequence(
+    this.gapInRecordKeyPrefixPattern =
+        new PatternSequence(
             TSList.of(
-                    new PatternString(
-                            env, WriteStateDeepDataArray.INDEX_KEY_PREFIX),
-                    new Digits()));
+                new PatternString(env, WriteStateDeepDataArray.INDEX_KEY_PREFIX), new Digits()));
 
     TSSet<AtomType> seen = new TSSet<>();
     for (Map.Entry<String, ROOrderedSetRef<AtomType>> splayedType : splayedTypes) {
@@ -154,6 +153,7 @@ public class Syntax {
                 new HomogenousSequence()
                     .add(new MatchingEventTerminal<>(new ETypeEvent()))
                     .add(new Reference(GRAMMAR_WILDCARD_KEY_UNTYPED))));
+    Union<AtomType.AtomParseResult> any = new Union<>();
     for (Map.Entry<String, ROOrderedSetRef<AtomType>> entry : splayedTypes) {
       ROOrderedSetRef<AtomType> types = entry.getValue();
       String key = entry.getKey();
@@ -161,15 +161,19 @@ public class Syntax {
       if (types.size() == 1 && key.equals(firstType.id())) {
         AtomType type = firstType;
         grammar.add(type.key, type.buildBackRule(env, this));
+        any.add(new Reference<>(type.key));
       } else {
         final Union<AtomType.AtomParseResult> group = new Union<>();
         for (AtomType type : types) {
-          group.add(new Reference<AtomType.AtomParseResult>(type.key));
+          Reference<AtomType.AtomParseResult> ref = new Reference<>(type.key);
+          group.add(ref);
+          any.add(ref);
         }
         grammar.add(new AtomKey(key), group);
       }
     }
     grammar.add(root.key, root.buildBackRule(env, this));
+    grammar.add(new AtomKey(null), any);
 
     errors.raise();
   }

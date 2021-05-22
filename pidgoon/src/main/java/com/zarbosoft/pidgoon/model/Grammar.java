@@ -25,7 +25,9 @@ public class Grammar {
   }
 
   public <T> Node<T> getNode(final Reference.Key<T> key) {
-    if (!nodes.containsKey(key)) throw new RuntimeException(Format.format("No rule named %s", key));
+    if (!nodes.containsKey(key)) {
+      throw new RuntimeException(Format.format("No rule named %s", key));
+    }
     return nodes.get(key);
   }
 }

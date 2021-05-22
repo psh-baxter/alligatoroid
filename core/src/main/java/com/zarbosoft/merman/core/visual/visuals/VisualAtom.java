@@ -262,7 +262,7 @@ public class VisualAtom extends Visual {
     throw new Assertion();
   }
 
-  private class ChildParent extends VisualParent {
+  public class ChildParent extends VisualParent {
     public final int index;
 
     public ChildParent(final int index) {
@@ -281,7 +281,11 @@ public class VisualAtom extends Visual {
 
     @Override
     public ExtendBrickResult createNextBrick(final Context context) {
-      if (index + 1 < children.size()) return children.get(index + 1).createFirstBrick(context);
+      for (int at = index + 1; at < children.size(); ++at) {
+        ExtendBrickResult res = children.get(at).createFirstBrick(context);
+        if (res.empty) continue;
+        return res;
+      }
       if (parent == null) return ExtendBrickResult.empty();
       if (context.windowAtom() == VisualAtom.this.atom) return ExtendBrickResult.empty();
       return parent.createNextBrick(context);
@@ -289,7 +293,11 @@ public class VisualAtom extends Visual {
 
     @Override
     public ExtendBrickResult createPreviousBrick(final Context context) {
-      if (index - 1 >= 0) return children.get(index - 1).createLastBrick(context);
+      for (int at = index - 1; at >= 0; --at) {
+        ExtendBrickResult res = children.get(at).createLastBrick(context);
+        if (res.empty) continue;
+        return res;
+      }
       if (parent == null) return ExtendBrickResult.empty();
       if (context.windowAtom() == VisualAtom.this.atom) return ExtendBrickResult.empty();
       return parent.createPreviousBrick(context);

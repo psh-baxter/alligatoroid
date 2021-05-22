@@ -198,6 +198,7 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
   protected void set(final Context context, final Atom data) {
     if (ellipsize(context)) return;
     boolean fixDeepSelection = false;
+    boolean fixParentSelectionCornerstone = false;
     boolean fixDeepHover = false;
     if (context.cursor != null) {
       VisualParent parent = context.cursor.getVisual().parent();
@@ -208,6 +209,15 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
           break;
         }
         parent = visual.parent();
+      }
+      if (this.parent.atomVisual().cursor != null
+          && this.parent
+                  .atomVisual()
+                  .selectable
+                  .get(((CursorAtom) this.parent.atomVisual().cursor).index)
+                  .second
+              == this) {
+        fixParentSelectionCornerstone = true;
       }
     }
     if (context.hover != null) {
@@ -223,9 +233,13 @@ public abstract class VisualFieldAtomBase extends Visual implements VisualLeaf {
     }
 
     coreSet(context, data);
-    context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
+    if (fixParentSelectionCornerstone) {
+      parent.atomVisual().cursor.resetCornerstone(context);
+    } else {
+      context.triggerIdleLayBricks(parent, 0, 1, 1, null, null);
+      if (fixDeepSelection) atomGet().fieldParentRef.selectField(context);
+    }
 
-    if (fixDeepSelection) atomGet().fieldParentRef.selectField(context);
     if (fixDeepHover) context.clearHover();
   }
 

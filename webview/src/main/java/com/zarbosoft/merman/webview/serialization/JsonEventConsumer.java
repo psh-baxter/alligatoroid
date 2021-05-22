@@ -69,7 +69,24 @@ public class JsonEventConsumer implements JSEventConsumer {
     if ("true".equals(value)) stack.last().value(true);
     else if ("false".equals(value)) stack.last().value(false);
     else if ("null".equals(value)) stack.last().value(null);
-    else if (!value.contains(".")) stack.last().value(JsNumber.parseInt(value, 10));
-    else stack.last().value(JsNumber.parseFloat(value));
+    else if (!value.contains(".")) {
+      int value1;
+      try {
+        value1 = JsNumber.parseInt(value, 10);
+      } catch (Exception e) {
+        // TODO log
+        value1 = -12345;
+      }
+      stack.last().value(value1);
+    } else {
+      double value1;
+      try {
+        value1 = JsNumber.parseFloat(value);
+      } catch (Exception e) {
+        // TODO log
+        value1 = -12345;
+      }
+      stack.last().value(value1);
+    }
   }
 }

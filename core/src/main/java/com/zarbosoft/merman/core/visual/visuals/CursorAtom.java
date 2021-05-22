@@ -24,28 +24,35 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
     setIndex(context, index);
   }
 
-  public void setIndex(Context context, int index) {
-    this.index = index;
+  public void resetCornerstone(Context context) {
     Visual fieldVisual = this.visual.selectable.get(index).second;
+    int visualIndex = ((VisualAtom.ChildParent) visual.selectable.get(index).second.parent()).index;
     context.wall.setCornerstone(
-        context,
-        fieldVisual.createOrGetCornerstoneCandidate(context).brick,
-        () -> {
-          for (int at = index - 1; at >= 0; --at) {
-            final Brick found = visual.selectable.get(at).second.getLastBrick(context);
-            if (found != null) return found;
-          }
-          return visual.parent().getPreviousBrick(context);
-        },
-        () -> {
-          for (int at = index + 1; at < visual.selectable.size(); ++at) {
-            final Brick found = visual.selectable.get(at).second.getFirstBrick(context);
-            if (found != null) return found;
-          }
-          return visual.parent().getNextBrick(context);
-        });
+            context,
+            fieldVisual.createOrGetCornerstoneCandidate(context).brick,
+            () -> {
+              for (int at = visualIndex - 1; at >= 0; --at) {
+                final Brick found = visual.children.get(at).getLastBrick(context);
+                if (found != null) return found;
+              }
+              if (visual.parent() == null) return null;
+              return visual.parent().getPreviousBrick(context);
+            },
+            () -> {
+              for (int at = visualIndex + 1; at < visual.selectable.size(); ++at) {
+                final Brick found = visual.children.get(at).getFirstBrick(context);
+                if (found != null) return found;
+              }
+              if (visual.parent() == null) return null;
+              return visual.parent().getNextBrick(context);
+            });
     border.setFirst(context, fieldVisual.getFirstBrick(context));
     border.setLast(context, fieldVisual.getLastBrick(context));
+  }
+
+  public void setIndex(Context context, int index) {
+    this.index = index;
+    resetCornerstone(context);
   }
 
   @Override

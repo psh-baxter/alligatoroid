@@ -429,7 +429,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 4, 4);
     Helper.cursorArray(context).actionNextElement(context);
-    assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "4")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "0")));
   }
 
   @Test
@@ -453,7 +453,7 @@ public class TestActionsArray {
     final Context context = buildFive();
     visual(context).select(context, true, 0, 0);
     Helper.cursorArray(context).actionPreviousElement(context);
-    assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "0")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "4")));
   }
 
   @Test

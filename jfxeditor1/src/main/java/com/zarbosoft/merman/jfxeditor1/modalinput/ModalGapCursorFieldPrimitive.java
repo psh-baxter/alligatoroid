@@ -18,6 +18,7 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
   public ModalCursorFieldPrimitive.Mode mode = ModalCursorFieldPrimitive.Mode.NAV;
   private SyntaxPath syntaxPath;
   private BannerMessage info;
+
   public ModalGapCursorFieldPrimitive(
       Editor editor,
       VisualFrontPrimitive visualPrimitive,
@@ -28,9 +29,8 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
     super(editor, visualPrimitive, leadFirst, beginOffset, endOffset);
     this.main = main;
     this.syntaxPath = syntaxPath;
-    if (range.beginOffset != range.endOffset)
-      setMode(editor, ModalCursorFieldPrimitive.Mode.SELECT);
-    else updateInfo(editor);
+    if (range.beginOffset != range.endOffset) setMode(editor, ModalCursorFieldPrimitive.Mode.SELECT);
+    else setMode(editor, ModalCursorFieldPrimitive.Mode.TEXT);
   }
 
   public void setMode(Editor editor, ModalCursorFieldPrimitive.Mode mode) {
@@ -75,17 +75,17 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
                 }
               case J:
                 {
-                  choicePage.nextChoice(context);
+                  if (choicePage != null) choicePage.nextChoice(context);
                   return true;
                 }
               case K:
                 {
-                  choicePage.previousChoice(context);
+                  if (choicePage != null) choicePage.previousChoice(context);
                   return true;
                 }
               case ENTER:
                 {
-                  choicePage.choose(Editor.get(context));
+                  if (choicePage != null) choicePage.choose(Editor.get(context));
                   return true;
                 }
               case L:
@@ -171,17 +171,17 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
                 }
               case J:
                 {
-                  choicePage.nextChoice(context);
+                  if (choicePage != null) choicePage.nextChoice(context);
                   return true;
                 }
               case K:
                 {
-                  choicePage.previousChoice(context);
+                  if (choicePage != null) choicePage.previousChoice(context);
                   return true;
                 }
               case ENTER:
                 {
-                  choicePage.choose(Editor.get(context));
+                  if (choicePage != null) choicePage.choose(Editor.get(context));
                   return true;
                 }
               case L:
@@ -261,12 +261,12 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
                 // Actions
               case DOWN:
                 {
-                  choicePage.nextChoice(context);
+                  if (choicePage != null) choicePage.nextChoice(context);
                   return true;
                 }
               case UP:
                 {
-                  choicePage.previousChoice(context);
+                  if (choicePage != null) choicePage.previousChoice(context);
                   return true;
                 }
               case LEFT:
@@ -291,7 +291,7 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
                 }
               case ENTER:
                 {
-                  editSplitLines(Editor.get(context));
+                  if (choicePage != null) choicePage.choose(Editor.get(context));
                   return true;
                 }
               case V:

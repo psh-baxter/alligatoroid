@@ -136,7 +136,31 @@ public class JavaSerializer implements Serializer {
 
       @Override
       public void jsonSpecialPrimitive(final String value) {
-        uncheck(() -> generator.writeRaw(value));
+        uncheck(
+            () -> {
+              if (value.equals("true")) generator.writeBoolean(true);
+              else if (value.equals("false")) generator.writeBoolean(false);
+              else if (value.equals("null")) generator.writeNull();
+              else if (value.contains(".")) {
+                int value1;
+                try {
+                  value1 = Integer.parseInt(value);
+                } catch (Exception e) {
+                  // TODO log
+                  value1 = -12345;
+                }
+                generator.writeNumber(value1);
+              } else {
+                double value1;
+                try {
+                  value1 = Double.parseDouble(value);
+                } catch (Exception e) {
+                  // TODO log
+                  value1 = -12345;
+                }
+                generator.writeNumber(value1);
+              }
+            });
       }
     };
   }

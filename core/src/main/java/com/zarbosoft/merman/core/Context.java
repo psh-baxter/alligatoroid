@@ -768,23 +768,23 @@ public class Context {
           return false;
         }
         if (!ends.isEmpty()) {
-          final Brick next = ends.iterator().next();
-          ends.remove(next);
-          if (next.parent != null) {
-            final Brick created = next.createNext(Context.this).brick;
+          final Brick end = ends.iterator().next();
+          ends.remove(end);
+          if (end.parent != null) {
+            final Brick created = end.createNext(Context.this).brick;
             if (created != null) {
-              next.addAfter(Context.this, created);
+              end.addAfter(Context.this, created);
               ends.add(created);
             }
           }
         }
         if (!starts.isEmpty()) {
-          final Brick previous = starts.iterator().next();
-          starts.remove(previous);
-          if (previous.parent != null) {
-            final Brick created = previous.createPrevious(Context.this).brick;
+          final Brick end = starts.iterator().next();
+          starts.remove(end);
+          if (end.parent != null) {
+            final Brick created = end.createPrevious(Context.this).brick;
             if (created != null) {
-              previous.addBefore(Context.this, created);
+              end.addBefore(Context.this, created);
               starts.add(created);
             }
           }

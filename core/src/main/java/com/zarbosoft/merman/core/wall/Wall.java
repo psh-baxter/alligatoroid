@@ -11,6 +11,21 @@ import com.zarbosoft.rendaw.common.TSSet;
 import java.util.function.Supplier;
 
 public class Wall {
+  /*
+  How bricks are laid:
+  1. Initially, cornerstone set then "lay bricks outward"
+  2. After scrolling, outward
+  3. When the cursor changes, cornerstone set then laid from cornerstone
+  4. When a visual is rooted, it triggers laying bricks between previous and following bricks (via parent)
+
+  Bricks won't be laid without a cornerstone
+
+  How cornerstones are set:
+  1. Initially
+  2. When cursor changes
+  3. Courses joined/broken and cornerstone moves
+  4. Primitive lines joined/broken and cornerstone moves
+   */
   public final Group visual;
   public TSList<Course> children = new TSList<>();
   /** Cornerstone may be null. Cornerstone course is only null in transition. */

@@ -213,8 +213,8 @@ public class NotMain extends Application {
                                   new Style(
                                       new Style.Config()
                                           .fontSize(5)
-                                              .spaceBefore(1)
-                                              .spaceAfter(1)
+                                          .spaceBefore(1)
+                                          .spaceAfter(1)
                                           .color(ModelColor.RGB.hex("938f8d")))))));
       editor.context.document.root.visual.selectIntoAnyChild(editor.context);
 
@@ -365,7 +365,6 @@ public class NotMain extends Application {
   public void flush(boolean clearBackup) {
     Path backupPath = Paths.get((path.startsWith(".") ? "" : ".") + path + ".merman_backup");
     if (editor.history.isModified()) {
-      System.out.format("flushed\n");
       Path path1 = Paths.get(this.path);
       if (!clearBackup && !Files.exists(backupPath)) {
         try {
@@ -377,14 +376,13 @@ public class NotMain extends Application {
         }
       }
       try {
-        Files.write(path1, (byte[]) editor.context.serializer.writeDocument(editor.context.document));
+        Files.write(
+            path1, (byte[]) editor.context.serializer.writeDocument(editor.context.document));
       } catch (IOException e) {
         logException(e, "Failed to write to %s", this.path);
         return;
       }
       editor.history.clearModified();
-    } else {
-      System.out.format("not modified\n");
     }
     if (clearBackup)
       try {
