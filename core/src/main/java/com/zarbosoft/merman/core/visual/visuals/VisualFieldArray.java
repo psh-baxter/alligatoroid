@@ -14,6 +14,7 @@ import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -92,7 +93,36 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
         final VisualAtom nodeVisual =
             (VisualAtom)
                 atom.ensureVisual(
-                    context, group.createParent(groupIndex++), group.visualDepth + 2, depthScore());
+                    context,
+                    new Parent(group, groupIndex++) {
+                      @Override
+                      public void notifyLastBrickCreated(Context context, Brick brick) {
+                        if (cursor != null
+                            && cursor.endIndex == ((FieldArray.Parent) atom.fieldParentRef).index)
+                          cursor.border.setLast(context, brick);
+                        if (hoverable != null
+                            && hoverable instanceof ElementHoverableFieldFieldArray
+                            && ((ElementHoverableFieldFieldArray) hoverable).index
+                                == ((FieldArray.Parent) atom.fieldParentRef).index)
+                          hoverable.border.setLast(context, brick);
+                        super.notifyLastBrickCreated(context, brick);
+                      }
+
+                      @Override
+                      public void notifyFirstBrickCreated(Context context, Brick brick) {
+                        if (cursor != null
+                            && cursor.beginIndex == ((FieldArray.Parent) atom.fieldParentRef).index)
+                          cursor.border.setFirst(context, brick);
+                        if (hoverable != null
+                            && hoverable instanceof ElementHoverableFieldFieldArray
+                            && ((ElementHoverableFieldFieldArray) hoverable).index
+                                == ((FieldArray.Parent) atom.fieldParentRef).index)
+                          hoverable.border.setFirst(context, brick);
+                        super.notifyFirstBrickCreated(context, brick);
+                      }
+                    },
+                    group.visualDepth + 2,
+                    depthScore());
         group.add(
             context,
             new Visual(group.visualDepth + 1) {
@@ -157,41 +187,12 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
 
               @Override
               public void notifyLastBrickCreated(Context context, Brick brick) {
-                if (cursor != null) {
-                  System.out.format(
-                      "notify last: cursor end %s, field index %s\n",
-                      cursor.endIndex, ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index);
-                }
-                if (cursor != null
-                    && cursor.endIndex
-                        == ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index)
-                  cursor.border.setLast(context, brick);
-                if (hoverable != null
-                    && hoverable instanceof ElementHoverableFieldFieldArray
-                    && ((ElementHoverableFieldFieldArray) hoverable).index
-                        == ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index)
-                  hoverable.border.setLast(context, brick);
-                parent.notifyLastBrickCreated(context, brick);
+                throw new Assertion();
               }
 
               @Override
               public void notifyFirstBrickCreated(Context context, Brick brick) {
-                if (cursor != null) {
-                  System.out.format(
-                      "notify first: cursor begin %s, field index %s\n",
-                      cursor.beginIndex,
-                      ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index);
-                }
-                if (cursor != null
-                    && cursor.beginIndex
-                        == ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index)
-                  cursor.border.setFirst(context, brick);
-                if (hoverable != null
-                    && hoverable instanceof ElementHoverableFieldFieldArray
-                    && ((ElementHoverableFieldFieldArray) hoverable).index
-                        == ((FieldArray.Parent) nodeVisual.atom.fieldParentRef).index)
-                  hoverable.border.setFirst(context, brick);
-                parent.notifyFirstBrickCreated(context, brick);
+                throw new Assertion();
               }
             });
         for (final FrontSymbol fix : front.suffix)

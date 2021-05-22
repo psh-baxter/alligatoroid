@@ -151,13 +151,8 @@ public class History {
   }
 
   public boolean isModified() {
-    System.out.format("is mod?\n");
-    System.out.format("clear lev = %s, top = %s\n", clearLevel, fixedTop());
     if (clearLevel!= fixedTop()) return true;
-    System.out.format("past empty %s\n", past.isEmpty());
-    if (!past.isEmpty()) System.out.format("past last empty %s\n", past.getLast().isEmpty());
     if (!past.isEmpty() && !past.getLast().isEmpty()) return true;
-    System.out.format("-> not mod\n");
     return false;
   }
 
