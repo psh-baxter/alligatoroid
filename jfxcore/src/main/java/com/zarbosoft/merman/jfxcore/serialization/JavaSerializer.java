@@ -1,8 +1,6 @@
 package com.zarbosoft.merman.jfxcore.serialization;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.core.util.DefaultPrettyPrinter;
+import com.google.gson.stream.JsonWriter;
 import com.zarbosoft.luxem.read.Parse;
 import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.luxem.write.Writer;
@@ -41,6 +39,7 @@ import com.zarbosoft.rendaw.common.TSList;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.OutputStreamWriter;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -97,11 +96,11 @@ public class JavaSerializer implements Serializer {
     };
   }
 
-  private static EventConsumer jsonEventConsumer(final JsonGenerator generator) {
+  private static EventConsumer jsonEventConsumer(final JsonWriter generator) {
     return new EventConsumer() {
       @Override
       public void primitive(final String value) {
-        uncheck(() -> generator.writeString(value));
+        uncheck(() -> generator.value(value));
       }
 
       @Override
@@ -111,36 +110,36 @@ public class JavaSerializer implements Serializer {
 
       @Override
       public void arrayBegin() {
-        uncheck(() -> generator.writeStartArray());
+        uncheck(() -> generator.beginArray());
       }
 
       @Override
       public void arrayEnd() {
-        uncheck(() -> generator.writeEndArray());
+        uncheck(() -> generator.endArray());
       }
 
       @Override
       public void recordBegin() {
-        uncheck(() -> generator.writeStartObject());
+        uncheck(() -> generator.beginObject());
       }
 
       @Override
       public void recordEnd() {
-        uncheck(() -> generator.writeEndObject());
+        uncheck(() -> generator.endObject());
       }
 
       @Override
       public void key(final String s) {
-        uncheck(() -> generator.writeFieldName(s));
+        uncheck(() -> generator.name(s));
       }
 
       @Override
       public void jsonSpecialPrimitive(final String value) {
         uncheck(
             () -> {
-              if (value.equals("true")) generator.writeBoolean(true);
-              else if (value.equals("false")) generator.writeBoolean(false);
-              else if (value.equals("null")) generator.writeNull();
+              if (value.equals("true")) generator.value(true);
+              else if (value.equals("false")) generator.value(false);
+              else if (value.equals("null")) generator.nullValue();
               else if (!value.contains(".")) {
                 int value1;
                 try {
@@ -149,7 +148,7 @@ public class JavaSerializer implements Serializer {
                   // TODO log
                   value1 = -12345;
                 }
-                generator.writeNumber(value1);
+                generator.value(value1);
               } else {
                 double value1;
                 try {
@@ -158,7 +157,7 @@ public class JavaSerializer implements Serializer {
                   // TODO log
                   value1 = -12345;
                 }
-                generator.writeNumber(value1);
+                generator.value(value1);
               }
             });
       }
@@ -226,7 +225,7 @@ public class JavaSerializer implements Serializer {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     uncheck(
         () -> {
-          JsonGenerator jsonGenerator = null;
+          JsonWriter jsonGenerator = null;
           final EventConsumer writer;
           switch (backType) {
             case LUXEM:
@@ -234,8 +233,8 @@ public class JavaSerializer implements Serializer {
               break;
             case JSON:
               {
-                jsonGenerator = new JsonFactory().createGenerator(stream);
-                jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
+                jsonGenerator = new JsonWriter(new OutputStreamWriter(stream));
+                jsonGenerator.setIndent("    ");
                 writer = jsonEventConsumer(jsonGenerator);
                 break;
               }
@@ -257,7 +256,7 @@ public class JavaSerializer implements Serializer {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     uncheck(
         () -> {
-          JsonGenerator jsonGenerator = null;
+          JsonWriter jsonGenerator = null;
           final EventConsumer writer;
           switch (backType) {
             case LUXEM:
@@ -275,16 +274,16 @@ public class JavaSerializer implements Serializer {
               break;
             case JSON:
               {
-                jsonGenerator = new JsonFactory().createGenerator(stream);
-                jsonGenerator.setPrettyPrinter(new DefaultPrettyPrinter());
+                jsonGenerator = new JsonWriter(new OutputStreamWriter(stream));
+                jsonGenerator.setIndent("    ");
                 switch (copyContext) {
                   case ROOT:
                     break;
                   case RECORD:
-                    jsonGenerator.writeStartObject();
+                    jsonGenerator.beginObject();
                     break;
                   case ARRAY:
-                    jsonGenerator.writeStartArray();
+                    jsonGenerator.beginArray();
                     break;
                 }
                 writer = jsonEventConsumer(jsonGenerator);
@@ -316,10 +315,10 @@ public class JavaSerializer implements Serializer {
                   case ROOT:
                     break;
                   case RECORD:
-                    jsonGenerator.writeEndObject();
+                    jsonGenerator.endObject();
                     break;
                   case ARRAY:
-                    jsonGenerator.writeEndArray();
+                    jsonGenerator.endArray();
                     break;
                 }
                 jsonGenerator.flush();

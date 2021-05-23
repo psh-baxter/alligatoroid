@@ -1,8 +1,6 @@
 package com.zarbosoft.merman.jfxcore.serialization;
 
-import com.fasterxml.jackson.core.JsonFactory;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
+import com.google.gson.stream.JsonReader;
 import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
@@ -17,10 +15,11 @@ import com.zarbosoft.pidgoon.BaseParseBuilder;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseEventSink;
 import com.zarbosoft.pidgoon.nodes.Reference;
-import com.zarbosoft.rendaw.common.DeadCode;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,79 +39,78 @@ public class JSONParse<O> extends BaseParseBuilder<O, JSONParse<O>> {
   }
 
   public static List<ROPair<? extends Event, Object>> streamEvents(InputStream stream) {
-    List<ROPair<? extends Event, Object>> out = new ArrayList<>();
-    final JsonParser stream1 = uncheck(() -> new JsonFactory().createParser(stream));
-    JSONPath path = new JSONObjectPath(null);
-    JsonToken token = uncheck(() -> stream1.nextToken());
+    return uncheck(
+        () -> {
+          List<ROPair<? extends Event, Object>> out = new ArrayList<>();
+          JsonReader stream1 = new JsonReader(new InputStreamReader(stream));
+          JSONPath path = new JSONObjectPath(null);
 
-    while (token != null) {
-      BackEvent e;
-      switch (token) {
-        case NOT_AVAILABLE:
-          // Only async mode
-          throw new DeadCode();
-        case START_OBJECT:
-          {
-            e = new EObjectOpenEvent();
-            break;
+          while (true) {
+            BackEvent e = null;
+            switch (stream1.peek()) {
+              case BEGIN_ARRAY:
+                {
+                  e = new EArrayOpenEvent();
+                  stream1.beginArray();
+                  break;
+                }
+              case END_ARRAY:
+                {
+                  e = new EArrayCloseEvent();
+                  stream1.endArray();
+                  break;
+                }
+              case BEGIN_OBJECT:
+                {
+                  e = new EObjectOpenEvent();
+                  stream1.beginObject();
+                  break;
+                }
+              case END_OBJECT:
+                {
+                  e = new EObjectCloseEvent();
+                  stream1.endObject();
+                  break;
+                }
+              case NAME:
+                {
+                  e = new EKeyEvent(stream1.nextName());
+                  break;
+                }
+              case STRING:
+                {
+                  e = new EPrimitiveEvent(stream1.nextString());
+                  break;
+                }
+              case NUMBER:
+                {
+                  e = new JSpecialPrimitiveEvent(stream1.nextString());
+                  break;
+                }
+              case BOOLEAN:
+                {
+                  e = new JSpecialPrimitiveEvent(stream1.nextBoolean() ? "true" : "false");
+                  break;
+                }
+              case NULL:
+                {
+                  e = new JSpecialPrimitiveEvent("null");
+                  stream1.nextNull();
+                  break;
+                }
+              case END_DOCUMENT:
+                {
+                  break;
+                }
+              default:
+                throw new Assertion();
+            }
+            if (e == null) break;
+            out.add(new ROPair<>(e, path));
+            path = path.push(e);
           }
-        case END_OBJECT:
-          {
-            e = new EObjectCloseEvent();
-            break;
-          }
-        case START_ARRAY:
-          {
-            e = new EArrayOpenEvent();
-            break;
-          }
-        case END_ARRAY:
-          {
-            e = new EArrayCloseEvent();
-            break;
-          }
-        case FIELD_NAME:
-          {
-            e = new EKeyEvent(uncheck(() -> stream1.getCurrentName()));
-            break;
-          }
-        case VALUE_EMBEDDED_OBJECT:
-          // Supposedly shouldn't apply with normal options
-          throw new DeadCode();
-        case VALUE_STRING:
-          {
-            e = new EPrimitiveEvent(uncheck(() -> stream1.getValueAsString()));
-            break;
-          }
-        case VALUE_NUMBER_INT:
-        case VALUE_NUMBER_FLOAT:
-          {
-            e = new JSpecialPrimitiveEvent(uncheck(() -> stream1.getValueAsString()));
-            break;
-          }
-        case VALUE_TRUE:
-          {
-            e = new JSpecialPrimitiveEvent("true");
-            break;
-          }
-        case VALUE_FALSE:
-          {
-            e = new JSpecialPrimitiveEvent("false");
-            break;
-          }
-        case VALUE_NULL:
-          {
-            e = new JSpecialPrimitiveEvent("null");
-            break;
-          }
-        default:
-          throw new DeadCode();
-      }
-      out.add(new ROPair<>(e, path));
-      path = path.push(e);
-      token = uncheck(() -> stream1.nextToken());
-    }
-    return out;
+          return out;
+        });
   }
 
   public JSONParse<O> eventUncertainty(final int limit) {
