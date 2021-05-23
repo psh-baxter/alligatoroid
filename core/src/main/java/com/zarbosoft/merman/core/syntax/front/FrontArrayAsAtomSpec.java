@@ -37,7 +37,7 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
   public void finish(
           MultiError errors, SyntaxPath typePath, final AtomType atomType, final TSSet<String> middleUsed) {
     middleUsed.add(fieldId);
-    field = (BaseBackArraySpec) atomType.getDataArray(errors, typePath, fieldId);
+    field = (BaseBackArraySpec) atomType.getDataArray(errors, typePath, fieldId, "front array-as-atom spec");
   }
 
   @Override

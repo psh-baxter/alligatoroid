@@ -52,7 +52,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
   public void finish(
           MultiError errors, SyntaxPath typePath, final AtomType atomType, final TSSet<String> middleUsed) {
     middleUsed.add(fieldId());
-    field = atomType.getDataArray(errors, typePath, fieldId());
+    field = atomType.getDataArray(errors, typePath, fieldId(), "front array spec");
   }
 
   public abstract String fieldId();

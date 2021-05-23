@@ -1,6 +1,8 @@
 package com.zarbosoft.merman.core.syntax.front;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
@@ -36,6 +38,10 @@ public class ConditionNode extends ConditionType {
   protected boolean defaultOnImplementation() {
     if (is == ConditionNode.Is.PRECEDENT && !invert) return false;
     return true;
+  }
+
+  @Override
+  public void finish(MultiError errors, SyntaxPath typePath, AtomType atomType) {
   }
 
   public static enum Is {

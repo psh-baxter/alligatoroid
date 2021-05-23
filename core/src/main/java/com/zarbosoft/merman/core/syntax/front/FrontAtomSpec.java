@@ -44,7 +44,7 @@ public class FrontAtomSpec extends FrontSpec {
   public void finish(
           MultiError errors, SyntaxPath typePath, final AtomType atomType, final TSSet<String> middleUsed) {
     middleUsed.add(fieldId);
-    field = atomType.getDataAtom(errors, typePath, fieldId);
+    field = atomType.getDataAtom(errors, typePath, fieldId, "front atom spec");
   }
 
   @Override

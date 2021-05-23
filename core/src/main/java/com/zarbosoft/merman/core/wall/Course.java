@@ -101,6 +101,13 @@ public class Course {
   }
 
   private void joinPreviousCourse(final Context context) {
+    for (Brick child : children) {
+      if (alignmentBrick == child) {
+        alignment.removeBrick(context, alignmentBrick);
+        alignment = null;
+        alignmentBrick = null;
+      }
+    }
     visual.clear();
     final boolean resetCornerstone = parent.cornerstoneCourse == this;
     final Course previous = parent.children.get(this.index - 1);
@@ -119,6 +126,11 @@ public class Course {
       ROList<Brick> transportAdd = transplantRemove.mut();
       getIdlePlace(context);
       for (final Brick brick : transportAdd) {
+        if (alignmentBrick == brick) {
+          alignment.removeBrick(context,alignmentBrick);
+          alignment = null;
+          alignmentBrick = null;
+        }
         idlePlace.removeMaxAscent = Math.max(idlePlace.removeMaxAscent, brick.ascent());
         idlePlace.removeMaxDescent = Math.max(idlePlace.removeMaxDescent, brick.descent());
         idlePlace.changed.remove(brick);

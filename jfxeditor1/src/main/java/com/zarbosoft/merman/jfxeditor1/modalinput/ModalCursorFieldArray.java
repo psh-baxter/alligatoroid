@@ -197,13 +197,11 @@ public class ModalCursorFieldArray extends EditCursorFieldArray {
               case B:
                 {
                   editInsertBefore(Editor.get(context));
-                  setMode(Editor.get(context), Mode.NAV);
                   return true;
                 }
               case A:
                 {
                   editInsertAfter(Editor.get(context));
-                  setMode(Editor.get(context), Mode.NAV);
                   return true;
                 }
               case F:

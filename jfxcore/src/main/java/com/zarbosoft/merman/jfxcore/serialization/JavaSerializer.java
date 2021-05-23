@@ -141,7 +141,7 @@ public class JavaSerializer implements Serializer {
               if (value.equals("true")) generator.writeBoolean(true);
               else if (value.equals("false")) generator.writeBoolean(false);
               else if (value.equals("null")) generator.writeNull();
-              else if (value.contains(".")) {
+              else if (!value.contains(".")) {
                 int value1;
                 try {
                   value1 = Integer.parseInt(value);

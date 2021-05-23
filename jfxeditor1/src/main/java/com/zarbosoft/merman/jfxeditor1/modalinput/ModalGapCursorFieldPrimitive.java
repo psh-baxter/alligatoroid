@@ -70,7 +70,7 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
 
               case H:
                 {
-                  actionExit(context);
+                  editExit(Editor.get(context));
                   return true;
                 }
               case J:

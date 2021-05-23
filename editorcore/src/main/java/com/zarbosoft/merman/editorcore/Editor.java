@@ -128,10 +128,14 @@ public class Editor {
   }
 
   public static Atom createEmptyAtom(Syntax syntax, AtomType atomType) {
+    return createEmptyAtom(syntax, atomType, 0);
+  }
+
+  public static Atom createEmptyAtom(Syntax syntax, AtomType atomType, int depth) {
     Atom out = new Atom(atomType);
     TSMap<String, Field> fields = new TSMap<>();
     for (Map.Entry<String, BackSpecData> field : atomType.fields) {
-      fields.put(field.getKey(), createEmptyField(syntax, field.getValue()));
+      fields.put(field.getKey(), createEmptyField(syntax, field.getValue(), depth));
     }
     out.initialSet(fields);
     return out;
@@ -151,10 +155,15 @@ public class Editor {
     } else throw new Assertion();
   }
 
-  public static Field createEmptyField(Syntax syntax, BackSpecData backSpecData) {
+  public static Field createEmptyField(Syntax syntax, BackSpecData backSpecData, int depth) {
     if (backSpecData instanceof BackAtomSpec) {
       FieldAtom field = new FieldAtom((BaseBackAtomSpec) backSpecData);
-      field.initialSet(createEmptyGap(syntax.gap));
+      ROOrderedSetRef<AtomType> candidates = syntax.splayedTypes.get(field.back().type);
+      if (depth < 10 && candidates.size() == 1) {
+        field.initialSet(createEmptyAtom(syntax, candidates.iterator().next(), depth + 1));
+      } else {
+        field.initialSet(createEmptyGap(syntax.gap));
+      }
       return field;
     } else return createEndEmptyField(backSpecData);
   }

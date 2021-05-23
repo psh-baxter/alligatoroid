@@ -27,6 +27,7 @@ import com.zarbosoft.merman.core.syntax.front.ConditionValue;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
+import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Integer;
 import com.zarbosoft.merman.core.syntax.primitivepattern.JsonDecimal;
@@ -85,7 +86,7 @@ public class JsonSyntax {
             .put(
                 ALIGNMENT_INDENT,
                 new RelativeAlignmentSpec(
-                    new RelativeAlignmentSpec.Config(ALIGNMENT_INDENT, 20, true)));
+                    new RelativeAlignmentSpec.Config(ALIGNMENT_INDENT, 4, true)));
     FrontSymbol breakIndent =
         new FrontSymbol(
             new FrontSymbol.Config(
@@ -199,28 +200,27 @@ public class JsonSyntax {
                                     .build(),
                                 baseAlignTextSym("]", baseAlignSymbolStyle))))
                     .alignments(containerAlignments)));
+    TSList<FrontSpec> gapEmptyPlaceholder =
+        new TSList<>(
+            new FrontSymbol(
+                new FrontSymbol.Config(
+                        new SymbolTextSpec(new SymbolTextSpec.Config("￮").style(gapStyle)))
+                    .condition(
+                        new ConditionValue(
+                            new ConditionValue.Config(
+                                BaseGapAtomType.PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))));
     GapAtomType gap =
         new GapAtomType(
             new GapAtomType.Config()
                 .back(GapAtomType.jsonBack)
                 .primitiveStyle(gapStyle)
-                .frontPrefix(
-                    new TSList<>(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
-                                    new SymbolTextSpec(
-                                        new SymbolTextSpec.Config("•").style(gapStyle)))
-                                .condition(
-                                    new ConditionValue(
-                                        new ConditionValue.Config(
-                                            BaseGapAtomType.PRIMITIVE_KEY,
-                                            ConditionValue.Is.EMPTY,
-                                            false)))))));
+                .frontSuffix(gapEmptyPlaceholder));
     SuffixGapAtomType suffixGap =
         new SuffixGapAtomType(
             new SuffixGapAtomType.Config()
                 .back(SuffixGapAtomType.jsonBack)
                 .primitiveStyle(gapStyle)
+                .frontSuffix(gapEmptyPlaceholder)
                 .frontArrayConfig(new FrontArraySpecBase.Config().prefix(TSList.of(breakIndent))));
     TSMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
     {

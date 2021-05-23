@@ -57,7 +57,7 @@ public class RelativeAlignment extends Alignment {
 
   @Override
   public void changed(Context context) {
-    converse = (base == null ? 0 : base.converse) + (collapse && bricks.isEmpty() ? 0 : offset);
+    converse = (base == null ? 0 : base.converse) + (collapse && bricks.isEmpty() ? 0 : offset * context.toPixels);
     super.changed(context);
   }
 }

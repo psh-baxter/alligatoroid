@@ -76,7 +76,8 @@ public class JFXEnvironment implements Environment {
     if (clipboard == null) {
       this.clipboard = Clipboard.getSystemClipboard();
     }
-    byte[] out = (byte[]) clipboard.getContent(new DataFormat(mime));
+    byte[] out =
+        (byte[]) clipboard.getContent(dataFormats.getCreate(mime, () -> new DataFormat(mime)));
     if (out == null) {
       final String temp = clipboard.getString();
       if (temp != null) {

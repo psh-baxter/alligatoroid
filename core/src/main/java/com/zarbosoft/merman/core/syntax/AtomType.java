@@ -219,41 +219,41 @@ public abstract class AtomType {
   }
 
   public BaseBackPrimitiveSpec getDataPrimitive(
-      MultiError errors, SyntaxPath typePath, final String key) {
-    BackSpecData found = getBack(errors, typePath, key);
+      MultiError errors, SyntaxPath typePath, final String key, String forName) {
+    BackSpecData found = getBack(errors, typePath, key, forName);
     try {
       return (BaseBackPrimitiveSpec) found;
     } catch (ClassCastException e) {
-      errors.add(new BackFieldWrongType(typePath, id, found, "primitive"));
+      errors.add(new BackFieldWrongType(typePath, id, found, "primitive", forName));
       return null;
     }
   }
 
-  private BackSpecData getBack(MultiError errors, SyntaxPath typePath, final String id) {
+  public BackSpecData getBack(MultiError errors, SyntaxPath typePath, final String id, String forName) {
     final BackSpecData found = fields.getOpt(id);
     if (found == null) {
-      errors.add(new MissingBack(typePath, id));
+      errors.add(new MissingBack(typePath, id, forName));
       return null;
     }
     return found;
   }
 
-  public BaseBackAtomSpec getDataAtom(MultiError errors, SyntaxPath typePath, final String key) {
-    BackSpecData found = getBack(errors, typePath, key);
+  public BaseBackAtomSpec getDataAtom(MultiError errors, SyntaxPath typePath, final String key, String forName) {
+    BackSpecData found = getBack(errors, typePath, key, forName);
     try {
       return (BaseBackAtomSpec) found;
     } catch (ClassCastException e) {
-      errors.add(new BackFieldWrongType(typePath, id, found, "atom"));
+      errors.add(new BackFieldWrongType(typePath, id, found, "atom", forName));
       return null;
     }
   }
 
-  public BaseBackArraySpec getDataArray(MultiError errors, SyntaxPath typePath, final String key) {
-    BackSpecData found = getBack(errors, typePath, key);
+  public BaseBackArraySpec getDataArray(MultiError errors, SyntaxPath typePath, final String key, String forName) {
+    BackSpecData found = getBack(errors, typePath, key, forName);
     try {
       return (BaseBackArraySpec) found;
     } catch (ClassCastException e) {
-      errors.add(new BackFieldWrongType(typePath, id, found, "array"));
+      errors.add(new BackFieldWrongType(typePath, id, found, "array", forName));
       return null;
     }
   }

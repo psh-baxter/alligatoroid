@@ -16,7 +16,7 @@ import com.zarbosoft.rendaw.common.TSList;
 
 public class EditCursorFieldArray extends CursorFieldArray {
   public EditCursorFieldArray(
-          Context context, VisualFieldArray visual, boolean leadFirst, int start, int end) {
+      Context context, VisualFieldArray visual, boolean leadFirst, int start, int end) {
     super(context, visual, leadFirst, start, end);
   }
 
@@ -54,10 +54,9 @@ public class EditCursorFieldArray extends CursorFieldArray {
         editor.context,
         new ROPair(visual.value, "insert_after"),
         recorder -> {
-          final Atom created = editor.arrayInsertNewDefault(recorder, visual.value, endIndex + 1);
-          if (!created.visual.selectIntoAnyChild(editor.context))
-            setPosition(editor.context, endIndex + 1);
+          editor.arrayInsertNewDefault(recorder, visual.value, endIndex + 1);
         });
+    setPosition(editor.context, endIndex + 1);
   }
 
   public void editInsertBefore(Editor editor) {
@@ -65,10 +64,9 @@ public class EditCursorFieldArray extends CursorFieldArray {
         editor.context,
         new ROPair(visual.value, "insert_before"),
         recorder -> {
-          final Atom created = editor.arrayInsertNewDefault(recorder, visual.value, beginIndex);
-          if (!created.visual.selectIntoAnyChild(editor.context))
-            setPosition(editor.context, beginIndex);
+          editor.arrayInsertNewDefault(recorder, visual.value, beginIndex);
         });
+    setPosition(editor.context, beginIndex);
   }
 
   public void editMoveAfter(Editor editor) {

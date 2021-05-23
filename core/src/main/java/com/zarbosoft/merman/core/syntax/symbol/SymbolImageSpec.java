@@ -1,8 +1,11 @@
 package com.zarbosoft.merman.core.syntax.symbol;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Image;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
@@ -38,5 +41,9 @@ public class SymbolImageSpec extends Symbol {
   @Override
   public Brick createBrick(final Context context, final BrickInterface inter) {
     return new BrickImage(context, inter, splitMode, style);
+  }
+
+  @Override
+  public void finish(MultiError errors, SyntaxPath typePath, AtomType atomType) {
   }
 }

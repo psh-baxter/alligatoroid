@@ -48,7 +48,7 @@ public class FrontPrimitiveSpec extends FrontSpec {
       final AtomType atomType,
       final TSSet<String> middleUsed) {
     middleUsed.add(fieldId);
-    this.field = atomType.getDataPrimitive(errors, typePath, fieldId);
+    this.field = atomType.getDataPrimitive(errors, typePath, fieldId, "front primitive spec");
   }
 
   @Override

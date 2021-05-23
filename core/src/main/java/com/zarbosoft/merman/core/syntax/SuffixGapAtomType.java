@@ -81,16 +81,6 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                     new FrontArraySpec(
                         new FrontArraySpec.Config(PRECEDING_KEY, config.frontArrayConfig)))
                 .add(
-                    new FrontSymbol(
-                        new FrontSymbol.Config(
-                                config.gapPlaceholderSymbol == null
-                                    ? new SymbolTextSpec(new SymbolTextSpec.Config("•"))
-                                    : config.gapPlaceholderSymbol)
-                            .condition(
-                                new ConditionValue(
-                                    new ConditionValue.Config(
-                                        PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))))
-                .add(
                     new FrontPrimitiveSpec(
                         new FrontPrimitiveSpec.Config(PRIMITIVE_KEY).style(config.primitiveStyle)))
                 .addAll(config.frontSuffix)));
@@ -163,6 +153,11 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
     public Config primitiveStyle(Style style) {
       this.primitiveStyle = style;
+      return this;
+    }
+
+    public Config frontSuffix(ROList<FrontSpec> specs) {
+      this.frontSuffix = specs;
       return this;
     }
 

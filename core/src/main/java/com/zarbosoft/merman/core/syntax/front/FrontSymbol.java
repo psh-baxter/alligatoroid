@@ -1,17 +1,28 @@
 package com.zarbosoft.merman.core.syntax.front;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.symbol.Symbol;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualSymbol;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontSymbol extends FrontSpec {
   public final Symbol type;
   /** Nullable */
   public final ConditionType condition;
+
+  @Override
+  public void finish(MultiError errors, SyntaxPath typePath, AtomType atomType, TSSet<String> middleUsed) {
+    super.finish(errors, typePath, atomType, middleUsed);
+    if (condition != null) condition.finish(errors, typePath, atomType);
+    if (type != null ) type.finish(errors, typePath, atomType);
+  }
 
   /**
    * Non-null, "" okay. When filling a gap: Text to match non-text symbols, or override the text of

@@ -3,7 +3,6 @@ package com.zarbosoft.merman.editorcore;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
-import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
@@ -14,9 +13,6 @@ import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
-import com.zarbosoft.rendaw.common.ROOrderedSetRef;
-import com.zarbosoft.rendaw.common.TSList;
 
 public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFactory {
   public final Editor editor;
@@ -68,22 +64,11 @@ public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFact
   @Override
   public boolean prepSelectEmptyArray(Context context, FieldArray value) {
     Editor editor = Editor.get(context);
-    ROOrderedSetRef<AtomType> candidates =
-        context.syntax.splayedTypes.get(value.back().elementAtomType());
     editor.history.record(
         context,
         null,
         recorder -> {
-          recorder.apply(
-              context,
-              new ChangeArray(
-                  value,
-                  0,
-                  0,
-                  TSList.of(
-                      candidates.size() == 1
-                          ? Editor.createEmptyAtom(context.syntax, candidates.iterator().next())
-                          : Editor.createEmptyAtom(context.syntax, context.syntax.gap))));
+          editor.arrayInsertNewDefault(recorder, value, 0);
         });
     return true;
   }

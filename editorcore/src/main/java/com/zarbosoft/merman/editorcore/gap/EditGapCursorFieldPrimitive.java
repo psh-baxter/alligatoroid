@@ -260,11 +260,25 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     super.destroy(context);
   }
 
-  /**
-   * @param editor
-   * @return true if consumed, false if text should proceed to value
-   */
-  public boolean textChanged(final Editor editor, History.Recorder recorder, String text) {
+  @Override
+  public void editCut(Editor editor) {
+    super.editCut(editor);
+    textChangedNoAutocomplete(editor, visualPrimitive.value.get());
+  }
+
+  @Override
+  public void editDeleteNext(Editor editor) {
+    super.editDeleteNext(editor);
+    textChangedNoAutocomplete(editor, visualPrimitive.value.get());
+  }
+
+  @Override
+  public void editDeletePrevious(Editor editor) {
+    super.editDeletePrevious(editor);
+    textChangedNoAutocomplete(editor, visualPrimitive.value.get());
+  }
+
+  public TextChangedResult textChangedNoAutocomplete(Editor editor, String text) {
     Context context = editor.context;
     Atom gap = gapAtom();
 
@@ -274,74 +288,53 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
       choicePage.destroy(context);
     }
 
+    TextChangedResult out = new TextChangedResult();
+
     /// Parse new text, rank choices
     // If the whole text matches, try to auto complete
     // Display info on matches and not-yet-mismatches
-    TSList<Event> glyphs = context.env.splitGlyphEvents(text);
-    final Pair<Step<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>, Position>
-        longest = new ParseBuilder<>(GAP_ROOT_KEY).grammar(grammar).longestMatchFromStart(glyphs);
-    TSList<GapChoice> choices = new TSList<>();
+    out.glyphs = context.env.splitGlyphEvents(text);
+    out.longest =
+        new ParseBuilder<>(GAP_ROOT_KEY).grammar(grammar).longestMatchFromStart(out.glyphs);
+    out.choices = new TSList<>();
     TSSet<AtomType> seen = new TSSet<>();
     for (ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>> result :
-        longest.first.completed) {
+        out.longest.first.completed) {
       PreGapChoice choice = result.first;
       seen.add(result.first.type);
-      choices.add(
+      out.choices.add(
           new GapChoice(
               gap,
               choice.type,
               choice.consumePreceding,
               choice.supplyFillAtoms,
-              glyphs,
-              ((int) longest.second.at) + 1,
+              out.glyphs,
+              ((int) out.longest.second.at) + 1,
               result.second.value,
               null,
               choice.keySpecs,
               choice.following));
     }
-    for (Step.Branch leaf : longest.first.branches) {
+    for (Step.Branch leaf : out.longest.first.branches) {
       PreGapChoice choice = (PreGapChoice) leaf.color();
       if (!seen.addNew(choice.type)) continue;
-      choices.add(
+      out.choices.add(
           new GapChoice(
               gap,
               choice.type,
               choice.consumePreceding,
               choice.supplyFillAtoms,
-              glyphs,
-              ((int) longest.second.at) + 1,
+              out.glyphs,
+              ((int) out.longest.second.at) + 1,
               null,
               leaf,
               choice.keySpecs,
               choice.following));
     }
 
-    /// Choose auto-choosable choices
-    if (glyphs.some()) {
-      if ((int) longest.second.at + 1 == glyphs.size()) {
-        for (final GapChoice choice : choices) {
-          if (choice.type.autoChooseUnambiguous && choices.size() == 1) {
-            choice.choose(editor, recorder);
-            return true;
-          }
-        }
-      } else if ((int) longest.second.at >= 0) {
-        // While typing, whole text will generally continue to match
-        // If there's a typo, nothing will match (at == 0)
-        // If has typed a whole candidate and continue to suffix, match will be < full, > 0 (ex:
-        // text.length() - 1)
-        // -> When the text stops matching (new element started?) go ahead and choose the
-        // closest-to-full choice
-        for (final GapChoice choice : choices) {
-          choice.choose(editor, recorder);
-          return true;
-        }
-      }
-    }
-
     /// Update visual
-    if (!choices.isEmpty()) {
-      choicePage = new TwoColumnChoicePage(editor, (TSList<TwoColumnChoice>) (TSList) choices);
+    if (!out.choices.isEmpty()) {
+      choicePage = new TwoColumnChoicePage(editor, (TSList<TwoColumnChoice>) (TSList) out.choices);
       editor.details.setPage(editor, choicePage);
     } else {
       if (choicePage != null) {
@@ -350,6 +343,40 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
         choicePage = null;
       }
     }
+
+    return out;
+  }
+
+  /**
+   * @param editor
+   * @return true if consumed, false if text should proceed to value
+   */
+  public boolean textChanged(final Editor editor, History.Recorder recorder, String text) {
+    TextChangedResult res = textChangedNoAutocomplete(editor, text);
+
+    /// Choose auto-choosable choices
+    if (res.glyphs.some()) {
+      if ((int) res.longest.second.at + 1 == res.glyphs.size()) {
+        for (final GapChoice choice : res.choices) {
+          if (choice.type.autoChooseUnambiguous && res.choices.size() == 1) {
+            choice.choose(editor, recorder);
+            return true;
+          }
+        }
+      } else if ((int) res.longest.second.at >= 0) {
+        // While typing, whole text will generally continue to match
+        // If there's a typo, nothing will match (at == 0)
+        // If has typed a whole candidate and continue to suffix, match will be < full, > 0 (ex:
+        // text.length() - 1)
+        // -> When the text stops matching (new element started?) go ahead and choose the
+        // closest-to-full choice
+        for (final GapChoice choice : res.choices) {
+          choice.choose(editor, recorder);
+          return true;
+        }
+      }
+    }
+
     return false;
   }
 
@@ -401,8 +428,6 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
         }
         if (!canPlaceAll) break;
         TSList<Atom> transplant = array.data.mut();
-        if (transplant.none())
-          transplant.add(Editor.createEmptyAtom(editor.context.syntax, editor.context.syntax.gap));
         editor.history.record(
             editor.context,
             null,
@@ -410,8 +435,12 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
               recorder.apply(
                   editor.context, new ChangeArray(array, 0, array.data.size(), ROList.empty));
               if (gapInField instanceof FieldAtom) {
-                recorder.apply(
-                    editor.context, new ChangeAtom((FieldAtom) gapInField, transplant.get(0)));
+                Atom transplant0;
+                if (transplant.some()) transplant0 = transplant.get(0);
+                else
+                  transplant0 =
+                      Editor.createEmptyAtom(editor.context.syntax, editor.context.syntax.gap);
+                recorder.apply(editor.context, new ChangeAtom((FieldAtom) gapInField, transplant0));
               } else if (gapInField instanceof FieldArray) {
                 recorder.apply(
                     editor.context,
@@ -434,5 +463,12 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
      * @return
      */
     public Field process(Editor editor, History.Recorder recorder);
+  }
+
+  public static class TextChangedResult {
+    public TSList<Event> glyphs;
+    public TSList<GapChoice> choices;
+    public Pair<Step<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>, Position>
+        longest;
   }
 }

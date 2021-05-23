@@ -1,8 +1,11 @@
 package com.zarbosoft.merman.core.syntax.symbol;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.MultiError;
+import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
@@ -33,6 +36,10 @@ public class SymbolTextSpec extends Symbol {
     final BrickText out = new BrickText(context, inter, splitMode, style);
     out.setText(context, this.text);
     return out;
+  }
+
+  @Override
+  public void finish(MultiError errors, SyntaxPath typePath, AtomType atomType) {
   }
 
   public static class Config {

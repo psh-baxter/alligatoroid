@@ -87,7 +87,7 @@ public class Wall {
     }
     renumber(at);
     for (Course course : courses) {
-      visual.add(course.visual);
+      visual.add(course.index, course.visual);
     }
     getIdle(context);
     if (children.size() > 1) {

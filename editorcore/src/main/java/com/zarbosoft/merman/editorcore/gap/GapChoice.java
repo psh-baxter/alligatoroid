@@ -13,6 +13,8 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
+import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
+import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
@@ -33,6 +35,7 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class GapChoice extends TwoColumnChoice {
@@ -116,7 +119,8 @@ public class GapChoice extends TwoColumnChoice {
           Field following = null;
           Atom created = new Atom(type);
           for (String fieldId : type.fields.keys().difference(fields.keys())) {
-            Field field = editor.createEmptyField(editor.context.syntax, type.fields.get(fieldId));
+            Field field =
+                editor.createEmptyField(editor.context.syntax, type.fields.get(fieldId), 0);
             fields.put(fieldId, field);
             if (followingSpec != null && followingSpec.fieldId().equals(fieldId)) {
               following = field;
@@ -151,11 +155,10 @@ public class GapChoice extends TwoColumnChoice {
     if (following instanceof FieldPrimitive) {
       following.selectInto(editor.context);
     } else if (following instanceof FieldAtom) {
-      ((FieldAtom) following).data.fields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
+      ((FieldAtom) following).data.selectInto(editor.context);
     } else if (following instanceof FieldArray) {
-      Atom gap = Editor.createEmptyGap(editor.context.syntax.gap);
-      recorder.apply(editor.context, new ChangeArray((FieldArray) following, 0, 0, TSList.of(gap)));
-      gap.fields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
+      editor.arrayInsertNewDefault(recorder, (FieldArray) following, 0);
+      ((FieldArray) following).data.get(0).selectInto(editor.context);
     } else throw new Assertion();
   }
 
