@@ -3,6 +3,7 @@ package com.zarbosoft.merman.editorcore.gap;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.FreeDisplayNode;
 import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.editorcore.Editor;
@@ -12,16 +13,19 @@ import com.zarbosoft.merman.editorcore.displayderived.ColumnarTableLayout;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class TwoColumnChoicePage extends DetailsPage {
+public class TwoColumnChoicePage extends DetailsPage implements FreeDisplayNode {
+  public final TSList<TwoColumnChoice> choices;
   private final Box highlight;
   private final Group tableGroup;
   private final Context.ContextDoubleListener edgeListener;
-  public final TSList<TwoColumnChoice> choices;
+  private final double transverseSpan;
+  public FreeDisplayNode group;
   TSList<ROPair<CourseDisplayNode, CourseDisplayNode>> rows = TSList.of();
   private int index = 0;
   private double scroll = 0;
 
   public TwoColumnChoicePage(Editor editor, TSList<TwoColumnChoice> choices) {
+    this.node = this;
     this.choices = choices;
     this.edgeListener =
         new Context.ContextDoubleListener() {
@@ -32,13 +36,14 @@ public class TwoColumnChoicePage extends DetailsPage {
         };
     editor.context.addConverseEdgeListener(edgeListener);
     final Group group = editor.context.display.group();
-    this.node = group;
+    this.group = group;
 
     highlight = new Box(editor.context);
     highlight.setStyle(editor.choiceCursorStyle);
     group.add(highlight.drawing);
 
-    final ColumnarTableLayout table = new ColumnarTableLayout(editor.context, editor.detailSpan);
+    this.transverseSpan = editor.detailSpan * editor.context.toPixels;
+    final ColumnarTableLayout table = new ColumnarTableLayout(editor.context, transverseSpan);
     tableGroup = table.group;
     group.add(table.group);
 
@@ -69,8 +74,7 @@ public class TwoColumnChoicePage extends DetailsPage {
     final double converse = preview.converse();
     final double transverse = Math.min(preview.transverse(), text.transverse());
     final double converseEdge = text.converseEdge();
-    final double transverseEdge =
-        Math.max(preview.transverseEdge(), text.transverseEdge());
+    final double transverseEdge = Math.max(preview.transverseEdge(), text.transverseEdge());
     highlight.setSize(context, converseEdge - converse, transverseEdge - transverse);
     highlight.setPosition(new Vector(converse, transverse), false);
     updateScroll(context);
@@ -90,5 +94,40 @@ public class TwoColumnChoicePage extends DetailsPage {
 
   public void previousChoice(Context context) {
     changeChoice(context, (index + choices.size() - 1) % choices.size());
+  }
+
+  @Override
+  public double converse() {
+    return group.converse();
+  }
+
+  @Override
+  public double transverse() {
+    return group.transverse();
+  }
+
+  @Override
+  public double transverseSpan() {
+    return transverseSpan;
+  }
+
+  @Override
+  public double converseSpan() {
+    return 0;
+  }
+
+  @Override
+  public void setConverse(double converse, boolean animate) {
+    group.setConverse(converse, animate);
+  }
+
+  @Override
+  public Object inner_() {
+    return group.inner_();
+  }
+
+  @Override
+  public void setPosition(Vector vector, boolean animate) {
+    group.setPosition(vector, animate);
   }
 }

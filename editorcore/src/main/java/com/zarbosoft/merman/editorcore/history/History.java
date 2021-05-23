@@ -115,17 +115,8 @@ public class History {
       future.clear();
 
       /// Record and apply changes as they're recorded
-      ChangeLevel partialUndo = new ChangeLevel(-1);
-      partialUndo.select = past.getLast().select;
-      try {
-        c.accept(new Recorder(partialUndo));
-      } catch (RuntimeException e) {
-        /// Roll back partial changes
-        partialUndo.apply(context);
-        throw e;
-      }
-      past.getLast().subchanges.addAll(partialUndo.subchanges);
-      if (past.getLast().select == null) past.getLast().select = partialUndo.select;
+      c.accept(new Recorder(past.getLast()));
+
     } catch (final IOException e) {
       throw new DeadCode();
     }

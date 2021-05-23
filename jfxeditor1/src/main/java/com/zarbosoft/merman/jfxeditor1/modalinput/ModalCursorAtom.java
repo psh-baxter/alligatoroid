@@ -37,6 +37,7 @@ public class ModalCursorAtom extends EditCursorAtom {
     } else if (indexVisual.second instanceof VisualFrontPrimitive) {
       indexVisType = "primitive";
     } else throw new Assertion();
+    /*
     editor.banner.setMessage(
         editor,
         info =
@@ -44,10 +45,13 @@ public class ModalCursorAtom extends EditCursorAtom {
                 Format.format(
                     "%s - %s / field %s (%s)",
                     getSyntaxPath(), visual.atom.type.id, indexVisual.first, indexVisType)));
+
+     */
   }
 
   @Override
   public void destroy(Context context) {
+    if (info != null)
     Editor.get(context).banner.removeMessage(context, info);
     super.destroy(context);
   }

@@ -44,7 +44,7 @@ public class Editor {
   public final ObboxStyle choiceCursorStyle;
   public final Style choiceDescriptionStyle;
   public final Symbol gapPlaceholderSymbol;
-  public final int detailSpan;
+  public final double detailSpan;
   public final Padding bannerPad;
   public final Padding detailPad;
   public Banner banner;
@@ -215,7 +215,7 @@ public class Editor {
     public ObboxStyle choiceCursorStyle;
     public Style bannerStyle;
     public Style detailsStyle;
-    public int detailSpan = 300;
+    public double detailSpan = 300;
     public Padding bannerPad = Padding.empty;
     public Padding detailPad = Padding.empty;
 
@@ -245,6 +245,11 @@ public class Editor {
 
     public Config detailsPad(Padding padding) {
       this.detailPad = padding;
+      return this;
+    }
+
+    public Config detailsSpan(double value) {
+      this.detailSpan = value;
       return this;
     }
 

@@ -9,7 +9,6 @@ import com.zarbosoft.merman.editorcore.banner.BannerMessage;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.Format;
 
 import static com.zarbosoft.merman.jfxeditor1.NotMain.controlKeys;
 
@@ -29,7 +28,8 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
     super(editor, visualPrimitive, leadFirst, beginOffset, endOffset);
     this.main = main;
     this.syntaxPath = syntaxPath;
-    if (range.beginOffset != range.endOffset) setMode(editor, ModalCursorFieldPrimitive.Mode.SELECT);
+    if (range.beginOffset != range.endOffset)
+      setMode(editor, ModalCursorFieldPrimitive.Mode.SELECT);
     else setMode(editor, ModalCursorFieldPrimitive.Mode.TEXT);
   }
 
@@ -39,6 +39,7 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
   }
 
   public void updateInfo(Editor editor) {
+    /*
     editor.banner.setMessage(
         editor,
         info =
@@ -49,10 +50,12 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
                     visualPrimitive.atomVisual().atom.type.id,
                     visualPrimitive.value.back().id,
                     mode)));
+
+     */
   }
 
   public void destroy(Context context) {
-    Editor.get(context).banner.removeMessage(context, info);
+    if (info != null) Editor.get(context).banner.removeMessage(context, info);
     super.destroy(context);
   }
 

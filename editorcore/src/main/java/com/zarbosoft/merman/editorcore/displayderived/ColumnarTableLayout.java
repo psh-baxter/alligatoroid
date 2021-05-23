@@ -19,16 +19,16 @@ import java.util.List;
  */
 public class ColumnarTableLayout {
   public final Group group;
-  private final int maxTransverse;
+  private final double maxTransverse;
   int innerColumns;
   TSList<ROList<CourseDisplayNode>> rows = new TSList<>();
 
-  public ColumnarTableLayout(final Display display, final int maxTransverse) {
+  public ColumnarTableLayout(final Display display, final double maxTransverse) {
     this.group = display.group();
     this.maxTransverse = maxTransverse;
   }
 
-  public ColumnarTableLayout(final Context context, final int maxTransverse) {
+  public ColumnarTableLayout(final Context context, final double maxTransverse) {
     this(context.display, maxTransverse);
   }
 

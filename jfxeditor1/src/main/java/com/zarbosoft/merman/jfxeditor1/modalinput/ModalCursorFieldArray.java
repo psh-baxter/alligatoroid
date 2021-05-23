@@ -8,7 +8,6 @@ import com.zarbosoft.merman.editorcore.banner.BannerMessage;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.Format;
 
 public class ModalCursorFieldArray extends EditCursorFieldArray {
   public final NotMain main;
@@ -29,6 +28,7 @@ public class ModalCursorFieldArray extends EditCursorFieldArray {
   }
 
   public void updateInfo(Editor editor) {
+    /*
     editor.banner.setMessage(
         editor,
         info =
@@ -39,11 +39,13 @@ public class ModalCursorFieldArray extends EditCursorFieldArray {
                     visual.atomVisual().atom.type.id,
                     visual.value.back().id,
                     mode)));
+
+     */
   }
 
   @Override
   public void destroy(Context context) {
-    Editor.get(context).banner.removeMessage(context, info);
+    if (info != null) Editor.get(context).banner.removeMessage(context, info);
     super.destroy(context);
   }
 

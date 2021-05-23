@@ -206,6 +206,7 @@ public class NotMain extends Application {
                           new Style.Config()
                               .obbox(new ObboxStyle(new ObboxStyle.Config().line(false)))))
                   .detailsPad(dialogPadding)
+                  .detailsSpan(40)
                   .gapPlaceholderSymbol(
                       new SymbolTextSpec(
                           new SymbolTextSpec.Config("▢")
