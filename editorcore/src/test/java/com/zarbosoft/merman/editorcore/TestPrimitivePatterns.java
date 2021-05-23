@@ -16,18 +16,13 @@ import org.junit.Test;
 public class TestPrimitivePatterns {
   @Test
   public void testPatternAllowed() {
-    final FreeAtomType unquoted = new TypeBuilder("unquoted")
-            .back(Helper.buildBackDataPrimitiveLetters("value"))
-            .frontDataPrimitive("value")
-            .build();
     final FreeAtomType quoted = new TypeBuilder("quoted")
             .back(Helper.buildBackDataPrimitiveLetters("value"))
             .frontDataPrimitive("value")
             .build();
     final Syntax syntax = new SyntaxBuilder("any")
-            .type(unquoted)
             .type(quoted)
-            .group("any", new GroupBuilder().type(unquoted).type(quoted).build())
+            .group("any", new GroupBuilder().type(quoted).build())
             .build();
     final Atom atom = new TreeBuilder(quoted).add("value", "").build();
     new GeneralTestWizard(syntax, atom)

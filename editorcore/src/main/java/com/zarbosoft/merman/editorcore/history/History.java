@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Iterator;
-import java.util.Objects;
 import java.util.function.Consumer;
 
 public class History {
@@ -30,6 +29,7 @@ public class History {
   private Object lastChangeUnique;
   private Environment.Time lastChangeTime;
   private ChangeLevel clearLevel;
+  private long nextLevelUnique = -1;
 
   public History() {}
 
@@ -56,7 +56,7 @@ public class History {
       if (past.getLast().isEmpty()) past.removeLast();
       if (past.isEmpty()) return false;
       future.addLast(applyLevel(context, past.removeLast()));
-      past.addLast(new ChangeLevel());
+      past.addLast(new ChangeLevel(++nextLevelUnique));
     } catch (final IOException ignored) {
     }
     if (isModified() != wasModified) {
@@ -71,8 +71,9 @@ public class History {
     final boolean wasModified = isModified();
     try (Closeable ignored = lock()) {
       if (future.isEmpty()) return false;
+      if (past.peekLast().isEmpty()) past.removeLast();
       past.addLast(applyLevel(context, future.removeLast()));
-      past.addLast(new ChangeLevel());
+      past.addLast(new ChangeLevel(++nextLevelUnique));
     } catch (final IOException ignored) {
     }
     if (wasModified != isModified()) {
@@ -92,7 +93,7 @@ public class History {
 
   private void finishChangeInner() {
     if (!past.isEmpty() && past.getLast().isEmpty()) return;
-    past.addLast(new ChangeLevel());
+    past.addLast(new ChangeLevel(++nextLevelUnique));
   }
 
   public void record(Context context, ROPair unique, Consumer<Recorder> c) {
@@ -114,7 +115,7 @@ public class History {
       future.clear();
 
       /// Record and apply changes as they're recorded
-      ChangeLevel partialUndo = new ChangeLevel();
+      ChangeLevel partialUndo = new ChangeLevel(-1);
       partialUndo.select = past.getLast().select;
       try {
         c.accept(new Recorder(partialUndo));
@@ -151,7 +152,13 @@ public class History {
   }
 
   public boolean isModified() {
-    if (clearLevel!= fixedTop()) return true;
+    ChangeLevel top = fixedTop();
+    if (clearLevel == null) {
+      if (top != null) return true;
+    } else {
+      if (top == null) return true; // dead?
+      if (clearLevel.unique != top.unique) return true;
+    }
     if (!past.isEmpty() && !past.getLast().isEmpty()) return true;
     return false;
   }

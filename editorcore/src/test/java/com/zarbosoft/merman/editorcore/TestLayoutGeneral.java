@@ -10,6 +10,7 @@ import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
+import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
 import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
 import com.zarbosoft.merman.editorcore.helper.Helper;
@@ -99,17 +100,22 @@ public class TestLayoutGeneral {
                     .addSeparator(
                         new FrontSymbol(
                             new FrontSymbol.Config(
-                                new SymbolTextSpec(
-                                    new SymbolTextSpec.Config(", ")
-                                        ))))
+                                new SymbolTextSpec(new SymbolTextSpec.Config(", ")))))
                     .build())
             .frontSplitMark("]")
+            .autoComplete(true)
+            .build();
+    FreeAtomType infinity = // to prevent default creation
+        new TypeBuilder("infinity")
+            .back(Helper.buildBackPrimitive("infinity"))
+            .front(new FrontMarkBuilder("infinity").build())
             .autoComplete(true)
             .build();
     final Syntax syntax =
         new SyntaxBuilder("any")
             .type(array)
-            .group("any", new GroupBuilder().type(array).build())
+            .type(infinity)
+            .group("any", new GroupBuilder().type(array).type(infinity).build())
             .build();
     final Atom gap = new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build();
     new GeneralTestWizard(syntax, gap)

@@ -155,10 +155,11 @@ public class GapChoice extends TwoColumnChoice {
     if (following instanceof FieldPrimitive) {
       following.selectInto(editor.context);
     } else if (following instanceof FieldAtom) {
+      following.selectInto(editor.context);
       ((FieldAtom) following).data.selectInto(editor.context);
     } else if (following instanceof FieldArray) {
       editor.arrayInsertNewDefault(recorder, (FieldArray) following, 0);
-      ((FieldArray) following).data.get(0).selectInto(editor.context);
+      following.selectInto(editor.context);
     } else throw new Assertion();
   }
 

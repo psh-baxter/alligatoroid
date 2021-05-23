@@ -22,9 +22,9 @@ public class EditCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     if (value.back.matcher != null) {
       String preview = value.get();
       preview =
-              preview.substring(0, range.beginOffset)
-                      + text
-                      + preview.substring(range.endOffset, preview.length());
+          preview.substring(0, range.beginOffset)
+              + text
+              + preview.substring(range.endOffset, preview.length());
       if (!value.back.matcher.match(editor.context.env, preview)) {
         return;
       }

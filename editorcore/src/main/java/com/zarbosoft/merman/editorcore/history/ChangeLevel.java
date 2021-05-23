@@ -7,8 +7,11 @@ import com.zarbosoft.rendaw.common.TSList;
 public class ChangeLevel extends Change {
   public final TSList<Change> subchanges = new TSList<>();
   CursorState select;
+  public final long unique;
 
-  ChangeLevel() {}
+  ChangeLevel(long unique) {
+    this.unique = unique;
+  }
 
   @Override
   public boolean merge(final Change other) {
@@ -21,7 +24,7 @@ public class ChangeLevel extends Change {
 
   @Override
   public Change apply(final Context context) {
-    final ChangeLevel out = new ChangeLevel();
+    final ChangeLevel out = new ChangeLevel(unique);
     if (context.cursor != null) out.select = context.cursor.saveState();
     for (int i = 0; i < subchanges.size(); ++i) {
       Change change = subchanges.getRev(i);

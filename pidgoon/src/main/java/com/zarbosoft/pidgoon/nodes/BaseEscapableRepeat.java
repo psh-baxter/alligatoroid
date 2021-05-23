@@ -48,7 +48,7 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
       child.context(
           grammar,
           step,
-          new RepParent<T, K>(this, parent, ROList.empty, color),
+          new RepParent<T, K>(this, parent, ROList.empty, color, 0),
           branch,
           seen,
           cause,
@@ -56,30 +56,33 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
   }
 
   private static class RepParent<T, K> implements Parent<EscapableResult<T>> {
+    final int count;
     public final Parent<EscapableResult<ROList<K>>> parent;
     final ROList<K> collected;
     private final BaseEscapableRepeat<T, K> self;
     private final Object color;
 
-    public RepParent(BaseEscapableRepeat self, Parent<EscapableResult<ROList<K>>> parent, ROList<K> collected, Object color) {
+    public RepParent(BaseEscapableRepeat self, Parent<EscapableResult<ROList<K>>> parent, ROList<K> collected, Object color, int count) {
       super();
       this.parent = parent;
       this.self = self;
       this.collected = collected;
       this.color = color;
+      this.count = count;
     }
 
     @Override
     public void advance(Grammar grammar, Step step, Step.Branch branch, EscapableResult<T> value, MismatchCause mismatchCause) {
       TSList<K> nextCollected = collected.mut();
       self.combine(nextCollected, value.value);
-      if (!value.completed || nextCollected.size() >= self.min)
+      int nextCount = this.count + 1;
+      if (!value.completed || nextCount >= self.min)
         parent.advance(grammar, step, branch, new EscapableResult<>(value.completed, nextCollected), mismatchCause);
-      if (self.max == -1 || nextCollected.size() < self.max)
+      if (self.max == -1 || nextCount < self.max)
         self.child.context(
                 grammar,
                 step,
-                new RepParent(self, parent, nextCollected, color),
+                new RepParent(self, parent, nextCollected, color, nextCount),
                 branch,
                 ROMap.empty,
                 mismatchCause,
