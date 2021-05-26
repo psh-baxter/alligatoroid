@@ -1,10 +1,10 @@
 package com.zarbosoft.merman;
 
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
@@ -31,8 +31,8 @@ public class TestLayoutGeneral {
         new TypeBuilder("one").back(Helper.buildBackPrimitive("one")).frontSplitMark("one").build();
     two =
         new TypeBuilder("two").back(Helper.buildBackPrimitive("two")).frontSplitMark("two").build();
-      /* only in first syntax */
-      big =
+    /* only in first syntax */
+    big =
         new TypeBuilder("big")
             .back(Helper.buildBackPrimitive("big"))
             .front(
@@ -42,9 +42,11 @@ public class TestLayoutGeneral {
                             new SymbolSpaceSpec.Config()
                                 .splitMode(Style.SplitMode.ALWAYS)
                                 .style(
-                                        new Style(new Style.Config()
-                                                .
-                                                /* only in first syntax */ spaceTransverseAfter(60)))))))
+                                    new Style(
+                                        new Style.Config()
+                                            .
+                                            /* only in first syntax */ padding(
+                                                new Padding(0, 0, 0, 60))))))))
             .build();
     text =
         new TypeBuilder("text")

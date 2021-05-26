@@ -15,7 +15,6 @@ public class JSBlank extends JSCourseDisplayNode implements Blank {
     element.classList.add("merman-display-blank", "merman-display");
   }
 
-  @Override
   public void setConverseSpan(Context context, double converse) {
     this.converseSpan = converse;
     Display.UnconvertAxis v = display.halfConvert.unconvertConverseSpan(converse);

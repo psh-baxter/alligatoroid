@@ -69,8 +69,10 @@ public class JsonSyntax {
         new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("7DD4FB")));
     final Style symbolStyle =
         new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("CACACA")));
-    final Style gapStyle =
-        new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("eabeca")));
+    Style.Config gapStyleConfig =
+        new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("d64a62"));
+    final Style gapStyle = new Style(gapStyleConfig);
+    Style gapEmptySymbolStyle = new Style(gapStyleConfig.dupe().padding(Padding.ct(1, 0)));
     final Style baseAlignSymbolStyle =
         new Style(
             new Style.Config()
@@ -204,7 +206,18 @@ public class JsonSyntax {
         new TSList<>(
             new FrontSymbol(
                 new FrontSymbol.Config(
-                        new SymbolTextSpec(new SymbolTextSpec.Config("￮").style(gapStyle)))
+                        new SymbolTextSpec(
+                            new SymbolTextSpec.Config("￮").style(gapEmptySymbolStyle)))
+                    .condition(
+                        new ConditionValue(
+                            new ConditionValue.Config(
+                                BaseGapAtomType.PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))));
+    TSList<FrontSpec> suffixGapEmptyPlaceholder =
+        new TSList<>(
+            new FrontSymbol(
+                new FrontSymbol.Config(
+                        new SymbolTextSpec(
+                            new SymbolTextSpec.Config("▹").style(gapEmptySymbolStyle)))
                     .condition(
                         new ConditionValue(
                             new ConditionValue.Config(
@@ -220,7 +233,7 @@ public class JsonSyntax {
             new SuffixGapAtomType.Config()
                 .back(SuffixGapAtomType.jsonBack)
                 .primitiveStyle(gapStyle)
-                .frontSuffix(gapEmptyPlaceholder)
+                .frontSuffix(suffixGapEmptyPlaceholder)
                 .frontArrayConfig(new FrontArraySpecBase.Config().prefix(TSList.of(breakIndent))));
     TSMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
     {
@@ -264,6 +277,7 @@ public class JsonSyntax {
             .primitiveHoverStyle(hoverStyle(true))
             .cursorStyle(cursorStyle(false))
             .primitiveCursorStyle(cursorStyle(true))
+            .courseTransverseStride(fontSize * 1.1)
             .pad(pad));
   }
 

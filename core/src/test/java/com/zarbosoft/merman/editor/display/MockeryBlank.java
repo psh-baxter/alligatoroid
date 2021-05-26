@@ -26,7 +26,6 @@ public class MockeryBlank extends MockeryCourseDisplayNode implements Blank {
 		return 0;
 	}
 
-	@Override
 	public void setConverseSpan(final Context context, final double span) {
 		this.converseSpan = span;
 	}

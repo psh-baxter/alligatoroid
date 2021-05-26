@@ -113,7 +113,7 @@ public class JavaFXDrawing extends JavaFXFreeDisplayNode implements Drawing {
         if (stroke) {
           Display.UnconvertVector v1 = display.convert.unconvert(c, t, 1, 1);
           Display.UnconvertVector v2 = display.convert.unconvert(c2, t2, 1, 1);
-          gc.arcTo(v1.x + 0.5, v1.y, v2.x + 0.5, v2.y + 0.5 + 0.5, radius);
+          gc.arcTo(v1.x + 0.5, v1.y + 0.5, v2.x + 0.5, v2.y + 0.5, radius);
         } else {
           Display.UnconvertVector v = display.convert.unconvert(c, t, 0, 0);
           Display.UnconvertVector v2 = display.convert.unconvert(c2, t2, 0, 0);

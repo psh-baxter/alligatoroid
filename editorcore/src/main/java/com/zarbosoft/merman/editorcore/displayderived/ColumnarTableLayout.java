@@ -4,8 +4,11 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Display;
 import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.display.FreeDisplayNode;
 import com.zarbosoft.merman.core.display.Group;
+import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.visual.Vector;
+import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -17,11 +20,18 @@ import java.util.List;
  * columns. Table is additionally wrapped into columns, where the total table transverse exceeds a
  * maximum.
  */
-public class ColumnarTableLayout {
+public class ColumnarTableLayout implements FreeDisplayNode {
   public final Group group;
   private final double maxTransverse;
   int innerColumns;
   TSList<ROList<CourseDisplayNode>> rows = new TSList<>();
+  private double usedTransverse;
+  private double rowStride;
+  private double rowPadConverseStart;
+  private double rowPadConverseEnd;
+  private double rowPadTransverseStart;
+  private double rowPadTransverseEnd;
+  private double outerColumnGap;
 
   public ColumnarTableLayout(final Display display, final double maxTransverse) {
     this.group = display.group();
@@ -32,6 +42,21 @@ public class ColumnarTableLayout {
     this(context.display, maxTransverse);
   }
 
+  public void setOuterColumnGap(Context context, double span) {
+    this.outerColumnGap = span * context.toPixels;
+  }
+
+  public void setRowStride(Context context, double span) {
+    this.rowStride = span * context.toPixels;
+  }
+
+  public void setRowPadding(Context context, Padding padding) {
+    this.rowPadConverseStart = padding.converseStart * context.toPixels;
+    this.rowPadConverseEnd = padding.converseEnd * context.toPixels;
+    this.rowPadTransverseStart = padding.converseStart * context.toPixels;
+    this.rowPadTransverseEnd = padding.converseEnd * context.toPixels;
+  }
+
   public void add(final ROList<CourseDisplayNode> row) {
     innerColumns = Math.max(innerColumns, row.size());
     rows.add(row);
@@ -39,19 +64,21 @@ public class ColumnarTableLayout {
   }
 
   public void layout() {
-    int outerColumnRowStart = 0;
-    int previousOuterColumnEdge = 0;
-    while (outerColumnRowStart < rows.size()) {
-      int newOuterColumnEdge = 0;
-      int outerColumnRowEnd = outerColumnRowStart;
+    int outerColumnRowStartIndex = 0;
+    double previousOuterColumnConverseEdge = 0;
+    usedTransverse = 0;
+    while (outerColumnRowStartIndex < rows.size()) {
+      double newOuterColumnEdge = 0;
+      int outerColumnRowEndIndex = outerColumnRowStartIndex;
 
       // Find the converse size of each column, and the number of rows that fit in the transverse
       // span
       final double[] innerColumnSpans = new double[innerColumns];
-      final List<LayoutInfo> rowStarts = new ArrayList<>();
+      final List<Double> baselines = new ArrayList<>();
       {
         double transverse = 0;
-        for (int y = outerColumnRowStart; y < rows.size(); ++y) {
+        for (int y = outerColumnRowStartIndex; y < rows.size(); ++y) {
+          if (rowStride == 0) transverse += rowPadTransverseStart;
           double ascent = 0;
           double descent = 0;
           final ROList<CourseDisplayNode> row = rows.get(y);
@@ -60,7 +87,7 @@ public class ColumnarTableLayout {
             ascent = Math.max(ascent, cell.ascent());
             descent = Math.max(descent, cell.descent());
           }
-          if (outerColumnRowEnd > outerColumnRowStart
+          if (outerColumnRowEndIndex > outerColumnRowStartIndex
               && transverse + ascent + descent >= maxTransverse) {
             break;
           }
@@ -68,39 +95,65 @@ public class ColumnarTableLayout {
             final DisplayNode cell = row.get(x);
             innerColumnSpans[x] = Math.max(innerColumnSpans[x], cell.converseSpan());
           }
-          rowStarts.add(new LayoutInfo(transverse, ascent));
-          transverse += ascent + descent;
-          outerColumnRowEnd += 1;
+          baselines.add(transverse + ascent);
+          if (rowStride != 0) transverse += rowStride;
+          else transverse += ascent + descent + rowPadTransverseEnd;
+          outerColumnRowEndIndex += 1;
         }
+        usedTransverse = Math.max(usedTransverse, transverse);
       }
 
       // Place everything
-      for (int rowIndex = outerColumnRowStart; rowIndex < outerColumnRowEnd; ++rowIndex) {
-        final LayoutInfo rowTransverse = rowStarts.get(rowIndex - outerColumnRowStart);
+      for (int rowIndex = outerColumnRowStartIndex; rowIndex < outerColumnRowEndIndex; ++rowIndex) {
+        final double baseline = baselines.get(rowIndex - outerColumnRowStartIndex);
         final ROList<CourseDisplayNode> row = rows.get(rowIndex);
-        int converse = previousOuterColumnEdge;
+        double converse = previousOuterColumnConverseEdge + rowPadConverseStart;
         for (int x = 0; x < innerColumns; ++x) {
-          row.get(x)
-              .setBaselinePosition(
-                  new Vector(converse, rowTransverse.transverse + rowTransverse.ascent), false);
+          row.get(x).setBaselinePosition(new Vector(converse, baseline), false);
           converse += innerColumnSpans[x];
         }
+        converse += rowPadConverseEnd;
         newOuterColumnEdge = Math.max(newOuterColumnEdge, converse);
       }
 
       //
-      outerColumnRowStart = outerColumnRowEnd;
-      previousOuterColumnEdge = newOuterColumnEdge;
+      outerColumnRowStartIndex = outerColumnRowEndIndex;
+      previousOuterColumnConverseEdge = newOuterColumnEdge + outerColumnGap;
     }
   }
 
-  private static class LayoutInfo {
-    private final double transverse;
-    private final double ascent;
+  @Override
+  public double converse() {
+    return group.converse();
+  }
 
-    private LayoutInfo(double transverse, double ascent) {
-      this.transverse = transverse;
-      this.ascent = ascent;
-    }
+  @Override
+  public double transverse() {
+    return group.transverse();
+  }
+
+  @Override
+  public double transverseSpan() {
+    return usedTransverse;
+  }
+
+  @Override
+  public double converseSpan() {
+    throw new Assertion();
+  }
+
+  @Override
+  public void setConverse(double converse, boolean animate) {
+    group.setConverse(converse, animate);
+  }
+
+  @Override
+  public Object inner_() {
+    return group.inner_();
+  }
+
+  @Override
+  public void setPosition(Vector vector, boolean animate) {
+    group.setPosition(vector, animate);
   }
 }

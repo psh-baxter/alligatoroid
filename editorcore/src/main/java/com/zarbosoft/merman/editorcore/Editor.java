@@ -26,7 +26,7 @@ import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomBase;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomFromArray;
 import com.zarbosoft.merman.editorcore.banner.Banner;
-import com.zarbosoft.merman.editorcore.details.Details;
+import com.zarbosoft.merman.editorcore.displayderived.BeddingContainer;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
@@ -42,13 +42,18 @@ public class Editor {
   public final Context context;
   public final History history;
   public final ObboxStyle choiceCursorStyle;
+  public final Padding choicePreviewPadding;
   public final Style choiceDescriptionStyle;
   public final Symbol gapPlaceholderSymbol;
   public final double detailSpan;
   public final Padding bannerPad;
+  public final ObboxStyle detailStyle;
   public final Padding detailPad;
+  public final double choiceRowStride;
+  public final Padding choiceRowPadding;
+  public final double choiceColumnSpace;
   public Banner banner;
-  public Details details;
+  public BeddingContainer details;
 
   public Editor(
       final Syntax syntax,
@@ -78,6 +83,11 @@ public class Editor {
         config.choiceDescriptionStyle == null
             ? new Style(new Style.Config())
             : config.choiceDescriptionStyle;
+    this.choicePreviewPadding = config.choicePreviewPadding;
+
+    choiceRowPadding = config.choiceRowPadding;
+    choiceRowStride = config.choiceRowStride;
+    choiceColumnSpace = config.choiceColumnSpace;
     this.gapPlaceholderSymbol =
         config.gapPlaceholderSymbol == null
             ? new SymbolTextSpec(new SymbolTextSpec.Config("▢"))
@@ -87,11 +97,10 @@ public class Editor {
             this.context,
             config.bannerStyle == null ? new Style(new Style.Config()) : config.bannerStyle);
     this.bannerPad = config.bannerPad;
-    this.details =
-        new Details(
-            this.context,
-            config.detailsStyle == null ? new Style(new Style.Config()) : config.detailsStyle);
+    this.details = new BeddingContainer(this.context, false);
     this.detailPad = config.detailPad;
+    this.detailStyle =
+        config.detailsStyle == null ? new ObboxStyle(new ObboxStyle.Config()) : config.detailsStyle;
     this.detailSpan = config.detailSpan;
   }
 
@@ -210,11 +219,15 @@ public class Editor {
 
   public static class Config {
     public final Context.InitialConfig context;
+    public double choiceRowStride;
+    public Padding choiceRowPadding = Padding.empty;
+    public double choiceColumnSpace;
     public Style choiceDescriptionStyle;
+    public Padding choicePreviewPadding = Padding.empty;
     public Symbol gapPlaceholderSymbol;
     public ObboxStyle choiceCursorStyle;
     public Style bannerStyle;
-    public Style detailsStyle;
+    public ObboxStyle detailsStyle;
     public double detailSpan = 300;
     public Padding bannerPad = Padding.empty;
     public Padding detailPad = Padding.empty;
@@ -238,7 +251,27 @@ public class Editor {
       return this;
     }
 
-    public Config detailsStyle(Style style) {
+    public Config choicePreviewPadding(Padding style) {
+      this.choicePreviewPadding = style;
+      return this;
+    }
+
+    public Config choiceRowStride(double span) {
+      this.choiceRowStride = span;
+      return this;
+    }
+
+    public Config choiceRowPadding(Padding padding) {
+      this.choiceRowPadding = padding;
+      return this;
+    }
+
+    public Config choiceColumnSpace(double span) {
+      this.choiceColumnSpace = span;
+      return this;
+    }
+
+    public Config detailsBoxStyle(ObboxStyle style) {
       this.detailsStyle = style;
       return this;
     }
@@ -248,7 +281,7 @@ public class Editor {
       return this;
     }
 
-    public Config detailsSpan(double value) {
+    public Config detailsMaxTransverseSpan(double value) {
       this.detailSpan = value;
       return this;
     }

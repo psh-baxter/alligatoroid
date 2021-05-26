@@ -317,11 +317,14 @@ public class Wall {
         backward = cornerstoneCourse.index - 1;
         forward = cornerstoneCourse.index + 1;
       }
+      double transverseStride = context.syntax.courseTransverseStride * context.toPixels;
       if (backward >= 0) {
         // Always < children size because of cornerstone
         final Course child = children.get(backward);
         final Course preceding = children.get(backward + 1);
-        double transverse = preceding.transverseStart - child.transverseSpan();
+        double transverse =
+            preceding.transverseStart
+                - (transverseStride == 0 ? child.transverseSpan() : transverseStride);
         if (preceding == cornerstoneCourse) transverse -= beddingBefore;
         child.setTransverse(context, transverse);
         backward -= 1;
@@ -329,7 +332,10 @@ public class Wall {
       }
       if (forward < children.size()) {
         // Always > 0 because of cornerstone
-        double transverse = children.get(forward - 1).transverseEdge();
+        Course preceding = children.get(forward - 1);
+        double transverse =
+            preceding.transverseStart
+                + (transverseStride == 0 ? preceding.transverseSpan() : transverseStride);
         if (forward - 1 == cornerstoneCourse.index) transverse += beddingAfter;
         children.get(forward).setTransverse(context, transverse);
         forward += 1;

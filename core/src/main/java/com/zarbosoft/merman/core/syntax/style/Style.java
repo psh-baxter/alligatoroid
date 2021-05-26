@@ -3,10 +3,7 @@ package com.zarbosoft.merman.core.syntax.style;
 public class Style {
   public final String alignment;
   public final String splitAlignment;
-  public final double spaceBefore;
-  public final double spaceAfter;
-  public final double spaceTransverseBefore;
-  public final double spaceTransverseAfter;
+  public final Padding padding;
   public final ModelColor color;
   public final String font;
   public final double fontSize;
@@ -24,14 +21,8 @@ public class Style {
     else alignment = null;
     if (config.splitAlignment != null) splitAlignment = config.splitAlignment;
     else splitAlignment = null;
-    if (config.spaceBefore != null) spaceBefore = config.spaceBefore;
-    else spaceBefore = 0;
-    if (config.spaceAfter != null) spaceAfter = config.spaceAfter;
-    else spaceAfter = 0;
-    if (config.spaceTransverseBefore != null) spaceTransverseBefore = config.spaceTransverseBefore;
-    else spaceTransverseBefore = 0;
-    if (config.spaceTransverseAfter != null) spaceTransverseAfter = config.spaceTransverseAfter;
-    else spaceTransverseAfter = 0;
+    if (config.padding == null) padding = Padding.empty;
+    else padding = config.padding;
     if (config.color != null) color = config.color;
     else color = new ModelColor.RGB(0, 0, 0);
     if (config.font != null) font = config.font;
@@ -62,10 +53,7 @@ public class Style {
     public Double ascent;
     public ObboxStyle obbox;
     public String alignment;
-    public Double spaceBefore;
-    public Double spaceAfter;
-    public Double spaceTransverseBefore;
-    public Double spaceTransverseAfter;
+    public Padding padding;
     public ModelColor color;
     public String font;
     public Double fontSize;
@@ -76,28 +64,13 @@ public class Style {
 
     public Config() {}
 
+    public Config padding(Padding padding) {
+      this.padding = padding;
+      return this;
+    }
+
     public Config space(double px) {
       space = px;
-      return this;
-    }
-
-    public Config spaceBefore(final double space) {
-      spaceBefore = space;
-      return this;
-    }
-
-    public Config spaceAfter(final double space) {
-      spaceAfter = space;
-      return this;
-    }
-
-    public Config spaceTransverseBefore(final double space) {
-      spaceTransverseBefore = space;
-      return this;
-    }
-
-    public Config spaceTransverseAfter(final double space) {
-      spaceTransverseAfter = space;
       return this;
     }
 
@@ -129,6 +102,22 @@ public class Style {
     public Config obbox(ObboxStyle obbox) {
       this.obbox = obbox;
       return this;
+    }
+
+    public Config dupe() {
+      Config config = new Config();
+      config.ascent = ascent;
+      config.obbox = obbox;
+      config.alignment = alignment;
+      config.padding = padding;
+      config.color = color;
+      config.font = font;
+      config.fontSize = fontSize;
+      config.image = image;
+      config.rotate = rotate;
+      config.space = space;
+      config.splitAlignment = splitAlignment;
+      return config;
     }
   }
 }

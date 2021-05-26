@@ -3,7 +3,8 @@ package com.zarbosoft.merman.core.visual;
 import com.zarbosoft.rendaw.common.Format;
 
 public class Vector {
-  public final double converse;
+  public final static Vector zero = new Vector(0,0);
+    public final double converse;
   public final double transverse;
 
   public Vector(final double converse, final double transverse) {

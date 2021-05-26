@@ -64,6 +64,7 @@ public class Syntax {
   public final Style primitiveHoverStyle;
   public final String gapInRecordKeyPrefix;
   public final PatternSequence gapInRecordKeyPrefixPattern;
+  public final double courseTransverseStride;
   private final Grammar grammar;
 
   public Syntax(Environment env, Config config) {
@@ -113,6 +114,7 @@ public class Syntax {
         new PatternSequence(
             TSList.of(
                 new PatternString(env, WriteStateDeepDataArray.INDEX_KEY_PREFIX), new Digits()));
+    courseTransverseStride = config.courseTransverseStride;
 
     TSSet<AtomType> seen = new TSSet<>();
     for (Map.Entry<String, ROOrderedSetRef<AtomType>> splayedType : splayedTypes) {
@@ -291,6 +293,7 @@ public class Syntax {
     public Style hoverStyle;
     public Style primitiveHoverStyle;
     public String gapInRecordKeyPrefix = "__gap_pair_";
+    public double courseTransverseStride;
 
     public Config(
         ROMap<String, ROOrderedSetRef<AtomType>> splayedTypes,
@@ -317,6 +320,11 @@ public class Syntax {
 
     public Config backType(BackType backType) {
       this.backType = backType;
+      return this;
+    }
+
+    public Config courseTransverseStride(double stride) {
+      this.courseTransverseStride = stride;
       return this;
     }
 

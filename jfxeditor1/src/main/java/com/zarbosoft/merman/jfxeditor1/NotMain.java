@@ -121,8 +121,6 @@ public class NotMain extends Application {
         throw new RuntimeException(Format.format("Failed to load document %s", path), e);
       }
 
-      Padding dialogPadding = Padding.ct(0, 5);
-
       JavaFXDisplay display = new JavaFXDisplay(syntax);
       editor =
           new Editor(
@@ -184,7 +182,7 @@ public class NotMain extends Application {
                               .fontSize(5)
                               .color(ModelColor.RGB.hex("938f8d"))
                               .obbox(new ObboxStyle(new ObboxStyle.Config().line(false)))))
-                  .bannerPad(dialogPadding)
+                  .bannerPad(Padding.ct(3, 3))
                   .choiceCursorStyle(
                       new ObboxStyle(
                           new ObboxStyle.Config()
@@ -200,13 +198,21 @@ public class NotMain extends Application {
                           new Style.Config()
                               .fontSize(5)
                               .color(ModelColor.RGB.hex("938f8d"))
-                              .spaceBefore(4)))
-                  .detailsStyle(
-                      new Style(
-                          new Style.Config()
-                              .obbox(new ObboxStyle(new ObboxStyle.Config().line(false)))))
-                  .detailsPad(dialogPadding)
-                  .detailsSpan(40)
+                              .padding(new Padding(4, 0, 1, 1))))
+                  .choiceColumnSpace(8)
+                  .detailsBoxStyle(
+                      new ObboxStyle(
+                          new ObboxStyle.Config()
+                              .line(false)
+                              .fill(true)
+                              .fillColor(ModelColor.RGB.hex("2A2A2A"))
+                              .roundStart(true)
+                              .roundEnd(true)
+                              .roundOuterEdges(true)
+                              .roundRadius(2)
+                              .padding(Padding.ct(20, 1))))
+                  .detailsPad(Padding.ct(3, 3))
+                  .detailsMaxTransverseSpan(40)
                   .gapPlaceholderSymbol(
                       new SymbolTextSpec(
                           new SymbolTextSpec.Config("▢")
@@ -214,8 +220,7 @@ public class NotMain extends Application {
                                   new Style(
                                       new Style.Config()
                                           .fontSize(5)
-                                          .spaceBefore(1)
-                                          .spaceAfter(1)
+                                          .padding(Padding.ct(1, 0))
                                           .color(ModelColor.RGB.hex("938f8d")))))));
       editor.context.document.root.visual.selectIntoAnyChild(editor.context);
 

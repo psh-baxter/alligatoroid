@@ -3,13 +3,14 @@ package com.zarbosoft.merman.editorcore.displayderived;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Drawing;
 import com.zarbosoft.merman.core.display.DrawingContext;
+import com.zarbosoft.merman.core.display.FreeDisplayNode;
 import com.zarbosoft.merman.core.display.derived.Obbox;
-import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class Box {
+public class Box implements FreeDisplayNode {
   public final Drawing drawing;
   private final double toPixels;
   private Vector offset;
@@ -74,5 +75,35 @@ public class Box {
             new ROPair<>(new Vector(converseSpan, transverseSpan), style.roundEnd),
             new ROPair<>(new Vector(0, transverseSpan), style.roundOuterCorners)),
         styleRoundRadius);
+  }
+
+  @Override
+  public double converse() {
+    return drawing.converse() - offset.converse;
+  }
+
+  @Override
+  public double transverse() {
+    return drawing.transverse() - offset.transverse;
+  }
+
+  @Override
+  public double transverseSpan() {
+    return drawing.transverseSpan() + offset.transverse * 2;
+  }
+
+  @Override
+  public double converseSpan() {
+    return drawing.converseSpan() + offset.converse * 2;
+  }
+
+  @Override
+  public void setConverse(double converse, boolean animate) {
+    drawing.setConverse(offset.converse + converse, animate);
+  }
+
+  @Override
+  public Object inner_() {
+    return drawing.inner_();
   }
 }

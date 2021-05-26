@@ -36,13 +36,13 @@ public class BrickText extends Brick {
 
   @Override
   public double descent() {
-    return text.descent() + style.spaceTransverseAfter * toPixels;
+    return text.descent() + style.padding.transverseEnd * toPixels;
   }
 
   @Override
   public double ascent() {
     if (style.ascent != null) return style.ascent * toPixels;
-    return text.ascent() + style.spaceTransverseBefore * toPixels;
+    return text.ascent() + style.padding.converseStart * toPixels;
   }
 
   @Override
@@ -63,7 +63,7 @@ public class BrickText extends Brick {
   @Override
   public void setConverse(final Context context, final double minConverse, final double converse) {
     this.preAlignConverse = minConverse;
-    text.setConverse(style.spaceBefore * toPixels + converse);
+    text.setConverse(style.padding.converseStart * toPixels + converse);
   }
 
   @Override
@@ -75,14 +75,14 @@ public class BrickText extends Brick {
     this.text.setText(context, text.replaceAll("\\p{Cntrl}", context.syntax.unprintable));
     this.converseSpan =
         font.measurer().getWidth(this.text.text())
-            + style.spaceBefore * toPixels
-            + style.spaceAfter * toPixels;
+            + style.padding.converseStart * toPixels
+            + style.padding.converseEnd * toPixels;
     changed(context);
   }
 
   @Override
   public double getConverse() {
-    return text.converse() - style.spaceBefore * toPixels;
+    return text.converse() - style.padding.converseStart * toPixels;
   }
 
   public Font getFont() {

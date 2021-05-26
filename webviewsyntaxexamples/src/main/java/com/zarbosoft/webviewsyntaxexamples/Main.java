@@ -489,10 +489,7 @@ public class Main {
   public static final FrontSymbol space = text(" ", Function.identity());
 
   private static Style.Config styleBase() {
-    return new Style.Config()
-        .spaceTransverseBefore(lineSpace)
-        .spaceTransverseAfter(lineSpace)
-        .fontSize(fontSize);
+    return new Style.Config().padding(Padding.ct(0, lineSpace)).fontSize(fontSize);
   }
 
   private static Style.Config styleString() {

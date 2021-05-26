@@ -3,9 +3,9 @@ package com.zarbosoft.merman.core.wall.bricks;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.display.Image;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
-import com.zarbosoft.merman.core.syntax.style.Style;
 
 public class BrickImage extends Brick {
   private final Image image;
@@ -29,13 +29,13 @@ public class BrickImage extends Brick {
 
   @Override
   public double descent() {
-    return image.descent() + style.spaceTransverseAfter * toPixels;
+    return image.descent() + style.padding.transverseEnd * toPixels;
   }
 
   @Override
   public double ascent() {
     if (style.ascent != null) return style.ascent * toPixels;
-    return image.ascent() + style.spaceTransverseBefore * toPixels;
+    return image.ascent() + style.padding.transverseStart * toPixels;
   }
 
   @Override
@@ -45,12 +45,14 @@ public class BrickImage extends Brick {
 
   @Override
   public double converseSpan() {
-    return converseSpan + style.spaceBefore * toPixels + style.spaceAfter * toPixels;
+    return converseSpan
+        + style.padding.converseStart * toPixels
+        + style.padding.converseEnd * toPixels;
   }
 
   @Override
   public double getConverse() {
-    return image.converse() - style.spaceBefore * toPixels;
+    return image.converse() - style.padding.converseStart * toPixels;
   }
 
   @Override
@@ -61,6 +63,6 @@ public class BrickImage extends Brick {
   @Override
   public void setConverse(final Context context, final double minConverse, final double converse) {
     this.preAlignConverse = minConverse;
-    image.setConverse(converse + style.spaceBefore * toPixels, false);
+    image.setConverse(converse + style.padding.converseStart * toPixels, false);
   }
 }

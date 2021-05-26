@@ -1,5 +1,8 @@
 package com.zarbosoft.merman.core.syntax.style;
 
+/**
+ * Unit is defined in context
+ */
 public class Padding {
   public static final Padding empty = new Padding(0, 0, 0, 0);
   public final double converseStart;

@@ -22,7 +22,6 @@ public class JavaFXBlank implements Blank {
     return node;
   }
 
-  @Override
   public void setConverseSpan(Context context, double converse) {
     this.converseSpan = converse;
   }

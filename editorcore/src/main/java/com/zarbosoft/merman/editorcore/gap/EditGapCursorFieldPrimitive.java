@@ -253,7 +253,8 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
   @Override
   public void destroy(Context context) {
     if (choicePage != null) {
-      Editor.get(context).details.removePage(context, choicePage);
+      Editor editor = Editor.get(context);
+      editor.details.setInner(editor, null);
       choicePage.destroy(context);
       choicePage = null;
     }
@@ -284,7 +285,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
 
     /// Clean up before new state
     if (choicePage != null) {
-      editor.details.removePage(context, choicePage);
+      editor.details.setInner(editor, null);
       choicePage.destroy(context);
     }
 
@@ -335,10 +336,10 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     /// Update visual
     if (!out.choices.isEmpty()) {
       choicePage = new TwoColumnChoicePage(editor, (TSList<TwoColumnChoice>) (TSList) out.choices);
-      editor.details.setPage(editor, choicePage);
+      editor.details.setInner(editor, choicePage.displayRoot);
     } else {
       if (choicePage != null) {
-        editor.details.removePage(context, choicePage);
+        editor.details.setInner(editor, null);
         choicePage.destroy(context);
         choicePage = null;
       }

@@ -3,10 +3,10 @@ package com.zarbosoft.merman.core.wall.bricks;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Blank;
 import com.zarbosoft.merman.core.display.DisplayNode;
+import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
-import com.zarbosoft.merman.core.syntax.style.Style;
 
 public class BrickEmpty extends Brick {
   private final Blank visual;
@@ -20,9 +20,12 @@ public class BrickEmpty extends Brick {
     visual = context.display.blank();
     double toPixels = context.toPixels;
     if (style.ascent != null) ascent = style.ascent * toPixels;
-    else ascent = style.spaceTransverseBefore * toPixels;
-    descent = style.spaceTransverseAfter * toPixels;
-    converseSpan = style.space * toPixels + style.spaceBefore * toPixels + style.spaceAfter * toPixels;
+    else ascent = style.padding.transverseStart * toPixels;
+    descent = style.padding.transverseEnd * toPixels;
+    converseSpan =
+        style.space * toPixels
+            + style.padding.converseStart * toPixels
+            + style.padding.converseEnd * toPixels;
     changed(context);
   }
 
@@ -49,7 +52,8 @@ public class BrickEmpty extends Brick {
   }
 
   @Override
-  public void allocateTransverse(final Context context, final double ascent, final double descent) {}
+  public void allocateTransverse(
+      final Context context, final double ascent, final double descent) {}
 
   @Override
   public double descent() {

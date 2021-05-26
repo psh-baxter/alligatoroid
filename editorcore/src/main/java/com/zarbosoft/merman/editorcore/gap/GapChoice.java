@@ -1,7 +1,6 @@
 package com.zarbosoft.merman.editorcore.gap;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.display.Blank;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Text;
 import com.zarbosoft.merman.core.display.derived.CourseGroup;
@@ -13,8 +12,6 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
-import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
-import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
@@ -35,7 +32,6 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
-import java.util.Map;
 import java.util.function.Consumer;
 
 public class GapChoice extends TwoColumnChoice {
@@ -221,6 +217,7 @@ public class GapChoice extends TwoColumnChoice {
   @Override
   public ROPair<CourseDisplayNode, CourseDisplayNode> display(Editor editor) {
     final CourseGroup previewLayout = new CourseGroup(editor.context.display.group());
+    previewLayout.setPadding(editor.context, editor.choicePreviewPadding);
     for (final FrontSpec part : keySpecs) {
       final CourseDisplayNode node;
       if (part instanceof FrontSymbol) {
@@ -230,17 +227,16 @@ public class GapChoice extends TwoColumnChoice {
       } else throw new DeadCode();
       previewLayout.add(node);
     }
-    final Blank space = editor.context.display.blank();
-    space.setConverseSpan(
-        editor.context, editor.choiceDescriptionStyle.spaceBefore * editor.context.toPixels);
-    previewLayout.add(space);
 
     final Text text = editor.context.display.text();
     text.setBaselineTransverse(0);
     text.setColor(editor.context, editor.choiceDescriptionStyle.color);
     text.setFont(editor.context, Context.getFont(editor.context, editor.choiceDescriptionStyle));
     text.setText(editor.context, type.name());
+    CourseGroup textPad = new CourseGroup(editor.context.display.group());
+    textPad.setPadding(editor.context, editor.choiceDescriptionStyle.padding);
+    textPad.add(text);
 
-    return new ROPair<CourseDisplayNode, CourseDisplayNode>(previewLayout, text);
+    return new ROPair<CourseDisplayNode, CourseDisplayNode>(previewLayout, textPad);
   }
 }

@@ -67,7 +67,7 @@ public class Context {
   public final Environment env;
   public final Display display;
   public final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
-  private final Padding pad;
+  public final Padding pad;
   public boolean animateCoursePlacement;
   public boolean animateDetails;
   public int ellipsizeThreshold;
