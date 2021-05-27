@@ -7,12 +7,14 @@ import com.zarbosoft.merman.core.visual.Vector;
 public class ConvScrollContainer implements Container {
   public FreeDisplayNode inner;
   private double converseSpan;
+  private double baseConverse;
+  private double scrollAbs;
 
-  public ConvScrollContainer() {
-  }
+  public ConvScrollContainer() {}
 
   public void scroll(double abs, boolean animate) {
-    inner.setConverse(abs, animate);
+    scrollAbs = abs;
+    inner.setConverse(baseConverse + scrollAbs, animate);
   }
 
   @Override
@@ -37,7 +39,8 @@ public class ConvScrollContainer implements Container {
 
   @Override
   public void setConverse(double converse, boolean animate) {
-    inner.setConverse(converse, animate);
+    baseConverse = converse;
+    inner.setConverse(baseConverse + scrollAbs, animate);
   }
 
   @Override
@@ -47,7 +50,8 @@ public class ConvScrollContainer implements Container {
 
   @Override
   public void setPosition(Vector vector, boolean animate) {
-    inner.setPosition(vector, animate);
+    baseConverse = vector.converse;
+    inner.setPosition(new Vector(baseConverse + scrollAbs, vector.transverse), animate);
   }
 
   @Override

@@ -175,7 +175,8 @@ public class NotMain extends Application {
                       return new ModalCursorAtom(context, base, index, NotMain.this);
                     }
                   },
-              new Editor.Config(new Context.InitialConfig())
+              new Editor.Config(
+                      new Context.InitialConfig().animateCoursePlacement(true).animateDetails(true))
                   .bannerStyle(
                       new Style(
                           new Style.Config()

@@ -99,7 +99,6 @@ public class Context {
   double scrollStartBeddingAfter;
   int selectToken = 0;
   boolean keyHandlingInProgress = false;
-  boolean debugInHover = false;
   private Atom windowAtom;
   private boolean iterationPending = false;
   private Environment.HandleDelay iterationTimer = null;
@@ -297,6 +296,10 @@ public class Context {
         if (top.run(iterationContext)) addIteration(top);
       }
     }
+    while (!iterationQueue.isEmpty()) {
+      IterationTask top = iterationQueue.poll();
+      top.destroy();
+    }
   }
 
   public void addIteration(final IterationTask task) {
@@ -323,7 +326,6 @@ public class Context {
   }
 
   public void clearHover() {
-    if (debugInHover) throw new AssertionError();
     if (hover != null) {
       hover.clear(this);
       hover = null;
@@ -388,7 +390,10 @@ public class Context {
     env.clipboardSetString(string);
   }
 
-  public void uncopy(Node<ROList<AtomType.AtomParseResult>> child, CopyContext copyContext, Consumer<ROList<Atom>> cb) {
+  public void uncopy(
+      Node<ROList<AtomType.AtomParseResult>> child,
+      CopyContext copyContext,
+      Consumer<ROList<Atom>> cb) {
     env.clipboardGet(
         syntax.backType.mime(),
         data -> {
@@ -742,6 +747,16 @@ public class Context {
       this.pad = pad;
       return this;
     }
+
+    public InitialConfig animateCoursePlacement(boolean value) {
+      this.animateCoursePlacement = value;
+      return this;
+    }
+
+    public InitialConfig animateDetails(boolean value) {
+      this.animateDetails = value;
+      return this;
+    }
   }
 
   public abstract static class HoverListener {
@@ -799,9 +814,9 @@ public class Context {
     }
   }
 
-  public class HoverIteration extends IterationTask {
+  public final class HoverIteration extends IterationTask {
+    final Context context;
     public Vector point = null;
-    Context context;
     Brick at;
 
     public HoverIteration(final Context context) {
@@ -825,9 +840,11 @@ public class Context {
       }
       if (point.transverse < at.parent.transverseStart && at.parent.index > 0) {
         at = context.wall.children.get(at.parent.index - 1).children.get(0);
-      } else if (point.transverse > at.parent.transverseEdge()
-          && at.parent.index < wall.children.size() - 1) {
+        return new ROPair<>(true, false);
+      } else if (at.parent.index < wall.children.size() - 1
+          && point.transverse > context.wall.children.get(at.parent.index + 1).transverseStart) {
         at = context.wall.children.get(at.parent.index + 1).children.get(0);
+        return new ROPair<>(true, false);
       } else {
         while (point.converse < at.getConverse() && at.index > 0) {
           at = at.parent.children.get(at.index - 1);
@@ -849,17 +866,13 @@ public class Context {
           if (old != null) old.clear(context);
         }
         hoverBrick = at;
-        hoverIdle = null;
         return new ROPair<>(false, hoverChanged);
       }
-      return new ROPair<>(true, false);
     }
 
     @Override
     public boolean runImplementation(final IterationContext iterationContext) {
-      debugInHover = true;
       ROPair<Boolean, Boolean> res = inner();
-      debugInHover = false;
       if (res.second) {
         for (HoverListener l : hoverListeners.copy()) {
           l.hoverChanged(context, hover);
