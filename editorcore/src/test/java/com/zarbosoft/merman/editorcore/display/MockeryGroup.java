@@ -25,7 +25,7 @@ public class MockeryGroup extends MockFreeDisplayNode implements Group {
 
   @Override
   public void remove(final DisplayNode node) {
-    nodes.removeVal((MockeryDisplayNode) node);
+    nodes.removeVal(node);
   }
 
   @Override
