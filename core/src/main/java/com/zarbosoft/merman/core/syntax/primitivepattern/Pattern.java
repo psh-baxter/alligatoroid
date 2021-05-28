@@ -33,7 +33,7 @@ public abstract class Pattern {
     public boolean match(Environment env, final String value) {
       try {
         EscapableResult<ROList<String>> res =
-            new ParseBuilder<>(ROOT_KEY).grammar(grammar).parse(env.splitGlyphEvents(value));
+            new ParseBuilder<>(ROOT_KEY).grammar(grammar).parallelParse(env.splitGlyphEvents(value));
         return res.completed;
       } catch (final InvalidStream e) {
         return false;

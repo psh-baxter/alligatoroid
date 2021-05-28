@@ -1,6 +1,7 @@
 package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
@@ -38,17 +39,17 @@ public abstract class BaseRepeat<T, K> extends Node<ROList<K>> {
       Grammar grammar,
       final Step step,
       final Parent<ROList<K>> parent,
-      Step.Branch branch,
+      Leaf leaf,
       ROMap<Object, Reference.RefParent> seen,
       final MismatchCause cause,
       Object color) {
-    if (min == 0) parent.advance(grammar, step, branch, ROList.empty, cause);
+    if (min == 0) parent.advance(grammar, step, leaf, ROList.empty, cause);
     if (max == -1 || max > 0)
       child.context(
           grammar,
           step,
           new RepParent<T, K>(this, parent, ROList.empty, color),
-          branch,
+              leaf,
           seen,
           cause,
           color);
@@ -70,17 +71,17 @@ public abstract class BaseRepeat<T, K> extends Node<ROList<K>> {
 
     @Override
     public void advance(
-        Grammar grammar, final Step step, Step.Branch branch, T value, final MismatchCause cause) {
+            Grammar grammar, final Step step, Leaf leaf, T value, final MismatchCause cause) {
       TSList<K> nextCollected = collected.mut();
       self.combine(nextCollected, value);
       if (nextCollected.size() >= self.min)
-        parent.advance(grammar, step, branch, nextCollected, cause);
+        parent.advance(grammar, step, leaf, nextCollected, cause);
       if (self.max == -1 || nextCollected.size() < self.max)
         self.child.context(
             grammar,
             step,
             new RepParent(self, parent, nextCollected, color),
-            branch,
+                leaf,
             ROMap.empty,
             cause,
             color);
@@ -88,8 +89,8 @@ public abstract class BaseRepeat<T, K> extends Node<ROList<K>> {
 
     @Override
     public void error(
-        Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
-      parent.error(grammar, step, branch, cause);
+            Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
+      parent.error(grammar, step, leaf, cause);
     }
   }
 }

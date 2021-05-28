@@ -1,6 +1,7 @@
 package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
@@ -43,7 +44,7 @@ public class UnitSequence<T> extends Node<T> {
       Grammar grammar,
       final Step step,
       final Parent<T> parent,
-      Step.Branch branch,
+      Leaf leaf,
       final ROMap<Object, Reference.RefParent> seen,
       final MismatchCause cause,
       Object color) {
@@ -57,7 +58,7 @@ public class UnitSequence<T> extends Node<T> {
               grammar,
               step,
               new SeqParent<T>(this, parent, 0, null, color),
-              branch,
+                  leaf,
               seen,
               cause,
               color);
@@ -88,7 +89,7 @@ public class UnitSequence<T> extends Node<T> {
     public void advance(
         Grammar grammar,
         Step step,
-        Step.Branch branch,
+        Leaf leaf,
         Object result,
         MismatchCause mismatchCause) {
       final int nextStep = this.step + 1;
@@ -96,7 +97,7 @@ public class UnitSequence<T> extends Node<T> {
       if (self.children.get(this.step).second) newCollected = (T) result;
       else newCollected = collected;
       if (nextStep >= self.children.size()) {
-        parent.advance(grammar, step, branch, newCollected, mismatchCause);
+        parent.advance(grammar, step, leaf, newCollected, mismatchCause);
       } else {
         self.children
             .get(nextStep)
@@ -105,7 +106,7 @@ public class UnitSequence<T> extends Node<T> {
                 grammar,
                 step,
                 new SeqParent<T>(self, parent, nextStep, newCollected, color),
-                branch,
+                    leaf,
                 ROMap.empty,
                 mismatchCause,
                 color);
@@ -113,8 +114,8 @@ public class UnitSequence<T> extends Node<T> {
     }
 
     @Override
-    public void error(Grammar grammar, Step step, Step.Branch branch, MismatchCause mismatchCause) {
-      parent.error(grammar, step, branch, mismatchCause);
+    public void error(Grammar grammar, Step step, Leaf leaf, MismatchCause mismatchCause) {
+      parent.error(grammar, step, leaf, mismatchCause);
     }
   }
 }

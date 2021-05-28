@@ -212,7 +212,7 @@ public class JSSerializer implements Serializer {
           ROList<AtomType.AtomParseResult> result =
               new ParseBuilder<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
                   .grammar(grammar)
-                  .parsePosition(events);
+                  .serialParsePosition(events);
           TSList<Atom> finalOut = new TSList<>();
           for (AtomType.AtomParseResult e : result) {
             finalOut.add(e.finish());

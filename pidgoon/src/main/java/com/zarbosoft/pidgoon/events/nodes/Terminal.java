@@ -1,6 +1,7 @@
 package com.zarbosoft.pidgoon.events.nodes;
 
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
@@ -18,11 +19,11 @@ public abstract class Terminal<E, V> extends Node<V> {
       Grammar grammar,
       Step step,
       Parent<V> parent,
-      Step.Branch branch,
+      Leaf leaf,
       ROMap<Object, Reference.RefParent> seen,
       MismatchCause cause,
       Object color) {
-    step.branches.add(new TerminalBranch<E, V>(this, parent, color));
+    step.leaves.add(new TerminalLeaf<E, V>(this, parent, color));
   }
 
   /**
@@ -34,12 +35,12 @@ public abstract class Terminal<E, V> extends Node<V> {
    */
   protected abstract ROPair<Boolean, V> matches(E event);
 
-  public static class TerminalBranch<E, V> extends Step.Branch<E> {
+  public static class TerminalLeaf<E, V> extends Leaf<E> {
     public Terminal<E, V> self;
     private Parent<V> parent;
     private Object color;
 
-    public TerminalBranch(Terminal<E, V> self, Parent<V> parent, Object color) {
+    public TerminalLeaf(Terminal<E, V> self, Parent<V> parent, Object color) {
       this.self = self;
       this.parent = parent;
       this.color = color;

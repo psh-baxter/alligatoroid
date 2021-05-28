@@ -3,6 +3,7 @@ package com.zarbosoft.pidgoon.nodes;
 import com.zarbosoft.pidgoon.errors.AbortParse;
 import com.zarbosoft.pidgoon.model.ExceptionMismatchCause;
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
@@ -22,10 +23,10 @@ public abstract class Operator<L, T> extends Node<T> {
   public void context(
           Grammar grammar, final Step step,
           final Parent<T> parent,
-          Step.Branch branch, ROMap<Object, Reference.RefParent> seen,
+          Leaf leaf, ROMap<Object, Reference.RefParent> seen,
           final MismatchCause cause,
           Object color) {
-    root.context(grammar, step, new OperatorParent<L, T>(this, parent),branch , seen, cause, color);
+    root.context(grammar, step, new OperatorParent<L, T>(this, parent), leaf, seen, cause, color);
   }
 
   /**
@@ -48,20 +49,20 @@ public abstract class Operator<L, T> extends Node<T> {
 
     @Override
     public void advance(
-            Grammar grammar, final Step step, Step.Branch branch, L result, final MismatchCause cause) {
+            Grammar grammar, final Step step, Leaf leaf, L result, final MismatchCause cause) {
       T out;
       try {
         out = operator.process(result);
       } catch (final AbortParse a) {
-        parent.error(grammar, step, branch, new ExceptionMismatchCause(operator, a));
+        parent.error(grammar, step, leaf, new ExceptionMismatchCause(operator, a));
         return;
       }
-      parent.advance(grammar, step, branch, out, cause);
+      parent.advance(grammar, step, leaf, out, cause);
     }
 
     @Override
-    public void error(Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
-      parent.error(grammar, step, branch, cause);
+    public void error(Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
+      parent.error(grammar, step, leaf, cause);
     }
   }
 }

@@ -3,6 +3,7 @@ package com.zarbosoft.pidgoon;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Step;
@@ -10,8 +11,8 @@ import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.rendaw.common.ROMap;
 
 public class Pidgoon {
-  public static <R> Step<R> prepare(final Grammar grammar, final Reference.Key<R> root) {
-    final Step<R> step = new Step<R>();
+  public static <R, S extends Step<R>> S prepare(
+      final Grammar grammar, final Reference.Key<R> root, S step) {
     grammar
         .getNode(root)
         .context(
@@ -22,7 +23,7 @@ public class Pidgoon {
               public void advance(
                   Grammar grammar,
                   final Step step,
-                  Step.Branch branch,
+                  Leaf leaf,
                   R result,
                   final MismatchCause cause) {
                 step.completed.add(result);
@@ -30,7 +31,7 @@ public class Pidgoon {
 
               @Override
               public void error(
-                  Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
+                  Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
                 step.errors.add(cause);
               }
             },
@@ -48,15 +49,16 @@ public class Pidgoon {
    * @param position the next event to parse
    * @return parse after consuming current position, or null if EOF reached
    */
-  public static <E, R> Step<R> step(Grammar grammar, int uncertaintyLimit, Step<R> step, E event) {
-    if (step.branches.isEmpty()) return null;
+  public static <E, R> Step<R> parallelStep(
+      Grammar grammar, int uncertaintyLimit, Step<R> step, E event) {
+    if (step.leaves.isEmpty()) return null;
 
     final Step<R> nextStep = new Step<R>();
 
-    for (final Step.Branch<E> leaf : step.branches) leaf.parse(grammar, nextStep, event);
+    for (final Leaf<E> leaf : step.leaves) leaf.parse(grammar, nextStep, event);
 
-    if (nextStep.branches.size() > uncertaintyLimit) throw new GrammarTooUncertain(nextStep);
-    if (nextStep.branches.isEmpty() && nextStep.errors.size() == step.branches.size())
+    if (nextStep.leaves.size() > uncertaintyLimit) throw new GrammarTooUncertain(nextStep);
+    if (nextStep.leaves.isEmpty() && nextStep.errors.size() == step.leaves.size())
       throw new InvalidStream(nextStep);
 
     return nextStep;

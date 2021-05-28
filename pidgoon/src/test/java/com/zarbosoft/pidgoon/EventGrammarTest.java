@@ -20,7 +20,7 @@ public class EventGrammarTest {
         new HomogenousSequence()
             .add(new MatchingEventTerminal<>(new EventA()))
             .add(new MatchingEventTerminal<>(new EventB())));
-    ParseEventSink<Object> parse = new ParseBuilder<>(key).grammar(inner).parse();
+    ParseEventSink<Object> parse = new ParseBuilder<>(key).grammar(inner).parallelParse();
     parse = parse.push(new EventB(), "");
     parse = parse.push(new EventB(), "");
     parse.result();
@@ -35,7 +35,7 @@ public class EventGrammarTest {
         new HomogenousSequence()
             .add(new MatchingEventTerminal<>(new EventA()))
             .add(new MatchingEventTerminal<>(new EventB())));
-    ParseEventSink<Object> parse = new ParseBuilder<>(key).grammar(inner).parse();
+    ParseEventSink<Object> parse = new ParseBuilder<>(key).grammar(inner).parallelParse();
     parse = parse.push(new EventA(), "");
     parse = parse.push(new EventA(), "");
     parse.result();
@@ -50,7 +50,7 @@ public class EventGrammarTest {
         new HomogenousSequence()
             .add(new MatchingEventTerminal<>(new EventA()))
             .add(new MatchingEventTerminal<>(new EventB())));
-    ParseEventSink<Object> parse = new ParseBuilder<>(key).grammar(inner).parse();
+    ParseEventSink<Object> parse = new ParseBuilder<>(key).grammar(inner).parallelParse();
     parse = parse.push(new EventA(), "");
     //noinspection UnusedAssignment
     parse = parse.push(new EventB(), "");

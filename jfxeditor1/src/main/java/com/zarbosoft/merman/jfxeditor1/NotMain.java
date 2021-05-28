@@ -38,8 +38,8 @@ import com.zarbosoft.pidgoon.errors.GrammarTooUncertainAt;
 import com.zarbosoft.pidgoon.errors.InvalidStreamAt;
 import com.zarbosoft.pidgoon.errors.NoResults;
 import com.zarbosoft.pidgoon.events.Position;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
-import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
@@ -339,7 +339,7 @@ public class NotMain extends Application {
 
     } catch (GrammarTooUncertainAt e) {
       StringBuilder message = new StringBuilder();
-      for (Step.Branch leaf : (TSList<Step.Branch>) e.e.step.branches) {
+      for (Leaf leaf : (TSList<Leaf>) e.e.step.leaves) {
         message.append(Format.format(" * %s (%s)\n", leaf, leaf.color()));
       }
       throw new RuntimeException(

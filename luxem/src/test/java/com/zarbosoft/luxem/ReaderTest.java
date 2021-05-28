@@ -6,6 +6,7 @@ import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.MatchingEvent;
 import com.zarbosoft.pidgoon.events.Position;
+import com.zarbosoft.rendaw.common.ROPair;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -17,11 +18,11 @@ import java.util.List;
 public class ReaderTest {
   public List<Event> read(final String source) {
     List<Event> out = new ArrayList<>();
-    for (Position p :
+    for (ROPair p :
         Luxem.streamEvents(
             new ByteArrayInputStream(source.getBytes(StandardCharsets.UTF_8)),
             new Reader.DefaultEventFactory())) {
-      out.add(p.event);
+      out.add((Event) p.first);
     }
     return out;
   }

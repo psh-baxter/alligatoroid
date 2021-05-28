@@ -2,6 +2,7 @@ package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.events.EscapableResult;
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
@@ -36,12 +37,12 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
       Grammar grammar,
       final Step step,
       final Parent<EscapableResult<ROList<T>>> parent,
-      Step.Branch branch,
+      Leaf leaf,
       final ROMap<Object, Reference.RefParent> seen,
       final MismatchCause cause,
       Object color) {
     if (children.isEmpty()) {
-      parent.advance(grammar, step, branch, new EscapableResult<>(true, ROList.empty), cause);
+      parent.advance(grammar, step, leaf, new EscapableResult<>(true, ROList.empty), cause);
     } else {
       children
           .get(0)
@@ -50,7 +51,7 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
               grammar,
               step,
               new SeqParent<K, T>(this, parent, 0, ROList.empty, color),
-              branch,
+                  leaf,
               seen,
               cause,
               color);
@@ -87,7 +88,7 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
     public void advance(
         Grammar grammar,
         Step step,
-        Step.Branch branch,
+        Leaf leaf,
         EscapableResult<K> result,
         MismatchCause mismatchCause) {
       final int nextStep = this.step + 1;
@@ -98,7 +99,7 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
         parent.advance(
             grammar,
             step,
-            branch,
+                leaf,
             new EscapableResult<>(result.completed, newCollected),
             mismatchCause);
       } else {
@@ -109,7 +110,7 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
                 grammar,
                 step,
                 new SeqParent<K, T>(self, parent, nextStep, newCollected, color),
-                branch,
+                    leaf,
                 ROMap.empty,
                 mismatchCause,
                 color);
@@ -117,8 +118,8 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
     }
 
     @Override
-    public void error(Grammar grammar, Step step, Step.Branch branch, MismatchCause mismatchCause) {
-      parent.error(grammar, step, branch, mismatchCause);
+    public void error(Grammar grammar, Step step, Leaf leaf, MismatchCause mismatchCause) {
+      parent.error(grammar, step, leaf, mismatchCause);
     }
   }
 }

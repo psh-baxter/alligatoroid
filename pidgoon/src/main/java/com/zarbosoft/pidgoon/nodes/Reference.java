@@ -3,6 +3,7 @@ package com.zarbosoft.pidgoon.nodes;
 import com.zarbosoft.pidgoon.errors.AbortParse;
 import com.zarbosoft.pidgoon.model.ExceptionMismatchCause;
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
@@ -26,7 +27,7 @@ public class Reference<T> extends Node<T> {
   public void context(
           Grammar grammar, final Step step,
           final Parent<T> parent,
-          Step.Branch branch,
+          Leaf leaf,
           final ROMap<Object, RefParent> seen,
           final MismatchCause cause,
           Object color) {
@@ -39,11 +40,11 @@ public class Reference<T> extends Node<T> {
       try {
         base = grammar.getNode(key);
       } catch (AbortParse e) {
-        parent.error(grammar, step, branch, new ExceptionMismatchCause(this, e));
+        parent.error(grammar, step, leaf, new ExceptionMismatchCause(this, e));
         return;
       }
     }
-    base.context(grammar, step, subParent, branch, seen.mut().put(key, subParent), cause, color);
+    base.context(grammar, step, subParent, leaf, seen.mut().put(key, subParent), cause, color);
   }
 
   /**
@@ -64,16 +65,16 @@ public class Reference<T> extends Node<T> {
 
     @Override
     public void advance(
-            Grammar grammar, final Step step, Step.Branch branch, T result, final MismatchCause cause) {
-      originalParent.advance(grammar, step, branch, result, cause);
+            Grammar grammar, final Step step, Leaf leaf, T result, final MismatchCause cause) {
+      originalParent.advance(grammar, step, leaf, result, cause);
       for (final Parent<T> p : loopParents) {
-        p.advance(grammar, step, branch, result, cause);
+        p.advance(grammar, step, leaf, result, cause);
       }
     }
 
     @Override
-    public void error(Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
-      originalParent.error(grammar, step, branch, cause);
+    public void error(Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
+      originalParent.error(grammar, step, leaf, cause);
     }
   }
 }

@@ -28,7 +28,7 @@ public class ParseEventSink<O> implements EventSink<ParseEventSink<O>> {
       final Grammar grammar, final Reference.Key<O> root, final int uncertaintyLimit) {
     this.grammar = grammar;
     this.uncertaintyLimit = uncertaintyLimit;
-    this.step = Pidgoon.prepare(grammar, root);
+    this.step = Pidgoon.prepare(grammar, root, new Step<>());
   }
 
   public ParseEventSink(final Step<O> step, final Grammar grammar, int uncertaintyLimit) {
@@ -38,11 +38,11 @@ public class ParseEventSink<O> implements EventSink<ParseEventSink<O>> {
   }
 
   @Override
-  public ParseEventSink<O> push(final Event event, final Object at) {
+  public ParseEventSink<O> push(final Object event, final Object at) {
     if (ended()) throw new Assertion();
     final Step<O> nextStep;
     try {
-      nextStep = Pidgoon.step(grammar, uncertaintyLimit, step, event);
+      nextStep = Pidgoon.parallelStep(grammar, uncertaintyLimit, step, event);
     } catch (GrammarTooUncertain e) {
       throw new GrammarTooUncertainAt(at, e);
     } catch (InvalidStream e) {
@@ -54,7 +54,7 @@ public class ParseEventSink<O> implements EventSink<ParseEventSink<O>> {
   }
 
   public boolean ended() {
-    return step.branches.isEmpty();
+    return step.leaves.isEmpty();
   }
 
   public O result() {

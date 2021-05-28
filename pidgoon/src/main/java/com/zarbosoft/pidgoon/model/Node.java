@@ -5,5 +5,5 @@ import com.zarbosoft.rendaw.common.ROMap;
 
 public abstract class Node<T> {
   public abstract void context(
-          Grammar grammar, Step step, Parent<T> parent, Step.Branch branch, ROMap<Object, Reference.RefParent> seen, MismatchCause cause, Object color);
+          Grammar grammar, Step step, Parent<T> parent, Leaf leaf, ROMap<Object, Reference.RefParent> seen, MismatchCause cause, Object color);
 }

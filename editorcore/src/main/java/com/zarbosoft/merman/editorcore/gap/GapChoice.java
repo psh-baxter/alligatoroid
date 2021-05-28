@@ -24,6 +24,7 @@ import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
 import com.zarbosoft.pidgoon.events.EscapableResult;
 import com.zarbosoft.pidgoon.events.Event;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
@@ -40,7 +41,7 @@ public class GapChoice extends TwoColumnChoice {
   public final int consumePreceding;
   public final ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms;
   public final int consumeText;
-  public final Step.Branch incompleteFields;
+  public final Leaf incompleteFields;
   private final TSList<Event> glyphs;
   private final FrontSpec followingSpec;
   private final ROList<FrontSpec> keySpecs;
@@ -54,7 +55,7 @@ public class GapChoice extends TwoColumnChoice {
       TSList<Event> glyphs,
       int consumeText,
       ROList<FieldPrimitive> fields,
-      Step.Branch incompleteFields,
+      Leaf incompleteFields,
       ROList<FrontSpec> keySpecs,
       FrontSpec followingSpec) {
     this.gap = gap;

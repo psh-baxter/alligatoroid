@@ -1,13 +1,13 @@
 package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
-import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -33,17 +33,17 @@ public abstract class BaseSet<K, T> extends Node<ROList<T>> {
       Grammar grammar,
       final Step step,
       final Parent<ROList<T>> parent,
-      Step.Branch branch,
+      Leaf leaf,
       final ROMap<Object, Reference.RefParent> seen,
       final MismatchCause cause,
       Object color) {
-    advance(grammar, step, branch, parent, seen, cause, children, color, ROList.empty);
+    advance(grammar, step, leaf, parent, seen, cause, children, color, ROList.empty);
   }
 
   private void advance(
       Grammar grammar,
       final Step step,
-      Step.Branch branch,
+      Leaf leaf,
       final Parent<ROList<T>> parent,
       final ROMap<Object, Reference.RefParent> seen,
       final MismatchCause cause,
@@ -58,7 +58,7 @@ public abstract class BaseSet<K, T> extends Node<ROList<T>> {
       }
     }
     if (!requiredRemain) {
-      parent.advance(grammar, step, branch, collected, cause);
+      parent.advance(grammar, step, leaf, collected, cause);
     }
     for (Map.Entry<Node<K>, Boolean> c : remaining) {
       c.getKey()
@@ -66,7 +66,7 @@ public abstract class BaseSet<K, T> extends Node<ROList<T>> {
               grammar,
               step,
               new SetParent<K, T>(this, parent, remaining.mut().remove(c.getKey()), collected, color),
-              branch,
+                  leaf,
               seen,
               cause,
               color);
@@ -96,11 +96,11 @@ public abstract class BaseSet<K, T> extends Node<ROList<T>> {
 
     @Override
     public void advance(
-        Grammar grammar, final Step step, Step.Branch branch, K result, final MismatchCause cause) {
+            Grammar grammar, final Step step, Leaf leaf, K result, final MismatchCause cause) {
       base.advance(
           grammar,
           step,
-          branch,
+              leaf,
           parent,
           ROMap.empty,
           cause,
@@ -111,8 +111,8 @@ public abstract class BaseSet<K, T> extends Node<ROList<T>> {
 
     @Override
     public void error(
-        Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
-      parent.error(grammar, step, branch, cause);
+            Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
+      parent.error(grammar, step, leaf, cause);
     }
   }
 }

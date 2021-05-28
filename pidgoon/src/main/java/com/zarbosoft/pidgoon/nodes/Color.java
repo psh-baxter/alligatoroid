@@ -1,6 +1,7 @@
 package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
@@ -24,10 +25,10 @@ public class Color<T> extends Node<T> {
   public void context(
           Grammar grammar, final Step step,
           final Parent<T> parent,
-          Step.Branch branch, ROMap<Object, Reference.RefParent> seen,
+          Leaf leaf, ROMap<Object, Reference.RefParent> seen,
           final MismatchCause cause,
           Object color) {
-    child.context(grammar, step, new ColorParent<T>(parent), branch, seen, cause, this.color);
+    child.context(grammar, step, new ColorParent<T>(parent), leaf, seen, cause, this.color);
   }
 
   private static class ColorParent<T> implements Parent<T> {
@@ -40,13 +41,13 @@ public class Color<T> extends Node<T> {
 
     @Override
     public void advance(
-            Grammar grammar, final Step step, Step.Branch branch, T result, final MismatchCause cause) {
-      parent.advance(grammar, step, branch, result, cause);
+            Grammar grammar, final Step step, Leaf leaf, T result, final MismatchCause cause) {
+      parent.advance(grammar, step, leaf, result, cause);
     }
 
     @Override
-    public void error(Grammar grammar, final Step step, Step.Branch branch, final MismatchCause cause) {
-      parent.error(grammar, step, branch, cause);
+    public void error(Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
+      parent.error(grammar, step, leaf, cause);
     }
   }
 }

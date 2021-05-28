@@ -1,11 +1,11 @@
 package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
 import com.zarbosoft.pidgoon.model.Step;
-import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -35,12 +35,12 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
   public void context(
           Grammar grammar, final Step step,
           final Parent<ROList<T>> parent,
-          Step.Branch branch,
+          Leaf leaf,
           final ROMap<Object, Reference.RefParent> seen,
           final MismatchCause cause,
           Object color) {
     if (children.isEmpty()) {
-      parent.advance(grammar, step, branch, ROList.empty, cause);
+      parent.advance(grammar, step, leaf, ROList.empty, cause);
     } else {
       children
           .get(0)
@@ -48,7 +48,7 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
           .context(
                   grammar, step,
               new SeqParent<K, T>(this, parent, 0, ROList.empty, color),
-              branch,
+                  leaf,
               seen,
               cause,
               color);
@@ -80,13 +80,13 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
     }
 
     @Override
-    public void advance(Grammar grammar, Step step, Step.Branch branch, K result, MismatchCause mismatchCause) {
+    public void advance(Grammar grammar, Step step, Leaf leaf, K result, MismatchCause mismatchCause) {
       final int nextStep = this.step + 1;
       ROList<T> newCollected;
       if (self.children.get(this.step).second) newCollected = self.collect(collected,result);
       else newCollected = collected;
       if (nextStep >= self.children.size()) {
-        parent.advance(grammar, step, branch, newCollected, mismatchCause);
+        parent.advance(grammar, step, leaf, newCollected, mismatchCause);
       } else {
         self.children
             .get(nextStep)
@@ -95,7 +95,7 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
                     grammar,
                 step,
                 new SeqParent<K, T>(self, parent, nextStep, newCollected, color),
-                branch,
+                    leaf,
                 ROMap.empty,
                 mismatchCause,
                 color);
@@ -103,8 +103,8 @@ public abstract class BaseSequence<K, T> extends Node<ROList<T>> {
     }
 
     @Override
-    public void error(Grammar grammar, Step step, Step.Branch branch, MismatchCause mismatchCause) {
-      parent.error(grammar, step, branch, mismatchCause);
+    public void error(Grammar grammar, Step step, Leaf leaf, MismatchCause mismatchCause) {
+      parent.error(grammar, step, leaf, mismatchCause);
     }
   }
 

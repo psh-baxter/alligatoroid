@@ -1,6 +1,7 @@
 package com.zarbosoft.pidgoon.nodes;
 
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.MismatchCause;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.model.Parent;
@@ -13,11 +14,11 @@ public class Wildcard extends Node<Object> {
   public void context(
           Grammar grammar, final Step step,
           final Parent<Object> parent,
-          Step.Branch branch, final ROMap<Object, Reference.RefParent> seen,
+          Leaf leaf, final ROMap<Object, Reference.RefParent> seen,
           final MismatchCause cause,
           Object color) {
-    step.branches.add(
-        new Step.Branch<Object>() {
+    step.leaves.add(
+        new Leaf<Object>() {
           @Override
           public <T> T color() {
             return (T) color;

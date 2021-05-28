@@ -26,6 +26,7 @@ import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.pidgoon.events.ParseBuilder;
 import com.zarbosoft.pidgoon.events.Position;
 import com.zarbosoft.pidgoon.model.Grammar;
+import com.zarbosoft.pidgoon.model.Leaf;
 import com.zarbosoft.pidgoon.model.Step;
 import com.zarbosoft.pidgoon.nodes.Color;
 import com.zarbosoft.pidgoon.nodes.HomogenousSequence;
@@ -316,7 +317,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
               choice.keySpecs,
               choice.following));
     }
-    for (Step.Branch leaf : out.longest.first.branches) {
+    for (Leaf leaf : out.longest.first.leaves) {
       PreGapChoice choice = (PreGapChoice) leaf.color();
       if (!seen.addNew(choice.type)) continue;
       out.choices.add(

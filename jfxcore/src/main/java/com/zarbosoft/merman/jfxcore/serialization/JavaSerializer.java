@@ -375,7 +375,7 @@ public class JavaSerializer implements Serializer {
                 new Parse<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
                     .grammar(grammar)
                     .eventFactory(luxemEventFactory())
-                    .parse(new ByteArrayInputStream((byte[]) data));
+                    .serialParse(new ByteArrayInputStream((byte[]) data));
             TSList<Atom> finalOut = new TSList<>();
             for (AtomType.AtomParseResult e : result) {
               finalOut.add(e.finish());
@@ -415,7 +415,7 @@ public class JavaSerializer implements Serializer {
             ROList<AtomType.AtomParseResult> result =
                 new JSONParse<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
                     .grammar(grammar)
-                    .parse(new ByteArrayInputStream((byte[]) data));
+                    .serialParse(new ByteArrayInputStream((byte[]) data));
             TSList<Atom> finalOut = new TSList<>();
             for (AtomType.AtomParseResult e : result) {
               finalOut.add(e.finish());

@@ -13,15 +13,14 @@ import com.zarbosoft.merman.core.serialization.JSONObjectPath;
 import com.zarbosoft.merman.core.serialization.JSONPath;
 import com.zarbosoft.pidgoon.BaseParseBuilder;
 import com.zarbosoft.pidgoon.events.Event;
-import com.zarbosoft.pidgoon.events.ParseEventSink;
 import com.zarbosoft.pidgoon.nodes.Reference;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.TSList;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.List;
 
 import static com.zarbosoft.rendaw.common.Common.uncheck;
 
@@ -38,10 +37,10 @@ public class JSONParse<O> extends BaseParseBuilder<O, JSONParse<O>> {
     super(root);
   }
 
-  public static List<ROPair<? extends Event, Object>> streamEvents(InputStream stream) {
+  public static ROList<? extends ROPair> streamEvents(InputStream stream) {
     return uncheck(
         () -> {
-          List<ROPair<? extends Event, Object>> out = new ArrayList<>();
+          TSList<ROPair<? extends Event, Object>> out = new TSList<>();
           JsonReader stream1 = new JsonReader(new InputStreamReader(stream));
           JSONPath path = new JSONObjectPath(null);
 
@@ -126,31 +125,11 @@ public class JSONParse<O> extends BaseParseBuilder<O, JSONParse<O>> {
     return new JSONParse<>(this);
   }
 
-  public O parse(InputStream stream) {
-    return parse(streamEvents(stream));
+  public O parallelParse(InputStream stream) {
+    return parallelParse(streamEvents(stream));
   }
 
-  /**
-   * Parse by pulling events from the stream.
-   *
-   * @param data
-   * @return
-   */
-  public O parse(final List<ROPair<? extends Event, Object>> data) {
-    ParseEventSink<O> eventStream = parse();
-    for (ROPair<? extends Event, Object> pair : data) {
-      eventStream = eventStream.push(pair.first, pair.second.toString());
-    }
-    return eventStream.result();
-  }
-
-  /**
-   * Instead of pulling from an input stream, use the returned EventStream to push events to the
-   * parse.
-   *
-   * @return
-   */
-  public ParseEventSink<O> parse() {
-    return new ParseEventSink<>(grammar, root, uncertaintyLimit);
+  public O serialParse(InputStream stream) {
+    return serialParsePosition(streamEvents(stream));
   }
 }
