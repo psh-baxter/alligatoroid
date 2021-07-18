@@ -7,7 +7,7 @@ import com.zarbosoft.merman.core.display.Group;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
 import com.zarbosoft.merman.core.visual.alignment.Alignment;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.rendaw.common.ChainComparator;
 import com.zarbosoft.rendaw.common.EnumerateIterable;
 import com.zarbosoft.rendaw.common.ROList;
@@ -347,7 +347,7 @@ public class Course {
   class IterationCompactTask extends IterationTask {
     private final Context context;
     private final Set<VisualAtom> skip = new HashSet<>();
-    private final Set<VisualFrontPrimitive> skipPrimitives = new HashSet<>();
+    private final Set<VisualFieldPrimitive> skipPrimitives = new HashSet<>();
 
     IterationCompactTask(final Context context) {
       this.context = context;
@@ -362,14 +362,14 @@ public class Course {
     public boolean runImplementation(final IterationContext iterationContext) {
       // Find higest priority brick in this course
       final PriorityQueue<VisualAtom> priorities = new PriorityQueue<>(11, compactComparator);
-      VisualFrontPrimitive lastPrimitive = null;
+      VisualFieldPrimitive lastPrimitive = null;
       double converse = 0;
       for (int index = 0; index < children.size(); ++index) {
         final Brick brick = children.get(index);
         final VisualLeaf visual = brick.getVisual();
         final VisualAtom atomVisual = visual.parent().atomVisual();
-        if (visual instanceof VisualFrontPrimitive && !skipPrimitives.contains(visual))
-          lastPrimitive = (VisualFrontPrimitive) visual;
+        if (visual instanceof VisualFieldPrimitive && !skipPrimitives.contains(visual))
+          lastPrimitive = (VisualFieldPrimitive) visual;
         if ((!visual.atomVisual().compact && !skip.contains(atomVisual)))
           priorities.add(atomVisual);
         converse = brick.converseEdge();
@@ -421,11 +421,11 @@ public class Course {
       // Try to unwrap any soft-wrapped primitives first
       for (Brick child : children) {
         VisualLeaf visual = child.getVisual();
-        if (!(visual instanceof VisualFrontPrimitive)
-            || !((VisualFrontPrimitive) visual).softWrapped()) continue;
-        int oldLines = ((VisualFrontPrimitive) visual).hardLineCount;
-        ((VisualFrontPrimitive) visual).primitiveReflow(context);
-        int newLines = ((VisualFrontPrimitive) visual).hardLineCount;
+        if (!(visual instanceof VisualFieldPrimitive)
+            || !((VisualFieldPrimitive) visual).softWrapped()) continue;
+        int oldLines = ((VisualFieldPrimitive) visual).hardLineCount;
+        ((VisualFieldPrimitive) visual).primitiveReflow(context);
+        int newLines = ((VisualFieldPrimitive) visual).hardLineCount;
         return oldLines != newLines;
       }
 

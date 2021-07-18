@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.DisplayNode;
 import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.core.display.Text;
+import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.wall.Brick;
@@ -19,19 +20,24 @@ public class BrickText extends Brick {
       final BrickInterface inter,
       Style.SplitMode splitMode,
       Style style,
+      ModelColor initialColor,
       int hackAvoidChanged) {
     super(inter, style, splitMode);
     toPixels = context.toPixels;
     text = context.display.text();
-    text.setColor(context, style.color);
+    text.setColor(context, initialColor);
     this.font = Context.getFont(context, style);
     text.setFont(context, font);
   }
 
   public BrickText(
       final Context context, final BrickInterface inter, Style.SplitMode splitMode, Style style) {
-    this(context, inter, splitMode, style, 0);
-    changed(context);
+    this(context, inter, splitMode, style, style.color, 0);
+    layoutPropertiesChanged(context);
+  }
+
+  public void setColor(Context context, ModelColor color) {
+    text.setColor(context, color);
   }
 
   @Override
@@ -77,7 +83,7 @@ public class BrickText extends Brick {
         font.measurer().getWidth(this.text.text())
             + style.padding.converseStart * toPixels
             + style.padding.converseEnd * toPixels;
-    changed(context);
+    layoutPropertiesChanged(context);
   }
 
   @Override

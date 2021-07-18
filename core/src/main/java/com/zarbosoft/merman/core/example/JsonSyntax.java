@@ -28,7 +28,7 @@ import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Integer;
 import com.zarbosoft.merman.core.syntax.primitivepattern.JsonDecimal;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
@@ -89,9 +89,9 @@ public class JsonSyntax {
                 ALIGNMENT_INDENT,
                 new RelativeAlignmentSpec(
                     new RelativeAlignmentSpec.Config(ALIGNMENT_INDENT, 4, true)));
-    FrontSymbol breakIndent =
-        new FrontSymbol(
-            new FrontSymbol.Config(
+    FrontSymbolSpec breakIndent =
+        new FrontSymbolSpec(
+            new FrontSymbolSpec.Config(
                 new SymbolSpaceSpec(
                     new SymbolSpaceSpec.Config()
                         .splitMode(Style.SplitMode.COMPACT)
@@ -204,8 +204,8 @@ public class JsonSyntax {
                     .alignments(containerAlignments)));
     TSList<FrontSpec> gapEmptyPlaceholder =
         new TSList<>(
-            new FrontSymbol(
-                new FrontSymbol.Config(
+            new FrontSymbolSpec(
+                new FrontSymbolSpec.Config(
                         new SymbolTextSpec(
                             new SymbolTextSpec.Config("￮").style(gapEmptySymbolStyle)))
                     .condition(
@@ -214,8 +214,8 @@ public class JsonSyntax {
                                 BaseGapAtomType.PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))));
     TSList<FrontSpec> suffixGapEmptyPlaceholder =
         new TSList<>(
-            new FrontSymbol(
-                new FrontSymbol.Config(
+            new FrontSymbolSpec(
+                new FrontSymbolSpec.Config(
                         new SymbolTextSpec(
                             new SymbolTextSpec.Config("▹").style(gapEmptySymbolStyle)))
                     .condition(
@@ -309,14 +309,14 @@ public class JsonSyntax {
                         .lineColor(ModelColor.RGB.hex("888888")))));
   }
 
-  public static FrontSymbol textSym(String s, Style style) {
-    return new FrontSymbol(
-        new FrontSymbol.Config(new SymbolTextSpec(new SymbolTextSpec.Config(s).style(style))));
+  public static FrontSymbolSpec textSym(String s, Style style) {
+    return new FrontSymbolSpec(
+        new FrontSymbolSpec.Config(new SymbolTextSpec(new SymbolTextSpec.Config(s).style(style))));
   }
 
-  public static FrontSymbol baseAlignTextSym(String s, Style style) {
-    return new FrontSymbol(
-        new FrontSymbol.Config(
+  public static FrontSymbolSpec baseAlignTextSym(String s, Style style) {
+    return new FrontSymbolSpec(
+        new FrontSymbolSpec.Config(
             new SymbolTextSpec(
                 new SymbolTextSpec.Config(s).splitMode(Style.SplitMode.COMPACT).style(style))));
   }

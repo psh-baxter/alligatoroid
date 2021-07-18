@@ -13,7 +13,7 @@ import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
@@ -98,8 +98,8 @@ public class TestWindowing {
                 name,
                 TSList.of(Helper.buildBackPrimitive("a" + name)),
                 TSList.of(
-                    new FrontSymbol(
-                        new FrontSymbol.Config(
+                    new FrontSymbolSpec(
+                        new FrontSymbolSpec.Config(
                             new SymbolTextSpec(new SymbolTextSpec.Config(name))))))));
   }
 

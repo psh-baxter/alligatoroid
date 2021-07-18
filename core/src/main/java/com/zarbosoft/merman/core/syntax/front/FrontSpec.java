@@ -30,7 +30,7 @@ public abstract class FrontSpec {
 
   public abstract static class DispatchHandler {
 
-    public abstract void handle(FrontSymbol front);
+    public abstract void handle(FrontSymbolSpec front);
 
     public abstract void handle(FrontArraySpecBase front);
 

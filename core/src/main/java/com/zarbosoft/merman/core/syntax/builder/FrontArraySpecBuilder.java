@@ -2,30 +2,30 @@ package com.zarbosoft.merman.core.syntax.builder;
 
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class FrontArraySpecBuilder {
-  private final TSList<FrontSymbol> prefix = new TSList<>();
-  private final TSList<FrontSymbol> suffix = new TSList<>();
-  private final TSList<FrontSymbol> separator = new TSList<>();
+  private final TSList<FrontSymbolSpec> prefix = new TSList<>();
+  private final TSList<FrontSymbolSpec> suffix = new TSList<>();
+  private final TSList<FrontSymbolSpec> separator = new TSList<>();
   private final String back;
 
   public FrontArraySpecBuilder(String back) {
     this.back = back;
   }
 
-  public FrontArraySpecBuilder prefix(FrontSymbol symbol) {
+  public FrontArraySpecBuilder prefix(FrontSymbolSpec symbol) {
     prefix.add(symbol);
     return this;
   }
 
-  public FrontArraySpecBuilder suffix(FrontSymbol symbol) {
+  public FrontArraySpecBuilder suffix(FrontSymbolSpec symbol) {
     suffix.add(symbol);
     return this;
   }
 
-  public FrontArraySpecBuilder separator(FrontSymbol symbol) {
+  public FrontArraySpecBuilder separator(FrontSymbolSpec symbol) {
     separator.add(symbol);
     return this;
   }

@@ -3,7 +3,7 @@ package com.zarbosoft.merman.editorcore.cursors;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
@@ -16,7 +16,7 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
 
   public BaseEditCursorFieldPrimitive(
       Context context,
-      VisualFrontPrimitive visualPrimitive,
+      VisualFieldPrimitive visualPrimitive,
       boolean leadFirst,
       int beginOffset,
       int endOffset) {
@@ -38,7 +38,7 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
                   value, range.beginOffset, range.endOffset - range.beginOffset, text));
         };
     if (recorder != null) apply.accept(recorder);
-    else editor.history.record(editor.context, new ROPair(visualPrimitive.value, "text"), apply);
+    else editor.history.record(editor.context, new ROPair<>(visualPrimitive.value, "text"), apply);
   }
 
   public void editCut(Editor editor) {
@@ -63,7 +63,7 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
       if (range.endOffset == visualPrimitive.value.length()) return;
       editor.history.record(
           editor.context,
-          new ROPair(visualPrimitive.value, "text"),
+          new ROPair<>(visualPrimitive.value, "text"),
           recorder -> {
             final int following = followingStart();
             recorder.apply(
@@ -74,7 +74,7 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
     } else
       editor.history.record(
           editor.context,
-          new ROPair(visualPrimitive.value, "text"),
+          new ROPair<>(visualPrimitive.value, "text"),
           recorder -> {
             recorder.apply(
                 editor.context,
@@ -91,7 +91,7 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
       if (range.beginOffset == 0) return;
       editor.history.record(
           editor.context,
-          new ROPair(visualPrimitive.value, "text"),
+          new ROPair<>(visualPrimitive.value, "text"),
           recorder -> {
             final int preceding = precedingStart();
             recorder.apply(
@@ -102,7 +102,7 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
     } else
       editor.history.record(
           editor.context,
-          new ROPair(visualPrimitive.value, "text"),
+          new ROPair<>(visualPrimitive.value, "text"),
           recorder -> {
             recorder.apply(
                 editor.context,
@@ -117,8 +117,8 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
   public void editJoinLines(Editor editor) {
     int beginOffset = range.beginOffset;
     int endOffset = range.endOffset;
-    VisualFrontPrimitive.Line beginLine = range.beginLine;
-    VisualFrontPrimitive.Line endLine = range.endLine;
+    VisualFieldPrimitive.Line beginLine = range.beginLine;
+    VisualFieldPrimitive.Line endLine = range.endLine;
     if (beginOffset == endOffset) {
       if (beginLine.index + 1 >= visualPrimitive.lines.size()) return;
       editor.history.record(

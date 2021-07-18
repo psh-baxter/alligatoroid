@@ -5,7 +5,7 @@ import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
@@ -34,8 +34,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
                                         .splitMode(Style.SplitMode.COMPACT)))))
@@ -88,8 +88,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
                                         .splitMode(Style.SplitMode.COMPACT)))))
@@ -161,8 +161,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
                                         .splitMode(Style.SplitMode.COMPACT)))))
@@ -220,8 +220,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
                                         .splitMode(Style.SplitMode.COMPACT)))))
@@ -235,8 +235,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
                                         .splitMode(Style.SplitMode.COMPACT)))))
@@ -250,8 +250,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
                                         .splitMode(Style.SplitMode.COMPACT)))))
@@ -322,8 +322,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config()
                                         .splitMode(Style.SplitMode.COMPACT)))))

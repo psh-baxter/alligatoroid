@@ -18,7 +18,7 @@ public class BrickImage extends Brick {
     image.setImage(context, style.image);
     image.rotate(context, style.rotate);
     converseSpan = (int) image.converseSpan();
-    changed(context);
+    layoutPropertiesChanged(context);
     toPixels = context.toPixels;
   }
 

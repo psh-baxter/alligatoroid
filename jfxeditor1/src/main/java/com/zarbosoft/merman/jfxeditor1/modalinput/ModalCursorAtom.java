@@ -6,13 +6,12 @@ import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtom;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.banner.BannerMessage;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 import com.zarbosoft.rendaw.common.Assertion;
-import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public class ModalCursorAtom extends EditCursorAtom {
@@ -34,7 +33,7 @@ public class ModalCursorAtom extends EditCursorAtom {
       indexVisType = "atom";
     } else if (indexVisual.second instanceof VisualFieldArray) {
       indexVisType = "array";
-    } else if (indexVisual.second instanceof VisualFrontPrimitive) {
+    } else if (indexVisual.second instanceof VisualFieldPrimitive) {
       indexVisType = "primitive";
     } else throw new Assertion();
     /*

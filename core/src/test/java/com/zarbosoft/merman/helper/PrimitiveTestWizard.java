@@ -1,14 +1,14 @@
 package com.zarbosoft.merman.helper;
 
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 
 import static org.hamcrest.core.IsEqual.equalTo;
 import static org.junit.Assert.assertThat;
 
 public class PrimitiveTestWizard {
   TestWizard inner;
-  private final VisualFrontPrimitive primitive;
+  private final VisualFieldPrimitive primitive;
 
   public PrimitiveTestWizard(final String string) {
     inner =

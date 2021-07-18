@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
 import com.zarbosoft.merman.core.visual.VisualParent;
@@ -14,19 +14,19 @@ import com.zarbosoft.rendaw.common.TSList;
 
 public class VisualSymbol extends Visual
     implements VisualLeaf, ConditionAttachment.Listener, BrickInterface {
-  private final FrontSymbol frontSymbol;
+  private final FrontSymbolSpec frontSymbol;
   public VisualParent parent;
   public Brick brick = null;
   public ConditionAttachment condition = null;
 
   public VisualSymbol(
       final VisualParent parent,
-      final FrontSymbol frontSymbol,
+      final FrontSymbolSpec frontSymbolSpec,
       final ConditionAttachment condition,
       final int visualDepth) {
     super(visualDepth);
     this.parent = parent;
-    this.frontSymbol = frontSymbol;
+    this.frontSymbol = frontSymbolSpec;
     if (condition != null) {
       this.condition = condition;
       condition.register(this);
@@ -103,12 +103,12 @@ public class VisualSymbol extends Visual
 
   @Override
   public void compact(Context context) {
-    if (brick != null) brick.changed(context);
+    if (brick != null) brick.layoutPropertiesChanged(context);
   }
 
   @Override
   public void expand(Context context) {
-    if (brick != null) brick.changed(context);
+    if (brick != null) brick.layoutPropertiesChanged(context);
   }
 
   @Override

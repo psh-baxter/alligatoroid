@@ -3,7 +3,7 @@ package com.zarbosoft.merman.jfxeditor1.modalinput;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.banner.BannerMessage;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
@@ -20,7 +20,7 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
 
   public ModalGapCursorFieldPrimitive(
       Editor editor,
-      VisualFrontPrimitive visualPrimitive,
+      VisualFieldPrimitive visualPrimitive,
       boolean leadFirst,
       int beginOffset,
       int endOffset,

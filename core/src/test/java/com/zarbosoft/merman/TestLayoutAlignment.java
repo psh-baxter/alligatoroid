@@ -4,7 +4,7 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
@@ -129,8 +129,8 @@ public class TestLayoutAlignment {
             .type(pair)
             .concensusAlignment("concensus1")
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
@@ -189,8 +189,8 @@ public class TestLayoutAlignment {
             .type(pair)
             .concensusAlignment("concensus1")
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
@@ -240,8 +240,8 @@ public class TestLayoutAlignment {
             .group("any", new GroupBuilder().type(primitive).type(pair).build())
             .concensusAlignment("concensus1")
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
@@ -292,8 +292,8 @@ public class TestLayoutAlignment {
             .group("any", new GroupBuilder().type(pair).type(splitPair).build())
             .concensusAlignment("concensus1")
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
@@ -340,12 +340,12 @@ public class TestLayoutAlignment {
                     .add(Helper.buildBackDataAtom("second", "any"))
                     .build())
             .front(
-                new FrontSymbol(
-                    new FrontSymbol.Config(new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
             .frontDataNode("first")
             .front(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config()
                                 .splitMode(Style.SplitMode.COMPACT)
@@ -361,8 +361,8 @@ public class TestLayoutAlignment {
             .concensusAlignment("concensus1")
             .concensusAlignment("concensus2")
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
@@ -391,13 +391,13 @@ public class TestLayoutAlignment {
             .back(Helper.buildBackPrimitive("threeLine"))
             .front(new FrontMarkBuilder("line1").build())
             .front(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolTextSpec(
                             new SymbolTextSpec.Config("line2").splitMode(Style.SplitMode.ALWAYS)))))
             .front(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolTextSpec(
                             new SymbolTextSpec.Config("line3")
                                 .splitMode(Style.SplitMode.COMPACT)))))
@@ -407,8 +407,8 @@ public class TestLayoutAlignment {
             .type(threeLine2)
             .group("any", new GroupBuilder().type(threeLine2).build())
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();

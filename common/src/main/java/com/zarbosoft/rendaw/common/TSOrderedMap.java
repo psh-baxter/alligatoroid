@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
   final List<ROPair<K, V>> ordered;
@@ -27,6 +28,17 @@ public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
       ordered.add(new ROPair<>(k, v));
     }
     return this;
+  }
+
+  public V getCreate(K k, Supplier<V> s) {
+    V got = unordered.get(k);
+    if (got != null) {
+      return got;
+    }
+    got = s.get();
+    unordered.put(k, got);
+    ordered.add(new ROPair<>(k, got));
+    return got;
   }
 
   @Override

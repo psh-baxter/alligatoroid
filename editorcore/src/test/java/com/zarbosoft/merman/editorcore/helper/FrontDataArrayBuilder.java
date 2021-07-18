@@ -2,12 +2,12 @@ package com.zarbosoft.merman.editorcore.helper;
 
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class FrontDataArrayBuilder {
-  private final TSList<FrontSymbol> prefix = new TSList<>();
-  private final TSList<FrontSymbol> separator = new TSList<>();
+  private final TSList<FrontSymbolSpec> prefix = new TSList<>();
+  private final TSList<FrontSymbolSpec> separator = new TSList<>();
   private final String field;
 
   public FrontDataArrayBuilder(final String field) {
@@ -21,12 +21,12 @@ public class FrontDataArrayBuilder {
     return new FrontArraySpec(new FrontArraySpec.Config(field, base));
   }
 
-  public FrontDataArrayBuilder addSeparator(final FrontSymbol part) {
+  public FrontDataArrayBuilder addSeparator(final FrontSymbolSpec part) {
     separator.add(part);
     return this;
   }
 
-  public FrontDataArrayBuilder addPrefix(final FrontSymbol part) {
+  public FrontDataArrayBuilder addPrefix(final FrontSymbolSpec part) {
     prefix.add(part);
     return this;
   }

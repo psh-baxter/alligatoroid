@@ -27,7 +27,7 @@ import com.zarbosoft.merman.core.syntax.builder.TypeBuilder;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.JsonDecimal;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternCharacterClass;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternSequence;
@@ -472,21 +472,21 @@ public class Main {
   public static final String moduloOperatorType = "modulo";
   public static final String addEqualOperatorType = "add_equal";
   public static final String tripleEqualOperatorType = "triple_equal";
-  public static final FrontSymbol prefixCompactIndent =
-      new FrontSymbol(
-          new FrontSymbol.Config(
+  public static final FrontSymbolSpec prefixCompactIndent =
+      new FrontSymbolSpec(
+          new FrontSymbolSpec.Config(
               new SymbolSpaceSpec(
                   new SymbolSpaceSpec.Config()
                       .splitMode(Style.SplitMode.COMPACT)
                       .style(new Style(new Style.Config().splitAlignment(indentAlign))))));
-  public static final FrontSymbol prefixIndent =
-      new FrontSymbol(
-          new FrontSymbol.Config(
+  public static final FrontSymbolSpec prefixIndent =
+      new FrontSymbolSpec(
+          new FrontSymbolSpec.Config(
               new SymbolSpaceSpec(
                   new SymbolSpaceSpec.Config()
                       .splitMode(Style.SplitMode.ALWAYS)
                       .style(new Style(new Style.Config().splitAlignment(indentAlign))))));
-  public static final FrontSymbol space = text(" ", Function.identity());
+  public static final FrontSymbolSpec space = text(" ", Function.identity());
 
   private static Style.Config styleBase() {
     return new Style.Config().padding(Padding.ct(0, lineSpace)).fontSize(fontSize);
@@ -579,8 +579,8 @@ public class Main {
     FrontArraySpec statementsFront =
         new FrontArraySpecBuilder("statements")
             .prefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
@@ -1000,17 +1000,17 @@ public class Main {
         .build();
   }
 
-  private static FrontSymbol text(String text, Function<Style.Config, Style.Config> styler) {
-    return new FrontSymbol(
-        new FrontSymbol.Config(
+  private static FrontSymbolSpec text(String text, Function<Style.Config, Style.Config> styler) {
+    return new FrontSymbolSpec(
+        new FrontSymbolSpec.Config(
             new SymbolTextSpec(
                 new SymbolTextSpec.Config(text)
                     .style(new Style(styler.apply(new Style.Config()))))));
   }
 
-  private static FrontSymbol textBase(String text, Function<Style.Config, Style.Config> styler) {
-    return new FrontSymbol(
-        new FrontSymbol.Config(
+  private static FrontSymbolSpec textBase(String text, Function<Style.Config, Style.Config> styler) {
+    return new FrontSymbolSpec(
+        new FrontSymbolSpec.Config(
             new SymbolTextSpec(
                 new SymbolTextSpec.Config(text)
                     .splitMode(Style.SplitMode.ALWAYS)
@@ -1018,10 +1018,10 @@ public class Main {
                         new Style(styler.apply(new Style.Config()).splitAlignment(baseAlign))))));
   }
 
-  private static FrontSymbol textCompactBase(
+  private static FrontSymbolSpec textCompactBase(
       String text, Function<Style.Config, Style.Config> styler) {
-    return new FrontSymbol(
-        new FrontSymbol.Config(
+    return new FrontSymbolSpec(
+        new FrontSymbolSpec.Config(
             new SymbolTextSpec(
                 new SymbolTextSpec.Config(text)
                     .splitMode(Style.SplitMode.COMPACT)
@@ -1029,10 +1029,10 @@ public class Main {
                         new Style(styler.apply(new Style.Config()).splitAlignment(baseAlign))))));
   }
 
-  private static FrontSymbol textCompactIndent(
+  private static FrontSymbolSpec textCompactIndent(
       String text, Function<Style.Config, Style.Config> styler) {
-    return new FrontSymbol(
-        new FrontSymbol.Config(
+    return new FrontSymbolSpec(
+        new FrontSymbolSpec.Config(
             new SymbolTextSpec(
                 new SymbolTextSpec.Config(text)
                     .splitMode(Style.SplitMode.COMPACT)
@@ -1122,8 +1122,8 @@ public class Main {
       return type.front(new FrontAtomSpec(new FrontAtomSpec.Config(leftKey)))
           .front(space)
           .front(
-              new FrontSymbol(
-                  new FrontSymbol.Config(
+              new FrontSymbolSpec(
+                  new FrontSymbolSpec.Config(
                       new SymbolTextSpec(
                           new SymbolTextSpec.Config(symbol + " ")
                               .splitMode(Style.SplitMode.COMPACT)

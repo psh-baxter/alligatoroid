@@ -6,7 +6,7 @@ import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.editorcore.helper.FrontDataArrayBuilder;
@@ -98,8 +98,8 @@ public class TestLayoutGeneral {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addSeparator(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolTextSpec(new SymbolTextSpec.Config(", ")))))
                     .build())
             .frontSplitMark("]")

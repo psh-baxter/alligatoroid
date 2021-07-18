@@ -22,7 +22,7 @@ import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
@@ -134,7 +134,7 @@ public class NotMain extends Application {
                   new EditorCursorFactory(e) {
                     @Override
                     public EditGapCursorFieldPrimitive createGapCursor(
-                        VisualFrontPrimitive visualPrimitive,
+                        VisualFieldPrimitive visualPrimitive,
                         boolean leadFirst,
                         int beginOffset,
                         int endOffset) {
@@ -145,7 +145,7 @@ public class NotMain extends Application {
                     @Override
                     public CursorFieldPrimitive createPrimitiveCursor1(
                         Context context,
-                        VisualFrontPrimitive visualPrimitive,
+                        VisualFieldPrimitive visualPrimitive,
                         boolean leadFirst,
                         int beginOffset,
                         int endOffset) {

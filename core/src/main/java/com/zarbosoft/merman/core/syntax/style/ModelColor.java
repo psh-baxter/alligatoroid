@@ -41,6 +41,7 @@ public abstract class ModelColor {
     }
 
     public static RGB hex(String hex) {
+      if (hex.startsWith("#")) hex = hex.substring(1);
       return new RGB(
           Integer.parseInt(hex.substring(0, 2), 16) / 255.0,
           Integer.parseInt(hex.substring(2, 4), 16) / 255.0,
@@ -63,6 +64,15 @@ public abstract class ModelColor {
       this.g = g;
       this.b = b;
       this.a = a;
+    }
+
+    public static RGBA hex(String hex) {
+      if (hex.startsWith("#")) hex = hex.substring(1);
+      return new RGBA(
+          Integer.parseInt(hex.substring(0, 2), 16) / 255.0,
+          Integer.parseInt(hex.substring(2, 4), 16) / 255.0,
+          Integer.parseInt(hex.substring(4, 6), 16) / 255.0,
+          Integer.parseInt(hex.substring(6, 8), 16) / 255.0);
     }
 
     public static RGBA polarOKLab(

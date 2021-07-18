@@ -3,7 +3,7 @@ package com.zarbosoft.merman;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
@@ -36,8 +36,8 @@ public class TestLayoutGeneral {
         new TypeBuilder("big")
             .back(Helper.buildBackPrimitive("big"))
             .front(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config()
                                 .splitMode(Style.SplitMode.ALWAYS)

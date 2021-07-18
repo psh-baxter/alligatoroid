@@ -9,7 +9,7 @@ import com.zarbosoft.merman.helper.TreeBuilder;
 import com.zarbosoft.merman.helper.TypeBuilder;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import org.junit.Test;
@@ -36,8 +36,8 @@ public class TestLayoutRootArray {
             .type(text)
             .group("any", new GroupBuilder().type(one).type(text).build())
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
   }

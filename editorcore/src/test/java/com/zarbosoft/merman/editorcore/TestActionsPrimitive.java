@@ -4,7 +4,7 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.helper.FrontMarkBuilder;
 import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
@@ -48,8 +48,8 @@ public class TestActionsPrimitive {
     return editor;
   }
 
-  public static VisualFrontPrimitive visual(final Context context) {
-    return (VisualFrontPrimitive) context.cursor.getVisual();
+  public static VisualFieldPrimitive visual(final Context context) {
+    return (VisualFieldPrimitive) context.cursor.getVisual();
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {

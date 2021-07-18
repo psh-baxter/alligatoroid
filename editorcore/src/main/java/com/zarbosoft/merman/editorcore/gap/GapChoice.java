@@ -14,7 +14,7 @@ import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.CharacterEvent;
 import com.zarbosoft.merman.core.syntax.primitivepattern.ForceEndCharacterEvent;
 import com.zarbosoft.merman.editorcore.Editor;
@@ -221,8 +221,8 @@ public class GapChoice extends TwoColumnChoice {
     previewLayout.setPadding(editor.context, editor.choicePreviewPadding);
     for (final FrontSpec part : keySpecs) {
       final CourseDisplayNode node;
-      if (part instanceof FrontSymbol) {
-        node = ((FrontSymbol) part).createDisplay(editor.context);
+      if (part instanceof FrontSymbolSpec) {
+        node = ((FrontSymbolSpec) part).createDisplay(editor.context);
       } else if (part instanceof FrontPrimitiveSpec) {
         node = editor.gapPlaceholderSymbol.createDisplay(editor.context);
       } else throw new DeadCode();

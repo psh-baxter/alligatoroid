@@ -8,7 +8,7 @@ import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldPrimitive;
@@ -24,7 +24,7 @@ public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFact
   @Override
   public final CursorFieldPrimitive createFieldPrimitiveCursor(
       Context context,
-      VisualFrontPrimitive visualPrimitive,
+      VisualFieldPrimitive visualPrimitive,
       boolean leadFirst,
       int beginOffset,
       int endOffset) {
@@ -35,14 +35,14 @@ public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFact
   }
 
   public EditGapCursorFieldPrimitive createGapCursor(
-      VisualFrontPrimitive visualPrimitive, boolean leadFirst, int beginOffset, int endOffset) {
+          VisualFieldPrimitive visualPrimitive, boolean leadFirst, int beginOffset, int endOffset) {
     return new EditGapCursorFieldPrimitive(
         editor, visualPrimitive, leadFirst, beginOffset, endOffset);
   }
 
   public CursorFieldPrimitive createPrimitiveCursor1(
       Context context,
-      VisualFrontPrimitive visualPrimitive,
+      VisualFieldPrimitive visualPrimitive,
       boolean leadFirst,
       int beginOffset,
       int endOffset) {

@@ -5,6 +5,7 @@ public class Style {
   public final String splitAlignment;
   public final Padding padding;
   public final ModelColor color;
+  public final ModelColor invalidColor;
   public final String font;
   public final double fontSize;
   public final String image;
@@ -24,7 +25,9 @@ public class Style {
     if (config.padding == null) padding = Padding.empty;
     else padding = config.padding;
     if (config.color != null) color = config.color;
-    else color = new ModelColor.RGB(0, 0, 0);
+    else color = ModelColor.RGB.black;
+    if (config.invalidColor != null) invalidColor = config.color;
+    else invalidColor = color;
     if (config.font != null) font = config.font;
     else font = null;
     if (config.fontSize != null) fontSize = config.fontSize;
@@ -61,6 +64,7 @@ public class Style {
     public Double rotate;
     public Double space;
     private String splitAlignment;
+    private ModelColor invalidColor;
 
     public Config() {}
 
@@ -84,8 +88,12 @@ public class Style {
       return this;
     }
 
-    public Config color(ModelColor.RGB color) {
+    public Config color(ModelColor color) {
       this.color = color;
+      return this;
+    }
+    public Config invalidColor(ModelColor color) {
+      this.invalidColor = color;
       return this;
     }
 

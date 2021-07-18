@@ -4,7 +4,7 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
@@ -34,8 +34,8 @@ public class TestPrimitiveBreaking {
             .type(primitiveType)
             .group("any", new GroupBuilder().type(primitiveType).build())
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
@@ -68,8 +68,8 @@ public class TestPrimitiveBreaking {
             .type(quoted)
             .group("any", new GroupBuilder().type(quoted).build())
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
@@ -118,8 +118,8 @@ public class TestPrimitiveBreaking {
             .type(quoted)
             .group("any", new GroupBuilder().type(primitiveType).type(quoted).build())
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
@@ -160,8 +160,8 @@ public class TestPrimitiveBreaking {
             .type(primitiveType)
             .group("any", new GroupBuilder().type(primitiveType).build())
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
@@ -195,8 +195,8 @@ public class TestPrimitiveBreaking {
             .type(primitiveType)
             .group("any", new GroupBuilder().type(primitiveType).build())
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
@@ -231,8 +231,8 @@ public class TestPrimitiveBreaking {
             .type(primitiveType)
             .group("any", new GroupBuilder().type(primitiveType).build())
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
@@ -267,8 +267,8 @@ public class TestPrimitiveBreaking {
             .type(primitiveType)
             .group("any", new GroupBuilder().type(primitiveType).build())
             .addRootFrontPrefix(
-                new FrontSymbol(
-                    new FrontSymbol.Config(
+                new FrontSymbolSpec(
+                    new FrontSymbolSpec.Config(
                         new SymbolSpaceSpec(
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();

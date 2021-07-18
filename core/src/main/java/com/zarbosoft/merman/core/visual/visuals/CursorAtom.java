@@ -118,9 +118,9 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
     } else if (selectable instanceof VisualFieldArray) {
       ((VisualFieldArray) selectable)
           .copy(context, 0, ((VisualFieldArray) selectable).value.data.size() - 1);
-    } else if (selectable instanceof VisualFrontPrimitive) {
-      ((VisualFrontPrimitive) selectable)
-          .copy(context, 0, ((VisualFrontPrimitive) selectable).value.data.length());
+    } else if (selectable instanceof VisualFieldPrimitive) {
+      ((VisualFieldPrimitive) selectable)
+          .copy(context, 0, ((VisualFieldPrimitive) selectable).value.data.length());
     } else throw new Assertion();
   }
 
@@ -142,7 +142,7 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
         ((VisualFieldAtomBase) selectable).atomGet().visual.selectIntoAnyChild(context);
       }
     } else if (selectable instanceof VisualFieldArray
-        || selectable instanceof VisualFrontPrimitive) {
+        || selectable instanceof VisualFieldPrimitive) {
       context.windowExact(visual.atom);
       context.triggerIdleLayBricksOutward();
     } else throw new Assertion();

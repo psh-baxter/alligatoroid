@@ -6,7 +6,7 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualLeaf;
@@ -70,7 +70,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
                     visualDepth + 1,
                     depthScore());
             for (int fixIndex = 0; fixIndex < front.separator.size(); ++fixIndex) {
-              final FrontSymbol fix = front.separator.get(fixIndex);
+              final FrontSymbolSpec fix = front.separator.get(fixIndex);
               group.add(
                   context,
                   fix.createVisual(
@@ -85,7 +85,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
             new VisualGroup(
                 context, new FrontArrayParent(this, addIndex, true), visualDepth + 1, depthScore());
         int groupIndex = 0;
-        for (final FrontSymbol fix : front.prefix)
+        for (final FrontSymbolSpec fix : front.prefix)
           group.add(
               context,
               fix.createVisual(
@@ -195,7 +195,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
                 throw new Assertion();
               }
             });
-        for (final FrontSymbol fix : front.suffix)
+        for (final FrontSymbolSpec fix : front.suffix)
           group.add(
               context,
               fix.createVisual(

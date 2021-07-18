@@ -14,7 +14,7 @@ public abstract class Alignment {
 
   public void changed(final Context context) {
     for (Brick brick : bricks) {
-      brick.changed(context);
+      brick.layoutPropertiesChanged(context);
     }
     for (Alignment alignment : derived) {
       alignment.changed(context);

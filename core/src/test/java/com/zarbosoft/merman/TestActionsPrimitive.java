@@ -3,10 +3,9 @@ package com.zarbosoft.merman;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.MiscSyntax;
@@ -23,7 +22,7 @@ public class TestActionsPrimitive {
   @Test
   public void testExit() {
     final Context context = buildFive();
-    assertThat(context.cursor.getVisual(), instanceOf(VisualFrontPrimitive.class));
+    assertThat(context.cursor.getVisual(), instanceOf(VisualFieldPrimitive.class));
     Helper.cursorPrimitive(context).actionExit(context);
     assertNotNull(((VisualFieldArray) Helper.rootArray(context.document).visual).cursor);
   }
@@ -48,8 +47,8 @@ public class TestActionsPrimitive {
     assertSelection(context, 3, 3);
   }
 
-  public static VisualFrontPrimitive visual(final Context context) {
-    return (VisualFrontPrimitive) context.cursor.getVisual();
+  public static VisualFieldPrimitive visual(final Context context) {
+    return (VisualFieldPrimitive) context.cursor.getVisual();
   }
 
   public static void assertSelection(final Context context, final int begin, final int end) {

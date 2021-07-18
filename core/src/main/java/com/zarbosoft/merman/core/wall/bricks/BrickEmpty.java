@@ -26,7 +26,7 @@ public class BrickEmpty extends Brick {
         style.space * toPixels
             + style.padding.converseStart * toPixels
             + style.padding.converseEnd * toPixels;
-    changed(context);
+    layoutPropertiesChanged(context);
   }
 
   @Override

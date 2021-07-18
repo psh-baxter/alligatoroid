@@ -8,7 +8,6 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
-import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
@@ -48,6 +47,7 @@ import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 
 public abstract class AtomType {
   public final ROMap<String, BackSpecData> fields;
@@ -275,9 +275,9 @@ public abstract class AtomType {
   }
 
   public static class PrimitiveFieldParseResult extends FieldParseResult {
-    final FieldPrimitive field;
+    final Field field;
 
-    public PrimitiveFieldParseResult(String key, FieldPrimitive field) {
+    public PrimitiveFieldParseResult(String key, Field field) {
       super(key);
       this.field = field;
     }

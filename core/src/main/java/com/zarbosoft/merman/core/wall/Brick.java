@@ -149,7 +149,7 @@ public abstract class Brick {
    *
    * @param context
    */
-  public void changed(final Context context) {
+  public void layoutPropertiesChanged(final Context context) {
     String alignmentName = isSplit() ? style.splitAlignment : style.alignment;
     if (alignmentName == null) this.alignment = null;
     else this.alignment = inter.findAlignment(alignmentName);

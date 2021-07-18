@@ -11,7 +11,7 @@ import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
@@ -83,8 +83,8 @@ public class TypeBuilder {
 
   public TypeBuilder frontSplitMark(final String value) {
     this.front.add(
-        new FrontSymbol(
-            new FrontSymbol.Config(
+        new FrontSymbolSpec(
+            new FrontSymbolSpec.Config(
                 new SymbolTextSpec(
                     new SymbolTextSpec.Config(value).splitMode(Style.SplitMode.ALWAYS)))));
     return this;
@@ -92,15 +92,15 @@ public class TypeBuilder {
 
   public TypeBuilder frontMark(final String value) {
     this.front.add(
-        new FrontSymbol(
-            new FrontSymbol.Config(new SymbolTextSpec(new SymbolTextSpec.Config(value)))));
+        new FrontSymbolSpec(
+            new FrontSymbolSpec.Config(new SymbolTextSpec(new SymbolTextSpec.Config(value)))));
     return this;
   }
 
   public TypeBuilder frontSpace(Style.SplitMode splitMode) {
     this.front.add(
-        new FrontSymbol(
-            new FrontSymbol.Config(
+        new FrontSymbolSpec(
+            new FrontSymbolSpec.Config(
                 new SymbolSpaceSpec(new SymbolSpaceSpec.Config().splitMode(splitMode)))));
     return this;
   }

@@ -12,7 +12,7 @@ import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualSymbol;
 import com.zarbosoft.rendaw.common.TSSet;
 
-public class FrontSymbol extends FrontSpec {
+public class FrontSymbolSpec extends FrontSpec {
   public final Symbol type;
   /** Nullable */
   public final ConditionType condition;
@@ -30,7 +30,7 @@ public class FrontSymbol extends FrontSpec {
    */
   public final String gapKey;
 
-  public FrontSymbol(Config config) {
+  public FrontSymbolSpec(Config config) {
     type = config.type;
     condition = config.condition;
     gapKey = config.gapKey;

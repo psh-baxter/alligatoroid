@@ -10,7 +10,7 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
 import com.zarbosoft.merman.core.syntax.alignments.ConcensusAlignmentSpec;
 import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
@@ -73,12 +73,12 @@ public class SyntaxBuilder {
     return this;
   }
 
-  public SyntaxBuilder addRootFrontSeparator(final FrontSymbol part) {
+  public SyntaxBuilder addRootFrontSeparator(final FrontSymbolSpec part) {
     front.addSeparator(part);
     return this;
   }
 
-  public SyntaxBuilder addRootFrontPrefix(final FrontSymbol part) {
+  public SyntaxBuilder addRootFrontPrefix(final FrontSymbolSpec part) {
     front.addPrefix(part);
     return this;
   }

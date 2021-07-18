@@ -9,7 +9,7 @@ import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.rendaw.common.TSSet;
 
 public class FrontPrimitiveSpec extends FrontSpec {
@@ -38,7 +38,7 @@ public class FrontPrimitiveSpec extends FrontSpec {
       final Atom atom,
       final int visualDepth,
       final int depthScore) {
-    return new VisualFrontPrimitive(context, parent, this, field.get(atom.fields), visualDepth);
+    return new VisualFieldPrimitive(context, parent, this, field.get(atom.fields), visualDepth);
   }
 
   @Override

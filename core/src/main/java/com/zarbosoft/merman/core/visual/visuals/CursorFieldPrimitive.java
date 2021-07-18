@@ -10,19 +10,19 @@ import com.zarbosoft.merman.core.visual.Visual;
 import static com.zarbosoft.merman.core.Environment.I18N_DONE;
 
 public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
-  public final VisualFrontPrimitive.RangeAttachment range;
-  public final VisualFrontPrimitive visualPrimitive;
+  public final VisualFieldPrimitive.RangeAttachment range;
+  public final VisualFieldPrimitive visualPrimitive;
   private final FieldPrimitive.Listener clusterListener;
   Environment.I18nWalker clusterIterator;
 
   public CursorFieldPrimitive(
       final Context context,
-      final VisualFrontPrimitive visualPrimitive,
+      final VisualFieldPrimitive visualPrimitive,
       final boolean leadFirst,
       final int beginOffset,
       final int endOffset) {
     this.visualPrimitive = visualPrimitive;
-    range = new VisualFrontPrimitive.RangeAttachment(visualPrimitive, true);
+    range = new VisualFieldPrimitive.RangeAttachment(visualPrimitive, true);
     range.setStyle(context, context.syntax.cursorStyle.obbox);
     range.leadFirst = leadFirst;
     range.setOffsets(context, beginOffset, endOffset);
@@ -98,26 +98,26 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
     return precedingStart(iter, source);
   }
 
-  private int nextLine(final VisualFrontPrimitive.Line sourceLine, final int source) {
+  private int nextLine(final VisualFieldPrimitive.Line sourceLine, final int source) {
     if (sourceLine.index + 1 < visualPrimitive.lines.size()) {
-      final VisualFrontPrimitive.Line nextLine = visualPrimitive.lines.get(sourceLine.index + 1);
+      final VisualFieldPrimitive.Line nextLine = visualPrimitive.lines.get(sourceLine.index + 1);
       return nextLine.offset + Math.min(nextLine.text.length(), source - sourceLine.offset);
     } else return sourceLine.offset + sourceLine.text.length();
   }
 
-  private int previousLine(final VisualFrontPrimitive.Line sourceLine, final int source) {
+  private int previousLine(final VisualFieldPrimitive.Line sourceLine, final int source) {
     if (sourceLine.index > 0) {
-      final VisualFrontPrimitive.Line previousLine =
+      final VisualFieldPrimitive.Line previousLine =
           visualPrimitive.lines.get(sourceLine.index - 1);
       return previousLine.offset + Math.min(previousLine.text.length(), source - sourceLine.offset);
     } else return sourceLine.offset;
   }
 
-  private int endOfLine(final VisualFrontPrimitive.Line sourceLine) {
+  private int endOfLine(final VisualFieldPrimitive.Line sourceLine) {
     return sourceLine.offset + sourceLine.text.length();
   }
 
-  private int startOfLine(final VisualFrontPrimitive.Line sourceLine) {
+  private int startOfLine(final VisualFieldPrimitive.Line sourceLine) {
     return sourceLine.offset;
   }
 
@@ -136,7 +136,7 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
 
   @Override
   public CursorState saveState() {
-    return new VisualFrontPrimitive.PrimitiveCursorState(
+    return new VisualFieldPrimitive.PrimitiveCursorState(
         visualPrimitive.value, range.leadFirst, range.beginOffset, range.endOffset);
   }
 
@@ -325,11 +325,11 @@ public class CursorFieldPrimitive extends com.zarbosoft.merman.core.Cursor {
   }
 
   private static class ClusterIteratorUpdater implements FieldPrimitive.Listener {
-    private final VisualFrontPrimitive visualPrimitive;
+    private final VisualFieldPrimitive visualPrimitive;
     private final CursorFieldPrimitive primitiveCursor;
 
     public ClusterIteratorUpdater(
-        CursorFieldPrimitive primitiveCursor, VisualFrontPrimitive visualPrimitive) {
+        CursorFieldPrimitive primitiveCursor, VisualFieldPrimitive visualPrimitive) {
       this.visualPrimitive = visualPrimitive;
       this.primitiveCursor = primitiveCursor;
     }

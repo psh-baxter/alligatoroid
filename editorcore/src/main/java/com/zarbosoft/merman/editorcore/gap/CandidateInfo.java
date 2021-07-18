@@ -7,7 +7,7 @@ import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Any;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternString;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
@@ -53,8 +53,8 @@ public class CandidateInfo {
       {
         for (int i = 0; i < front.size(); ++i) {
           FrontSpec f = front.get(i);
-          if (f instanceof FrontSymbol) {
-            processSymbol((FrontSymbol) f);
+          if (f instanceof FrontSymbolSpec) {
+            processSymbol((FrontSymbolSpec) f);
 
           } else if (f instanceof FrontArraySpecBase) {
             if (((FrontArraySpecBase) f).prefix.isEmpty()) {
@@ -64,7 +64,7 @@ public class CandidateInfo {
               }
               preceding.add(f);
             } else {
-              for (FrontSymbol prefix : ((FrontArraySpecBase) f).prefix) {
+              for (FrontSymbolSpec prefix : ((FrontArraySpecBase) f).prefix) {
                 processSymbol(prefix);
               }
               following[0] = f;
@@ -98,7 +98,7 @@ public class CandidateInfo {
         }
       }
 
-      void processSymbol(FrontSymbol f) {
+      void processSymbol(FrontSymbolSpec f) {
         keySpecs.add(f);
         if (f.gapKey != null) {
           keyGrammar.addIgnored(new PatternString(env, f.gapKey).build(false));

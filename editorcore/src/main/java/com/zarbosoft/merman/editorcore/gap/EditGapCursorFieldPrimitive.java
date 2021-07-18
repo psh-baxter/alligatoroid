@@ -13,7 +13,7 @@ import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.History;
@@ -56,7 +56,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
 
   public EditGapCursorFieldPrimitive(
       Editor editor,
-      VisualFrontPrimitive visualPrimitive,
+      VisualFieldPrimitive visualPrimitive,
       boolean leadFirst,
       int beginOffset,
       int endOffset) {

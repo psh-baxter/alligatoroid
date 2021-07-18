@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.core.document.fields;
 
 import com.zarbosoft.merman.core.Context;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
 
@@ -11,7 +11,7 @@ import java.util.Set;
 public class FieldPrimitive extends Field {
   public final BaseBackPrimitiveSpec back;
   public final Set<Listener> listeners = new HashSet<>();
-  public VisualFrontPrimitive visual;
+  public VisualFieldPrimitive visual;
   public StringBuilder data;
 
   public FieldPrimitive(final BaseBackPrimitiveSpec back, final String data) {

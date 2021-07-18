@@ -6,12 +6,12 @@ import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
-import com.zarbosoft.merman.core.visual.visuals.VisualFrontPrimitive;
+import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 
 public interface CursorFactory {
   CursorFieldPrimitive createFieldPrimitiveCursor(
       final Context context,
-      final VisualFrontPrimitive visualPrimitive,
+      final VisualFieldPrimitive visualPrimitive,
       final boolean leadFirst,
       final int beginOffset,
       final int endOffset);

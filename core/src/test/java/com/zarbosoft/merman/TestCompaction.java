@@ -4,7 +4,7 @@ import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.front.FrontSymbol;
+import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
@@ -58,8 +58,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
                     .build())
             .precedence(0)
@@ -71,8 +71,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -92,8 +92,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -106,8 +106,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -198,8 +198,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
                     .build())
             .precedence(0)
@@ -211,8 +211,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -232,8 +232,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -246,8 +246,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -355,8 +355,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
                     .build())
             .precedence(0)
@@ -368,8 +368,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -389,8 +389,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -403,8 +403,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -509,8 +509,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
                     .build())
             .precedence(0)
@@ -522,8 +522,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -543,8 +543,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -557,8 +557,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -668,8 +668,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -682,8 +682,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -810,8 +810,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
                     .build())
             .precedence(0)
@@ -823,8 +823,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -844,8 +844,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -858,8 +858,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -938,8 +938,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -952,8 +952,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -966,8 +966,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -1054,8 +1054,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(new SymbolSpaceSpec.Config()))))
                     .build())
             .precedence(0)
@@ -1067,8 +1067,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -1088,8 +1088,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
@@ -1102,8 +1102,8 @@ public class TestCompaction {
             .front(
                 new FrontDataArrayBuilder("value")
                     .addPrefix(
-                        new FrontSymbol(
-                            new FrontSymbol.Config(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
                                 new SymbolSpaceSpec(
                                     new SymbolSpaceSpec.Config().splitMode(COMPACT)))))
                     .build())
