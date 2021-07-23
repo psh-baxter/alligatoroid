@@ -8,12 +8,33 @@ public class ConvScrollContainer implements Container {
   public FreeDisplayNode inner;
   private double converseSpan;
   private double baseConverse;
+  private double childMin;
+  private double childMax;
+  private boolean animate;
   private double scrollAbs;
 
   public ConvScrollContainer() {}
 
-  public void scroll(double abs, boolean animate) {
-    scrollAbs = abs;
+  public void scrollVisible(double childMin, double childMax, boolean animate) {
+    this.childMin = childMin;
+    this.childMax = childMax;
+    this.animate = animate;
+    updateScroll();
+  }
+
+  private void updateScroll() {
+    if (converseSpan == 0) return;
+    double newScroll = scrollAbs;
+    double overMax = childMax + newScroll - converseSpan;
+    if (overMax > 0) {
+      newScroll -= overMax;
+    }
+    double underMin = childMin + newScroll;
+    if (underMin < 0) {
+      newScroll -= underMin;
+    }
+    if (newScroll == scrollAbs) return;
+    scrollAbs = newScroll;
     inner.setConverse(baseConverse + scrollAbs, animate);
   }
 
@@ -57,5 +78,6 @@ public class ConvScrollContainer implements Container {
   @Override
   public void setConverseSpan(Context context, double span) {
     this.converseSpan = span;
+    updateScroll();
   }
 }

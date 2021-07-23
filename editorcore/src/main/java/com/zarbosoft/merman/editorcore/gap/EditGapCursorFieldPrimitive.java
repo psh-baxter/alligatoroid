@@ -9,6 +9,7 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
+import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
@@ -389,8 +390,10 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     atomParentRef.selectParent(editor.context);
     Field gapInField = gap.fieldParentRef.field;
     if (gap.type == editor.context.syntax.gap)
+      // Remove empty unit gaps
       do {
         if (!(gapInField instanceof FieldArray)) break;
+        if (gapInField.atomParentRef.atom().type instanceof RootAtomType) break;
         FieldArray value = (FieldArray) gapInField;
         TSList<Atom> data = value.data;
         if (data.size() > 1) break;

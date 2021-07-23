@@ -119,7 +119,8 @@ public class BackRecordSpec extends BaseBackArraySpec {
 
   @Override
   public void uncopy(Context context, Consumer<ROList<Atom>> consumer) {
-    context.uncopy(buildBackRuleInner(context.env, context.syntax), Context.CopyContext.RECORD, consumer);
+    context.uncopy(
+        buildBackRuleInner(context.env, context.syntax), Context.CopyContext.RECORD, consumer);
   }
 
   public static enum CheckBackState {

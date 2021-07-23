@@ -32,6 +32,7 @@ public class VisualAtom extends Visual {
   public CursorAtom cursor;
   public AtomHoverable hoverable;
   public boolean needIntermediateCursor = false;
+  public int defaultSelection = -1;
   private VisualParent parent;
 
   public VisualAtom(
@@ -59,11 +60,24 @@ public class VisualAtom extends Visual {
               this.depthScore);
       children.add(visual);
       if (front.fieldId() != null) {
-        if (visual instanceof VisualFieldAtomBase) needIntermediateCursor = true;
+        if (visual instanceof VisualFieldAtomBase) {
+          needIntermediateCursor = true;
+          defaultSelection = 0;
+        }
         selectable.add(new ROPair<>(front.fieldId(), visual));
       }
     }
-    if (selectable.size() >= 2) needIntermediateCursor = true;
+    if (selectable.size() >= 2) {
+      needIntermediateCursor = true;
+      defaultSelection = 0;
+    }
+    if (needIntermediateCursor && atom.type.defaultSelection != null) {
+      for (int i = 0; i < selectable.size(); ++i) {
+        if (!selectable.get(i).first.equals(atom.type.defaultSelection))continue;
+        defaultSelection = i;
+        break;
+      }
+    }
     atom.visual = this;
   }
 
@@ -81,7 +95,7 @@ public class VisualAtom extends Visual {
   @Override
   public boolean selectIntoAnyChild(final Context context) {
     if (selectable.isEmpty()) return false;
-    if (needIntermediateCursor) select(context, 0);
+    if (needIntermediateCursor) select(context, defaultSelection);
     else selectable.get(0).second.selectIntoAnyChild(context);
     return true;
   }

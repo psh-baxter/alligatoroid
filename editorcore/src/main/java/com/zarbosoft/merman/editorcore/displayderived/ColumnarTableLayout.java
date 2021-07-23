@@ -109,7 +109,13 @@ public class ColumnarTableLayout implements FreeDisplayNode {
         final ROList<CourseDisplayNode> row = rows.get(rowIndex);
         double converse = previousOuterColumnConverseEdge + rowPadConverseStart;
         for (int x = 0; x < innerColumns; ++x) {
-          row.get(x).setBaselinePosition(new Vector(converse, baseline), false);
+          double useConverse;
+          if (x == 0) {
+            useConverse = converse + innerColumnSpans[x] - row.get(x).converseSpan();
+          } else {
+            useConverse = converse;
+          }
+          row.get(x).setBaselinePosition(new Vector(useConverse, baseline), false);
           converse += innerColumnSpans[x];
         }
         converse += rowPadConverseEnd;

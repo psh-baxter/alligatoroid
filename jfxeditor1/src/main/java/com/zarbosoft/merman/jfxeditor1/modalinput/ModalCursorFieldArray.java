@@ -111,6 +111,11 @@ public class ModalCursorFieldArray extends EditCursorFieldArray {
                   editPaste(Editor.get(context));
                   return true;
                 }
+              case S:
+                {
+                  editSuffix(Editor.get(context));
+                  return true;
+                }
               case B:
                 {
                   editInsertBefore(Editor.get(context));

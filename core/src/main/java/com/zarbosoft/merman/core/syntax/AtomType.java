@@ -21,14 +21,15 @@ import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.merman.core.syntax.back.BackSubArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackTypeSpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.error.AtomTypeErrors;
 import com.zarbosoft.merman.core.syntax.error.AtomTypeNoBack;
 import com.zarbosoft.merman.core.syntax.error.BackFieldWrongType;
 import com.zarbosoft.merman.core.syntax.error.DuplicateBackId;
 import com.zarbosoft.merman.core.syntax.error.MissingBack;
+import com.zarbosoft.merman.core.syntax.error.NonexistentDefaultSelection;
 import com.zarbosoft.merman.core.syntax.error.UnusedBackData;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
@@ -47,7 +48,6 @@ import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.Arrays;
 import java.util.Iterator;
-import java.util.Map;
 
 public abstract class AtomType {
   public final ROMap<String, BackSpecData> fields;
@@ -55,12 +55,14 @@ public abstract class AtomType {
   public final AtomKey key;
   private final ROList<BackSpec> back;
   private final ROList<FrontSpec> front;
+  public final String defaultSelection;
 
   public AtomType(Config config) {
     id = config.id;
     key = new AtomKey(this.id);
     back = config.back;
     front = config.front;
+    defaultSelection = config.defaultSelection;
     TSMap<String, BackSpecData> fields = new TSMap<>();
     MultiError errors = new MultiError();
     if (back.isEmpty()) {
@@ -152,6 +154,9 @@ public abstract class AtomType {
       if (!missing.isEmpty()) {
         subErrors.add(new UnusedBackData(missing.ro()));
       }
+    }
+    if (defaultSelection!=null && !fields.has(defaultSelection)) {
+      subErrors.add(new NonexistentDefaultSelection(defaultSelection));
     }
     if (!subErrors.isEmpty()) {
       errors.add(new AtomTypeErrors(this, subErrors));
@@ -366,11 +371,20 @@ public abstract class AtomType {
     public final String id;
     public final ROList<BackSpec> back;
     public final ROList<FrontSpec> front;
+    /**
+     * If this has multiple selectable front elements, this is the default selection when selecting in.  If not specified, defaults to first one.
+     */
+    public String defaultSelection;
 
     public Config(String id, ROList<BackSpec> back, ROList<FrontSpec> front) {
       this.id = id;
       this.back = back;
       this.front = front;
+    }
+
+    public Config defaultSelection(String id) {
+      this.defaultSelection = id;
+      return this;
     }
   }
 

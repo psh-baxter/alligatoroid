@@ -20,6 +20,7 @@ public class WriteStateFixedRecord extends WriteState {
 
   @Override
   public void run(final TSList<WriteState> stack, final EventConsumer writer) {
+    if (!iterator.hasNext()) return;
     final ROPair<String, BackSpec> next = iterator.next();
     if (iterator.hasNext()) {
       stack.add(this);

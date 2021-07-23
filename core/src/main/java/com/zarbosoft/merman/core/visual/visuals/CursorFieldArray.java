@@ -161,7 +161,7 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
   }
 
   public void actionCopy(final Context context) {
-    visual.copy(context,beginIndex,endIndex);
+    visual.copy(context, beginIndex, endIndex);
   }
 
   public void actionGatherNext(final Context context) {

@@ -352,24 +352,31 @@ public class JavaSerializer implements Serializer {
           {
             final Grammar grammar = new Grammar(syntax.getGrammar());
             switch (uncopyContext) {
-              case ARRAY:
-                grammar.add(
-                    ROOT_KEY,
-                    new UnitSequence<ROList<AtomType.AtomParseResult>>()
-                        .addIgnored(new MatchingEventTerminal(new EArrayOpenEvent()))
-                        .add(child)
-                        .addIgnored(new MatchingEventTerminal(new EArrayCloseEvent())));
-                break;
               case ROOT:
-                break;
+                {
+                  grammar.add(ROOT_KEY, child);
+                  break;
+                }
               case RECORD:
-                grammar.add(
-                    ROOT_KEY,
-                    new UnitSequence<ROList<AtomType.AtomParseResult>>()
-                        .addIgnored(new MatchingEventTerminal(new EObjectOpenEvent()))
-                        .add(child)
-                        .addIgnored(new MatchingEventTerminal(new EObjectCloseEvent())));
-                break;
+                {
+                  grammar.add(
+                      ROOT_KEY,
+                      new UnitSequence<ROList<AtomType.AtomParseResult>>()
+                          .addIgnored(new MatchingEventTerminal(new EObjectOpenEvent()))
+                          .add(child)
+                          .addIgnored(new MatchingEventTerminal(new EObjectCloseEvent())));
+                  break;
+                }
+              case ARRAY:
+                {
+                  grammar.add(
+                      ROOT_KEY,
+                      new UnitSequence<ROList<AtomType.AtomParseResult>>()
+                          .addIgnored(new MatchingEventTerminal(new EArrayOpenEvent()))
+                          .add(child)
+                          .addIgnored(new MatchingEventTerminal(new EArrayCloseEvent())));
+                  break;
+                }
             }
             ROList<AtomType.AtomParseResult> result =
                 new Parse<ROList<AtomType.AtomParseResult>>(ROOT_KEY)

@@ -17,6 +17,8 @@ import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.CharacterEvent;
 import com.zarbosoft.merman.core.syntax.primitivepattern.ForceEndCharacterEvent;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
+import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
@@ -219,13 +221,25 @@ public class GapChoice extends TwoColumnChoice {
   public ROPair<CourseDisplayNode, CourseDisplayNode> display(Editor editor) {
     final CourseGroup previewLayout = new CourseGroup(editor.context.display.group());
     previewLayout.setPadding(editor.context, editor.choicePreviewPadding);
+    TSList<FrontSymbolSpec> spaces = new TSList<>();
     for (final FrontSpec part : keySpecs) {
       final CourseDisplayNode node;
       if (part instanceof FrontSymbolSpec) {
-        node = ((FrontSymbolSpec) part).createDisplay(editor.context);
+        if (((FrontSymbolSpec) part).type instanceof SymbolSpaceSpec
+            || ((FrontSymbolSpec) part).type instanceof SymbolTextSpec
+                && ((SymbolTextSpec) ((FrontSymbolSpec) part).type).text.trim().isEmpty()) {
+          spaces.add((FrontSymbolSpec) part);
+          continue;
+        } else {
+          node = ((FrontSymbolSpec) part).createDisplay(editor.context);
+        }
       } else if (part instanceof FrontPrimitiveSpec) {
         node = editor.gapPlaceholderSymbol.createDisplay(editor.context);
       } else throw new DeadCode();
+      for (FrontSymbolSpec space : spaces) {
+        previewLayout.add(space.createDisplay(editor.context));
+      }
+      spaces.clear();
       previewLayout.add(node);
     }
 

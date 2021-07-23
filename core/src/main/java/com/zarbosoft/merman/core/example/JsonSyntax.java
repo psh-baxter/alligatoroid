@@ -59,7 +59,7 @@ public class JsonSyntax {
   private static final String ALIGNMENT_INDENT = "indent";
   private static final String ALIGNMENT_BASE = "base";
 
-  public static Syntax create(Environment env, Padding pad) {
+  public static SyntaxOut create(Environment env, Padding pad) {
     double fontSize = 6;
     final Style stringStyle =
         new Style(new Style.Config().fontSize(fontSize).color(ModelColor.RGB.hex("F79578")));
@@ -258,27 +258,32 @@ public class JsonSyntax {
                           TYPE_DECIMAL)));
       errors.raise();
     }
-    return new Syntax(
-        env,
-        new Syntax.Config(
-                splayedTypes,
-                new RootAtomType(
-                    new RootAtomType.Config(
-                        TSList.of(
-                            new BackAtomSpec(new BaseBackAtomSpec.Config(DEFAULT_ID, GROUP_ANY))),
-                        TSList.of(new FrontAtomSpec(new FrontAtomSpec.Config(DEFAULT_ID))),
-                        ROMap.empty)),
-                gap,
-                suffixGap)
-            .backType(BackType.JSON)
-            .displayUnit(Syntax.DisplayUnit.MM)
-            .background(ModelColor.RGB.hex("333333"))
-            .hoverStyle(hoverStyle(false))
-            .primitiveHoverStyle(hoverStyle(true))
-            .cursorStyle(cursorStyle(false))
-            .primitiveCursorStyle(cursorStyle(true))
-            .courseTransverseStride(fontSize * 1.1)
-            .pad(pad));
+    return new SyntaxOut(
+        ModelColor.RGB.hex("938f8d"),
+        ModelColor.RGB.hex("938f8d"),
+        ModelColor.RGB.hex("2A2A2A"),
+        new Syntax(
+            env,
+            new Syntax.Config(
+                    splayedTypes,
+                    new RootAtomType(
+                        new RootAtomType.Config(
+                            TSList.of(
+                                new BackAtomSpec(
+                                    new BaseBackAtomSpec.Config(DEFAULT_ID, GROUP_ANY))),
+                            TSList.of(new FrontAtomSpec(new FrontAtomSpec.Config(DEFAULT_ID))),
+                            ROMap.empty)),
+                    gap,
+                    suffixGap)
+                .backType(BackType.JSON)
+                .displayUnit(Syntax.DisplayUnit.MM)
+                .background(ModelColor.RGB.hex("333333"))
+                .hoverStyle(hoverStyle(false))
+                .primitiveHoverStyle(hoverStyle(true))
+                .cursorStyle(cursorStyle(false))
+                .primitiveCursorStyle(cursorStyle(true))
+                .courseTransverseStride(fontSize * 1.1)
+                .pad(pad)));
   }
 
   private static Style cursorStyle(boolean primitive) {

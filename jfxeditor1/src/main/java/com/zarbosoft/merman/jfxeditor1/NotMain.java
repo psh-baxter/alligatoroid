@@ -9,10 +9,10 @@ import com.zarbosoft.merman.core.document.Document;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.example.JsonSyntax;
+import com.zarbosoft.merman.core.example.SyntaxOut;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Syntax;
-import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.syntax.style.Style;
@@ -98,20 +98,24 @@ public class NotMain extends Application {
         throw new RuntimeException("Need to specify one file to open on the command line");
 
       Environment env = new JFXEnvironment(Locale.getDefault());
+
       JavaSerializer serializer;
-      ROMap<String, Syntax> syntaxes =
-          new TSMap<String, Syntax>().put("json", JsonSyntax.create(env, new Padding(5, 5, 5, 5)));
+      ROMap<String, SyntaxOut> syntaxes =
+          new TSMap<String, SyntaxOut>()
+              .put("json", JsonSyntax.create(env, new Padding(5, 5, 5, 5)))
+              .put("at", AlligatoroidSyntax.create(env, new Padding(5, 5, 5, 5)));
 
       path = args.get(0);
       Document document;
       String extension = extension(path);
-      Syntax syntax =
+      SyntaxOut syntaxOut =
           syntaxes.getOr(
               extension,
               () -> {
                 throw new RuntimeException(
                     Format.format("No syntax for files with extension [%s]", extension));
               });
+      Syntax syntax = syntaxOut.syntax;
       serializer = new JavaSerializer(syntax.backType);
       try {
         document = serializer.loadDocument(syntax, Files.readAllBytes(Paths.get(path)));
@@ -181,7 +185,7 @@ public class NotMain extends Application {
                       new Style(
                           new Style.Config()
                               .fontSize(5)
-                              .color(ModelColor.RGB.hex("938f8d"))
+                              .color(syntaxOut.choiceText /* TODO */)
                               .obbox(new ObboxStyle(new ObboxStyle.Config().line(false)))))
                   .bannerPad(Padding.ct(3, 3))
                   .choiceCursorStyle(
@@ -193,12 +197,12 @@ public class NotMain extends Application {
                               .roundEnd(true)
                               .roundOuterEdges(true)
                               .roundRadius(1)
-                              .lineColor(ModelColor.RGB.hex("938f8d"))))
+                              .lineColor(syntaxOut.choiceCursor)))
                   .choiceDescriptionStyle(
                       new Style(
                           new Style.Config()
                               .fontSize(5)
-                              .color(ModelColor.RGB.hex("938f8d"))
+                              .color(syntaxOut.choiceText)
                               .padding(new Padding(4, 0, 1, 1))))
                   .choiceColumnSpace(8)
                   .detailsBoxStyle(
@@ -206,7 +210,7 @@ public class NotMain extends Application {
                           new ObboxStyle.Config()
                               .line(false)
                               .fill(true)
-                              .fillColor(ModelColor.RGB.hex("2A2A2A"))
+                              .fillColor(syntaxOut.choiceBg)
                               .roundStart(true)
                               .roundEnd(true)
                               .roundOuterEdges(true)
@@ -222,7 +226,7 @@ public class NotMain extends Application {
                                       new Style.Config()
                                           .fontSize(5)
                                           .padding(Padding.ct(1, 0))
-                                          .color(ModelColor.RGB.hex("938f8d")))))));
+                                          .color(syntaxOut.choiceCursor))))));
       editor.context.document.root.visual.selectIntoAnyChild(editor.context);
 
       editor.context.addHoverListener(
@@ -365,7 +369,7 @@ public class NotMain extends Application {
     } catch (RuntimeException e) {
       StringWriter writer = new StringWriter();
       e.printStackTrace(new PrintWriter(writer));
-      throw new RuntimeException("\n" + writer.toString());
+      throw new RuntimeException("\n" + writer);
     }
   }
 

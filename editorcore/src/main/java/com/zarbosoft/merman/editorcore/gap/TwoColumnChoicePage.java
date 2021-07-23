@@ -23,7 +23,6 @@ public class TwoColumnChoicePage {
   public Container displayRoot;
   TSList<ROPair<CourseDisplayNode, CourseDisplayNode>> rows = TSList.of();
   private int index = 0;
-  private double converseScroll = 0;
 
   public TwoColumnChoicePage(Editor editor, TSList<TwoColumnChoice> choices) {
     this.choices = choices;
@@ -69,8 +68,7 @@ public class TwoColumnChoicePage {
     final DisplayNode text = row.second;
     final double converse = preview.converse();
     final double converseEdge = text.converseEdge();
-    converseScroll = Math.min(converse, Math.max(converseEdge - context.edge, converseScroll));
-    scroller.scroll(converseScroll, context.animateDetails);
+    scroller.scrollVisible(converse, converseEdge, context.animateDetails);
   }
 
   private void changeChoice(final Context context, final int index) {
