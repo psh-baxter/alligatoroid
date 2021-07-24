@@ -47,24 +47,23 @@ public class Banner {
         });
   }
 
-  private void idlePlace(final Context context, final boolean animate) {
+  private void idlePlace(final Context context) {
     if (text == null) return;
     if (idle == null) {
       idle = new IterationPlace(context);
       context.addIteration(idle);
     }
-    idle.animate = idle.animate && animate;
   }
 
-  private void place(final Editor editor, final boolean animate) {
+  private void place(final Editor editor) {
     if (text == null) return;
     final double calculatedTransverse =
         transverse - text.descent() - editor.bannerPad.transverseEnd * editor.context.toPixels;
     text.setBaselinePosition(
         new Vector(editor.bannerPad.converseStart * editor.context.toPixels, calculatedTransverse),
-        animate);
+        false);
     if (background != null)
-      background.setPosition(new Vector(0, calculatedTransverse - text.ascent()), animate);
+      background.setPosition(new Vector(0, calculatedTransverse - text.ascent()), false);
   }
 
   private void resizeBackground(final Context context) {
@@ -100,7 +99,7 @@ public class Banner {
                     * editor.context.toPixels,
             0);
     editor.context.wall.addBedding(editor.context, bedding);
-    idlePlace(editor.context, true);
+    idlePlace(editor.context);
   }
 
   public void removeMessage(final Context context, final BannerMessage message) {
@@ -126,7 +125,7 @@ public class Banner {
     @Override
     public void setTransverse(final Context context, final double transverse) {
       banner.transverse = transverse;
-      banner.idlePlace(context, false);
+      banner.idlePlace(context);
     }
 
     @Override
@@ -137,16 +136,14 @@ public class Banner {
 
   private class IterationPlace extends IterationTask {
     private final Context context;
-    public boolean animate;
 
     private IterationPlace(final Context context) {
       this.context = context;
-      animate = context.animateCoursePlacement;
     }
 
     @Override
     protected boolean runImplementation(final IterationContext iterationContext) {
-      place(Editor.get(context), animate);
+      place(Editor.get(context));
       return false;
     }
 

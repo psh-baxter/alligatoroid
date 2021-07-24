@@ -3,18 +3,22 @@ package com.zarbosoft.merman.jfxeditor1.modalinput;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
+import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.banner.BannerMessage;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
-import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.Format;
+import com.zarbosoft.rendaw.common.ROSetRef;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import static com.zarbosoft.merman.jfxeditor1.NotMain.controlKeys;
 
 public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
+  public static ROSetRef<Key> shiftKeys = TSSet.of(Key.SHIFT, Key.SHIFT_LEFT, Key.SHIFT_RIGHT);
+
   public final NotMain main;
-  public ModalCursorFieldPrimitive.Mode mode = ModalCursorFieldPrimitive.Mode.NAV;
   private SyntaxPath syntaxPath;
   private BannerMessage info;
 
@@ -28,13 +32,6 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
     super(editor, visualPrimitive, leadFirst, beginOffset, endOffset);
     this.main = main;
     this.syntaxPath = syntaxPath;
-    if (range.beginOffset != range.endOffset)
-      setMode(editor, ModalCursorFieldPrimitive.Mode.SELECT);
-    else setMode(editor, ModalCursorFieldPrimitive.Mode.TEXT);
-  }
-
-  public void setMode(Editor editor, ModalCursorFieldPrimitive.Mode mode) {
-    this.mode = mode;
     updateInfo(editor);
   }
 
@@ -45,277 +42,90 @@ public class ModalGapCursorFieldPrimitive extends EditGapCursorFieldPrimitive {
         info =
             new BannerMessage(
                 Format.format(
-                    "%s - %s / %s (primitive) %s",
+                    "%s - %s / %s (gap)",
                     syntaxPath,
                     visualPrimitive.atomVisual().atom.type.id,
-                    visualPrimitive.value.back().id,
-                    mode)));
-
+                    visualPrimitive.value.back().id)));
      */
   }
 
   public void destroy(Context context) {
-    if (info != null) Editor.get(context).banner.removeMessage(context, info);
+    Editor.get(context).banner.removeMessage(context, info);
     super.destroy(context);
   }
 
   public boolean handleKey(Context context, ButtonEvent hidEvent) {
-    if (hidEvent.press)
-      switch (mode) {
-        case NAV:
+    if (hidEvent.press) {
+      switch (hidEvent.key) {
+        case ESCAPE:
           {
-            switch (hidEvent.key) {
-              case S:
-                {
-                  setMode(Editor.get(context), ModalCursorFieldPrimitive.Mode.SELECT);
-                  return true;
-                }
-
-              case H:
-                {
-                  editExit(Editor.get(context));
-                  return true;
-                }
-              case J:
-                {
-                  if (choicePage != null) choicePage.nextChoice(context);
-                  return true;
-                }
-              case K:
-                {
-                  if (choicePage != null) choicePage.previousChoice(context);
-                  return true;
-                }
-              case ENTER:
-                {
-                  if (choicePage != null) choicePage.choose(Editor.get(context));
-                  return true;
-                }
-              case L:
-                {
-                  setMode(Editor.get(context), ModalCursorFieldPrimitive.Mode.TEXT);
-                  return true;
-                }
-              case N:
-                {
-                  actionPreviousWord(context);
-                  return true;
-                }
-              case M:
-                {
-                  actionPreviousGlyph(context);
-                  return true;
-                }
-              case COMMA:
-                {
-                  actionNextGlyph(context);
-                  return true;
-                }
-              case PERIOD:
-                {
-                  actionNextWord(context);
-                  return true;
-                }
-              case Y:
-                {
-                  actionFirstGlyph(context);
-                  return true;
-                }
-              case U:
-                {
-                  Editor.get(context).undo(context);
-                  return true;
-                }
-              case O:
-                {
-                  actionLastGlyph(context);
-                  return true;
-                }
-              case BACK_SPACE:
-                {
-                  editDeletePrevious(Editor.get(context));
-                  return true;
-                }
-              case DELETE:
-              case X:
-                {
-                  if (range.beginOffset != range.endOffset) editCut(Editor.get(context));
-                  else editDeleteNext(Editor.get(context));
-                  return true;
-                }
-              case C:
-                {
-                  actionCopy(context);
-                  return true;
-                }
-              case V:
-                {
-                  editPaste(Editor.get(context));
-                  return true;
-                }
-              case F:
-                {
-                  main.flush(true);
-                  return true;
-                }
-            }
-            return true; // Prevent typing in this mode
+            actionExit(context);
+            return true;
           }
-        case SELECT:
+        case DOWN:
           {
-            switch (hidEvent.key) {
-                // Mode changes
-                // Actions
-              case H:
-                {
-                  actionReleaseAll(context);
-                  setMode(Editor.get(context), ModalCursorFieldPrimitive.Mode.NAV);
-                  return true;
-                }
-              case J:
-                {
-                  if (choicePage != null) choicePage.nextChoice(context);
-                  return true;
-                }
-              case K:
-                {
-                  if (choicePage != null) choicePage.previousChoice(context);
-                  return true;
-                }
-              case ENTER:
-                {
-                  if (choicePage != null) choicePage.choose(Editor.get(context));
-                  return true;
-                }
-              case L:
-                {
-                  // nop
-                  return true;
-                }
-              case N:
-                {
-                  if (range.leadFirst) actionGatherPreviousWord(context);
-                  else actionReleaseNextWord(context);
-                  return true;
-                }
-              case M:
-                {
-                  if (range.leadFirst) actionGatherPreviousGlyph(context);
-                  else actionReleaseNextGlyph(context);
-                  return true;
-                }
-              case COMMA:
-                {
-                  if (range.leadFirst) actionReleasePreviousGlyph(context);
-                  else actionGatherNextGlyph(context);
-                  return true;
-                }
-              case PERIOD:
-                {
-                  if (range.leadFirst) actionReleasePreviousWord(context);
-                  else actionGatherNextWord(context);
-                  return true;
-                }
-              case Y:
-                {
-                  actionGatherLast(context);
-                  return true;
-                }
-              case O:
-                {
-                  actionGatherFirst(context);
-                  return true;
-                }
-              case DELETE:
-              case X:
-                {
-                  if (range.beginOffset != range.endOffset) editCut(Editor.get(context));
-                  else editDeleteNext(Editor.get(context));
-                  setMode(Editor.get(context), ModalCursorFieldPrimitive.Mode.NAV);
-                  return true;
-                }
-              case C:
-                {
-                  actionCopy(context);
-                  return true;
-                }
-              case V:
-                {
-                  editPaste(Editor.get(context));
-                  return true;
-                }
-              case F:
-                {
-                  main.flush(true);
-                  return true;
-                }
-            }
-            return true; // Prevent typing in this mode
+            if (choicePage != null) choicePage.nextChoice(context);
+            return true;
           }
-        case TEXT:
+        case UP:
           {
-            switch (hidEvent.key) {
-                // Mode changes
-              case ESCAPE:
-                {
-                  setMode(Editor.get(context), ModalCursorFieldPrimitive.Mode.NAV);
-                  return true;
-                }
-                // Actions
-              case DOWN:
-                {
-                  if (choicePage != null) choicePage.nextChoice(context);
-                  return true;
-                }
-              case UP:
-                {
-                  if (choicePage != null) choicePage.previousChoice(context);
-                  return true;
-                }
-              case LEFT:
-                {
-                  actionPreviousGlyph(context);
-                  return true;
-                }
-              case RIGHT:
-                {
-                  actionNextGlyph(context);
-                  return true;
-                }
-              case BACK_SPACE:
-                {
-                  editDeletePrevious(Editor.get(context));
-                  return true;
-                }
-              case DELETE:
-                {
-                  editDeleteNext(Editor.get(context));
-                  return true;
-                }
-              case ENTER:
-                {
-                  if (choicePage != null) choicePage.choose(Editor.get(context));
-                  return true;
-                }
-              case V:
-                {
-                  if (hidEvent.modifiers.containsAny(controlKeys)) {
-                    editPaste(Editor.get(context));
-                    return true;
-                  }
-                }
-            }
-            break;
+            if (choicePage != null) choicePage.previousChoice(context);
+            return true;
           }
-        default:
-          throw new Assertion();
+        case LEFT:
+          {
+            if (hidEvent.modifiers.containsAll(shiftKeys)) {
+              if (range.leadFirst) actionGatherPreviousGlyph(context);
+              else actionReleaseNextGlyph(context);
+            } else actionPreviousGlyph(context);
+            return true;
+          }
+        case RIGHT:
+          {
+            if (hidEvent.modifiers.containsAll(shiftKeys)) {
+              if (range.leadFirst) actionReleasePreviousGlyph(context);
+              else actionGatherNextGlyph(context);
+            } else actionNextGlyph(context);
+            return true;
+          }
+        case BACK_SPACE:
+          {
+            editDeletePrevious(Editor.get(context));
+            return true;
+          }
+        case DELETE:
+          {
+            editDeleteNext(Editor.get(context));
+            return true;
+          }
+        case X:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              if (range.beginOffset != range.endOffset) editCut(Editor.get(context));
+              return true;
+            }
+          }
+        case ENTER:
+          {
+            if (choicePage != null) choicePage.choose(Editor.get(context));
+            return true;
+          }
+        case V:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              editPaste(Editor.get(context));
+              return true;
+            }
+          }
+        case F:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              main.flush(true);
+              return true;
+            }
+          }
       }
+    }
     return false;
-  }
-
-  public static enum Mode {
-    NAV,
-    SELECT,
-    TEXT
   }
 }
