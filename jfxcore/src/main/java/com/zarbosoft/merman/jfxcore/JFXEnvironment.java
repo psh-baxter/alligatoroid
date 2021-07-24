@@ -156,7 +156,7 @@ public class JFXEnvironment implements Environment {
 
       @Override
       public String charAt(int offset) {
-        return text.substring(offset, 1);
+        return text.substring(offset, offset + 1);
       }
 
       @Override
