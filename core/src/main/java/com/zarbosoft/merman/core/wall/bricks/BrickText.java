@@ -42,6 +42,7 @@ public class BrickText extends Brick {
 
   @Override
   public double descent() {
+    if (style.descent != null) return style.descent * toPixels;
     return text.descent() + style.padding.transverseEnd * toPixels;
   }
 

@@ -16,6 +16,8 @@ public class Style {
   public final ObboxStyle obbox;
   /** Override automatic ascent */
   public final Double ascent;
+  /** Override automatic descent */
+  public final Double descent;
 
   public Style(Config config) {
     if (config.alignment != null) alignment = config.alignment;
@@ -43,6 +45,11 @@ public class Style {
     } else {
       ascent = config.ascent;
     }
+    if (config.descent == null) {
+      descent = null;
+    } else {
+      descent = config.descent;
+    }
     obbox = config.obbox == null ? new ObboxStyle(new ObboxStyle.Config()) : config.obbox;
   }
 
@@ -54,6 +61,7 @@ public class Style {
 
   public static final class Config {
     public Double ascent;
+    public Double descent;
     public ObboxStyle obbox;
     public String alignment;
     public Padding padding;
@@ -92,6 +100,7 @@ public class Style {
       this.color = color;
       return this;
     }
+
     public Config invalidColor(ModelColor color) {
       this.invalidColor = color;
       return this;
@@ -99,6 +108,16 @@ public class Style {
 
     public Config fontSize(double size) {
       this.fontSize = size;
+      return this;
+    }
+
+    public Config ascent(double ascent) {
+      this.ascent = ascent;
+      return this;
+    }
+
+    public Config descent(double descent) {
+      this.descent = descent;
       return this;
     }
 
@@ -115,6 +134,7 @@ public class Style {
     public Config dupe() {
       Config config = new Config();
       config.ascent = ascent;
+      config.descent = descent;
       config.obbox = obbox;
       config.alignment = alignment;
       config.padding = padding;

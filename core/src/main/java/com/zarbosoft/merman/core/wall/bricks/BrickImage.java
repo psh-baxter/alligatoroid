@@ -29,6 +29,7 @@ public class BrickImage extends Brick {
 
   @Override
   public double descent() {
+    if (style.descent != null) return style.descent * toPixels;
     return image.descent() + style.padding.transverseEnd * toPixels;
   }
 

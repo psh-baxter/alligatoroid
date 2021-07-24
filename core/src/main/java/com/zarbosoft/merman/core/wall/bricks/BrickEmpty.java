@@ -21,7 +21,8 @@ public class BrickEmpty extends Brick {
     double toPixels = context.toPixels;
     if (style.ascent != null) ascent = style.ascent * toPixels;
     else ascent = style.padding.transverseStart * toPixels;
-    descent = style.padding.transverseEnd * toPixels;
+    if (style.descent != null) descent= style.descent * toPixels;
+    else descent = style.padding.transverseEnd * toPixels;
     converseSpan =
         style.space * toPixels
             + style.padding.converseStart * toPixels

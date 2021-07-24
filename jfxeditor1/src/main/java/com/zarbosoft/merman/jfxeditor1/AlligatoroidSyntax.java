@@ -272,11 +272,11 @@ public class AlligatoroidSyntax {
   }
 
   private static Style.Config baseCodeStyle() {
-    return new Style.Config().fontSize(fontSize);
+    return sizedBaseCodeStyle(fontSize);
   }
 
   private static Style.Config sizedBaseCodeStyle(double size) {
-    return new Style.Config().fontSize(size);
+    return new Style.Config().fontSize(size).ascent(size * 0.8).descent(size * 0.2);
   }
 
   public static AtomType binaryInfix(
