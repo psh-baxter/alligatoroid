@@ -77,6 +77,7 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                 .add(
                     new FrontArraySpec(
                         new FrontArraySpec.Config(PRECEDING_KEY, config.frontArrayConfig)))
+                .addAll(config.frontPrefix)
                 .add(
                     new FrontPrimitiveSpec(
                         new FrontPrimitiveSpec.Config(PRIMITIVE_KEY).style(config.primitiveStyle)))
@@ -127,21 +128,11 @@ public class SuffixGapAtomType extends BaseGapAtomType {
     public ROList<BackSpec> back;
     public FrontArraySpecBase.Config frontArrayConfig = new FrontArraySpecBase.Config();
     public ROList<FrontSpec> frontSuffix = ROList.empty;
+    public ROList<FrontSpec> frontPrefix = ROList.empty;
     public Symbol gapPlaceholderSymbol;
     public Style primitiveStyle;
 
     public Config() {}
-
-    public Config(
-        String id,
-        String backType,
-        FrontArraySpecBase.Config frontArrayConfig,
-        ROList<FrontSpec> frontSuffix) {
-      this.id = id;
-      this.backType = backType;
-      this.frontArrayConfig = frontArrayConfig;
-      this.frontSuffix = frontSuffix;
-    }
 
     public Config back(ROList<BackSpec> back) {
       this.back = back;
@@ -155,6 +146,11 @@ public class SuffixGapAtomType extends BaseGapAtomType {
 
     public Config frontSuffix(ROList<FrontSpec> specs) {
       this.frontSuffix = specs;
+      return this;
+    }
+
+    public Config frontPrefix(ROList<FrontSpec> specs) {
+      this.frontPrefix = specs;
       return this;
     }
 

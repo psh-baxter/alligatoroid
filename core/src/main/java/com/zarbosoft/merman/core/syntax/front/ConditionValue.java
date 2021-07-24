@@ -90,11 +90,7 @@ public class ConditionValue extends ConditionType {
     private static boolean check(FieldPrimitive value, Is is) {
       switch (is) {
         case EMPTY:
-          {
-            if (value.data.length() == 0) {
-              return true;
-            } else return false;
-          }
+          return value.data.length() == 0;
         default:
           throw new Assertion();
       }
@@ -125,11 +121,7 @@ public class ConditionValue extends ConditionType {
     private static boolean check(FieldArray value, Is is) {
       switch (is) {
         case EMPTY:
-          {
-            if (value.data.isEmpty()) {
-              return true;
-            } else return false;
-          }
+          return value.data.isEmpty();
         default:
           throw new Assertion();
       }

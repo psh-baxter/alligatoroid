@@ -99,6 +99,7 @@ public class BorderAttachment {
     if (last == null) return;
     border.setSize(
         context,
+        this.first.parent == this.last.parent,
         startConverse,
         startTransverse,
         startTransverse + startTransverseSpan,

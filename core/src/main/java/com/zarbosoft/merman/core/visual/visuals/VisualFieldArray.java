@@ -2,7 +2,6 @@ package com.zarbosoft.merman.core.visual.visuals;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Hoverable;
-import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.front.FrontArraySpecBase;
@@ -26,7 +25,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
   private final FieldArray.Listener dataListener;
   private final FrontArraySpecBase front;
   public CursorFieldArray cursor;
-  public HoverableFieldArray hoverable;
+  public HoverableFieldArrayBase hoverable;
   private Brick ellipsis = null;
   private Brick empty = null;
 
@@ -81,28 +80,31 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
           };
       for (final Atom atom : add) {
         if (!front.separator.isEmpty() && addIndex > 0) addSeparator.accept(addIndex++);
-        final VisualGroup group =
+        final VisualGroup elementGroup =
             new VisualGroup(
                 context, new FrontArrayParent(this, addIndex, true), visualDepth + 1, depthScore());
         int groupIndex = 0;
         for (final FrontSymbolSpec fix : front.prefix)
-          group.add(
+          elementGroup.add(
               context,
               fix.createVisual(
-                  context, group.createParent(groupIndex++), group.visualDepth + 1, depthScore()));
+                  context,
+                  elementGroup.createParent(groupIndex++),
+                  elementGroup.visualDepth + 1,
+                  depthScore()));
         final VisualAtom nodeVisual =
             (VisualAtom)
                 atom.ensureVisual(
                     context,
-                    new Parent(group, groupIndex++) {
+                    new Parent(elementGroup, groupIndex++) {
                       @Override
                       public void notifyLastBrickCreated(Context context, Brick brick) {
                         if (cursor != null
                             && cursor.endIndex == ((FieldArray.Parent) atom.fieldParentRef).index)
                           cursor.border.setLast(context, brick);
                         if (hoverable != null
-                            && hoverable instanceof ElementHoverableFieldFieldArray
-                            && ((ElementHoverableFieldFieldArray) hoverable).index
+                            && hoverable instanceof HoverableFieldArray
+                            && ((HoverableFieldArray) hoverable).index
                                 == ((FieldArray.Parent) atom.fieldParentRef).index)
                           hoverable.border.setLast(context, brick);
                         super.notifyLastBrickCreated(context, brick);
@@ -114,18 +116,18 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
                             && cursor.beginIndex == ((FieldArray.Parent) atom.fieldParentRef).index)
                           cursor.border.setFirst(context, brick);
                         if (hoverable != null
-                            && hoverable instanceof ElementHoverableFieldFieldArray
-                            && ((ElementHoverableFieldFieldArray) hoverable).index
+                            && hoverable instanceof HoverableFieldArray
+                            && ((HoverableFieldArray) hoverable).index
                                 == ((FieldArray.Parent) atom.fieldParentRef).index)
                           hoverable.border.setFirst(context, brick);
                         super.notifyFirstBrickCreated(context, brick);
                       }
                     },
-                    group.visualDepth + 2,
+                    elementGroup.visualDepth + 2,
                     depthScore());
-        group.add(
+        elementGroup.add(
             context,
-            new Visual(group.visualDepth + 1) {
+            new Visual(elementGroup.visualDepth + 1) {
               @Override
               public VisualParent parent() {
                 return nodeVisual.parent();
@@ -196,12 +198,15 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
               }
             });
         for (final FrontSymbolSpec fix : front.suffix)
-          group.add(
+          elementGroup.add(
               context,
               fix.createVisual(
-                  context, group.createParent(groupIndex++), group.visualDepth + 1, depthScore()));
-        if (atomVisual().compact) group.compact(context);
-        super.add(context, group, addIndex++);
+                  context,
+                  elementGroup.createParent(groupIndex++),
+                  elementGroup.visualDepth + 1,
+                  depthScore()));
+        if (atomVisual().compact) elementGroup.compact(context);
+        super.add(context, elementGroup, addIndex++);
       }
       if (!front.separator.isEmpty() && visualIndex == 0 && value.data.size() > add.size())
         addSeparator.accept(addIndex++);
@@ -429,11 +434,10 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
           && visual.cursor.beginIndex == visual.cursor.endIndex
           && visual.cursor.beginIndex == newIndex) return null;
       if (visual.hoverable == null) {
-        visual.hoverable = visual.new ElementHoverableFieldFieldArray(context, visual);
+        visual.hoverable = new HoverableFieldArray(context, visual);
         changed = true;
       }
-      ElementHoverableFieldFieldArray elementHoverable =
-          (ElementHoverableFieldFieldArray) visual.hoverable;
+      HoverableFieldArray elementHoverable = (HoverableFieldArray) visual.hoverable;
       if (elementHoverable.index != newIndex) changed = true;
       elementHoverable.setIndex(context, newIndex);
       return new ROPair<>(visual.hoverable, changed);
@@ -442,47 +446,6 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
     private int valueIndex() {
       if (visual.front.separator.isEmpty()) return index;
       return index / 2;
-    }
-  }
-
-  private class ElementHoverableFieldFieldArray extends HoverableFieldArray {
-    private int index;
-
-    ElementHoverableFieldFieldArray(final Context context, VisualFieldArray visual) {
-      super(visual, context);
-    }
-
-    @Override
-    public SyntaxPath getSyntaxPath() {
-      return visual.value.getSyntaxPath().add(String.valueOf(index));
-    }
-
-    @Override
-    public void select(final Context context) {
-      VisualFieldArray.this.select(context, true, index, index);
-    }
-
-    @Override
-    public void notifyRangeAdjusted(
-        final Context context, final int index, final int removed, final int added) {
-      if (this.index >= index + removed) {
-        setIndex(context, this.index - removed + added);
-      } else if (this.index >= index) {
-        context.clearHover();
-      }
-    }
-
-    public void setIndex(final Context context, final int index) {
-      this.index = index;
-      border.setFirst(context, children.get(visualIndex(index)).getFirstBrick(context));
-      border.setLast(context, children.get(visualIndex(index)).getLastBrick(context));
-    }
-
-    @Override
-    public void notifySelected(final Context context, final int start, final int end) {
-      if (this.index >= start && this.index <= end) {
-        context.clearHover();
-      }
     }
   }
 

@@ -5,7 +5,7 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.rendaw.common.DeadCode;
 
-class HoverableFieldArrayPlaceholder extends HoverableFieldArray {
+class HoverableFieldArrayPlaceholder extends HoverableFieldArrayBase {
   public final VisualFieldArray visual;
 
   HoverableFieldArrayPlaceholder(final Context context, final Brick brick, VisualFieldArray visual) {

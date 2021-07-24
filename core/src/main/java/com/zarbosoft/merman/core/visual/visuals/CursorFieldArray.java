@@ -31,8 +31,8 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
   public void setRange(final Context context, final int begin, final int end) {
     setBeginInternal(context, begin);
     setEndInternal(context, end);
-    border.setFirst(context, visual.children.get(visual.visualIndex(begin)).getFirstBrick(context));
-    border.setLast(context, visual.children.get(visual.visualIndex(end)).getLastBrick(context));
+    border.setFirst(context, getElementVisual(begin).getFirstBrick(context));
+    border.setLast(context, getElementVisual(end).getLastBrick(context));
   }
 
   private void setBeginInternal(final Context context, final int index) {
@@ -43,9 +43,7 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
   private void setCornerstone(final Context context, final int index) {
     context.wall.setCornerstone(
         context,
-        visual
-            .children
-            .get(visual.visualIndex(index))
+        getElementVisual(index)
             .createOrGetCornerstoneCandidate(context)
             .brick,
         () -> {
@@ -72,20 +70,25 @@ public class CursorFieldArray extends com.zarbosoft.merman.core.Cursor {
   public void setBegin(final Context context, final int index) {
     leadFirst = true;
     setBeginInternal(context, index);
-    border.setFirst(context, visual.children.get(visual.visualIndex(index)).getFirstBrick(context));
+    border.setFirst(context, getElementVisual(index).getFirstBrick(context));
+  }
+
+  private Visual getElementVisual(int index) {
+    //return visual.children.get(visual.visualIndex(index));
+    return visual.value.data.get(index).visual;
   }
 
   public void setEnd(final Context context, final int index) {
     leadFirst = false;
     setEndInternal(context, index);
-    border.setLast(context, visual.children.get(visual.visualIndex(index)).getLastBrick(context));
+    border.setLast(context, getElementVisual(index).getLastBrick(context));
   }
 
   public void setPosition(final Context context, final int index) {
     setEndInternal(context, index);
     setBeginInternal(context, index);
-    border.setFirst(context, visual.children.get(visual.visualIndex(index)).getFirstBrick(context));
-    border.setLast(context, visual.children.get(visual.visualIndex(index)).getLastBrick(context));
+    border.setFirst(context, getElementVisual(index).getFirstBrick(context));
+    border.setLast(context, getElementVisual(index).getLastBrick(context));
   }
 
   @Override

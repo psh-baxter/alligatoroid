@@ -199,12 +199,14 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
 
   @Override
   public void compact(final Context context) {
-    lines.get(0).brick.layoutPropertiesChanged(context);
+    Line line = lines.get(0);
+    if (line.brick != null) line.brick.layoutPropertiesChanged(context);
   }
 
   @Override
   public void expand(final Context context) {
-    lines.get(0).brick.layoutPropertiesChanged(context);
+    Line line = lines.get(0);
+    if (line.brick != null) line.brick.layoutPropertiesChanged(context);
   }
 
   @Override

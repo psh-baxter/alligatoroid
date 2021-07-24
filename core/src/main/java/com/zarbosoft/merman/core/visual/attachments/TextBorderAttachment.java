@@ -2,9 +2,9 @@ package com.zarbosoft.merman.core.visual.attachments;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.derived.Obbox;
+import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.wall.Attachment;
 import com.zarbosoft.merman.core.wall.bricks.BrickText;
-import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 
 public class TextBorderAttachment {
   private final Obbox border;
@@ -111,6 +111,7 @@ public class TextBorderAttachment {
     if (blockRedraw) return;
     border.setSize(
         context,
+        this.first.parent == this.last.parent,
         startConverse + first.getConverseOffset(firstIndex),
         startTransverse,
         startTransverse + startTransverseSpan,

@@ -51,6 +51,7 @@ import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 public class AlligatoroidSyntax {
@@ -277,7 +278,11 @@ public class AlligatoroidSyntax {
   }
 
   private static Style.Config sizedBaseCodeStyle(double size) {
-    return new Style.Config().fontSize(size).ascent(size * 0.8).descent(size * 0.2);
+    return new Style.Config()
+        .font("monospace")
+        .fontSize(size)
+        .ascent(size * 0.8)
+        .descent(size * 0.2);
   }
 
   public static AtomType binaryInfix(
@@ -571,7 +576,7 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_STATEMENT_COMMENT, "Comment")
             .gapKey(",")
             .placeholder("￮", "children", COLOR_COMMENT)
-            .simpleArray("children", GROUP_COMMENT_BODY)
+            .custom(AlligatoroidSyntax::commentArray)
             .build(),
         GROUP_STATEMENT);
     types.add(
@@ -579,21 +584,22 @@ public class AlligatoroidSyntax {
             .atom("nested", GROUP_EXPR)
             .gapKey(",")
             .placeholder("￮", "children", COLOR_COMMENT)
-            .simpleArray("children", GROUP_COMMENT_BODY)
+            .custom(AlligatoroidSyntax::commentArray)
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_COMMENT_P, "Paragraph")
             .gapKey("p")
-            .compactZeroSplit()
-            .primitive("text", COLOR_COMMENT)
+            .styledPrimitive("text", COLOR_COMMENT, null, fontSize)
+            .vspacer(fontSize, fontSize * 0.8)
             .build(),
         GROUP_COMMENT_BODY);
     types.add(
         new ATypeBuilder(TYPE_COMMENT_H1, "Header (1)")
             .gapKey("h1")
-            .zeroSplit()
-            .sizedPrimitive("text", COLOR_COMMENT, fontSize * 2)
+            .vspacer(fontSize * 2 * 1.5, 0)
+            .styledPrimitive("text", COLOR_COMMENT, null, fontSize * 2)
+            .vspacer(0, fontSize * 0.8)
             .build(),
         GROUP_COMMENT_BODY);
 
@@ -695,6 +701,15 @@ public class AlligatoroidSyntax {
                 .primitiveCursorStyle(cursorStyle(true))
                 .pad(pad)),
         TSSet.of(TYPE_LOCAL, TYPE_ACCESS));
+  }
+
+  private static void commentArray(ATypeBuilder b) {
+    b.front.front.add(
+        new FrontArraySpec(
+            new FrontArraySpec.Config(
+                "children", new FrontArraySpecBase.Config().prefix(new TSList<>(zeroSplit)))));
+    b.front.vspacer(0, fontSize * 1.5);
+    b.back.array("children", GROUP_COMMENT_BODY);
   }
 
   private static ROList<BackSpec> backBuiltinField(BackSpec child) {
@@ -800,11 +815,6 @@ public class AlligatoroidSyntax {
       front.add(compactZeroSplit);
     }
 
-    public AFrontBuilder simpleArray(String id) {
-      front.add(new FrontArraySpec(new FrontArraySpec.Config(id, new FrontArraySpecBase.Config())));
-      return this;
-    }
-
     public AFrontBuilder array(String id, String separator) {
       front.add(
           new FrontArraySpec(
@@ -832,11 +842,11 @@ public class AlligatoroidSyntax {
       return this;
     }
 
-    public AFrontBuilder sizedPrimitive(String id, ModelColor color, double size) {
+    public AFrontBuilder styledPrimitive(String id, ModelColor color, String font, double size) {
       front.add(
           new FrontPrimitiveSpec(
               new FrontPrimitiveSpec.Config(id)
-                  .style(new Style(sizedBaseCodeStyle(size).color(color)))));
+                  .style(new Style(sizedBaseCodeStyle(size).font(font).color(color)))));
       return this;
     }
 
@@ -849,7 +859,7 @@ public class AlligatoroidSyntax {
                               .style(new Style(baseCodeStyle().color(color)))))
                   .condition(
                       new ConditionValue(
-                          new ConditionValue.Config(field, ConditionValue.Is.EMPTY, true)))));
+                          new ConditionValue.Config(field, ConditionValue.Is.EMPTY, false)))));
     }
 
     public void gapKey(String text) {
@@ -864,6 +874,15 @@ public class AlligatoroidSyntax {
           new FrontPrimitiveSpec(
               new FrontPrimitiveSpec.Config(field)
                   .style(new Style(baseCodeStyle().color(color).invalidColor(invalidColor)))));
+    }
+
+    public void vspacer(double ascent, double descent) {
+      front.add(
+          new FrontSymbolSpec(
+              new FrontSymbolSpec.Config(
+                  new SymbolSpaceSpec(
+                      new SymbolSpaceSpec.Config()
+                          .style(new Style(new Style.Config().ascent(ascent).descent(descent)))))));
     }
   }
 
@@ -1006,12 +1025,6 @@ public class AlligatoroidSyntax {
       return this;
     }
 
-    public ATypeBuilder simpleArray(String id, String elementType) {
-      back.array(id, elementType);
-      front.simpleArray(id);
-      return this;
-    }
-
     public ATypeBuilder array(String id, String elementType, String separator) {
       back.array(id, elementType);
       front.array(id, separator);
@@ -1035,8 +1048,8 @@ public class AlligatoroidSyntax {
       return this;
     }
 
-    public ATypeBuilder sizedPrimitive(String id, ModelColor color, double size) {
-      front.sizedPrimitive(id, color, size);
+    public ATypeBuilder styledPrimitive(String id, ModelColor color, String font, double size) {
+      front.styledPrimitive(id, color, font, size);
       back.primitive(id);
       return this;
     }
@@ -1064,6 +1077,16 @@ public class AlligatoroidSyntax {
 
     public ATypeBuilder defaultSelection(String id) {
       defaultSelection = id;
+      return this;
+    }
+
+    public ATypeBuilder vspacer(double ascent, double descent) {
+      front.vspacer(ascent, descent);
+      return this;
+    }
+
+    public ATypeBuilder custom(Consumer<ATypeBuilder> c) {
+      c.accept(this);
       return this;
     }
   }

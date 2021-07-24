@@ -88,13 +88,13 @@ public class Obbox {
 
   public void setSize(
       final Context context,
+      boolean oneLine,
       double firstLineConverse,
       double firstLineTransverse,
       double firstLineTransverseEnd,
       double lastLineConverseEnd,
       double lastLineTransverse,
       double lastLineTransverseEnd) {
-    final boolean oneLine = firstLineTransverse == lastLineTransverse;
     drawing.clear();
     firstLineConverse -= stylePaddingConverse;
     firstLineTransverse -= stylePaddingTransverse;
