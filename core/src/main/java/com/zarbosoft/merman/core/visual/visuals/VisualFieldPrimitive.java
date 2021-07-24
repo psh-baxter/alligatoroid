@@ -45,7 +45,7 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
   public CursorFieldPrimitive cursor;
   public TSList<Line> lines = new TSList<>();
   public int hardLineCount = 0;
-  public boolean valid;
+  public boolean valid = true;
 
   public VisualFieldPrimitive(
       final Context context,
@@ -464,14 +464,16 @@ public class VisualFieldPrimitive extends Visual implements VisualLeaf {
       removed(context, index, remove);
       added(context, index, add);
       if (this.visualFieldPrimitive.value.back.matcher != null) {
-        boolean newValid= this.visualFieldPrimitive.value.back.matcher.match(context.env, this.visualFieldPrimitive.value.data.toString());
+        boolean newValid =
+            this.visualFieldPrimitive.value.back.matcher.match(
+                context.env, this.visualFieldPrimitive.value.data.toString());
         if (newValid != visualFieldPrimitive.valid) {
+          visualFieldPrimitive.valid = newValid;
           for (Line line : this.visualFieldPrimitive.lines) {
             if (line.brick == null) continue;
             line.brick.updateValid(context);
           }
         }
-        visualFieldPrimitive.valid = newValid;
       }
     }
 

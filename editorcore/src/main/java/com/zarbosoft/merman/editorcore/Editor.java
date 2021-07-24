@@ -32,6 +32,8 @@ import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
+import com.zarbosoft.rendaw.common.ROSet;
+import com.zarbosoft.rendaw.common.ROSetRef;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -52,6 +54,7 @@ public class Editor {
   public final double choiceRowStride;
   public final Padding choiceRowPadding;
   public final double choiceColumnSpace;
+  public final ROSetRef<String> suffixOnPatternMismatch;
   public Banner banner;
   public BeddingContainer details;
 
@@ -96,6 +99,7 @@ public class Editor {
         new Banner(
             this.context,
             config.bannerStyle == null ? new Style(new Style.Config()) : config.bannerStyle);
+    suffixOnPatternMismatch = config.suffixOnPatternMismatch;
     this.bannerPad = config.bannerPad;
     this.details = new BeddingContainer(this.context, false);
     this.detailPad = config.detailPad;
@@ -106,6 +110,23 @@ public class Editor {
 
   public static Editor get(Context context) {
     return ((EditorContext) context).editor;
+  }
+
+  public static void replaceInParent(
+      Context context, History.Recorder recorder, Atom child, Atom replacement) {
+    child.fieldParentRef.dispatch(
+        new Field.ParentDispatcher() {
+          @Override
+          public void handle(FieldArray.Parent parent) {
+            recorder.apply(
+                context, new ChangeArray(parent.field, parent.index, 1, new TSList<>(replacement)));
+          }
+
+          @Override
+          public void handle(FieldAtom.Parent parent) {
+            recorder.apply(context, new ChangeAtom(parent.field, replacement));
+          }
+        });
   }
 
   public static void atomSet(
@@ -231,9 +252,15 @@ public class Editor {
     public double detailSpan = 300;
     public Padding bannerPad = Padding.empty;
     public Padding detailPad = Padding.empty;
+    public ROSetRef<String> suffixOnPatternMismatch = ROSet.empty;
 
     public Config(Context.InitialConfig context) {
       this.context = context;
+    }
+
+    public Config suffixOnPatternMismatch(ROSetRef<String> set) {
+      this.suffixOnPatternMismatch = set;
+      return this;
     }
 
     public Config bannerStyle(Style style) {

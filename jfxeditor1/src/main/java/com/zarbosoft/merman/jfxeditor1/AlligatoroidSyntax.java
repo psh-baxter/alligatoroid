@@ -49,6 +49,7 @@ import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
+import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.function.Function;
 
@@ -601,34 +602,38 @@ public class AlligatoroidSyntax {
         new Style.Config().fontSize(fontSize).color(COLOR_INCOMPLETE);
     final Style gapStyle = new Style(gapStyleConfig);
     final Style gapEmptySymbolStyle = new Style(gapStyleConfig.dupe().padding(Padding.ct(1, 0)));
-    TSList<FrontSpec> gapEmptyPlaceholder =
-        new TSList<>(
-            new FrontSymbolSpec(
-                new FrontSymbolSpec.Config(
-                        new SymbolTextSpec(
-                            new SymbolTextSpec.Config("￮").style(gapEmptySymbolStyle)))
-                    .condition(
-                        new ConditionValue(
-                            new ConditionValue.Config(
-                                BaseGapAtomType.PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))));
-    TSList<FrontSpec> suffixGapEmptyPlaceholder =
-        new TSList<>(
-            new FrontSymbolSpec(
-                new FrontSymbolSpec.Config(
-                        new SymbolTextSpec(
-                            new SymbolTextSpec.Config("▹").style(gapEmptySymbolStyle)))
-                    .condition(
-                        new ConditionValue(
-                            new ConditionValue.Config(
-                                BaseGapAtomType.PRIMITIVE_KEY, ConditionValue.Is.EMPTY, false)))));
     GapAtomType gap =
         new GapAtomType(
-            new GapAtomType.Config().primitiveStyle(gapStyle).frontSuffix(gapEmptyPlaceholder));
+            new GapAtomType.Config()
+                .primitiveStyle(gapStyle)
+                .frontSuffix(
+                    new TSList<FrontSpec>(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
+                                    new SymbolTextSpec(
+                                        new SymbolTextSpec.Config("￮").style(gapEmptySymbolStyle)))
+                                .condition(
+                                    new ConditionValue(
+                                        new ConditionValue.Config(
+                                            BaseGapAtomType.PRIMITIVE_KEY,
+                                            ConditionValue.Is.EMPTY,
+                                            false)))))));
     SuffixGapAtomType suffixGap =
         new SuffixGapAtomType(
             new SuffixGapAtomType.Config()
                 .primitiveStyle(gapStyle)
-                .frontSuffix(suffixGapEmptyPlaceholder)
+                .frontSuffix(
+                    new TSList<FrontSpec>(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
+                                    new SymbolTextSpec(
+                                        new SymbolTextSpec.Config("▹").style(gapEmptySymbolStyle)))
+                                .condition(
+                                    new ConditionValue(
+                                        new ConditionValue.Config(
+                                            BaseGapAtomType.PRIMITIVE_KEY,
+                                            ConditionValue.Is.EMPTY,
+                                            false))))))
                 .frontArrayConfig(new FrontArraySpecBase.Config().prefix(TSList.of(compactSplit))));
 
     TSMap<String, ROOrderedSetRef<AtomType>> splayedTypes;
@@ -688,7 +693,8 @@ public class AlligatoroidSyntax {
                 .primitiveHoverStyle(hoverStyle(true))
                 .cursorStyle(cursorStyle(false))
                 .primitiveCursorStyle(cursorStyle(true))
-                .pad(pad)));
+                .pad(pad)),
+        TSSet.of(TYPE_LOCAL, TYPE_ACCESS));
   }
 
   private static ROList<BackSpec> backBuiltinField(BackSpec child) {
@@ -1014,7 +1020,7 @@ public class AlligatoroidSyntax {
 
     public ATypeBuilder nestedIdentifier(String child, ModelColor color) {
       back.nestedIdentifier(child);
-      front.primitive(child, color);
+      front.pattern(child, color, COLOR_INCOMPLETE);
       return this;
     }
 

@@ -47,6 +47,11 @@ public abstract class ModelColor {
           Integer.parseInt(hex.substring(2, 4), 16) / 255.0,
           Integer.parseInt(hex.substring(4, 6), 16) / 255.0);
     }
+
+    @Override
+    public String toString() {
+      return "RGB{" + "r=" + r + ", g=" + g + ", b=" + b + '}';
+    }
   }
 
   public static class RGBA extends ModelColor {
@@ -85,6 +90,11 @@ public abstract class ModelColor {
         double alpha) {
       RGB temp = RGB.polarOKLab(lightness, chroma, hue);
       return new RGBA(temp.r, temp.g, temp.b, alpha);
+    }
+
+    @Override
+    public String toString() {
+      return "RGBA{" + "r=" + r + ", g=" + g + ", b=" + b + ", a=" + a + '}';
     }
   }
 }

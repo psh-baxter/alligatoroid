@@ -28,7 +28,7 @@ public class Style {
     else padding = config.padding;
     if (config.color != null) color = config.color;
     else color = ModelColor.RGB.black;
-    if (config.invalidColor != null) invalidColor = config.color;
+    if (config.invalidColor != null) invalidColor = config.invalidColor;
     else invalidColor = color;
     if (config.font != null) font = config.font;
     else font = null;

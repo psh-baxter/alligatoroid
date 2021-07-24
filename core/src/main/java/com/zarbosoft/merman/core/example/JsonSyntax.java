@@ -40,6 +40,7 @@ import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
+import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
@@ -283,7 +284,8 @@ public class JsonSyntax {
                 .cursorStyle(cursorStyle(false))
                 .primitiveCursorStyle(cursorStyle(true))
                 .courseTransverseStride(fontSize * 1.1)
-                .pad(pad)));
+                .pad(pad)),
+        ROSet.empty);
   }
 
   private static Style cursorStyle(boolean primitive) {

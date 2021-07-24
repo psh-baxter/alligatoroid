@@ -181,6 +181,7 @@ public class NotMain extends Application {
                   },
               new Editor.Config(
                       new Context.InitialConfig().animateCoursePlacement(true).animateDetails(true))
+                  .suffixOnPatternMismatch(syntaxOut.suffixOnPatternMismatch)
                   .bannerStyle(
                       new Style(
                           new Style.Config()
