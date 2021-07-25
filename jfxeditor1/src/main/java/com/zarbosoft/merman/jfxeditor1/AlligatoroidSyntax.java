@@ -628,6 +628,13 @@ public class AlligatoroidSyntax {
         new SuffixGapAtomType(
             new SuffixGapAtomType.Config()
                 .primitiveStyle(gapStyle)
+                .frontPrefix(
+                    new TSList<>(
+                        new FrontSymbolSpec(
+                            new FrontSymbolSpec.Config(
+                                new SymbolSpaceSpec(
+                                    new SymbolSpaceSpec.Config()
+                                        .style(new Style(new Style.Config().space(1))))))))
                 .frontSuffix(
                     new TSList<FrontSpec>(
                         new FrontSymbolSpec(

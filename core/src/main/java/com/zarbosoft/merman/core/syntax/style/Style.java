@@ -81,8 +81,8 @@ public class Style {
       return this;
     }
 
-    public Config space(double px) {
-      space = px;
+    public Config space(double unit) {
+      space = unit;
       return this;
     }
 
