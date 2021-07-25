@@ -73,7 +73,7 @@ public class Wall {
     }
   }
 
-  private void getIdle(final Context context) {
+  private void ensureIdleAdjust(final Context context) {
     if (idleAdjust == null) {
       idleAdjust = new IterationAdjustTask(context);
       context.addIteration(idleAdjust);
@@ -89,7 +89,7 @@ public class Wall {
     for (Course course : courses) {
       visual.add(course.index, course.visual);
     }
-    getIdle(context);
+    ensureIdleAdjust(context);
     if (children.size() > 1) {
       if (idleAdjust.backward >= at) idleAdjust.backward += 1;
       if (idleAdjust.forward >= at && idleAdjust.forward < Integer.MAX_VALUE)
@@ -106,7 +106,7 @@ public class Wall {
     visual.remove(at);
     if (at < children.size()) {
       renumber(at);
-      getIdle(context);
+      ensureIdleAdjust(context);
       if (at < idleAdjust.backward) idleAdjust.backward -= 1;
       if (at < idleAdjust.forward && idleAdjust.forward < Integer.MAX_VALUE)
         idleAdjust.forward -= 1;
@@ -201,7 +201,7 @@ public class Wall {
         }
       }
       this.cornerstoneCourse = cornerstone.parent;
-      if (beddingBefore > 0 || beddingAfter > 0) adjust(context, cornerstoneCourse.index);
+      adjust(context, cornerstoneCourse.index);
       for (CornerstoneListener l : cornerstoneListeners.copy()) {
         l.cornerstoneChanged(context, cornerstone);
       }
@@ -211,7 +211,7 @@ public class Wall {
   }
 
   void adjust(final Context context, final int at) {
-    getIdle(context);
+    ensureIdleAdjust(context);
     idleAdjust.at(at);
   }
 

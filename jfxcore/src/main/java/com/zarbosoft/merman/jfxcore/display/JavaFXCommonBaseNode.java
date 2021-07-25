@@ -2,22 +2,24 @@ package com.zarbosoft.merman.jfxcore.display;
 
 import com.zarbosoft.merman.core.display.Display;
 import com.zarbosoft.merman.core.display.DisplayNode;
+import javafx.animation.Transition;
 import javafx.geometry.Bounds;
 import javafx.scene.Node;
 
 public abstract class JavaFXCommonBaseNode implements DisplayNode {
   public final Node node;
   protected final JavaFXDisplay display;
-
-  @Override
-  public final Node inner_() {
-    return node;
-  }
+  private Transition transition;
 
   protected JavaFXCommonBaseNode(JavaFXDisplay display, Node node) {
     this.display = display;
     this.node = node;
     this.node.setMouseTransparent(true);
+  }
+
+  @Override
+  public final Node inner_() {
+    return node;
   }
 
   @Override
@@ -40,18 +42,37 @@ public abstract class JavaFXCommonBaseNode implements DisplayNode {
         display.convert.unconvert(
             converseCorner(), transverseCorner(), bounds.getWidth(), bounds.getHeight());
     if (animate)
-      new TransitionSmoothOut(node, v.x - node.getLayoutX(), v.y - node.getLayoutY())
-          .play();
+      transition(
+          new TransitionSmoothOut(
+              node,
+              v.x - (node.getLayoutX() + node.getTranslateX()),
+              v.y - (node.getLayoutY() + node.getTranslateY())));
     node.setLayoutX(v.x);
     node.setLayoutY(v.y);
   }
 
+  private void transition(Transition newTransition) {
+    if (transition != null) transition.stop();
+    transition = newTransition;
+    transition.setOnFinished(
+        e -> {
+          transition = null;
+        });
+    transition.play();
+  }
+
   public void setJFXPositionInternal(final Display.UnconvertAxis v, final boolean animate) {
     if (v.x) {
-      if (animate) new TransitionSmoothOut(node, v.amount - node.getLayoutX(), 0.0).play();
+      if (animate)
+        transition(
+            new TransitionSmoothOut(
+                node, v.amount - (node.getLayoutX() + node.getTranslateX()), null));
       node.setLayoutX(v.amount);
     } else {
-      if (animate) new TransitionSmoothOut(node, 0.0, v.amount - node.getLayoutY()).play();
+      if (animate)
+        transition(
+            new TransitionSmoothOut(
+                node, null, v.amount - (node.getLayoutY() + node.getTranslateY())));
       node.setLayoutY(v.amount);
     }
   }

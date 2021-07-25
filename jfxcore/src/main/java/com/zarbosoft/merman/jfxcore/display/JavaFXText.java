@@ -4,9 +4,10 @@ import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.display.Display;
 import com.zarbosoft.merman.core.display.Font;
 import com.zarbosoft.merman.core.display.Text;
-import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
+import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.rendaw.common.DeadCode;
+import javafx.animation.Transition;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.VPos;
@@ -20,17 +21,28 @@ public class JavaFXText implements Text {
   private double ascent;
   private double descent;
   private double converse;
-
-  @Override
-  public Node inner_() {
-    return text;
-  }
+  private Transition transition;
 
   protected JavaFXText(JavaFXDisplay display) {
     this.display = display;
     this.text = new javafx.scene.text.Text();
     this.text.setMouseTransparent(true);
     ((javafx.scene.text.Text) text).setTextOrigin(VPos.BASELINE);
+  }
+
+  private void transition(Transition newTransition) {
+    if (transition != null) transition.stop();
+    transition = newTransition;
+    transition.setOnFinished(
+        e -> {
+          transition = null;
+        });
+    transition.play();
+  }
+
+  @Override
+  public Node inner_() {
+    return text;
   }
 
   @Override
@@ -87,9 +99,7 @@ public class JavaFXText implements Text {
     final double precedingLength = measurer.getWidth(text.getText().substring(0, index));
     int charStart = Math.max(0, index - 1);
     int charEnd = Math.min(text.getText().length(), Math.max(1, index));
-    String charSubstr = text.getText()
-            .substring(
-                    charStart, charEnd);
+    String charSubstr = text.getText().substring(charStart, charEnd);
     final double charLength = measurer.getWidth(charSubstr);
     return (int) (precedingLength - charLength * 0.2);
   }
@@ -112,7 +122,11 @@ public class JavaFXText implements Text {
     Display.UnconvertVector v =
         display.convert.unconvert(converse, transverseBaseline, bounds.getWidth(), 0);
     if (animate)
-      new TransitionSmoothOut(text, v.x - text.getLayoutX(), v.y - text.getLayoutY()).play();
+      transition(
+          new TransitionSmoothOut(
+              text,
+              v.x - (text.getLayoutX() + text.getTranslateX()),
+              v.y - (text.getLayoutY() + text.getTranslateY())));
     text.setLayoutX(v.x);
     text.setLayoutY(v.y);
   }
@@ -150,10 +164,16 @@ public class JavaFXText implements Text {
 
   public void setJFXPositionInternal(final Display.UnconvertAxis v, final boolean animate) {
     if (v.x) {
-      if (animate) new TransitionSmoothOut(text, v.amount - text.getLayoutX(), 0.0).play();
+      if (animate)
+        transition(
+            new TransitionSmoothOut(
+                text, v.amount - (text.getLayoutX() + text.getTranslateX()), null));
       text.setLayoutX(v.amount);
     } else {
-      if (animate) new TransitionSmoothOut(text, 0.0, v.amount - text.getLayoutY()).play();
+      if (animate)
+        transition(
+            new TransitionSmoothOut(
+                text, null, v.amount - (text.getLayoutY() + text.getTranslateY())));
       text.setLayoutY(v.amount);
     }
   }

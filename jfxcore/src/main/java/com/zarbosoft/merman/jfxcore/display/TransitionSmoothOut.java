@@ -16,6 +16,7 @@ public class TransitionSmoothOut extends Transition {
     this.node = node;
     this.diffX = diffX;
     this.diffY = diffY;
+    interpolate(0);
   }
 
   @Override

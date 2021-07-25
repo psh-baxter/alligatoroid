@@ -100,9 +100,12 @@ import static com.zarbosoft.merman.core.hid.Key.DIGIT6;
 import static com.zarbosoft.merman.core.hid.Key.DIGIT7;
 import static com.zarbosoft.merman.core.hid.Key.DIGIT8;
 import static com.zarbosoft.merman.core.hid.Key.DIGIT9;
+import static com.zarbosoft.merman.core.hid.Key.DIR_DIVE;
+import static com.zarbosoft.merman.core.hid.Key.DIR_NEXT;
+import static com.zarbosoft.merman.core.hid.Key.DIR_PREV;
+import static com.zarbosoft.merman.core.hid.Key.DIR_SURFACE;
 import static com.zarbosoft.merman.core.hid.Key.DIVIDE;
 import static com.zarbosoft.merman.core.hid.Key.DOLLAR;
-import static com.zarbosoft.merman.core.hid.Key.DOWN;
 import static com.zarbosoft.merman.core.hid.Key.E;
 import static com.zarbosoft.merman.core.hid.Key.EJECT_TOGGLE;
 import static com.zarbosoft.merman.core.hid.Key.END;
@@ -170,7 +173,6 @@ import static com.zarbosoft.merman.core.hid.Key.KP_LEFT;
 import static com.zarbosoft.merman.core.hid.Key.KP_RIGHT;
 import static com.zarbosoft.merman.core.hid.Key.KP_UP;
 import static com.zarbosoft.merman.core.hid.Key.L;
-import static com.zarbosoft.merman.core.hid.Key.LEFT;
 import static com.zarbosoft.merman.core.hid.Key.LEFT_PARENTHESIS;
 import static com.zarbosoft.merman.core.hid.Key.LESS;
 import static com.zarbosoft.merman.core.hid.Key.M;
@@ -217,7 +219,6 @@ import static com.zarbosoft.merman.core.hid.Key.QUOTEDBL;
 import static com.zarbosoft.merman.core.hid.Key.R;
 import static com.zarbosoft.merman.core.hid.Key.RECORD;
 import static com.zarbosoft.merman.core.hid.Key.REWIND;
-import static com.zarbosoft.merman.core.hid.Key.RIGHT;
 import static com.zarbosoft.merman.core.hid.Key.RIGHT_PARENTHESIS;
 import static com.zarbosoft.merman.core.hid.Key.ROMAN_CHARACTERS;
 import static com.zarbosoft.merman.core.hid.Key.S;
@@ -249,7 +250,6 @@ import static com.zarbosoft.merman.core.hid.Key.U;
 import static com.zarbosoft.merman.core.hid.Key.UNDEFINED;
 import static com.zarbosoft.merman.core.hid.Key.UNDERSCORE;
 import static com.zarbosoft.merman.core.hid.Key.UNDO;
-import static com.zarbosoft.merman.core.hid.Key.UP;
 import static com.zarbosoft.merman.core.hid.Key.V;
 import static com.zarbosoft.merman.core.hid.Key.VOLUME_DOWN;
 import static com.zarbosoft.merman.core.hid.Key.VOLUME_UP;
@@ -274,9 +274,10 @@ public class JavaFXDisplay extends Display {
     node.setSnapToPixel(true);
     node.setFocusTraversable(true);
     node.getChildren().add(origin);
-    node.setOnMouseEntered(event -> {
-        node.requestFocus();
-    });
+    node.setOnMouseEntered(
+        event -> {
+          node.requestFocus();
+        });
     node.setOnMouseExited(
         event -> {
           mouseExited();
@@ -295,7 +296,8 @@ public class JavaFXDisplay extends Display {
         MouseEvent.MOUSE_PRESSED,
         e -> {
           node.requestFocus();
-          if (this.mouseButtonEventListener.apply(buildHIDEvent(convertButton(e.getButton()), true))) {
+          if (this.mouseButtonEventListener.apply(
+              buildHIDEvent(convertButton(e.getButton()), true))) {
             e.consume();
           }
         });
@@ -303,7 +305,8 @@ public class JavaFXDisplay extends Display {
         MouseEvent.MOUSE_RELEASED,
         e -> {
           node.requestFocus();
-          if (this.mouseButtonEventListener.apply(buildHIDEvent(convertButton(e.getButton()), false))) {
+          if (this.mouseButtonEventListener.apply(
+              buildHIDEvent(convertButton(e.getButton()), false))) {
             e.consume();
           }
         });
@@ -318,7 +321,8 @@ public class JavaFXDisplay extends Display {
         });
     node.setOnKeyPressed(
         e -> {
-          if (this.keyEventListener.apply(buildHIDEvent(convertButton(e.getCode()), true))) {
+          if (this.keyEventListener.apply(
+              buildHIDEvent(convertButton(syntax, e.getCode()), true))) {
             e.consume();
           } else if (e.getCode() == KeyCode.ENTER) {
             if (this.typingListener.apply("\n")) {
@@ -328,7 +332,8 @@ public class JavaFXDisplay extends Display {
         });
     node.setOnKeyReleased(
         e -> {
-          if (this.keyEventListener.apply(buildHIDEvent(convertButton(e.getCode()), false))) {
+          if (this.keyEventListener.apply(
+              buildHIDEvent(convertButton(syntax, e.getCode()), false))) {
             e.consume();
           }
         });
@@ -415,7 +420,7 @@ public class JavaFXDisplay extends Display {
     throw new DeadCode();
   }
 
-  public static Key convertButton(final KeyCode code) {
+  public static Key convertButton(Syntax syntax, final KeyCode code) {
     switch (code) {
       case ENTER:
         return ENTER;
@@ -450,13 +455,61 @@ public class JavaFXDisplay extends Display {
       case HOME:
         return HOME;
       case LEFT:
-        return LEFT;
+        switch (syntax.converseDirection) {
+          case LEFT:
+            return DIR_DIVE;
+          case RIGHT:
+            return DIR_SURFACE;
+        }
+        switch (syntax.transverseDirection) {
+          case LEFT:
+            return DIR_NEXT;
+          case RIGHT:
+            return DIR_PREV;
+        }
+        throw new DeadCode();
       case UP:
-        return UP;
+        switch (syntax.converseDirection) {
+          case UP:
+            return DIR_DIVE;
+          case DOWN:
+            return DIR_SURFACE;
+        }
+        switch (syntax.transverseDirection) {
+          case UP:
+            return DIR_NEXT;
+          case DOWN:
+            return DIR_PREV;
+        }
+        throw new DeadCode();
       case RIGHT:
-        return RIGHT;
+        switch (syntax.converseDirection) {
+          case LEFT:
+            return DIR_SURFACE;
+          case RIGHT:
+            return DIR_DIVE;
+        }
+        switch (syntax.transverseDirection) {
+          case LEFT:
+            return DIR_PREV;
+          case RIGHT:
+            return DIR_NEXT;
+        }
+        throw new DeadCode();
       case DOWN:
-        return DOWN;
+        switch (syntax.converseDirection) {
+          case UP:
+            return DIR_SURFACE;
+          case DOWN:
+            return DIR_DIVE;
+        }
+        switch (syntax.transverseDirection) {
+          case UP:
+            return DIR_PREV;
+          case DOWN:
+            return DIR_NEXT;
+        }
+        throw new DeadCode();
       case COMMA:
         return COMMA;
       case MINUS:

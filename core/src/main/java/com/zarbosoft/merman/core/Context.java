@@ -68,19 +68,19 @@ public class Context {
   public final Display display;
   public final PriorityQueue<IterationTask> iterationQueue = new PriorityQueue<>();
   public final Padding pad;
-  public boolean animateCoursePlacement;
-  public boolean animateDetails;
+  public final boolean animateCoursePlacement;
+  public final boolean animateDetails;
   public int ellipsizeThreshold;
   public int layBrickBatchSize;
   public double retryExpandFactor;
-  public double scrollFactor;
-  public double scrollAlotFactor;
+  public final double scrollFactor;
+  public final double scrollAlotFactor;
   public boolean window;
   public KeyListener mouseButtonEventListener;
   /** Contains banner/details and icons. Scrolls. */
-  public Group midground;
+  public final Group midground;
   /** Contains source borders. Scrolls. */
-  public Group background;
+  public final Group background;
 
   public double scroll = 0;
   public double peek = 0;

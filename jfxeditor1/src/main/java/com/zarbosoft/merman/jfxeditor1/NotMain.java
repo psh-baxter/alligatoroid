@@ -25,6 +25,7 @@ import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
+import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
@@ -88,6 +89,138 @@ public class NotMain extends Application {
   public static void logException(Exception e, String s, Object... args) {
     System.out.format(s + "\n", args);
     e.printStackTrace();
+  }
+
+  public static boolean handleCommonNavigation(
+      Context context, NotMain main, ButtonEvent hidEvent) {
+    if (hidEvent.press) {
+      switch (hidEvent.key) {
+        case F:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              main.flush(true);
+              return true;
+            }
+          }
+        case Z:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              if (hidEvent.modifiers.containsAny(shiftKeys)) {
+                Editor.get(context).redo(context);
+              } else {
+                Editor.get(context).undo(context);
+              }
+              return true;
+            }
+          }
+        case Y:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              Editor.get(context).redo(context);
+              return true;
+            }
+          }
+      }
+    }
+    return false;
+  }
+
+  public static boolean handlePrimitiveNavigation(
+      Context context,
+      NotMain main,
+      BaseEditCursorFieldPrimitive cursor,
+      ButtonEvent hidEvent,
+      PrimitiveKeyHandler handler) {
+    if (handleCommonNavigation(context, main, hidEvent)) return true;
+    if (hidEvent.press) {
+      switch (hidEvent.key) {
+        case ESCAPE:
+          {
+            cursor.actionExit(context);
+            return true;
+          }
+        case DIR_DIVE:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              if (hidEvent.modifiers.containsAny(shiftKeys)) {
+                if (cursor.range.leadFirst) cursor.actionReleasePreviousWord(context);
+                else cursor.actionGatherNextWord(context);
+              } else cursor.actionNextWord(context);
+            } else {
+              if (hidEvent.modifiers.containsAny(shiftKeys)) {
+                if (cursor.range.leadFirst) cursor.actionReleasePreviousGlyph(context);
+                else cursor.actionGatherNextGlyph(context);
+              } else cursor.actionNextGlyph(context);
+            }
+            return true;
+          }
+        case DIR_SURFACE:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              if (hidEvent.modifiers.containsAny(shiftKeys)) {
+                if (cursor.range.leadFirst) cursor.actionGatherPreviousWord(context);
+                else cursor.actionReleaseNextWord(context);
+              } else cursor.actionPreviousWord(context);
+            } else {
+              if (hidEvent.modifiers.containsAny(shiftKeys)) {
+                if (cursor.range.leadFirst) cursor.actionGatherPreviousGlyph(context);
+                else cursor.actionReleaseNextGlyph(context);
+              } else cursor.actionPreviousGlyph(context);
+            }
+            return true;
+          }
+        case DIR_PREV:
+          return handler.prev(hidEvent);
+        case DIR_NEXT:
+          return handler.next(hidEvent);
+        case HOME:
+          {
+            cursor.actionLineBegin(context);
+            return true;
+          }
+        case END:
+          {
+            cursor.actionLineEnd(context);
+            return true;
+          }
+        case BACK_SPACE:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              cursor.actionGatherPreviousWord(context);
+            }
+            cursor.editDeletePrevious(Editor.get(context));
+            return true;
+          }
+        case DELETE:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              cursor.actionGatherNextWord(context);
+            }
+            cursor.editDeleteNext(Editor.get(context));
+            return true;
+          }
+        case X:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              if (cursor.range.beginOffset != cursor.range.endOffset)
+                cursor.editCut(Editor.get(context));
+              return true;
+            }
+            break;
+          }
+        case ENTER:
+          return handler.enter(hidEvent);
+        case V:
+          {
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              cursor.editPaste(Editor.get(context));
+              return true;
+            }
+            break;
+          }
+      }
+    }
+    return false;
   }
 
   @Override
@@ -402,6 +535,14 @@ public class NotMain extends Application {
       } catch (IOException e) {
         logException(e, "Failed to clean up backup %s", backupPath);
       }
+  }
+
+  public static interface PrimitiveKeyHandler {
+    boolean prev(ButtonEvent hidEvent);
+
+    boolean next(ButtonEvent hidEvent);
+
+    boolean enter(ButtonEvent hidEvent);
   }
 
   public static class DragSelectState {
