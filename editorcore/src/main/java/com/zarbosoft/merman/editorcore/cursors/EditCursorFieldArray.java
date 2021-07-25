@@ -50,23 +50,25 @@ public class EditCursorFieldArray extends CursorFieldArray {
   }
 
   public void editInsertAfter(Editor editor) {
+    Atom[] created = new Atom[1];
     editor.history.record(
         editor.context,
         new ROPair(visual.value, "insert_after"),
         recorder -> {
-          editor.arrayInsertNewDefault(recorder, visual.value, endIndex + 1);
+          created[0] = editor.arrayInsertNewDefault(recorder, visual.value, endIndex + 1);
         });
-    setPosition(editor.context, endIndex + 1);
+    created[0].selectInto(editor.context);
   }
 
   public void editInsertBefore(Editor editor) {
+    Atom[] created = new Atom[1];
     editor.history.record(
         editor.context,
         new ROPair(visual.value, "insert_before"),
         recorder -> {
-          editor.arrayInsertNewDefault(recorder, visual.value, beginIndex);
+          created[0] = editor.arrayInsertNewDefault(recorder, visual.value, beginIndex);
         });
-    setPosition(editor.context, beginIndex);
+    created[0].selectInto(editor.context);
   }
 
   public void editMoveAfter(Editor editor) {
