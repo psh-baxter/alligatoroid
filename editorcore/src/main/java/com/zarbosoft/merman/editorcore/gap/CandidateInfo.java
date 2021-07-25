@@ -16,38 +16,41 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.HomogenousEscapableSequence;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class CandidateInfo {
   /** Atom/array fronts preceding the concrete key text */
   public final ROList<FrontSpec> preceding;
   /**
-   * Matches the key text and puts a var double list of (string key, string primitive contents) for
-   * parsed primitive front
+   * Matches the key text and returns parsed + partially parsed primitive from that text. Boolean is
+   * whether it had completed (if last front element is primitive the last one will be false; if it
+   * was parsing a symbol or whatever it can be true)
    */
-  public final Node<EscapableResult<ROList<FieldPrimitive>>> keyGrammar;
+  public final Node<EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> keyGrammar;
 
-  public final ROList<FrontSpec> keySpecs;
+  public final ROList<FrontSpec> allKeyFrontSpecs;
   /** May be null */
   public final FrontSpec following;
 
   public CandidateInfo(
       ROList<FrontSpec> preceding,
-      Node<EscapableResult<ROList<FieldPrimitive>>> keyGrammar,
-      ROList<FrontSpec> keySpecs,
+      Node<EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> keyGrammar,
+      ROList<FrontSpec> allKeyFrontSpecs,
       FrontSpec following) {
     this.preceding = preceding;
     this.keyGrammar = keyGrammar;
-    this.keySpecs = keySpecs;
+    this.allKeyFrontSpecs = allKeyFrontSpecs;
     this.following = following;
   }
 
   public static CandidateInfo inspect(Environment env, AtomType candidate) {
     ROList<FrontSpec> front = candidate.front();
     TSList<FrontSpec> preceding = new TSList<>();
-    HomogenousEscapableSequence<FieldPrimitive> keyGrammar =
-        new HomogenousEscapableSequence<FieldPrimitive>();
-    TSList<FrontSpec> keySpecs = new TSList<>();
+    HomogenousEscapableSequence<ROPair<FieldPrimitive, Boolean>> keyGrammar =
+        new HomogenousEscapableSequence<>();
+    TSList<FrontSpec> allKeyFrontSpecs = new TSList<>();
+    TSList<FrontPrimitiveSpec> primitiveKeyFrontSpecs = new TSList<>();
     FrontSpec[] following = {null};
     new Object() {
       {
@@ -79,19 +82,25 @@ public class CandidateInfo {
             preceding.add(f);
 
           } else if (f instanceof FrontPrimitiveSpec) {
-            keySpecs.add(f);
+            allKeyFrontSpecs.add(f);
+            primitiveKeyFrontSpecs.add((FrontPrimitiveSpec) f);
             keyGrammar.add(
-                new Operator<EscapableResult<ROList<String>>, EscapableResult<FieldPrimitive>>(
+                new Operator<
+                    EscapableResult<ROList<String>>,
+                    EscapableResult<ROPair<FieldPrimitive, Boolean>>>(
                     ((FrontPrimitiveSpec) f).field.pattern != null
                         ? ((FrontPrimitiveSpec) f).field.pattern.build(true)
                         : Any.repeatedAny.build(true)) {
                   @Override
-                  protected EscapableResult<FieldPrimitive> process(
+                  protected EscapableResult<ROPair<FieldPrimitive, Boolean>> process(
                       EscapableResult<ROList<String>> value) {
                     return new EscapableResult<>(
                         value.completed,
-                        new FieldPrimitive(
-                            ((FrontPrimitiveSpec) f).field, Environment.joinGlyphs(value.value)));
+                        new ROPair<>(
+                            new FieldPrimitive(
+                                ((FrontPrimitiveSpec) f).field,
+                                Environment.joinGlyphs(value.value)),
+                            value.completed));
                   }
                 });
           }
@@ -99,7 +108,7 @@ public class CandidateInfo {
       }
 
       void processSymbol(FrontSymbolSpec f) {
-        keySpecs.add(f);
+        allKeyFrontSpecs.add(f);
         if (f.gapKey != null) {
           keyGrammar.addIgnored(new PatternString(env, f.gapKey).build(false));
         } else if (f.type instanceof SymbolTextSpec) {
@@ -109,6 +118,6 @@ public class CandidateInfo {
       }
     };
 
-    return new CandidateInfo(preceding, keyGrammar, keySpecs, following[0]);
+    return new CandidateInfo(preceding, keyGrammar, allKeyFrontSpecs, following[0]);
   }
 }

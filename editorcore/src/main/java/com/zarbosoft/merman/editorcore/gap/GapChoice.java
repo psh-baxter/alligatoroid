@@ -40,35 +40,35 @@ import java.util.function.Consumer;
 public class GapChoice extends TwoColumnChoice {
   public final Atom gap;
   public final FreeAtomType type;
-  public final int consumePreceding;
+  public final int consumePrecedingAtoms;
   public final ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms;
   public final int consumeText;
-  public final Leaf incompleteFields;
+  public final Leaf incompleteKeyParse;
   private final TSList<Event> glyphs;
   private final FrontSpec followingSpec;
-  private final ROList<FrontSpec> keySpecs;
-  private ROList fields;
+  private final ROList<FrontSpec> allKeyFrontSpecs;
+  private ROList<ROPair<FieldPrimitive, Boolean>> fields;
 
   public GapChoice(
       Atom gap,
       FreeAtomType type,
-      int consumePreceding,
+      int consumePrecedingAtoms,
       ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms,
       TSList<Event> glyphs,
       int consumeText,
-      ROList<FieldPrimitive> fields,
-      Leaf incompleteFields,
-      ROList<FrontSpec> keySpecs,
+      ROList<ROPair<FieldPrimitive, Boolean>> fields,
+      Leaf incompleteKeyParse,
+      ROList<FrontSpec> allKeyFrontSpecs,
       FrontSpec followingSpec) {
     this.gap = gap;
     this.type = type;
-    this.consumePreceding = consumePreceding;
+    this.consumePrecedingAtoms = consumePrecedingAtoms;
     this.supplyFillAtoms = supplyFillAtoms;
     this.glyphs = glyphs;
     this.consumeText = consumeText;
     this.fields = fields;
-    this.incompleteFields = incompleteFields;
-    this.keySpecs = keySpecs;
+    this.incompleteKeyParse = incompleteKeyParse;
+    this.allKeyFrontSpecs = allKeyFrontSpecs;
     this.followingSpec = followingSpec;
   }
 
@@ -77,28 +77,70 @@ public class GapChoice extends TwoColumnChoice {
     Consumer<History.Recorder> apply =
         recorder1 -> {
           TSMap<String, Field> fields = new TSMap<>();
+
           /// Aggregate typed text parsing results into primitive fields
           // + identify last primitive
-          ROList<FieldPrimitive> preFields;
+          FieldPrimitive nextIncompletePrimitive = null;
+          ROList<ROPair<FieldPrimitive, Boolean>> preFields;
           if (this.fields != null) {
             preFields = this.fields;
+            ROPair<FieldPrimitive, Boolean> lastField = preFields.lastOpt();
+            if (lastField != null) nextIncompletePrimitive = lastField.first;
           } else {
-            final Step<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>> nextStep =
-                new Step<>();
-            this.incompleteFields.parse(null, nextStep, new ForceEndCharacterEvent());
+            final Step<
+                    ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>
+                nextStep = new Step<>();
+            this.incompleteKeyParse.parse(null, nextStep, new ForceEndCharacterEvent());
             preFields = nextStep.completed.get(0).second.value;
+            ROPair<FieldPrimitive, Boolean> preNextIncompletePrimitive = preFields.lastOpt();
+            if (preNextIncompletePrimitive != null) {
+              if (preNextIncompletePrimitive.second) {
+                // Last parsed primtive was completed (walled in by symbol) - find the next
+                // primitive
+                boolean next = false;
+                for (FrontSpec spec : allKeyFrontSpecs) {
+                  if (spec instanceof FrontPrimitiveSpec) {
+                    if (next) {
+                      nextIncompletePrimitive =
+                          new FieldPrimitive(((FrontPrimitiveSpec) spec).field, "");
+                      fields.put(nextIncompletePrimitive.back.id, nextIncompletePrimitive);
+                      break;
+                    }
+                    if (((FrontPrimitiveSpec) spec)
+                        .fieldId.equals(preNextIncompletePrimitive.first.back.id)) {
+                      next = true;
+                    }
+                  }
+                }
+              } else {
+                // Last parsed primitive was incomplete
+                nextIncompletePrimitive = preNextIncompletePrimitive.first;
+              }
+            } else {
+              // No primitives reached - find the first primitive and use
+              for (FrontSpec spec : allKeyFrontSpecs) {
+                if (spec instanceof FrontPrimitiveSpec) {
+                  nextIncompletePrimitive =
+                      new FieldPrimitive(((FrontPrimitiveSpec) spec).field, "");
+                  fields.put(nextIncompletePrimitive.back.id, nextIncompletePrimitive);
+                }
+              }
+            }
           }
-          FieldPrimitive lastPrimitive = preFields.lastOpt();
-          for (FieldPrimitive field : preFields) {
-            fields.put(field.back.id, field);
+
+          // Add parsed primitive fields
+          for (ROPair<FieldPrimitive, Boolean> field : preFields) {
+            fields.put(field.first.back.id, field.first);
           }
+
           // Remainder text
           StringBuilder remainderText = new StringBuilder();
           for (Event event : glyphs.subFrom(consumeText)) {
             remainderText.append(((CharacterEvent) event).value);
           }
+
           /// Aggregate consumed preceding atoms and remove from prefix
-          if (consumePreceding > 0) {
+          if (consumePrecedingAtoms > 0) {
             FieldArray precedingField =
                 (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY);
             TSList<Atom> preceding = precedingField.data;
@@ -106,14 +148,15 @@ public class GapChoice extends TwoColumnChoice {
                 editor.context,
                 new ChangeArray(
                     precedingField,
-                    preceding.size() - consumePreceding,
-                    consumePreceding,
+                    preceding.size() - consumePrecedingAtoms,
+                    consumePrecedingAtoms,
                     ROList.empty));
             for (EditGapCursorFieldPrimitive.PrepareAtomField s : supplyFillAtoms) {
               Field field = s.process(editor, recorder1);
               fields.put(field.back().id, field);
             }
           }
+
           /// Create atom
           Field following = null;
           Atom created = new Atom(type);
@@ -126,6 +169,7 @@ public class GapChoice extends TwoColumnChoice {
             }
           }
           created.initialSet(fields);
+
           /// Place and select next focus
           if (remainderText.length() > 0) {
             if (following != null) {
@@ -136,9 +180,9 @@ public class GapChoice extends TwoColumnChoice {
             }
             ((EditGapCursorFieldPrimitive) editor.context.cursor)
                 .editHandleTyping(editor, recorder1, remainderText.toString());
-          } else if (lastPrimitive != null) {
+          } else if (nextIncompletePrimitive != null) {
             place(editor, recorder1, created);
-            lastPrimitive.selectInto(editor.context);
+            nextIncompletePrimitive.selectInto(editor.context);
           } else if (following != null) {
             place(editor, recorder1, created);
             deepSelectInto(editor, recorder1, following);
@@ -222,7 +266,7 @@ public class GapChoice extends TwoColumnChoice {
     final CourseGroup previewLayout = new CourseGroup(editor.context.display.group());
     previewLayout.setPadding(editor.context, editor.choicePreviewPadding);
     TSList<FrontSymbolSpec> spaces = new TSList<>();
-    for (final FrontSpec part : keySpecs) {
+    for (final FrontSpec part : allKeyFrontSpecs) {
       final CourseDisplayNode node;
       if (part instanceof FrontSymbolSpec) {
         if (((FrontSymbolSpec) part).type instanceof SymbolSpaceSpec

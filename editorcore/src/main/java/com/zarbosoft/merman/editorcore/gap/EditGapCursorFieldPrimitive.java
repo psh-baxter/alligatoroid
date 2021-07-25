@@ -49,7 +49,7 @@ import java.util.Iterator;
 
 public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
   public static Reference.Key<ROList<PrepareAtomField>> PRECEDING_ROOT_KEY = new Reference.Key<>();
-  public static Reference.Key<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>
+  public static Reference.Key<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>
       GAP_ROOT_KEY = new Reference.Key<>();
   public final Grammar grammar;
   public String currentText;
@@ -85,7 +85,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     Atom gap = gapAtom();
     AtomType gapType = gap.type;
     String baseType = gap.fieldParentRef.valueType();
-    Union<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>> union = new Union<>();
+    Union<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>> union = new Union<>();
 
     TSSet<AtomType> seen = new TSSet<>();
     Deque<Iterator<AtomType>> stack = new ArrayDeque<>();
@@ -105,17 +105,16 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
           /// Starts with text, is candidate
           PreGapChoice preChoice =
               new PreGapChoice(
-                  (FreeAtomType) leafType, 0, TSList.empty, info.keySpecs, info.following);
+                  (FreeAtomType) leafType, 0, TSList.empty, info.allKeyFrontSpecs, info.following);
           union.add(
               new Color<>(
                   preChoice,
                   new Operator<
-                      EscapableResult<ROList<FieldPrimitive>>,
-                      ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>(
+                      EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>,
+                      ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>(
                       info.keyGrammar) {
                     @Override
-                    protected ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>> process(
-                        EscapableResult<ROList<FieldPrimitive>> value) {
+                    protected ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> process(EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>> value) {
                       return new ROPair<>(preChoice, value);
                     }
                   }));
@@ -212,18 +211,17 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
                   (FreeAtomType) leafType,
                   (Integer) longestMatch.second.at + 1,
                   longestMatch.first.completed.get(0),
-                  info.keySpecs,
+                  info.allKeyFrontSpecs,
                   info.following);
           union.add(
               new Color<>(
                   preChoice,
                   new Operator<
-                      EscapableResult<ROList<FieldPrimitive>>,
-                      ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>(
+                      EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>,
+                      ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>(
                       info.keyGrammar) {
                     @Override
-                    protected ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>> process(
-                        EscapableResult<ROList<FieldPrimitive>> value) {
+                    protected ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> process(EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>> value) {
                       return new ROPair<>(preChoice, value);
                     }
                   }));
@@ -296,12 +294,12 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     /// Parse new text, rank choices
     // If the whole text matches, try to auto complete
     // Display info on matches and not-yet-mismatches
-    out.glyphs = context.env.splitGlyphEvents(text);
+    out.allGlyphs = context.env.splitGlyphEvents(text);
     out.longest =
-        new ParseBuilder<>(GAP_ROOT_KEY).grammar(grammar).longestMatchFromStart(out.glyphs);
+        new ParseBuilder<>(GAP_ROOT_KEY).grammar(grammar).longestMatchFromStart(out.allGlyphs);
     out.choices = new TSList<>();
     TSSet<AtomType> seen = new TSSet<>();
-    for (ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>> result :
+    for (ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> result :
         out.longest.first.completed) {
       PreGapChoice choice = result.first;
       seen.add(result.first.type);
@@ -311,7 +309,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
               choice.type,
               choice.consumePreceding,
               choice.supplyFillAtoms,
-              out.glyphs,
+              out.allGlyphs,
               ((int) out.longest.second.at) + 1,
               result.second.value,
               null,
@@ -327,7 +325,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
               choice.type,
               choice.consumePreceding,
               choice.supplyFillAtoms,
-              out.glyphs,
+              out.allGlyphs,
               ((int) out.longest.second.at) + 1,
               null,
               leaf,
@@ -358,8 +356,8 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     TextChangedResult res = textChangedNoAutocomplete(editor, text);
 
     /// Choose auto-choosable choices
-    if (res.glyphs.some()) {
-      if ((int) res.longest.second.at + 1 == res.glyphs.size()) {
+    if (res.allGlyphs.some()) {
+      if ((int) res.longest.second.at + 1 == res.allGlyphs.size()) {
         for (final GapChoice choice : res.choices) {
           if (choice.type.autoChooseUnambiguous && res.choices.size() == 1) {
             choice.choose(editor, recorder);
@@ -471,9 +469,9 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
   }
 
   public static class TextChangedResult {
-    public TSList<Event> glyphs;
+    public TSList<Event> allGlyphs;
     public TSList<GapChoice> choices;
-    public Pair<Step<ROPair<PreGapChoice, EscapableResult<ROList<FieldPrimitive>>>>, Position>
+    public Pair<Step<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>, Position>
         longest;
   }
 }
