@@ -119,7 +119,7 @@ public class CandidateInfo {
                       value.completed, new ROPair<>(null, value.completed));
                 }
               });
-        } else if (f.type instanceof SymbolTextSpec) {
+        } else if (f.type instanceof SymbolTextSpec && !((SymbolTextSpec) f.type).nonGapKey) {
           keyGrammar.add(
               new Operator<>(new PatternString(env, ((SymbolTextSpec) f.type).text).build(false)) {
                 @Override

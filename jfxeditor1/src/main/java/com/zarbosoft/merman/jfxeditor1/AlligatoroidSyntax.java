@@ -771,7 +771,7 @@ public class AlligatoroidSyntax {
           new FrontSymbolSpec(
               new FrontSymbolSpec.Config(
                   new SymbolTextSpec(
-                      new SymbolTextSpec.Config(" ").style(new Style(baseCodeStyle()))))));
+                      new SymbolTextSpec.Config(" ").nonGapKey().style(new Style(baseCodeStyle()))))));
       return this;
     }
 

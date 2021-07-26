@@ -64,7 +64,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
       int endOffset) {
     super(editor.context, visualPrimitive, leadFirst, beginOffset, endOffset);
     grammar = createChoiceGrammar(editor.context);
-    textChanged(editor, null, visualPrimitive.value.data.toString());
+    textChangedNoAutocomplete(editor, visualPrimitive.value.data.toString());
   }
 
   @Override

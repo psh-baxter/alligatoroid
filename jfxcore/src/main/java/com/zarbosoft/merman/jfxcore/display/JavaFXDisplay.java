@@ -258,6 +258,7 @@ import static com.zarbosoft.merman.core.hid.Key.WINDOWS;
 import static com.zarbosoft.merman.core.hid.Key.X;
 import static com.zarbosoft.merman.core.hid.Key.Y;
 import static com.zarbosoft.merman.core.hid.Key.Z;
+import static javafx.scene.input.KeyEvent.CHAR_UNDEFINED;
 
 public class JavaFXDisplay extends Display {
   public final Pane node = new Pane();
@@ -339,7 +340,8 @@ public class JavaFXDisplay extends Display {
         });
     node.setOnKeyTyped(
         e -> {
-          if (this.typingListener.apply(e.getCharacter())) {
+          String character = e.getCharacter();
+          if (!CHAR_UNDEFINED.equals(character) && this.typingListener.apply(character)) {
             e.consume();
           }
         });

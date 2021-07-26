@@ -6,6 +6,7 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.display.CourseDisplayNode;
 import com.zarbosoft.merman.core.display.Text;
 import com.zarbosoft.merman.core.syntax.AtomType;
+import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.style.Style;
 import com.zarbosoft.merman.core.wall.Brick;
 import com.zarbosoft.merman.core.wall.BrickInterface;
@@ -15,11 +16,13 @@ public class SymbolTextSpec extends Symbol {
   public final String text;
   public final Style.SplitMode splitMode;
   public final Style style;
+  public final boolean nonGapKey;
 
   public SymbolTextSpec(Config config) {
     this.text = config.text;
     this.splitMode = config.splitMode;
     this.style = config.style;
+    this.nonGapKey = config.nonGapKey;
   }
 
   @Override
@@ -46,8 +49,9 @@ public class SymbolTextSpec extends Symbol {
     public final String text;
     public Style.SplitMode splitMode = Style.SplitMode.NEVER;
     public Style style = new Style(new Style.Config());
+    public boolean nonGapKey = false;
 
-      public Config(String text) {
+    public Config(String text) {
       this.text = text;
     }
 
@@ -58,6 +62,11 @@ public class SymbolTextSpec extends Symbol {
 
     public Config style(Style style) {
       this.style = style;
+      return this;
+    }
+
+    public Config nonGapKey() {
+        this.nonGapKey=true;
       return this;
     }
   }
