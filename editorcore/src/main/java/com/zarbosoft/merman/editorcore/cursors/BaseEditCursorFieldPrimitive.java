@@ -41,6 +41,10 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
     else editor.history.record(editor.context, new ROPair<>(visualPrimitive.value, "text"), apply);
   }
 
+  public void editExit(Editor editor) {
+      actionExit(editor.context);
+  }
+
   public void editCut(Editor editor) {
     editor.history.record(
         editor.context,

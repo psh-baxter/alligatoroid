@@ -136,7 +136,7 @@ public class NotMain extends Application {
       switch (hidEvent.key) {
         case ESCAPE:
           {
-            cursor.actionExit(context);
+            cursor.editExit(Editor.get(context));
             return true;
           }
         case DIR_DIVE:

@@ -49,7 +49,8 @@ import java.util.Iterator;
 
 public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
   public static Reference.Key<ROList<PrepareAtomField>> PRECEDING_ROOT_KEY = new Reference.Key<>();
-  public static Reference.Key<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>
+  public static Reference.Key<
+          ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>
       GAP_ROOT_KEY = new Reference.Key<>();
   public final Grammar grammar;
   public String currentText;
@@ -85,7 +86,8 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     Atom gap = gapAtom();
     AtomType gapType = gap.type;
     String baseType = gap.fieldParentRef.valueType();
-    Union<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>> union = new Union<>();
+    Union<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>> union =
+        new Union<>();
 
     TSSet<AtomType> seen = new TSSet<>();
     Deque<Iterator<AtomType>> stack = new ArrayDeque<>();
@@ -111,10 +113,13 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
                   preChoice,
                   new Operator<
                       EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>,
-                      ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>(
+                      ROPair<
+                          PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>(
                       info.keyGrammar) {
                     @Override
-                    protected ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> process(EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>> value) {
+                    protected ROPair<
+                            PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>
+                        process(EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>> value) {
                       return new ROPair<>(preChoice, value);
                     }
                   }));
@@ -218,10 +223,13 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
                   preChoice,
                   new Operator<
                       EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>,
-                      ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>(
+                      ROPair<
+                          PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>(
                       info.keyGrammar) {
                     @Override
-                    protected ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> process(EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>> value) {
+                    protected ROPair<
+                            PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>
+                        process(EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>> value) {
                       return new ROPair<>(preChoice, value);
                     }
                   }));
@@ -381,18 +389,19 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     return false;
   }
 
+  @Override
   public void editExit(Editor editor) {
     Atom.Parent atomParentRef = visualPrimitive.value.atomParentRef;
     if (atomParentRef == null) return;
     Atom gap = atomParentRef.atom();
     atomParentRef.selectParent(editor.context);
-    Field gapInField = gap.fieldParentRef.field;
+    Field inField = gap.fieldParentRef.field;
     if (gap.type == editor.context.syntax.gap)
       // Remove empty unit gaps
       do {
-        if (!(gapInField instanceof FieldArray)) break;
-        if (gapInField.atomParentRef.atom().type instanceof RootAtomType) break;
-        FieldArray value = (FieldArray) gapInField;
+        if (!(inField instanceof FieldArray)) break;
+        if (inField.atomParentRef.atom().type instanceof RootAtomType) break;
+        FieldArray value = (FieldArray) inField;
         TSList<Atom> data = value.data;
         if (data.size() > 1) break;
         Atom atom = data.get(0);
@@ -415,12 +424,12 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
         ROOrderedSetRef<AtomType> canPlace;
         if (array.data.size() == 0) {
           canPlace = ROOrderedSetRef.empty;
-        } else if (array.data.size() == 1 && gapInField instanceof FieldAtom) {
-          canPlace = editor.context.syntax.splayedTypes.get(((FieldAtom) gapInField).back().type);
-        } else if (gapInField instanceof FieldArray) {
+        } else if (array.data.size() == 1 && inField instanceof FieldAtom) {
+          canPlace = editor.context.syntax.splayedTypes.get(((FieldAtom) inField).back().type);
+        } else if (inField instanceof FieldArray) {
           canPlace =
               editor.context.syntax.splayedTypes.get(
-                  ((FieldArray) gapInField).back().elementAtomType());
+                  ((FieldArray) inField).back().elementAtomType());
         } else break;
         boolean canPlaceAll = true;
         for (Atom atom : array.data) {
@@ -437,18 +446,18 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
             recorder -> {
               recorder.apply(
                   editor.context, new ChangeArray(array, 0, array.data.size(), ROList.empty));
-              if (gapInField instanceof FieldAtom) {
+              if (inField instanceof FieldAtom) {
                 Atom transplant0;
                 if (transplant.some()) transplant0 = transplant.get(0);
                 else
                   transplant0 =
                       Editor.createEmptyAtom(editor.context.syntax, editor.context.syntax.gap);
-                recorder.apply(editor.context, new ChangeAtom((FieldAtom) gapInField, transplant0));
-              } else if (gapInField instanceof FieldArray) {
+                recorder.apply(editor.context, new ChangeAtom((FieldAtom) inField, transplant0));
+              } else if (inField instanceof FieldArray) {
                 recorder.apply(
                     editor.context,
                     new ChangeArray(
-                        (FieldArray) gapInField,
+                        (FieldArray) inField,
                         ((FieldArray.Parent) gap.fieldParentRef).index,
                         1,
                         transplant));
@@ -471,7 +480,9 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
   public static class TextChangedResult {
     public TSList<Event> allGlyphs;
     public TSList<GapChoice> choices;
-    public Pair<Step<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>, Position>
+    public Pair<
+            Step<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>,
+            Position>
         longest;
   }
 }
