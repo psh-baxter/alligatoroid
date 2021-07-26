@@ -100,10 +100,6 @@ import static com.zarbosoft.merman.core.hid.Key.DIGIT6;
 import static com.zarbosoft.merman.core.hid.Key.DIGIT7;
 import static com.zarbosoft.merman.core.hid.Key.DIGIT8;
 import static com.zarbosoft.merman.core.hid.Key.DIGIT9;
-import static com.zarbosoft.merman.core.hid.Key.DIR_DIVE;
-import static com.zarbosoft.merman.core.hid.Key.DIR_NEXT;
-import static com.zarbosoft.merman.core.hid.Key.DIR_PREV;
-import static com.zarbosoft.merman.core.hid.Key.DIR_SURFACE;
 import static com.zarbosoft.merman.core.hid.Key.DIVIDE;
 import static com.zarbosoft.merman.core.hid.Key.DOLLAR;
 import static com.zarbosoft.merman.core.hid.Key.E;
@@ -322,8 +318,7 @@ public class JavaFXDisplay extends Display {
         });
     node.setOnKeyPressed(
         e -> {
-          if (this.keyEventListener.apply(
-              buildHIDEvent(convertButton(syntax, e.getCode()), true))) {
+          if (this.keyEventListener.apply(buildHIDEvent(convertButton(e.getCode()), true))) {
             e.consume();
           } else if (e.getCode() == KeyCode.ENTER) {
             if (this.typingListener.apply("\n")) {
@@ -333,8 +328,7 @@ public class JavaFXDisplay extends Display {
         });
     node.setOnKeyReleased(
         e -> {
-          if (this.keyEventListener.apply(
-              buildHIDEvent(convertButton(syntax, e.getCode()), false))) {
+          if (this.keyEventListener.apply(buildHIDEvent(convertButton(e.getCode()), false))) {
             e.consume();
           }
         });
@@ -422,7 +416,7 @@ public class JavaFXDisplay extends Display {
     throw new DeadCode();
   }
 
-  public static Key convertButton(Syntax syntax, final KeyCode code) {
+  public Key convertButton(final KeyCode code) {
     switch (code) {
       case ENTER:
         return ENTER;
@@ -457,61 +451,13 @@ public class JavaFXDisplay extends Display {
       case HOME:
         return HOME;
       case LEFT:
-        switch (syntax.converseDirection) {
-          case LEFT:
-            return DIR_DIVE;
-          case RIGHT:
-            return DIR_SURFACE;
-        }
-        switch (syntax.transverseDirection) {
-          case LEFT:
-            return DIR_NEXT;
-          case RIGHT:
-            return DIR_PREV;
-        }
-        throw new DeadCode();
+        return convert.convertCardinal(Direction.LEFT);
       case UP:
-        switch (syntax.converseDirection) {
-          case UP:
-            return DIR_DIVE;
-          case DOWN:
-            return DIR_SURFACE;
-        }
-        switch (syntax.transverseDirection) {
-          case UP:
-            return DIR_NEXT;
-          case DOWN:
-            return DIR_PREV;
-        }
-        throw new DeadCode();
+        return convert.convertCardinal(Direction.UP);
       case RIGHT:
-        switch (syntax.converseDirection) {
-          case LEFT:
-            return DIR_SURFACE;
-          case RIGHT:
-            return DIR_DIVE;
-        }
-        switch (syntax.transverseDirection) {
-          case LEFT:
-            return DIR_PREV;
-          case RIGHT:
-            return DIR_NEXT;
-        }
-        throw new DeadCode();
+        return convert.convertCardinal(Direction.RIGHT);
       case DOWN:
-        switch (syntax.converseDirection) {
-          case UP:
-            return DIR_SURFACE;
-          case DOWN:
-            return DIR_DIVE;
-        }
-        switch (syntax.transverseDirection) {
-          case UP:
-            return DIR_PREV;
-          case DOWN:
-            return DIR_NEXT;
-        }
-        throw new DeadCode();
+        return convert.convertCardinal(Direction.DOWN);
       case COMMA:
         return COMMA;
       case MINUS:

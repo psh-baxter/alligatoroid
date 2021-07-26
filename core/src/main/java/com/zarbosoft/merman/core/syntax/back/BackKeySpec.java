@@ -51,7 +51,7 @@ public class BackKeySpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.key(((StringBuilder) data.get(id)).toString());
   }
 

@@ -64,6 +64,8 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
       int endOffset) {
     super(editor.context, visualPrimitive, leadFirst, beginOffset, endOffset);
     grammar = createChoiceGrammar(editor.context);
+    // Can't autocomplete here - the selection hasn't finished changing yet and interrupting it
+    // midway gets things into a weird state
     textChangedNoAutocomplete(editor, visualPrimitive.value.data.toString());
   }
 

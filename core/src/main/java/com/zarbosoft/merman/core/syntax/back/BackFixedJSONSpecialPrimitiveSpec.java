@@ -42,7 +42,7 @@ public class BackFixedJSONSpecialPrimitiveSpec extends BackSpec {
   }
 
   @Override
-  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.jsonSpecialPrimitive(value);
   }
 

@@ -383,7 +383,7 @@ public class Context {
   }
 
   public void copy(CopyContext copyContext, TSList<WriteState> stack) {
-    env.clipboardSet(syntax.backType.mime(), serializer.writeForClipboard(copyContext, stack));
+    env.clipboardSet(syntax.backType.mime(), serializer.writeForClipboard(env, copyContext, stack));
   }
 
   public void copy(final String string) {

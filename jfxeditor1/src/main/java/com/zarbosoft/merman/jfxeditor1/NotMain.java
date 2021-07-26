@@ -522,7 +522,7 @@ public class NotMain extends Application {
       }
       try {
         Files.write(
-            path1, (byte[]) editor.context.serializer.writeDocument(editor.context.document));
+            path1, (byte[]) editor.context.serializer.writeDocument(editor.context.env, editor.context.document));
       } catch (IOException e) {
         logException(e, "Failed to write to %s", this.path);
         return;

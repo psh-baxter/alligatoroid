@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.serialization;
 
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -19,7 +20,7 @@ public class WriteStateFixedRecord extends WriteState {
   }
 
   @Override
-  public void run(final TSList<WriteState> stack, final EventConsumer writer) {
+  public void run(Environment env, final TSList<WriteState> stack, final EventConsumer writer) {
     if (!iterator.hasNext()) return;
     final ROPair<String, BackSpec> next = iterator.next();
     if (iterator.hasNext()) {
@@ -27,6 +28,6 @@ public class WriteStateFixedRecord extends WriteState {
     }
     writer.key(next.first);
     BackSpec part = next.second;
-    part.write(stack, data, writer);
+    part.write(env, stack, data, writer);
   }
 }

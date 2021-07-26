@@ -6,6 +6,7 @@ import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.merman.core.AtomKey;
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
 import com.zarbosoft.merman.core.backevents.EKeyEvent;
@@ -221,7 +222,7 @@ public class JavaSerializer implements Serializer {
   }
 
   @Override
-  public Object writeDocument(Document document) {
+  public Object writeDocument(Environment env, Document document) {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     uncheck(
         () -> {
@@ -243,7 +244,7 @@ public class JavaSerializer implements Serializer {
           }
           final TSList<WriteState> stack = new TSList<>();
           document.root.write(stack);
-          while (!stack.isEmpty()) stack.removeLast().run(stack, writer);
+          while (!stack.isEmpty()) stack.removeLast().run(env, stack, writer);
           if (backType == BackType.JSON) jsonGenerator.flush();
           stream.write('\n');
           stream.flush();
@@ -252,7 +253,7 @@ public class JavaSerializer implements Serializer {
   }
 
   @Override
-  public Object writeForClipboard(Context.CopyContext copyContext, TSList<WriteState> stack) {
+  public Object writeForClipboard(Environment env, Context.CopyContext copyContext, TSList<WriteState> stack) {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     uncheck(
         () -> {
@@ -292,7 +293,7 @@ public class JavaSerializer implements Serializer {
             default:
               throw new DeadCode();
           }
-          while (!stack.isEmpty()) stack.removeLast().run(stack, writer);
+          while (!stack.isEmpty()) stack.removeLast().run(env, stack, writer);
           switch (backType) {
             case LUXEM:
               {

@@ -29,8 +29,6 @@ import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.primitivepattern.Integer;
-import com.zarbosoft.merman.core.syntax.primitivepattern.JsonDecimal;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
 import com.zarbosoft.merman.core.syntax.style.Padding;
@@ -139,8 +137,7 @@ public class JsonSyntax {
                         TYPE_INT,
                         TSList.of(
                             new BackJSONSpecialPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID)
-                                    .pattern(new Integer(), "integer"))),
+                                BackJSONSpecialPrimitiveSpec.integerConfig(DEFAULT_ID))),
                         TSList.of(
                             new FrontPrimitiveSpec(
                                 new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),
@@ -151,8 +148,7 @@ public class JsonSyntax {
                         TYPE_DECIMAL,
                         TSList.of(
                             new BackJSONSpecialPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config(DEFAULT_ID)
-                                    .pattern(new JsonDecimal(), "json decimal"))),
+                                BackJSONSpecialPrimitiveSpec.decimalConfig(DEFAULT_ID))),
                         TSList.of(
                             new FrontPrimitiveSpec(
                                 new FrontPrimitiveSpec.Config(DEFAULT_ID).style(numberStyle)))))),

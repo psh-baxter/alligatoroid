@@ -28,6 +28,11 @@ import elemental2.dom.MouseEvent;
 import elemental2.dom.WheelEvent;
 import jsinterop.base.JsPropertyMap;
 
+import static com.zarbosoft.merman.core.syntax.Direction.DOWN;
+import static com.zarbosoft.merman.core.syntax.Direction.LEFT;
+import static com.zarbosoft.merman.core.syntax.Direction.RIGHT;
+import static com.zarbosoft.merman.core.syntax.Direction.UP;
+
 public class JSDisplay extends Display {
   private final HTMLDivElement base;
   private final HTMLDivElement origin;
@@ -314,24 +319,24 @@ public class JSDisplay extends Display {
           key = Key.ALT_RIGHT;
           break;
         }
-      case "ArrowDown":
-        {
-          key = Key.DOWN;
-          break;
-        }
       case "ArrowLeft":
         {
-          key = Key.LEFT;
-          break;
-        }
-      case "ArrowRight":
-        {
-          key = Key.RIGHT;
+          key = convert.convertCardinal(LEFT);
           break;
         }
       case "ArrowUp":
         {
-          key = Key.UP;
+          key = convert.convertCardinal(UP);
+          break;
+        }
+      case "ArrowRight":
+        {
+          key = convert.convertCardinal(RIGHT);
+          break;
+        }
+      case "ArrowDown":
+        {
+          key = convert.convertCardinal(DOWN);
           break;
         }
       case "AudioVolumeDown":

@@ -81,7 +81,7 @@ public class BackFixedTypeSpec extends BackSpec {
 
   @Override
   public void write(
-          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+          Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.type(type);
     stack.add(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }

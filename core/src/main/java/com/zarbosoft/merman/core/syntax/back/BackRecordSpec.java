@@ -40,7 +40,7 @@ public class BackRecordSpec extends BaseBackArraySpec {
   }
 
   @Override
-  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.recordBegin();
     stack.add(new WriteStateRecordEnd());
     stack.add(writeContents((TSList<Atom>) data.get(id)));

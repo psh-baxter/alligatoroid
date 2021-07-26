@@ -1,5 +1,6 @@
 package com.zarbosoft.merman.core.serialization;
 
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -16,11 +17,11 @@ public class WriteStateBack extends WriteState {
     }
 
     @Override
-    public void run(final TSList<WriteState> stack, final EventConsumer writer) {
+    public void run(Environment env, final TSList<WriteState> stack, final EventConsumer writer) {
         BackSpec next = iterator.next();
         if (iterator.hasNext()) {
             stack.add(this);
         }
-        next.write(stack, data, writer);
+        next.write(env, stack, data, writer);
     }
 }

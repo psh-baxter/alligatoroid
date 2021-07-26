@@ -70,7 +70,7 @@ public class BackFixedArraySpec extends BackSpec {
 
   @Override
   public void write(
-          TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+          Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.arrayBegin();
     stack.add(new WriteStateArrayEnd());
     stack.add(new WriteStateBack(data, elements.iterator()));

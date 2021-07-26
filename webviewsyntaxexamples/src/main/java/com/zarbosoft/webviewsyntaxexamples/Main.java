@@ -28,11 +28,8 @@ import com.zarbosoft.merman.core.syntax.front.FrontArraySpec;
 import com.zarbosoft.merman.core.syntax.front.FrontAtomSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
-import com.zarbosoft.merman.core.syntax.primitivepattern.JsonDecimal;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternCharacterClass;
 import com.zarbosoft.merman.core.syntax.primitivepattern.PatternSequence;
-import com.zarbosoft.merman.core.syntax.primitivepattern.PatternString;
-import com.zarbosoft.merman.core.syntax.primitivepattern.PatternUnion;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.syntax.style.ObboxStyle;
@@ -672,22 +669,44 @@ public class Main {
                 .build(),
             //
             /// Literal
-            estreeTypeBuilder(symbolLiteralType, "Symbol literal")
+            estreeTypeBuilder(symbolLiteralType, "True literal")
+                .back(
+                    estreeBackBuilder()
+                        .field("type", new BackFixedPrimitiveSpec("Literal"))
+                        .field("value", new BackFixedJSONSpecialPrimitiveSpec("true"))
+                        .build())
+                .front(
+                    new FrontPrimitiveSpec(
+                        new FrontPrimitiveSpec.Config("value").style(new Style(styleNonstring()))))
+                .build(),
+            estreeTypeBuilder(symbolLiteralType, "False literal")
+                .back(
+                    estreeBackBuilder()
+                        .field("type", new BackFixedPrimitiveSpec("Literal"))
+                        .field("value", new BackFixedJSONSpecialPrimitiveSpec("false"))
+                        .build())
+                .front(
+                    new FrontPrimitiveSpec(
+                        new FrontPrimitiveSpec.Config("value").style(new Style(styleNonstring()))))
+                .build(),
+            estreeTypeBuilder(symbolLiteralType, "Null literal")
+                .back(
+                    estreeBackBuilder()
+                        .field("type", new BackFixedPrimitiveSpec("Literal"))
+                        .field("value", new BackFixedJSONSpecialPrimitiveSpec("null"))
+                        .build())
+                .front(
+                    new FrontPrimitiveSpec(
+                        new FrontPrimitiveSpec.Config("value").style(new Style(styleNonstring()))))
+                .build(),
+            estreeTypeBuilder(symbolLiteralType, "Decimal literal")
                 .back(
                     estreeBackBuilder()
                         .field("type", new BackFixedPrimitiveSpec("Literal"))
                         .field(
                             "value",
                             new BackJSONSpecialPrimitiveSpec(
-                                new BaseBackPrimitiveSpec.Config("value")
-                                    .pattern(
-                                        new PatternUnion(
-                                            TSList.of(
-                                                new PatternString(env, "true"),
-                                                new PatternString(env, "false"),
-                                                new PatternString(env, "null"),
-                                                new JsonDecimal())),
-                                        "json keywords")))
+                                BackJSONSpecialPrimitiveSpec.decimalConfig("value")))
                         .build())
                 .front(
                     new FrontPrimitiveSpec(
@@ -1008,7 +1027,8 @@ public class Main {
                     .style(new Style(styler.apply(new Style.Config()))))));
   }
 
-  private static FrontSymbolSpec textBase(String text, Function<Style.Config, Style.Config> styler) {
+  private static FrontSymbolSpec textBase(
+      String text, Function<Style.Config, Style.Config> styler) {
     return new FrontSymbolSpec(
         new FrontSymbolSpec.Config(
             new SymbolTextSpec(

@@ -52,12 +52,13 @@ public abstract class BackSpec {
       boolean typeRestriction) {}
 
   /**
+   * @param env
    * @param stack
    * @param data map of ids to data (StringBuilder, Atom, List of Atom)
    * @param writer
    */
   public abstract void write(
-      TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer);
+          Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer);
 
   /**
    * Can this represent a single value (non key/type) field in back type Subarrays can represent a

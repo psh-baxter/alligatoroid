@@ -1,6 +1,7 @@
 package com.zarbosoft.merman.core.serialization;
 
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.Document;
 import com.zarbosoft.merman.core.syntax.AtomType;
@@ -11,13 +12,15 @@ import com.zarbosoft.rendaw.common.TSList;
 
 public interface Serializer {
   /** @return byte[] in java, string in js */
-  Object writeDocument(Document document);
+  Object writeDocument(Environment env, Document document);
 
   /**
+   *
+   * @param env
    * @param copyContext
    * @return byte[] in java, string in js
    */
-  Object writeForClipboard(Context.CopyContext copyContext, TSList<WriteState> stack);
+  Object writeForClipboard(Environment env, Context.CopyContext copyContext, TSList<WriteState> stack);
 
   /**
    * Per clipboard, data is bytes or string depending on execution environment (js vs java)

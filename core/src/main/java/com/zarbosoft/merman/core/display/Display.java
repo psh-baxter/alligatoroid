@@ -1,11 +1,13 @@
 package com.zarbosoft.merman.core.display;
 
 import com.zarbosoft.merman.core.hid.ButtonEvent;
+import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.Direction;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.ModelColor;
 import com.zarbosoft.merman.core.visual.Vector;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.util.function.Consumer;
@@ -36,6 +38,22 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
+                      public Key convertCardinal(Direction direction) {
+                        switch (direction) {
+                          case UP:
+                            return Key.DIR_DIVE; // == conv
+                          case DOWN:
+                            return Key.DIR_SURFACE; // == against conv
+                          case LEFT:
+                            return Key.DIR_NEXT; // == transv
+                          case RIGHT:
+                            return Key.DIR_PREV; // == against transv
+                          default:
+                            throw new DeadCode();
+                        }
+                      }
+
+                      @Override
                       public Vector convert(double left, double right, double top, double bottom) {
                         return new Vector((-bottom), (-right));
                       }
@@ -64,6 +82,22 @@ public abstract class Display {
               {
                 convert =
                     new DisplayAbsoluteConvert() {
+                      @Override
+                      public Key convertCardinal(Direction direction) {
+                        switch (direction) {
+                          case UP:
+                            return Key.DIR_DIVE; // == conv
+                          case DOWN:
+                            return Key.DIR_SURFACE; // == against conv
+                          case RIGHT:
+                            return Key.DIR_NEXT; // == transv
+                          case LEFT:
+                            return Key.DIR_PREV; // == against transv
+                          default:
+                            throw new DeadCode();
+                        }
+                      }
+
                       @Override
                       public Vector convert(double left, double right, double top, double bottom) {
                         return new Vector((-bottom), left);
@@ -102,6 +136,22 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
+                      public Key convertCardinal(Direction direction) {
+                        switch (direction) {
+                          case DOWN:
+                            return Key.DIR_DIVE; // == conv
+                          case UP:
+                            return Key.DIR_SURFACE; // == against conv
+                          case LEFT:
+                            return Key.DIR_NEXT; // == transv
+                          case RIGHT:
+                            return Key.DIR_PREV; // == against transv
+                          default:
+                            throw new DeadCode();
+                        }
+                      }
+
+                      @Override
                       public Vector convert(double left, double right, double top, double bottom) {
                         return new Vector(top, (-right));
                       }
@@ -130,6 +180,22 @@ public abstract class Display {
               {
                 convert =
                     new DisplayAbsoluteConvert() {
+                      @Override
+                      public Key convertCardinal(Direction direction) {
+                        switch (direction) {
+                          case DOWN:
+                            return Key.DIR_DIVE; // == conv
+                          case UP:
+                            return Key.DIR_SURFACE; // == against conv
+                          case RIGHT:
+                            return Key.DIR_NEXT; // == transv
+                          case LEFT:
+                            return Key.DIR_PREV; // == against transv
+                          default:
+                            throw new DeadCode();
+                        }
+                      }
+
                       @Override
                       public Vector convert(double left, double right, double top, double bottom) {
                         return new Vector(top, left);
@@ -168,6 +234,22 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
+                      public Key convertCardinal(Direction direction) {
+                        switch (direction) {
+                          case LEFT:
+                            return Key.DIR_DIVE; // == conv
+                          case RIGHT:
+                            return Key.DIR_SURFACE; // == against conv
+                          case UP:
+                            return Key.DIR_NEXT; // == transv
+                          case DOWN:
+                            return Key.DIR_PREV; // == against transv
+                          default:
+                            throw new DeadCode();
+                        }
+                      }
+
+                      @Override
                       public Vector convert(double left, double right, double top, double bottom) {
                         return new Vector((-right), (-bottom));
                       }
@@ -196,6 +278,22 @@ public abstract class Display {
               {
                 convert =
                     new DisplayAbsoluteConvert() {
+                      @Override
+                      public Key convertCardinal(Direction direction) {
+                        switch (direction) {
+                          case LEFT:
+                            return Key.DIR_DIVE; // == conv
+                          case RIGHT:
+                            return Key.DIR_SURFACE; // == against conv
+                          case DOWN:
+                            return Key.DIR_NEXT; // == transv
+                          case UP:
+                            return Key.DIR_PREV; // == against transv
+                          default:
+                            throw new DeadCode();
+                        }
+                      }
+
                       @Override
                       public Vector convert(double left, double right, double top, double bottom) {
                         return new Vector((-right), top);
@@ -234,6 +332,22 @@ public abstract class Display {
                 convert =
                     new DisplayAbsoluteConvert() {
                       @Override
+                      public Key convertCardinal(Direction direction) {
+                        switch (direction) {
+                          case RIGHT:
+                            return Key.DIR_DIVE; // == conv
+                          case LEFT:
+                            return Key.DIR_SURFACE; // == against conv
+                          case UP:
+                            return Key.DIR_NEXT; // == transv
+                          case DOWN:
+                            return Key.DIR_PREV; // == against transv
+                          default:
+                            throw new DeadCode();
+                        }
+                      }
+
+                      @Override
                       public Vector convert(double left, double right, double top, double bottom) {
                         return new Vector(left, (-bottom));
                       }
@@ -262,6 +376,22 @@ public abstract class Display {
               {
                 convert =
                     new DisplayAbsoluteConvert() {
+                      @Override
+                      public Key convertCardinal(Direction direction) {
+                        switch (direction) {
+                          case RIGHT:
+                            return Key.DIR_DIVE; // == conv
+                          case LEFT:
+                            return Key.DIR_SURFACE; // == against conv
+                          case DOWN:
+                            return Key.DIR_NEXT; // == transv
+                          case UP:
+                            return Key.DIR_PREV; // == against transv
+                          default:
+                            throw new DeadCode();
+                        }
+                      }
+
                       @Override
                       public Vector convert(double left, double right, double top, double bottom) {
                         return new Vector(left, top);
@@ -469,6 +599,8 @@ public abstract class Display {
     public UnconvertAxis unconvertConverse(double converse, double xSpan, double ySpan);
 
     public UnconvertAxis unconvertTransverse(double transverse, double xSpan, double ySpan);
+
+    public Key convertCardinal(Direction direction);
   }
 
   public interface DisplayHalfConvert {

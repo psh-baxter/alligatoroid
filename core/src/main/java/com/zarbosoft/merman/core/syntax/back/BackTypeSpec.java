@@ -63,7 +63,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     writer.type(((StringBuilder) data.get(type)).toString());
     stack.add(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }

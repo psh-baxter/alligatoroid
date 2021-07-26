@@ -3,6 +3,7 @@ package com.zarbosoft.merman.webview;
 import com.zarbosoft.merman.core.AtomKey;
 import com.zarbosoft.merman.core.BackPath;
 import com.zarbosoft.merman.core.Context;
+import com.zarbosoft.merman.core.Environment;
 import com.zarbosoft.merman.core.backevents.BackEvent;
 import com.zarbosoft.merman.core.backevents.EArrayCloseEvent;
 import com.zarbosoft.merman.core.backevents.EArrayOpenEvent;
@@ -56,7 +57,7 @@ public class JSSerializer implements Serializer {
   }
 
   @Override
-  public String writeDocument(Document document) {
+  public String writeDocument(Environment env, Document document) {
     return uncheck(
         () -> {
           final JSEventConsumer writer;
@@ -76,14 +77,14 @@ public class JSSerializer implements Serializer {
           document.root.write(stack);
           uncheck(
               () -> {
-                while (!stack.isEmpty()) stack.removeLast().run(stack, writer);
+                while (!stack.isEmpty()) stack.removeLast().run(env, stack, writer);
               });
           return writer.resultOne();
         });
   }
 
   @Override
-  public String writeForClipboard(Context.CopyContext copyContext, TSList<WriteState> stack) {
+  public String writeForClipboard(Environment env, Context.CopyContext copyContext, TSList<WriteState> stack) {
     return uncheck(
         () -> {
           final JSEventConsumer writer;
@@ -99,7 +100,7 @@ public class JSSerializer implements Serializer {
             default:
               throw new DeadCode();
           }
-          while (!stack.isEmpty()) stack.removeLast().run(stack, writer);
+          while (!stack.isEmpty()) stack.removeLast().run(env, stack, writer);
           return writer.resultMany();
         });
   }

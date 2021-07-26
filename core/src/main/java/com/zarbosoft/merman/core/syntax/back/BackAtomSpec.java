@@ -38,7 +38,7 @@ public class BackAtomSpec extends BaseBackAtomSpec {
   }
 
   @Override
-  public void write(TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
     ((Atom) data.get(id)).write(stack);
   }
 

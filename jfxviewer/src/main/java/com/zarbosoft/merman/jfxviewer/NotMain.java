@@ -10,14 +10,15 @@ import com.zarbosoft.merman.core.document.Document;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.example.JsonSyntax;
+import com.zarbosoft.merman.core.example.SyntaxOut;
 import com.zarbosoft.merman.core.hid.ButtonEvent;
 import com.zarbosoft.merman.core.hid.Key;
 import com.zarbosoft.merman.core.syntax.BackType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.style.Padding;
 import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
-import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
@@ -60,7 +61,8 @@ public class NotMain extends Application {
         throw new RuntimeException("need to specify one file to open on the command line");
       String path = args.get(0);
       Environment env = new JFXEnvironment(Locale.getDefault());
-      Syntax syntax = JsonSyntax.create(env, new Padding(5, 5, 5, 5));
+      SyntaxOut syntaxOut = JsonSyntax.create(env, new Padding(5, 5, 5, 5));
+      Syntax syntax = syntaxOut.syntax;
       JavaSerializer serializer;
       Document document;
       if (path.endsWith(".json")) {
@@ -130,7 +132,7 @@ public class NotMain extends Application {
 
                 @Override
                 public CursorAtom createAtomCursor(Context context, VisualAtom base, int index) {
-                  return new CursorAtom(context,base,index) {
+                  return new CursorAtom(context, base, index) {
                     @Override
                     public boolean handleKey(Context context, ButtonEvent hidEvent) {
                       return handleCommon(context, hidEvent, () -> actionCopy(context));
