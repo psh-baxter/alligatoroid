@@ -2,6 +2,7 @@ package com.zarbosoft.merman.editorcore.cursors;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
+import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.syntax.AtomType;
 import com.zarbosoft.merman.core.syntax.BaseGapAtomType;
@@ -117,6 +118,30 @@ public class EditCursorAtom extends CursorAtom {
                     TSList.of(old)));
             gap.fields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
           });
+    }
+  }
+
+  public void editInsertAfter(Editor editor) {
+    Field.Parent<?> parent = visual.atom.fieldParentRef;
+    while (parent != null) {
+      if (parent instanceof FieldArray.Parent) {
+        EditCursorFieldArray.editInsertAfter(
+            editor, (FieldArray) parent.field, ((FieldArray.Parent) parent).index);
+        break;
+      }
+      parent = parent.field.atomParentRef.atom().fieldParentRef;
+    }
+  }
+
+  public void editInsertBefore(Editor editor) {
+    Field.Parent<?> parent = visual.atom.fieldParentRef;
+    while (parent != null) {
+      if (parent instanceof FieldArray.Parent) {
+        EditCursorFieldArray.editInsertBefore(
+            editor, (FieldArray) parent.field, ((FieldArray.Parent) parent).index);
+        break;
+      }
+      parent = parent.field.atomParentRef.atom().fieldParentRef;
     }
   }
 }

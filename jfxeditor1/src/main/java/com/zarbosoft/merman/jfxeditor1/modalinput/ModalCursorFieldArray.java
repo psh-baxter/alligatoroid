@@ -116,11 +116,6 @@ public class ModalCursorFieldArray extends EditCursorFieldArray {
                   editInsertAfter(Editor.get(context));
                   return true;
                 }
-              case F:
-                {
-                  main.flush(true);
-                  return true;
-                }
             }
             break;
           }
@@ -199,11 +194,6 @@ public class ModalCursorFieldArray extends EditCursorFieldArray {
               case A:
                 {
                   editInsertAfter(Editor.get(context));
-                  return true;
-                }
-              case F:
-                {
-                  main.flush(true);
                   return true;
                 }
             }

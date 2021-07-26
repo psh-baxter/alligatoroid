@@ -49,27 +49,34 @@ public class EditCursorFieldArray extends CursorFieldArray {
         });
   }
 
-  public void editInsertAfter(Editor editor) {
-    Atom[] created = new Atom[1];
-    editor.history.record(
-        editor.context,
-        new ROPair(visual.value, "insert_after"),
-        recorder -> {
-          created[0] = editor.arrayInsertNewDefault(recorder, visual.value, endIndex + 1);
-        });
-    created[0].selectInto(editor.context);
+  public static void editInsertAfter(Editor editor, FieldArray field, int index) {
+      Atom[] created = new Atom[1];
+      editor.history.record(
+              editor.context,
+              new ROPair(field, "insert_after"),
+              recorder -> {
+                  created[0] = editor.arrayInsertNewDefault(recorder, field, index + 1);
+              });
+      created[0].selectInto(editor.context);
   }
 
-  public void editInsertBefore(Editor editor) {
-    Atom[] created = new Atom[1];
-    editor.history.record(
-        editor.context,
-        new ROPair(visual.value, "insert_before"),
-        recorder -> {
-          created[0] = editor.arrayInsertNewDefault(recorder, visual.value, beginIndex);
-        });
-    created[0].selectInto(editor.context);
+  public void editInsertAfter(Editor editor) {
+      editInsertAfter(editor, visual.value, endIndex);
   }
+
+    public void editInsertBefore(Editor editor) {
+        editInsertBefore(editor, visual.value, beginIndex);
+    }
+    public static void editInsertBefore(Editor editor, FieldArray field, int index) {
+        Atom[] created = new Atom[1];
+        editor.history.record(
+                editor.context,
+                new ROPair(field, "insert_before"),
+                recorder -> {
+                    created[0] = editor.arrayInsertNewDefault(recorder, field, index);
+                });
+        created[0].selectInto(editor.context);
+    }
 
   public void editMoveAfter(Editor editor) {
     if (endIndex == visual.value.data.size() - 1) return;

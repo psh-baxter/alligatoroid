@@ -59,6 +59,16 @@ public class ModalCursorAtom extends EditCursorAtom {
             editSuffix(Editor.get(context));
             return true;
           }
+        case B:
+        {
+          editInsertBefore(Editor.get(context));
+          return true;
+        }
+        case A:
+        {
+          editInsertAfter(Editor.get(context));
+          return true;
+        }
       }
     return super.handleKey(context, hidEvent);
   }
