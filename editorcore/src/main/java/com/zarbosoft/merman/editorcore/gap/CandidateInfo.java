@@ -110,10 +110,25 @@ public class CandidateInfo {
       void processSymbol(FrontSymbolSpec f) {
         allKeyFrontSpecs.add(f);
         if (f.gapKey != null) {
-          keyGrammar.addIgnored(new PatternString(env, f.gapKey).build(false));
+          keyGrammar.add(
+              new Operator<>(new PatternString(env, f.gapKey).build(false)) {
+                @Override
+                protected EscapableResult<ROPair<FieldPrimitive, Boolean>> process(
+                    EscapableResult<ROList<String>> value) {
+                  return new EscapableResult<>(
+                      value.completed, new ROPair<>(null, value.completed));
+                }
+              });
         } else if (f.type instanceof SymbolTextSpec) {
-          keyGrammar.addIgnored(
-              new PatternString(env, ((SymbolTextSpec) f.type).text).build(false));
+          keyGrammar.add(
+              new Operator<>(new PatternString(env, ((SymbolTextSpec) f.type).text).build(false)) {
+                @Override
+                protected EscapableResult<ROPair<FieldPrimitive, Boolean>> process(
+                    EscapableResult<ROList<String>> value) {
+                  return new EscapableResult<>(
+                      value.completed, new ROPair<>(null, value.completed));
+                }
+              });
         }
       }
     };

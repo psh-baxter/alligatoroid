@@ -32,6 +32,7 @@ import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
+import com.zarbosoft.rendaw.common.ReverseIterable;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
@@ -72,6 +73,32 @@ public class GapChoice extends TwoColumnChoice {
     this.followingSpec = followingSpec;
   }
 
+  /**
+   * Creates a new primitive from the next primtive spec following id, or the first if id is null
+   *
+   * @param fields
+   * @param allKeyFrontSpecs
+   * @param id
+   * @return
+   */
+  private static FieldPrimitive generateNextEmptyPrimitive(
+      TSMap<String, Field> fields, ROList<FrontSpec> allKeyFrontSpecs, String id) {
+    boolean next = id == null;
+    for (FrontSpec spec : allKeyFrontSpecs) {
+      if (spec instanceof FrontPrimitiveSpec) {
+        if (next) {
+          FieldPrimitive generated = new FieldPrimitive(((FrontPrimitiveSpec) spec).field, "");
+          fields.put(generated.back.id, generated);
+          return generated;
+        }
+        if (((FrontPrimitiveSpec) spec).fieldId.equals(id)) {
+          next = true;
+        }
+      }
+    }
+    return null;
+  }
+
   @Override
   public void choose(Editor editor, History.Recorder recorder) {
     Consumer<History.Recorder> apply =
@@ -92,44 +119,51 @@ public class GapChoice extends TwoColumnChoice {
                 nextStep = new Step<>();
             this.incompleteKeyParse.parse(null, nextStep, new ForceEndCharacterEvent());
             preFields = nextStep.completed.get(0).second.value;
-            ROPair<FieldPrimitive, Boolean> preNextIncompletePrimitive = preFields.lastOpt();
-            if (preNextIncompletePrimitive != null) {
-              if (preNextIncompletePrimitive.second) {
-                // Last parsed primtive was completed (walled in by symbol) - find the next
-                // primitive
-                boolean next = false;
-                for (FrontSpec spec : allKeyFrontSpecs) {
-                  if (spec instanceof FrontPrimitiveSpec) {
-                    if (next) {
-                      nextIncompletePrimitive =
-                          new FieldPrimitive(((FrontPrimitiveSpec) spec).field, "");
-                      fields.put(nextIncompletePrimitive.back.id, nextIncompletePrimitive);
-                      break;
-                    }
-                    if (((FrontPrimitiveSpec) spec)
-                        .fieldId.equals(preNextIncompletePrimitive.first.back.id)) {
-                      next = true;
-                    }
+
+            // Here we look really lookingly to find the last incompletely parsed primitive to
+            // move the cursor into later.
+            ROPair<FieldPrimitive, Boolean> lastRes = preFields.lastOpt();
+            if (lastRes != null) {
+              if (lastRes.first == null) {
+                // Last parsed was symbol
+                if (!lastRes.second) {
+                  // But the symbol was not finished, so the one before it might be an incomplete
+                  // primitive
+                  if (preFields.size() >= 2) {
+                    nextIncompletePrimitive = preFields.getRev(1).first;
+                  }
+                } else {
+                  // The symbol was finished, so next primitive would be incomplete if it exists
+                  // But to do that, need to find the preceding primitive if there was one
+                  for (ROPair<FieldPrimitive, Boolean> pair : new ReverseIterable<>(preFields)) {
+                    if (pair.first == null)
+                      continue; // penultimate was also a symbol (and therefore must have completed)
+                    // Preceding was primitive - since most primitives don't have a maximum length
+                    // assume it was still in progress.
+                    nextIncompletePrimitive = pair.first;
+                    break;
                   }
                 }
               } else {
-                // Last parsed primitive was incomplete
-                nextIncompletePrimitive = preNextIncompletePrimitive.first;
+                if (lastRes.second) {
+                  // Last parsed primtive was completed (walled in by symbol) - find the next
+                  // primitive
+                  nextIncompletePrimitive =
+                      generateNextEmptyPrimitive(fields, allKeyFrontSpecs, lastRes.first.back.id);
+                } else {
+                  // Last parsed primitive was incomplete
+                  nextIncompletePrimitive = lastRes.first;
+                }
               }
             } else {
               // No primitives reached - find the first primitive and use
-              for (FrontSpec spec : allKeyFrontSpecs) {
-                if (spec instanceof FrontPrimitiveSpec) {
-                  nextIncompletePrimitive =
-                      new FieldPrimitive(((FrontPrimitiveSpec) spec).field, "");
-                  fields.put(nextIncompletePrimitive.back.id, nextIncompletePrimitive);
-                }
-              }
+              nextIncompletePrimitive = generateNextEmptyPrimitive(fields, allKeyFrontSpecs, null);
             }
           }
 
           // Add parsed primitive fields
           for (ROPair<FieldPrimitive, Boolean> field : preFields) {
+            if (field.first == null) continue;
             fields.put(field.first.back.id, field.first);
           }
 
