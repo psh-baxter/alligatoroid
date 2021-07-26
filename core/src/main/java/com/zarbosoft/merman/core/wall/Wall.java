@@ -100,17 +100,28 @@ public class Wall {
 
   void remove(final Context context, final int at) {
     if (cornerstoneCourse != null && cornerstoneCourse.index == at) {
+      double transverseSpan = cornerstoneCourse.transverseSpan();
       cornerstoneCourse = null;
+
+      // When removing cornerstone course, immediately move all following courses to fill gap.
+      // Otherwise the next course might become the cornerstone causing an aesthetically displeasing
+      // transverse walk.
+      for (int at2 = at; at2 < children.size(); ++at2) {
+        Course following = children.get(at2);
+        following.setTransverse(context, following.transverseStart - transverseSpan);
+      }
     }
     children.remove(at);
     visual.remove(at);
     if (at < children.size()) {
       renumber(at);
-      ensureIdleAdjust(context);
-      if (at < idleAdjust.backward) idleAdjust.backward -= 1;
-      if (at < idleAdjust.forward && idleAdjust.forward < Integer.MAX_VALUE)
-        idleAdjust.forward -= 1;
-      idleAdjust.at(at);
+      if (cornerstoneCourse != null) {
+        ensureIdleAdjust(context);
+        if (at < idleAdjust.backward) idleAdjust.backward -= 1;
+        if (at < idleAdjust.forward && idleAdjust.forward < Integer.MAX_VALUE)
+          idleAdjust.forward -= 1;
+        idleAdjust.at(at);
+      }
     }
   }
 
