@@ -452,6 +452,17 @@ public class Context {
     this.hoverListeners.remove(listener);
   }
 
+  /**
+   * When one or more atoms were added in the document tree, use this to trigger laying bricks before or after them.
+   * 1. Try to lay bricks using the first/last brick of surrounding elements _within_ parent
+   * 2. Try to lay bricks using the first/last brick of elements surrounding parent
+   * @param parent The parent containing the added bricks.
+   * @param index The index within parent of the first element added.
+   * @param addCount The number of elements added.
+   * @param size The number of elements in parent (total).
+   * @param accessFirst Get the first brick of element N within parent.
+   * @param accessLast Get the last brick of element N within parent.
+   */
   public void triggerIdleLayBricks(
       final VisualParent parent,
       final int index,
@@ -794,12 +805,12 @@ public class Context {
           }
         }
         if (!starts.isEmpty()) {
-          final Brick end = starts.iterator().next();
-          starts.remove(end);
-          if (end.parent != null) {
-            final Brick created = end.createPrevious(Context.this).brick;
+          final Brick start = starts.iterator().next();
+          starts.remove(start);
+          if (start.parent != null) {
+            final Brick created = start.createPrevious(Context.this).brick;
             if (created != null) {
-              end.addBefore(Context.this, created);
+              start.addBefore(Context.this, created);
               starts.add(created);
             }
           }
