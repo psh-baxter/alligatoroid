@@ -11,6 +11,8 @@ import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.RootAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
+import com.zarbosoft.merman.core.syntax.alignments.AlignmentSpec;
+import com.zarbosoft.merman.core.syntax.alignments.RelativeAlignmentSpec;
 import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
@@ -51,6 +53,7 @@ import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -74,23 +77,21 @@ public class AlligatoroidSyntax {
   public static final Pattern PATTERN_HEXINT;
   public static final Pattern PATTERN_FLOAT;
   public static final Pattern PATTERN_HEXFLOAT;
-  private static final ModelColor COLOR_LITERAL_SYMBOL; // number suffix
-  private static final ModelColor COLOR_LITERAL_PRIMITIVE; // numbers
-  private static final ModelColor COLOR_LITERAL_KEYWORD; // true/false
-  private static final ModelColor COLOR_IDENTIFIER;
-  private static final ModelColor COLOR_OPERATOR;
-  private static final ModelColor COLOR_ARRAY_SEP;
-  private static final ModelColor COLOR_BRACKET;
-  private static final ModelColor COLOR_LABEL;
-  private static final ModelColor COLOR_KEYWORD;
-  private static final ModelColor COLOR_BACKGROUND;
-  private static final ModelColor COLOR_CHOICE_BACKGROUND;
-  private static final ModelColor COLOR_INCOMPLETE;
-  private static final ModelColor COLOR_HOVER;
-  private static final ModelColor COLOR_CURSOR;
-  private static final ModelColor COLOR_CHOICE_TEXT;
-  private static final ModelColor COLOR_CHOICE_CURSOR;
-  private static final ModelColor COLOR_COMMENT;
+
+  public static final ModelColor COLOR_IDENTIFIER = ModelColor.RGB.hex("#d8c3ff");
+  public static final ModelColor.RGB COLOR_LITERAL_TEXT = ModelColor.RGB.hex("#79bf97");
+  public static final ModelColor COLOR_LITERAL_SYMBOL =
+      new ModelColor.RGBA(COLOR_LITERAL_TEXT.r, COLOR_LITERAL_TEXT.g, COLOR_LITERAL_TEXT.b, 0.7);
+  public static final ModelColor COLOR_COMMENT = ModelColor.RGB.hex("#5285b5");
+  public static final ModelColor COLOR_CHOICE = ModelColor.RGB.hex("#bdbdbd");
+  public static final ModelColor COLOR_KEYWORD = ModelColor.RGB.hex("#e66ea5");
+  public static final ModelColor COLOR_LABEL = ModelColor.RGB.hex("#557fde");
+  public static final ModelColor COLOR_OTHER = ModelColor.RGB.hex("#a27878");
+  public static final ModelColor COLOR_INCOMPLETE = ModelColor.RGB.hex("#ea4c3b");
+  public static final ModelColor COLOR_BG = ModelColor.RGB.hex("#2b323a");
+  public static final ModelColor COLOR_POPUP_BG = new ModelColor.RGBA(14. / 255, 8. / 255, 0, 0.3);
+  public static final ModelColor COLOR_HOVER = ModelColor.RGB.hex("#737373");
+  public static final ModelColor COLOR_CURSOR = ModelColor.RGB.hex("#b9b9b9");
   private static final double fontSize = 6;
   private static final String GROUP_EXPR = "expr";
   private static final String GROUP_STATEMENT = "statement";
@@ -136,6 +137,7 @@ public class AlligatoroidSyntax {
   private static final String TYPE_LITERAL_TUPLE = "tuple";
   private static final String TYPE_EXIT = "exit";
   private static final String TYPE_RETURN = "return";
+  private static final double indent = 10;
   private static final String ALIGN_INDENT = "indent";
   public static final FrontSymbolSpec compactSplit =
       new FrontSymbolSpec(
@@ -170,7 +172,6 @@ public class AlligatoroidSyntax {
   private static final String TYPE_LITERAL_FALSE = "false";
   private static final String TYPE_LITERAL_UNIQUE = "unique";
   private static final String TYPE_LITERAL_VOID = "void";
-  private static final String TYPE_STATEMENT_COMMENT = "comment_statement";
   private static final String TYPE_EXPR_COMMENT = "comment_expr";
   private static final String TYPE_COMMENT_H1 = "comment_h1";
   private static final String TYPE_COMMENT_P = "comment_p";
@@ -197,42 +198,6 @@ public class AlligatoroidSyntax {
                 maybeNegative,
                 new Repeat1(hexDigit),
                 new Maybe(new PatternSequence(new TSList<>(dot, new Repeat0(hexDigit))))));
-  }
-
-  static {
-    ModelColor identifier = ModelColor.RGB.hex("#dbec80");
-    ModelColor.RGB literal = ModelColor.RGB.hex("#85c1da");
-    ModelColor literalFade = new ModelColor.RGBA(literal.r, literal.g, literal.b, 0.7);
-    ModelColor comment = ModelColor.RGB.hex("#827c67");
-    ModelColor choice = ModelColor.RGB.hex("#909090");
-    ModelColor keyword = ModelColor.RGB.hex("#be74d0");
-    ModelColor label = ModelColor.RGB.hex("#3a7fff");
-    ModelColor other = ModelColor.RGB.hex("#b2c5d4");
-    ModelColor error = ModelColor.RGB.hex("#ea4c3b");
-
-    ModelColor bg = ModelColor.RGB.hex("#2b323a");
-    // ModelColor popupBg = ModelColor.RGB.hex("#222529");
-    ModelColor popupBg = new ModelColor.RGBA(14. / 255, 8. / 255, 0, 0.3);
-    ModelColor hover = ModelColor.RGB.hex("#737373");
-    ModelColor cursor = ModelColor.RGB.hex("#b9b9b9");
-
-    COLOR_LITERAL_PRIMITIVE = literal; // numbers
-    COLOR_LITERAL_SYMBOL = literalFade; // number suffix
-    COLOR_LITERAL_KEYWORD = literal; // true/false
-    COLOR_IDENTIFIER = identifier;
-    COLOR_OPERATOR = other;
-    COLOR_ARRAY_SEP = other;
-    COLOR_BRACKET = other;
-    COLOR_LABEL = label;
-    COLOR_KEYWORD = keyword;
-    COLOR_BACKGROUND = bg;
-    COLOR_CHOICE_BACKGROUND = popupBg;
-    COLOR_INCOMPLETE = error;
-    COLOR_HOVER = hover;
-    COLOR_CURSOR = cursor;
-    COLOR_CHOICE_TEXT = choice;
-    COLOR_CHOICE_CURSOR = choice;
-    COLOR_COMMENT = comment;
   }
 
   private static BackSpec literalStringBack(BackSpec value) {
@@ -291,7 +256,7 @@ public class AlligatoroidSyntax {
         .precedence(precedence)
         .atom("first", args)
         .s()
-        .t(symbol, COLOR_OPERATOR)
+        .t(symbol, COLOR_OTHER)
         .s()
         .atom("second", args)
         .build();
@@ -302,7 +267,7 @@ public class AlligatoroidSyntax {
     return new ATypeBuilder(id, description)
         .precedence(precedence)
         .atom("first", args)
-        .t(symbol, COLOR_OPERATOR)
+        .t(symbol, COLOR_OTHER)
         .atom("second", args)
         .build();
   }
@@ -310,7 +275,16 @@ public class AlligatoroidSyntax {
   public static AtomType unaryPrefix(String id, String description, String prefix, String arg) {
     return new ATypeBuilder(id, description)
         .precedence(Integer.MAX_VALUE)
-        .t(prefix, COLOR_OPERATOR)
+        .t(prefix, COLOR_OTHER)
+        .atom("first", arg)
+        .build();
+  }
+
+  public static AtomType unaryPrefix(
+      String id, String description, String prefix, ModelColor color, String arg) {
+    return new ATypeBuilder(id, description)
+        .precedence(Integer.MAX_VALUE)
+        .t(prefix, color)
         .atom("first", arg)
         .build();
   }
@@ -325,7 +299,7 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_ACCESS, "Access")
             .type(BACK_TYPE_ACCESS)
             .atom("parent", GROUP_EXPR)
-            .t(".", COLOR_OPERATOR)
+            .t(".", COLOR_OTHER)
             .nestedIdentifier("child", COLOR_IDENTIFIER)
             .build(),
         GROUP_EXPR);
@@ -333,10 +307,10 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_ACCESS_DYNAMIC, "Dynamic Access")
             .type(BACK_TYPE_ACCESS)
             .atom("parent", GROUP_EXPR)
-            .sb("[", COLOR_BRACKET)
+            .sb("[", COLOR_OTHER)
             .compactSplit()
             .atom("child", GROUP_EXPR)
-            .eb("]", COLOR_BRACKET)
+            .eb("]", COLOR_OTHER)
             .build(),
         GROUP_EXPR);
     types.add(
@@ -350,7 +324,7 @@ public class AlligatoroidSyntax {
 
     // Calls
     types.add(
-        binaryInfixNoSpace(TYPE_CALL, "Call", Integer.MAX_VALUE, "@", GROUP_EXPR), GROUP_EXPR);
+        binaryInfixNoSpace(TYPE_CALL, "Call", Integer.MAX_VALUE, " ", GROUP_EXPR), GROUP_EXPR);
 
     // Control flow
     types.add(
@@ -363,11 +337,11 @@ public class AlligatoroidSyntax {
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_BLOCK, "Block")
-            .sb("{", COLOR_BRACKET)
+            .sb("{", COLOR_OTHER)
             .s()
-            .array("statements", GROUP_STATEMENT, "; ")
+            .arraySuffix("statements", GROUP_STATEMENT, "; ")
             .s()
-            .eb("}", COLOR_BRACKET)
+            .eb("}", COLOR_OTHER)
             .build(),
         GROUP_EXPR);
     types.add(
@@ -381,14 +355,14 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_BRANCH, "Branch")
             .t("branch", COLOR_KEYWORD)
             .s()
-            .array("clauses", GROUP_BRANCH_ELEMENT, ", ")
+            .arraySep("clauses", GROUP_BRANCH_ELEMENT, ", ")
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_BRANCH_COND, "Conditional")
             .atom("condition", GROUP_EXPR)
             .s()
-            .t("->", COLOR_OPERATOR)
+            .t("->", COLOR_OTHER)
             .s()
             .atom("body", GROUP_EXPR)
             .build(),
@@ -398,7 +372,7 @@ public class AlligatoroidSyntax {
             .defaultSelection("body")
             .t("default", COLOR_KEYWORD)
             .s()
-            .t("->", COLOR_OPERATOR)
+            .t("->", COLOR_OTHER)
             .s()
             .atom("body", GROUP_EXPR)
             .build(),
@@ -445,12 +419,12 @@ public class AlligatoroidSyntax {
         GROUP_EXPR);
 
     // Staging
-    types.add(unaryPrefix(TYPE_STAGE, "Stage", "`", GROUP_EXPR), GROUP_EXPR);
+    types.add(unaryPrefix(TYPE_STAGE, "Stage", "`", COLOR_LITERAL_SYMBOL, GROUP_EXPR), GROUP_EXPR);
     types.add(unaryPrefix(TYPE_LOWER, "Lower", "$", GROUP_EXPR), GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_LOWER_LABEL, "Lower (from label)")
             .defaultSelection("child")
-            .t("~", COLOR_OPERATOR)
+            .t("~", COLOR_OTHER)
             .primitive("label", COLOR_LABEL)
             .s()
             .atom("child", GROUP_EXPR)
@@ -462,7 +436,7 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_LITERAL_STRING, "String")
             .type(BACK_TYPE_LITERAL_STRING)
             .t("\"", COLOR_LITERAL_SYMBOL)
-            .primitive(FIELD_LITERAL_VALUE, COLOR_LITERAL_PRIMITIVE)
+            .primitive(FIELD_LITERAL_VALUE, COLOR_LITERAL_TEXT)
             .t("\"", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
@@ -472,7 +446,7 @@ public class AlligatoroidSyntax {
                 FIELD_LITERAL_VALUE,
                 PATTERN_HEXINT,
                 "hex int",
-                COLOR_LITERAL_PRIMITIVE,
+                COLOR_LITERAL_TEXT,
                 COLOR_INCOMPLETE)
             .t("x", COLOR_LITERAL_SYMBOL)
             .build(),
@@ -483,49 +457,44 @@ public class AlligatoroidSyntax {
                 FIELD_LITERAL_VALUE,
                 PATTERN_HEXFLOAT,
                 "hex float",
-                COLOR_LITERAL_PRIMITIVE,
+                COLOR_LITERAL_TEXT,
                 COLOR_INCOMPLETE)
             .t("xf", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_LITERAL_INT, "Int")
-            .pattern(
-                FIELD_LITERAL_VALUE, PATTERN_INT, "int", COLOR_LITERAL_PRIMITIVE, COLOR_INCOMPLETE)
+            .pattern(FIELD_LITERAL_VALUE, PATTERN_INT, "int", COLOR_LITERAL_TEXT, COLOR_INCOMPLETE)
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_LITERAL_FLOAT, "Float")
             .pattern(
-                FIELD_LITERAL_VALUE,
-                PATTERN_FLOAT,
-                "float",
-                COLOR_LITERAL_PRIMITIVE,
-                COLOR_INCOMPLETE)
+                FIELD_LITERAL_VALUE, PATTERN_FLOAT, "float", COLOR_LITERAL_TEXT, COLOR_INCOMPLETE)
             .t("f", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_TRUE, "True").t("true", COLOR_LITERAL_KEYWORD).build(),
+        new ATypeBuilder(TYPE_LITERAL_TRUE, "True").t("true", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_FALSE, "False").t("false", COLOR_LITERAL_KEYWORD).build(),
+        new ATypeBuilder(TYPE_LITERAL_FALSE, "False").t("false", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_UNIQUE, "Unique").t("unique", COLOR_LITERAL_KEYWORD).build(),
+        new ATypeBuilder(TYPE_LITERAL_UNIQUE, "Unique").t("unique", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_VOID, "Void").t("void", COLOR_LITERAL_KEYWORD).build(),
+        new ATypeBuilder(TYPE_LITERAL_VOID, "Void").t("void", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
 
     // Aggregate literals
     types.add(
         new ATypeBuilder(TYPE_LITERAL_RECORD, "Record")
             .type(BACK_TYPE_LITERAL_RECORD)
-            .t("rec", COLOR_LITERAL_KEYWORD)
+            .t("rec", COLOR_LITERAL_TEXT)
             .s()
             .sb("(", COLOR_LITERAL_SYMBOL)
-            .array("elements", TYPE_LITERAL_RECORD_ELEMENT, ",")
+            .arraySep("elements", TYPE_LITERAL_RECORD_ELEMENT, ",")
             .eb(")", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
@@ -533,14 +502,14 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_LITERAL_RECORD_ELEMENT, "Element")
             .defaultSelection("value")
             .atom("key", GROUP_EXPR)
-            .t(":", COLOR_OPERATOR)
+            .t(":", COLOR_OTHER)
             .s()
             .atom("value", GROUP_EXPR)
             .build());
     types.add(
         new ATypeBuilder(TYPE_LITERAL_TUPLE, "Tuple")
             .sb("(", COLOR_LITERAL_SYMBOL)
-            .array("elements", GROUP_EXPR, ",")
+            .arraySep("elements", GROUP_EXPR, ",")
             .eb(")", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR); // TODO key/value tuple
@@ -573,13 +542,6 @@ public class AlligatoroidSyntax {
 
     // Comments
     types.add(
-        new ATypeBuilder(TYPE_STATEMENT_COMMENT, "Comment")
-            .gapKey(",")
-            .placeholder("￮", "children", COLOR_COMMENT)
-            .custom(AlligatoroidSyntax::commentArray)
-            .build(),
-        GROUP_STATEMENT);
-    types.add(
         new ATypeBuilder(TYPE_EXPR_COMMENT, "Comment")
             .atom("nested", GROUP_EXPR)
             .gapKey(",")
@@ -587,21 +549,26 @@ public class AlligatoroidSyntax {
             .custom(AlligatoroidSyntax::commentArray)
             .build(),
         GROUP_EXPR);
-    types.add(
-        new ATypeBuilder(TYPE_COMMENT_P, "Paragraph")
-            .gapKey("p")
-            .styledPrimitive("text", COLOR_COMMENT, null, fontSize)
-            .vspacer(fontSize, fontSize * 0.8)
-            .build(),
-        GROUP_COMMENT_BODY);
-    types.add(
-        new ATypeBuilder(TYPE_COMMENT_H1, "Header (1)")
-            .gapKey("h1")
-            .vspacer(fontSize * 2 * 1.5, 0)
-            .styledPrimitive("text", COLOR_COMMENT, null, fontSize * 2)
-            .vspacer(0, fontSize * 0.8)
-            .build(),
-        GROUP_COMMENT_BODY);
+    BiConsumer<String, String> generateComments =
+        (String gapKeyPrefix, String group) -> {
+          types.add(
+              new ATypeBuilder(TYPE_COMMENT_P, "Paragraph")
+                  .gapKey(gapKeyPrefix + "p")
+                  .styledPrimitive("text", COLOR_COMMENT, null, fontSize)
+                  .vspacer(fontSize, fontSize * 0.8)
+                  .build(),
+              group);
+          types.add(
+              new ATypeBuilder(TYPE_COMMENT_H1, "Header (1)")
+                  .gapKey(gapKeyPrefix + "h1")
+                  .vspacer(fontSize * 2 * 1.5, 0)
+                  .styledPrimitive("text", COLOR_COMMENT, null, fontSize * 2)
+                  .vspacer(0, fontSize * 0.8)
+                  .build(),
+              group);
+        };
+    generateComments.accept(",", GROUP_STATEMENT);
+    generateComments.accept("", GROUP_COMMENT_BODY);
 
     // Gap
     final Style.Config gapStyleConfig =
@@ -656,9 +623,9 @@ public class AlligatoroidSyntax {
       errors.raise();
     }
     return new SyntaxOut(
-        COLOR_CHOICE_TEXT,
-        COLOR_CHOICE_CURSOR,
-        COLOR_CHOICE_BACKGROUND,
+        COLOR_CHOICE,
+        COLOR_CHOICE,
+        COLOR_POPUP_BG,
         new Syntax(
             env,
             new Syntax.Config(
@@ -695,13 +662,13 @@ public class AlligatoroidSyntax {
                                                                         new Style(
                                                                             baseCodeStyle()
                                                                                 .color(
-                                                                                    COLOR_ARRAY_SEP))))))))))),
+                                                                                    COLOR_OTHER))))))))))),
                             ROMap.empty)),
                     gap,
                     suffixGap)
                 .backType(BackType.LUXEM)
                 .displayUnit(Syntax.DisplayUnit.MM)
-                .background(COLOR_BACKGROUND)
+                .background(COLOR_BG)
                 .hoverStyle(hoverStyle(false))
                 .primitiveHoverStyle(hoverStyle(true))
                 .cursorStyle(cursorStyle(false))
@@ -771,7 +738,9 @@ public class AlligatoroidSyntax {
           new FrontSymbolSpec(
               new FrontSymbolSpec.Config(
                   new SymbolTextSpec(
-                      new SymbolTextSpec.Config(" ").nonGapKey().style(new Style(baseCodeStyle()))))));
+                      new SymbolTextSpec.Config(" ")
+                          .nonGapKey()
+                          .style(new Style(baseCodeStyle()))))));
       return this;
     }
 
@@ -782,7 +751,6 @@ public class AlligatoroidSyntax {
                   new SymbolTextSpec(
                       new SymbolTextSpec.Config(text)
                           .style(new Style(baseCodeStyle().color(color)))))));
-      front.add(compactSplit);
       return this;
     }
 
@@ -822,7 +790,7 @@ public class AlligatoroidSyntax {
       front.add(compactZeroSplit);
     }
 
-    public AFrontBuilder array(String id, String separator) {
+    public AFrontBuilder arraySuffix(String id, String suffix) {
       front.add(
           new FrontArraySpec(
               new FrontArraySpec.Config(
@@ -834,11 +802,29 @@ public class AlligatoroidSyntax {
                               new FrontSymbolSpec(
                                   new FrontSymbolSpec.Config(
                                       new SymbolTextSpec(
+                                          new SymbolTextSpec.Config(suffix)
+                                              .style(
+                                                  new Style(
+                                                      baseCodeStyle().color(COLOR_OTHER)))))))))));
+      return this;
+    }
+
+    public AFrontBuilder arraySep(String id, String separator) {
+      front.add(
+          new FrontArraySpec(
+              new FrontArraySpec.Config(
+                  id,
+                  new FrontArraySpecBase.Config()
+                      .prefix(new TSList<>(compactSplit))
+                      .separator(
+                          new TSList<>(
+                              new FrontSymbolSpec(
+                                  new FrontSymbolSpec.Config(
+                                      new SymbolTextSpec(
                                           new SymbolTextSpec.Config(separator)
                                               .style(
                                                   new Style(
-                                                      baseCodeStyle()
-                                                          .color(COLOR_ARRAY_SEP)))))))))));
+                                                      baseCodeStyle().color(COLOR_OTHER)))))))))));
       return this;
     }
 
@@ -977,6 +963,16 @@ public class AlligatoroidSyntax {
                   description,
                   new AtomType.Config(id, back.build(), front.front)
                       .defaultSelection(defaultSelection))
+              .alignments(
+                  new TSMap<String, AlignmentSpec>()
+                      .put(
+                          ALIGN_BASE,
+                          new RelativeAlignmentSpec(
+                              new RelativeAlignmentSpec.Config(ALIGN_INDENT, 0, false)))
+                      .put(
+                          ALIGN_INDENT,
+                          new RelativeAlignmentSpec(
+                              new RelativeAlignmentSpec.Config(ALIGN_INDENT, indent, true))))
               .precedence(this.precedence));
     }
 
@@ -1032,9 +1028,15 @@ public class AlligatoroidSyntax {
       return this;
     }
 
-    public ATypeBuilder array(String id, String elementType, String separator) {
+    public ATypeBuilder arraySuffix(String id, String elementType, String suffix) {
       back.array(id, elementType);
-      front.array(id, separator);
+      front.arraySuffix(id, suffix);
+      return this;
+    }
+
+    public ATypeBuilder arraySep(String id, String elementType, String separator) {
+      back.array(id, elementType);
+      front.arraySep(id, separator);
       return this;
     }
 

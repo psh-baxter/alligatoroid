@@ -6,15 +6,15 @@ import com.zarbosoft.merman.core.wall.Brick;
 
 public class RelativeAlignment extends Alignment {
   private final String baseKey;
-  private final int offset;
+  private final double offset;
   public final boolean collapse;
   private Alignment base;
 
   public RelativeAlignment(
       /** Name of alignment in ancestors (closest) */
       final String baseKey,
-      /** Pixel offset from base alignment */
-      final int offset,
+      /** Offset from base alignment */
+      final double offset,
       /**
        * If true, doesn't contribute offset to derived alignments if this alignment doesn't have any
        * bricks

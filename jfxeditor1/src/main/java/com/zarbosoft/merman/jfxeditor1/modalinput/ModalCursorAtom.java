@@ -7,6 +7,8 @@ import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
 import com.zarbosoft.merman.jfxeditor1.NotMain;
 
+import static com.zarbosoft.merman.jfxeditor1.NotMain.controlKeys;
+
 public class ModalCursorAtom extends EditCursorAtom {
   public final NotMain main;
 
@@ -19,29 +21,38 @@ public class ModalCursorAtom extends EditCursorAtom {
     if (NotMain.handleCommonNavigation(context, main, hidEvent)) return true;
     if (hidEvent.press)
       switch (hidEvent.key) {
+        case DIR_SURFACE:
         case H:
           {
             actionExit(context);
             return true;
           }
+        case DIR_DIVE:
         case L:
           {
             actionEnter(context);
             return true;
           }
+        case DIR_NEXT:
         case J:
           {
             actionNextElement(context);
             return true;
           }
+        case DIR_PREV:
         case K:
           {
             actionPreviousElement(context);
             return true;
           }
+        case DELETE:
         case X:
           {
-            editCut(Editor.get(context));
+            if (hidEvent.modifiers.containsAny(controlKeys)) {
+              editCut(Editor.get(context));
+            } else {
+              editDelete(Editor.get(context));
+            }
             return true;
           }
         case C:
@@ -60,15 +71,15 @@ public class ModalCursorAtom extends EditCursorAtom {
             return true;
           }
         case B:
-        {
-          editInsertBefore(Editor.get(context));
-          return true;
-        }
+          {
+            editInsertBefore(Editor.get(context));
+            return true;
+          }
         case A:
-        {
-          editInsertAfter(Editor.get(context));
-          return true;
-        }
+          {
+            editInsertAfter(Editor.get(context));
+            return true;
+          }
       }
     return super.handleKey(context, hidEvent);
   }

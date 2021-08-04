@@ -186,17 +186,19 @@ public class NotMain extends Application {
         case BACK_SPACE:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              cursor.actionGatherPreviousWord(context);
+              cursor.editCut(Editor.get(context));
+            } else {
+              cursor.editDeletePrevious(Editor.get(context));
             }
-            cursor.editDeletePrevious(Editor.get(context));
             return true;
           }
         case DELETE:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              cursor.actionGatherNextWord(context);
+              cursor.editCut(Editor.get(context));
+            } else {
+              cursor.editDeleteNext(Editor.get(context));
             }
-            cursor.editDeleteNext(Editor.get(context));
             return true;
           }
         case X:
@@ -522,7 +524,10 @@ public class NotMain extends Application {
       }
       try {
         Files.write(
-            path1, (byte[]) editor.context.serializer.writeDocument(editor.context.env, editor.context.document));
+            path1,
+            (byte[])
+                editor.context.serializer.writeDocument(
+                    editor.context.env, editor.context.document));
       } catch (IOException e) {
         logException(e, "Failed to write to %s", this.path);
         return;
