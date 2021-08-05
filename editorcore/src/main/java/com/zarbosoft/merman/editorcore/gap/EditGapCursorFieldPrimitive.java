@@ -18,8 +18,6 @@ import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.History;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
 import com.zarbosoft.pidgoon.errors.GrammarTooUncertain;
 import com.zarbosoft.pidgoon.errors.InvalidStream;
 import com.zarbosoft.pidgoon.events.EscapableResult;
@@ -160,7 +158,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
                           @Override
                           public Field process(Editor editor, History.Recorder recorder) {
                             FieldArray field = new FieldArray(((FrontArraySpecBase) front).field);
-                            recorder.apply(editor.context, new ChangeArray(field, 0, 0, value));
+                            Editor.arrayChange(editor, recorder, field, 0, 0, value);
                             return field;
                           }
                         };
@@ -178,7 +176,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
                           @Override
                           public Field process(Editor editor, History.Recorder recorder) {
                             FieldAtom field = new FieldAtom(((FrontAtomSpec) front).field());
-                            recorder.apply(editor.context, new ChangeAtom(field, value));
+                            Editor.atomSet(editor, recorder, field, value);
                             return field;
                           }
                         };
@@ -411,10 +409,10 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
         FieldPrimitive field = (FieldPrimitive) atom.fields.get(GapAtomType.PRIMITIVE_KEY);
         if (!field.get().isEmpty()) break;
         editor.history.record(
-            editor.context,
+            editor,
             null,
             recorder -> {
-              recorder.apply(editor.context, new ChangeArray(value, 0, 1, ROList.empty));
+              Editor.arrayChange(editor, recorder, value, 0, 1, ROList.empty);
             });
       } while (false);
     else
@@ -443,26 +441,25 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
         if (!canPlaceAll) break;
         TSList<Atom> transplant = array.data.mut();
         editor.history.record(
-            editor.context,
+            editor,
             null,
             recorder -> {
-              recorder.apply(
-                  editor.context, new ChangeArray(array, 0, array.data.size(), ROList.empty));
+              Editor.arrayChange(editor, recorder, array, 0, array.data.size(), ROList.empty);
               if (inField instanceof FieldAtom) {
                 Atom transplant0;
                 if (transplant.some()) transplant0 = transplant.get(0);
                 else
                   transplant0 =
-                      Editor.createEmptyAtom(editor.context.syntax, editor.context.syntax.gap);
-                recorder.apply(editor.context, new ChangeAtom((FieldAtom) inField, transplant0));
+                      editor.createEmptyGap(editor.context.syntax.gap);
+                Editor.atomSet(editor, recorder, (FieldAtom) inField, transplant0);
               } else if (inField instanceof FieldArray) {
-                recorder.apply(
-                    editor.context,
-                    new ChangeArray(
-                        (FieldArray) inField,
-                        ((FieldArray.Parent) gap.fieldParentRef).index,
-                        1,
-                        transplant));
+                Editor.arrayChange(
+                    editor,
+                    recorder,
+                    (FieldArray) inField,
+                    ((FieldArray.Parent) gap.fieldParentRef).index,
+                    1,
+                    transplant);
               } else throw new Assertion();
             });
       } while (false);

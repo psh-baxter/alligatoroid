@@ -18,6 +18,7 @@ import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
+import com.zarbosoft.merman.core.syntax.back.BackIdSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
@@ -204,12 +205,6 @@ public class AlligatoroidSyntax {
     return new ABackBuilder(BACK_TYPE_LITERAL_STRING).raw("value", value).build().get(0);
   }
 
-  private static BackSpec literalStringBackDynamic(String field) {
-    return literalStringBack(
-        new BackPrimitiveSpec(
-            new BaseBackPrimitiveSpec.Config(field).pattern(PATTERN_IDENTIFIER, "identifier")));
-  }
-
   private static Style cursorStyle(boolean primitive) {
     return new Style(
         new Style.Config()
@@ -255,9 +250,9 @@ public class AlligatoroidSyntax {
     return new ATypeBuilder(id, description)
         .precedence(precedence)
         .atom("first", args)
-        .s()
-        .t(symbol, COLOR_OTHER)
-        .s()
+        .space()
+        .text(symbol, COLOR_OTHER)
+        .space()
         .atom("second", args)
         .build();
   }
@@ -267,7 +262,7 @@ public class AlligatoroidSyntax {
     return new ATypeBuilder(id, description)
         .precedence(precedence)
         .atom("first", args)
-        .t(symbol, COLOR_OTHER)
+        .text(symbol, COLOR_OTHER)
         .atom("second", args)
         .build();
   }
@@ -275,7 +270,7 @@ public class AlligatoroidSyntax {
   public static AtomType unaryPrefix(String id, String description, String prefix, String arg) {
     return new ATypeBuilder(id, description)
         .precedence(Integer.MAX_VALUE)
-        .t(prefix, COLOR_OTHER)
+        .text(prefix, COLOR_OTHER)
         .atom("first", arg)
         .build();
   }
@@ -284,7 +279,7 @@ public class AlligatoroidSyntax {
       String id, String description, String prefix, ModelColor color, String arg) {
     return new ATypeBuilder(id, description)
         .precedence(Integer.MAX_VALUE)
-        .t(prefix, color)
+        .text(prefix, color)
         .atom("first", arg)
         .build();
   }
@@ -299,7 +294,7 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_ACCESS, "Access")
             .type(BACK_TYPE_ACCESS)
             .atom("parent", GROUP_EXPR)
-            .t(".", COLOR_OTHER)
+            .text(".", COLOR_OTHER)
             .nestedIdentifier("child", COLOR_IDENTIFIER)
             .build(),
         GROUP_EXPR);
@@ -307,10 +302,10 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_ACCESS_DYNAMIC, "Dynamic Access")
             .type(BACK_TYPE_ACCESS)
             .atom("parent", GROUP_EXPR)
-            .sb("[", COLOR_OTHER)
+            .startBracket("[", COLOR_OTHER)
             .compactSplit()
             .atom("child", GROUP_EXPR)
-            .eb("]", COLOR_OTHER)
+            .endBracket("]", COLOR_OTHER)
             .build(),
         GROUP_EXPR);
     types.add(
@@ -329,58 +324,58 @@ public class AlligatoroidSyntax {
     // Control flow
     types.add(
         new ATypeBuilder(TYPE_LABEL, "Label")
-            .t("#", COLOR_LABEL)
+            .text("#", COLOR_LABEL)
             .primitive("label", COLOR_LABEL)
-            .s()
+            .space()
             .atom("child", GROUP_EXPR)
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_BLOCK, "Block")
-            .sb("{", COLOR_OTHER)
-            .s()
+            .startBracket("{", COLOR_OTHER)
+            .space()
             .arraySuffix("statements", GROUP_STATEMENT, "; ")
-            .s()
-            .eb("}", COLOR_OTHER)
+            .space()
+            .endBracket("}", COLOR_OTHER)
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_LOOP, "Loop")
-            .t("loop", COLOR_KEYWORD)
-            .s()
+            .text("loop", COLOR_KEYWORD)
+            .space()
             .atom("body", GROUP_EXPR)
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_BRANCH, "Branch")
-            .t("branch", COLOR_KEYWORD)
-            .s()
+            .text("branch", COLOR_KEYWORD)
+            .space()
             .arraySep("clauses", GROUP_BRANCH_ELEMENT, ", ")
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_BRANCH_COND, "Conditional")
             .atom("condition", GROUP_EXPR)
-            .s()
-            .t("->", COLOR_OTHER)
-            .s()
+            .space()
+            .text("->", COLOR_OTHER)
+            .space()
             .atom("body", GROUP_EXPR)
             .build(),
         GROUP_BRANCH_ELEMENT);
     types.add(
         new ATypeBuilder(TYPE_BRANCH_DEFAULT, "Default")
             .defaultSelection("body")
-            .t("default", COLOR_KEYWORD)
-            .s()
-            .t("->", COLOR_OTHER)
-            .s()
+            .text("default", COLOR_KEYWORD)
+            .space()
+            .text("->", COLOR_OTHER)
+            .space()
             .atom("body", GROUP_EXPR)
             .build(),
         GROUP_BRANCH_ELEMENT);
     types.add(
         new ATypeBuilder(TYPE_EXIT, "Exit")
-            .t("exit", COLOR_KEYWORD)
-            .s()
+            .text("exit", COLOR_KEYWORD)
+            .space()
             .compactSplit()
             .primitive("label", COLOR_LABEL)
             .build(),
@@ -388,10 +383,10 @@ public class AlligatoroidSyntax {
     types.add(
         new ATypeBuilder(TYPE_RETURN, "Return")
             .defaultSelection("value")
-            .t("return", COLOR_KEYWORD)
-            .s()
+            .text("return", COLOR_KEYWORD)
+            .space()
             .primitive("label", COLOR_LABEL)
-            .s()
+            .space()
             .compactSplit()
             .atom("value", GROUP_EXPR)
             .build(),
@@ -400,19 +395,19 @@ public class AlligatoroidSyntax {
     // Imports
     types.add(
         new ATypeBuilder(TYPE_MODULE_LOCAL, "Local Module")
-            .t("mod", COLOR_KEYWORD)
-            .s()
+            .text("mod", COLOR_KEYWORD)
+            .space()
             .compactSplit()
             .atom("path", GROUP_EXPR)
             .build(b -> backBuiltinFunc("moduleLocal", b.get(0))),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_MODULE_REMOTE_BUNDLE, "Bundle Module")
-            .t("mod", COLOR_KEYWORD)
-            .s()
+            .text("mod", COLOR_KEYWORD)
+            .space()
             .compactSplit()
             .atom("uri", GROUP_EXPR)
-            .s()
+            .space()
             .compactSplit()
             .atom("hash", GROUP_EXPR)
             .build(b -> backBuiltinFunc("moduleBundle", b.get(0))),
@@ -424,9 +419,9 @@ public class AlligatoroidSyntax {
     types.add(
         new ATypeBuilder(TYPE_LOWER_LABEL, "Lower (from label)")
             .defaultSelection("child")
-            .t("~", COLOR_OTHER)
+            .text("~", COLOR_OTHER)
             .primitive("label", COLOR_LABEL)
-            .s()
+            .space()
             .atom("child", GROUP_EXPR)
             .build(),
         GROUP_EXPR);
@@ -435,9 +430,9 @@ public class AlligatoroidSyntax {
     types.add(
         new ATypeBuilder(TYPE_LITERAL_STRING, "String")
             .type(BACK_TYPE_LITERAL_STRING)
-            .t("\"", COLOR_LITERAL_SYMBOL)
+            .text("\"", COLOR_LITERAL_SYMBOL)
             .primitive(FIELD_LITERAL_VALUE, COLOR_LITERAL_TEXT)
-            .t("\"", COLOR_LITERAL_SYMBOL)
+            .text("\"", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
     types.add(
@@ -448,7 +443,7 @@ public class AlligatoroidSyntax {
                 "hex int",
                 COLOR_LITERAL_TEXT,
                 COLOR_INCOMPLETE)
-            .t("x", COLOR_LITERAL_SYMBOL)
+            .text("x", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
     types.add(
@@ -459,7 +454,7 @@ public class AlligatoroidSyntax {
                 "hex float",
                 COLOR_LITERAL_TEXT,
                 COLOR_INCOMPLETE)
-            .t("xf", COLOR_LITERAL_SYMBOL)
+            .text("xf", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
     types.add(
@@ -471,51 +466,52 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_LITERAL_FLOAT, "Float")
             .pattern(
                 FIELD_LITERAL_VALUE, PATTERN_FLOAT, "float", COLOR_LITERAL_TEXT, COLOR_INCOMPLETE)
-            .t("f", COLOR_LITERAL_SYMBOL)
+            .text("f", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_TRUE, "True").t("true", COLOR_LITERAL_TEXT).build(),
+        new ATypeBuilder(TYPE_LITERAL_TRUE, "True").text("true", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_FALSE, "False").t("false", COLOR_LITERAL_TEXT).build(),
+        new ATypeBuilder(TYPE_LITERAL_FALSE, "False").text("false", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_UNIQUE, "Unique").t("unique", COLOR_LITERAL_TEXT).build(),
+        new ATypeBuilder(TYPE_LITERAL_UNIQUE, "Unique").text("unique", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_VOID, "Void").t("void", COLOR_LITERAL_TEXT).build(),
+        new ATypeBuilder(TYPE_LITERAL_VOID, "Void").text("void", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
 
     // Aggregate literals
     types.add(
         new ATypeBuilder(TYPE_LITERAL_RECORD, "Record")
             .type(BACK_TYPE_LITERAL_RECORD)
-            .t("rec", COLOR_LITERAL_TEXT)
-            .s()
-            .sb("(", COLOR_LITERAL_SYMBOL)
+            .text("rec", COLOR_LITERAL_TEXT)
+            .space()
+            .startBracket("(", COLOR_LITERAL_SYMBOL)
             .arraySep("elements", TYPE_LITERAL_RECORD_ELEMENT, ",")
-            .eb(")", COLOR_LITERAL_SYMBOL)
+            .endBracket(")", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_LITERAL_RECORD_ELEMENT, "Element")
             .defaultSelection("value")
             .atom("key", GROUP_EXPR)
-            .t(":", COLOR_OTHER)
-            .s()
+            .text(":", COLOR_OTHER)
+            .space()
             .atom("value", GROUP_EXPR)
             .build());
     types.add(
         new ATypeBuilder(TYPE_LITERAL_TUPLE, "Tuple")
-            .sb("(", COLOR_LITERAL_SYMBOL)
+            .startBracket("(", COLOR_LITERAL_SYMBOL)
             .arraySep("elements", GROUP_EXPR, ",")
-            .eb(")", COLOR_LITERAL_SYMBOL)
+            .endBracket(")", COLOR_LITERAL_SYMBOL)
             .build(),
         GROUP_EXPR); // TODO key/value tuple
-    types.add(new ATypeBuilder(TYPE_BUILTIN, "Builtin").t("%", COLOR_KEYWORD).build(), GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_SCOPE, "Scope").t("scope", COLOR_KEYWORD).build(),
+        new ATypeBuilder(TYPE_BUILTIN, "Builtin").text("%", COLOR_KEYWORD).build(), GROUP_EXPR);
+    types.add(
+        new ATypeBuilder(TYPE_LITERAL_SCOPE, "Scope").text("scope", COLOR_KEYWORD).build(),
         GROUP_EXPR);
 
     // Numeric operators
@@ -885,6 +881,7 @@ public class AlligatoroidSyntax {
 
     public ABackBuilder(String backType) {
       this.backType = backType;
+      back.put("id", new BackIdSpec("id"));
     }
 
     public ROList<BackSpec> build() {
@@ -911,7 +908,12 @@ public class AlligatoroidSyntax {
     }
 
     public ABackBuilder nestedIdentifier(String child) {
-      back.put(child, literalStringBackDynamic(child));
+      back.put(
+          child,
+          literalStringBack(
+              new BackPrimitiveSpec(
+                  new BaseBackPrimitiveSpec.Config(child)
+                      .pattern(PATTERN_IDENTIFIER, "identifier"))));
       return this;
     }
 
@@ -982,22 +984,22 @@ public class AlligatoroidSyntax {
               description, new AtomType.Config(id, wrap.apply(back.build()), front.front)));
     }
 
-    public ATypeBuilder t(String text, ModelColor color) {
+    public ATypeBuilder text(String text, ModelColor color) {
       front.fixed(text, color);
       return this;
     }
 
-    public ATypeBuilder s() {
+    public ATypeBuilder space() {
       front.space();
       return this;
     }
 
-    public ATypeBuilder sb(String text, ModelColor color) {
+    public ATypeBuilder startBracket(String text, ModelColor color) {
       front.startBracket(text, color);
       return this;
     }
 
-    public ATypeBuilder eb(String text, ModelColor color) {
+    public ATypeBuilder endBracket(String text, ModelColor color) {
       front.endBracket(text, color);
       return this;
     }

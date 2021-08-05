@@ -25,17 +25,4 @@ public abstract class FrontSpec {
    * @return
    */
   public abstract String fieldId();
-
-  public abstract void dispatch(DispatchHandler handler);
-
-  public abstract static class DispatchHandler {
-
-    public abstract void handle(FrontSymbolSpec front);
-
-    public abstract void handle(FrontArraySpecBase front);
-
-    public abstract void handle(FrontAtomSpec front);
-
-    public abstract void handle(FrontPrimitiveSpec front);
-  }
 }

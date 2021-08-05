@@ -312,7 +312,7 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard change(Change change) {
     inner.editor.history.record(
-        inner.editor.context, null, r -> r.apply(inner.editor.context, change));
+        inner.editor, null, r -> r.apply(inner.editor, change));
     inner.flushIteration();
     return this;
   }

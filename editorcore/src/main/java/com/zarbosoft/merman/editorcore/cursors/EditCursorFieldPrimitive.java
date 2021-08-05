@@ -10,7 +10,6 @@ import com.zarbosoft.merman.core.visual.visuals.VisualFieldPrimitive;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.history.History;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -39,21 +38,21 @@ public class EditCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
             recorder1 -> {
               // Remove everything after inserted text
               recorder1.apply(
-                  editor.context,
+                  editor,
                   new ChangePrimitive(
                       value, range.beginOffset, value.length() - range.beginOffset, ""));
 
               // Replace with suffix
               final Atom old = value.atomParentRef.atom();
               final Atom gap = editor.createEmptyGap(editor.context.syntax.suffixGap);
-              editor.replaceInParent(editor.context, recorder1, old, gap);
-              recorder1.apply(
-                  editor.context,
-                  new ChangeArray(
-                      (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
-                      0,
-                      0,
-                      TSList.of(old)));
+              editor.replaceInParent(editor, recorder1, old, gap);
+              Editor.arrayChange(
+                  editor,
+                  recorder1,
+                  (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
+                  0,
+                  0,
+                  TSList.of(old));
               gap.fields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
 
               // Send new text + chopped text to suffix
@@ -61,7 +60,7 @@ public class EditCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
                   .editHandleTyping(editor, recorder1, text + after);
             };
         if (recorder != null) apply.accept(recorder);
-        else editor.history.record(editor.context, null, apply);
+        else editor.history.record(editor, null, apply);
         return;
       }
     }

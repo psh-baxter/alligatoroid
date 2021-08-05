@@ -45,10 +45,7 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
     return fieldId;
   }
 
-  @Override
-  public void dispatch(final DispatchHandler handler) {}
-
-  public static class Config {
+    public static class Config {
     public final String field;
     public final Symbol ellipsis;
 

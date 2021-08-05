@@ -2,6 +2,7 @@ package com.zarbosoft.merman.editorcore.history.changes;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
+import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.Change;
 
 public class ChangePrimitive extends Change {
@@ -39,13 +40,13 @@ public class ChangePrimitive extends Change {
   }
 
   @Override
-  public Change apply(final Context context) {
+  public Change apply(final Editor editor) {
     final String clearSublist = value.data.substring(index, index + remove);
     final ChangePrimitive reverse = new ChangePrimitive(value, index, add.length(), clearSublist);
     value.data.replace(index, index + remove, "");
     value.data.insert(index, add);
     for (final FieldPrimitive.Listener listener : value.listeners) {
-      listener.changed(context, index, remove, add);
+      listener.changed(editor.context, index, remove, add);
     }
     return reverse;
   }

@@ -27,6 +27,7 @@ import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.EditorCursorFactory;
 import com.zarbosoft.merman.editorcore.cursors.BaseEditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.gap.EditGapCursorFieldPrimitive;
+import com.zarbosoft.merman.editorcore.history.FileIds;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.JFXEnvironment;
 import com.zarbosoft.merman.jfxcore.display.JavaFXDisplay;
@@ -57,6 +58,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -106,9 +108,9 @@ public class NotMain extends Application {
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
               if (hidEvent.modifiers.containsAny(shiftKeys)) {
-                Editor.get(context).redo(context);
+                Editor.get(context).redo();
               } else {
-                Editor.get(context).undo(context);
+                Editor.get(context).undo();
               }
               return true;
             }
@@ -116,7 +118,7 @@ public class NotMain extends Application {
         case Y:
           {
             if (hidEvent.modifiers.containsAny(controlKeys)) {
-              Editor.get(context).redo(context);
+              Editor.get(context).redo();
               return true;
             }
           }
@@ -251,11 +253,12 @@ public class NotMain extends Application {
                     Format.format("No syntax for files with extension [%s]", extension));
               });
       Syntax syntax = syntaxOut.syntax;
+      FileIds fileIds = new FileIds();
       serializer = new JavaSerializer(syntax.backType);
       try {
         document = serializer.loadDocument(syntax, Files.readAllBytes(Paths.get(path)));
       } catch (NoSuchFileException e) {
-        document = new Document(syntax, Editor.createEmptyAtom(syntax, syntax.root));
+        document = new Document(syntax, Editor.createEmptyAtom(syntax, fileIds,syntax.root));
       } catch (Exception e) {
         throw new RuntimeException(Format.format("Failed to load document %s", path), e);
       }
@@ -264,6 +267,7 @@ public class NotMain extends Application {
       editor =
           new Editor(
               syntax,
+              fileIds,
               document,
               display,
               env,

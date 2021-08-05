@@ -4,6 +4,7 @@ import com.zarbosoft.merman.core.MultiError;
 import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
+import com.zarbosoft.merman.core.syntax.back.BackIdSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
@@ -75,6 +76,8 @@ public class GapAtomType extends BaseGapAtomType {
                         new GapPrimitiveHasBadId(
                             GapAtomType.this.id, ((BaseBackPrimitiveSpec) backSpec).id));
                   }
+                } else if (backSpec instanceof BackIdSpec){
+                  // nop
                 } else {
                   checkErrors.add(new GapHasExtraField(id, GapAtomType.this.id));
                 }

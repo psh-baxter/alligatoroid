@@ -13,7 +13,6 @@ import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldAtomBase;
 import com.zarbosoft.merman.editorcore.Editor;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -29,11 +28,11 @@ public class EditCursorAtom extends CursorAtom {
     if (selectable.second instanceof VisualFieldAtomBase) {
       actionCopy(editor.context);
       editor.history.record(
-          editor.context,
+          editor,
           null,
           recorder -> {
-            editor.atomSet(
-                editor.context,
+            editor.visualAtomSet(
+                editor,
                 recorder,
                 (VisualFieldAtomBase) selectable.second,
                 editor.createEmptyGap(editor.context.syntax.gap));
@@ -45,11 +44,11 @@ public class EditCursorAtom extends CursorAtom {
     ROPair<String, Visual> selectable = visual.selectable.get(index);
     if (selectable.second instanceof VisualFieldAtomBase) {
       editor.history.record(
-          editor.context,
+          editor,
           null,
           recorder -> {
-            editor.atomSet(
-                editor.context,
+            editor.visualAtomSet(
+                editor,
                 recorder,
                 (VisualFieldAtomBase) selectable.second,
                 editor.createEmptyGap(editor.context.syntax.gap));
@@ -73,26 +72,23 @@ public class EditCursorAtom extends CursorAtom {
           atoms -> {
             if (atoms.isEmpty()) return;
             editor.history.record(
-                editor.context,
+                editor,
                 null,
                 recorder -> {
                   if (atoms.size() == 1) {
-                    editor.atomSet(
-                        editor.context,
-                        recorder,
-                        (VisualFieldAtomBase) selectable.second,
-                        atoms.get(0));
+                    editor.visualAtomSet(
+                        editor, recorder, (VisualFieldAtomBase) selectable.second, atoms.get(0));
                   } else {
                     Atom gap = editor.createEmptyGap(editor.context.syntax.suffixGap);
-                    editor.atomSet(
-                        editor.context, recorder, (VisualFieldAtomBase) selectable.second, gap);
-                    recorder.apply(
-                        editor.context,
-                        new ChangeArray(
-                            (FieldArray) gap.fields.get(BaseGapAtomType.PRIMITIVE_KEY),
-                            0,
-                            0,
-                            atoms));
+                    editor.visualAtomSet(
+                        editor, recorder, (VisualFieldAtomBase) selectable.second, gap);
+                    Editor.arrayChange(
+                        editor,
+                        recorder,
+                        (FieldArray) gap.fields.get(BaseGapAtomType.PRIMITIVE_KEY),
+                        0,
+                        0,
+                        atoms);
                   }
                 });
           });
@@ -103,19 +99,19 @@ public class EditCursorAtom extends CursorAtom {
     ROPair<String, Visual> selectable = visual.selectable.get(index);
     if (selectable.second instanceof VisualFieldAtomBase) {
       editor.history.record(
-          editor.context,
+          editor,
           null,
           recorder -> {
             final Atom old = ((VisualFieldAtomBase) selectable.second).atomGet();
             final Atom gap = editor.createEmptyGap(editor.context.syntax.suffixGap);
-            editor.atomSet(editor.context, recorder, (VisualFieldAtomBase) selectable.second, gap);
-            recorder.apply(
-                editor.context,
-                new ChangeArray(
-                    (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
-                    0,
-                    0,
-                    TSList.of(old)));
+            editor.visualAtomSet(editor, recorder, (VisualFieldAtomBase) selectable.second, gap);
+            Editor.arrayChange(
+                editor,
+                recorder,
+                (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
+                0,
+                0,
+                TSList.of(old));
             gap.fields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
           });
     }

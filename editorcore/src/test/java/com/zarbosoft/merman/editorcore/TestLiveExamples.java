@@ -63,11 +63,11 @@ public class TestLiveExamples {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
+                    editor,
                     null,
                     r ->
                         r.apply(
-                            editor.context,
+                            editor,
                             new ChangeArray(
                                 Helper.rootArray(editor.context.document), 1, 1, TSList.of()))));
   }

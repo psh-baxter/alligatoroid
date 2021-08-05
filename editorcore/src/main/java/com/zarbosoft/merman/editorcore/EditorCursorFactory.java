@@ -65,7 +65,7 @@ public class EditorCursorFactory implements com.zarbosoft.merman.core.CursorFact
   public boolean prepSelectEmptyArray(Context context, FieldArray value) {
     Editor editor = Editor.get(context);
     editor.history.record(
-        context,
+        editor,
         null,
         recorder -> {
           editor.arrayInsertNewDefault(recorder, value, 0);

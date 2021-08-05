@@ -33,6 +33,7 @@ import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldArray;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorAtom;
 import com.zarbosoft.merman.editorcore.cursors.EditCursorFieldPrimitive;
 import com.zarbosoft.merman.editorcore.display.MockeryDisplay;
+import com.zarbosoft.merman.editorcore.history.FileIds;
 import com.zarbosoft.merman.editorcore.history.History;
 import com.zarbosoft.merman.jfxcore.serialization.JavaSerializer;
 import com.zarbosoft.rendaw.common.Assertion;
@@ -195,6 +196,7 @@ public class Helper {
     final Editor editor =
         new Editor(
             syntax,
+            new FileIds(),
             doc,
             new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
             new TestEnvironment(),

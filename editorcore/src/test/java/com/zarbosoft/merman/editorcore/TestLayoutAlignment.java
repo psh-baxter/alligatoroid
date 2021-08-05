@@ -157,11 +157,11 @@ public class TestLayoutAlignment {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
+                    editor,
                     null,
                     r ->
                         r.apply(
-                            editor.context,
+                            editor,
                             new ChangeArray(
                                 Helper.rootArray(editor.context.document),
                                 1,
@@ -212,11 +212,11 @@ public class TestLayoutAlignment {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
+                    editor,
                     null,
                     r ->
                         r.apply(
-                            editor.context,
+                            editor,
                             new ChangeArray(
                                 Helper.rootArray(editor.context.document), 1, 1, TSList.of()))))
         .checkBrick(0, 2, 10);

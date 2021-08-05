@@ -48,11 +48,11 @@ public class TestLayoutArray {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
+                    editor,
                     null,
                     r ->
                         r.apply(
-                            editor.context,
+                            editor,
                             new ChangeArray(array, 0, 0, TSList.of(new TreeBuilder(one).build())))))
         .checkTextBrick(0, 0, "[")
         .checkTextBrick(0, 1, "one")
@@ -91,11 +91,11 @@ public class TestLayoutArray {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
+                    editor,
                     null,
                     r ->
                         r.apply(
-                            editor.context,
+                            editor,
                             new ChangeArray(array, 0, 0, TSList.of(new TreeBuilder(one).build())))))
         .checkTextBrick(0, 0, "[")
         .checkTextBrick(0, 1, "one")
@@ -136,11 +136,11 @@ public class TestLayoutArray {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
+                    editor,
                     null,
                     r ->
                         r.apply(
-                            editor.context,
+                            editor,
                             new ChangeArray(array, 1, 0, TSList.of(new TreeBuilder(one).build())))))
         .checkTextBrick(0, 0, "[")
         .checkTextBrick(0, 1, "one")
@@ -184,11 +184,11 @@ public class TestLayoutArray {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
+                    editor,
                     null,
                     r ->
                         r.apply(
-                            editor.context,
+                            editor,
                             new ChangeArray(array, 1, 0, TSList.of(new TreeBuilder(one).build())))))
         .checkTextBrick(0, index2++, "[")
         .checkTextBrick(0, index2++, "[")
@@ -233,9 +233,7 @@ public class TestLayoutArray {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
-                    null,
-                    r -> r.apply(editor.context, new ChangeArray(array, 0, 1, TSList.of()))))
+                    editor, null, r -> r.apply(editor, new ChangeArray(array, 0, 1, TSList.of()))))
         .checkTextBrick(0, 0, "[")
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(0, 2, "]");
@@ -285,9 +283,7 @@ public class TestLayoutArray {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
-                    null,
-                    r -> r.apply(editor.context, new ChangeArray(array, 1, 1, TSList.of()))))
+                    editor, null, r -> r.apply(editor, new ChangeArray(array, 1, 1, TSList.of()))))
         .checkTextBrick(0, 0, "[")
         .checkTextBrick(0, 1, "one")
         .checkTextBrick(0, 2, "]");
@@ -335,9 +331,7 @@ public class TestLayoutArray {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
-                    null,
-                    r -> r.apply(editor.context, new ChangeArray(array, 0, 1, TSList.of()))))
+                    editor, null, r -> r.apply(editor, new ChangeArray(array, 0, 1, TSList.of()))))
         .checkTextBrick(0, 0, "[")
         .checkSpaceBrick(0, 1)
         .checkTextBrick(0, 2, "]");

@@ -2,9 +2,10 @@ package com.zarbosoft.merman.editorcore.history;
 
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.CursorState;
+import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.rendaw.common.TSList;
 
-public class ChangeLevel extends Change {
+public class ChangeLevel  {
   public final TSList<Change> subchanges = new TSList<>();
   CursorState select;
   public final long unique;
@@ -13,7 +14,6 @@ public class ChangeLevel extends Change {
     this.unique = unique;
   }
 
-  @Override
   public boolean merge(final Change other) {
     if (subchanges.isEmpty()) {
       subchanges.add(other);
@@ -22,15 +22,14 @@ public class ChangeLevel extends Change {
     return true;
   }
 
-  @Override
-  public Change apply(final Context context) {
+  public ChangeLevel apply(final Editor editor) {
     final ChangeLevel out = new ChangeLevel(unique);
-    if (context.cursor != null) out.select = context.cursor.saveState();
+    if (editor.context.cursor != null) out.select = editor.context.cursor.saveState();
     for (int i = 0; i < subchanges.size(); ++i) {
       Change change = subchanges.getRev(i);
-      out.subchanges.add(change.apply(context));
+      out.subchanges.add(change.apply(editor));
     }
-    if (select != null) select.select(context);
+    if (select != null) select.select(editor.context);
     return out;
   }
 

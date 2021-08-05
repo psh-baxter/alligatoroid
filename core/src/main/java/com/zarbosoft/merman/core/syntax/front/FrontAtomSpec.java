@@ -52,12 +52,7 @@ public class FrontAtomSpec extends FrontSpec {
     return fieldId;
   }
 
-  @Override
-  public void dispatch(final DispatchHandler handler) {
-    handler.handle(this);
-  }
-
-  public static class Config {
+    public static class Config {
     public final String fieldId;
     public final Style.Config ellipsisStyle = new Style.Config();
     public Symbol ellipsis = new SymbolTextSpec(new SymbolTextSpec.Config("..."));

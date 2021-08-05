@@ -14,6 +14,7 @@ import com.zarbosoft.merman.core.syntax.back.BackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
+import com.zarbosoft.merman.core.syntax.back.BackIdSpec;
 import com.zarbosoft.merman.core.syntax.back.BackKeySpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
@@ -48,6 +49,7 @@ import com.zarbosoft.rendaw.common.TSSet;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 
 public abstract class AtomType {
   public final ROMap<String, BackSpecData> fields;
@@ -75,7 +77,9 @@ public abstract class AtomType {
               if (!(s instanceof BackSpecData)) return true;
               BackSpecData s1 = (BackSpecData) s;
               BackSpecData old = fields.putReplace(s1.id, s1);
-              if (old != null) errors.add(new DuplicateBackId(s1.id));
+              if (old != null) {
+                errors.add(new DuplicateBackId(s1.id));
+              }
               if (s instanceof BaseBackArraySpec) return false;
               return true;
             });
@@ -150,7 +154,12 @@ public abstract class AtomType {
         e.finish(
             subErrors, new SyntaxPath("front").add(Integer.toString(i)), this, fieldsUsedFront);
       }
-      final TSSet<String> missing = fields.keys().difference(fieldsUsedFront);
+      TSSet<String> missing = new TSSet<>();
+      for (Map.Entry<String, BackSpecData> field : fields) {
+          if (field.getValue() instanceof BackIdSpec) continue;
+          missing.add(field.getKey());
+      }
+      missing.removeAll(fieldsUsedFront);
       if (!missing.isEmpty()) {
         subErrors.add(new UnusedBackData(missing.ro()));
       }

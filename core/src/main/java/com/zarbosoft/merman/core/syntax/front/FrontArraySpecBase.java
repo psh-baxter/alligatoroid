@@ -60,12 +60,7 @@ public abstract class FrontArraySpecBase extends FrontSpec {
 
   public abstract String fieldId();
 
-  @Override
-  public void dispatch(final DispatchHandler handler) {
-    handler.handle(this);
-  }
-
-  public static class Config {
+    public static class Config {
     public ROSet<String> tags = ROSet.empty;
     public ROList<FrontSymbolSpec> prefix = ROList.empty;
     public ROList<FrontSymbolSpec> suffix = ROList.empty;

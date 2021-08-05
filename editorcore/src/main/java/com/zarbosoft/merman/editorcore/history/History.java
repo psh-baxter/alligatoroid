@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.editorcore.history;
 
-import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.Environment;
+import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.DeadCode;
 import com.zarbosoft.rendaw.common.ROPair;
@@ -44,18 +44,18 @@ public class History {
     };
   }
 
-  private ChangeLevel applyLevel(final Context context, final ChangeLevel group) {
-    final ChangeLevel out = (ChangeLevel) group.apply(context);
+  private ChangeLevel applyLevel(final Editor editor, final ChangeLevel group) {
+    final ChangeLevel out = (ChangeLevel) group.apply(editor);
     return out;
   }
 
-  public boolean undo(final Context context) {
+  public boolean undo(final Editor editor) {
     final boolean wasModified = isModified();
     try (Closeable ignored = lock()) {
       if (past.isEmpty()) return false;
       if (past.getLast().isEmpty()) past.removeLast();
       if (past.isEmpty()) return false;
-      future.addLast(applyLevel(context, past.removeLast()));
+      future.addLast(applyLevel(editor, past.removeLast()));
       past.addLast(new ChangeLevel(++nextLevelUnique));
     } catch (final IOException ignored) {
     }
@@ -67,12 +67,12 @@ public class History {
     return true;
   }
 
-  public boolean redo(final Context context) {
+  public boolean redo(final Editor editor) {
     final boolean wasModified = isModified();
     try (Closeable ignored = lock()) {
       if (future.isEmpty()) return false;
       if (past.peekLast().isEmpty()) past.removeLast();
-      past.addLast(applyLevel(context, future.removeLast()));
+      past.addLast(applyLevel(editor, future.removeLast()));
       past.addLast(new ChangeLevel(++nextLevelUnique));
     } catch (final IOException ignored) {
     }
@@ -96,11 +96,11 @@ public class History {
     past.addLast(new ChangeLevel(++nextLevelUnique));
   }
 
-  public void record(Context context, ROPair unique, Consumer<Recorder> c) {
+  public void record(Editor editor, ROPair unique, Consumer<Recorder> c) {
     final boolean wasModified = isModified();
     try (Closeable ignored = lock()) {
       /// Demarcate change level based on conditions
-      Environment.Time now = context.env.now();
+      Environment.Time now = editor.context.env.now();
       if (lastChangeUnique == null
           || unique == null
           || !unique.equals(lastChangeUnique)
@@ -182,10 +182,10 @@ public class History {
       this.partial = partial;
     }
 
-    public void apply(final Context context, final Change change) {
-      if (partial.select == null && context.cursor != null)
-        partial.select = context.cursor.saveState();
-      final Change reverse = change.apply(context);
+    public void apply(final Editor editor, final Change change) {
+      if (partial.select == null && editor.context.cursor != null)
+        partial.select = editor.context.cursor.saveState();
+      final Change reverse = change.apply(editor);
       partial.merge(reverse);
     }
   }

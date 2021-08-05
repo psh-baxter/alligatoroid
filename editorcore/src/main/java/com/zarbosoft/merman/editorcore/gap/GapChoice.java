@@ -21,8 +21,6 @@ import com.zarbosoft.merman.core.syntax.symbol.SymbolSpaceSpec;
 import com.zarbosoft.merman.core.syntax.symbol.SymbolTextSpec;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.History;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeAtom;
 import com.zarbosoft.merman.editorcore.history.changes.ChangePrimitive;
 import com.zarbosoft.pidgoon.events.EscapableResult;
 import com.zarbosoft.pidgoon.events.Event;
@@ -178,13 +176,13 @@ public class GapChoice extends TwoColumnChoice {
             FieldArray precedingField =
                 (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY);
             TSList<Atom> preceding = precedingField.data;
-            recorder1.apply(
-                editor.context,
-                new ChangeArray(
-                    precedingField,
-                    preceding.size() - consumePrecedingAtoms,
-                    consumePrecedingAtoms,
-                    ROList.empty));
+            Editor.arrayChange(
+                editor,
+                recorder1,
+                precedingField,
+                preceding.size() - consumePrecedingAtoms,
+                consumePrecedingAtoms,
+                ROList.empty);
             for (EditGapCursorFieldPrimitive.PrepareAtomField s : supplyFillAtoms) {
               Field field = s.process(editor, recorder1);
               fields.put(field.back().id, field);
@@ -195,8 +193,7 @@ public class GapChoice extends TwoColumnChoice {
           Field following = null;
           Atom created = new Atom(type);
           for (String fieldId : type.fields.keys().difference(fields.keys())) {
-            Field field =
-                editor.createEmptyField(editor.context.syntax, type.fields.get(fieldId), 0);
+            Field field = editor.createEmptyField(type.fields.get(fieldId));
             fields.put(fieldId, field);
             if (followingSpec != null && followingSpec.fieldId().equals(fieldId)) {
               following = field;
@@ -225,7 +222,7 @@ public class GapChoice extends TwoColumnChoice {
           }
         };
     if (recorder != null) apply.accept(recorder);
-    else editor.history.record(editor.context, null, apply);
+    else editor.history.record(editor, null, apply);
   }
 
   private void deepSelectInto(Editor editor, History.Recorder recorder, Field following) {
@@ -244,30 +241,27 @@ public class GapChoice extends TwoColumnChoice {
     FieldArray precedingField = (FieldArray) gap.fields.getOpt(SuffixGapAtomType.PRECEDING_KEY);
     if (precedingField != null) {
       /// In a suffix gap - reuse, adding to preceding and clearing/selecting text field
-      recorder.apply(
-          editor.context,
-          new ChangeArray(precedingField, precedingField.data.size(), 0, TSList.of(created)));
+      Editor.arrayChange(
+          editor, recorder, precedingField, precedingField.data.size(), 0, TSList.of(created));
       FieldPrimitive gapText = (FieldPrimitive) gap.fields.get(GapAtomType.PRIMITIVE_KEY);
-      recorder.apply(editor.context, new ChangePrimitive(gapText, 0, gapText.data.length(), ""));
+      recorder.apply(editor, new ChangePrimitive(gapText, 0, gapText.data.length(), ""));
       gapText.selectInto(editor.context);
     } else {
       /// Wrap in a suffix gap and select text
       Atom wrap = editor.createEmptyGap(editor.context.syntax.suffixGap);
       if (gap.fieldParentRef instanceof FieldArray.Parent) {
         FieldArray.Parent parent = (FieldArray.Parent) gap.fieldParentRef;
-        recorder.apply(
-            editor.context, new ChangeArray(parent.field, parent.index, 1, TSList.of(wrap)));
+        Editor.arrayChange(editor, recorder, parent.field, parent.index, 1, TSList.of(wrap));
       } else if (gap.fieldParentRef instanceof FieldAtom.Parent) {
-        recorder.apply(
-            editor.context, new ChangeAtom(((FieldAtom.Parent) gap.fieldParentRef).field, wrap));
+        Editor.atomSet(editor, recorder, ((FieldAtom.Parent) gap.fieldParentRef).field, wrap);
       }
-      recorder.apply(
-          editor.context,
-          new ChangeArray(
-              (FieldArray) wrap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
-              0,
-              0,
-              TSList.of(created)));
+      Editor.arrayChange(
+          editor,
+          recorder,
+          (FieldArray) wrap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
+          0,
+          0,
+          TSList.of(created));
       FieldPrimitive wrapText = (FieldPrimitive) wrap.fields.get(GapAtomType.PRIMITIVE_KEY);
       wrapText.selectInto(editor.context);
     }
@@ -277,20 +271,17 @@ public class GapChoice extends TwoColumnChoice {
     FieldArray precedingField = (FieldArray) gap.fields.getOpt(SuffixGapAtomType.PRECEDING_KEY);
     if (precedingField != null && precedingField.data.some()) {
       /// Reuse current suffix gap - add to preceding and clear text
-      recorder.apply(
-          editor.context,
-          new ChangeArray(precedingField, precedingField.data.size(), 0, TSList.of(created)));
+      Editor.arrayChange(
+          editor, recorder, precedingField, precedingField.data.size(), 0, TSList.of(created));
       FieldPrimitive gapText = (FieldPrimitive) gap.fields.get(GapAtomType.PRIMITIVE_KEY);
-      recorder.apply(editor.context, new ChangePrimitive(gapText, 0, gapText.data.length(), ""));
+      recorder.apply(editor, new ChangePrimitive(gapText, 0, gapText.data.length(), ""));
     } else {
       /// Replace gap
       if (gap.fieldParentRef instanceof FieldArray.Parent) {
         FieldArray.Parent parent = (FieldArray.Parent) gap.fieldParentRef;
-        recorder.apply(
-            editor.context, new ChangeArray(parent.field, parent.index, 1, TSList.of(created)));
+        Editor.arrayChange(editor, recorder, parent.field, parent.index, 1, TSList.of(created));
       } else if (gap.fieldParentRef instanceof FieldAtom.Parent) {
-        recorder.apply(
-            editor.context, new ChangeAtom(((FieldAtom.Parent) gap.fieldParentRef).field, created));
+        Editor.atomSet(editor, recorder, ((FieldAtom.Parent) gap.fieldParentRef).field, created);
       }
     }
   }

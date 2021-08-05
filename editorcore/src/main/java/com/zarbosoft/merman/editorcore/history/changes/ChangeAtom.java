@@ -3,6 +3,7 @@ package com.zarbosoft.merman.editorcore.history.changes;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.Change;
 
 public class ChangeAtom extends Change {
@@ -28,14 +29,14 @@ public class ChangeAtom extends Change {
   }
 
   @Override
-  public Change apply(final Context context) {
+  public Change apply(final Editor editor) {
     final Change reverse = new ChangeAtom(value, value.data);
     if (value.data != null) /* modifying new fields, not yet in tree */
       value.data.setFieldParentRef(null);
     value.data = atom;
     if (atom != null) /* undoing initial creation, might be null */
       atom.setFieldParentRef(new FieldAtom.Parent(value));
-    for (final FieldAtom.Listener listener : value.listeners) listener.set(context, atom);
+    for (final FieldAtom.Listener listener : value.listeners) listener.set(editor.context, atom);
     return reverse;
   }
 }

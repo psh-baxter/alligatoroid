@@ -3,6 +3,7 @@ package com.zarbosoft.merman.editorcore.history.changes;
 import com.zarbosoft.merman.core.Context;
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
+import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.Change;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
@@ -43,7 +44,7 @@ public class ChangeArray extends Change {
   }
 
   @Override
-  public Change apply(final Context context) {
+  public Change apply(final Editor editor) {
     final TSList<Atom> clearSublist = value.data.sublist(index, index + remove);
     final ChangeArray reverse = new ChangeArray(value, index, add.size(), clearSublist.mut());
     for (Atom atom : clearSublist) {
@@ -56,7 +57,7 @@ public class ChangeArray extends Change {
     }
     value.renumber(index);
     for (final FieldArray.Listener listener : value.listeners) {
-      listener.changed(context, index, remove, add);
+      listener.changed(editor.context, index, remove, add);
     }
     return reverse;
   }

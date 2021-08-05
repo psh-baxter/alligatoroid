@@ -84,9 +84,9 @@ public class TestPrimitiveBreaking {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
+                    editor,
                     null,
-                    r -> r.apply(editor.context, new ChangePrimitive(primitive, 3, 2, ""))))
+                    r -> r.apply(editor, new ChangePrimitive(primitive, 3, 2, ""))))
         .checkCourseCount(1)
         .checkCourse(0, -10, 0)
         .run(
@@ -135,9 +135,9 @@ public class TestPrimitiveBreaking {
         .run(
             editor ->
                 editor.history.record(
-                    editor.context,
+                    editor,
                     null,
-                    r -> r.apply(editor.context, new ChangePrimitive(primitive, 1, 5, ""))))
+                    r -> r.apply(editor, new ChangePrimitive(primitive, 1, 5, ""))))
         .checkCourseCount(1)
         .checkCourse(0, -10, 0)
         .run(
@@ -174,9 +174,9 @@ public class TestPrimitiveBreaking {
         .run(
             editor -> {
               editor.history.record(
-                  editor.context,
+                  editor,
                   null,
-                  r -> r.apply(editor.context, new ChangePrimitive(primitive, 0, 8, "")));
+                  r -> r.apply(editor, new ChangePrimitive(primitive, 0, 8, "")));
             })
         .checkCourseCount(1)
         .checkTextBrick(0, 1, "");
@@ -210,9 +210,9 @@ public class TestPrimitiveBreaking {
         .run(
             editor -> {
               editor.history.record(
-                  editor.context,
+                  editor,
                   null,
-                  r -> r.apply(editor.context, new ChangePrimitive(primitive, 5, 8, "")));
+                  r -> r.apply(editor, new ChangePrimitive(primitive, 5, 8, "")));
             })
         .checkCourseCount(2)
         .checkTextBrick(1, 0, "");
@@ -246,9 +246,9 @@ public class TestPrimitiveBreaking {
         .run(
             editor -> {
               editor.history.record(
-                  editor.context,
+                  editor,
                   null,
-                  r -> r.apply(editor.context, new ChangePrimitive(primitive, 0, 8, "")));
+                  r -> r.apply(editor, new ChangePrimitive(primitive, 0, 8, "")));
             })
         .checkCourseCount(2)
         .checkTextBrick(0, 1, "");
@@ -281,9 +281,9 @@ public class TestPrimitiveBreaking {
         .run(
             editor -> {
               editor.history.record(
-                  editor.context,
+                  editor,
                   null,
-                  r -> r.apply(editor.context, new ChangePrimitive(primitive, 1, 0, "ord eg")));
+                  r -> r.apply(editor, new ChangePrimitive(primitive, 1, 0, "ord eg")));
               primitive.visual.select(editor.context, true, 0, 8);
             })
         .checkCourseCount(2)

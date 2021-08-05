@@ -35,9 +35,9 @@ public class TestCursorChanges {
 
   public static void arrayParentDelete(Editor editor, FieldArray.Parent parent) {
     editor.history.record(
-        editor.context,
+        editor,
         null,
-        r -> r.apply(editor.context, new ChangeArray(parent.field, parent.index, 1, TSList.of())));
+        r -> r.apply(editor, new ChangeArray(parent.field, parent.index, 1, TSList.of())));
   }
 
   public static void parentDelete(Editor editor, Field.Parent<?> parent) {
@@ -51,11 +51,11 @@ public class TestCursorChanges {
           @Override
           public void handle(FieldAtom.Parent parent) {
             editor.history.record(
-                editor.context,
+                editor,
                 null,
                 r ->
                     r.apply(
-                        editor.context,
+                        editor,
                         new ChangeAtom(
                             parent.field,
                             new TreeBuilder(editor.context.syntax.gap)
@@ -120,19 +120,19 @@ public class TestCursorChanges {
     transform.accept(
         editor,
         found,
-        c -> editor.history.record(editor.context, null, r -> r.apply(editor.context, c)));
+        c -> editor.history.record(editor, null, r -> r.apply(editor, c)));
     MatcherAssert.assertThat(Helper.rootArray(editor.context.document).data.size(), equalTo(1));
     Helper.assertTreeEqual(Helper.rootArray(editor.context.document).data.get(0), end);
     assertThat(editor.context.cursor.getSyntaxPath(), equalTo(selectEnd));
 
     // Undo
-    editor.history.undo(editor.context);
+    editor.history.undo(editor);
     MatcherAssert.assertThat(Helper.rootArray(editor.context.document).data.size(), equalTo(1));
     Helper.assertTreeEqual(Helper.rootArray(editor.context.document).data.get(0), begin);
     assertThat(editor.context.cursor.getSyntaxPath(), equalTo(selectBegin));
 
     // Redo
-    editor.history.redo(editor.context);
+    editor.history.redo(editor);
     MatcherAssert.assertThat(Helper.rootArray(editor.context.document).data.size(), equalTo(1));
     Helper.assertTreeEqual(Helper.rootArray(editor.context.document).data.get(0), end);
     assertThat(editor.context.cursor.getSyntaxPath(), equalTo(selectEnd));
@@ -580,17 +580,17 @@ public class TestCursorChanges {
         editor,
         value,
         syntax,
-        c -> editor.history.record(editor.context, null, r -> r.apply(editor.context, c)));
+        c -> editor.history.record(editor, null, r -> r.apply(editor, c)));
     assertThat(selection.beginIndex, equalTo(endSelectBegin));
     assertThat(selection.endIndex, equalTo(endSelectEnd));
 
     // Undo
-    editor.history.undo(editor.context);
+    editor.history.undo(editor);
     assertThat(selection.beginIndex, equalTo(beginSelectBegin));
     assertThat(selection.endIndex, equalTo(beginSelectEnd));
 
     // Redo
-    editor.history.redo(editor.context);
+    editor.history.redo(editor);
     assertThat(selection.beginIndex, equalTo(endSelectBegin));
     assertThat(selection.endIndex, equalTo(endSelectEnd));
   }

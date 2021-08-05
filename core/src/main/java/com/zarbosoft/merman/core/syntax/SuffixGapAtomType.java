@@ -5,6 +5,7 @@ import com.zarbosoft.merman.core.syntax.back.BackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackFixedTypeSpec;
+import com.zarbosoft.merman.core.syntax.back.BackIdSpec;
 import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpecData;
@@ -106,6 +107,8 @@ public class SuffixGapAtomType extends BaseGapAtomType {
                   } else {
                     checkErrors.add(new SuffixGapPrecedingHasBadId(SuffixGapAtomType.this.id, id));
                   }
+                } else if (backSpec instanceof BackIdSpec) {
+                  // nop
                 } else {
                   checkErrors.add(new GapHasExtraField(SuffixGapAtomType.this.id, id));
                 }

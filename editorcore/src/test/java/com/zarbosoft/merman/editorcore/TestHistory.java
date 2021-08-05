@@ -42,11 +42,11 @@ public class TestHistory {
           @Override
           public void accept(final Editor editor) {
             editor.history.record(
-                editor.context,
+                editor,
                 null,
                 r ->
                     r.apply(
-                        editor.context,
+                        editor,
                         new ChangeArray(
                             Helper.rootArray(editor.context.document),
                             0,
@@ -59,14 +59,14 @@ public class TestHistory {
         new Consumer<Editor>() {
           @Override
           public void accept(final Editor editor) {
-            editor.history.undo(editor.context);
+            editor.history.undo(editor);
           }
         };
     redo =
         new Consumer<Editor>() {
           @Override
           public void accept(final Editor editor) {
-            editor.history.redo(editor.context);
+            editor.history.redo(editor);
           }
         };
   }

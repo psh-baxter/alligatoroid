@@ -63,11 +63,6 @@ public class FrontSymbolSpec extends FrontSpec {
     return null;
   }
 
-  @Override
-  public void dispatch(final DispatchHandler handler) {
-    handler.handle(this);
-  }
-
   public CourseDisplayNode createDisplay(final Context context) {
     final CourseDisplayNode out = type.createDisplay(context);
     return out;

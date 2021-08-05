@@ -33,27 +33,27 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
     Consumer<History.Recorder> apply =
         recorder1 -> {
           recorder1.apply(
-              editor.context,
+              editor,
               new ChangePrimitive(
                   value, range.beginOffset, range.endOffset - range.beginOffset, text));
         };
     if (recorder != null) apply.accept(recorder);
-    else editor.history.record(editor.context, new ROPair<>(visualPrimitive.value, "text"), apply);
+    else editor.history.record(editor, new ROPair<>(visualPrimitive.value, "text"), apply);
   }
 
   public void editExit(Editor editor) {
-      actionExit(editor.context);
+    actionExit(editor.context);
   }
 
   public void editCut(Editor editor) {
     editor.history.record(
-        editor.context,
+        editor,
         null,
         recorder -> {
           editor.context.copy(
               visualPrimitive.value.get().substring(range.beginOffset, range.endOffset));
           recorder.apply(
-              editor.context,
+              editor,
               new ChangePrimitive(
                   visualPrimitive.value,
                   range.beginOffset,
@@ -66,22 +66,22 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
     if (range.beginOffset == range.endOffset) {
       if (range.endOffset == visualPrimitive.value.length()) return;
       editor.history.record(
-          editor.context,
+          editor,
           new ROPair<>(visualPrimitive.value, "text"),
           recorder -> {
             final int following = followingStart();
             recorder.apply(
-                editor.context,
+                editor,
                 new ChangePrimitive(
                     visualPrimitive.value, range.beginOffset, following - range.beginOffset, ""));
           });
     } else
       editor.history.record(
-          editor.context,
+          editor,
           new ROPair<>(visualPrimitive.value, "text"),
           recorder -> {
             recorder.apply(
-                editor.context,
+                editor,
                 new ChangePrimitive(
                     visualPrimitive.value,
                     range.beginOffset,
@@ -94,22 +94,22 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
     if (range.beginOffset == range.endOffset) {
       if (range.beginOffset == 0) return;
       editor.history.record(
-          editor.context,
+          editor,
           new ROPair<>(visualPrimitive.value, "text"),
           recorder -> {
             final int preceding = precedingStart();
             recorder.apply(
-                editor.context,
+                editor,
                 new ChangePrimitive(
                     visualPrimitive.value, preceding, range.beginOffset - preceding, ""));
           });
     } else
       editor.history.record(
-          editor.context,
+          editor,
           new ROPair<>(visualPrimitive.value, "text"),
           recorder -> {
             recorder.apply(
-                editor.context,
+                editor,
                 new ChangePrimitive(
                     visualPrimitive.value,
                     range.beginOffset,
@@ -126,12 +126,12 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
     if (beginOffset == endOffset) {
       if (beginLine.index + 1 >= visualPrimitive.lines.size()) return;
       editor.history.record(
-          editor.context,
+          editor,
           null,
           recorder -> {
             final int select = endLine.offset + endLine.text.length();
             recorder.apply(
-                editor.context,
+                editor,
                 new ChangePrimitive(
                     visualPrimitive.value,
                     visualPrimitive.lines.get(beginLine.index + 1).offset - 1,
@@ -142,7 +142,7 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
     } else {
       if (beginLine == endLine) return;
       editor.history.record(
-          editor.context,
+          editor,
           null,
           recorder -> {
             final StringBuilder replace = new StringBuilder();
@@ -155,7 +155,7 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
             }
             replace.append(endLine.text.substring(0, endOffset - endLine.offset));
             recorder.apply(
-                editor.context,
+                editor,
                 new ChangePrimitive(
                     visualPrimitive.value,
                     beginOffset,
@@ -170,13 +170,13 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
     editor.context.uncopyString(
         text ->
             editor.history.record(
-                editor.context,
+                editor,
                 null,
                 recorder -> {
                   if (text == null) return;
                   FieldPrimitive value = visualPrimitive.value;
                   recorder.apply(
-                      editor.context,
+                      editor,
                       new ChangePrimitive(
                           value, range.beginOffset, range.endOffset - range.beginOffset, text));
                 }));
@@ -184,11 +184,11 @@ public class BaseEditCursorFieldPrimitive extends CursorFieldPrimitive {
 
   public void editSplitLines(Editor editor) {
     editor.history.record(
-        editor.context,
+        editor,
         null,
         recorder -> {
           recorder.apply(
-              editor.context,
+              editor,
               new ChangePrimitive(
                   visualPrimitive.value,
                   range.beginOffset,

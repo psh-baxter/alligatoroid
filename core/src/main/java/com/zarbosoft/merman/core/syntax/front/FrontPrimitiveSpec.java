@@ -56,11 +56,6 @@ public class FrontPrimitiveSpec extends FrontSpec {
     return fieldId;
   }
 
-  @Override
-  public void dispatch(final DispatchHandler handler) {
-    handler.handle(this);
-  }
-
   public static class Config {
     public final String fieldId;
     public Style.SplitMode splitMode = Style.SplitMode.NEVER;

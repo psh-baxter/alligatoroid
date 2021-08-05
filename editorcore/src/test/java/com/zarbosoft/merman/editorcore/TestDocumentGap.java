@@ -366,7 +366,7 @@ public class TestDocumentGap {
 
     innerTestTransform(
         syntax,
-        () -> Editor.createEmptyGap(syntax.gap),
+        () -> new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build(),
         editor -> {
           selectInitialGap(editor);
           editor.context.cursor.handleTyping(editor.context, "9");
@@ -783,9 +783,9 @@ public class TestDocumentGap {
     transform.accept(editor);
     Helper.dumpTree(editor);
     assertTreeEqual(editor.context, end, Helper.rootArray(editor.context.document));
-    editor.history.undo(editor.context);
+    editor.history.undo(editor);
     assertTreeEqual(editor.context, start.get(), Helper.rootArray(editor.context.document));
-    editor.history.redo(editor.context);
+    editor.history.redo(editor);
     assertTreeEqual(editor.context, end, Helper.rootArray(editor.context.document));
   }
 
