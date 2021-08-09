@@ -34,7 +34,7 @@ public class TestAttachments {
             .build();
 
     final Atom textAtom = new TreeBuilder(text).add("value", "hi\ndog").build();
-    final FieldPrimitive value = (FieldPrimitive) textAtom.fields.getOpt("value");
+    final FieldPrimitive value = (FieldPrimitive) textAtom.namedFields.getOpt("value");
     final Brick[] lastBrick = {null};
     final Attachment listener =
         new Attachment() {

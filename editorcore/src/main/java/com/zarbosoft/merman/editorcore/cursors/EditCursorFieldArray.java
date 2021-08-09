@@ -9,7 +9,6 @@ import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
 import com.zarbosoft.merman.core.visual.visuals.VisualFieldArray;
 import com.zarbosoft.merman.editorcore.Editor;
 import com.zarbosoft.merman.editorcore.history.History;
-import com.zarbosoft.merman.editorcore.history.changes.ChangeArray;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
@@ -144,11 +143,11 @@ public class EditCursorFieldArray extends CursorFieldArray {
           Editor.arrayChange(
               editor,
               recorder,
-              (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
+              (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY),
               0,
               0,
               transplant);
-          gap.fields.getOpt("gap").selectInto(editor.context);
+          gap.namedFields.getOpt("gap").selectInto(editor.context);
         });
   }
 }

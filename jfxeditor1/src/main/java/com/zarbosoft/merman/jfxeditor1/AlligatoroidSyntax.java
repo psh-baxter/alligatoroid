@@ -54,7 +54,6 @@ import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -101,6 +100,8 @@ public class AlligatoroidSyntax {
   private static final String BACK_TYPE_SCOPE = "local";
   private static final String BACK_TYPE_BUILTIN = "builtin";
   private static final String BACK_TYPE_ACCESS = "access";
+  private static final String ACCESS_BACK_FIELD_BASE = "base";
+  private static final String ACCESS_BACK_FIELD_FIELD = "field";
   private static final String TYPE_MODULE_LOCAL = "mod_local";
   private static final String TYPE_MODULE_REMOTE_BUNDLE = "mod_git";
   private static final String TYPE_BIND = "bind";
@@ -162,6 +163,8 @@ public class AlligatoroidSyntax {
   private static final String TYPE_LABEL = "label";
   private static final String BACK_TYPE_CALL = "call";
   private static final String TYPE_CALL = "call";
+  private static final String CALL_BACK_FIELD_TARGET = "target";
+  private static final String CALL_BACK_FIELD_ARGUMENT = "argument";
   private static final String TYPE_LITERAL_RECORD_ELEMENT = "record_element";
   private static final String BACK_TYPE_LITERAL_STRING = "string";
   private static final String TYPE_LITERAL_STRING = "string";
@@ -174,8 +177,12 @@ public class AlligatoroidSyntax {
   private static final String TYPE_LITERAL_UNIQUE = "unique";
   private static final String TYPE_LITERAL_VOID = "void";
   private static final String TYPE_EXPR_COMMENT = "comment_expr";
+  private static final String BACK_TYPE_COMMENT_P = "comment_p";
+  private static final String BACK_TYPE_COMMENT_H1 = "comment_h1";
   private static final String TYPE_COMMENT_H1 = "comment_h1";
+  private static final String TYPE_EXPR_COMMENT_H1 = "expr_comment_h1";
   private static final String TYPE_COMMENT_P = "comment_p";
+  private static final String TYPE_EXPR_COMMENT_P = "expr_comment_p";
   private static final String FIELD_LITERAL_VALUE = "value";
 
   static {
@@ -293,18 +300,18 @@ public class AlligatoroidSyntax {
     types.add(
         new ATypeBuilder(TYPE_ACCESS, "Access")
             .type(BACK_TYPE_ACCESS)
-            .atom("parent", GROUP_EXPR)
+            .atom(ACCESS_BACK_FIELD_BASE, GROUP_EXPR)
             .text(".", COLOR_OTHER)
-            .nestedIdentifier("child", COLOR_IDENTIFIER)
+            .nestedIdentifier(ACCESS_BACK_FIELD_FIELD, COLOR_IDENTIFIER)
             .build(),
         GROUP_EXPR);
     types.add(
         new ATypeBuilder(TYPE_ACCESS_DYNAMIC, "Dynamic Access")
             .type(BACK_TYPE_ACCESS)
-            .atom("parent", GROUP_EXPR)
+            .atom(ACCESS_BACK_FIELD_BASE, GROUP_EXPR)
             .startBracket("[", COLOR_OTHER)
             .compactSplit()
-            .atom("child", GROUP_EXPR)
+            .atom(ACCESS_BACK_FIELD_FIELD, GROUP_EXPR)
             .endBracket("]", COLOR_OTHER)
             .build(),
         GROUP_EXPR);
@@ -319,7 +326,13 @@ public class AlligatoroidSyntax {
 
     // Calls
     types.add(
-        binaryInfixNoSpace(TYPE_CALL, "Call", Integer.MAX_VALUE, " ", GROUP_EXPR), GROUP_EXPR);
+        new ATypeBuilder(TYPE_CALL, "Call")
+            .precedence(Integer.MAX_VALUE)
+            .atom(CALL_BACK_FIELD_TARGET, GROUP_EXPR)
+            .text(" ", COLOR_OTHER)
+            .atom(CALL_BACK_FIELD_ARGUMENT, GROUP_EXPR)
+            .build(),
+        GROUP_EXPR);
 
     // Control flow
     types.add(
@@ -545,26 +558,30 @@ public class AlligatoroidSyntax {
             .custom(AlligatoroidSyntax::commentArray)
             .build(),
         GROUP_EXPR);
-    BiConsumer<String, String> generateComments =
-        (String gapKeyPrefix, String group) -> {
-          types.add(
-              new ATypeBuilder(TYPE_COMMENT_P, "Paragraph")
-                  .gapKey(gapKeyPrefix + "p")
-                  .styledPrimitive("text", COLOR_COMMENT, null, fontSize)
-                  .vspacer(fontSize, fontSize * 0.8)
-                  .build(),
-              group);
-          types.add(
-              new ATypeBuilder(TYPE_COMMENT_H1, "Header (1)")
-                  .gapKey(gapKeyPrefix + "h1")
-                  .vspacer(fontSize * 2 * 1.5, 0)
-                  .styledPrimitive("text", COLOR_COMMENT, null, fontSize * 2)
-                  .vspacer(0, fontSize * 0.8)
-                  .build(),
-              group);
-        };
-    generateComments.accept(",", GROUP_STATEMENT);
-    generateComments.accept("", GROUP_COMMENT_BODY);
+    class GenerateComments {
+      void generate(String pType, String h1Type, String gapKeyPrefix, String group) {
+        types.add(
+            new ATypeBuilder(pType, "Paragraph")
+                .type(BACK_TYPE_COMMENT_P)
+                .gapKey(gapKeyPrefix + "p")
+                .styledPrimitive("text", COLOR_COMMENT, null, fontSize)
+                .vspacer(fontSize, fontSize * 0.8)
+                .build(),
+            group);
+        types.add(
+            new ATypeBuilder(h1Type, "Header (1)")
+                .type(BACK_TYPE_COMMENT_H1)
+                .gapKey(gapKeyPrefix + "h1")
+                .vspacer(fontSize * 2 * 1.5, 0)
+                .styledPrimitive("text", COLOR_COMMENT, null, fontSize * 2)
+                .vspacer(0, fontSize * 0.8)
+                .build(),
+            group);
+      }
+    }
+    GenerateComments generateComments = new GenerateComments();
+    generateComments.generate(TYPE_COMMENT_P, TYPE_COMMENT_H1, ",", GROUP_STATEMENT);
+    generateComments.generate(TYPE_EXPR_COMMENT_P, TYPE_EXPR_COMMENT_H1, "", GROUP_COMMENT_BODY);
 
     // Gap
     final Style.Config gapStyleConfig =
@@ -684,15 +701,17 @@ public class AlligatoroidSyntax {
 
   private static ROList<BackSpec> backBuiltinField(BackSpec child) {
     return new ABackBuilder(BACK_TYPE_ACCESS)
-        .raw("parent", new ABackBuilder(BACK_TYPE_BUILTIN).build().get(0))
-        .raw("child", child)
+        .raw(ACCESS_BACK_FIELD_BASE, new ABackBuilder(BACK_TYPE_BUILTIN).build().get(0))
+        .raw(ACCESS_BACK_FIELD_FIELD, child)
         .build();
   }
 
   public static ROList<BackSpec> backBuiltinFunc(String field, BackSpec args) {
     return new ABackBuilder(BACK_TYPE_CALL)
-        .raw("first", backBuiltinField(literalStringBack(new BackFixedPrimitiveSpec(field))).get(0))
-        .raw("second", args)
+        .raw(
+            CALL_BACK_FIELD_TARGET,
+            backBuiltinField(literalStringBack(new BackFixedPrimitiveSpec(field))).get(0))
+        .raw(CALL_BACK_FIELD_ARGUMENT, args)
         .build();
   }
 
@@ -881,7 +900,7 @@ public class AlligatoroidSyntax {
 
     public ABackBuilder(String backType) {
       this.backType = backType;
-      back.put("id", new BackIdSpec("id"));
+      back.put("id", new BackIdSpec());
     }
 
     public ROList<BackSpec> build() {

@@ -12,9 +12,9 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Discard;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Iterator;
+import java.util.Map;
 
 public class BackFixedKeySpec extends BackSpec {
   public final String value;
@@ -29,7 +29,7 @@ public class BackFixedKeySpec extends BackSpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.key(value);
   }
 

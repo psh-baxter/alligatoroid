@@ -1,21 +1,21 @@
 package com.zarbosoft.luxem.read.path;
 
-public class LuxemObjectPath extends LuxemPath {
+public class LuxemRecordPath extends LuxemPath {
 
   private String key;
 
-  public LuxemObjectPath(final LuxemPath parent) {
+  public LuxemRecordPath(final LuxemPath parent) {
     this.parent = parent;
   }
 
-  public LuxemObjectPath(final LuxemPath parent, final String key) {
+  public LuxemRecordPath(final LuxemPath parent, final String key) {
     this.parent = parent;
     this.key = key;
   }
 
   @Override
   public LuxemPath unkey() {
-    return new LuxemObjectPath(parent, null);
+    return new LuxemRecordPath(parent, null);
   }
 
   @Override
@@ -25,7 +25,7 @@ public class LuxemObjectPath extends LuxemPath {
 
   @Override
   public LuxemPath key(final String data) {
-    return new LuxemObjectPath(parent, data);
+    return new LuxemRecordPath(parent, data);
   }
 
   @Override

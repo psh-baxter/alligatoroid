@@ -38,7 +38,7 @@ public class FrontPrimitiveSpec extends FrontSpec {
       final Atom atom,
       final int visualDepth,
       final int depthScore) {
-    return new VisualFieldPrimitive(context, parent, this, field.get(atom.fields), visualDepth);
+    return new VisualFieldPrimitive(context, parent, this, field.get(atom.namedFields), visualDepth);
   }
 
   @Override

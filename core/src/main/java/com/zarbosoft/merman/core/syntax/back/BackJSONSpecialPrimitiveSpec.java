@@ -21,9 +21,9 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Iterator;
+import java.util.Map;
 
 public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
   public static final String INVALID_INT_PREFIX = "invalid_json_int:";
@@ -104,7 +104,7 @@ public class BackJSONSpecialPrimitiveSpec extends BaseBackPrimitiveSpec {
 
   @Override
   public void write(
-      Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+          Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     String value = ((StringBuilder) data.get(id)).toString();
     if (matcher.match(env, value)) {
       writer.jsonSpecialPrimitive(value);

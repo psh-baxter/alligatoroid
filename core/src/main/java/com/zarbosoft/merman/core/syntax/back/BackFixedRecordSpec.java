@@ -24,9 +24,9 @@ import com.zarbosoft.rendaw.common.ROOrderedMap;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Iterator;
+import java.util.Map;
 
 public class BackFixedRecordSpec extends BackSpec {
 
@@ -96,7 +96,7 @@ public class BackFixedRecordSpec extends BackSpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.recordBegin();
     stack.add(new WriteStateRecordEnd());
     stack.add(new WriteStateFixedRecord(data, pairs));

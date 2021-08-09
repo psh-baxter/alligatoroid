@@ -235,7 +235,7 @@ public class GeneralTestWizard {
 
   public GeneralTestWizard checkArrayTree(final Atom... atoms) {
     final FieldArray documentAtoms =
-        (FieldArray) inner.context.document.root.fields.getOpt("value");
+        (FieldArray) inner.context.document.root.namedFields.getOpt("value");
     assertThat(documentAtoms.data.size(), equalTo(atoms.length));
     for (int i = 0; i < atoms.length; ++i) {
       Helper.assertTreeEqual(atoms[i], documentAtoms.data.get(i));

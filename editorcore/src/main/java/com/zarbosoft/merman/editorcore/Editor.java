@@ -145,13 +145,13 @@ public class Editor {
 
   public static void atomSet(
       Editor editor, History.Recorder recorder, FieldAtom field, Atom value) {
-    removeIds(editor, field.data);
+    if (field.data != null) removeIds(editor, field.data);
     makeIdsUnique(editor, recorder, value);
     recorder.apply(editor, new ChangeAtom(field, value));
   }
 
   private static void removeIds(Editor editor, Atom atom) {
-    for (Map.Entry<String, Field> entry : atom.fields) {
+    for (Map.Entry<String, Field> entry : atom.namedFields) {
       Field field = entry.getValue();
       if (field instanceof FieldId) {
         editor.fileIds.remove(((FieldId) field).id);
@@ -184,7 +184,7 @@ public class Editor {
   }
 
   private static void makeIdsUnique(Editor editor, History.Recorder recorder, Atom atom) {
-    for (Map.Entry<String, Field> entry : atom.fields) {
+    for (Map.Entry<String, Field> entry : atom.namedFields) {
       Field field = entry.getValue();
       if (field instanceof FieldId) {
         Integer uniqueId = editor.fileIds.take(((FieldId) field).id);
@@ -220,11 +220,15 @@ public class Editor {
 
   public static Atom createEmptyGap(FileIds fileIds, AtomType gapType) {
     Atom out = new Atom(gapType);
-    TSMap<String, Field> fields = new TSMap<>();
-    for (Map.Entry<String, BackSpecData> field : gapType.fields) {
-      fields.put(field.getKey(), createEndEmptyField(fileIds, field.getValue()));
+    TSList<Field> unnamedFields = new TSList<>();
+    for (BackSpecData field : gapType.unnamedFields) {
+      unnamedFields.add(createEndEmptyField(fileIds, field));
     }
-    out.initialSet(fields);
+    TSMap<String, Field> namedFields = new TSMap<>();
+    for (Map.Entry<String, BackSpecData> field : gapType.namedFields) {
+      namedFields.put(field.getKey(), createEndEmptyField(fileIds, field.getValue()));
+    }
+    out.initialSet(unnamedFields, namedFields);
     return out;
   }
 
@@ -234,11 +238,15 @@ public class Editor {
 
   public static Atom createEmptyAtom(Syntax syntax, FileIds fileIds, AtomType atomType, int depth) {
     Atom out = new Atom(atomType);
-    TSMap<String, Field> fields = new TSMap<>();
-    for (Map.Entry<String, BackSpecData> field : atomType.fields) {
-      fields.put(field.getKey(), createEmptyField(syntax, fileIds, field.getValue(), depth));
+    TSList<Field> unnamedFields = new TSList<>();
+    for (BackSpecData field : atomType.unnamedFields) {
+      unnamedFields.add(createEndEmptyField(fileIds, field));
     }
-    out.initialSet(fields);
+    TSMap<String, Field> namedFields = new TSMap<>();
+    for (Map.Entry<String, BackSpecData> field : atomType.namedFields) {
+      namedFields.put(field.getKey(), createEmptyField(syntax, fileIds, field.getValue(), depth));
+    }
+    out.initialSet(unnamedFields, namedFields);
     return out;
   }
 

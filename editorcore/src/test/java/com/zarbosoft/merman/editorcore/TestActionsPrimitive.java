@@ -42,7 +42,7 @@ public class TestActionsPrimitive {
     Helper.rootArray(editor.context.document)
         .data
         .get(0)
-        .fields
+        .namedFields
         .getOpt("value")
         .selectInto(editor.context);
     return editor;

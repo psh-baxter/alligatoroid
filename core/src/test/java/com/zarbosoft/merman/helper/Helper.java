@@ -19,15 +19,15 @@ import com.zarbosoft.merman.core.syntax.back.BackPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.back.BackRecordSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.merman.core.syntax.back.BackSubArraySpec;
+import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackAtomSpec;
 import com.zarbosoft.merman.core.syntax.back.BaseBackPrimitiveSpec;
-import com.zarbosoft.merman.core.syntax.back.BaseBackArraySpec;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Digits;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Letters;
 import com.zarbosoft.merman.core.syntax.primitivepattern.Repeat1;
 import com.zarbosoft.merman.core.visual.visuals.CursorAtom;
-import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.core.visual.visuals.CursorFieldArray;
+import com.zarbosoft.merman.core.visual.visuals.CursorFieldPrimitive;
 import com.zarbosoft.merman.editor.display.MockeryDisplay;
 import com.zarbosoft.rendaw.common.Format;
 import com.zarbosoft.rendaw.common.ROList;
@@ -98,8 +98,8 @@ public class Helper {
           Format.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
               expected.type, got.type, got.getSyntaxPath()));
-    final ROSet<String> expectedKeys = expected.fields.keys();
-    final ROSet<String> gotKeys = got.fields.keys();
+    final ROSet<String> expectedKeys = expected.namedFields.keys();
+    final ROSet<String> gotKeys = got.namedFields.keys();
     {
       final TSSet<String> missing = expectedKeys.difference(gotKeys);
       if (!missing.isEmpty())
@@ -113,7 +113,7 @@ public class Helper {
             Format.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
     }
     for (final String key : expectedKeys.intersect(gotKeys)) {
-      assertTreeEqual(expected.fields.getOpt(key), got.fields.getOpt(key));
+      assertTreeEqual(expected.namedFields.getOpt(key), got.namedFields.getOpt(key));
     }
   }
 
@@ -149,13 +149,13 @@ public class Helper {
   }
 
   public static void assertTreeEqual(final Context context, final Atom expected, final Field got) {
-    FieldArray value = new FieldArray((BaseBackArraySpec) context.syntax.root.fields.get("value"));
+    FieldArray value = new FieldArray((BaseBackArraySpec) context.syntax.root.namedFields.get("value"));
     value.initialSet(TSList.of(expected)); // TODO this shouldn't really be setting the value
     assertTreeEqual(value, got);
   }
 
   public static FieldArray rootArray(final Document doc) {
-    return (FieldArray) doc.root.fields.getOpt("value");
+    return (FieldArray) doc.root.namedFields.getOpt("value");
   }
 
   public static Context buildDoc(final Syntax syntax, final Atom... root) {
@@ -164,10 +164,10 @@ public class Helper {
 
   public static Context buildDoc(
       Context.InitialConfig contextConfig, final Syntax syntax, final Atom... root) {
-    FieldArray rootArray = new FieldArray((BaseBackArraySpec) syntax.root.fields.get("value"));
+    FieldArray rootArray = new FieldArray((BaseBackArraySpec) syntax.root.namedFields.get("value"));
     rootArray.initialSet(TSList.of(root));
     Atom rootAtom = new Atom(syntax.root);
-    rootAtom.initialSet(new TSMap<String, Field>().put("value", rootArray));
+    rootAtom.initialSet(new TSList<>(), new TSMap<String, Field>().put("value", rootArray));
     final Document doc = new Document(syntax, rootAtom);
     final Context context =
         new Context(

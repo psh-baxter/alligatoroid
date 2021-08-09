@@ -29,7 +29,7 @@ public class ConditionValue extends ConditionType {
 
   @Override
   public ConditionAttachment create(final Context context, final Atom atom) {
-    final Field field = atom.fields.getOpt(this.field);
+    final Field field = atom.namedFields.getOpt(this.field);
     if (field instanceof FieldPrimitive) {
       return new PrimitiveCondition(invert, (FieldPrimitive) field, is);
     } else if (field instanceof FieldArray) {

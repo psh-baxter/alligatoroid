@@ -43,7 +43,7 @@ public class TestLayoutArray {
             .group("any", new GroupBuilder().type(one).type(arrayType).build())
             .build();
     final Atom arrayAtom = new TreeBuilder(arrayType).addArray("value").build();
-    final FieldArray array = (FieldArray) arrayAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) arrayAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, arrayAtom)
         .run(
             editor ->
@@ -86,7 +86,7 @@ public class TestLayoutArray {
             .build();
     final Atom arrayAtom =
         new TreeBuilder(arrayType).addArray("value", new TreeBuilder(one).build()).build();
-    final FieldArray array = (FieldArray) arrayAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) arrayAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, arrayAtom)
         .run(
             editor ->
@@ -131,7 +131,7 @@ public class TestLayoutArray {
             .build();
     final Atom arrayAtom =
         new TreeBuilder(arrayType).addArray("value", new TreeBuilder(one).build()).build();
-    final FieldArray array = (FieldArray) arrayAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) arrayAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, arrayAtom)
         .run(
             editor ->
@@ -178,7 +178,7 @@ public class TestLayoutArray {
         new TreeBuilder(arrayType)
             .addArray("value", new TreeBuilder(arrayType).addArray("value").build())
             .build();
-    final FieldArray array = (FieldArray) arrayAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) arrayAtom.namedFields.getOpt("value");
     int index2 = 0;
     new GeneralTestWizard(syntax, arrayAtom)
         .run(
@@ -228,7 +228,7 @@ public class TestLayoutArray {
         new TreeBuilder(arrayType)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
             .build();
-    final FieldArray array = (FieldArray) arrayAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) arrayAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, arrayAtom)
         .run(
             editor ->
@@ -278,7 +278,7 @@ public class TestLayoutArray {
         new TreeBuilder(arrayType)
             .addArray("value", new TreeBuilder(one).build(), new TreeBuilder(one).build())
             .build();
-    final FieldArray array = (FieldArray) arrayAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) arrayAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, arrayAtom)
         .run(
             editor ->
@@ -326,7 +326,7 @@ public class TestLayoutArray {
             .build();
     final Atom arrayAtom =
         new TreeBuilder(arrayType).addArray("value", new TreeBuilder(one).build()).build();
-    final FieldArray array = (FieldArray) arrayAtom.fields.getOpt("value");
+    final FieldArray array = (FieldArray) arrayAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, arrayAtom)
         .run(
             editor ->

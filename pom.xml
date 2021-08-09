@@ -16,6 +16,7 @@
         <module>common</module>
         <module>jfxcore</module>
         <module>jfxviewer</module>
+        <module>alligatoroid</module>
     </modules>
     <properties>
         <jver>9</jver>

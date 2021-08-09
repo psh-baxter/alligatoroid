@@ -52,12 +52,13 @@ import java.util.Iterator;
 import java.util.Map;
 
 public abstract class AtomType {
-  public final ROMap<String, BackSpecData> fields;
+  public final ROList<BackSpecData> unnamedFields;
+  public final ROMap<String, BackSpecData> namedFields;
   public final String id;
   public final AtomKey key;
+  public final String defaultSelection;
   private final ROList<BackSpec> back;
   private final ROList<FrontSpec> front;
-  public final String defaultSelection;
 
   public AtomType(Config config) {
     id = config.id;
@@ -65,7 +66,8 @@ public abstract class AtomType {
     back = config.back;
     front = config.front;
     defaultSelection = config.defaultSelection;
-    TSMap<String, BackSpecData> fields = new TSMap<>();
+    TSList<BackSpecData> unnamedFields = new TSList<>();
+    TSMap<String, BackSpecData> namedFields = new TSMap<>();
     MultiError errors = new MultiError();
     if (back.isEmpty()) {
       errors.add(new AtomTypeNoBack());
@@ -76,15 +78,20 @@ public abstract class AtomType {
             s -> {
               if (!(s instanceof BackSpecData)) return true;
               BackSpecData s1 = (BackSpecData) s;
-              BackSpecData old = fields.putReplace(s1.id, s1);
-              if (old != null) {
-                errors.add(new DuplicateBackId(s1.id));
+              if (s1.id == null) {
+                unnamedFields.add(s1);
+              } else {
+                BackSpecData old = namedFields.putReplace(s1.id, s1);
+                if (old != null) {
+                  errors.add(new DuplicateBackId(s1.id));
+                }
+                if (s instanceof BaseBackArraySpec) return false;
               }
-              if (s instanceof BaseBackArraySpec) return false;
               return true;
             });
       }
-    this.fields = fields;
+    this.unnamedFields = unnamedFields;
+    this.namedFields = namedFields;
     errors.raise();
   }
 
@@ -155,16 +162,16 @@ public abstract class AtomType {
             subErrors, new SyntaxPath("front").add(Integer.toString(i)), this, fieldsUsedFront);
       }
       TSSet<String> missing = new TSSet<>();
-      for (Map.Entry<String, BackSpecData> field : fields) {
-          if (field.getValue() instanceof BackIdSpec) continue;
-          missing.add(field.getKey());
+      for (Map.Entry<String, BackSpecData> field : namedFields) {
+        if (field.getValue() instanceof BackIdSpec) continue;
+        missing.add(field.getKey());
       }
       missing.removeAll(fieldsUsedFront);
       if (!missing.isEmpty()) {
         subErrors.add(new UnusedBackData(missing.ro()));
       }
     }
-    if (defaultSelection!=null && !fields.has(defaultSelection)) {
+    if (defaultSelection != null && !namedFields.has(defaultSelection)) {
       subErrors.add(new NonexistentDefaultSelection(defaultSelection));
     }
     if (!subErrors.isEmpty()) {
@@ -243,8 +250,9 @@ public abstract class AtomType {
     }
   }
 
-  public BackSpecData getBack(MultiError errors, SyntaxPath typePath, final String id, String forName) {
-    final BackSpecData found = fields.getOpt(id);
+  public BackSpecData getBack(
+      MultiError errors, SyntaxPath typePath, final String id, String forName) {
+    final BackSpecData found = namedFields.getOpt(id);
     if (found == null) {
       errors.add(new MissingBack(typePath, id, forName));
       return null;
@@ -252,7 +260,8 @@ public abstract class AtomType {
     return found;
   }
 
-  public BaseBackAtomSpec getDataAtom(MultiError errors, SyntaxPath typePath, final String key, String forName) {
+  public BaseBackAtomSpec getDataAtom(
+      MultiError errors, SyntaxPath typePath, final String key, String forName) {
     BackSpecData found = getBack(errors, typePath, key, forName);
     try {
       return (BaseBackAtomSpec) found;
@@ -262,7 +271,8 @@ public abstract class AtomType {
     }
   }
 
-  public BaseBackArraySpec getDataArray(MultiError errors, SyntaxPath typePath, final String key, String forName) {
+  public BaseBackArraySpec getDataArray(
+      MultiError errors, SyntaxPath typePath, final String key, String forName) {
     BackSpecData found = getBack(errors, typePath, key, forName);
     try {
       return (BaseBackArraySpec) found;
@@ -286,6 +296,23 @@ public abstract class AtomType {
     public abstract Field field();
 
     public abstract void finish();
+  }
+
+  public static class IdFieldParseResult extends FieldParseResult {
+    final Field field;
+
+    public IdFieldParseResult(Field field) {
+      super(null);
+      this.field = field;
+    }
+
+    @Override
+    public Field field() {
+      return field;
+    }
+
+    @Override
+    public void finish() {}
   }
 
   public static class PrimitiveFieldParseResult extends FieldParseResult {
@@ -365,13 +392,18 @@ public abstract class AtomType {
     }
 
     public Atom finish() {
-      TSMap<String, Field> initialFields = new TSMap<>();
+      TSList<Field> initialUnnamedFields = new TSList<>();
+      TSMap<String, Field> initialNamedFields = new TSMap<>();
       for (FieldParseResult field : fields) {
         if (field == null) continue;
         field.finish();
-        initialFields.put(field.key, field.field());
+        if (field.key == null) {
+          initialUnnamedFields.add(field.field());
+        } else {
+          initialNamedFields.put(field.key, field.field());
+        }
       }
-      atom.initialSet(initialFields);
+      atom.initialSet(initialUnnamedFields, initialNamedFields);
       return atom;
     }
   }
@@ -381,7 +413,8 @@ public abstract class AtomType {
     public final ROList<BackSpec> back;
     public final ROList<FrontSpec> front;
     /**
-     * If this has multiple selectable front elements, this is the default selection when selecting in.  If not specified, defaults to first one.
+     * If this has multiple selectable front elements, this is the default selection when selecting
+     * in. If not specified, defaults to first one.
      */
     public String defaultSelection;
 

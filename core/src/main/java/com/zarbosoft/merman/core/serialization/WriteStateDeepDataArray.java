@@ -6,9 +6,10 @@ import com.zarbosoft.merman.core.syntax.back.BackSpec;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 public class WriteStateDeepDataArray extends WriteState {
   public static final String INDEX_KEY = "__deep_index";
@@ -32,10 +33,9 @@ public class WriteStateDeepDataArray extends WriteState {
     index += 1;
     ROList<BackSpec> nextPlate = boilerplate.getOpt(next.type.id());
     if (nextPlate != null) {
-      TSMap<String, Object> carryNext =
-          new TSMap<String, Object>()
-              .putNull(null, next)
-              .put(INDEX_KEY, new StringBuilder(INDEX_KEY_PREFIX + index));
+      Map<Object, Object> carryNext = new HashMap<>();
+      carryNext.put(null, next);
+      carryNext.put(INDEX_KEY, new StringBuilder(INDEX_KEY_PREFIX + index));
       for (BackSpec plateSpec : nextPlate) {
         plateSpec.write(env, stack, carryNext, writer);
       }

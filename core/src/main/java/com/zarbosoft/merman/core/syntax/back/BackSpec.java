@@ -10,10 +10,10 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.function.Function;
 
 public abstract class BackSpec {
@@ -40,7 +40,8 @@ public abstract class BackSpec {
 
   protected abstract Iterator<BackSpec> walkStep();
 
-  public abstract Node<ROList<AtomType.FieldParseResult>> buildBackRule(Environment env, Syntax syntax);
+  public abstract Node<ROList<AtomType.FieldParseResult>> buildBackRule(
+      Environment env, Syntax syntax);
 
   public void finish(
       MultiError errors,
@@ -54,11 +55,12 @@ public abstract class BackSpec {
   /**
    * @param env
    * @param stack
-   * @param data map of ids to data (StringBuilder, Atom, List of Atom)
+   * @param data map of ids (named fields) or back specs (unnamed fields) to data (StringBuilder,
+   *     Atom, List of Atom, int, etc)
    * @param writer
    */
   public abstract void write(
-          Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer);
+      Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer);
 
   /**
    * Can this represent a single value (non key/type) field in back type Subarrays can represent a

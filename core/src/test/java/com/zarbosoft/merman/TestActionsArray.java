@@ -10,7 +10,6 @@ import com.zarbosoft.merman.helper.BackArrayBuilder;
 import com.zarbosoft.merman.helper.BackRecordBuilder;
 import com.zarbosoft.merman.helper.FrontDataArrayBuilder;
 import com.zarbosoft.merman.helper.FrontMarkBuilder;
-import com.zarbosoft.merman.helper.GeneralTestWizard;
 import com.zarbosoft.merman.helper.GroupBuilder;
 import com.zarbosoft.merman.helper.Helper;
 import com.zarbosoft.merman.helper.MiscSyntax;
@@ -63,7 +62,7 @@ public class TestActionsArray {
     final Context context =
         buildDoc(
             syntax, new TreeBuilder(MiscSyntax.array).addArray("value", atoms).build());
-    ((FieldArray) Helper.rootArray(context.document).data.get(0).fields.getOpt("value"))
+    ((FieldArray) Helper.rootArray(context.document).data.get(0).namedFields.getOpt("value"))
         .selectInto(context);
     return context;
   }
@@ -500,7 +499,7 @@ public class TestActionsArray {
   public void testReleaseNext() {
     final Context context = buildFive();
     ((VisualFieldArray)
-            ((FieldArray) ((Atom) context.syntaxLocate(new SyntaxPath("value", "0"))).fields.getOpt("value"))
+            ((FieldArray) ((Atom) context.syntaxLocate(new SyntaxPath("value", "0"))).namedFields.getOpt("value"))
                 .visual)
         .select(context, true, 2, 3);
     Helper.cursorArray(context).actionReleaseNext(context);
@@ -523,7 +522,7 @@ public class TestActionsArray {
   public void testReleasePrevious() {
     final Context context = buildFive();
     (((VisualFieldArray)
-            ((FieldArray) ((Atom) context.syntaxLocate(new SyntaxPath("value", "0"))).fields.getOpt("value"))
+            ((FieldArray) ((Atom) context.syntaxLocate(new SyntaxPath("value", "0"))).namedFields.getOpt("value"))
                 .visual))
         .select(context, true, 1, 2);
     Helper.cursorArray(context).actionReleasePrevious(context);

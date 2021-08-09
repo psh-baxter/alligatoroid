@@ -42,7 +42,7 @@ public class TestPrimitiveBreaking {
     final Atom primitive = new TreeBuilder(primitiveType).add("value", "123").build();
     new GeneralTestWizard(syntax, primitive)
         .resize(40)
-        .run(editor -> primitive.fields.getOpt("value").selectInto(editor.context))
+        .run(editor -> primitive.namedFields.getOpt("value").selectInto(editor.context))
         .sendText("4")
         .checkTextBrick(0, 1, "1234")
         .sendText("5")
@@ -74,7 +74,7 @@ public class TestPrimitiveBreaking {
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom = new TreeBuilder(quoted).add("value", "12345").build();
-    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.fields.getOpt("value");
+    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, primitiveAtom)
         .run(editor -> ((FieldPrimitive) primitive).visual.select(editor.context, true, 5, 5))
         .resize(50)
@@ -124,7 +124,7 @@ public class TestPrimitiveBreaking {
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom = new TreeBuilder(quoted).add("value", "123456").build();
-    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.fields.getOpt("value");
+    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");
     new GeneralTestWizard(
             syntax, new TreeBuilder(primitiveType).add("value", "aaaaa").build(), primitiveAtom)
         .run(editor -> ((FieldPrimitive) primitive).visual.select(editor.context, true, 6, 6))
@@ -166,7 +166,7 @@ public class TestPrimitiveBreaking {
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom = new TreeBuilder(primitiveType).add("value", "word egg").build();
-    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.fields.getOpt("value");
+    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, primitiveAtom)
         .resize(40)
         .checkCourseCount(2)
@@ -202,7 +202,7 @@ public class TestPrimitiveBreaking {
             .build();
     final Atom primitiveAtom =
         new TreeBuilder(primitiveType).add("value", "gate\nword egg").build();
-    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.fields.getOpt("value");
+    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, primitiveAtom)
         .resize(40)
         .checkCourseCount(3)
@@ -238,7 +238,7 @@ public class TestPrimitiveBreaking {
             .build();
     final Atom primitiveAtom =
         new TreeBuilder(primitiveType).add("value", "word egg\nroad").build();
-    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.fields.getOpt("value");
+    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, primitiveAtom)
         .resize(40)
         .checkCourseCount(3)
@@ -273,7 +273,7 @@ public class TestPrimitiveBreaking {
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.COMPACT)))))
             .build();
     final Atom primitiveAtom = new TreeBuilder(primitiveType).add("value", "ab").build();
-    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.fields.getOpt("value");
+    final FieldPrimitive primitive = (FieldPrimitive) primitiveAtom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, primitiveAtom)
         .resize(40)
         .checkCourseCount(1)

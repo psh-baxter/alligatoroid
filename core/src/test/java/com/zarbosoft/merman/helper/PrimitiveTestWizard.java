@@ -18,7 +18,7 @@ public class PrimitiveTestWizard {
     inner.context.retryExpandFactor = 1.05;
     this.primitive =
         ((FieldPrimitive)
-                Helper.rootArray(inner.context.document).data.get(0).fields.getOpt("value"))
+                Helper.rootArray(inner.context.document).data.get(0).namedFields.getOpt("value"))
             .visual;
   }
 

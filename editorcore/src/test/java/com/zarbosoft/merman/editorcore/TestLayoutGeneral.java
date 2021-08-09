@@ -37,7 +37,7 @@ public class TestLayoutGeneral {
             .build();
     final Atom text = new TreeBuilder(textType).add("value", "123").build();
     new GeneralTestWizard(syntax, text)
-        .run(editor -> text.fields.getOpt("value").selectInto(editor.context))
+        .run(editor -> text.namedFields.getOpt("value").selectInto(editor.context))
         .resize(40)
         .sendText("4")
         .checkCourseCount(1)
@@ -70,9 +70,9 @@ public class TestLayoutGeneral {
             .group("any", new GroupBuilder().type(textType).build())
             .build();
     final Atom text = new TreeBuilder(textType).add("value", "123456").build();
-    final FieldPrimitive primitive = (FieldPrimitive) text.fields.getOpt("value");
+    final FieldPrimitive primitive = (FieldPrimitive) text.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, text)
-        .run(editor -> text.fields.getOpt("value").selectInto(editor.context))
+        .run(editor -> text.namedFields.getOpt("value").selectInto(editor.context))
         .resize(40)
         .change(new ChangePrimitive(primitive, 5, 1, ""))
         .checkCourseCount(2)
@@ -121,7 +121,7 @@ public class TestLayoutGeneral {
     new GeneralTestWizard(syntax, gap)
         .run(
             editor -> {
-              gap.fields.getOpt("gap").selectInto(editor.context);
+              gap.namedFields.getOpt("gap").selectInto(editor.context);
             })
         .sendText("[")
         .checkTextBrick(0, 0, "[")

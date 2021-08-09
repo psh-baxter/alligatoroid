@@ -19,10 +19,10 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 
 public class BackTypeSpec extends BaseBackPrimitiveSpec {
   public final String type;
@@ -63,7 +63,7 @@ public class BackTypeSpec extends BaseBackPrimitiveSpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.type(((StringBuilder) data.get(type)).toString());
     stack.add(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }

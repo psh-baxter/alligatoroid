@@ -85,7 +85,7 @@ public class EditCursorAtom extends CursorAtom {
                     Editor.arrayChange(
                         editor,
                         recorder,
-                        (FieldArray) gap.fields.get(BaseGapAtomType.PRIMITIVE_KEY),
+                        (FieldArray) gap.namedFields.get(BaseGapAtomType.PRIMITIVE_KEY),
                         0,
                         0,
                         atoms);
@@ -108,11 +108,11 @@ public class EditCursorAtom extends CursorAtom {
             Editor.arrayChange(
                 editor,
                 recorder,
-                (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
+                (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY),
                 0,
                 0,
                 TSList.of(old));
-            gap.fields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
+            gap.namedFields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
           });
     }
   }

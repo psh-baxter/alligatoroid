@@ -144,7 +144,7 @@ public class TestDocumentGap {
 
     final Atom gap = Helper.createGap(syntax);
     new GeneralTestWizard(syntax, new TreeBuilder(restricted).add("value", gap).build())
-        .run(editor -> gap.fields.getOpt("gap").selectInto(editor.context))
+        .run(editor -> gap.namedFields.getOpt("gap").selectInto(editor.context))
         .sendText("q")
         .run(editor -> assertChoices(editor, 1));
   }
@@ -326,10 +326,10 @@ public class TestDocumentGap {
   }
 
   public void selectInitialGap(Editor editor) {
-    ((FieldArray) editor.context.document.root.fields.get("value"))
+    ((FieldArray) editor.context.document.root.namedFields.get("value"))
         .data
         .get(0)
-        .fields
+        .namedFields
         .get(GapAtomType.PRIMITIVE_KEY)
         .selectInto(editor.context);
   }

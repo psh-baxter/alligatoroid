@@ -570,7 +570,7 @@ public class TestCursorChanges {
                 .build());
 
     final FieldArray value =
-        (FieldArray) Helper.rootArray(editor.context.document).data.get(0).fields.getOpt("value");
+        (FieldArray) Helper.rootArray(editor.context.document).data.get(0).namedFields.getOpt("value");
     final VisualFieldArray visual = (VisualFieldArray) value.visual;
     visual.select(editor.context, true, beginSelectBegin, beginSelectEnd);
     final CursorFieldArray selection = visual.cursor;

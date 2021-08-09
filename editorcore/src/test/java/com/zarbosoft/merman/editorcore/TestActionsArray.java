@@ -108,7 +108,7 @@ public class TestActionsArray {
 
   public Editor build(final Atom... atoms) {
     final Editor editor = buildDoc(syntax, new TreeBuilder(array).addArray("value", atoms).build());
-    ((FieldArray) Helper.rootArray(editor.context.document).data.get(0).fields.getOpt("value"))
+    ((FieldArray) Helper.rootArray(editor.context.document).data.get(0).namedFields.getOpt("value"))
         .selectInto(editor.context);
     return editor;
   }
@@ -128,7 +128,7 @@ public class TestActionsArray {
     (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
     Helper.cursorArray(editor.context).editDelete(editor);
@@ -152,7 +152,7 @@ public class TestActionsArray {
     (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
     Helper.cursorArray(editor.context).editInsertBefore(editor);
@@ -201,7 +201,7 @@ public class TestActionsArray {
         new TreeBuilder(restrictedArray)
             .addArray("value", new TreeBuilder(quoted).add("value", "").build())
             .build();
-    final FieldArray value = (FieldArray) atom.fields.getOpt("value");
+    final FieldArray value = (FieldArray) atom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, atom)
         .run(editor -> value.selectInto(editor.context, true, 0, 0))
         .editInsertBefore()
@@ -221,7 +221,7 @@ public class TestActionsArray {
     (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
     Helper.cursorArray(editor.context).editInsertAfter(editor);
@@ -270,7 +270,7 @@ public class TestActionsArray {
         new TreeBuilder(restrictedArray)
             .addArray("value", new TreeBuilder(quoted).add("value", "").build())
             .build();
-    final FieldArray value = (FieldArray) atom.fields.getOpt("value");
+    final FieldArray value = (FieldArray) atom.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, atom)
         .run(editor -> value.selectInto(editor.context, true, 0, 0))
         .editInsertAfter()
@@ -290,7 +290,7 @@ public class TestActionsArray {
     (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
     Helper.cursorArray(editor.context).editMoveBefore(editor);
@@ -317,7 +317,7 @@ public class TestActionsArray {
     (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 0, 1);
     Helper.cursorArray(editor.context).editMoveBefore(editor);
@@ -344,7 +344,7 @@ public class TestActionsArray {
     (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
     Helper.cursorArray(editor.context).editMoveAfter(editor);
@@ -371,7 +371,7 @@ public class TestActionsArray {
     (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 3, 4);
     Helper.cursorArray(editor.context).editMoveAfter(editor);
@@ -399,7 +399,7 @@ public class TestActionsArray {
         ((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual);
     visual.select(editor.context, true, 1, 2);
     Helper.cursorArray(editor.context).actionCopy(editor.context);
@@ -431,7 +431,7 @@ public class TestActionsArray {
     (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
     Helper.cursorArray(editor.context).editCut(editor);
@@ -443,7 +443,7 @@ public class TestActionsArray {
     (((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 2, 2);
     Helper.cursorArray(editor.context).editPaste(editor);
@@ -474,7 +474,7 @@ public class TestActionsArray {
         ((VisualFieldArray)
             ((FieldArray)
                     ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
-                        .fields.getOpt("value"))
+                        .namedFields.getOpt("value"))
                 .visual);
     visual.select(editor.context, true, 1, 1);
     Helper.cursorArray(editor.context).editSuffix(editor);

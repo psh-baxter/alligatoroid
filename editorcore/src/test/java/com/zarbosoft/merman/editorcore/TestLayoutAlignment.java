@@ -60,7 +60,7 @@ public class TestLayoutAlignment {
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
     final Atom line2 = new TreeBuilder(pair).add("first", "c").add("second", "d").build();
-    final FieldPrimitive line2_1 = (FieldPrimitive) line2.fields.getOpt("first");
+    final FieldPrimitive line2_1 = (FieldPrimitive) line2.namedFields.getOpt("first");
     new GeneralTestWizard(
             syntax, new TreeBuilder(pair).add("first", "a").add("second", "b").build(), line2)
         .change(new ChangePrimitive(line2_1, 1, 0, "cc"))
@@ -91,7 +91,7 @@ public class TestLayoutAlignment {
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
     final Atom line = new TreeBuilder(pair).add("first", "a").add("second", "b").build();
-    final FieldPrimitive text = (FieldPrimitive) line.fields.getOpt("first");
+    final FieldPrimitive text = (FieldPrimitive) line.namedFields.getOpt("first");
     new GeneralTestWizard(
             syntax, line, new TreeBuilder(pair).add("first", "c").add("second", "d").build())
         .change(new ChangePrimitive(text, 1, 0, "aa"))
@@ -122,7 +122,7 @@ public class TestLayoutAlignment {
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
     final Atom line2 = new TreeBuilder(pair).add("first", "ccccc").add("second", "d").build();
-    final FieldPrimitive line2_1 = (FieldPrimitive) line2.fields.getOpt("first");
+    final FieldPrimitive line2_1 = (FieldPrimitive) line2.namedFields.getOpt("first");
     new GeneralTestWizard(
             syntax, new TreeBuilder(pair).add("first", "a").add("second", "b").build(), line2)
         .change(new ChangePrimitive(line2_1, 1, 4, ""))
@@ -252,7 +252,7 @@ public class TestLayoutAlignment {
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
     final Atom line2 = new TreeBuilder(pair).add("first", "").add("second", "d").build();
-    final FieldPrimitive line2_1 = (FieldPrimitive) line2.fields.getOpt("first");
+    final FieldPrimitive line2_1 = (FieldPrimitive) line2.namedFields.getOpt("first");
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(line)
@@ -299,7 +299,7 @@ public class TestLayoutAlignment {
         new TreeBuilder(line)
             .addArray("value", new TreeBuilder(pair).add("first", "ccc").add("second", "d").build())
             .build();
-    final FieldArray array = (FieldArray) line2.fields.getOpt("value");
+    final FieldArray array = (FieldArray) line2.namedFields.getOpt("value");
     new GeneralTestWizard(syntax, line2)
         .change(
             new ChangeArray(
@@ -341,7 +341,7 @@ public class TestLayoutAlignment {
                             new SymbolSpaceSpec.Config().splitMode(Style.SplitMode.ALWAYS)))))
             .build();
     final Atom line2 = new TreeBuilder(pair).add("first", "cc").add("second", "d").build();
-    final FieldPrimitive line2_1 = (FieldPrimitive) line2.fields.getOpt("first");
+    final FieldPrimitive line2_1 = (FieldPrimitive) line2.namedFields.getOpt("first");
     new GeneralTestWizard(
             syntax,
             new TreeBuilder(line)

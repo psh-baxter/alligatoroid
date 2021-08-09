@@ -36,7 +36,7 @@ public class VisualFieldArray extends VisualGroup implements VisualLeaf {
       final int visualDepth) {
     super(visualDepth);
     this.front = front;
-    this.value = front.field.get(atom.fields);
+    this.value = front.field.get(atom.namedFields);
     dataListener = new DataListener(value, parent);
     value.addListener(dataListener);
     value.visual = this;

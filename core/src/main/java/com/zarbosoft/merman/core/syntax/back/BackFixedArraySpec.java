@@ -16,11 +16,11 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 public class BackFixedArraySpec extends BackSpec {
   public List<BackSpec> elements = new ArrayList<>();
@@ -70,7 +70,7 @@ public class BackFixedArraySpec extends BackSpec {
 
   @Override
   public void write(
-          Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+          Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.arrayBegin();
     stack.add(new WriteStateArrayEnd());
     stack.add(new WriteStateBack(data, elements.iterator()));

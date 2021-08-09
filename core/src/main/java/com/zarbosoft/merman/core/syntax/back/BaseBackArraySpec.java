@@ -197,7 +197,7 @@ public abstract class BaseBackArraySpec extends BackSpecData {
     return value.getSyntaxPath().add(Integer.toString(actualIndex));
   }
 
-  public FieldArray get(final TSMap<String, Field> data) {
+  public FieldArray get(final ROMap<String, Field> data) {
     return (FieldArray) data.getOpt(id);
   }
 

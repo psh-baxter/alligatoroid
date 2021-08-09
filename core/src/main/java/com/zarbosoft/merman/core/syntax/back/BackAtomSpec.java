@@ -11,9 +11,9 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Iterator;
+import java.util.Map;
 
 public class BackAtomSpec extends BaseBackAtomSpec {
   public BackAtomSpec(Config config) {
@@ -38,7 +38,7 @@ public class BackAtomSpec extends BaseBackAtomSpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     ((Atom) data.get(id)).write(stack);
   }
 

@@ -9,6 +9,7 @@ import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.core.syntax.error.AtomCandidatePluralBack;
 import com.zarbosoft.merman.core.syntax.error.AtomCandidateTypeNotAllowed;
 import com.zarbosoft.merman.core.syntax.error.AtomTypeDoesntExist;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.ROOrderedSetRef;
 import com.zarbosoft.rendaw.common.ROSet;
 import com.zarbosoft.rendaw.common.TSMap;
@@ -32,7 +33,7 @@ public abstract class BaseBackAtomSpec extends BackSpecData {
     this.type = config.type;
   }
 
-  public FieldAtom get(final TSMap<String, Field> data) {
+  public FieldAtom get(final ROMap<String, Field> data) {
     return (FieldAtom) data.getOpt(id);
   }
 

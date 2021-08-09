@@ -2,8 +2,6 @@ package com.zarbosoft.merman.editorcore;
 
 import com.zarbosoft.merman.core.document.Atom;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
-import com.zarbosoft.merman.core.syntax.GapAtomType;
-import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
 import com.zarbosoft.merman.core.syntax.Syntax;
 import com.zarbosoft.merman.editorcore.helper.GeneralTestWizard;
 import com.zarbosoft.merman.editorcore.helper.GroupBuilder;
@@ -26,7 +24,7 @@ public class TestPrimitivePatterns {
             .build();
     final Atom atom = new TreeBuilder(quoted).add("value", "").build();
     new GeneralTestWizard(syntax, atom)
-        .run(editor -> atom.fields.getOpt("value").selectInto(editor.context))
+        .run(editor -> atom.namedFields.getOpt("value").selectInto(editor.context))
         .sendText("a")
         .checkArrayTree(new TreeBuilder(quoted).add("value", "a").build());
   }
@@ -43,7 +41,7 @@ public class TestPrimitivePatterns {
             .build();
     final Atom atom = new TreeBuilder(quoted).add("value", "").build();
     new GeneralTestWizard(syntax, atom)
-        .run(editor -> atom.fields.getOpt("value").selectInto(editor.context))
+        .run(editor -> atom.namedFields.getOpt("value").selectInto(editor.context))
         .sendText("1")
         .checkArrayTree(new TreeBuilder(quoted).add("value", "").build());
   }

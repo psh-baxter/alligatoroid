@@ -13,13 +13,13 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Iterator;
+import java.util.Map;
 
 public class BackIdSpec extends BackSpecData {
-  public BackIdSpec(String id) {
-    super(id);
+  public BackIdSpec() {
+    super(null);
   }
 
   @Override
@@ -41,8 +41,7 @@ public class BackIdSpec extends BackSpecData {
         }
         return new ROPair<>(
             true,
-            TSList.of(
-                new AtomType.PrimitiveFieldParseResult(id, new FieldId(BackIdSpec.this, valueId))));
+            TSList.of(new AtomType.IdFieldParseResult(new FieldId(BackIdSpec.this, valueId))));
       }
 
       @Override
@@ -54,8 +53,11 @@ public class BackIdSpec extends BackSpecData {
 
   @Override
   public void write(
-      Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
-    writer.primitive(((StringBuilder) data.get(id)).toString());
+          Environment env,
+          TSList<WriteState> stack,
+          Map<Object, Object> data,
+          EventConsumer writer) {
+    writer.primitive(Integer.toString((int) data.get(this)));
   }
 
   @Override

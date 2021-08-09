@@ -3,15 +3,14 @@ package com.zarbosoft.luxem;
 import com.zarbosoft.luxem.read.BufferedReader;
 import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.luxem.read.path.LuxemArrayPath;
-import com.zarbosoft.luxem.read.path.LuxemObjectPath;
 import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.luxem.read.path.LuxemRecordPath;
 import com.zarbosoft.pidgoon.events.Event;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 
 /** Methods for common use cases. */
 public class Luxem {
@@ -26,7 +25,7 @@ public class Luxem {
         new BufferedReader() {
           @Override
           protected void eatRecordBegin() {
-            state.path = new LuxemObjectPath(state.path.value());
+            state.path = new LuxemRecordPath(state.path.value());
             state.events.add(new ROPair<>(factory.objectOpen(), state.path));
           }
 
@@ -49,26 +48,22 @@ public class Luxem {
           }
 
           @Override
-          protected void eatType(byte[] bytes) {
+          protected void eatType(String text) {
             state.path = state.path.type();
-            state.events.add(
-                new ROPair<>(factory.type(new String(bytes, StandardCharsets.UTF_8)), state.path));
+            state.events.add(new ROPair<>(factory.type(text), state.path));
           }
 
           @Override
-          protected void eatKey(byte[] bytes) {
-            final String string = new String(bytes, StandardCharsets.UTF_8);
+          protected void eatKey(String string) {
             state.path = state.path.unkey();
             state.events.add(new ROPair<>(factory.key(string), state.path));
             state.path = state.path.key(string);
           }
 
           @Override
-          protected void eatPrimitive(byte[] bytes) {
+          protected void eatPrimitive(String string) {
             state.path = state.path.value();
-            state.events.add(
-                new ROPair<>(
-                    factory.primitive(new String(bytes, StandardCharsets.UTF_8)), state.path));
+            state.events.add(new ROPair<>(factory.primitive(string), state.path));
           }
         };
     reader.feed(source);

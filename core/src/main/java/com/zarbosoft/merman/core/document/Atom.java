@@ -5,6 +5,7 @@ import com.zarbosoft.merman.core.SyntaxPath;
 import com.zarbosoft.merman.core.document.fields.Field;
 import com.zarbosoft.merman.core.document.fields.FieldArray;
 import com.zarbosoft.merman.core.document.fields.FieldAtom;
+import com.zarbosoft.merman.core.document.fields.FieldId;
 import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.serialization.WriteState;
 import com.zarbosoft.merman.core.serialization.WriteStateBack;
@@ -13,14 +14,18 @@ import com.zarbosoft.merman.core.visual.Visual;
 import com.zarbosoft.merman.core.visual.VisualParent;
 import com.zarbosoft.merman.core.visual.visuals.VisualAtom;
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.ROList;
+import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public class Atom {
   public final AtomType type;
-  public TSMap<String, Field> fields;
+  public ROList<Field> unnamedFields;
+  public ROMap<String, Field> namedFields;
   /** Null if root */
   public Field.Parent<?> fieldParentRef;
 
@@ -30,8 +35,33 @@ public class Atom {
     this.type = type;
   }
 
-  public void initialSet(final TSMap<String, Field> fields) {
-    this.fields = fields;
+  public void initialSet(TSList<Field> unnamedFields, final TSMap<String, Field> fields) {
+    this.unnamedFields = unnamedFields;
+    this.namedFields = fields;
+    for (int i = 0; i < unnamedFields.size(); ++i) {
+      Field field = unnamedFields.get(i);
+      String strI = Integer.toString(i);
+      field.setAtomParentRef(
+          new Parent() {
+            @Override
+            public Atom atom() {
+              return Atom.this;
+            }
+
+            @Override
+            public boolean selectParent(Context context) {
+              return false;
+            }
+
+            @Override
+            public SyntaxPath getSyntaxPath() {
+              SyntaxPath out;
+              if (Atom.this.fieldParentRef == null) out = new SyntaxPath();
+              else out = Atom.this.fieldParentRef.getSyntaxPath();
+              return out.add("unnamed").add(strI);
+            }
+          });
+    }
     for (Map.Entry<String, Field> entry : fields.entries()) {
       entry
           .getValue()
@@ -58,7 +88,7 @@ public class Atom {
                   SyntaxPath out;
                   if (Atom.this.fieldParentRef == null) out = new SyntaxPath();
                   else out = Atom.this.fieldParentRef.getSyntaxPath();
-                  return out.add(entry.getKey());
+                  return out.add("named").add(entry.getKey());
                 }
               });
     }
@@ -89,12 +119,17 @@ public class Atom {
   }
 
   public Object syntaxLocateStep(String segment) {
-    return fields.getOpt(segment);
+    return namedFields.getOpt(segment);
   }
 
   public void write(TSList<WriteState> stack) {
-    TSMap<String, Object> childData = new TSMap<>();
-    for (Map.Entry<String, Field> entry : fields.entries()) {
+    Map<Object, Object> childData = new HashMap<>();
+    for (Field field : unnamedFields) {
+      if (field instanceof FieldId) {
+        childData.put(field.back(), ((FieldId) field).id );
+    } else throw new Assertion();
+  }
+    for (Map.Entry<String, Field> entry : namedFields) {
       if (entry.getValue() instanceof FieldAtom) {
         childData.put(entry.getKey(), ((FieldAtom) entry.getValue()).data);
       } else if (entry.getValue() instanceof FieldArray) {

@@ -18,10 +18,10 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.MergeSequence;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 
 public class BackFixedTypeSpec extends BackSpec {
   public final String type;
@@ -81,7 +81,7 @@ public class BackFixedTypeSpec extends BackSpec {
 
   @Override
   public void write(
-          Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+          Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     writer.type(type);
     stack.add(new WriteStateBack(data, Arrays.asList(value).iterator()));
   }

@@ -86,7 +86,7 @@ public class CursorAtom extends com.zarbosoft.merman.core.Cursor {
 
   @Override
   public SyntaxPath getSyntaxPath() {
-    return visual.atom.fields.get(visual.selectable.get(index).first).getSyntaxPath();
+    return visual.atom.namedFields.get(visual.selectable.get(index).first).getSyntaxPath();
   }
 
   public void actionEnter(final Context context) {

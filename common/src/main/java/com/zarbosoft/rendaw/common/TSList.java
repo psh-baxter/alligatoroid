@@ -22,8 +22,13 @@ public class TSList<T> implements ROList<T> {
   public TSList() {
     this.values = new ArrayList<>();
   }
+
   public TSList(T... values) {
     this.values = new ArrayList<>(Arrays.asList(values));
+  }
+
+  public static <T> TSList<T> fromList(List<T> value) {
+    return new TSList<>(value);
   }
 
   private TSList(List<T> values) {
@@ -193,5 +198,9 @@ public class TSList<T> implements ROList<T> {
   public T lastOpt() {
     if (none()) return null;
     return last();
+  }
+
+  public void set(int index, T value) {
+    values.set(index, value);
   }
 }

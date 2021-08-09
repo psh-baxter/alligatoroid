@@ -30,7 +30,7 @@ public class FrontArrayAsAtomSpec extends FrontSpec {
       final int visualDepth,
       final int depthScore) {
     return new VisualFieldAtomFromArray(
-        context, parent, field.get(atom.fields), visualDepth, depthScore, ellipsis);
+        context, parent, field.get(atom.namedFields), visualDepth, depthScore, ellipsis);
   }
 
   @Override

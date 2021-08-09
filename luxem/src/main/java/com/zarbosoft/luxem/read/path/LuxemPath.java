@@ -10,7 +10,6 @@ import com.zarbosoft.luxem.events.LTypeEvent;
 import com.zarbosoft.luxem.events.LuxemEvent;
 
 public abstract class LuxemPath {
-
   public LuxemPath parent;
 
   public abstract LuxemPath unkey();
@@ -21,7 +20,7 @@ public abstract class LuxemPath {
     } else if (e.getClass() == LArrayCloseEvent.class) {
       return pop();
     } else if (e.getClass() == LRecordOpenEvent.class) {
-      return new LuxemObjectPath(value());
+      return new LuxemRecordPath(value());
     } else if (e.getClass() == LRecordCloseEvent.class) {
       return pop();
     } else if (e.getClass() == LKeyEvent.class) {
@@ -31,6 +30,14 @@ public abstract class LuxemPath {
     } else if (e.getClass() == LPrimitiveEvent.class) {
       return value();
     } else throw new AssertionError(String.format("Unknown luxem event type [%s]", e.getClass()));
+  }
+
+  public LuxemPath pushArrayOpen() {
+    return new LuxemArrayPath(value());
+  }
+
+  public LuxemPath pushRecordOpen() {
+    return new LuxemRecordPath(value());
   }
 
   public abstract LuxemPath value();

@@ -49,11 +49,11 @@ public class EditCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
               Editor.arrayChange(
                   editor,
                   recorder1,
-                  (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
+                  (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY),
                   0,
                   0,
                   TSList.of(old));
-              gap.fields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
+              gap.namedFields.get(GapAtomType.PRIMITIVE_KEY).selectInto(editor.context);
 
               // Send new text + chopped text to suffix
               ((EditGapCursorFieldPrimitive) editor.context.cursor)

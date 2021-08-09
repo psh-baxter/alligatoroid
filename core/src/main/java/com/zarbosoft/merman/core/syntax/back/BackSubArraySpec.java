@@ -14,8 +14,8 @@ import com.zarbosoft.merman.core.syntax.error.PluralInvalidAtLocation;
 import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.TSList;
-import com.zarbosoft.rendaw.common.TSMap;
 
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class BackSubArraySpec extends BaseBackArraySpec {
@@ -53,7 +53,7 @@ public class BackSubArraySpec extends BaseBackArraySpec {
   }
 
   @Override
-  public void write(Environment env, TSList<WriteState> stack, TSMap<String, Object> data, EventConsumer writer) {
+  public void write(Environment env, TSList<WriteState> stack, Map<Object, Object> data, EventConsumer writer) {
     stack.add(writeContents((TSList<Atom>) data.get(id)));
   }
 

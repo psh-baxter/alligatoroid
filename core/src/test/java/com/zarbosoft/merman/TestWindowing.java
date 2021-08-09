@@ -283,9 +283,7 @@ public class TestWindowing {
     start(false)
         .run(
             context ->
-                ((FieldAtom)
-                        context.syntaxLocate(
-                            new SyntaxPath("value", "0", "value", "value")))
+                ((FieldAtom) context.syntaxLocate(new SyntaxPath("value", "0", "value", "value")))
                     .selectInto(context))
         .actWindow()
         .checkTextBrick(0, i++, "0_0")
@@ -402,11 +400,11 @@ public class TestWindowing {
             context ->
                 ((Atom) context.syntaxLocate(new SyntaxPath("value", "1")))
                     .fieldParentRef.selectField(context))
-            .dumpWall()
+        .dumpWall()
         .actWindow()
-            .dumpWall()
+        .dumpWall()
         .actWindowClear()
-            .dumpWall()
+        .dumpWall()
         .checkTextBrick(0, i++, "0_0")
         .checkTextBrick(0, i++, "1_0")
         .checkTextBrick(0, i++, "2_0")
@@ -545,30 +543,29 @@ public class TestWindowing {
 
     public GeneralTestWizard(final Syntax syntax, boolean startWindowed, final Atom... atoms) {
       FieldArray rootArrayValue =
-          new FieldArray((BaseBackArraySpec) syntax.root.fields.get("value"));
+          new FieldArray((BaseBackArraySpec) syntax.root.namedFields.get("value"));
       rootArrayValue.initialSet(TSList.of(atoms));
       Atom rootAtom = new Atom(syntax.root);
-      rootAtom.initialSet(new TSMap<String, Field>().put("value", rootArrayValue));
+      rootAtom.initialSet(new TSList<>(), new TSMap<String, Field>().put("value", rootArrayValue));
       final Document doc = new Document(syntax, rootAtom);
       Context.InitialConfig initialConfig =
           new Context.InitialConfig().startWindowed(startWindowed);
       initialConfig.ellipsizeThreshold = 3;
       context =
           new Context(
-                  initialConfig,
-                  syntax,
-                  doc,
-                  new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
-                  new TestEnvironment(),
-                  null,
-                  new ViewerCursorFactory());
+              initialConfig,
+              syntax,
+              doc,
+              new MockeryDisplay(Direction.RIGHT, Direction.DOWN),
+              new TestEnvironment(),
+              null,
+              new ViewerCursorFactory());
       flushIteration();
     }
 
     public void flushIteration() {
       context.flushIteration(1000);
-      if (!context.iterationQueue.isEmpty())
-        throw new AssertionError("Too much idle activity");
+      if (!context.iterationQueue.isEmpty()) throw new AssertionError("Too much idle activity");
     }
 
     private Course getCourse(final int courseIndex) {

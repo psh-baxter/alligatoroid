@@ -35,7 +35,7 @@ public class TestActionsPrimitive {
     final Context context =
         buildDoc(
             MiscSyntax.syntax, new TreeBuilder(MiscSyntax.quoted).add("value", string).build());
-    Helper.rootArray(context.document).data.get(0).fields.getOpt("value").selectInto(context);
+    Helper.rootArray(context.document).data.get(0).namedFields.getOpt("value").selectInto(context);
     return context;
   }
 
@@ -296,7 +296,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
-                ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
+                ((FieldPrimitive) primitiveAtom.namedFields.getOpt("value"))
                     .visual.select(context, false, 2, 2))
         .actGatherNext()
         .actGatherNext()
@@ -309,7 +309,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
-                ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
+                ((FieldPrimitive) primitiveAtom.namedFields.getOpt("value"))
                     .visual.select(context, false, 2, 2))
         .actGatherNext()
         .actGatherNext()
@@ -378,7 +378,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
-                ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
+                ((FieldPrimitive) primitiveAtom.namedFields.getOpt("value"))
                     .visual.select(context, false, 5, 5))
         .actGatherPreviousLine()
         .run(context -> assertSelection(context, 1, 5));
@@ -390,7 +390,7 @@ public class TestActionsPrimitive {
     new GeneralTestWizard(MiscSyntax.syntax,  primitiveAtom)
         .run(
             context ->
-                ((FieldPrimitive) primitiveAtom.fields.getOpt("value"))
+                ((FieldPrimitive) primitiveAtom.namedFields.getOpt("value"))
                     .visual.select(context, false, 4, 4))
         .actGatherPreviousLine()
         .run(context -> assertSelection(context, 0, 4));

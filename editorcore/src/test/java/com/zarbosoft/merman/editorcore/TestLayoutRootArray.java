@@ -41,7 +41,7 @@ public class TestLayoutRootArray {
             .build();
     final Atom text = new TreeBuilder(textType).add("value", "").build();
     new GeneralTestWizard(syntax, new TreeBuilder(one).build(), text)
-        .run(editor -> text.fields.getOpt("value").selectInto(editor.context))
+        .run(editor -> text.namedFields.getOpt("value").selectInto(editor.context))
         .resize(40)
         .checkSpaceBrick(0, 0)
         .checkTextBrick(0, 1, "one")

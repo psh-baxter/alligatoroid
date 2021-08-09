@@ -12,6 +12,7 @@ import com.zarbosoft.merman.core.document.fields.FieldPrimitive;
 import com.zarbosoft.merman.core.syntax.FreeAtomType;
 import com.zarbosoft.merman.core.syntax.GapAtomType;
 import com.zarbosoft.merman.core.syntax.SuffixGapAtomType;
+import com.zarbosoft.merman.core.syntax.back.BackSpecData;
 import com.zarbosoft.merman.core.syntax.front.FrontPrimitiveSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSpec;
 import com.zarbosoft.merman.core.syntax.front.FrontSymbolSpec;
@@ -101,7 +102,7 @@ public class GapChoice extends TwoColumnChoice {
   public void choose(Editor editor, History.Recorder recorder) {
     Consumer<History.Recorder> apply =
         recorder1 -> {
-          TSMap<String, Field> fields = new TSMap<>();
+          TSMap<String, Field> namedFields = new TSMap<>();
 
           /// Aggregate typed text parsing results into primitive fields
           // + identify last primitive
@@ -147,7 +148,8 @@ public class GapChoice extends TwoColumnChoice {
                   // Last parsed primtive was completed (walled in by symbol) - find the next
                   // primitive
                   nextIncompletePrimitive =
-                      generateNextEmptyPrimitive(fields, allKeyFrontSpecs, lastRes.first.back.id);
+                      generateNextEmptyPrimitive(
+                          namedFields, allKeyFrontSpecs, lastRes.first.back.id);
                 } else {
                   // Last parsed primitive was incomplete
                   nextIncompletePrimitive = lastRes.first;
@@ -155,14 +157,15 @@ public class GapChoice extends TwoColumnChoice {
               }
             } else {
               // No primitives reached - find the first primitive and use
-              nextIncompletePrimitive = generateNextEmptyPrimitive(fields, allKeyFrontSpecs, null);
+              nextIncompletePrimitive =
+                  generateNextEmptyPrimitive(namedFields, allKeyFrontSpecs, null);
             }
           }
 
           // Add parsed primitive fields
           for (ROPair<FieldPrimitive, Boolean> field : preFields) {
             if (field.first == null) continue;
-            fields.put(field.first.back.id, field.first);
+            namedFields.put(field.first.back.id, field.first);
           }
 
           // Remainder text
@@ -174,7 +177,7 @@ public class GapChoice extends TwoColumnChoice {
           /// Aggregate consumed preceding atoms and remove from prefix
           if (consumePrecedingAtoms > 0) {
             FieldArray precedingField =
-                (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY);
+                (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY);
             TSList<Atom> preceding = precedingField.data;
             Editor.arrayChange(
                 editor,
@@ -185,21 +188,27 @@ public class GapChoice extends TwoColumnChoice {
                 ROList.empty);
             for (EditGapCursorFieldPrimitive.PrepareAtomField s : supplyFillAtoms) {
               Field field = s.process(editor, recorder1);
-              fields.put(field.back().id, field);
+              namedFields.put(field.back().id, field);
             }
           }
 
           /// Create atom
           Field following = null;
           Atom created = new Atom(type);
-          for (String fieldId : type.fields.keys().difference(fields.keys())) {
-            Field field = editor.createEmptyField(type.fields.get(fieldId));
-            fields.put(fieldId, field);
+          for (String fieldId : type.namedFields.keys().difference(namedFields.keys())) {
+            Field field = editor.createEmptyField(type.namedFields.get(fieldId));
+            namedFields.put(fieldId, field);
             if (followingSpec != null && followingSpec.fieldId().equals(fieldId)) {
               following = field;
             }
           }
-          created.initialSet(fields);
+
+          TSList<Field> unnamedFields = new TSList<>();
+          for (BackSpecData field : type.unnamedFields) {
+            unnamedFields.add(Editor.createEndEmptyField(editor.fileIds, field));
+          }
+
+          created.initialSet(unnamedFields, namedFields);
 
           /// Place and select next focus
           if (remainderText.length() > 0) {
@@ -238,12 +247,13 @@ public class GapChoice extends TwoColumnChoice {
   }
 
   private void placeWithSuffixSelect(Editor editor, History.Recorder recorder, Atom created) {
-    FieldArray precedingField = (FieldArray) gap.fields.getOpt(SuffixGapAtomType.PRECEDING_KEY);
+    FieldArray precedingField =
+        (FieldArray) gap.namedFields.getOpt(SuffixGapAtomType.PRECEDING_KEY);
     if (precedingField != null) {
       /// In a suffix gap - reuse, adding to preceding and clearing/selecting text field
       Editor.arrayChange(
           editor, recorder, precedingField, precedingField.data.size(), 0, TSList.of(created));
-      FieldPrimitive gapText = (FieldPrimitive) gap.fields.get(GapAtomType.PRIMITIVE_KEY);
+      FieldPrimitive gapText = (FieldPrimitive) gap.namedFields.get(GapAtomType.PRIMITIVE_KEY);
       recorder.apply(editor, new ChangePrimitive(gapText, 0, gapText.data.length(), ""));
       gapText.selectInto(editor.context);
     } else {
@@ -258,22 +268,23 @@ public class GapChoice extends TwoColumnChoice {
       Editor.arrayChange(
           editor,
           recorder,
-          (FieldArray) wrap.fields.get(SuffixGapAtomType.PRECEDING_KEY),
+          (FieldArray) wrap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY),
           0,
           0,
           TSList.of(created));
-      FieldPrimitive wrapText = (FieldPrimitive) wrap.fields.get(GapAtomType.PRIMITIVE_KEY);
+      FieldPrimitive wrapText = (FieldPrimitive) wrap.namedFields.get(GapAtomType.PRIMITIVE_KEY);
       wrapText.selectInto(editor.context);
     }
   }
 
   private void place(Editor editor, History.Recorder recorder, Atom created) {
-    FieldArray precedingField = (FieldArray) gap.fields.getOpt(SuffixGapAtomType.PRECEDING_KEY);
+    FieldArray precedingField =
+        (FieldArray) gap.namedFields.getOpt(SuffixGapAtomType.PRECEDING_KEY);
     if (precedingField != null && precedingField.data.some()) {
       /// Reuse current suffix gap - add to preceding and clear text
       Editor.arrayChange(
           editor, recorder, precedingField, precedingField.data.size(), 0, TSList.of(created));
-      FieldPrimitive gapText = (FieldPrimitive) gap.fields.get(GapAtomType.PRIMITIVE_KEY);
+      FieldPrimitive gapText = (FieldPrimitive) gap.namedFields.get(GapAtomType.PRIMITIVE_KEY);
       recorder.apply(editor, new ChangePrimitive(gapText, 0, gapText.data.length(), ""));
     } else {
       /// Replace gap

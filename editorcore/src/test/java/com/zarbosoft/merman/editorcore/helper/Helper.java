@@ -122,8 +122,8 @@ public class Helper {
           Format.format(
               "Atom type mismatch.\nExpected: %s\nGot: %s\nAt: %s",
               expected.type, got.type, got.getSyntaxPath()));
-    final ROSet<String> expectedKeys = expected.fields.keys();
-    final ROSet<String> gotKeys = got.fields.keys();
+    final ROSet<String> expectedKeys = expected.namedFields.keys();
+    final ROSet<String> gotKeys = got.namedFields.keys();
     {
       final TSSet<String> missing = expectedKeys.difference(gotKeys);
       if (!missing.isEmpty())
@@ -137,7 +137,7 @@ public class Helper {
             Format.format("Unknown fields: %s\nAt: %s", extra, got.getSyntaxPath()));
     }
     for (final String key : expectedKeys.intersect(gotKeys)) {
-      assertTreeEqual(expected.fields.getOpt(key), got.fields.getOpt(key));
+      assertTreeEqual(expected.namedFields.getOpt(key), got.namedFields.getOpt(key));
     }
   }
 
@@ -173,13 +173,13 @@ public class Helper {
   }
 
   public static void assertTreeEqual(final Context context, final Atom expected, final Field got) {
-    FieldArray value = new FieldArray((BaseBackArraySpec) context.syntax.root.fields.get("value"));
+    FieldArray value = new FieldArray((BaseBackArraySpec) context.syntax.root.namedFields.get("value"));
     value.initialSet(TSList.of(expected)); // TODO this shouldn't really be setting the value
     assertTreeEqual(value, got);
   }
 
   public static FieldArray rootArray(final Document doc) {
-    return (FieldArray) doc.root.fields.getOpt("value");
+    return (FieldArray) doc.root.namedFields.getOpt("value");
   }
 
   public static Editor buildDoc(final Syntax syntax, final Atom... root) {
@@ -188,10 +188,10 @@ public class Helper {
 
   public static Editor buildDoc(
       Context.InitialConfig contextConfig, final Syntax syntax, final Atom... root) {
-    FieldArray rootArray = new FieldArray((BaseBackArraySpec) syntax.root.fields.get("value"));
+    FieldArray rootArray = new FieldArray((BaseBackArraySpec) syntax.root.namedFields.get("value"));
     rootArray.initialSet(TSList.of(root));
     Atom rootAtom = new Atom(syntax.root);
-    rootAtom.initialSet(new TSMap<String, Field>().put("value", rootArray));
+    rootAtom.initialSet(new TSList<>(),new TSMap<String, Field>().put("value", rootArray));
     final Document doc = new Document(syntax, rootAtom);
     final Editor editor =
         new Editor(
@@ -211,7 +211,7 @@ public class Helper {
     String indentChunk = "   ";
     System.out.format("%satom type [%s]\n", indentText, a.type.id);
     indentText += indentChunk;
-    for (Map.Entry<String, Field> field : a.fields) {
+    for (Map.Entry<String, Field> field : a.namedFields) {
       System.out.format(
           "%sfield [%s] %s\n", indentText, field.getKey(), field.getValue().getClass().getName());
       if (field.getValue() instanceof FieldArray) {

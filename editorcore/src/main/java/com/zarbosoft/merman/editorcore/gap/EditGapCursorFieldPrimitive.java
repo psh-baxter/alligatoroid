@@ -189,7 +189,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
           Grammar precedingPlacementsGrammar =
               new Grammar().add(PRECEDING_ROOT_KEY, precedingConsumptionGrammar);
 
-          FieldArray precedingValues = (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY);
+          FieldArray precedingValues = (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY);
           TSList<Atom> reversePrecedingValues = precedingValues.data.mut();
           reversePrecedingValues.reverse();
           TSList<Event> events = new TSList<Event>();
@@ -406,7 +406,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
         if (data.size() > 1) break;
         Atom atom = data.get(0);
         if (atom.type != editor.context.syntax.gap) break;
-        FieldPrimitive field = (FieldPrimitive) atom.fields.get(GapAtomType.PRIMITIVE_KEY);
+        FieldPrimitive field = (FieldPrimitive) atom.namedFields.get(GapAtomType.PRIMITIVE_KEY);
         if (!field.get().isEmpty()) break;
         editor.history.record(
             editor,
@@ -420,7 +420,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
         /// Remove empty syntax gaps and place lifted preceding back into parent
         FieldPrimitive prim = visualPrimitive.value;
         if (!prim.get().isEmpty()) break;
-        FieldArray array = (FieldArray) gap.fields.get(SuffixGapAtomType.PRECEDING_KEY);
+        FieldArray array = (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY);
         ROOrderedSetRef<AtomType> canPlace;
         if (array.data.size() == 0) {
           canPlace = ROOrderedSetRef.empty;

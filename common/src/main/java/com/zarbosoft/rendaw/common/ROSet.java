@@ -1,5 +1,6 @@
 package com.zarbosoft.rendaw.common;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -74,5 +75,9 @@ public class ROSet<T> implements ROSetRef<T> {
   @Override
   public boolean contains(T t) {
     return data.contains(t);
+  }
+
+  public TSList<T> toList() {
+    return TSList.fromList(new ArrayList<>(inner_()));
   }
 }
