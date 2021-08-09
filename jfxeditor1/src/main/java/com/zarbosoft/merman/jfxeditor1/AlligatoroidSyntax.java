@@ -166,16 +166,16 @@ public class AlligatoroidSyntax {
   private static final String CALL_BACK_FIELD_TARGET = "target";
   private static final String CALL_BACK_FIELD_ARGUMENT = "argument";
   private static final String TYPE_LITERAL_RECORD_ELEMENT = "record_element";
-  private static final String BACK_TYPE_LITERAL_STRING = "string";
-  private static final String TYPE_LITERAL_STRING = "string";
-  private static final String TYPE_LITERAL_INT = "int";
-  private static final String TYPE_LITERAL_HEX_INT = "hex_int";
-  private static final String TYPE_LITERAL_FLOAT = "float";
-  private static final String TYPE_LITERAL_HEX_FLOAT = "hex_float";
-  private static final String TYPE_LITERAL_TRUE = "true";
-  private static final String TYPE_LITERAL_FALSE = "false";
-  private static final String TYPE_LITERAL_UNIQUE = "unique";
-  private static final String TYPE_LITERAL_VOID = "void";
+  private static final String BACK_TYPE_LITERAL_STRING = "literal_string";
+  private static final String TYPE_LITERAL_STRING = "literal_string";
+  private static final String TYPE_LITERAL_INT = "literal_int";
+  private static final String TYPE_LITERAL_HEX_INT = "literal_hex_int";
+  private static final String TYPE_LITERAL_FLOAT = "literal_float";
+  private static final String TYPE_LITERAL_HEX_FLOAT = "literal_hex_float";
+  private static final String TYPE_LITERAL_TRUE = "literal_true";
+  private static final String TYPE_LITERAL_FALSE = "literal_false";
+  private static final String TYPE_LITERAL_UNIQUE = "literal_unique";
+  private static final String TYPE_LITERAL_NULL = "literal_null";
   private static final String TYPE_EXPR_COMMENT = "comment_expr";
   private static final String BACK_TYPE_COMMENT_P = "comment_p";
   private static final String BACK_TYPE_COMMENT_H1 = "comment_h1";
@@ -492,7 +492,7 @@ public class AlligatoroidSyntax {
         new ATypeBuilder(TYPE_LITERAL_UNIQUE, "Unique").text("unique", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
     types.add(
-        new ATypeBuilder(TYPE_LITERAL_VOID, "Void").text("void", COLOR_LITERAL_TEXT).build(),
+        new ATypeBuilder(TYPE_LITERAL_NULL, "Null").text("null", COLOR_LITERAL_TEXT).build(),
         GROUP_EXPR);
 
     // Aggregate literals
@@ -648,7 +648,7 @@ public class AlligatoroidSyntax {
                             TSList.of(
                                 new BackFixedTypeSpec(
                                     new BackFixedTypeSpec.Config(
-                                        "alligatorus:0.0.1",
+                                        "alligatoroid:0.0.1",
                                         new BackArraySpec(
                                             new BaseBackArraySpec.Config(
                                                 "root_elements", GROUP_STATEMENT, ROList.empty))))),

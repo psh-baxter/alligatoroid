@@ -440,7 +440,7 @@ public class JavaSerializer implements Serializer {
       }
       throw new RuntimeException(
           Format.format(
-              "Clipboard contents don't conform to syntax tree\nat %s %s\nmismatches at final stream element:\n%s",
+              "Code don't conform to syntax tree\nat %s %s\nmismatches at final stream element:\n%s",
               ((Position) e.at).at, ((Position) e.at).event, message.toString()));
     }
   }

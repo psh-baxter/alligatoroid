@@ -183,21 +183,28 @@ public class Editor {
     recorder.apply(editor, new ChangeArray(array, index, remove, add));
   }
 
-  private static void makeIdsUnique(Editor editor, History.Recorder recorder, Atom atom) {
+  private static void makeIdsUniqueInner(Editor editor, History.Recorder recorder, Field field) {
+    if (field instanceof FieldId) {
+      Integer uniqueId = editor.fileIds.take(((FieldId) field).id);
+      if (uniqueId != null) recorder.apply(editor, new ChangeId((FieldId) field, uniqueId));
+    } else if (field instanceof FieldAtom) {
+      makeIdsUnique(editor, recorder, ((FieldAtom) field).data);
+    } else if (field instanceof FieldArray) {
+      for (Atom child : ((FieldArray) field).data) {
+        makeIdsUnique(editor, recorder, child);
+      }
+    } else if (field instanceof FieldPrimitive) {
+      // nop
+    } else throw new Assertion();
+  }
+
+  public static void makeIdsUnique(Editor editor, History.Recorder recorder, Atom atom) {
+    for (Field field : atom.unnamedFields) {
+      makeIdsUniqueInner(editor, recorder, field);
+    }
     for (Map.Entry<String, Field> entry : atom.namedFields) {
       Field field = entry.getValue();
-      if (field instanceof FieldId) {
-        Integer uniqueId = editor.fileIds.take(((FieldId) field).id);
-        if (uniqueId != null) recorder.apply(editor, new ChangeId((FieldId) field, uniqueId));
-      } else if (field instanceof FieldAtom) {
-        makeIdsUnique(editor, recorder, ((FieldAtom) field).data);
-      } else if (field instanceof FieldArray) {
-        for (Atom child : ((FieldArray) field).data) {
-          makeIdsUnique(editor, recorder, child);
-        }
-      } else if (field instanceof FieldPrimitive) {
-        // nop
-      } else throw new Assertion();
+      makeIdsUniqueInner(editor, recorder, field);
     }
   }
 

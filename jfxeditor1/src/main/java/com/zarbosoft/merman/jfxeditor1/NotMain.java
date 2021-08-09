@@ -58,7 +58,6 @@ import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -258,7 +257,7 @@ public class NotMain extends Application {
       try {
         document = serializer.loadDocument(syntax, Files.readAllBytes(Paths.get(path)));
       } catch (NoSuchFileException e) {
-        document = new Document(syntax, Editor.createEmptyAtom(syntax, fileIds,syntax.root));
+        document = new Document(syntax, Editor.createEmptyAtom(syntax, fileIds, syntax.root));
       } catch (Exception e) {
         throw new RuntimeException(Format.format("Failed to load document %s", path), e);
       }

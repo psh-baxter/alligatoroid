@@ -11,4 +11,9 @@ public class LArrayOpenEvent implements LuxemEvent {
   public boolean matches(final MatchingEvent event) {
     return event.getClass() == getClass();
   }
+
+  @Override
+  public String toString() {
+    return "ARRAY OPEN";
+  }
 }

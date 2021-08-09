@@ -1,24 +1,35 @@
 package com.zarbosoft.merman.editorcore.history;
 
-import com.zarbosoft.merman.core.document.fields.FieldId;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class FileIds {
-    private final List<Boolean> fileIds = new ArrayList<>();
-    public void remove(int id) {
-        fileIds.set(id, false);
-    }
-    public Integer take(Integer desired) {
-        if (desired != null && desired >= 0 && desired < fileIds.size() && !fileIds.get(desired)) return null;
-        for (int i = 0; i < fileIds.size(); ++i) {
-            if (!fileIds.get(i)) {
-                fileIds.set(i, true);
-                return i;
-            }
+  private final TSList<Integer> free = new TSList<>();
+  private int next;
+
+  public void remove(int id) {
+    free.add(id);
+  }
+
+  public Integer take(Integer desired) {
+    if (desired != null) {
+      if (desired >= next) {
+        for (int i = next; i < desired; ++i) {
+          free.add(i);
         }
-        fileIds.add(true);
-        return fileIds.size() - 1;
+        next = desired + 1;
+        return null;
+      } else {
+        for (int i = 0; i < free.size(); ++i) {
+          if (free.get(i) == (int) desired) {
+            free.remove(i);
+            return null;
+          }
+        }
+      }
     }
+    if (free.some()) {
+      return free.removeLast();
+    }
+    return next++;
+  }
 }
