@@ -68,6 +68,11 @@ public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
   }
 
   @Override
+  public int size() {
+    return ordered.size();
+  }
+
+  @Override
   public Iterator<ROPair<K, V>> iterator() {
     return ordered.iterator();
   }

@@ -10,4 +10,6 @@ public interface ROOrderedMap<K, V> extends Iterable<ROPair<K, V>> {
   boolean has(K key);
 
   Iterator<V> iterValues();
+
+    int size();
 }

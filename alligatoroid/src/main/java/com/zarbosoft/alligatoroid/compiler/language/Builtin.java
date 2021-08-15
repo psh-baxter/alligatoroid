@@ -4,9 +4,11 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.ModuleContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvm.JVMBuiltin;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
+import com.zarbosoft.alligatoroid.compiler.mortar.BuiltinModuleFunction;
 import com.zarbosoft.alligatoroid.compiler.mortar.Function;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarClass;
 import com.zarbosoft.alligatoroid.compiler.mortar.MortarHalfStringType;
@@ -25,8 +27,21 @@ public class Builtin extends LanguageValue {
   public static Record builtin =
       new Record(
           new TSMap()
-              .put("print", wrapFunction(Builtin.class, "builtinPrint"))
+              .put("print", wrapModuleFunction("builtinLog"))
               .put("jvm", JVMBuiltin.builtin));
+
+  private static Value wrapModuleFunction(String methodName) {
+    Method method = null;
+    for (Method c : ModuleContext.class.getDeclaredMethods()) {
+      if (c.getName().equals(methodName)) {
+        method = c;
+        break;
+      }
+    }
+    if (method == null) throw new Assertion();
+    ROPair<String, MortarHalfType> desc = funcDescriptor(method);
+    return new BuiltinModuleFunction(methodName, desc.first, desc.second);
+  }
 
   public Builtin(Location id) {
     super(id);

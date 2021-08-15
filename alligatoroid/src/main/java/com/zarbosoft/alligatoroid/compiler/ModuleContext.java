@@ -10,6 +10,10 @@ public class ModuleContext {
   public final TSList<Location> sourceMapReverse = new TSList<>();
   public final TSMap<Location, Integer> sourceMapForward = new TSMap<>();
 
+  public final void builtinLog(String message) {
+      log.add(message);
+  }
+
   public ModuleContext(GlobalContext global) {
     this.global = global;
   }

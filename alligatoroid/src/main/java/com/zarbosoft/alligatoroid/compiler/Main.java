@@ -25,12 +25,21 @@ public class Main {
     for (Module value : modules.values()) {
       outWriter.recordBegin().key("id");
       value.id.serialize(outWriter);
+
+      outWriter.key("log");
+      outWriter.arrayBegin();
+      for (String message : value.context.log) {
+        outWriter.primitive(message);
+      }
+      outWriter.arrayEnd();
+
       outWriter.key("errors");
       outWriter.arrayBegin();
       for (Error error : value.context.errors) {
         error.serialize(outWriter);
       }
       outWriter.arrayEnd();
+
       outWriter.recordEnd();
     }
     outWriter.arrayEnd();
