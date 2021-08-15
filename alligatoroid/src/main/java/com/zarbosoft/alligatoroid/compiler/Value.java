@@ -1,33 +1,29 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.rendaw.common.ROPair;
+
 public interface Value {
-  Value call(Context context, Location location, Value argument);
+  EvaluateResult call(Context context, Location location, Value argument);
 
-  Value access(Context context, Location location, Value field);
+  EvaluateResult access(Context context, Location location, Value field);
 
-  default Value evaluate(Context context) {
-    return this;
+  default EvaluateResult evaluate(Context context) {
+    return new EvaluateResult(null, this);
   }
 
-  /**
-   * Merge values in a sequence. If this node doesn't know how to merge, return null and mergeNext
-   * will be used instead. Return this value carrying previous side effects.
-   *
-   * @param context
-   * @param previous
-   * @return
-   */
-  Value mergePrevious(Context context, Value previous);
+  TargetCode drop(Context context, Location location);
 
   /**
-   * Merge values in a sequence. Return the next value carrying this's side effects. Only called if
-   * mergePrevious fails. Use a dumb merge process (may assume no side effects).
-   *
+   * Creates a value to put in the scope. If error, return error value, null (add error to context).
    * @param context
-   * @param next
+   * @param location
+   * @return side effect, binding
+   */
+  ROPair<EvaluateResult, Binding> bind(Context context, Location location);
+
+  /**
+   * Location or null
    * @return
    */
-  Value mergeNext(Context context, Value next);
-
-  Value drop(Context context);
+  Location location();
 }

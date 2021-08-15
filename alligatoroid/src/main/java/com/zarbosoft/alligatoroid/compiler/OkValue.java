@@ -1,25 +1,20 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-public abstract class OkValue implements Value {
+public interface OkValue extends Value {
   @Override
-  public Value call(Context context, Location location, Value argument) {
-    context.errors.add(Error.callNotSupported(location));
-    return ErrorValue.error;
+  public default EvaluateResult call(Context context, Location location, Value argument) {
+    context.module.errors.add(Error.callNotSupported(location));
+    return EvaluateResult.error;
   }
 
   @Override
-  public Value access(Context context, Location location, Value field) {
-    context.errors.add(Error.accessNotSupported(location));
-    return ErrorValue.error;
+  public default EvaluateResult access(Context context, Location location, Value field) {
+    context.module.errors.add(Error.accessNotSupported(location));
+    return EvaluateResult.error;
   }
 
   @Override
-  public Value mergePrevious(Context context, Value previous) {
+  default Location location() {
     return null;
-  }
-
-  @Override
-  public Value mergeNext(Context context, Value next) {
-    return this;
   }
 }

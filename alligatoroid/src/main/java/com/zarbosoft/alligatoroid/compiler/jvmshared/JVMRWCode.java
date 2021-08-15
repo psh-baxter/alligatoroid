@@ -23,7 +23,7 @@ import static org.objectweb.asm.Opcodes.FSTORE;
 import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.LSTORE;
 
-public class JVMRWCode extends JVMCode {
+public abstract class JVMRWCode extends JVMCode {
   private static final Object scopePush = new Object();
   private static final Object scopePop = new Object();
   private final List<Object> children = new ArrayList<>();
@@ -123,7 +123,7 @@ public class JVMRWCode extends JVMCode {
 
   public JVMRWCode add(JVMCode child) {
     if (child == null) throw new Assertion(); // FIXME debug
-    if (child != empty) children.add(child);
+    children.add(child);
     return this;
   }
 

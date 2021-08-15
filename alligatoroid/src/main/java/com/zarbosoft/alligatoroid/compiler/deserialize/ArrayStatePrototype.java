@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.deserialize;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.ModuleContext;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.rendaw.common.TSList;
 
@@ -12,7 +12,7 @@ public class ArrayStatePrototype extends BaseStatePrototype {
   }
 
   @Override
-  public State createArray(Context context, LuxemPath luxemPath, String type) {
+  public State createArray(ModuleContext context, LuxemPath luxemPath, String type) {
     return new BaseNonPrimitiveState() {
       TSList<State> elements = new TSList<>();
 
@@ -22,25 +22,25 @@ public class ArrayStatePrototype extends BaseStatePrototype {
       }
 
       @Override
-      public void eatArrayBegin(Context context, TSList<State> stack, LuxemPath luxemPath) {
+      public void eatArrayBegin(ModuleContext context, TSList<State> stack, LuxemPath luxemPath) {
         proto = inner;
         super.eatArrayBegin(context, stack, luxemPath);
       }
 
       @Override
-      public void eatRecordBegin(Context context, TSList<State> stack, LuxemPath luxemPath) {
+      public void eatRecordBegin(ModuleContext context, TSList<State> stack, LuxemPath luxemPath) {
         proto = inner;
         super.eatRecordBegin(context, stack, luxemPath);
       }
 
       @Override
-      public void eatPrimitive(Context context, TSList<State> stack, LuxemPath luxemPath, String value) {
+      public void eatPrimitive(ModuleContext context, TSList<State> stack, LuxemPath luxemPath, String value) {
         proto = inner;
         super.eatPrimitive(context, stack, luxemPath, value);
       }
 
       @Override
-      public Object build(Context context) {
+      public Object build(ModuleContext context) {
         if (!ok) return null;
         TSList<Object> out = new TSList<>();
         for (State element : elements) {

@@ -1,16 +1,18 @@
 package com.zarbosoft.alligatoroid.compiler.deserialize;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.ErrorValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.ModuleContext;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.language.Access;
+import com.zarbosoft.alligatoroid.compiler.language.Bind;
 import com.zarbosoft.alligatoroid.compiler.language.Block;
 import com.zarbosoft.alligatoroid.compiler.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.language.Call;
 import com.zarbosoft.alligatoroid.compiler.language.LiteralString;
+import com.zarbosoft.alligatoroid.compiler.language.Local;
 import com.zarbosoft.luxem.read.BufferedReader;
 import com.zarbosoft.luxem.read.path.LuxemArrayPath;
 import com.zarbosoft.luxem.read.path.LuxemPath;
@@ -31,7 +33,15 @@ import static com.zarbosoft.rendaw.common.Common.uncheck;
 
 public class Deserializer {
   private static final Class[] language =
-      new Class[] {Access.class, Block.class, Call.class, LiteralString.class, Builtin.class};
+      new Class[] {
+        Access.class,
+        Bind.class,
+        Block.class,
+        Builtin.class,
+        Call.class,
+        LiteralString.class,
+        Local.class
+      };
   private final StatePrototype valuePrototype;
   private final TSMap<String, ClassInfo> languageNodeInfos = new TSMap<>();
 
@@ -39,7 +49,7 @@ public class Deserializer {
     valuePrototype =
         new BaseStatePrototype() {
           @Override
-          public State createRecord(Context context, LuxemPath luxemPath, String type) {
+          public State createRecord(ModuleContext context, LuxemPath luxemPath, String type) {
             ClassInfo info = languageNodeInfos.getOpt(type);
             if (info == null) {
               context.errors.add(
@@ -57,7 +67,7 @@ public class Deserializer {
 
               @Override
               public void eatKey(
-                  Context context, TSList<State> stack, LuxemPath luxemPath, String name) {
+                  ModuleContext context, TSList<State> stack, LuxemPath luxemPath, String name) {
                 proto = info.fields.getOpt(name);
                 if (proto == null) {
                   context.errors.add(
@@ -69,7 +79,7 @@ public class Deserializer {
               }
 
               @Override
-              public Object build(Context context) {
+              public Object build(ModuleContext context) {
                 if (!ok) return ErrorValue.error;
                 Object[] args = new Object[info.argOrder.size()];
                 for (int i = 0; i < args.length; ++i) {
@@ -92,26 +102,26 @@ public class Deserializer {
     StatePrototype intPrototype =
         new BaseStatePrototype() {
           @Override
-          public State createPrimitive(Context context, LuxemPath luxemPath, String type) {
+          public State createPrimitive(ModuleContext context, LuxemPath luxemPath, String type) {
             return StateInt.state;
           }
         };
     StatePrototype stringPrototype =
         new BaseStatePrototype() {
           @Override
-          public State createPrimitive(Context context, LuxemPath luxemPath, String type) {
+          public State createPrimitive(ModuleContext context, LuxemPath luxemPath, String type) {
             return new BasePrimitiveState() {
               private String value;
 
               @Override
               public void eatPrimitive(
-                  Context context, TSList<State> stack, LuxemPath luxemPath, String value) {
+                  ModuleContext context, TSList<State> stack, LuxemPath luxemPath, String value) {
                 this.value = value;
                 stack.removeLast();
               }
 
               @Override
-              public Object build(Context context) {
+              public Object build(ModuleContext context) {
                 if (!ok || value == null) return null; // was not primitive, error
                 return value;
               }
@@ -170,11 +180,11 @@ public class Deserializer {
     return out.toString();
   }
 
-  public static ROList<Value> deserialize(Context context, ModuleId module, Path path) {
+  public static ROList<Value> deserialize(ModuleContext context, ModuleId module, Path path) {
     return new Deserializer(module).deserialize(context, path);
   }
 
-  private ROList<Value> deserialize(Context context, Path path) {
+  private ROList<Value> deserialize(ModuleContext context, Path path) {
     State languageState =
         new BaseNonPrimitiveState() {
           State inner;
@@ -186,7 +196,7 @@ public class Deserializer {
 
           @Override
           public void eatType(
-              Context context, TSList<State> stack, LuxemPath luxemPath, String version) {
+              ModuleContext context, TSList<State> stack, LuxemPath luxemPath, String version) {
             switch (version) {
               case "alligatoroid:0.0.1":
                 {
@@ -203,7 +213,7 @@ public class Deserializer {
           }
 
           @Override
-          public Object build(Context context) {
+          public Object build(ModuleContext context) {
             if (!ok) return ErrorValue.error;
             if (inner == null) {
               context.errors.add(Error.deserializeMissingVersion());

@@ -101,11 +101,15 @@ public class AlligatoroidSyntax {
   private static final String BACK_TYPE_BUILTIN = "builtin";
   private static final String BACK_TYPE_ACCESS = "access";
   private static final String ACCESS_BACK_FIELD_BASE = "base";
-  private static final String ACCESS_BACK_FIELD_FIELD = "field";
+  private static final String ACCESS_BACK_FIELD_FIELD = "key";
   private static final String TYPE_MODULE_LOCAL = "mod_local";
   private static final String TYPE_MODULE_REMOTE_BUNDLE = "mod_git";
+  private static final String BACK_TYPE_BIND = "bind";
   private static final String TYPE_BIND = "bind";
+  private static final String TYPE_BIND_DYNAMIC = "bind_dynamic";
+  private static final String BACK_TYPE_ASSIGN = "assign";
   private static final String TYPE_ASSIGN = "assign";
+  private static final String TYPE_ASSIGN_DYNAMIC = "assign_dynamic";
   private static final String TYPE_LOWER = "lower";
   private static final String TYPE_LOWER_LABEL = "lower_label";
   private static final String TYPE_STAGE = "stage";
@@ -184,6 +188,8 @@ public class AlligatoroidSyntax {
   private static final String TYPE_COMMENT_P = "comment_p";
   private static final String TYPE_EXPR_COMMENT_P = "expr_comment_p";
   private static final String FIELD_LITERAL_VALUE = "value";
+  private static final String BIND_BACK_FIELD_NAME = "key";
+  private static final String BIND_BACK_FIELD_VALUE = "value";
 
   static {
     Pattern maybeNegative =
@@ -299,6 +305,7 @@ public class AlligatoroidSyntax {
     // Variables, fields
     types.add(
         new ATypeBuilder(TYPE_ACCESS, "Access")
+            .precedence(0)
             .type(BACK_TYPE_ACCESS)
             .atom(ACCESS_BACK_FIELD_BASE, GROUP_EXPR)
             .text(".", COLOR_OTHER)
@@ -308,6 +315,7 @@ public class AlligatoroidSyntax {
     types.add(
         new ATypeBuilder(TYPE_ACCESS_DYNAMIC, "Dynamic Access")
             .type(BACK_TYPE_ACCESS)
+            .precedence(0)
             .atom(ACCESS_BACK_FIELD_BASE, GROUP_EXPR)
             .startBracket("[", COLOR_OTHER)
             .compactSplit()
@@ -321,8 +329,42 @@ public class AlligatoroidSyntax {
             .nestedIdentifier("value", COLOR_IDENTIFIER)
             .build(),
         GROUP_EXPR);
-    types.add(binaryInfix(TYPE_BIND, "Bind", 0, ":=", GROUP_EXPR), GROUP_EXPR);
-    types.add(binaryInfix(TYPE_ASSIGN, "Set", 0, "=", GROUP_EXPR), GROUP_EXPR);
+    types.add(
+        new ATypeBuilder(TYPE_BIND, "Bind")
+            .type(BACK_TYPE_BIND)
+            .precedence(0)
+            .nestedIdentifier(BIND_BACK_FIELD_NAME, COLOR_IDENTIFIER)
+            .space()
+            .text(":=", COLOR_OTHER)
+            .space()
+            .atom(BIND_BACK_FIELD_VALUE, GROUP_EXPR)
+            .build(),
+        GROUP_EXPR);
+    types.add(
+        new ATypeBuilder(TYPE_BIND_DYNAMIC, "Dynamic Bind")
+            .type(BACK_TYPE_BIND)
+            .precedence(0)
+            .startBracket("[", COLOR_OTHER)
+            .compactSplit()
+            .atom(BIND_BACK_FIELD_NAME, GROUP_EXPR)
+            .endBracket("]", COLOR_OTHER)
+            .space()
+            .text(":=", COLOR_OTHER)
+            .space()
+            .atom(BIND_BACK_FIELD_VALUE, GROUP_EXPR)
+            .build(),
+        GROUP_EXPR);
+    types.add(
+        new ATypeBuilder(TYPE_ASSIGN, "Set")
+            .type(BACK_TYPE_ASSIGN)
+            .precedence(0)
+            .atom(BIND_BACK_FIELD_NAME, GROUP_EXPR)
+            .space()
+            .text("=", COLOR_OTHER)
+            .space()
+            .atom(BIND_BACK_FIELD_VALUE, GROUP_EXPR)
+            .build(),
+        GROUP_EXPR);
 
     // Calls
     types.add(

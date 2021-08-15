@@ -1,24 +1,24 @@
 package com.zarbosoft.alligatoroid.compiler.language;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Value;
 
 public class Access extends LanguageValue {
   public final Value base;
-  public final Value field;
+  public final Value key;
 
-  public Access(Location id, Value base, Value field) {
+  public Access(Location id, Value base, Value key) {
     super(id);
     this.base = base;
-    this.field = field;
+    this.key = key;
   }
 
   @Override
-  public Value evaluate(Context context) {
-    Value base = this.base.evaluate(context);
-    Value field = this.field.evaluate(context);
-    return base.access(context, location, field);
+  public EvaluateResult evaluate(com.zarbosoft.alligatoroid.compiler.Context context) {
+    EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
+    return ectx.build(
+        ectx.record(ectx.evaluate(this.base).access(context, location, ectx.evaluate(this.key))));
   }
 }

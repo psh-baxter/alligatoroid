@@ -1,20 +1,23 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.Context;
-import com.zarbosoft.alligatoroid.compiler.Value;
+import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
 
-public class NullValue extends MortarValue implements LowerableValue{
+public class NullValue implements MortarProtocode, MortarValue {
   public static final NullValue value = new NullValue();
 
-  @Override
-  public Value drop(Context context) {
-    return this;
-  }
+  private NullValue() {}
 
   @Override
   public JVMCode lower() {
-    return new JVMRWCode();
+    return new MortarCode();
+  }
+
+  @Override
+  public TargetCode drop(Context context, Location location) {
+    return null;
   }
 }

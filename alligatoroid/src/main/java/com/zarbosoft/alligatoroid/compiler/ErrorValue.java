@@ -1,32 +1,34 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
+import com.zarbosoft.rendaw.common.ROPair;
 
-public class ErrorValue implements Value {
+public final class ErrorValue implements Value {
   public static final ErrorValue error = new ErrorValue();
 
+  private ErrorValue() {}
+
   @Override
-  public Value call(Context context, Location location, Value argument) {
-    return this;
+  public EvaluateResult call(Context context, Location location, Value argument) {
+    return EvaluateResult.error;
   }
 
   @Override
-  public Value access(Context context, Location location, Value field) {
-    return this;
+  public EvaluateResult access(Context context, Location location, Value field) {
+    return EvaluateResult.error;
   }
 
   @Override
-  public Value mergePrevious(Context context, Value previous) {
-    return this;
+  public TargetCode drop(Context context, Location location) {
+    return null;
   }
 
   @Override
-  public Value mergeNext(Context context, Value next) {
-    return next;
+  public ROPair<EvaluateResult, Binding> bind(Context context, Location location) {
+    return new ROPair<>(EvaluateResult.error, null);
   }
 
   @Override
-  public Value drop(Context context) {
-    return NullValue.value;
+  public Location location() {
+    return null;
   }
 }

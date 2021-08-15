@@ -49,11 +49,15 @@ public class JVMDescriptor {
   }
 
   public static String objReal(Class klass) {
-    return obj_(klass.getCanonicalName());
+    return objExternal(klass.getCanonicalName());
   }
 
-  public static String obj_(String externalName) {
-    return "L" + internalName(externalName) + ";";
+  public static String objExternal(String externalName) {
+    return objInternal(internalName(externalName));
+  }
+
+  public static String objInternal(String internalName) {
+    return "L" + internalName + ";";
   }
 
   /**
@@ -64,6 +68,10 @@ public class JVMDescriptor {
    */
   public static String internalName(String externalName) {
     return externalName.replace('.', '/');
+  }
+
+  public static String internalName(Class klass) {
+    return klass.getCanonicalName().replace('.', '/');
   }
 
   public static String array(String child) {

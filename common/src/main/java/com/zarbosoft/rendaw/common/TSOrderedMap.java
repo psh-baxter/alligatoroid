@@ -77,4 +77,16 @@ public class TSOrderedMap<K, V> implements ROOrderedMap<K, V> {
     put(k, v);
     return this;
   }
+
+  public V removeGet(K k) {
+    V out = unordered.remove(k);
+    for (Iterator<ROPair<K, V>> iter = ordered.iterator(); iter.hasNext(); ) {
+      ROPair<K, V> p = iter.next();
+      if (p.first.equals(k)) {
+        iter.remove();
+        break;
+      }
+    }
+    return out;
+  }
 }

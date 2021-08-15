@@ -1,6 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler.deserialize;
 
-import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.ModuleContext;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.luxem.read.path.LuxemPath;
@@ -13,10 +13,10 @@ public class LocationPrototype extends BaseStatePrototype {
   }
 
   @Override
-  public State createPrimitive(Context context, LuxemPath luxemPath, String type) {
+  public State createPrimitive(ModuleContext context, LuxemPath luxemPath, String type) {
     return new StateInt() {
       @Override
-      public Object build(Context context) {
+      public Object build(ModuleContext context) {
         Integer value = (Integer) super.build(context);
         if (value == null) {
           return null;

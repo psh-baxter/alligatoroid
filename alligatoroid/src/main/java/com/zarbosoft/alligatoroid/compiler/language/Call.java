@@ -1,6 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.language;
 
 import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Value;
@@ -16,9 +17,9 @@ public class Call extends LanguageValue {
   }
 
   @Override
-  public Value evaluate(Context context) {
-    Value target = this.target.evaluate(context);
-    Value argument = this.argument.evaluate(context);
-    return target.call(context, location, argument);
+  public EvaluateResult evaluate(Context context) {
+    EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
+    return ectx.build(
+        ectx.record(ectx.evaluate(target).call(context, location, ectx.evaluate(argument))));
   }
 }

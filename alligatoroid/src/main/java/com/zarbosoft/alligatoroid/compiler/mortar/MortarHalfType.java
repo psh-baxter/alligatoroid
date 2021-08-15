@@ -1,9 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
 
-public interface LowerableValue {
-    public JVMCode lower();
+public interface MortarHalfType extends MortarValue {
+  public Value asValue(MortarProtocode lower);
+
+  public Value stackAsValue(JVMRWCode code);
 }

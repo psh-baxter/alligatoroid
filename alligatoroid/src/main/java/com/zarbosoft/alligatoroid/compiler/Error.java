@@ -1,5 +1,6 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.ROList;
@@ -158,6 +159,15 @@ public class Error implements Serializable {
         new TSMap<String, Object>()
             .put("location", location)
             .put("description", "the base value doesn't have fields that can be accessed"));
+  }
+
+  public static Error valueNotWhole(Location location, Value value) {
+    return new Error(
+        "value_not_known_at_phase_1",
+        new TSMap<String, Object>()
+            .put("location", location)
+            .put("value", value.getClass().getCanonicalName())
+            .put("description", "this value needs to be known completely in phase 1 to use here"));
   }
 
   @Override

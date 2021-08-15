@@ -1,21 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.rendaw.common.TSList;
 import org.objectweb.asm.MethodVisitor;
 
-public abstract class JVMCode {
-  public static final EmptyCode empty = new EmptyCode();
-
+public abstract class JVMCode implements TargetCode {
   public void render(MethodVisitor out, TSList<Object> initialIndexes) {
     render(new Scope(initialIndexes), out);
   }
 
   protected abstract void render(Scope scope, MethodVisitor out);
-
-  private static class EmptyCode extends JVMCode {
-    @Override
-    protected void render(Scope scope, MethodVisitor out) {}
-  }
 
   protected static class Scope {
     final Scope parent;

@@ -21,7 +21,7 @@ public class GlobalContext {
     Module module = modules.getOpt(id);
     if (module == null) {
       CompletableFuture<Value> result = new CompletableFuture<>();
-      module = new Module(id, new Context(this), result);
+      module = new Module(id, new ModuleContext(this), result);
       modules.put(id, module);
       Module finalModule = module;
       executor.submit(() -> execute.accept(finalModule));

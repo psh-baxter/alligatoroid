@@ -1,12 +1,14 @@
 package com.zarbosoft.alligatoroid.compiler.language;
 
+import com.zarbosoft.alligatoroid.compiler.Binding;
 import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.ReverseIterable;
 
 public class Block extends LanguageValue {
   public final ROList<Value> children;
@@ -16,29 +18,28 @@ public class Block extends LanguageValue {
     this.children = children;
   }
 
-  public static Value evaluate(Context context, ROList<Value> children) {
+  public static EvaluateResult evaluate(
+      Context context, Location location, ROList<Value> children) {
+    context = context.pushScope();
+    EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
     Value last = null;
+    Location lastLocation = null;
     for (Value child : children) {
-      Value evaluated = child.evaluate(context);
-      if (last != null) {
-        last = last.drop(context);
-        Value temp = evaluated.mergePrevious(context, last);
-        if (temp == null) {
-          temp = last.mergeNext(context, evaluated);
-        }
-        last = temp;
-      } else {
-        last = evaluated;
-      }
+      if (last != null) ectx.record(last.drop(context, lastLocation));
+      lastLocation = child.location();
+      last = ectx.evaluate(child);
     }
     if (last == null) {
       last = NullValue.value;
     }
-    return last;
+    for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
+      ectx.record(binding.drop(context, location));
+    }
+    return ectx.buildScoped(last);
   }
 
   @Override
-  public Value evaluate(Context context) {
-    return evaluate(context, children);
+  public EvaluateResult evaluate(Context context) {
+    return evaluate(context, location, children);
   }
 }
