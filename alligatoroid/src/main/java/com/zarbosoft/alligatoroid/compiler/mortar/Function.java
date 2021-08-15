@@ -27,6 +27,7 @@ public class Function implements MortarValue {
     JVMRWCode code =
         new MortarCode()
             .add(((MortarLowerableValue) argument).lower())
+            .line(context.module.sourceLocation(location))
             .add(new MethodInsnNode(INVOKESTATIC, jbcInternalClass, name, jbcDesc, false));
     if (returnType == null) return new EvaluateResult(code, NullValue.value);
     else return EvaluateResult.pure(returnType.stackAsValue(code));

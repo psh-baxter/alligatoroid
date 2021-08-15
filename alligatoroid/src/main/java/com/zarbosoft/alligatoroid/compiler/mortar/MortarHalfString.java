@@ -8,8 +8,6 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
 import com.zarbosoft.rendaw.common.ROPair;
 
-import static org.objectweb.asm.Opcodes.ASTORE;
-
 public class MortarHalfString implements MortarLowerableValue {
   private final MortarProtocode lower;
 
@@ -24,11 +22,7 @@ public class MortarHalfString implements MortarLowerableValue {
 
   @Override
   public ROPair<EvaluateResult, Binding> bind(Context context, Location location) {
-    Object key = new Object();
-    return new ROPair<>(
-        new EvaluateResult(
-            new MortarCode().add(lower.lower()).addVarInsn(ASTORE, key), NullValue.value),
-        new MortarHalfObjBinding(key, new MortarHalfStringType()));
+    return MortarHalfObjBinding.bind(context, location, lower, new MortarHalfStringType());
   }
 
   @Override

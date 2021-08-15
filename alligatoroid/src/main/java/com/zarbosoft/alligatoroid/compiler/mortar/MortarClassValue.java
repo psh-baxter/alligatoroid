@@ -10,8 +10,6 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.rendaw.common.ROPair;
 
-import static org.objectweb.asm.Opcodes.ASTORE;
-
 public class MortarClassValue implements OkValue {
   private final MortarProtocode lower;
   private final MortarClass type;
@@ -39,10 +37,6 @@ public class MortarClassValue implements OkValue {
 
   @Override
   public ROPair<EvaluateResult, Binding> bind(Context context, Location location) {
-    Object key = new Object();
-    return new ROPair<>(
-        new EvaluateResult(
-            new MortarCode().add(lower.lower()).addVarInsn(ASTORE, key), NullValue.value),
-        new MortarHalfObjBinding(key, type));
+    return MortarHalfObjBinding.bind(context,location, lower, type);
   }
 }

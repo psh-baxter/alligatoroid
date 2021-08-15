@@ -5,7 +5,6 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
@@ -31,6 +30,7 @@ public class MortarMethodField implements MortarValue {
             new MortarCode()
                 .add(lower.lower())
                 .add(((MortarLowerableValue) argument).lower())
+                .line(context.module.sourceLocation(location))
                 .add(
                     new MethodInsnNode(
                         INVOKESPECIAL,

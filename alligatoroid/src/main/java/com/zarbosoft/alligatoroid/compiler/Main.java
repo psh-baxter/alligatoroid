@@ -38,5 +38,6 @@ public class Main {
     // TODO output value
 
     outWriter.recordEnd();
+    System.out.flush();
   }
 }
