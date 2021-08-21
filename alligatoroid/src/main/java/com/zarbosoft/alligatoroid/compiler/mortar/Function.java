@@ -4,12 +4,12 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
 
-public class Function implements MortarValue {
+public class Function implements SimpleValue {
   private final String name;
   private final String jbcDesc;
   private final String jbcInternalClass;
@@ -24,7 +24,7 @@ public class Function implements MortarValue {
 
   @Override
   public EvaluateResult call(Context context, Location location, Value argument) {
-    JVMRWCode code =
+    JVMRWSharedCode code =
         new MortarCode()
             .add(((MortarLowerableValue) argument).lower())
             .line(context.module.sourceLocation(location))

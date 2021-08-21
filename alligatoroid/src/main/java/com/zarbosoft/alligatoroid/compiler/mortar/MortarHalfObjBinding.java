@@ -5,7 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.rendaw.common.ROPair;
 
 import static org.objectweb.asm.Opcodes.ALOAD;
@@ -39,7 +39,7 @@ public class MortarHalfObjBinding implements Binding {
         type.asValue(
             new MortarProtocode() {
               @Override
-              public JVMCode lower() {
+              public JVMSharedCode lower() {
                 return new MortarCode().addVarInsn(ALOAD, key);
               }
 

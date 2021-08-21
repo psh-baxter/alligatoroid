@@ -1,14 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.mortar.WholeValue;
 import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.ROList;
 import com.zarbosoft.rendaw.common.ROMap;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
+import com.zarbosoft.rendaw.common.TSSet;
 
 public class Error implements Serializable {
+  public static final String DESCRIPTION_KEY = "description";
   private final String type;
   private final ROMap<String, Object> data;
 
@@ -22,7 +23,7 @@ public class Error implements Serializable {
         "deserialize_not_array",
         new TSMap<String, Object>()
             .put("path", path.toString())
-            .put("description", "a luxem array is not allowed at this location in the source"));
+            .put(DESCRIPTION_KEY, "a luxem array is not allowed at this location in the source"));
   }
 
   public static Error deserializeNotRecord(LuxemPath path) {
@@ -30,7 +31,7 @@ public class Error implements Serializable {
         "deserialize_not_record",
         new TSMap<String, Object>()
             .put("path", path.toString())
-            .put("description", "a luxem record is not allowed at this location in the source"));
+            .put(DESCRIPTION_KEY, "a luxem record is not allowed at this location in the source"));
   }
 
   public static Error deserializeNotPrimitive(LuxemPath path) {
@@ -38,7 +39,9 @@ public class Error implements Serializable {
         "deserialize_not_primitive",
         new TSMap<String, Object>()
             .put("path", path.toString())
-            .put("description", "a luxem primitive is not allowed at this location in the source"));
+            .put(
+                DESCRIPTION_KEY,
+                "a luxem primitive is not allowed at this location in the source"));
   }
 
   public static Error deserializeNotTyped(LuxemPath path) {
@@ -47,7 +50,7 @@ public class Error implements Serializable {
         new TSMap<String, Object>()
             .put("path", path.toString())
             .put(
-                "description",
+                DESCRIPTION_KEY,
                 "a typed luxem value is not allowed at this location in the source"));
   }
 
@@ -59,7 +62,7 @@ public class Error implements Serializable {
             .put("path", path.toString())
             .put("got", type)
             .put("expected", knownTypes)
-            .put("description", "this is not a known language node type"));
+            .put(DESCRIPTION_KEY, "this is not a known language node type"));
   }
 
   public static Error deserializeUnknownField(
@@ -71,7 +74,7 @@ public class Error implements Serializable {
             .put("got", field)
             .put("expected", fields)
             .put("type", type)
-            .put("description", "this type does not have a field with this name"));
+            .put(DESCRIPTION_KEY, "this type does not have a field with this name"));
   }
 
   public static Error deserializeMissingField(LuxemPath path, String type, String field) {
@@ -81,7 +84,7 @@ public class Error implements Serializable {
             .put("path", path.toString())
             .put("field", field)
             .put("type", type)
-            .put("description", "a value was not provided for this field in the source"));
+            .put(DESCRIPTION_KEY, "a value was not provided for this field in the source"));
   }
 
   public static Error deserializeUnknownLanguageVersion(LuxemPath path, String version) {
@@ -90,13 +93,13 @@ public class Error implements Serializable {
         new TSMap<String, Object>()
             .put("path", path.toString())
             .put("version", version)
-            .put("description", "this language version is not supported"));
+            .put(DESCRIPTION_KEY, "this language version is not supported"));
   }
 
   public static Error deserializeMissingVersion() {
     return new Error(
         "deserialize_missing_version",
-        new TSMap<String, Object>().put("description", "the source version is missing"));
+        new TSMap<String, Object>().put(DESCRIPTION_KEY, "the source version is missing"));
   }
 
   public static Error deserializeNotInteger(LuxemPath path, String value) {
@@ -105,7 +108,7 @@ public class Error implements Serializable {
         new TSMap<String, Object>()
             .put("path", path.toString())
             .put("got", value)
-            .put("description", "expected an integer but got a value that is not an integer"));
+            .put(DESCRIPTION_KEY, "expected an integer but got a value that is not an integer"));
   }
 
   public static Error incompatibleTargetValues(
@@ -116,7 +119,7 @@ public class Error implements Serializable {
             .put("location", location)
             .put("got", gotTarget)
             .put("expected", expectedTarget)
-            .put("description", "this block contains values for incompatible targets"));
+            .put(DESCRIPTION_KEY, "this block contains values for incompatible targets"));
   }
 
   public static Error noField(Location location, Value field) {
@@ -125,7 +128,7 @@ public class Error implements Serializable {
         new TSMap<String, Object>()
             .put("location", location)
             .put("field", field)
-            .put("description", "the field accessed does not exist"));
+            .put(DESCRIPTION_KEY, "the field accessed does not exist"));
   }
 
   public static Error unexpected(Throwable e) {
@@ -142,7 +145,7 @@ public class Error implements Serializable {
         new TSMap<String, Object>()
             .put("exception", e.toString())
             .put("stacktrace", stack)
-            .put("description", "an unexpected error occurred while processing module"));
+            .put(DESCRIPTION_KEY, "an unexpected error occurred while processing module"));
   }
 
   public static Error callNotSupported(Location location) {
@@ -150,7 +153,7 @@ public class Error implements Serializable {
         "call_not_supported",
         new TSMap<String, Object>()
             .put("location", location)
-            .put("description", "this value cannot be called"));
+            .put(DESCRIPTION_KEY, "this value cannot be called"));
   }
 
   public static Error accessNotSupported(Location location) {
@@ -158,7 +161,7 @@ public class Error implements Serializable {
         "access_not_supported",
         new TSMap<String, Object>()
             .put("location", location)
-            .put("description", "the base value doesn't have fields that can be accessed"));
+            .put(DESCRIPTION_KEY, "the base value doesn't have fields that can be accessed"));
   }
 
   public static Error valueNotWhole(Location location, Value value) {
@@ -167,7 +170,26 @@ public class Error implements Serializable {
         new TSMap<String, Object>()
             .put("location", location)
             .put("value", value.getClass().getCanonicalName())
-            .put("description", "this value needs to be known completely in phase 1 to use here"));
+            .put(
+                DESCRIPTION_KEY, "this value needs to be known completely in phase 1 to use here"));
+  }
+
+  public static Error methodsNotDefined(TSSet<String> incompleteMethods) {
+    return new Error(
+        "methods_not_defined",
+        new TSMap<String, Object>()
+            .put("methods", TSList.fromSet(incompleteMethods))
+            .put(DESCRIPTION_KEY, "these methods were declared but never defined"));
+  }
+
+  public static Error notRecordPair(Location location, String gotType) {
+    return new Error(
+        "record_element_not_record_pair",
+        new TSMap<String, Object>()
+            .put("location", location)
+            .put("got", gotType)
+            .put("expected", "record pair")
+            .put("description", "this element in a record literal is not a record pair"));
   }
 
   @Override

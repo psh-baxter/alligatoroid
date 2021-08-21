@@ -4,9 +4,9 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.rendaw.common.Assertion;
 import org.objectweb.asm.tree.FieldInsnNode;
 
@@ -28,15 +28,15 @@ public class MortarClassClassFieldType implements MortarHalfType {
     return fieldType.asValue(
         new MortarProtocode() {
           @Override
-          public JVMCode lower() {
+          public JVMSharedCode lower() {
             return new MortarCode()
                 .add(lower.lower())
                 .add(
                     new FieldInsnNode(
                         GETFIELD,
-                        type.jbcInternalClass,
+                        type.jvmInternalClass,
                         fieldName,
-                        JVMDescriptor.objExternal(fieldType.jbcInternalClass)));
+                        JVMDescriptor.objExternal(fieldType.jvmInternalClass)));
           }
 
           @Override
@@ -47,7 +47,7 @@ public class MortarClassClassFieldType implements MortarHalfType {
   }
 
     @Override
-    public Value stackAsValue(JVMRWCode code) {
+    public Value stackAsValue(JVMRWSharedCode code) {
       throw new Assertion();
     }
 }

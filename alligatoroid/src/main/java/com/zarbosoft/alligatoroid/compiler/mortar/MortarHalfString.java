@@ -5,7 +5,7 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.rendaw.common.ROPair;
 
 public class MortarHalfString implements MortarLowerableValue {
@@ -26,7 +26,7 @@ public class MortarHalfString implements MortarLowerableValue {
   }
 
   @Override
-  public JVMCode lower() {
+  public JVMSharedCode lower() {
     return lower.lower();
   }
 }

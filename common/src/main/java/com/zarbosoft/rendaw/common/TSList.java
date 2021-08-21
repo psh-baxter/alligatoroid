@@ -30,6 +30,9 @@ public class TSList<T> implements ROList<T> {
   public static <T> TSList<T> fromList(List<T> value) {
     return new TSList<>(value);
   }
+  public static <T> TSList<T> fromSet(ROSetRef<T> value) {
+    return new TSList<>(new ArrayList<>(value.inner_()));
+  }
 
   private TSList(List<T> values) {
     this.values = values;

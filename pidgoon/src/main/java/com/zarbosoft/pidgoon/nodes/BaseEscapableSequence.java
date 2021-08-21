@@ -42,7 +42,7 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
       final MismatchCause cause,
       Object color) {
     if (children.isEmpty()) {
-      parent.advance(grammar, step, leaf, new EscapableResult<>(true, ROList.empty), cause);
+      parent.advance(grammar, step, leaf, new EscapableResult<>(false, true, ROList.empty), cause);
     } else {
       children
           .get(0)
@@ -100,7 +100,7 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
             grammar,
             step,
                 leaf,
-            new EscapableResult<>(result.completed, newCollected),
+            new EscapableResult<>(true, result.completed, newCollected),
             mismatchCause);
       } else {
         self.children

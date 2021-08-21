@@ -1,10 +1,10 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.rendaw.common.Assertion;
 
-public class MortarMethodFieldType implements MortarValue, MortarHalfType {
+public class MortarMethodFieldType implements SimpleValue, MortarHalfType {
   public final String name;
   public final String jbcDesc;
   /**
@@ -26,7 +26,7 @@ public class MortarMethodFieldType implements MortarValue, MortarHalfType {
   }
 
   @Override
-  public Value stackAsValue(JVMRWCode code) {
+  public Value stackAsValue(JVMRWSharedCode code) {
     throw new Assertion();
   }
 }

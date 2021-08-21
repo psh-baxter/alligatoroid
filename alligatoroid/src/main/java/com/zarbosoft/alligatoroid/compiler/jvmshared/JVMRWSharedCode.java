@@ -23,7 +23,7 @@ import static org.objectweb.asm.Opcodes.FSTORE;
 import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.LSTORE;
 
-public abstract class JVMRWCode extends JVMCode {
+public abstract class JVMRWSharedCode extends JVMSharedCode {
   private static final Object scopePush = new Object();
   private static final Object scopePop = new Object();
   private final List<Object> children = new ArrayList<>();
@@ -39,7 +39,7 @@ public abstract class JVMRWCode extends JVMCode {
     // FIXME! DEBUG
   }
 
-  public JVMRWCode line(Integer line) {
+  public JVMRWSharedCode line(Integer line) {
     if (line != null) {
       LabelNode label = new LabelNode();
       m().add(label);
@@ -49,15 +49,15 @@ public abstract class JVMRWCode extends JVMCode {
   }
 
   @Override
-  protected void render(JVMCode.Scope scope, MethodVisitor out) {
+  protected void render(JVMSharedCode.Scope scope, MethodVisitor out) {
     for (Object child : children) {
-      if (child instanceof JVMCode) {
-        ((JVMCode) child).render(scope, out);
+      if (child instanceof JVMSharedCode) {
+        ((JVMSharedCode) child).render(scope, out);
       } else if (child instanceof InsnList) {
         // print((InsnList) child);
         ((InsnList) child).accept(out);
       } else if (child == scopePush) {
-        scope = new JVMCode.Scope(scope);
+        scope = new JVMSharedCode.Scope(scope);
       } else if (child == scopePop) {
         scope = scope.parent;
       } else if (child instanceof StoreLoad) {
@@ -98,7 +98,7 @@ public abstract class JVMRWCode extends JVMCode {
     }
   }
 
-  private int findIndex(JVMCode.Scope scope, Object childKey) {
+  private int findIndex(JVMSharedCode.Scope scope, Object childKey) {
     int i = 0;
     for (; i < scope.indexes.size(); ++i) {
       if (scope.indexes.get(i) == childKey) break;
@@ -111,23 +111,23 @@ public abstract class JVMRWCode extends JVMCode {
     return i;
   }
 
-  public JVMRWCode add(AbstractInsnNode node) {
+  public JVMRWSharedCode add(AbstractInsnNode node) {
     m().add(node);
     return this;
   }
 
-  public JVMRWCode add(int opcode) {
+  public JVMRWSharedCode add(int opcode) {
     m().add(new InsnNode(opcode));
     return this;
   }
 
-  public JVMRWCode add(JVMCode child) {
+  public JVMRWSharedCode add(JVMSharedCode child) {
     if (child == null) throw new Assertion(); // FIXME debug
     children.add(child);
     return this;
   }
 
-  public JVMRWCode addScoped(JVMCode child) {
+  public JVMRWSharedCode addScoped(JVMSharedCode child) {
     children.add(scopePush);
     children.add(child);
     children.add(scopePop);
@@ -148,17 +148,17 @@ public abstract class JVMRWCode extends JVMCode {
     return (InsnList) last;
   }
 
-  public JVMRWCode addVarInsn(int opcode, Object key) {
+  public JVMRWSharedCode addVarInsn(int opcode, Object key) {
     children.add(new StoreLoad(opcode, key));
     return this;
   }
 
-  public JVMRWCode addDrop(Object key) {
+  public JVMRWSharedCode addDrop(Object key) {
     children.add(new Drop(key));
     return this;
   }
 
-  public JVMRWCode addString(String value) {
+  public JVMRWSharedCode addString(String value) {
     m().add(new LdcInsnNode(value));
     return this;
   }

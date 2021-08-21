@@ -1,8 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.OkValue;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 
 public interface MortarLowerableValue extends OkValue {
-    public JVMCode lower();
+    public JVMSharedCode lower();
 }

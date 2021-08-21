@@ -16,7 +16,6 @@ import com.zarbosoft.pidgoon.model.Node;
 import com.zarbosoft.pidgoon.nodes.HomogenousEscapableSequence;
 import com.zarbosoft.pidgoon.nodes.Operator;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 
 public class CandidateInfo {
@@ -27,7 +26,7 @@ public class CandidateInfo {
    * whether it had completed (if last front element is primitive the last one will be false; if it
    * was parsing a symbol or whatever it can be true)
    */
-  public final Node<EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> keyGrammar;
+  public final Node<EscapableResult<ROList<GapChoice.ParsedField>>> keyGrammar;
 
   public final ROList<FrontSpec> allKeyFrontSpecs;
   /** May be null */
@@ -35,7 +34,7 @@ public class CandidateInfo {
 
   public CandidateInfo(
       ROList<FrontSpec> preceding,
-      Node<EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> keyGrammar,
+      Node<EscapableResult<ROList<GapChoice.ParsedField>>> keyGrammar,
       ROList<FrontSpec> allKeyFrontSpecs,
       FrontSpec following) {
     this.preceding = preceding;
@@ -47,7 +46,7 @@ public class CandidateInfo {
   public static CandidateInfo inspect(Environment env, AtomType candidate) {
     ROList<FrontSpec> front = candidate.front();
     TSList<FrontSpec> preceding = new TSList<>();
-    HomogenousEscapableSequence<ROPair<FieldPrimitive, Boolean>> keyGrammar =
+    HomogenousEscapableSequence<GapChoice.ParsedField> keyGrammar =
         new HomogenousEscapableSequence<>();
     TSList<FrontSpec> allKeyFrontSpecs = new TSList<>();
     TSList<FrontPrimitiveSpec> primitiveKeyFrontSpecs = new TSList<>();
@@ -86,20 +85,20 @@ public class CandidateInfo {
             primitiveKeyFrontSpecs.add((FrontPrimitiveSpec) f);
             keyGrammar.add(
                 new Operator<
-                    EscapableResult<ROList<String>>,
-                    EscapableResult<ROPair<FieldPrimitive, Boolean>>>(
+                    EscapableResult<ROList<String>>, EscapableResult<GapChoice.ParsedField>>(
                     ((FrontPrimitiveSpec) f).field.pattern != null
                         ? ((FrontPrimitiveSpec) f).field.pattern.build(true)
                         : Any.repeatedAny.build(true)) {
                   @Override
-                  protected EscapableResult<ROPair<FieldPrimitive, Boolean>> process(
+                  protected EscapableResult<GapChoice.ParsedField> process(
                       EscapableResult<ROList<String>> value) {
+                    String data = Environment.joinGlyphs(value.value);
                     return new EscapableResult<>(
+                        data.length() > 0,
                         value.completed,
-                        new ROPair<>(
-                            new FieldPrimitive(
-                                ((FrontPrimitiveSpec) f).field,
-                                Environment.joinGlyphs(value.value)),
+                        new GapChoice.ParsedField(
+                            new FieldPrimitive(((FrontPrimitiveSpec) f).field, data),
+                            data.length() > 0,
                             value.completed));
                   }
                 });
@@ -108,25 +107,30 @@ public class CandidateInfo {
       }
 
       void processSymbol(FrontSymbolSpec f) {
-        allKeyFrontSpecs.add(f);
-        if (f.gapKey != null) {
-          keyGrammar.add(
-              new Operator<>(new PatternString(env, f.gapKey).build(false)) {
-                @Override
-                protected EscapableResult<ROPair<FieldPrimitive, Boolean>> process(
-                    EscapableResult<ROList<String>> value) {
-                  return new EscapableResult<>(
-                      value.completed, new ROPair<>(null, value.completed));
-                }
-              });
-        } else if (f.type instanceof SymbolTextSpec && !((SymbolTextSpec) f.type).nonGapKey) {
+        if (f.gapKey == null && f.type instanceof SymbolTextSpec) {
+          allKeyFrontSpecs.add(f);
           keyGrammar.add(
               new Operator<>(new PatternString(env, ((SymbolTextSpec) f.type).text).build(false)) {
                 @Override
-                protected EscapableResult<ROPair<FieldPrimitive, Boolean>> process(
+                protected EscapableResult<GapChoice.ParsedField> process(
                     EscapableResult<ROList<String>> value) {
                   return new EscapableResult<>(
-                      value.completed, new ROPair<>(null, value.completed));
+                      value.started,
+                      value.completed,
+                      new GapChoice.ParsedField(null, value.started, value.completed));
+                }
+              });
+        } else if (f.gapKey != null && !f.gapKey.isEmpty()) {
+          allKeyFrontSpecs.add(f);
+          keyGrammar.add(
+              new Operator<>(new PatternString(env, f.gapKey).build(false)) {
+                @Override
+                protected EscapableResult<GapChoice.ParsedField> process(
+                    EscapableResult<ROList<String>> value) {
+                  return new EscapableResult<>(
+                      value.started,
+                      value.completed,
+                      new GapChoice.ParsedField(null, value.started, value.completed));
                 }
               });
         }

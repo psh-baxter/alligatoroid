@@ -4,8 +4,8 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 
 import static org.objectweb.asm.Opcodes.POP;
 
@@ -16,11 +16,11 @@ public class MortarHalfStringType implements MortarHalfType {
   }
 
   @Override
-  public Value stackAsValue(JVMRWCode code) {
+  public Value stackAsValue(JVMRWSharedCode code) {
     return new MortarHalfString(
         new MortarProtocode() {
           @Override
-          public JVMCode lower() {
+          public JVMSharedCode lower() {
             return code;
           }
 

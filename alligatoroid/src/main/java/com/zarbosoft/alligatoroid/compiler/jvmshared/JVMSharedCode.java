@@ -4,7 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.rendaw.common.TSList;
 import org.objectweb.asm.MethodVisitor;
 
-public abstract class JVMCode implements TargetCode {
+public abstract class JVMSharedCode implements TargetCode {
   public void render(MethodVisitor out, TSList<Object> initialIndexes) {
     render(new Scope(initialIndexes), out);
   }

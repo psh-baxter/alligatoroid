@@ -8,7 +8,7 @@ import com.zarbosoft.alligatoroid.compiler.OkValue;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.rendaw.common.ROPair;
 
-public interface MortarValue extends Binding, OkValue {
+public interface SimpleValue extends Binding, OkValue {
   @Override
   public default TargetCode drop(Context context, Location location) {
     return null;

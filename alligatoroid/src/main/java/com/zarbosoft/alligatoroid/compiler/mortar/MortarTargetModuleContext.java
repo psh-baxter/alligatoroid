@@ -5,9 +5,9 @@ import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.rendaw.common.TSOrderedMap;
 import org.objectweb.asm.tree.FieldInsnNode;
 
@@ -41,13 +41,13 @@ public class MortarTargetModuleContext implements TargetModuleContext {
 
   @Override
   public TargetCode mergeScoped(Context context, Location location, Iterable<TargetCode> chunks) {
-    JVMCode inner = (JVMCode) merge(context, location, chunks);
+    JVMSharedCode inner = (JVMSharedCode) merge(context, location, chunks);
     return new MortarCode().addScoped(inner);
   }
 
   @Override
   public TargetCode merge(Context context, Location location, Iterable<TargetCode> chunks) {
-    JVMRWCode code = new MortarCode();
+    JVMRWSharedCode code = new MortarCode();
     for (TargetCode chunk : chunks) {
       if (chunk == null) continue;
       if (!(chunk instanceof MortarCode)) {

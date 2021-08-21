@@ -47,7 +47,7 @@ public class GapChoice extends TwoColumnChoice {
   private final TSList<Event> glyphs;
   private final FrontSpec followingSpec;
   private final ROList<FrontSpec> allKeyFrontSpecs;
-  private ROList<ROPair<FieldPrimitive, Boolean>> fields;
+  private ROList<ParsedField> completeMatchFields;
 
   public GapChoice(
       Atom gap,
@@ -56,7 +56,7 @@ public class GapChoice extends TwoColumnChoice {
       ROList<EditGapCursorFieldPrimitive.PrepareAtomField> supplyFillAtoms,
       TSList<Event> glyphs,
       int consumeText,
-      ROList<ROPair<FieldPrimitive, Boolean>> fields,
+      ROList<ParsedField> completeMatchFields,
       Leaf incompleteKeyParse,
       ROList<FrontSpec> allKeyFrontSpecs,
       FrontSpec followingSpec) {
@@ -66,7 +66,7 @@ public class GapChoice extends TwoColumnChoice {
     this.supplyFillAtoms = supplyFillAtoms;
     this.glyphs = glyphs;
     this.consumeText = consumeText;
-    this.fields = fields;
+    this.completeMatchFields = completeMatchFields;
     this.incompleteKeyParse = incompleteKeyParse;
     this.allKeyFrontSpecs = allKeyFrontSpecs;
     this.followingSpec = followingSpec;
@@ -77,12 +77,14 @@ public class GapChoice extends TwoColumnChoice {
    *
    * @param fields
    * @param allKeyFrontSpecs
-   * @param id
+   * @param precedingPrimitiveId
    * @return
    */
   private static FieldPrimitive generateNextEmptyPrimitive(
-      TSMap<String, Field> fields, ROList<FrontSpec> allKeyFrontSpecs, String id) {
-    boolean next = id == null;
+      TSMap<String, Field> fields,
+      ROList<FrontSpec> allKeyFrontSpecs,
+      String precedingPrimitiveId) {
+    boolean next = precedingPrimitiveId == null;
     for (FrontSpec spec : allKeyFrontSpecs) {
       if (spec instanceof FrontPrimitiveSpec) {
         if (next) {
@@ -90,7 +92,7 @@ public class GapChoice extends TwoColumnChoice {
           fields.put(generated.back.id, generated);
           return generated;
         }
-        if (((FrontPrimitiveSpec) spec).fieldId.equals(id)) {
+        if (((FrontPrimitiveSpec) spec).fieldId.equals(precedingPrimitiveId)) {
           next = true;
         }
       }
@@ -106,66 +108,69 @@ public class GapChoice extends TwoColumnChoice {
 
           /// Aggregate typed text parsing results into primitive fields
           // + identify last primitive
-          FieldPrimitive nextIncompletePrimitive = null;
-          ROList<ROPair<FieldPrimitive, Boolean>> preFields;
-          if (this.fields != null) {
-            preFields = this.fields;
-            ROPair<FieldPrimitive, Boolean> lastField = preFields.lastOpt();
-            if (lastField != null) nextIncompletePrimitive = lastField.first;
+          FieldPrimitive nextIncompletePrimitiveField = null;
+          ROList<ParsedField> preFields;
+          if (this.completeMatchFields != null) {
+            preFields = this.completeMatchFields;
+            ParsedField lastField = preFields.lastOpt();
+            if (lastField != null) nextIncompletePrimitiveField = lastField.primitive;
           } else {
-            final Step<
-                    ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>
-                nextStep = new Step<>();
+            final Step<ROPair<PreGapChoice, EscapableResult<ROList<ParsedField>>>> nextStep =
+                new Step<>();
             this.incompleteKeyParse.parse(null, nextStep, new ForceEndCharacterEvent());
             preFields = nextStep.completed.get(0).second.value;
 
             // Here we look really lookingly to find the last incompletely parsed primitive to
             // move the cursor into later.
-            ROPair<FieldPrimitive, Boolean> lastRes = preFields.lastOpt();
+            ParsedField lastRes = preFields.lastOpt();
             if (lastRes != null) {
-              if (lastRes.first == null) {
+              if (lastRes.primitive == null) {
                 // Last parsed was symbol
-                if (!lastRes.second) {
-                  // But the symbol was not finished, so the one before it might be an incomplete
+                if (!lastRes.started) {
+                  // But the symbol was not started, so the one before it might be an incomplete
                   // primitive
                   if (preFields.size() >= 2) {
-                    nextIncompletePrimitive = preFields.getRev(1).first;
+                    nextIncompletePrimitiveField = preFields.getRev(1).primitive;
                   }
                 } else {
-                  // The symbol was finished, so next primitive would be incomplete if it exists
+                  // The symbol was started, so next primitive would be incomplete if it exists
                   // But to do that, need to find the preceding primitive if there was one
-                  for (ROPair<FieldPrimitive, Boolean> pair : new ReverseIterable<>(preFields)) {
-                    if (pair.first == null)
+                  FieldPrimitive finishedPrimitive = null;
+                  for (ParsedField pair : new ReverseIterable<>(preFields)) {
+                    if (pair.primitive == null)
                       continue; // penultimate was also a symbol (and therefore must have completed)
                     // Preceding was primitive - since most primitives don't have a maximum length
                     // assume it was still in progress.
-                    nextIncompletePrimitive = pair.first;
+                    finishedPrimitive = pair.primitive;
                     break;
                   }
+                  nextIncompletePrimitiveField =
+                      generateNextEmptyPrimitive(
+                          namedFields, allKeyFrontSpecs, finishedPrimitive.back.id);
                 }
               } else {
-                if (lastRes.second) {
+                if (lastRes.finished) {
                   // Last parsed primtive was completed (walled in by symbol) - find the next
                   // primitive
-                  nextIncompletePrimitive =
+                  nextIncompletePrimitiveField =
                       generateNextEmptyPrimitive(
-                          namedFields, allKeyFrontSpecs, lastRes.first.back.id);
+                          namedFields, allKeyFrontSpecs, lastRes.primitive.back.id);
                 } else {
                   // Last parsed primitive was incomplete
-                  nextIncompletePrimitive = lastRes.first;
+                  nextIncompletePrimitiveField = lastRes.primitive;
                 }
               }
             } else {
               // No primitives reached - find the first primitive and use
-              nextIncompletePrimitive =
+              nextIncompletePrimitiveField =
                   generateNextEmptyPrimitive(namedFields, allKeyFrontSpecs, null);
             }
           }
 
           // Add parsed primitive fields
-          for (ROPair<FieldPrimitive, Boolean> field : preFields) {
-            if (field.first == null) continue;
-            namedFields.put(field.first.back.id, field.first);
+          for (ParsedField field : preFields) {
+            if (field.primitive == null) continue;
+            namedFields.put(field.primitive.back.id, field.primitive);
           }
 
           // Remainder text
@@ -193,13 +198,13 @@ public class GapChoice extends TwoColumnChoice {
           }
 
           /// Create atom
-          Field following = null;
+          Field atomFieldFollowingEnteredText = null;
           Atom created = new Atom(type);
           for (String fieldId : type.namedFields.keys().difference(namedFields.keys())) {
             Field field = editor.createEmptyField(type.namedFields.get(fieldId));
             namedFields.put(fieldId, field);
             if (followingSpec != null && followingSpec.fieldId().equals(fieldId)) {
-              following = field;
+              atomFieldFollowingEnteredText = field;
             }
           }
 
@@ -212,20 +217,20 @@ public class GapChoice extends TwoColumnChoice {
 
           /// Place and select next focus
           if (remainderText.length() > 0) {
-            if (following != null) {
+            if (atomFieldFollowingEnteredText != null) {
               place(editor, recorder1, created);
-              deepSelectInto(editor, recorder1, following);
+              deepSelectInto(editor, recorder1, atomFieldFollowingEnteredText);
             } else {
               placeWithSuffixSelect(editor, recorder1, created);
             }
             ((EditGapCursorFieldPrimitive) editor.context.cursor)
                 .editHandleTyping(editor, recorder1, remainderText.toString());
-          } else if (nextIncompletePrimitive != null) {
+          } else if (nextIncompletePrimitiveField != null) {
             place(editor, recorder1, created);
-            nextIncompletePrimitive.selectInto(editor.context);
-          } else if (following != null) {
+            nextIncompletePrimitiveField.selectInto(editor.context);
+          } else if (atomFieldFollowingEnteredText != null) {
             place(editor, recorder1, created);
-            deepSelectInto(editor, recorder1, following);
+            deepSelectInto(editor, recorder1, atomFieldFollowingEnteredText);
           } else {
             placeWithSuffixSelect(editor, recorder1, created);
           }
@@ -333,5 +338,20 @@ public class GapChoice extends TwoColumnChoice {
     textPad.add(text);
 
     return new ROPair<CourseDisplayNode, CourseDisplayNode>(previewLayout, textPad);
+  }
+
+  public static class ParsedField {
+    /** Primitive or null if symbol. */
+    public final FieldPrimitive primitive;
+    /** Whether the primitive/symbol had at least one glyph parsed */
+    public final boolean started;
+    /** Whether the primitive/symbol was parsed to the end. Last is false, rest are true? */
+    public final boolean finished;
+
+    public ParsedField(FieldPrimitive primitive, boolean started, boolean finished) {
+      this.primitive = primitive;
+      this.started = started;
+      this.finished = finished;
+    }
   }
 }

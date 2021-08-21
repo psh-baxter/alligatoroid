@@ -1,8 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler;
 
-import com.zarbosoft.alligatoroid.compiler.mortar.MortarValue;
+import com.zarbosoft.alligatoroid.compiler.mortar.SimpleValue;
 
-public abstract class LanguageValue implements MortarValue {
+public abstract class LanguageValue implements SimpleValue {
   public final Location location;
 
   public LanguageValue(Location id) {

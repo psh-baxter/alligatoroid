@@ -6,12 +6,12 @@ import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.ModuleContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
-public class BuiltinModuleFunction implements MortarValue {
+public class BuiltinModuleFunction implements SimpleValue {
   public static final String jbcInternalClass = JVMDescriptor.internalName(ModuleContext.class);
   private final String name;
   private final String jbcDesc;
@@ -25,7 +25,7 @@ public class BuiltinModuleFunction implements MortarValue {
 
   @Override
   public EvaluateResult call(Context context, Location location, Value argument) {
-    JVMRWCode code =
+    JVMRWSharedCode code =
         new MortarCode()
             .add(((MortarTargetModuleContext) context.target).transfer(context.module))
             .add(((MortarLowerableValue) argument).lower())

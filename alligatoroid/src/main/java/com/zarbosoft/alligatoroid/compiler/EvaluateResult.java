@@ -44,9 +44,5 @@ public class EvaluateResult {
     public EvaluateResult build(Value value) {
       return new EvaluateResult(context.target.merge(context, location, sideEffect), value);
     }
-
-    public EvaluateResult buildScoped(Value value) {
-      return new EvaluateResult(context.target.mergeScoped(context, location, sideEffect), value);
-    }
   }
 }

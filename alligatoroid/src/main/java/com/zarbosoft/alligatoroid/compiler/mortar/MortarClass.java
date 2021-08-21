@@ -6,30 +6,18 @@ import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import com.zarbosoft.rendaw.common.ROMap;
 
 import static org.objectweb.asm.Opcodes.POP;
 
-public class MortarClass implements MortarHalfType, MortarValue {
-  public final String jbcInternalClass;
+public class MortarClass implements MortarHalfType, SimpleValue {
+  public final String jvmInternalClass;
   public ROMap<Object, MortarHalfType> fields;
 
-  public MortarClass(String jbcInternalClass) {
-    this.jbcInternalClass = jbcInternalClass;
-  }
-
-  @Override
-  public EvaluateResult access(Context context, Location location, Value field) {
-    WholeValue key = WholeValue.getWhole(context, location, field);
-    if (key == null) return EvaluateResult.error;
-    Value out = fields.getOpt(key);
-    if (out == null) {
-      context.module.errors.add(Error.noField(location, key));
-      return EvaluateResult.error;
-    }
-    return EvaluateResult.pure(out);
+  public MortarClass(String jvmInternalClass) {
+    this.jvmInternalClass = jvmInternalClass;
   }
 
   @Override
@@ -38,11 +26,11 @@ public class MortarClass implements MortarHalfType, MortarValue {
   }
 
   @Override
-  public Value stackAsValue(JVMRWCode code) {
+  public Value stackAsValue(JVMRWSharedCode code) {
     return new MortarClassValue(
         new MortarProtocode() {
           @Override
-          public JVMCode lower() {
+          public JVMSharedCode lower() {
             return code;
           }
 

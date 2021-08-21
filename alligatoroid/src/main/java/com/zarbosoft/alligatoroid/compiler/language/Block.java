@@ -35,7 +35,7 @@ public class Block extends LanguageValue {
     for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
       ectx.record(binding.drop(context, location));
     }
-    return ectx.buildScoped(last);
+    return ectx.build(last);
   }
 
   @Override

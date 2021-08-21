@@ -25,8 +25,10 @@ public class FrontSymbolSpec extends FrontSpec {
   }
 
   /**
-   * Non-null, "" okay. When filling a gap: Text to match non-text symbols, or override the text of
-   * text symbols
+   * Null = use default key (text for text, not a gap key for image/space)
+   * "" = don't use as a gap key
+   * non-"" = use this as a gap key
+   * When filling a gap: Text to match non-text symbols, or override the text of text symbols.
    */
   public final String gapKey;
 
@@ -79,6 +81,11 @@ public class FrontSymbolSpec extends FrontSpec {
 
     public Config condition(ConditionType condition) {
       this.condition = condition;
+      return this;
+    }
+
+    public Config nonGapKey() {
+      this.gapKey = "";
       return this;
     }
 

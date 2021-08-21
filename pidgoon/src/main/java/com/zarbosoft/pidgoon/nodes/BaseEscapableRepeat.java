@@ -44,7 +44,7 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
       ROMap<Object, Reference.RefParent> seen,
       final MismatchCause cause,
       Object color) {
-    if (min == 0) parent.advance(grammar, step, leaf, new EscapableResult<>(true, ROList.empty), cause);
+    if (min == 0) parent.advance(grammar, step, leaf, new EscapableResult<>(false, true, ROList.empty), cause);
     if (max == -1 || max > 0)
       child.context(
           grammar,
@@ -78,7 +78,7 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
       self.combine(nextCollected, value.value);
       int nextCount = this.count + 1;
       if (!value.completed || nextCount >= self.min)
-        parent.advance(grammar, step, leaf, new EscapableResult<>(value.completed, nextCollected), mismatchCause);
+        parent.advance(grammar, step, leaf, new EscapableResult<>(true, value.completed, nextCollected), mismatchCause);
       if (self.max == -1 || nextCount < self.max)
         self.child.context(
                 grammar,

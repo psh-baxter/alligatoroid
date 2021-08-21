@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.MethodInsnNode;
 
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 
-public class MortarMethodField implements MortarValue {
+public class MortarMethodField implements SimpleValue {
   private final MortarProtocode lower;
   private final MortarMethodFieldType type;
 
@@ -34,7 +34,7 @@ public class MortarMethodField implements MortarValue {
                 .add(
                     new MethodInsnNode(
                         INVOKESPECIAL,
-                        type.base.jbcInternalClass,
+                        type.base.jvmInternalClass,
                         type.name,
                         type.jbcDesc,
                         false))));

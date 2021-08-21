@@ -1,7 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
 import com.zarbosoft.alligatoroid.compiler.OkValue;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMCode;
+import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 import com.zarbosoft.luxem.write.Writer;
 
 public class WholeString implements WholeValue, OkValue {
@@ -12,7 +12,7 @@ public class WholeString implements WholeValue, OkValue {
   }
 
   @Override
-  public JVMCode lower() {
+  public JVMSharedCode lower() {
     return new MortarCode().addString(value);
   }
 

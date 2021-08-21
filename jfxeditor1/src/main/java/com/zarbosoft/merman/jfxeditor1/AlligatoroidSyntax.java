@@ -109,7 +109,6 @@ public class AlligatoroidSyntax {
   private static final String TYPE_BIND_DYNAMIC = "bind_dynamic";
   private static final String BACK_TYPE_ASSIGN = "assign";
   private static final String TYPE_ASSIGN = "assign";
-  private static final String TYPE_ASSIGN_DYNAMIC = "assign_dynamic";
   private static final String TYPE_LOWER = "lower";
   private static final String TYPE_LOWER_LABEL = "lower_label";
   private static final String TYPE_STAGE = "stage";
@@ -332,6 +331,7 @@ public class AlligatoroidSyntax {
     types.add(
         new ATypeBuilder(TYPE_BIND, "Bind")
             .type(BACK_TYPE_BIND)
+            .defaultSelection(BIND_BACK_FIELD_VALUE)
             .precedence(0)
             .nestedIdentifier(BIND_BACK_FIELD_NAME, COLOR_IDENTIFIER)
             .space()
@@ -794,10 +794,9 @@ public class AlligatoroidSyntax {
       front.add(
           new FrontSymbolSpec(
               new FrontSymbolSpec.Config(
-                  new SymbolTextSpec(
-                      new SymbolTextSpec.Config(" ")
-                          .nonGapKey()
-                          .style(new Style(baseCodeStyle()))))));
+                      new SymbolTextSpec(
+                          new SymbolTextSpec.Config(" ").style(new Style(baseCodeStyle()))))
+                  .nonGapKey()));
       return this;
     }
 

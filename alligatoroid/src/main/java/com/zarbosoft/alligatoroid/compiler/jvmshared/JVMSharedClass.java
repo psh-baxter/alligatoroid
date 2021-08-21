@@ -39,7 +39,7 @@ public class JVMSharedClass {
   }
 
   public JVMSharedClass defineFunction(
-      String methodId, String desc, JVMCode code, TSList<Object> initialIndexes) {
+          String methodId, String desc, JVMSharedCode code, TSList<Object> initialIndexes) {
     MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodId, desc, null, null);
     mv.visitCode();
     code.render(mv, initialIndexes);

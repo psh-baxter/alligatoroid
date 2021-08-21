@@ -48,7 +48,7 @@ import java.util.Iterator;
 public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
   public static Reference.Key<ROList<PrepareAtomField>> PRECEDING_ROOT_KEY = new Reference.Key<>();
   public static Reference.Key<
-          ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>
+          ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>
       GAP_ROOT_KEY = new Reference.Key<>();
   public final Grammar grammar;
   public String currentText;
@@ -86,7 +86,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     Atom gap = gapAtom();
     AtomType gapType = gap.type;
     String baseType = gap.fieldParentRef.valueType();
-    Union<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>> union =
+    Union<ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>> union =
         new Union<>();
 
     TSSet<AtomType> seen = new TSSet<>();
@@ -112,14 +112,14 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
               new Color<>(
                   preChoice,
                   new Operator<
-                      EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>,
+                      EscapableResult<ROList<GapChoice.ParsedField>>,
                       ROPair<
-                          PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>(
+                          PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>(
                       info.keyGrammar) {
                     @Override
                     protected ROPair<
-                            PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>
-                        process(EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>> value) {
+                            PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>
+                        process(EscapableResult<ROList<GapChoice.ParsedField>> value) {
                       return new ROPair<>(preChoice, value);
                     }
                   }));
@@ -189,7 +189,8 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
           Grammar precedingPlacementsGrammar =
               new Grammar().add(PRECEDING_ROOT_KEY, precedingConsumptionGrammar);
 
-          FieldArray precedingValues = (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY);
+          FieldArray precedingValues =
+              (FieldArray) gap.namedFields.get(SuffixGapAtomType.PRECEDING_KEY);
           TSList<Atom> reversePrecedingValues = precedingValues.data.mut();
           reversePrecedingValues.reverse();
           TSList<Event> events = new TSList<Event>();
@@ -222,14 +223,14 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
               new Color<>(
                   preChoice,
                   new Operator<
-                      EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>,
+                      EscapableResult<ROList<GapChoice.ParsedField>>,
                       ROPair<
-                          PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>(
+                          PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>(
                       info.keyGrammar) {
                     @Override
                     protected ROPair<
-                            PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>
-                        process(EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>> value) {
+                            PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>
+                        process(EscapableResult<ROList<GapChoice.ParsedField>> value) {
                       return new ROPair<>(preChoice, value);
                     }
                   }));
@@ -307,7 +308,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
         new ParseBuilder<>(GAP_ROOT_KEY).grammar(grammar).longestMatchFromStart(out.allGlyphs);
     out.choices = new TSList<>();
     TSSet<AtomType> seen = new TSSet<>();
-    for (ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>> result :
+    for (ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>> result :
         out.longest.first.completed) {
       PreGapChoice choice = result.first;
       seen.add(result.first.type);
@@ -448,9 +449,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
               if (inField instanceof FieldAtom) {
                 Atom transplant0;
                 if (transplant.some()) transplant0 = transplant.get(0);
-                else
-                  transplant0 =
-                      editor.createEmptyGap(editor.context.syntax.gap);
+                else transplant0 = editor.createEmptyGap(editor.context.syntax.gap);
                 Editor.atomSet(editor, recorder, (FieldAtom) inField, transplant0);
               } else if (inField instanceof FieldArray) {
                 Editor.arrayChange(
@@ -480,8 +479,7 @@ public class EditGapCursorFieldPrimitive extends BaseEditCursorFieldPrimitive {
     public TSList<Event> allGlyphs;
     public TSList<GapChoice> choices;
     public Pair<
-            Step<ROPair<PreGapChoice, EscapableResult<ROList<ROPair<FieldPrimitive, Boolean>>>>>,
-            Position>
+            Step<ROPair<PreGapChoice, EscapableResult<ROList<GapChoice.ParsedField>>>>, Position>
         longest;
   }
 }
