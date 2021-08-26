@@ -22,6 +22,13 @@ import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BASTORE;
 import static org.objectweb.asm.Opcodes.DSTORE;
 import static org.objectweb.asm.Opcodes.FSTORE;
+import static org.objectweb.asm.Opcodes.ICONST_0;
+import static org.objectweb.asm.Opcodes.ICONST_1;
+import static org.objectweb.asm.Opcodes.ICONST_2;
+import static org.objectweb.asm.Opcodes.ICONST_3;
+import static org.objectweb.asm.Opcodes.ICONST_4;
+import static org.objectweb.asm.Opcodes.ICONST_5;
+import static org.objectweb.asm.Opcodes.ICONST_M1;
 import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.LSTORE;
 
@@ -140,8 +147,7 @@ public abstract class JVMRWSharedCode extends JVMSharedCode {
   }
 
   public JVMRWSharedCode add(JVMSharedCode child) {
-    if (child == null) throw new Assertion(); // FIXME debug
-    children.add(child);
+    if (child != null) children.add(child);
     return this;
   }
 
@@ -165,6 +171,27 @@ public abstract class JVMRWSharedCode extends JVMSharedCode {
   }
 
   public JVMRWSharedCode addString(String value) {
+    m().add(new LdcInsnNode(value));
+    return this;
+  }
+
+  public JVMRWSharedCode addInt(int value) {
+    switch (value) {
+      case -1:
+        return add(ICONST_M1);
+      case 0:
+        return add(ICONST_0);
+      case 1:
+        return add(ICONST_1);
+      case 2:
+        return add(ICONST_2);
+      case 3:
+        return add(ICONST_3);
+      case 4:
+        return add(ICONST_4);
+      case 5:
+        return add(ICONST_5);
+    }
     m().add(new LdcInsnNode(value));
     return this;
   }

@@ -130,7 +130,7 @@ public class Builtin extends LanguageValue {
         JVMDescriptor.jvmName(klass.getCanonicalName()), name, desc.first, desc.second);
   }
 
-  public CreatedFile builtinCreateFile(String path) {
+  public static CreatedFile builtinCreateFile(String path) {
     return new CreatedFile(path);
   }
 

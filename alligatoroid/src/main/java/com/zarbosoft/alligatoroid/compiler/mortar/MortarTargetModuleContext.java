@@ -4,6 +4,7 @@ import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.TargetModuleContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
@@ -33,43 +34,60 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       new MortarCode()
           .add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(TSList.class)))
           .add(DUP)
+          .add(callConstructorCode(TSList.class));
+  public static JVMRWSharedCode tsListAddCode =
+      new MortarCode()
           .add(
               new MethodInsnNode(
-                  INVOKESPECIAL, JVMDescriptor.jvmName(TSList.class), "<init>", "()V", false));
+                  INVOKEVIRTUAL,
+                  JVMDescriptor.jvmName(TSList.class),
+                  "add",
+                  JVMDescriptor.func(
+                      JVMDescriptor.objDescriptorFromReal(TSList.class),
+                      JVMDescriptor.objDescriptorFromReal(Object.class)),
+                  false));
   public static JVMRWSharedCode newTSMapCode =
       new MortarCode()
           .add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(TSMap.class)))
           .add(DUP)
-          .add(
-              new MethodInsnNode(
-                  INVOKESPECIAL, JVMDescriptor.jvmName(TSMap.class), "<init>", "()V", false));
+          .add(callConstructorCode(TSMap.class));
   public static JVMRWSharedCode newTupleCode1 =
       new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Tuple.class))).add(DUP);
-  public static JVMRWSharedCode newTupleCode2 =
-      new MortarCode()
-          .add(
-              new MethodInsnNode(
-                  INVOKESPECIAL,
-                  JVMDescriptor.jvmName(Tuple.class),
-                  "<init>",
-                  JVMDescriptor.func("V", JVMDescriptor.objDescriptorFromReal(TSList.class)),
-                  false));
+  public static JVMRWSharedCode newTupleCode2 = callConstructorCode(Tuple.class, TSList.class);
   public static JVMRWSharedCode newRecordCode1 =
       new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Record.class))).add(DUP);
-  public static JVMRWSharedCode newRecordCode2 =
-      new MortarCode()
-          .add(
-              new MethodInsnNode(
-                  INVOKESPECIAL,
-                  JVMDescriptor.jvmName(Record.class),
-                  "<init>",
-                  JVMDescriptor.func("V", JVMDescriptor.objDescriptorFromReal(ROMap.class)),
-                  false));
+  public static JVMRWSharedCode newRecordCode2 = callConstructorCode(Record.class, ROMap.class);
+  public static JVMRWSharedCode newLocationCode1 =
+      new MortarCode().add(new TypeInsnNode(NEW, JVMDescriptor.jvmName(Location.class))).add(DUP);
+  public static JVMRWSharedCode newLocationCode2 =
+      callConstructorCode(Location.class, ModuleId.class, int.class);
   public final TSOrderedMap<Object, String> transfers = new TSOrderedMap<>();
   public final String moduleInternalName;
 
   public MortarTargetModuleContext(String moduleInternalName) {
     this.moduleInternalName = moduleInternalName;
+  }
+
+  public static JVMRWSharedCode callConstructorCode(Class klass, Class... args) {
+    String[] argDesc = new String[args.length];
+    for (int i = 0; i < args.length; i++) {
+      Class arg = args[i];
+      if (arg == int.class) {
+        argDesc[i] = JVMDescriptor.intDescriptor();
+        continue;
+      }
+      if (arg.isPrimitive()) throw new Assertion(); // todo?
+      if (arg.isArray()) throw new Assertion();
+      argDesc[i] = JVMDescriptor.objDescriptorFromReal(arg);
+    }
+    return new MortarCode()
+        .add(
+            new MethodInsnNode(
+                INVOKESPECIAL,
+                JVMDescriptor.jvmName(klass),
+                "<init>",
+                JVMDescriptor.func("V", argDesc),
+                false));
   }
 
   public static JVMSharedCode lower(Context context, Value value) {
@@ -80,15 +98,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       for (EvaluateResult e : ((LooseTuple) value).data) {
         if (e.preEffect != null) out.add((JVMSharedCode) e.preEffect);
         out.add(lower(context, e.value));
-        out.add(
-            new MethodInsnNode(
-                INVOKEVIRTUAL,
-                JVMDescriptor.jvmName(TSList.class),
-                "add",
-                JVMDescriptor.func(
-                    JVMDescriptor.objDescriptorFromReal(TSList.class),
-                    JVMDescriptor.objDescriptorFromReal(Object.class)),
-                false));
+        out.add(tsListAddCode);
       }
       out.add(newTupleCode2);
       return out;
@@ -98,7 +108,7 @@ public class MortarTargetModuleContext implements TargetModuleContext {
       out.add(newTSMapCode);
       for (ROPair<Object, EvaluateResult> e : ((LooseRecord) value).data) {
         if (e.second.preEffect != null) out.add((JVMSharedCode) e.second.preEffect);
-        out.add(lowerRaw(e.first));
+        out.add(lowerRaw(context, e.first, true));
         out.add(lower(context, e.second.value));
         out.add(
             new MethodInsnNode(
@@ -122,9 +132,19 @@ public class MortarTargetModuleContext implements TargetModuleContext {
     }
   }
 
-  private static JVMSharedCode lowerRaw(Object value) {
+  public static JVMSharedCode lowerRaw(Context context, Object value, boolean boxed) {
     if (value.getClass() == String.class) {
       return new MortarCode().addString((String) value);
+    } else if (value.getClass() == Integer.class && !boxed) {
+      return new MortarCode().addInt((Integer) value);
+    } else if (value.getClass() == Location.class) {
+      MortarCode out = new MortarCode();
+      out.add(MortarTargetModuleContext.newLocationCode1);
+      Location location = (Location) value;
+      out.add(((MortarTargetModuleContext) context.target).transfer(location.module));
+      out.addInt(location.id);
+      out.add(MortarTargetModuleContext.newLocationCode2);
+      return out;
     } else throw new Assertion();
   }
 
