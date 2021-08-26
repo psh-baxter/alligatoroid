@@ -392,7 +392,8 @@ public class TestDocumentGap {
     final Editor editor = blank(syntax);
     editor.context.cursor.handleTyping(editor.context, "+");
     assertThat(
-        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "text", "0")));
+        editor.context.cursor.getSyntaxPath(),
+        equalTo(new SyntaxPath("named", "value", "0", "named", "text", "0")));
   }
 
   /** After completing a gap, if the next field is an atom the atom's inner gap is selected */
@@ -423,7 +424,9 @@ public class TestDocumentGap {
     editor.context.cursor.handleTyping(editor.context, "+");
     assertThat(
         editor.context.cursor.getSyntaxPath(),
-        equalTo(new SyntaxPath("value", "0", "value", GapAtomType.PRIMITIVE_KEY, "0")));
+        equalTo(
+            new SyntaxPath(
+                "named", "value", "0", "named", "value", "named", GapAtomType.PRIMITIVE_KEY, "0")));
   }
 
   /** After completing a gap, if the next field is an array the array/inner gap is selected */
@@ -480,7 +483,7 @@ public class TestDocumentGap {
         Helper.rootArray(editor.context.document));
     assertThat(
         editor.context.cursor.getSyntaxPath(),
-        equalTo(new SyntaxPath("value", "0", GapAtomType.PRIMITIVE_KEY, "0")));
+        equalTo(new SyntaxPath("named", "value", "0", "named", GapAtomType.PRIMITIVE_KEY, "0")));
   }
 
   /** Suffix gap identifies choices that match preceding atoms */
@@ -807,7 +810,8 @@ public class TestDocumentGap {
         () -> new TreeBuilder(array).addArray("value", Helper.createGap(syntax)).build(),
         editor -> {
           ((FieldPrimitive)
-                  editor.context.syntaxLocate(new SyntaxPath("value", "0", "value", "0", "gap")))
+                  editor.context.syntaxLocate(
+                      new SyntaxPath("named", "value", "0", "named", "value", "0", "named", "gap")))
               .selectInto(editor.context);
           ((EditGapCursorFieldPrimitive) editor.context.cursor).editExit(editor);
         },
@@ -832,7 +836,9 @@ public class TestDocumentGap {
         syntax,
         () -> Helper.createSuffixGap(syntax, new TreeBuilder(infinity).build()),
         editor -> {
-          ((FieldPrimitive) editor.context.syntaxLocate(new SyntaxPath("value", "0", "gap")))
+          ((FieldPrimitive)
+                  editor.context.syntaxLocate(
+                      new SyntaxPath("named", "value", "0", "named", "gap")))
               .selectInto(editor.context);
           ((EditGapCursorFieldPrimitive) editor.context.cursor).editExit(editor);
         },
@@ -876,7 +882,9 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(array).addArray("value").build(),
         editor -> {
-          ((FieldArray) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value")))
+          ((FieldArray)
+                  editor.context.syntaxLocate(
+                      new SyntaxPath("named", "value", "0", "named", "value")))
               .visual.selectIntoAnyChild(editor.context);
         },
         new TreeBuilder(array).addArray("value", Helper.createGap(syntax)).build());
@@ -909,7 +917,9 @@ public class TestDocumentGap {
         syntax,
         () -> new TreeBuilder(array).addArray("value").build(),
         editor -> {
-          ((FieldArray) editor.context.syntaxLocate(new SyntaxPath("value", "0", "value")))
+          ((FieldArray)
+                  editor.context.syntaxLocate(
+                      new SyntaxPath("named", "value", "0", "named", "value")))
               .visual.selectIntoAnyChild(editor.context);
         },
         new TreeBuilder(array).addArray("value", new TreeBuilder(one).build()).build());

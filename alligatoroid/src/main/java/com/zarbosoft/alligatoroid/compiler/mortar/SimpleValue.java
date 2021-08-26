@@ -16,11 +16,11 @@ public interface SimpleValue extends Binding, OkValue {
 
   @Override
   public default ROPair<EvaluateResult, Binding> bind(Context context, Location location) {
-    return new ROPair<>(new EvaluateResult(null, this), this);
+    return new ROPair<>(new EvaluateResult(null, null, this), this);
   }
 
   @Override
   public default EvaluateResult fork(Context context, Location location) {
-    return new EvaluateResult(null, this);
+    return new EvaluateResult(null, null, this);
   }
 }

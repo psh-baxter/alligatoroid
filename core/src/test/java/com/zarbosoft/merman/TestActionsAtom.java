@@ -27,10 +27,11 @@ public class TestActionsAtom {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((FieldAtom) context.syntaxLocate(new SyntaxPath("value", "0", "value"))).selectInto(context);
+    ((FieldAtom) context.syntaxLocate(new SyntaxPath("named","value", "0", "named","value"))).selectInto(context);
     Helper.cursorAtom(context).actionEnter(context);
     assertThat(
-        context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "value")));
+        context.cursor.getSyntaxPath(),
+        equalTo(new SyntaxPath("named", "value", "0", "named", "value", "named", "value")));
   }
 
   @Test
@@ -45,9 +46,9 @@ public class TestActionsAtom {
                         .add("value", new TreeBuilder(MiscSyntax.infinity).build())
                         .build())
                 .build());
-    ((FieldAtom) context.syntaxLocate(new SyntaxPath("value", "0", "value"))).selectInto(context);
+    ((FieldAtom) context.syntaxLocate(new SyntaxPath("named","value", "0", "named","value"))).selectInto(context);
     Helper.cursorAtom(context).actionExit(context);
-    assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0")));
+    assertThat(context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("named", "value", "0")));
   }
 
   @Test
@@ -65,7 +66,7 @@ public class TestActionsAtom {
             context ->
                 assertThat(
                     context.cursor.getSyntaxPath(),
-                    equalTo(new SyntaxPath("value", "0", "second"))));
+                    equalTo(new SyntaxPath("named", "value", "0", "named", "second"))));
   }
 
   @Test
@@ -83,6 +84,6 @@ public class TestActionsAtom {
             context ->
                 assertThat(
                     context.cursor.getSyntaxPath(),
-                    equalTo(new SyntaxPath("value", "0", "first"))));
+                    equalTo(new SyntaxPath("named", "value", "0", "named","first"))));
   }
 }

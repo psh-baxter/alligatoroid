@@ -1,6 +1,7 @@
 package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.alligatoroid.compiler.deserialize.Deserializer;
+import com.zarbosoft.alligatoroid.compiler.jvm.MultiError;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.DynamicClassLoader;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedClass;
@@ -15,6 +16,7 @@ import com.zarbosoft.rendaw.common.ROPair;
 import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 
+import java.lang.reflect.InvocationTargetException;
 import java.nio.file.Path;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
@@ -24,7 +26,7 @@ import static org.objectweb.asm.Opcodes.RETURN;
 
 public class Module {
   public static final String METHOD_NAME = "enter";
-  public static final String METHOD_DESCRIPTOR = JVMDescriptor.func(JVMDescriptor.void_());
+  public static final String METHOD_DESCRIPTOR = JVMDescriptor.func(JVMDescriptor.voidDescriptor());
   public static long uniqueClass = 0;
   public final ModuleId id;
   public final ModuleContext context;
@@ -40,12 +42,22 @@ public class Module {
     String className = Format.format("com.zarbosoft.alligatoroidmortar.Generated%s", uniqueClass++);
 
     // Do first pass flat evaluation
-    MortarTargetModuleContext targetContext = new MortarTargetModuleContext(JVMDescriptor.internalName(className));
+    MortarTargetModuleContext targetContext =
+        new MortarTargetModuleContext(JVMDescriptor.jvmName(className));
     Context context = new Context(moduleContext, targetContext, new Scope(null));
     ROList<Value> rootStatements = Deserializer.deserialize(moduleContext, module, module.path);
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
-    ectx.record(ectx.record(Block.evaluate(context, null, rootStatements)).drop(context, null));
-    MortarCode code = (MortarCode) ectx.build(null).sideEffect;
+    ectx.recordPre(
+        ectx.record(
+                new com.zarbosoft.alligatoroid.compiler.language.Scope(
+                        null, new Block(null, rootStatements))
+                    .evaluate(context))
+            .drop(context, null));
+    EvaluateResult evaluateResult = ectx.build(null);
+    MortarCode code =
+        (MortarCode)
+            targetContext.merge(
+                context, null, new TSList<>(evaluateResult.preEffect, evaluateResult.postEffect));
     if (moduleContext.errors.some()) {
       return ErrorValue.error;
     }
@@ -67,6 +79,18 @@ public class Module {
     return NullValue.value;
   }
 
+  private static void processError(Module module, Throwable e) {
+    if (e instanceof Common.UncheckedException) {
+      processError(module, e.getCause());
+    } else if (e instanceof InvocationTargetException) {
+      processError(module,e.getCause());
+    } else if (e instanceof MultiError) {
+      module.context.errors.addAll(((MultiError)e).errors);
+    } else {
+      module.context.errors.add(Error.unexpected(e));
+    }
+  }
+
   public static Future<Value> loadRoot(GlobalContext globalContext, Path path) {
     LocalModuleId id = new LocalModuleId(path);
     return globalContext.requestModule(
@@ -75,7 +99,7 @@ public class Module {
           try {
             module.result.complete(loadRootInner(id, module.context));
           } catch (Throwable e) {
-            module.context.errors.add(Error.unexpected(e));
+            processError(module, e);
             module.result.complete(ErrorValue.error);
           }
         });

@@ -8,13 +8,14 @@ public interface Value {
   EvaluateResult access(Context context, Location location, Value field);
 
   default EvaluateResult evaluate(Context context) {
-    return new EvaluateResult(null, this);
+    return new EvaluateResult(null, null, this);
   }
 
   TargetCode drop(Context context, Location location);
 
   /**
    * Creates a value to put in the scope. If error, return error value, null (add error to context).
+   *
    * @param context
    * @param location
    * @return side effect, binding
@@ -23,6 +24,7 @@ public interface Value {
 
   /**
    * Location or null
+   *
    * @return
    */
   Location location();

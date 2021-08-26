@@ -43,6 +43,6 @@ public class TestPrimitivePatterns {
     new GeneralTestWizard(syntax, atom)
         .run(editor -> atom.namedFields.getOpt("value").selectInto(editor.context))
         .sendText("1")
-        .checkArrayTree(new TreeBuilder(quoted).add("value", "").build());
+        .checkArrayTree(new TreeBuilder(quoted).add("value", "1").build());
   }
 }

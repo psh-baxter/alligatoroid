@@ -56,11 +56,11 @@ public class TestDisplayDerived {
     int index = 0;
     for (final Pair<Integer, Integer> pair :
         TSList.of(
-            new Pair<>(0, 0),
+            new Pair<>(20, 0),
             new Pair<>(30, 0),
             new Pair<>(0, 10),
             new Pair<>(30, 10),
-            new Pair<>(60, 0),
+            new Pair<>(80, 0),
             new Pair<>(100, 0),
             new Pair<>(60, 10),
             new Pair<>(100, 10))) {

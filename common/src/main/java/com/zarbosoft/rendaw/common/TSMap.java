@@ -59,6 +59,11 @@ public class TSMap<K, V> implements ROMap<K, V> {
     return inner.put(k, v);
   }
 
+  public TSMap<K, V> putIfAbsent(K k, V v) {
+    inner.putIfAbsent(k, v);
+    return this;
+  }
+
   public TSMap<K, V> putNew(K k, V v) {
     if (k == null) throw new Assertion();
     putNull(k, v);

@@ -10,7 +10,7 @@ public class LiteralString extends LanguageValue {
   public final String value;
 
   public LiteralString(Location id, String value) {
-    super(id);
+    super(id, false);
     this.value = value;
   }
 

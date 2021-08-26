@@ -23,7 +23,8 @@ public class FieldId extends Field {
   }
 
   @Override
-  public Object syntaxLocateStep(String segment) {
+  public Object syntaxLocateStep(Context.SyntaxLocateQueue segments) {
+    segments.consumeRemaining();
     return this;
   }
 

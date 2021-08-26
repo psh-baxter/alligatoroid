@@ -127,7 +127,7 @@ public class TestActionsArray {
     final Editor editor = buildFive();
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
@@ -143,7 +143,7 @@ public class TestActionsArray {
             .build(),
         Helper.rootArray(editor.context.document));
     assertThat(
-        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "1")));
+        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("named", "value", "0", "named", "value", "1")));
   }
 
   @Test
@@ -151,7 +151,7 @@ public class TestActionsArray {
     final Editor editor = buildFive();
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
@@ -220,7 +220,7 @@ public class TestActionsArray {
     final Editor editor = buildFive();
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
@@ -289,7 +289,7 @@ public class TestActionsArray {
     final Editor editor = buildFive();
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
@@ -316,7 +316,7 @@ public class TestActionsArray {
     final Editor editor = buildFive();
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 0, 1);
@@ -343,7 +343,7 @@ public class TestActionsArray {
     final Editor editor = buildFive();
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
@@ -370,7 +370,7 @@ public class TestActionsArray {
     final Editor editor = buildFive();
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 3, 4);
@@ -398,7 +398,7 @@ public class TestActionsArray {
     final VisualFieldArray visual =
         ((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual);
     visual.select(editor.context, true, 1, 2);
@@ -422,7 +422,7 @@ public class TestActionsArray {
     assertThat(selection.beginIndex, equalTo(5));
     assertThat(selection.endIndex, equalTo(5));
     assertThat(
-        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "5")));
+        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("named", "value", "0", "named", "value", "5")));
   }
 
   @Test
@@ -430,7 +430,7 @@ public class TestActionsArray {
     final Editor editor = buildFive();
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 1, 2);
@@ -442,7 +442,7 @@ public class TestActionsArray {
     }
     (((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual))
         .select(editor.context, true, 2, 2);
@@ -464,7 +464,7 @@ public class TestActionsArray {
       assertThat(selection.endIndex, equalTo(3));
     }
     assertThat(
-        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("value", "0", "value", "3")));
+        editor.context.cursor.getSyntaxPath(), equalTo(new SyntaxPath("named", "value", "0", "named", "value", "3")));
   }
 
   @Test
@@ -473,7 +473,7 @@ public class TestActionsArray {
     final VisualFieldArray visual =
         ((VisualFieldArray)
             ((FieldArray)
-                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("value", "0")))
+                    ((Atom) editor.context.syntaxLocate(new SyntaxPath("named", "value", "0")))
                         .namedFields.getOpt("value"))
                 .visual);
     visual.select(editor.context, true, 1, 1);
@@ -495,6 +495,6 @@ public class TestActionsArray {
         Helper.rootArray(editor.context.document));
     assertThat(
         editor.context.cursor.getSyntaxPath(),
-        equalTo(new SyntaxPath("value", "0", "value", "1", "gap", "0")));
+        equalTo(new SyntaxPath("named", "value", "0", "named", "value", "1", "named","gap", "0")));
   }
 }

@@ -1,6 +1,15 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
+/**
+ * 3 types of strings: 1. Normal names (a.b.c.MyClass - objects only) 2. JVM names (a/b/c/MyClass -
+ * objects only) 3. Descriptors (La/b/c/MyClass; - all types)
+ */
 public class JVMDescriptor {
+  public static final String objectJvmName = jvmName(Object.class);
+  public static final String objectDescriptor = objDescriptorFromJvmName(objectJvmName);
+  public static final String stringJvmName = jvmName(String.class);
+  public static final String stringDescriptor = objDescriptorFromJvmName(stringJvmName);
+
   public static String func(String returnDescriptor, String... argDescriptors) {
     StringBuilder builder = new StringBuilder();
     builder.append('(');
@@ -12,52 +21,52 @@ public class JVMDescriptor {
     return builder.toString();
   }
 
-  public static String void_() {
+  public static String voidDescriptor() {
     return "V";
   }
 
-  public static String bool_() {
+  public static String boolDescriptor() {
     return "Z";
   }
 
-  public static String short_() {
+  public static String shortDescriptor() {
     return "S";
   }
 
-  public static String char_() {
+  public static String charDescriptor() {
     return "C";
   }
 
-  public static String byte_() {
+  public static String byteDescriptor() {
     return "B";
   }
 
-  public static String double_() {
+  public static String doubleDescriptor() {
     return "D";
   }
 
-  public static String float_() {
+  public static String floatDescriptor() {
     return "F";
   }
 
-  public static String int_() {
+  public static String intDescriptor() {
     return "I";
   }
 
-  public static String long_() {
+  public static String longDescriptor() {
     return "J";
   }
 
-  public static String objReal(Class klass) {
-    return objExternal(klass.getCanonicalName());
+  public static String objDescriptorFromReal(Class klass) {
+    return objDescriptorFromNormalName(klass.getCanonicalName());
   }
 
-  public static String objExternal(String externalName) {
-    return objInternal(internalName(externalName));
+  public static String objDescriptorFromNormalName(String normalName) {
+    return objDescriptorFromJvmName(jvmName(normalName));
   }
 
-  public static String objInternal(String internalName) {
-    return "L" + internalName + ";";
+  public static String objDescriptorFromJvmName(String jvmName) {
+    return "L" + jvmName + ";";
   }
 
   /**
@@ -66,15 +75,15 @@ public class JVMDescriptor {
    * @param externalName
    * @return
    */
-  public static String internalName(String externalName) {
+  public static String jvmName(String externalName) {
     return externalName.replace('.', '/');
   }
 
-  public static String internalName(Class klass) {
+  public static String jvmName(Class klass) {
     return klass.getCanonicalName().replace('.', '/');
   }
 
-  public static String array(String child) {
+  public static String arrayDescriptor(String child) {
     return "[" + child;
   }
 }

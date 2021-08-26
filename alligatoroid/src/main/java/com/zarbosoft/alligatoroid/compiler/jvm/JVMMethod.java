@@ -27,7 +27,7 @@ public class JVMMethod implements SimpleValue {
     this.externName = name;
   }
 
-  public void define(Record spec, Value body) {
+  public void implement(Record spec, Value body) {
     JVMShallowMethodFieldType.MethodSpecDetails specDetails =
         JVMShallowMethodFieldType.specDetails(spec);
 
@@ -41,7 +41,7 @@ public class JVMMethod implements SimpleValue {
 
     EvaluateResult.Context ectx = new EvaluateResult.Context(context, null);
     ectx.record(body.evaluate(context));
-    built = (JVMCode) ectx.build(null).sideEffect;
+    built = (JVMCode) ectx.build(null).preEffect;
     if (moduleContext.errors.some()) {
       throw new MultiError(moduleContext.errors);
     }

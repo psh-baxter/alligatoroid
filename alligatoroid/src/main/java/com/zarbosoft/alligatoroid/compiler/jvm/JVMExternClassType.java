@@ -2,12 +2,13 @@ package com.zarbosoft.alligatoroid.compiler.jvm;
 
 import com.zarbosoft.alligatoroid.compiler.mortar.Record;
 
-public class JVMExternClassType extends JVMClassType {
+public class JVMExternClassType extends JVMBaseClassType {
   public JVMExternClassType(String jvmExternalClass) {
     super(jvmExternalClass);
   }
 
-  public void defineFunction(String name, Record spec) {
+  public void defineMethod(String name, Record spec) {
+    // TODO take internal name as well
     JVMShallowMethodFieldType.MethodSpecDetails specDetails =
         JVMShallowMethodFieldType.specDetails(spec);
     fields.putNew(

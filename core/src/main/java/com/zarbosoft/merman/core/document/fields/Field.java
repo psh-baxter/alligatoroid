@@ -28,7 +28,7 @@ public abstract class Field {
 
   public abstract boolean selectInto(Context context);
 
-  public abstract Object syntaxLocateStep(String segment);
+  public abstract Object syntaxLocateStep(Context.SyntaxLocateQueue segment);
 
   public interface ParentDispatcher {
     void handle(FieldArray.Parent parent);

@@ -906,7 +906,7 @@ public class TestCompaction {
                 new TreeBuilder(one).build())
             .build();
     new GeneralTestWizard(syntax, new TreeBuilder(low).addArray("value", midAtom).build())
-        .select("value")
+        .select("named", "value")
         .actWindow()
         .displayWidth(70)
         .checkTextBrick(1, 1, "one")

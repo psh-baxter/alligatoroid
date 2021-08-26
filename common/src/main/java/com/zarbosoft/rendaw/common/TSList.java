@@ -43,6 +43,11 @@ public class TSList<T> implements ROList<T> {
   }
 
   @Override
+  public String toString() {
+    return values.toString();
+  }
+
+  @Override
   public Iterator<T> iterator() {
     return values.iterator();
   }

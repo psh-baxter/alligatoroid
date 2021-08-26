@@ -7,7 +7,7 @@ import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import org.objectweb.asm.tree.MethodInsnNode;
 
-import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
+import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public class MortarMethodField implements SimpleValue {
   private final MortarProtocode lower;
@@ -25,18 +25,13 @@ public class MortarMethodField implements SimpleValue {
 
   @Override
   public EvaluateResult call(Context context, Location location, Value argument) {
-    return EvaluateResult.pure(
-        type.returnType.stackAsValue(
-            new MortarCode()
-                .add(lower.lower())
-                .add(((MortarLowerableValue) argument).lower())
-                .line(context.module.sourceLocation(location))
-                .add(
-                    new MethodInsnNode(
-                        INVOKESPECIAL,
-                        type.base.jvmInternalClass,
-                        type.name,
-                        type.jbcDesc,
-                        false))));
+    MortarCode code = (MortarCode) new MortarCode().add(lower.lower());
+    MortarTargetModuleContext.convertFunctionArgument(context, code, argument);
+    code.line(context.module.sourceLocation(location))
+        .add(
+            new MethodInsnNode(
+                INVOKEVIRTUAL, type.base.jvmInternalClass, type.name, type.jbcDesc, false));
+    if (type.returnType == null) return new EvaluateResult(code, null, NullValue.value);
+    else return EvaluateResult.pure(type.returnType.stackAsValue(code));
   }
 }

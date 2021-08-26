@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Atom {
+  public static final String SYNTAX_PATH_UNNAMED = "unnamed";
+  public static final String SYNTAX_PATH_NAMED = "named";
   public final AtomType type;
   public ROList<Field> unnamedFields;
   public ROMap<String, Field> namedFields;
@@ -58,7 +60,7 @@ public class Atom {
               SyntaxPath out;
               if (Atom.this.fieldParentRef == null) out = new SyntaxPath();
               else out = Atom.this.fieldParentRef.getSyntaxPath();
-              return out.add("unnamed").add(strI);
+              return out.add(SYNTAX_PATH_UNNAMED).add(strI);
             }
           });
     }
@@ -88,7 +90,7 @@ public class Atom {
                   SyntaxPath out;
                   if (Atom.this.fieldParentRef == null) out = new SyntaxPath();
                   else out = Atom.this.fieldParentRef.getSyntaxPath();
-                  return out.add("named").add(entry.getKey());
+                  return out.add(SYNTAX_PATH_NAMED).add(entry.getKey());
                 }
               });
     }
@@ -118,17 +120,25 @@ public class Atom {
     this.fieldParentRef = fieldParentRef;
   }
 
-  public Object syntaxLocateStep(String segment) {
-    return namedFields.getOpt(segment);
+  public Object syntaxLocateStep(Context.SyntaxLocateQueue segments) {
+    String fieldType = segments.consumeSegment();
+    switch (fieldType) {
+      case SYNTAX_PATH_NAMED:
+        return namedFields.getOpt(segments.consumeSegment());
+      case SYNTAX_PATH_UNNAMED:
+        return unnamedFields.get(Integer.parseInt(segments.consumeSegment()));
+      default:
+        return null;
+    }
   }
 
   public void write(TSList<WriteState> stack) {
     Map<Object, Object> childData = new HashMap<>();
     for (Field field : unnamedFields) {
       if (field instanceof FieldId) {
-        childData.put(field.back(), ((FieldId) field).id );
-    } else throw new Assertion();
-  }
+        childData.put(field.back(), ((FieldId) field).id);
+      } else throw new Assertion();
+    }
     for (Map.Entry<String, Field> entry : namedFields) {
       if (entry.getValue() instanceof FieldAtom) {
         childData.put(entry.getKey(), ((FieldAtom) entry.getValue()).data);

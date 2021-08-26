@@ -1,10 +1,17 @@
 package com.zarbosoft.alligatoroid.compiler.mortar;
 
+import com.zarbosoft.alligatoroid.compiler.Context;
+import com.zarbosoft.alligatoroid.compiler.Error;
+import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
+import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.Value;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 
 public interface MortarHalfType extends SimpleValue {
-  public Value asValue(MortarProtocode lower);
+  Value asValue(MortarProtocode lower);
 
-  public Value stackAsValue(JVMRWSharedCode code);
+  default EvaluateResult valueAccess(
+      Context context, Location location, Value field, MortarProtocode lower) {
+    context.module.errors.add(Error.accessNotSupported(location));
+    return EvaluateResult.error;
+  }
 }

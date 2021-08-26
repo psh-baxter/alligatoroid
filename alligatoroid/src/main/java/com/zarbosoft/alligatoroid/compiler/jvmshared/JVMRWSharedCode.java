@@ -1,6 +1,8 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
 import com.zarbosoft.rendaw.common.Assertion;
+import com.zarbosoft.rendaw.common.TSList;
+import com.zarbosoft.rendaw.common.TSMap;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.InsnList;
@@ -13,8 +15,8 @@ import org.objectweb.asm.util.Textifier;
 import org.objectweb.asm.util.TraceMethodVisitor;
 
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Iterator;
 
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BASTORE;
@@ -24,9 +26,7 @@ import static org.objectweb.asm.Opcodes.ISTORE;
 import static org.objectweb.asm.Opcodes.LSTORE;
 
 public abstract class JVMRWSharedCode extends JVMSharedCode {
-  private static final Object scopePush = new Object();
-  private static final Object scopePop = new Object();
-  private final List<Object> children = new ArrayList<>();
+  private final TSList<Object> children = new TSList<>();
 
   public static void print(MethodNode m) {
     // FIXME! DEBUG
@@ -49,20 +49,47 @@ public abstract class JVMRWSharedCode extends JVMSharedCode {
   }
 
   @Override
-  protected void render(JVMSharedCode.Scope scope, MethodVisitor out) {
-    for (Object child : children) {
-      if (child instanceof JVMSharedCode) {
-        ((JVMSharedCode) child).render(scope, out);
-      } else if (child instanceof InsnList) {
-        // print((InsnList) child);
+  public void render(MethodVisitor out, TSList<Object> initialIndexes) {
+    TSList<Object> children = new TSList<>();
+
+    // Flatten for ease of use, find last uses
+    TSMap<Object, Integer> lastUses = new TSMap<>();
+    ArrayDeque<Iterator<Object>> stack = new ArrayDeque<>();
+    {
+      Iterator<Object> iter = this.children.iterator();
+      if (iter.hasNext()) stack.addLast(iter);
+    }
+    while (!stack.isEmpty()) {
+      Object next;
+      {
+        Iterator<Object> iter = stack.peekLast();
+        next = iter.next();
+        if (!iter.hasNext()) stack.removeLast();
+      }
+
+      // Recurse other code chunks
+      if (next instanceof JVMRWSharedCode) {
+        Iterator<Object> iter = ((JVMRWSharedCode) next).children.iterator();
+        if (iter.hasNext()) stack.addLast(iter);
+        continue;
+      }
+
+      // Process element
+      if (next instanceof StoreLoad) {
+        lastUses.putReplace(((StoreLoad) next).key, children.size());
+      }
+      children.add(next);
+    }
+
+    // Render, considering
+    TSList<Object> indexes = initialIndexes.mut();
+    for (int i = 0; i < children.size(); i++) {
+      Object child = children.get(i);
+      if (child instanceof InsnList) {
         ((InsnList) child).accept(out);
-      } else if (child == scopePush) {
-        scope = new JVMSharedCode.Scope(scope);
-      } else if (child == scopePop) {
-        scope = scope.parent;
       } else if (child instanceof StoreLoad) {
-        int i = 0;
         Object childKey = ((StoreLoad) child).key;
+        int index = -1;
         if (((StoreLoad) child).code == ISTORE
             || ((StoreLoad) child).code == LSTORE
             || ((StoreLoad) child).code == ASTORE
@@ -70,45 +97,36 @@ public abstract class JVMRWSharedCode extends JVMSharedCode {
             || ((StoreLoad) child).code == FSTORE
             || ((StoreLoad) child).code == DSTORE) {
           // Handle store
-          int firstNull = -1;
-          for (; i < scope.indexes.size(); ++i) {
-            Object key = scope.indexes.get(i);
-            if (key == null && firstNull == -1) {
-              firstNull = i;
-            } else if (key == childKey) {
-              break;
+          for (int j = 0; j < indexes.size(); j++) {
+            {
+              Object lastKey;
+              Integer lastIndex;
+              if ((lastKey = indexes.get(j)) != null
+                  && (lastIndex = lastUses.get(lastKey)) != null
+                  && (lastIndex > i)) {
+                continue;
+              }
             }
+            indexes.set(j, childKey);
+            index = j;
           }
-          if (i == scope.indexes.size()) {
-            if (firstNull == -1) {
-              scope.indexes.add(childKey);
-            } else {
-              scope.indexes.set(firstNull, childKey);
-            }
+          if (index == -1) {
+            index = indexes.size();
+            indexes.add(childKey);
           }
         } else {
           // Handle load - must already exist
-          i = findIndex(scope, childKey);
+          for (int j = 0; j < indexes.size(); j++) {
+            if (indexes.get(j) == childKey) {
+              index = j;
+              break;
+            }
+          }
+          if (index == -1) throw new Assertion();
         }
-        out.visitVarInsn(((StoreLoad) child).code, i);
-      } else if (child instanceof Drop) {
-        int i = findIndex(scope, ((Drop) child).key);
-        scope.indexes.set(i, null);
+        out.visitVarInsn(((StoreLoad) child).code, index);
       } else throw new Assertion();
     }
-  }
-
-  private int findIndex(JVMSharedCode.Scope scope, Object childKey) {
-    int i = 0;
-    for (; i < scope.indexes.size(); ++i) {
-      if (scope.indexes.get(i) == childKey) break;
-    }
-    if (i == scope.indexes.size()) {
-      // throw new Assertion();
-      // FIXME! DEBUG
-      return 99;
-    }
-    return i;
   }
 
   public JVMRWSharedCode add(AbstractInsnNode node) {
@@ -124,13 +142,6 @@ public abstract class JVMRWSharedCode extends JVMSharedCode {
   public JVMRWSharedCode add(JVMSharedCode child) {
     if (child == null) throw new Assertion(); // FIXME debug
     children.add(child);
-    return this;
-  }
-
-  public JVMRWSharedCode addScoped(JVMSharedCode child) {
-    children.add(scopePush);
-    children.add(child);
-    children.add(scopePop);
     return this;
   }
 
@@ -153,11 +164,6 @@ public abstract class JVMRWSharedCode extends JVMSharedCode {
     return this;
   }
 
-  public JVMRWSharedCode addDrop(Object key) {
-    children.add(new Drop(key));
-    return this;
-  }
-
   public JVMRWSharedCode addString(String value) {
     m().add(new LdcInsnNode(value));
     return this;
@@ -168,15 +174,10 @@ public abstract class JVMRWSharedCode extends JVMSharedCode {
     final Object key;
 
     public StoreLoad(int code, Object key) {
+      if (key == null) {
+        throw new Assertion();
+      }
       this.code = code;
-      this.key = key;
-    }
-  }
-
-  private static class Drop {
-    final Object key;
-
-    private Drop(Object key) {
       this.key = key;
     }
   }

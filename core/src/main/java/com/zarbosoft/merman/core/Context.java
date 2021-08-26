@@ -414,6 +414,31 @@ public class Context {
     env.clipboardGetString(cb);
   }
 
+  public static class SyntaxLocateQueue {
+    public int at = 0;
+    public final SyntaxPath path;
+
+    public SyntaxLocateQueue(SyntaxPath path) {
+      this.path = path;
+    }
+
+    public String consumeSegment() {
+      return path.segments.get(at++);
+    }
+
+    public boolean atEnd() {
+      return at >= path.segments.size();
+    }
+
+    public ROList<String> consumed() {
+      return path.segments.sublist(0, at - 1);
+    }
+
+    public void consumeRemaining() {
+      at = path.segments.size();
+    }
+  }
+
   /**
    * Note that the paths for atom fields and atoms are the same. There's no way to get an Atom back
    * if the atom's in an atom field, you'll always get the field.
@@ -423,14 +448,14 @@ public class Context {
    */
   public Object syntaxLocate(final SyntaxPath path) {
     Object at = document.root;
-    for (int i = 0; i < path.segments.size(); ++i) {
-      String segment = path.segments.get(i);
+    SyntaxLocateQueue pathQueue = new SyntaxLocateQueue(path);
+    while (!pathQueue.atEnd()) {
       if (at instanceof Atom) {
-        at = ((Atom) at).syntaxLocateStep(segment);
-        if (at == null) throw new InvalidPath(path.segments.sublist(0, i), path.segments);
+        at = ((Atom) at).syntaxLocateStep(pathQueue);
+        if (at == null) throw new InvalidPath(pathQueue.consumed(), path.segments);
       } else if (at instanceof Field) {
-        at = ((Field) at).syntaxLocateStep(segment);
-        if (at == null) throw new InvalidPath(path.segments.sublist(0, i), path.segments);
+        at = ((Field) at).syntaxLocateStep(pathQueue);
+        if (at == null) throw new InvalidPath(pathQueue.consumed(), path.segments);
       } else throw new Assertion();
     }
     return at;

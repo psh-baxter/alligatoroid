@@ -3,7 +3,6 @@ package com.zarbosoft.alligatoroid.compiler.mortar;
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.TargetCode;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMSharedCode;
 
 public class NullValue implements MortarProtocode, SimpleValue {
   public static final NullValue value = new NullValue();
@@ -11,7 +10,7 @@ public class NullValue implements MortarProtocode, SimpleValue {
   private NullValue() {}
 
   @Override
-  public JVMSharedCode lower() {
+  public MortarCode lower() {
     return new MortarCode();
   }
 

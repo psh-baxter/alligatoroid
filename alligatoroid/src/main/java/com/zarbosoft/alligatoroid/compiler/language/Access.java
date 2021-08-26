@@ -10,7 +10,7 @@ public class Access extends LanguageValue {
   public final Value key;
 
   public Access(Location id, Value base, Value key) {
-    super(id);
+    super(id, hasLowerInSubtree(base, key));
     this.base = base;
     this.key = key;
   }

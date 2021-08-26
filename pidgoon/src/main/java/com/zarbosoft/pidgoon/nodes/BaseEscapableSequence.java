@@ -51,7 +51,7 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
               grammar,
               step,
               new SeqParent<K, T>(this, parent, 0, ROList.empty, color),
-                  leaf,
+              leaf,
               seen,
               cause,
               color);
@@ -99,8 +99,9 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
         parent.advance(
             grammar,
             step,
-                leaf,
-            new EscapableResult<>(true, result.completed, newCollected),
+            leaf,
+            new EscapableResult<>(
+                result.completed || this.step > 0, result.completed, newCollected),
             mismatchCause);
       } else {
         self.children
@@ -110,7 +111,7 @@ public abstract class BaseEscapableSequence<K, T> extends Node<EscapableResult<R
                 grammar,
                 step,
                 new SeqParent<K, T>(self, parent, nextStep, newCollected, color),
-                    leaf,
+                leaf,
                 ROMap.empty,
                 mismatchCause,
                 color);

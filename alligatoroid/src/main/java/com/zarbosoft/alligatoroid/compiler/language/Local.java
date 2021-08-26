@@ -13,7 +13,7 @@ public class Local extends LanguageValue {
   public final Value key;
 
   public Local(Location id, Value key) {
-    super(id);
+    super(id, hasLowerInSubtree(key));
     this.key = key;
   }
 

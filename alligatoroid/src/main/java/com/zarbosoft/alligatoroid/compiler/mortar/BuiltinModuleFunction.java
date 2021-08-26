@@ -6,18 +6,18 @@ import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.ModuleContext;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMDescriptor;
-import com.zarbosoft.alligatoroid.compiler.jvmshared.JVMRWSharedCode;
 import org.objectweb.asm.tree.MethodInsnNode;
 
+import static com.zarbosoft.alligatoroid.compiler.mortar.MortarTargetModuleContext.convertFunctionArgument;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 
 public class BuiltinModuleFunction implements SimpleValue {
-  public static final String jbcInternalClass = JVMDescriptor.internalName(ModuleContext.class);
+  public static final String jbcInternalClass = JVMDescriptor.jvmName(ModuleContext.class);
   private final String name;
   private final String jbcDesc;
-  private final MortarHalfType returnType;
+  private final MortarHalfDataType returnType;
 
-  public BuiltinModuleFunction(String name, String jbcDesc, MortarHalfType returnType) {
+  public BuiltinModuleFunction(String name, String jbcDesc, MortarHalfDataType returnType) {
     this.name = name;
     this.jbcDesc = jbcDesc;
     this.returnType = returnType;
@@ -25,13 +25,12 @@ public class BuiltinModuleFunction implements SimpleValue {
 
   @Override
   public EvaluateResult call(Context context, Location location, Value argument) {
-    JVMRWSharedCode code =
-        new MortarCode()
-            .add(((MortarTargetModuleContext) context.target).transfer(context.module))
-            .add(((MortarLowerableValue) argument).lower())
-            .line(context.module.sourceLocation(location))
-            .add(new MethodInsnNode(INVOKEVIRTUAL, jbcInternalClass, name, jbcDesc, false));
-    if (returnType == null) return new EvaluateResult(code, NullValue.value);
+    MortarCode code = new MortarCode();
+    code.add(((MortarTargetModuleContext) context.target).transfer(context.module));
+    convertFunctionArgument(context, code, argument);
+    code.line(context.module.sourceLocation(location))
+        .add(new MethodInsnNode(INVOKEVIRTUAL, jbcInternalClass, name, jbcDesc, false));
+    if (returnType == null) return new EvaluateResult(code, null, NullValue.value);
     else return EvaluateResult.pure(returnType.stackAsValue(code));
   }
 }

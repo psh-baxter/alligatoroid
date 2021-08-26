@@ -85,12 +85,12 @@ public class TestCursorChanges {
     innerTestTransform(
         syntax,
         new TreeBuilder(infinity).build(),
-        new SyntaxPath("value", "0"),
+        new SyntaxPath("named", "value", "0"),
         (editor, selected, changer) -> {
           ((EditCursorFieldArray) editor.context.cursor).editDelete(editor);
         },
         new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build(),
-        new SyntaxPath("value", "0"));
+        new SyntaxPath("named", "value", "0"));
   }
 
   private void innerTestTransform(
@@ -166,13 +166,13 @@ public class TestCursorChanges {
     innerTestTransform(
         syntax,
         new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
-        new SyntaxPath("value", "0", "value", "0"),
+        new SyntaxPath("named", "value", "0", "named", "value", "0"),
         (context, selected, changer) -> {
           changer.accept(
               new ChangeArray((FieldArray) selected.fieldParentRef.field, 0, 1, TSList.of()));
         },
         new TreeBuilder(array).addArray("value").build(),
-        new SyntaxPath("value", "0"));
+        new SyntaxPath("named", "value", "0"));
   }
 
   @Test
@@ -205,12 +205,12 @@ public class TestCursorChanges {
         new TreeBuilder(array)
             .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "0"),
+        new SyntaxPath("named", "value", "0", "named", "value", "0"),
         (context, selected, changer) ->
             changer.accept(
                 new ChangeArray((FieldArray) selected.fieldParentRef.field, 1, 1, TSList.of())),
         new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
-        new SyntaxPath("value", "0", "value", "0"));
+        new SyntaxPath("named", "value", "0", "named", "value", "0"));
   }
 
   @Test
@@ -243,12 +243,12 @@ public class TestCursorChanges {
         new TreeBuilder(array)
             .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "1"),
+        new SyntaxPath("named", "value", "0", "named", "value", "1"),
         (context, selected, changer) ->
             changer.accept(
                 new ChangeArray((FieldArray) selected.fieldParentRef.field, 0, 1, TSList.of())),
         new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
-        new SyntaxPath("value", "0", "value", "0"));
+        new SyntaxPath("named", "value", "0", "named", "value", "0"));
   }
 
   @Test
@@ -285,14 +285,14 @@ public class TestCursorChanges {
                 new TreeBuilder(infinity).build(),
                 new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "1"),
+        new SyntaxPath("named", "value", "0", "named", "value", "1"),
         (context, selected, changer) ->
             changer.accept(
                 new ChangeArray((FieldArray) selected.fieldParentRef.field, 1, 1, TSList.of())),
         new TreeBuilder(array)
             .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "1"));
+        new SyntaxPath("named", "value", "0", "named", "value", "1"));
   }
 
   @Test
@@ -325,12 +325,12 @@ public class TestCursorChanges {
         new TreeBuilder(array)
             .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "1"),
+        new SyntaxPath("named", "value", "0", "named", "value", "1"),
         (context, selected, changer) ->
             changer.accept(
                 new ChangeArray((FieldArray) selected.fieldParentRef.field, 1, 1, TSList.of())),
         new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
-        new SyntaxPath("value", "0", "value", "0"));
+        new SyntaxPath("named", "value", "0", "named", "value", "0"));
   }
 
   @Test
@@ -367,19 +367,19 @@ public class TestCursorChanges {
                 new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build(),
                 new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "1", "value", "0"),
+        new SyntaxPath("named", "value", "0", "named", "value", "1", "named", "value", "0"),
         (editor, selected, changer) -> {
           parentDelete(
               editor,
               ((Field)
                       editor.context.syntaxLocate(
-                          new SyntaxPath("value", "0", "value", "1", "value")))
+                          new SyntaxPath("named", "value", "0", "named", "value", "1", "named", "value")))
                   .atomParentRef.atom().fieldParentRef);
         },
         new TreeBuilder(array)
             .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "1"));
+        new SyntaxPath("named", "value", "0", "named", "value", "1"));
   }
 
   @Test
@@ -412,7 +412,7 @@ public class TestCursorChanges {
         new TreeBuilder(array)
             .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "0"),
+        new SyntaxPath("named", "value", "0", "named", "value", "0"),
         (context, selected, changer) ->
             changer.accept(
                 new ChangeArray(
@@ -427,7 +427,7 @@ public class TestCursorChanges {
                 new TreeBuilder(infinity).build(),
                 new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "1"));
+        new SyntaxPath("named", "value", "0", "named", "value", "1"));
   }
 
   @Test
@@ -460,7 +460,7 @@ public class TestCursorChanges {
         new TreeBuilder(array)
             .addArray("value", new TreeBuilder(infinity).build(), new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "1"),
+        new SyntaxPath("named", "value", "0", "named", "value", "1"),
         (context, selected, changer) ->
             changer.accept(
                 new ChangeArray(
@@ -475,7 +475,7 @@ public class TestCursorChanges {
                 new TreeBuilder(infinity).build(),
                 new TreeBuilder(infinity).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "2"));
+        new SyntaxPath("named", "value", "0", "named", "value", "2"));
   }
 
   @Test
@@ -792,7 +792,7 @@ public class TestCursorChanges {
     innerTestTransform(
         syntax,
         new TreeBuilder(snooze).add("value", new TreeBuilder(infinity).build()).build(),
-        new SyntaxPath("value", "0", "value"),
+        new SyntaxPath("named", "value", "0", "named", "value"),
         (context, selected, changer) -> {
           changer.accept(
               new ChangeAtom(
@@ -802,7 +802,7 @@ public class TestCursorChanges {
         new TreeBuilder(snooze)
             .add("value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
             .build(),
-        new SyntaxPath("value", "0", "value"));
+        new SyntaxPath("named", "value", "0", "named", "value"));
   }
 
   @Test
@@ -848,18 +848,18 @@ public class TestCursorChanges {
                 "value",
                 new TreeBuilder(array).addArray("value", new TreeBuilder(infinity).build()).build())
             .build(),
-        new SyntaxPath("value", "0", "value", "value", "0"),
+        new SyntaxPath("named", "value", "0", "named", "value", "named", "value", "0"),
         (editor, selected, changer) -> {
           parentDelete(
               editor,
               ((FieldArray)
-                      editor.context.syntaxLocate(new SyntaxPath("value", "0", "value", "value")))
+                      editor.context.syntaxLocate(new SyntaxPath("named", "value", "0", "named", "value", "named", "value")))
                   .atomParentRef.atom().fieldParentRef);
         },
         new TreeBuilder(snooze)
             .add("value", new TreeBuilder(syntax.gap).add(GapAtomType.PRIMITIVE_KEY, "").build())
             .build(),
-        new SyntaxPath("value", "0", "value"));
+        new SyntaxPath("named", "value", "0", "named", "value"));
   }
 
   @FunctionalInterface

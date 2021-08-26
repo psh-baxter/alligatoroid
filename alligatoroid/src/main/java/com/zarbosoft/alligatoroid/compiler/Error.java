@@ -131,20 +131,25 @@ public class Error implements Serializable {
             .put(DESCRIPTION_KEY, "the field accessed does not exist"));
   }
 
-  public static Error unexpected(Throwable e) {
+  public static TSMap<String, Object> convertThrowable(Throwable e) {
     TSList<Object> stack = new TSList<>();
     for (StackTraceElement element : e.getStackTrace()) {
       stack.add(
           new TSMap<String, Object>()
-              .put("path", element.getFileName())
+              .put("class", element.getClassName())
               .put("method", element.getMethodName())
               .put("line", element.getLineNumber()));
     }
+    TSMap<String, Object> out =
+        new TSMap<String, Object>().put("exception", e.toString()).put("stacktrace", stack);
+    if (e.getCause() != null) out.put("cause", convertThrowable(e.getCause()));
+    return out;
+  }
+
+  public static Error unexpected(Throwable e) {
     return new Error(
         "unexpected",
-        new TSMap<String, Object>()
-            .put("exception", e.toString())
-            .put("stacktrace", stack)
+        convertThrowable(e)
             .put(DESCRIPTION_KEY, "an unexpected error occurred while processing module"));
   }
 
@@ -162,6 +167,14 @@ public class Error implements Serializable {
         new TSMap<String, Object>()
             .put("location", location)
             .put(DESCRIPTION_KEY, "the base value doesn't have fields that can be accessed"));
+  }
+
+  public static Error bindNotSupported(Location location) {
+    return new Error(
+        "bind_not_supported",
+        new TSMap<String, Object>()
+            .put("location", location)
+            .put(DESCRIPTION_KEY, "the base value cannot be bound to a variable"));
   }
 
   public static Error valueNotWhole(Location location, Value value) {
@@ -190,6 +203,18 @@ public class Error implements Serializable {
             .put("got", gotType)
             .put("expected", "record pair")
             .put("description", "this element in a record literal is not a record pair"));
+  }
+
+  public static Error lowerTooDeep(Location location) {
+    return new Error(
+        "lower_too_deep",
+        new TSMap<String, Object>()
+            .put("location", location)
+            .put("got", "no matching containing stage element")
+            .put("expected", "at least one more containing element is a stage")
+            .put(
+                "description",
+                "This lower element isn't in a matching stage element. If multiple stage elements are nested, the number of corresponding nested lower elements can't exceed the number of stage elements."));
   }
 
   @Override

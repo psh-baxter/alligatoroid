@@ -6,6 +6,7 @@ import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.util.CheckClassAdapter;
 
 import java.io.OutputStream;
@@ -25,12 +26,7 @@ public class JVMSharedClass {
   public JVMSharedClass(String classId) {
     this.cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
     cw.visit(
-        52,
-        ACC_PUBLIC + ACC_SUPER,
-        JVMDescriptor.internalName(classId),
-        null,
-        "java/lang/Object",
-        null);
+        52, ACC_PUBLIC + ACC_SUPER, JVMDescriptor.jvmName(classId), null, "java/lang/Object", null);
   }
 
   public JVMSharedClass setMetaSource(String address) {
@@ -39,9 +35,12 @@ public class JVMSharedClass {
   }
 
   public JVMSharedClass defineFunction(
-          String methodId, String desc, JVMSharedCode code, TSList<Object> initialIndexes) {
+      String methodId, String desc, JVMSharedCode code, TSList<Object> initialIndexes) {
     MethodVisitor mv = cw.visitMethod(ACC_PUBLIC + ACC_STATIC, methodId, desc, null, null);
     mv.visitCode();
+    MethodNode temp = new MethodNode();
+    code.render(temp, initialIndexes);
+    JVMRWSharedCode.print(temp);
     code.render(mv, initialIndexes);
     mv.visitMaxs(-1, -1);
     mv.visitEnd();

@@ -142,8 +142,8 @@ public class TestPrimitiveBreaking {
         .checkCourse(0, -10, 0)
         .run(
             context -> {
-              assertThat(primitive.visual.cursor.range.cursor.drawing.transverse(), new IsCloseTo(-13, 0.01));
-              assertThat(primitive.visual.cursor.range.cursor.drawing.transverseEdge(), new IsCloseTo(1, 0.01));
+              assertThat(primitive.visual.cursor.range.cursor.drawing.transverse(), new IsCloseTo(-3, 0.01));
+              assertThat(primitive.visual.cursor.range.cursor.drawing.transverseEdge(), new IsCloseTo(11, 0.01));
             });
   }
 

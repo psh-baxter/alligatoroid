@@ -1,45 +1,52 @@
 package com.zarbosoft.alligatoroid.compiler.language;
 
-import com.zarbosoft.alligatoroid.compiler.Binding;
 import com.zarbosoft.alligatoroid.compiler.Context;
 import com.zarbosoft.alligatoroid.compiler.EvaluateResult;
 import com.zarbosoft.alligatoroid.compiler.LanguageValue;
 import com.zarbosoft.alligatoroid.compiler.Location;
+import com.zarbosoft.alligatoroid.compiler.TargetCode;
 import com.zarbosoft.alligatoroid.compiler.Value;
 import com.zarbosoft.alligatoroid.compiler.mortar.NullValue;
 import com.zarbosoft.rendaw.common.ROList;
-import com.zarbosoft.rendaw.common.ReverseIterable;
+import com.zarbosoft.rendaw.common.TSList;
 
 public class Block extends LanguageValue {
-  public final ROList<Value> children;
+  public final ROList<Value> statements;
 
-  public Block(Location id, ROList<Value> children) {
-    super(id);
-    this.children = children;
+  public Block(Location id, ROList<Value> statements) {
+    super(id, hasLowerInSubtree(statements));
+    this.statements = statements;
   }
 
   public static EvaluateResult evaluate(
       Context context, Location location, ROList<Value> children) {
     context = context.pushScope();
-    EvaluateResult.Context ectx = new EvaluateResult.Context(context, location);
-    Value last = null;
+    TSList<TargetCode> pre = new TSList<>();
+    EvaluateResult lastRes = null;
     Location lastLocation = null;
     for (Value child : children) {
-      if (last != null) ectx.record(last.drop(context, lastLocation));
+      if (lastRes != null) {
+        pre.add(lastRes.preEffect);
+        pre.add(lastRes.value.drop(context, lastLocation));
+        pre.add(lastRes.postEffect);
+      }
       lastLocation = child.location();
-      last = ectx.evaluate(child);
+      lastRes = child.evaluate(context);
     }
-    if (last == null) {
+    Value last;
+    TargetCode post = null;
+    if (lastRes != null) {
+      pre.add(lastRes.preEffect);
+      last = lastRes.value;
+      post = lastRes.postEffect;
+    } else {
       last = NullValue.value;
     }
-    for (Binding binding : new ReverseIterable<>(context.scope.atLevel())) {
-      ectx.record(binding.drop(context, location));
-    }
-    return ectx.build(last);
+    return new EvaluateResult(context.target.merge(context, location, pre), post, last);
   }
 
   @Override
   public EvaluateResult evaluate(Context context) {
-    return evaluate(context, location, children);
+    return evaluate(context, location, statements);
   }
 }

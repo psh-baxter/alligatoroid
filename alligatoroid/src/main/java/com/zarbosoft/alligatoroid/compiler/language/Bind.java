@@ -14,7 +14,7 @@ public class Bind extends LanguageValue {
   public final Value value;
 
   public Bind(Location id, Value key, Value value) {
-    super(id);
+    super(id, hasLowerInSubtree(key, value));
     this.key = key;
     this.value = value;
   }
@@ -25,9 +25,9 @@ public class Bind extends LanguageValue {
     WholeValue key = WholeValue.getWhole(context, location, ectx.evaluate(this.key));
     Value value = ectx.evaluate(this.value);
     if (key == null || value == ErrorValue.error) return EvaluateResult.error;
-    Binding old = context.scope.remove((WholeValue) key);
+    Binding old = context.scope.remove(key);
     if (old != null) {
-      ectx.record(old.drop(context, location));
+      ectx.recordPre(old.drop(context, location));
     }
     ROPair<EvaluateResult, Binding> bound = value.bind(context, location);
     context.scope.put(key, bound.second);

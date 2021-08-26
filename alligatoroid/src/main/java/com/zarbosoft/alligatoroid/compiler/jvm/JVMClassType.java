@@ -15,7 +15,7 @@ public class JVMClassType extends JVMBaseClassType {
     this.jvmClass = new JVMSharedClass(jvmExternalClass);
   }
 
-  public JVMMethod defineMethod(String name) {
+  public JVMMethod declareMethod(String name) {
     incompleteMethods.add(name);
     return new JVMMethod(this, name);
   }

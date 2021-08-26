@@ -11,7 +11,7 @@ public class Call extends LanguageValue {
   public final Value argument;
 
   public Call(Location id, Value target, Value argument) {
-    super(id);
+    super(id, hasLowerInSubtree(target, argument));
     this.target = target;
     this.argument = argument;
   }

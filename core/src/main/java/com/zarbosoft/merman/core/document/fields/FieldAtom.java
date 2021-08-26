@@ -56,8 +56,8 @@ public class FieldAtom extends Field {
   }
 
   @Override
-  public Object syntaxLocateStep(String segment) {
-    return data.syntaxLocateStep(segment);
+  public Object syntaxLocateStep(Context.SyntaxLocateQueue segments) {
+    return data.syntaxLocateStep(segments);
   }
 
   public abstract static class Listener {

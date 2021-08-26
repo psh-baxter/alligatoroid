@@ -81,10 +81,10 @@ public class FieldArray extends Field {
   }
 
   @Override
-  public Object syntaxLocateStep(String segment) {
+  public Object syntaxLocateStep(Context.SyntaxLocateQueue segments) {
     int val;
     try {
-      val = Integer.parseInt(segment);
+      val = Integer.parseInt(segments.consumeSegment());
     } catch (IllegalArgumentException e) {
       return null;
     }

@@ -135,22 +135,22 @@ public class GapChoice extends TwoColumnChoice {
                 } else {
                   // The symbol was started, so next primitive would be incomplete if it exists
                   // But to do that, need to find the preceding primitive if there was one
-                  FieldPrimitive finishedPrimitive = null;
+                  String finishedPrimitiveId = null;
                   for (ParsedField pair : new ReverseIterable<>(preFields)) {
                     if (pair.primitive == null)
                       continue; // penultimate was also a symbol (and therefore must have completed)
                     // Preceding was primitive - since most primitives don't have a maximum length
                     // assume it was still in progress.
-                    finishedPrimitive = pair.primitive;
+                    finishedPrimitiveId = pair.primitive.back.id;
                     break;
                   }
                   nextIncompletePrimitiveField =
                       generateNextEmptyPrimitive(
-                          namedFields, allKeyFrontSpecs, finishedPrimitive.back.id);
+                          namedFields, allKeyFrontSpecs, finishedPrimitiveId);
                 }
               } else {
                 if (lastRes.finished) {
-                  // Last parsed primtive was completed (walled in by symbol) - find the next
+                  // Last parsed primitive was completed (walled in by symbol) - find the next
                   // primitive
                   nextIncompletePrimitiveField =
                       generateNextEmptyPrimitive(

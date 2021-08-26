@@ -44,13 +44,14 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
       ROMap<Object, Reference.RefParent> seen,
       final MismatchCause cause,
       Object color) {
-    if (min == 0) parent.advance(grammar, step, leaf, new EscapableResult<>(false, true, ROList.empty), cause);
+    if (min == 0)
+      parent.advance(grammar, step, leaf, new EscapableResult<>(false, true, ROList.empty), cause);
     if (max == -1 || max > 0)
       child.context(
           grammar,
           step,
           new RepParent<T, K>(this, parent, ROList.empty, color, 0),
-              leaf,
+          leaf,
           seen,
           cause,
           color);
@@ -63,7 +64,12 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
     private final BaseEscapableRepeat<T, K> self;
     private final Object color;
 
-    public RepParent(BaseEscapableRepeat self, Parent<EscapableResult<ROList<K>>> parent, ROList<K> collected, Object color, int count) {
+    public RepParent(
+        BaseEscapableRepeat self,
+        Parent<EscapableResult<ROList<K>>> parent,
+        ROList<K> collected,
+        Object color,
+        int count) {
       super();
       this.parent = parent;
       this.self = self;
@@ -73,26 +79,36 @@ public abstract class BaseEscapableRepeat<T, K> extends Node<EscapableResult<ROL
     }
 
     @Override
-    public void advance(Grammar grammar, Step step, Leaf leaf, EscapableResult<T> value, MismatchCause mismatchCause) {
+    public void advance(
+        Grammar grammar,
+        Step step,
+        Leaf leaf,
+        EscapableResult<T> value,
+        MismatchCause mismatchCause) {
       TSList<K> nextCollected = collected.mut();
       self.combine(nextCollected, value.value);
       int nextCount = this.count + 1;
       if (!value.completed || nextCount >= self.min)
-        parent.advance(grammar, step, leaf, new EscapableResult<>(true, value.completed, nextCollected), mismatchCause);
+        parent.advance(
+            grammar,
+            step,
+            leaf,
+            new EscapableResult<>(
+                value.completed || this.count > 0, value.completed, nextCollected),
+            mismatchCause);
       if (self.max == -1 || nextCount < self.max)
         self.child.context(
-                grammar,
-                step,
-                new RepParent(self, parent, nextCollected, color, nextCount),
-                leaf,
-                ROMap.empty,
-                mismatchCause,
-                color);
+            grammar,
+            step,
+            new RepParent(self, parent, nextCollected, color, nextCount),
+            leaf,
+            ROMap.empty,
+            mismatchCause,
+            color);
     }
 
     @Override
-    public void error(
-            Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
+    public void error(Grammar grammar, final Step step, Leaf leaf, final MismatchCause cause) {
       parent.error(grammar, step, leaf, cause);
     }
   }

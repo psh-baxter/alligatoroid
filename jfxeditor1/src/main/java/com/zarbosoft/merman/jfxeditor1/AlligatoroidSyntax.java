@@ -283,7 +283,7 @@ public class AlligatoroidSyntax {
     return new ATypeBuilder(id, description)
         .precedence(Integer.MAX_VALUE)
         .text(prefix, COLOR_OTHER)
-        .atom("first", arg)
+        .atom("child", arg)
         .build();
   }
 
@@ -292,7 +292,7 @@ public class AlligatoroidSyntax {
     return new ATypeBuilder(id, description)
         .precedence(Integer.MAX_VALUE)
         .text(prefix, color)
-        .atom("first", arg)
+        .atom("child", arg)
         .build();
   }
 
@@ -325,7 +325,7 @@ public class AlligatoroidSyntax {
     types.add(
         new ATypeBuilder(TYPE_LOCAL, "Variable")
             .type(BACK_TYPE_SCOPE)
-            .nestedIdentifier("value", COLOR_IDENTIFIER)
+            .nestedIdentifier("key", COLOR_IDENTIFIER)
             .build(),
         GROUP_EXPR);
     types.add(

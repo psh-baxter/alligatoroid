@@ -69,6 +69,53 @@ import java.util.List;
 import java.util.Locale;
 
 public class NotMain extends Application {
+  /*
+  TODO
+  parens around non-precedential subtrees in at syntax
+  createfile and write
+  jvm builtin string
+  make call take multiple arguments, paren
+    redo tuple
+  record/tuple are dual types
+    half tuple = values + side effect
+    tuple = objects
+    half record = concrete keys: values + side effect
+    record = object map
+    bind half only produces store code if there are non-constant data (?)
+      otherwise just generate full object on load
+
+  tuple -> loose tuple then automatically convert to half tuple if accessed?
+    goal: functions are 1:1 and allow passing in all arguments as a group, easily joining functions
+
+  tuple literal -> loose tuple
+    access -> half tuple
+    bind -> half tuple
+    drop -> as is/reverse drop
+    use in function -> use as is
+
+
+    // records
+  loose record
+    map key -> evaluate res
+    access -> drop others
+    drop -> drop
+    lower -> new record + lower each field
+    bind -> bind each field individually, map to binding objects
+
+  loose record binding
+    drop -> drop
+    fork -> fork loose record binding obj
+
+  fork loose record binding obj
+    access -> access binding
+    drop -> nop
+    lower -> new record + lower each field
+    bind -> bind each as new loose record binding
+
+
+
+  best breaks music 2014 #3
+   */
   public static final ROSet<Key> controlKeys =
       TSSet.of(Key.CONTROL, Key.CONTROL_LEFT, Key.CONTROL_RIGHT).ro();
   public static final ROSet<Key> shiftKeys =

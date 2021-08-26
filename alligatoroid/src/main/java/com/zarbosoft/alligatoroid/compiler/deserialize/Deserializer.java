@@ -13,6 +13,11 @@ import com.zarbosoft.alligatoroid.compiler.language.Builtin;
 import com.zarbosoft.alligatoroid.compiler.language.Call;
 import com.zarbosoft.alligatoroid.compiler.language.LiteralString;
 import com.zarbosoft.alligatoroid.compiler.language.Local;
+import com.zarbosoft.alligatoroid.compiler.language.Lower;
+import com.zarbosoft.alligatoroid.compiler.language.Record;
+import com.zarbosoft.alligatoroid.compiler.language.RecordElement;
+import com.zarbosoft.alligatoroid.compiler.language.Stage;
+import com.zarbosoft.alligatoroid.compiler.language.Tuple;
 import com.zarbosoft.luxem.read.BufferedReader;
 import com.zarbosoft.luxem.read.path.LuxemArrayPath;
 import com.zarbosoft.luxem.read.path.LuxemPath;
@@ -40,7 +45,12 @@ public class Deserializer {
         Builtin.class,
         Call.class,
         LiteralString.class,
-        Local.class
+        Local.class,
+        Record.class,
+        RecordElement.class,
+        Tuple.class,
+        Stage.class,
+        Lower.class,
       };
   private final StatePrototype valuePrototype;
   private final TSMap<String, ClassInfo> languageNodeInfos = new TSMap<>();
