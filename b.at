@@ -1,0 +1,380 @@
+(alligatoroid:0.0.1) [
+    (bind) {
+        id: 31,
+        key: (literal_string) {
+            id: 32,
+            value: jvmPrintStream,
+        },
+        value: (call) {
+            id: 65,
+            target: (access) {
+                id: 66,
+                base: (access) {
+                    id: 68,
+                    base: (builtin) {
+                        id: 70,
+                    },
+                    key: (literal_string) {
+                        id: 69,
+                        value: jvm,
+                    },
+                },
+                key: (literal_string) {
+                    id: 67,
+                    value: externClass,
+                },
+            },
+            argument: (literal_string) {
+                id: 62,
+                value: java.io.PrintStream,
+            },
+        },
+    },
+    (call) {
+        id: 40,
+        target: (access) {
+            id: 39,
+            base: (local) {
+                id: 37,
+                key: (literal_string) {
+                    id: 36,
+                    value: jvmPrintStream,
+                },
+            },
+            key: (literal_string) {
+                id: 38,
+                value: defineMethod,
+            },
+        },
+        argument: (tuple) {
+            id: 34,
+            elements: [
+                (literal_string) {
+                    id: 22,
+                    value: println,
+                },
+                (record) {
+                    id: 20,
+                    elements: [
+                        (record_element) {
+                            id: 19,
+                            key: (literal_string) {
+                                id: 17,
+                                value: in,
+                            },
+                            value: (access) {
+                                id: 0,
+                                base: (access) {
+                                    id: 72,
+                                    base: (builtin) {
+                                        id: 74,
+                                    },
+                                    key: (literal_string) {
+                                        id: 73,
+                                        value: jvm,
+                                    },
+                                },
+                                key: (literal_string) {
+                                    id: 71,
+                                    value: string,
+                                },
+                            },
+                        },
+                        (record_element) {
+                            id: 75,
+                            key: (literal_string) {
+                                id: 77,
+                                value: out,
+                            },
+                            value: (access) {
+                                id: 83,
+                                base: (builtin) {
+                                    id: 85,
+                                },
+                                key: (literal_string) {
+                                    id: 84,
+                                    value: null,
+                                },
+                            },
+                        },
+                    ],
+                },
+            ],
+        },
+    },
+    (bind) {
+        id: 273,
+        key: (literal_string) {
+            id: 274,
+            value: jvmOut,
+        },
+        value: (call) {
+            id: 307,
+            target: (access) {
+                id: 308,
+                base: (access) {
+                    id: 310,
+                    base: (builtin) {
+                        id: 312,
+                    },
+                    key: (literal_string) {
+                        id: 311,
+                        value: jvm,
+                    },
+                },
+                key: (literal_string) {
+                    id: 309,
+                    value: externStaticField,
+                },
+            },
+            argument: (tuple) {
+                id: 314,
+                elements: [
+                    (literal_string) {
+                        id: 316,
+                        value: java.lang.System,
+                    },
+                    (literal_string) {
+                        id: 318,
+                        value: out,
+                    },
+                    (local) {
+                        id: 321,
+                        key: (literal_string) {
+                            id: 322,
+                            value: jvmPrintStream,
+                        },
+                    },
+                ],
+            },
+        },
+    },
+    (bind) {
+        id: 88,
+        key: (literal_string) {
+            id: 89,
+            value: class,
+        },
+        value: (call) {
+            id: 122,
+            target: (access) {
+                id: 123,
+                base: (access) {
+                    id: 125,
+                    base: (builtin) {
+                        id: 127,
+                    },
+                    key: (literal_string) {
+                        id: 126,
+                        value: jvm,
+                    },
+                },
+                key: (literal_string) {
+                    id: 124,
+                    value: newClass,
+                },
+            },
+            argument: (literal_string) {
+                id: 129,
+                value: com.zarbosoft.alligatest.Hello,
+            },
+        },
+    },
+    (bind) {
+        id: 132,
+        key: (literal_string) {
+            id: 133,
+            value: main,
+        },
+        value: (call) {
+            id: 155,
+            target: (access) {
+                id: 156,
+                base: (local) {
+                    id: 158,
+                    key: (literal_string) {
+                        id: 159,
+                        value: class,
+                    },
+                },
+                key: (literal_string) {
+                    id: 157,
+                    value: declareMethod,
+                },
+            },
+            argument: (literal_string) {
+                id: 161,
+                value: main,
+            },
+        },
+    },
+    (call) {
+        id: 183,
+        target: (access) {
+            id: 184,
+            base: (local) {
+                id: 186,
+                key: (literal_string) {
+                    id: 187,
+                    value: main,
+                },
+            },
+            key: (literal_string) {
+                id: 185,
+                value: implement,
+            },
+        },
+        argument: (tuple) {
+            id: 189,
+            elements: [
+                (record) {
+                    id: 191,
+                    elements: [
+                        (record_element) {
+                            id: 192,
+                            key: (literal_string) {
+                                id: 194,
+                                value: in,
+                            },
+                            value: (call) {
+                                id: 227,
+                                target: (access) {
+                                    id: 228,
+                                    base: (access) {
+                                        id: 230,
+                                        base: (builtin) {
+                                            id: 232,
+                                        },
+                                        key: (literal_string) {
+                                            id: 231,
+                                            value: jvm,
+                                        },
+                                    },
+                                    key: (literal_string) {
+                                        id: 229,
+                                        value: array,
+                                    },
+                                },
+                                argument: (access) {
+                                    id: 249,
+                                    base: (access) {
+                                        id: 251,
+                                        base: (builtin) {
+                                            id: 253,
+                                        },
+                                        key: (literal_string) {
+                                            id: 252,
+                                            value: jvm,
+                                        },
+                                    },
+                                    key: (literal_string) {
+                                        id: 250,
+                                        value: string,
+                                    },
+                                },
+                            },
+                        },
+                        (record_element) {
+                            id: 254,
+                            key: (literal_string) {
+                                id: 256,
+                                value: out,
+                            },
+                            value: (access) {
+                                id: 262,
+                                base: (builtin) {
+                                    id: 264,
+                                },
+                                key: (literal_string) {
+                                    id: 263,
+                                    value: null,
+                                },
+                            },
+                        },
+                    ],
+                },
+                (stage) {
+                    id: 266,
+                    child: (block) {
+                        id: 268,
+                        statements: [
+                            (call) {
+                                id: 351,
+                                target: (access) {
+                                    id: 352,
+                                    base: (lower) {
+                                        id: 354,
+                                        child: (local) {
+                                            id: 355,
+                                            key: (literal_string) {
+                                                id: 356,
+                                                value: jvmOut,
+                                            },
+                                        },
+                                    },
+                                    key: (literal_string) {
+                                        id: 353,
+                                        value: println,
+                                    },
+                                },
+                                argument: (literal_string) {
+                                    id: 358,
+                                    value: hello,
+                                },
+                            },
+                        ],
+                    },
+                },
+            ],
+        },
+    },
+    (call) {
+        id: 436,
+        target: (access) {
+            id: 437,
+            base: (call) {
+                id: 439,
+                target: (access) {
+                    id: 441,
+                    base: (builtin) {
+                        id: 443,
+                    },
+                    key: (literal_string) {
+                        id: 442,
+                        value: createFile,
+                    },
+                },
+                argument: (literal_string) {
+                    id: 440,
+                    value: Hello.class,
+                },
+            },
+            key: (literal_string) {
+                id: 438,
+                value: write,
+            },
+        },
+        argument: (call) {
+            id: 477,
+            target: (access) {
+                id: 478,
+                base: (local) {
+                    id: 480,
+                    key: (literal_string) {
+                        id: 481,
+                        value: class,
+                    },
+                },
+                key: (literal_string) {
+                    id: 479,
+                    value: bytes,
+                },
+            },
+            argument: (tuple) {
+                id: 483,
+                elements: [
+                ],
+            },
+        },
+    },
+],
