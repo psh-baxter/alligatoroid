@@ -1,21 +1,33 @@
 package com.zarbosoft.alligatoroid.compiler;
 
+import com.zarbosoft.appdirsj.AppDirs;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.rendaw.common.TSMap;
 
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class Main {
+  public static final AppDirs appDirs =
+      new AppDirs().set_appname("alligatoroid").set_appauthor("zarbosoft");
+
   public static void main(String[] args) {
     if (args.length != 1) {
       throw new RuntimeException("Need one argument, path to root module");
     }
-    GlobalContext globalContext = new GlobalContext();
+    Path cachePath;
+    String cachePath0 = System.getenv("ALLIGATOROID_CACHE");
+    if (cachePath0.isEmpty()) {
+      cachePath = appDirs.user_cache_dir(false);
+    } else {
+      cachePath = Paths.get(cachePath0);
+    }
+    CompilationContext compilationContext = new CompilationContext(cachePath);
     TSMap<ModuleId, Module> modules;
     try {
-      Module.loadRoot(globalContext, Paths.get(args[0]));
+      compilationContext.loadModule(new LocalModuleId(Paths.get(args[0]))); // TODO handle result
     } finally {
-      modules = globalContext.join();
+      modules = compilationContext.join();
     }
 
     Writer outWriter = new Writer(System.out, (byte) ' ', 4);

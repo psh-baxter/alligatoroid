@@ -139,6 +139,11 @@ public class TSMap<K, V> implements ROMap<K, V> {
   }
 
   @Override
+  public int size() {
+    return inner.size();
+  }
+
+  @Override
   public Iterator<V> iterValues() {
     return inner.values().iterator();
   }

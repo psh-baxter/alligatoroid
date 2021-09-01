@@ -7,10 +7,10 @@ import com.zarbosoft.rendaw.common.ROMap;
 
 import java.util.Map;
 
-public interface Serializable {
+public interface TreeSerializable {
   public static void serialize(Writer writer, Object object) {
-    if (object instanceof Serializable) {
-      ((Serializable) object).serialize(writer);
+    if (object instanceof TreeSerializable) {
+      ((TreeSerializable) object).serialize(writer);
     } else if (ROMap.class.isAssignableFrom(object.getClass())) {
       writer.recordBegin();
       for (Map.Entry e : (Iterable<Map.Entry>) ((ROMap) object)) {

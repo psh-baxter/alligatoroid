@@ -6,26 +6,26 @@ import com.zarbosoft.pidgoon.nodes.Reference;
 
 import java.io.InputStream;
 
-public class Parse<O> extends BaseParseBuilder<O, Parse<O>> {
+public class ParseBuilder<O> extends BaseParseBuilder<O, ParseBuilder<O>> {
   private Reader.EventFactory factory = null;
 
-  private Parse(final Parse<O> other) {
+  private ParseBuilder(final ParseBuilder<O> other) {
     super(other);
     this.factory = other.factory;
   }
 
-  public Parse(Reference.Key root) {
+  public ParseBuilder(Reference.Key root) {
     super(root);
   }
 
   @Override
-  protected Parse<O> split() {
-    return new Parse<>(this);
+  protected ParseBuilder<O> split() {
+    return new ParseBuilder<>(this);
   }
 
-  public Parse<O> eventFactory(final Reader.EventFactory factory) {
+  public ParseBuilder<O> eventFactory(final Reader.EventFactory factory) {
     if (this.factory != null) throw new IllegalArgumentException("Factory already set");
-    final Parse<O> out = split();
+    final ParseBuilder<O> out = split();
     out.factory = factory;
     return out;
   }

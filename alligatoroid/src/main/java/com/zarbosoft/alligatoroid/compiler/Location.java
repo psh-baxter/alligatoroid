@@ -2,7 +2,7 @@ package com.zarbosoft.alligatoroid.compiler;
 
 import com.zarbosoft.luxem.write.Writer;
 
-public final class Location implements Serializable {
+public final class Location implements TreeSerializable {
   public final ModuleId module;
   public final int id;
 

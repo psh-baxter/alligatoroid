@@ -13,7 +13,7 @@ public class JVMBaseClassType extends JVMObjectType {
   public final String jvmInternalClass;
   public final TSMap<Object, JVMType> fields = new TSMap<>();
 
-  public JVMBaseClassType(String jvmExternalClass) {
+  public JVMBaseClassType(String jvmExternalClass, TSMap<Object, JVMType> fields) {
     this.jvmInternalClass = JVMDescriptor.jvmName(jvmExternalClass);
   }
 

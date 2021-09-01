@@ -8,7 +8,7 @@ import com.zarbosoft.rendaw.common.TSList;
 import com.zarbosoft.rendaw.common.TSMap;
 import com.zarbosoft.rendaw.common.TSSet;
 
-public class Error implements Serializable {
+public class Error implements TreeSerializable {
   public static final String DESCRIPTION_KEY = "description";
   private final String type;
   private final ROMap<String, Object> data;
@@ -220,6 +220,6 @@ public class Error implements Serializable {
   @Override
   public void serialize(Writer writer) {
     writer.type(type);
-    Serializable.serialize(writer, data);
+    TreeSerializable.serialize(writer, data);
   }
 }

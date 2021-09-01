@@ -1,11 +1,12 @@
 package com.zarbosoft.alligatoroid.compiler.deserialize;
 
-import com.zarbosoft.alligatoroid.compiler.ModuleContext;
+import com.zarbosoft.alligatoroid.compiler.Error;
 import com.zarbosoft.alligatoroid.compiler.Location;
 import com.zarbosoft.alligatoroid.compiler.ModuleId;
 import com.zarbosoft.luxem.read.path.LuxemPath;
+import com.zarbosoft.rendaw.common.TSList;
 
-public class LocationPrototype extends BaseStatePrototype {
+public class LocationPrototype implements StatePrototype {
   private final ModuleId module;
 
   public LocationPrototype(ModuleId module) {
@@ -13,11 +14,11 @@ public class LocationPrototype extends BaseStatePrototype {
   }
 
   @Override
-  public State createPrimitive(ModuleContext context, LuxemPath luxemPath, String type) {
+  public State create(TSList<Error> errors, LuxemPath luxemPath, TSList<State> stack) {
     return new StateInt() {
       @Override
-      public Object build(ModuleContext context) {
-        Integer value = (Integer) super.build(context);
+      public Object build(TSList<Error> errors) {
+        Integer value = (Integer) super.build(errors);
         if (value == null) {
           return null;
         }

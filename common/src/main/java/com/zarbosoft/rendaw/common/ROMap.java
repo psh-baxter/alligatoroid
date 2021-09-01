@@ -2,7 +2,6 @@ package com.zarbosoft.rendaw.common;
 
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -12,6 +11,8 @@ public interface ROMap<K, V> extends Iterable<Map.Entry<K, V>> {
   V getOr(K k, Supplier<V> v);
 
   ROSet<K> keys();
+
+  int size();
 
   Iterator<V> iterValues();
 
@@ -41,5 +42,6 @@ public interface ROMap<K, V> extends Iterable<Map.Entry<K, V>> {
   TSMap<K, V> mut();
 
   boolean some();
+
   boolean none();
 }

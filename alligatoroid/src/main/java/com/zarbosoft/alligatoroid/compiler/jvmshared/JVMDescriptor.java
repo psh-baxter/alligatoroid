@@ -1,8 +1,13 @@
 package com.zarbosoft.alligatoroid.compiler.jvmshared;
 
 /**
- * 3 types of strings: 1. Normal names (a.b.c.MyClass - objects only) 2. JVM names (a/b/c/MyClass -
- * objects only) 3. Descriptors (La/b/c/MyClass; - all types)
+ * 3 types of strings:
+ *
+ * <p>1. Normal names (a.b.c.MyClass - objects only)
+ *
+ * <p>2. JVM names (a/b/c/MyClass - objects only)
+ *
+ * <p>3. Descriptors (La/b/c/MyClass; - all types)
  */
 public class JVMDescriptor {
   public static final String objectJvmName = jvmName(Object.class);

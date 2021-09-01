@@ -5,18 +5,17 @@ import com.zarbosoft.luxem.read.path.LuxemPath;
 import com.zarbosoft.rendaw.common.Assertion;
 import com.zarbosoft.rendaw.common.TSList;
 
-abstract class BasePrimitiveState implements State {
-  boolean ok = true;
-
-  void errorNonPrimitive(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath) {
-    errors.add(Error.deserializeNotPrimitive(luxemPath));
-    stack.add(StateErrorMultiple.state);
-    ok = false;
-  }
+public class BaseState implements State {
+  protected boolean ok = true;
 
   @Override
   public void eatArrayBegin(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath) {
-    errorNonPrimitive(errors, stack, luxemPath);
+    if (ok) {
+      errors.errors.add(Error.deserializeNotArray(luxemPath));
+    } else {
+      ok = true;
+    }
+    stack.add(StateErrorMultiple.state);
   }
 
   @Override
@@ -26,7 +25,12 @@ abstract class BasePrimitiveState implements State {
 
   @Override
   public void eatRecordBegin(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath) {
-    errorNonPrimitive(errors, stack, luxemPath);
+    if (ok) {
+      errors.errors.add(Error.deserializeNotRecord(luxemPath));
+    } else {
+      ok = true;
+    }
+    stack.add(StateErrorMultiple.state);
   }
 
   @Override
@@ -41,7 +45,21 @@ abstract class BasePrimitiveState implements State {
 
   @Override
   public void eatType(TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String name) {
-    errors.add(Error.deserializeNotTyped(luxemPath));
-    ok = false;
+    errors.errors.add(Error.deserializeNotTyped(luxemPath));
+  }
+
+  @Override
+  public void eatPrimitive(
+      TSList<Error> errors, TSList<State> stack, LuxemPath luxemPath, String value) {
+    if (ok) {
+      errors.errors.add(Error.deserializeNotPrimitive(luxemPath));
+    } else {
+      ok = true;
+    }
+  }
+
+  @Override
+  public Object build(TSList<Error> errors) {
+    throw new Assertion();
   }
 }

@@ -1,7 +1,7 @@
 package com.zarbosoft.merman.jfxcore.serialization;
 
 import com.google.gson.stream.JsonWriter;
-import com.zarbosoft.luxem.read.Parse;
+import com.zarbosoft.luxem.read.ParseBuilder;
 import com.zarbosoft.luxem.read.Reader;
 import com.zarbosoft.luxem.write.Writer;
 import com.zarbosoft.merman.core.AtomKey;
@@ -253,7 +253,8 @@ public class JavaSerializer implements Serializer {
   }
 
   @Override
-  public Object writeForClipboard(Environment env, Context.CopyContext copyContext, TSList<WriteState> stack) {
+  public Object writeForClipboard(
+      Environment env, Context.CopyContext copyContext, TSList<WriteState> stack) {
     ByteArrayOutputStream stream = new ByteArrayOutputStream();
     uncheck(
         () -> {
@@ -380,7 +381,7 @@ public class JavaSerializer implements Serializer {
                 }
             }
             ROList<AtomType.AtomParseResult> result =
-                new Parse<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
+                new ParseBuilder<ROList<AtomType.AtomParseResult>>(ROOT_KEY)
                     .grammar(grammar)
                     .eventFactory(luxemEventFactory())
                     .serialParse(new ByteArrayInputStream((byte[]) data));
